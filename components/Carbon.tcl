@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.9 2007-09-12 13:37:55 matben Exp $
+# $Id: Carbon.tcl,v 1.10 2007-09-15 13:16:12 matben Exp $
 # 
 # @@@ Move the sleep stuff to something more generic.
 
@@ -159,7 +159,7 @@ proc ::Carbon::BuildPage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
     
     ttk::frame $wc.head -padding {0 0 0 6}
-    ttk::label $wc.head.l -text [mc "Machine Sleep"]
+    ttk::label $wc.head.l -text [mc Sleep]
     ttk::separator $wc.head.s -orient horizontal
 
     grid  $wc.head.l  $wc.head.s

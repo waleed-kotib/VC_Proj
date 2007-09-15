@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.208 2007-09-13 08:25:37 matben Exp $
+# $Id: Chat.tcl,v 1.209 2007-09-15 13:16:12 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -3404,7 +3404,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
     grid columnconfigure $whi 1 -weight 1
     grid columnconfigure $whi 3 -minsize [$mb maxwidth]
 
-    ::balloonhelp::balloonforwindow $whi.shist [mc historymessages]
+    ::balloonhelp::balloonforwindow $whi.shist [mc tooltip-historymessages]
 
     ttk::separator $wc.sep3 -orient horizontal
 
@@ -3416,7 +3416,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
     grid  $wni.lni  $wni.eni  -sticky w
     grid columnconfigure $wni 1 -weight 1
 
-    ::balloonhelp::balloonforwindow $wni.eni [mc localnick]
+    ::balloonhelp::balloonforwindow $wni.eni [mc tooltip-localnick]
 
     grid  $wc.active  -sticky w
     grid  $wc.newwin  -sticky w

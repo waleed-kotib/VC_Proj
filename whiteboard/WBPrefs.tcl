@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: WBPrefs.tcl,v 1.15 2007-09-14 13:17:09 matben Exp $
+# $Id: WBPrefs.tcl,v 1.16 2007-09-15 13:16:14 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -148,7 +148,7 @@ proc ::WBPrefs::BuildFontsPage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     ttk::label $wc.sysfont -text [mc System]
-    ttk::label $wc.wifont -text Coccinella
+    ttk::label $wc.wifont -text $prefs(appName)
     ttk::frame $wc.fr1
     ttk::frame $wc.fr2
     ttk::frame $wc.fr3

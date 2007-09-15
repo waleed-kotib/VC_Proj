@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.193 2007-09-15 07:43:06 matben Exp $
+#   $Id: en.msg,v 1.194 2007-09-15 13:16:13 matben Exp $
 
 ::msgcat::mcset en Add
 ::msgcat::mcset en Address
@@ -151,6 +151,7 @@
 ::msgcat::mcset en Shortcuts
 ::msgcat::mcset en Size
 ::msgcat::mcset en Skin
+::msgcat::mcset en Sleep
 ::msgcat::mcset en Sounds
 ::msgcat::mcset en Stop
 ::msgcat::mcset en Subject
@@ -177,7 +178,9 @@
 ::msgcat::mcset en Yes
 ::msgcat::mcset en yes
 
-# A few words that are not unambiguous and have therefore a prefix.
+# A few words that are not unambiguous and have therefore a prefix:
+# Note to translators: this means "Application" as in computer program.
+::msgcat::mcset da program-Application        Application
 
 # Try to move next strings to normal strings
 # Canvas item options, names and values.
@@ -489,7 +492,6 @@
 ::msgcat::mcset en {Login as invisible}
 ::msgcat::mcset en {Logout on sleep}
 ::msgcat::mcset en {Logout With Message}
-::msgcat::mcset en {Machine Sleep}
 ::msgcat::mcset en {MIDI command}
 ::msgcat::mcset en {MIDI Player}
 ::msgcat::mcset en {Multi Connect}
@@ -535,7 +537,7 @@
 ::msgcat::mcset en {Remove Avatar}
 ::msgcat::mcset en {Remove Contact}
 ::msgcat::mcset en {Remove Item}
-::msgcat::mcset en {Requires a restart of Coccinella}
+::msgcat::mcset en {Requires a restart}
 ::msgcat::mcset en {Retype password}
 ::msgcat::mcset en {Revert Panel}
 ::msgcat::mcset en {Save As}
@@ -646,6 +648,12 @@
 ::msgcat::mcset en splashinit 		{Initialize}
 ::msgcat::mcset en splashprefs 		{Set and read preferences}
 ::msgcat::mcset en splashlook 		{Looking for}
+
+# Subscriptions:
+::msgcat::mcset en subscriptionBoth	    {Both you and your contact can see eachother's presence.}
+::msgcat::mcset en subscriptionFrom	    {You cannot see your contact's presence, but your contact can see yours.}
+::msgcat::mcset en subscriptionNone	    {Both you and your contact cannot see eachother's presence.}
+::msgcat::mcset en subscriptionTo	    {You can see your contact's presence, but your contact can't see yours.}
 
 
 # Messages for tk_messageBox:
@@ -807,8 +815,7 @@
 
 # Account xform balloon help.
 # From: JEP-0077: In-Band Registration (http://www.xmpp.org/extensions/xep-0077.html#registrar-formtypes)
-
-# translators should update all strings commented out in this paragraph!
+# Note to translators: these are tooltips and has lower priority
 ::msgcat::mcset en registration-address         {Street portion of a physical or mailing address}
 ::msgcat::mcset en registration-city            {Locality portion of a physical or mailing address}
 ::msgcat::mcset en registration-date            {Some date (e.g., birth date, hire date, sign-up date)}
@@ -884,8 +891,8 @@
 ::msgcat::mcset en preffontmsg           {Warning: by importing any other fonts than the standard three ones (Times, Helvetica or Courier), you must be confident that all remote clients also have this font installed on their system.}
 ::msgcat::mcset en preficonsel2          {The selected iconset will become the default.}
 ::msgcat::mcset en prefmidimsg           {Set command to use for playing MIDI sounds. This option is only relevant if you use a sound set with MIDI files.}
-::msgcat::mcset en prefminaw2            {Away after}
-::msgcat::mcset en prefminea2            {Extended Away after}
+::msgcat::mcset en prefminaw             {Minutes before Away}
+::msgcat::mcset en prefminea             {Minutes before Extended Away}
 ::msgcat::mcset en prefminlogout         {Logout after}
 ::msgcat::mcset en prefnatip2            {Use the following external address}
 ::msgcat::mcset en prefplugctrl2         {Select the plugins you want to be loaded.}
@@ -1008,18 +1015,14 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en chatcompgone       {%s has closed the chat}
 
 
-# The strings in next section are 99% similar to the strings in the section thereafter. Can you use the same strings for both get and put? That would be 11 strings less to translate...
-# I only updated the strings in the get file section, so use these as the base. I also didn't changed the key names!
 # Get file
+# Note to translators: these strings are marked EOL (EndOfLife) since the file transfer protocol will be changed.
 ::msgcat::mcset en getcontacting   {Contacting %s. Waiting for response...}
-# you can split next string and use append to create the strings getconnerr and geteoferr: 1 string less!
 ::msgcat::mcset en geteoferr       {Connection to %s failed: received an eof.}
 ::msgcat::mcset en getconnerr	   {Connection to %s failed.}
 ::msgcat::mcset en getnegotiate    {Contacted %s. Negotiating...}
 ::msgcat::mcset en getreaderr      {Cannot read server response from %s.}
-# I feel the next string also can be improved, no idea though
 ::msgcat::mcset en getunknownprot  {The server at %s did not respond with a well formed protocol.}
-# Use the append code I used before for other strings to remove the 2 %s's
 ::msgcat::mcset en getnot200	   {Received response of the server %s.\n Error code %s\nMessage: %s}
 ::msgcat::mcset en getstarts	   {%s accepted file %s. Initiating file transfer...}
 ::msgcat::mcset en getended	   {Transfer from %s ended prematurely.}
@@ -1027,6 +1030,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en getneterr	   {Cannot download from %s: network error.}
 
 # Put file
+# Note to translators: these strings are marked EOL (EndOfLife) since the file transfer protocol will be changed.
 ::msgcat::mcset en putcontacting   {Contacting %s. Waiting for response...}
 ::msgcat::mcset en puteoferr       {Connection to %s failed: received an eof.}
 ::msgcat::mcset en putconnerr	    {Connection to %s failed.}
@@ -1039,8 +1043,6 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en putfinished	    {Finished putting file "%s" to %s.}
 ::msgcat::mcset en putneterr	    {Network error when putting to %s.}
 
-# Are all the strings in next voip sections used in the interface? Or are some unrelevant for translators because an interface part is disabled?
-# Can you move most of these to normal strings instead of keys?
 # These are specific for phones (VoIP)
 ::msgcat::mcset en phoneMakeCall           {Call}
 ::msgcat::mcset en phoneMakeForward        {Forward current call to...}
@@ -1052,6 +1054,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en phoneDialerCall         {Call to...}
 ::msgcat::mcset en phoneDialerForward      {Forward to...}
 
+# Note to translators: these strings are not yet activated
 ::msgcat::mcset en AddressBook		{Address Book}
 ::msgcat::mcset en newAddressbookDlg	{New address book}
 ::msgcat::mcset en newAddressbook       {New address book}
@@ -1073,35 +1076,37 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en callVM               {Call VM?}
 
 # IAX Phone
-# Move these strings to the source code (so they don't get lost for future releases!) if the IAX Phone entry will not be in the preferences, this will save translators wasted time
-::msgcat::mcset en Codecs
-::msgcat::mcset en Devices
-::msgcat::mcset en Filters
-::msgcat::mcset en {IAX Phone}
-::msgcat::mcset en {IAX Account}
-# translation help: http://en.wikipedia.org/wiki/Caller_id
-::msgcat::mcset en {Caller ID number}
-::msgcat::mcset en {Caller ID name}
-::msgcat::mcset en Microphone
-::msgcat::mcset en Speakers
-# translation help: http://en.wikipedia.org/wiki/Automatic_gain_control
-::msgcat::mcset en {Automatic gain control (AGC)}
-::msgcat::mcset en agcTip		{Automatically adjust volume levels}
-# translation help: http://lists.xiph.org/pipermail/speex-dev/2007-May/005565.html
-::msgcat::mcset en {Analog automatic gain control (AAGC)}
-::msgcat::mcset en {Can prevent clipping}
-# translation help: http://en.wikipedia.org/wiki/Noise_reduction
-::msgcat::mcset en {Noise reduction}
-# translation help: http://en.wikipedia.org/wiki/Comfort_noise
-::msgcat::mcset en {Comfort noise} 
-::msgcat::mcset en comfortTip		{Artificial background noise to fill silence}
-::msgcat::mcset en Codec
-# I copied the following descriptions from the websites of these projects; do you think we should ask permission for this?
-::msgcat::mcset en ilbc			{iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
-::msgcat::mcset en speex		{Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
-::msgcat::mcset en alaw			{Standard used in European digital communication systems (ITU-T)}
-::msgcat::mcset en ulaw			{Standard used in digital communication systems in North America and Japan (ITU-T)}
-::msgcat::mcset en gsm			{GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
+# Note to translators: these strings are not yet activated
+if {0} {
+    ::msgcat::mcset en Codecs
+    ::msgcat::mcset en Devices
+    ::msgcat::mcset en Filters
+    ::msgcat::mcset en {IAX Phone}
+    ::msgcat::mcset en {IAX Account}
+    # translation help: http://en.wikipedia.org/wiki/Caller_id
+    ::msgcat::mcset en {Caller ID number}
+    ::msgcat::mcset en {Caller ID name}
+    ::msgcat::mcset en Microphone
+    ::msgcat::mcset en Speakers
+    # translation help: http://en.wikipedia.org/wiki/Automatic_gain_control
+    ::msgcat::mcset en {Automatic gain control (AGC)}
+    ::msgcat::mcset en agcTip		{Automatically adjust volume levels}
+    # translation help: http://lists.xiph.org/pipermail/speex-dev/2007-May/005565.html
+    ::msgcat::mcset en {Analog automatic gain control (AAGC)}
+    ::msgcat::mcset en {Can prevent clipping}
+    # translation help: http://en.wikipedia.org/wiki/Noise_reduction
+    ::msgcat::mcset en {Noise reduction}
+    # translation help: http://en.wikipedia.org/wiki/Comfort_noise
+    ::msgcat::mcset en {Comfort noise} 
+    ::msgcat::mcset en comfortTip		{Artificial background noise to fill silence}
+    ::msgcat::mcset en Codec
+    # I copied the following descriptions from the websites of these projects; do you think we should ask permission for this?
+    ::msgcat::mcset en ilbc			{iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
+    ::msgcat::mcset en speex		{Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
+    ::msgcat::mcset en alaw			{Standard used in European digital communication systems (ITU-T)}
+    ::msgcat::mcset en ulaw			{Standard used in digital communication systems in North America and Japan (ITU-T)}
+    ::msgcat::mcset en gsm			{GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
+}
 
 # Messages for Mood XEP
 # bug: this should be M&ood..., but this does not work!
@@ -1146,26 +1151,24 @@ namespace eval ::EditShortcuts:: {
 
 ::msgcat::mcset en {Custom Mood}
 ::msgcat::mcset en mCustomMood...       {&Custom Mood...}
-
-# More balloonhelp stuff and other strings, please add this in the right category Mats!
-::msgcat::mcset en contactid	    {Chat address}
-::msgcat::mcset en group	    {Group to which this contact should belong to}
-::msgcat::mcset en localnick	    {Your nickname for local display}
-::msgcat::mcset en historymessages  {Number of messages to display}
-::msgcat::mcset en chatroomservice  {Select or manually enter a chatroom service}
-::msgcat::mcset en chatroomselect   {Select or manually enter the name of a chatroom}
-::msgcat::mcset en subBoth	    {Both you and your contact can see eachother's presence.}
-::msgcat::mcset en subFrom	    {You cannot see your contact's presence, but your contact can see yours.}
-::msgcat::mcset en subNone	    {Both you and your contact cannot see eachother's presence.}
-::msgcat::mcset en subTo	    {You can see your contact's presence, but your contact can't see yours.}
-::msgcat::mcset en snack	    {Support for mp3, wav, and a few other audio formats}
-::msgcat::mcset en img		    {Support for common image formats}
-::msgcat::mcset en tkpng	    {Support for PNG images}
-::msgcat::mcset en xanim	    {Support for several animation, video and audio formats}
-::msgcat::mcset en matsShouldReplaceThis {Not yet implemented.}
-
 ::msgcat::mcset en moodPickMsg          {Select your mood to show to your contacts.}
 ::msgcat::mcset en moodPickDtl          {Only contacts with compatible software will see your mood.}
+
+# More balloonhelp stuff.
+::msgcat::mcset en tooltip-contactid	    {Chat address}
+::msgcat::mcset en tooltip-group            {Group to which this contact should belong to}
+::msgcat::mcset en tooltip-localnick	    {Your nickname for local display}
+::msgcat::mcset en tooltip-historymessages  {Number of messages to display}
+::msgcat::mcset en tooltip-chatroomservice  {Select or manually enter a chatroom service}
+::msgcat::mcset en tooltip-chatroomselect   {Select or manually enter the name of a chatroom}
+::msgcat::mcset en tooltip-snack	    {Support for mp3, wav, and a few other audio formats}
+::msgcat::mcset en tooltip-img		    {Support for common image formats}
+::msgcat::mcset en tooltip-tkpng	    {Support for PNG images}
+::msgcat::mcset en tooltip-xanim	    {Support for several animation, video and audio formats}
+::msgcat::mcset en tooltip-QuickTimeTcl	    {Support for several animation, image, video and audio formats}
+# Me knows :-)
+::msgcat::mcset en matsShouldReplaceThis {Not yet implemented.}
+
 
 # Messages for User Activity XEP
 ::msgcat::mcset en Activity
@@ -1263,41 +1266,41 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en locationPickMsg      {Set your location that will be shown to your contacts.}
 ::msgcat::mcset en locationPickDtl      {Enter your location details below. At least you should set latitude and longitude.}
 
-# Are all strings below really necessary?? AFAICS the interface does not support all of them
+# Note to translators: The commented strings are just there for completeness with the protocol, still not in UI
 ::msgcat::mcset en {Altitude}
-::msgcat::mcset en {Named Area}
-::msgcat::mcset en {GPS Bearing}
-::msgcat::mcset en {Building}
-::msgcat::mcset en {GPS Datum}
-::msgcat::mcset en {GPS Error}
-::msgcat::mcset en {Floor}
+#::msgcat::mcset en {Named Area}
+#::msgcat::mcset en {GPS Bearing}
+#::msgcat::mcset en {Building}
+#::msgcat::mcset en {GPS Datum}
+#::msgcat::mcset en {GPS Error}
+#::msgcat::mcset en {Floor}
 ::msgcat::mcset en {Latitude}
-::msgcat::mcset en {Locality}
+#::msgcat::mcset en {Locality}
 ::msgcat::mcset en {Longitude}
-::msgcat::mcset en {Room}
-::msgcat::mcset en {Street}
-::msgcat::mcset en {Text}
-::msgcat::mcset en {Timestamp}
+#::msgcat::mcset en {Room}
+#::msgcat::mcset en {Street}
+#::msgcat::mcset en {Text}
+#::msgcat::mcset en {Timestamp}
 
-# Are all strings below really necessary?? AFAICS the interface does not support all of them
 # Help strings:
-::msgcat::mcset en locationBearing      {GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north}
+# Note to translators: The commented strings are just there for completeness with the protocol, still not in UI
+#::msgcat::mcset en locationBearing      {GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north}
 ::msgcat::mcset en locationAlt          {Altitude in meters above or below sea level}
 ::msgcat::mcset en locationLon          {Longitude in decimal degrees East}
-::msgcat::mcset en locationError        {Horizontal GPS error in arc minutes}
-::msgcat::mcset en locationRegion       {An administrative region of the nation, such as a state or province}
-::msgcat::mcset en locationDescription  {A natural-language name for or description of the location}
-::msgcat::mcset en locationText         {A catch-all element that captures any other information about the location}
-::msgcat::mcset en locationRoom         {A particular room in a building}
-::msgcat::mcset en locationPostalcode   {A code used for postal delivery}
-::msgcat::mcset en locationBuilding     {A specific building on a street or in an area}
-::msgcat::mcset en locationStreet       {A thoroughfare within the locality, or a crossing of two thoroughfares}
-::msgcat::mcset en locationArea         {A named area such as a campus or neighborhood}
+#::msgcat::mcset en locationError        {Horizontal GPS error in arc minutes}
+#::msgcat::mcset en locationRegion       {An administrative region of the nation, such as a state or province}
+#::msgcat::mcset en locationDescription  {A natural-language name for or description of the location}
+#::msgcat::mcset en locationText         {A catch-all element that captures any other information about the location}
+#::msgcat::mcset en locationRoom         {A particular room in a building}
+#::msgcat::mcset en locationPostalcode   {A code used for postal delivery}
+#::msgcat::mcset en locationBuilding     {A specific building on a street or in an area}
+#::msgcat::mcset en locationStreet       {A thoroughfare within the locality, or a crossing of two thoroughfares}
+#::msgcat::mcset en locationArea         {A named area such as a campus or neighborhood}
 ::msgcat::mcset en locationLat          {Latitude in decimal degrees North}
-::msgcat::mcset en locationLocality     {A locality within the administrative region, such as a town or city}
-::msgcat::mcset en locationFloor        {A particular floor in a building}
-::msgcat::mcset en locationDatum        {GPS datum}
-::msgcat::mcset en locationTimestamp    {UTC timestamp specifying the moment when the reading was taken}
+#::msgcat::mcset en locationLocality     {A locality within the administrative region, such as a town or city}
+#::msgcat::mcset en locationFloor        {A particular floor in a building}
+#::msgcat::mcset en locationDatum        {GPS datum}
+#::msgcat::mcset en locationTimestamp    {UTC timestamp specifying the moment when the reading was taken}
 ::msgcat::mcset en locationCountry      {The nation where the user is located}
 
 ::msgcat::mcset en {Synchronize with Google Earth}
@@ -1321,6 +1324,7 @@ namespace eval ::EditShortcuts:: {
 
 # File Types
 # translation help: http://en.wikipedia.org/wiki/List_of_file_formats
+# Note to translators: these strings have very low priority since the English names can be taken as definitions
 ::msgcat::mcset en {World Application}
 ::msgcat::mcset en {QuickDraw 3D Metafile}
 ::msgcat::mcset en {Tcl File}

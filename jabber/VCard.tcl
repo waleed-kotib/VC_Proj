@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.69 2007-09-15 07:43:06 matben Exp $
+# $Id: VCard.tcl,v 1.70 2007-09-15 13:16:12 matben Exp $
 
 package provide VCard 1.0
 
@@ -314,7 +314,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     
     $pbi.ejid state {readonly}
         
-    ::balloonhelp::balloonforwindow $pbi.ejid [mc contactid]
+    ::balloonhelp::balloonforwindow $pbi.ejid [mc tooltip-contactid]
     ::balloonhelp::balloonforwindow $pbi.enick [mc registration-nick]
     ::balloonhelp::balloonforwindow $pbi.eemail [mc registration-email]
 

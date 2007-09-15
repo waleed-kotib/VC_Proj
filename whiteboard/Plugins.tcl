@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Plugins.tcl,v 1.28 2007-09-14 13:17:09 matben Exp $
+# $Id: Plugins.tcl,v 1.29 2007-09-15 13:16:14 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1342,7 +1342,7 @@ proc ::Plugins::BuildPrefsPage {page} {
 	  -variable [namespace current]::tmpPrefPlugins($plug)
 	grid  $pfr.i$i  $pfr.c$i  -sticky w  -padx 4
 	
-	::balloonhelp::balloonforwindow $pfr.c$i [mc $plug]
+	::balloonhelp::balloonforwindow $pfr.c$i [mc tooltip-$plug]
 	
 	incr i
     }

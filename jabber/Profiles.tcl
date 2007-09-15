@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.95 2007-09-13 15:53:40 matben Exp $
+# $Id: Profiles.tcl,v 1.96 2007-09-15 13:16:12 matben Exp $
 
 package require ui::megaentry
 
@@ -1104,7 +1104,7 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	set wuserinfofocus $wui.eserv
     }
     
-    ::balloonhelp::balloonforwindow $wui.ejid [mc contactid]
+    ::balloonhelp::balloonforwindow $wui.ejid [mc tooltip-contactid]
     ::balloonhelp::balloonforwindow $wui.epass [mc registration-password]
     ::balloonhelp::balloonforwindow $wui.enick [mc registration-nick]
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.129 2007-09-15 07:43:05 matben Exp $
+# $Id: Login.tcl,v 1.130 2007-09-15 13:16:12 matben Exp $
 
 package provide Login 1.0
 
@@ -194,7 +194,7 @@ proc ::Login::Dlg { } {
     }
     grid columnconfigure $frmid 1 -weight 1
     
-    ::balloonhelp::balloonforwindow $frmid.ejid [mc contactid]
+    ::balloonhelp::balloonforwindow $frmid.ejid [mc tooltip-contactid]
     ::balloonhelp::balloonforwindow $frmid.epass [mc registration-password]
 
     # Triangle switch for more options.

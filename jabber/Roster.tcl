@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.216 2007-09-13 15:53:40 matben Exp $
+# $Id: Roster.tcl,v 1.217 2007-09-15 13:16:12 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1463,7 +1463,7 @@ proc ::Roster::BuildPageRoster {page} {
     grid  $wc.showtrpt   -sticky w
     grid  $wc.showsubno  -sticky w
     
-    ::balloonhelp::balloonforwindow $wc.rmifunsub [mc subTo]
+    ::balloonhelp::balloonforwindow $wc.rmifunsub [mc subscriptionTo]
 }
 
 proc ::Roster::SavePrefsHook {} {
