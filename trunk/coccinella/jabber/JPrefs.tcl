@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.52 2007-09-13 08:25:39 matben Exp $
+# $Id: JPrefs.tcl,v 1.53 2007-09-15 13:16:12 matben Exp $
 
 package require ui::fontselector
 
@@ -202,7 +202,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     eval {ttk::optionmenu $wap.pthe [namespace current]::tmpPrefs(themeName)} \
       $allrsrc
     
-    ::balloonhelp::balloonforwindow $wap.pthe [mc {Requires a restart of Coccinella}]
+    ::balloonhelp::balloonforwindow $wap.pthe [mc "Requires a restart"]
 
     # Tile's themes (skins).
     # This is applied immediately and unaffected by Cancel/Save actions.

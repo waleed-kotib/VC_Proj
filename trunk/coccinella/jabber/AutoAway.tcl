@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.7 2007-09-14 13:41:26 matben Exp $
+# $Id: AutoAway.tcl,v 1.8 2007-09-15 13:16:12 matben Exp $
 
 package require idletime
 
@@ -248,7 +248,7 @@ proc ::AutoAway::BuildPage {page} {
     ttk::frame $waa
     
     set varName [namespace current]::tmpJPrefs(autoaway)
-    ttk::checkbutton $waa.lminaw -text [mc prefminaw] -variable $varName \
+    ttk::checkbutton $waa.lminaw -text "[mc prefminaw]:" -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.eminaw $waa.eawmsg] $varName]]
     ttk::entry $waa.eminaw -font CociSmallFont -width 3 \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
@@ -267,7 +267,7 @@ proc ::AutoAway::BuildPage {page} {
     grid $waa.eawmsg -sticky ew
 
     set varName [namespace current]::tmpJPrefs(xautoaway)
-    ttk::checkbutton $waa.lminxa -text [mc prefminea] -variable $varName \
+    ttk::checkbutton $waa.lminxa -text "[mc prefminea]:" -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.eminxa $waa.examsg] $varName]]
     ttk::entry $waa.eminxa -font CociSmallFont -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
@@ -282,7 +282,7 @@ proc ::AutoAway::BuildPage {page} {
     grid  $waa.lminxa  -         -            $waa.eminxa
     grid  x            $waa.lxa  $waa.examsg  -
     grid  $waa.pxa
-    grid $waa.lminaw -sticky w
+    grid $waa.lminxa -sticky w
     grid $waa.eawmsg -sticky ew    
         
     set varName [namespace current]::tmpJPrefs(autologout)

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.13 2007-09-13 08:25:38 matben Exp $
+# $Id: Create.tcl,v 1.14 2007-09-15 13:16:12 matben Exp $
 
 package provide Create 1.0
 
@@ -120,8 +120,8 @@ proc ::Create::Build {args} {
     grid  $frtop.eserv  $frtop.eroom  $frtop.enick  -sticky ew
     grid columnconfigure $frtop 1 -weight 1
 
-    ::balloonhelp::balloonforwindow $frtop.eserv [mc chatroomservice]
-    ::balloonhelp::balloonforwindow $frtop.eroom [mc chatroomselect]
+    ::balloonhelp::balloonforwindow $frtop.eserv [mc tooltip-chatroomservice]
+    ::balloonhelp::balloonforwindow $frtop.eroom [mc tooltip-chatroomselect]
     ::balloonhelp::balloonforwindow $frtop.enick [mc registration-nick]
 
     # Find the default conferencing server.

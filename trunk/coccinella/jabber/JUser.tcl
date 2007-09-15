@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.43 2007-09-13 15:53:39 matben Exp $
+# $Id: JUser.tcl,v 1.44 2007-09-15 13:16:12 matben Exp $
 
 package provide JUser 1.0
 
@@ -147,9 +147,9 @@ proc ::JUser::NewDlg {args} {
 
     grid $frmid.type $frmid.ejid $frmid.enick $frmid.egroup -sticky ew
 
-    ::balloonhelp::balloonforwindow $frmid.ejid [mc contactid]
+    ::balloonhelp::balloonforwindow $frmid.ejid [mc tooltip-contactid]
     ::balloonhelp::balloonforwindow $frmid.enick [mc registration-nick]
-    ::balloonhelp::balloonforwindow $frmid.egroup [mc group]
+    ::balloonhelp::balloonforwindow $frmid.egroup [mc tooltip-group]
 
     set state(gjid)  [lindex $trpts 0 0]
     set state(jid)   ""
@@ -464,9 +464,9 @@ proc ::JUser::EditUserDlg {jid} {
     
     set istransport [::Roster::IsTransport $jid]
     if {$istransport} {
-	set title [mc {Transport Info}]
+	set title [mc "Transport Info"]
     } else {
-	set title [mc {Edit Contact}]
+	set title [mc "Edit Contact"]
     }
 
     ::UI::Toplevel $w -class JUser \
@@ -587,10 +587,8 @@ proc ::JUser::EditUserDlg {jid} {
 	}
 	
 	# Present subscription.
-	set str "[mc Subscription]: "
-	append str [mc sub[string totitle $subscription]]
-	ttk::label $frmid.lsub -style Small.TLabel \
-	  -text $str -anchor e
+	set str [mc subscription[string totitle $subscription]]
+	ttk::label $frmid.lsub -style Small.TLabel -text $str -anchor e
 	    
 	# Presence presence subscription in a userfriendly way. Not sure if this is a good idea, but what about using $frmid.lsub in a balloon help string for $frmid.csubs instead of a label?
 	# Other idea to improve this dialog: change checkbox item in a button that do not close the dialog, but just update the string $frmid.lsub. So, maybe:

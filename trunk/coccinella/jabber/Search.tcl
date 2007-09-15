@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.36 2007-09-13 15:53:40 matben Exp $
+# $Id: Search.tcl,v 1.37 2007-09-15 13:16:12 matben Exp $
 
 package provide Search 1.0
 
@@ -432,10 +432,10 @@ proc ::Search::ResultCallback {server type subiq} {
     if {[string equal $type "error"]} {
 	foreach {ecode emsg} [lrange $subiq 0 1] break
 	if {$ecode eq "406"} {
-	    set msg [mc jamesssearchinval2]
+	    set msg [mc jamesssearchinval]
 	    append msg "\n[mc Message]: $emsg"
 	} else {
-	    set msg [mc jamesssearcherr2]
+	    set msg [mc jamesssearcherr]
 	    append msg "\n" "[mc {Error code}]: $ecode"
 	    append msg "\n" "[mc Message]: $emsg"
 	}

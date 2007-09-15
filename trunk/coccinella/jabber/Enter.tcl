@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.17 2007-09-13 08:25:38 matben Exp $
+# $Id: Enter.tcl,v 1.18 2007-09-15 13:16:12 matben Exp $
 
 package provide Enter 1.0
 
@@ -174,9 +174,9 @@ proc ::Enter::Build {protocol args} {
     grid  $wbrowse  -padx 10
     grid columnconfigure $frmid 1 -weight 1
 
-    ::balloonhelp::balloonforwindow $wserver [mc chatroomservice]
+    ::balloonhelp::balloonforwindow $wserver [mc tooltip-chatroomservice]
     ::balloonhelp::balloonforwindow $wbmark [mc Bookmarks]
-    ::balloonhelp::balloonforwindow $wroom [mc chatroomselect]
+    ::balloonhelp::balloonforwindow $wroom [mc tooltip-chatroomselect]
     ::balloonhelp::balloonforwindow $frmid.enick [mc registration-nick]
     ::balloonhelp::balloonforwindow $frmid.epass [mc registration-password]
 

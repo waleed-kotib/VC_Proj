@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: HttpTrpt.tcl,v 1.10 2007-09-14 08:11:45 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.11 2007-09-15 13:16:12 matben Exp $
 
 package require httpex
 package require timing
@@ -163,7 +163,7 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 	    set needupdate 1
 	}
 	if {$state(-progressmessage) != {}} {
-	    set msg "[mc DOwnloading] \"$state(fileTail)\""
+	    set msg "[mc Downloading] \"$state(fileTail)\""
 	    uplevel #0 $state(-progressmessage) [list $msg]
 	}
 	set state(startmillis) $ms
