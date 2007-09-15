@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.70 2007-09-15 13:16:12 matben Exp $
+# $Id: VCard.tcl,v 1.71 2007-09-15 14:27:27 matben Exp $
 
 package provide VCard 1.0
 
@@ -301,7 +301,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     # Other part.
     ttk::label $pbi.nick   -text "[mc Nickname]:"
     ttk::label $pbi.email  -text "[mc Email]:"
-    ttk::label $pbi.jid    -text "[mc {Conatct ID}]:"
+    ttk::label $pbi.jid    -text "[mc {Contact ID}]:"
     ttk::entry $pbi.enick  -textvariable $etoken\(nickname)
     ttk::entry $pbi.eemail -textvariable $etoken\(email_internet_pref)
     ttk::entry $pbi.ejid   -textvariable $etoken\(jid)
@@ -831,7 +831,7 @@ proc ::VCard::Import {} {
 	return
     }
     set fileName [tk_getOpenFile -defaultextension .xml \
-      -title [mc {Open vCard}] -filetypes {{"vCard" ".xml"}}]
+      -title [mc "Open Business Card"] -filetypes {{"vCard" ".xml"}}]
     if {$fileName ne ""} {
 	if {[file extension $fileName] ne ".xml"} {
 	    tk_messageBox -icon error -title [mc Error] \

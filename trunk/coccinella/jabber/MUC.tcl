@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.92 2007-09-13 15:53:40 matben Exp $
+# $Id: MUC.tcl,v 1.93 2007-09-15 14:27:24 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -718,7 +718,7 @@ proc ::MUC::GrantRevoke {roomjid which type} {
     set sdef [subst $dlgDefs($which,$type)]
     set title [lindex $sdef 0]
     set msg   [lindex $sdef 1]
-    set ans [ui::megaentry -label "[mc {Profile name}]:" -icon "" \
+    set ans [ui::megaentry -label "[mc {Profile Name}]:" -icon "" \
       -geovariable prefs(winGeom,jmucact) -title $title -message $msg]
 
     if {$ans ne ""} {

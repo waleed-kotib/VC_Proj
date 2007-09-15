@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.40 2007-09-11 12:41:34 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.41 2007-09-15 14:27:24 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -321,7 +321,7 @@ proc ::RosterAvatar::Configure {_T} {
       -borderwidth $bd -background $bg -image $simage -textcolor $fg
     $T column create -tags cTree    \
       -itembackground $itemBackground -resize 0 -expand 1 -squeeze 1  \
-      -text [mc {Contact Name}] -button 1 -arrow up -borderwidth $bd \
+      -text [mc "Contact Name"] -button 1 -arrow up -borderwidth $bd \
       -background $bg -textcolor $fg
     $T column create -tags cTag     \
       -visible 0

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.38 2007-09-12 13:37:55 matben Exp $
+# $Id: Sounds.tcl,v 1.39 2007-09-15 14:27:23 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -476,7 +476,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     ttk::frame $wc.alrt -padding {0 0 0 6}
-    ttk::label $wc.alrt.l -text [mc {Alert sounds}]
+    ttk::label $wc.alrt.l -text [mc "Alert sounds"]
     ttk::separator $wc.alrt.s -orient horizontal
     
     grid  $wc.alrt.l  $wc.alrt.s  -sticky w

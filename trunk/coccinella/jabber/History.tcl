@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: History.tcl,v 1.32 2007-09-13 08:25:38 matben Exp $
+# $Id: History.tcl,v 1.33 2007-09-15 14:27:24 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -1015,7 +1015,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
     
     if {[$wtext index end] eq "1.0"} {
 	$wtext configure -state normal
-	$wtext insert end [mc {No registered history for} $jid] histhead
+	$wtext insert end [mc "No registered history for" $jid] histhead
 	$wtext insert end "\n" histhead
 	$wtext configure -state disabled
     }

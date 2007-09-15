@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.22 2007-09-12 13:37:55 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.23 2007-09-15 14:27:23 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -566,7 +566,7 @@ proc ::BuddyPounce::Event {from eventkey args} {
 		}
 	    }
 	    msg {
-		set subject [mc {Auto Reply}]
+		set subject [mc "Auto Reply"]
 		set body "Insert your message!"
 		set subjectopt [lsearch -inline -glob $actions subject:*]
 		if {$subjectopt ne ""} {

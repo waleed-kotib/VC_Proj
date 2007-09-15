@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.129 2007-09-15 07:43:05 matben Exp $
+# $Id: Disco.tcl,v 1.130 2007-09-15 14:27:23 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1500,7 +1500,7 @@ proc ::Disco::InfoResultCB {type jid queryE args} {
 	set imd [::Theme::GetImage infoDis]
 
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc {Disco Info}] -compound left \
+	  -text [mc Discover] -compound left \
 	  -image [list $im background $imd]
 	pack $w.frall.head -side top -anchor w
 	

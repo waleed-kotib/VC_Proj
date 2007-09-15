@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.27 2007-09-15 07:43:06 matben Exp $
+# $Id: UserInfo.tcl,v 1.28 2007-09-15 14:27:25 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -153,7 +153,7 @@ proc ::UserInfo::DiscoCB {token disconame type from subiq args} {
     
     set wnb $priv(wnb)
 
-    $wnb add [ttk::frame $wnb.di] -text [mc {Disco}] -sticky news
+    $wnb add [ttk::frame $wnb.di] -text [mc Discover] -sticky news
 
     set wpage $wnb.di.f
     ttk::frame $wpage -padding [option get . notebookPagePadding {}]
