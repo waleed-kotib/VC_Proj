@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.45 2007-09-13 15:53:40 matben Exp $
+# $Id: Status.tcl,v 1.46 2007-09-16 14:55:27 matben Exp $
 
 package provide Status 1.0
 
@@ -379,7 +379,7 @@ proc ::Status::SetWithMessage {varName args} {
     
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} -closecommand [namespace current]::CloseStatus
-    wm title $w [mc {Set Status}]
+    wm title $w [mc "Set Status"]
 
     ::UI::SetWindowPosition $w
     
