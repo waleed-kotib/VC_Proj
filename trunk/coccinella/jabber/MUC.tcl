@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.93 2007-09-15 14:27:24 matben Exp $
+# $Id: MUC.tcl,v 1.94 2007-09-16 14:55:26 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -1497,7 +1497,7 @@ proc ::MUC::RoomConfigResult {roomjid jlibname type subiq} {
 
 # MUC::SetNick --
 # 
-# 
+#       For backup only
 
 proc ::MUC::SetNick {roomjid} {
     variable locals

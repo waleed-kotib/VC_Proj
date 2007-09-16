@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.103 2007-09-16 07:39:12 matben Exp $
+# $Id: Preferences.tcl,v 1.104 2007-09-16 14:55:27 matben Exp $
  
 package require mnotebook
 
@@ -242,9 +242,6 @@ proc ::Preferences::Build {args} {
     ttk::button $frbot.btfactory -style TButton \
       -text [mc {Factory Settings}]   \
       -command [list ::Preferences::ResetToFactoryDefaults "40"]
-    ttk::button $frbot.btrevert -style TButton \
-      -text [mc {Revert Panel}]  \
-      -command ::Preferences::ResetToUserDefaults
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btok     -side right -fill y
@@ -254,7 +251,6 @@ proc ::Preferences::Build {args} {
 	pack $frbot.btok     -side right -fill y -padx $padx
     }
     pack $frbot.btfactory -side left -fill y
-    pack $frbot.btrevert  -side left -fill y -padx $padx
     pack $frbot -side top -fill x
 
     wm resizable $w 0 0

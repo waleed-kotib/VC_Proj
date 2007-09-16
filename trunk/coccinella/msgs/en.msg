@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.198 2007-09-16 12:00:28 matben Exp $
+#   $Id: en.msg,v 1.199 2007-09-16 14:55:27 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -480,7 +480,7 @@
 ::msgcat::mcset en {Discover Server}
 ::msgcat::mcset en {Disk cache size}
 ::msgcat::mcset en {Edit Bookmarks}
-::msgcat::mcset en {Do you actually want to hang up?}
+::msgcat::mcset en {Do you want to hang up?}
 ::msgcat::mcset en {Edit Business Card}
 ::msgcat::mcset en {Edit Contact}
 ::msgcat::mcset en {Edit File Type}
@@ -530,7 +530,6 @@
 ::msgcat::mcset en {New Bookmark}
 ::msgcat::mcset en {New Form}
 ::msgcat::mcset en {New Message}
-::msgcat::mcset en {New Nickname}
 ::msgcat::mcset en {New password}
 ::msgcat::mcset en {New Password}
 ::msgcat::mcset en {New Profile}
@@ -569,7 +568,6 @@
 ::msgcat::mcset en {Remove Item}
 ::msgcat::mcset en {Requires a restart of} {Requires a restart of %s}
 ::msgcat::mcset en {Retype password}
-::msgcat::mcset en {Revert Panel}
 ::msgcat::mcset en {Save As}
 ::msgcat::mcset en {Save As GIF}
 ::msgcat::mcset en {Save Canvas Item}
@@ -582,11 +580,9 @@
 ::msgcat::mcset en {Select Avatar}
 ::msgcat::mcset en {Select File}
 ::msgcat::mcset en {Select Font}
-::msgcat::mcset en {Select a new nickname}
 ::msgcat::mcset en {Select Server}
 ::msgcat::mcset en {Send File}
 ::msgcat::mcset en {Send Live}
-::msgcat::mcset en {Set New Nickname}
 ::msgcat::mcset en {Set Status}
 ::msgcat::mcset en {Setup Assistant}
 ::msgcat::mcset en {Show Icon}
@@ -617,7 +613,6 @@
 ::msgcat::mcset en {Use secure connection}
 ::msgcat::mcset en {Use compression}
 ::msgcat::mcset en {User Activity}
-::msgcat::mcset en {User Profiles}
 ::msgcat::mcset en {Contact is offline}
 ::msgcat::mcset en {Contact is online}
 ::msgcat::mcset en {Contact presence change}
@@ -781,7 +776,7 @@
 ::msgcat::mcset en jamessoobok2          {File transfer of %s to %s was successful.}
 ::msgcat::mcset en jamessoobtimeout2     {Cannot download file over HTTP: timeout.}
 ::msgcat::mcset en jamessoonnohttp2      {The URL from %s does not use the HTTP protocol, but instead %s which is not supported.}
-::msgcat::mcset en jamessowntrpt2        {This is your own account at %s that acts as a service that transports messages to that IM system. It is needs to be in your list. You have a subscription for %s: %s.}
+::msgcat::mcset en jamessowntrpt2        {This is your own account at %s that acts as a service that transports messages to that IM system. It needs to be in your list. You have a subscription for %s: %s.}
 ::msgcat::mcset en jamesspasswderr2      {Cannot set new password.}
 ::msgcat::mcset en jamesspasswdok        {Setting new password was successful.}
 ::msgcat::mcset en jamessprofaskrem2     {The selected profile will be deleted. Do you also want to delete the account for this profile? This action cannot be undone. Press Cancel to abort deletion of account and profile.}

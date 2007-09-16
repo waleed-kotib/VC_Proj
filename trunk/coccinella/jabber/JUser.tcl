@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.45 2007-09-16 07:39:11 matben Exp $
+# $Id: JUser.tcl,v 1.46 2007-09-16 14:55:26 matben Exp $
 
 package provide JUser 1.0
 
@@ -439,7 +439,7 @@ proc ::JUser::EditTransportDlg {jid} {
     set ujid [jlib::unescapejid $jid3]
     set msg [mc jamessowntrpt2 $typename $ujid $subscription]
 
-    ::UI::MessageBox -title [mc Info] -type ok -message $msg -icon info
+    ::ui::dialog -title [mc Info] -type ok -message $msg -icon info
 }
 
 # JUser::EditUserDlg --
@@ -675,12 +675,19 @@ proc ::JUser::DoEdit {token} {
     set origgroups  $state(origgroups)
     set subscribe   $state(subscribe)
     set unsubscribe $state(unsubscribe)
+
+    set haveName 0
+    set haveGroup 0
+
+    puts "::JUser::DoEdit"
+    parray state
 	
     # This is the only situation when a client "sets" a roster item.
     # The actual roster item is pushed back to us, and not set from here.
     set opts [list]
     if {[string length $name]} {
 	lappend opts -name $name
+	set haveName 1
     }
     set groups [list]
     for {set igroup 0} {$igroup < $state(ngroups)} {incr igroup} { 
@@ -694,12 +701,14 @@ proc ::JUser::DoEdit {token} {
     set groups [lsort -unique $groups]
     if {$groups ne $origgroups} {
 	lappend opts -groups $groups
+	set haveGroup 1
     }
     set jlib $jstate(jlib)
 
-    # @@@ Not sure why I had this?
-    #set cb [list [namespace code SetCB] $jid]
-    #eval {$jlib roster send_set $jid -command $cb} $opts    
+    if {$haveName || $haveGroup} {
+	set cb [list [namespace code SetCB] $jid]
+	eval {$jlib roster send_set $jid -command $cb} $opts    
+    }
     
     # Send (un)subscribe request.
     if {$subscribe} {

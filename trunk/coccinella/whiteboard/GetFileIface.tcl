@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GetFileIface.tcl,v 1.14 2007-09-14 13:17:09 matben Exp $
+# $Id: GetFileIface.tcl,v 1.15 2007-09-16 14:55:28 matben Exp $
 
 package require getfile
 package require uriencode
@@ -283,7 +283,7 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime opts} {
 	ask {
 	    
 	    # 2: Ask user what to do with it.
-	    set ans [::UI::MessageBox -title [mc {Request To User}] \
+	    set ans [::UI::MessageBox -title [mc "Request To User"] \
 	      -type yesno -default yes -message [mc messaskreceive $fileTail]]
 	    if {[string equal $ans "no"]} {
 		return 321

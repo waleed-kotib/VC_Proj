@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.24 2007-09-16 07:39:11 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.25 2007-09-16 14:55:26 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -48,6 +48,9 @@ proc ::BuddyPounce::Init {} {
     }
     set menuType {
 	mContactActions... {group user}
+    }
+    set menuType {
+	mContactActions... {}
     }
     ::Roster::RegisterPopupEntry $menuDef $menuType
     
@@ -86,10 +89,10 @@ proc ::BuddyPounce::Init {} {
         
     variable alertTitle 
     array set alertTitle {
-	available   {Online}
-	unavailable {Offline}
-	msg         {Message}
-	chat        {Chat}
+	available   Online
+	unavailable Offline
+	msg         Message
+	chat        Chat
     }
 }
 
