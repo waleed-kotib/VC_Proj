@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.54 2007-09-16 07:39:11 matben Exp $
+# $Id: JPrefs.tcl,v 1.55 2007-09-16 12:00:28 matben Exp $
 
 package require ui::fontselector
 
@@ -194,15 +194,13 @@ proc ::JPrefs::BuildAppearancePage {page} {
     ttk::label  $wap.lfont -text "[mc {Chat window}]:"
     ttk::button $wap.btfont -text "[mc {Select Font}]..." -style Small.TButton \
       -command [namespace current]::PickFont
-    ttk::button $wap.dfont -text [mc Default]  \
-      -command [namespace current]::DefaultChatFont  \
-      -style Small.TButton
-
+    
     ttk::label $wap.lthe -text "[mc Theme]:"
     eval {ttk::optionmenu $wap.pthe [namespace current]::tmpPrefs(themeName)} \
       $allrsrc
     
-    ::balloonhelp::balloonforwindow $wap.pthe [mc "Requires a restart"]
+    ::balloonhelp::balloonforwindow $wap.pthe \
+      [mc "Requires a restart of" $prefs(appName)]
 
     # Tile's themes (skins).
     # This is applied immediately and unaffected by Cancel/Save actions.
@@ -238,7 +236,6 @@ proc ::JPrefs::BuildAppearancePage {page} {
     
     grid  $wap.tab    -            -padx 2 -pady 2 -sticky w
     grid  $wap.lfont  $wap.btfont  -padx 2 -pady 2 -sticky e
-    grid  x           $wap.dfont   -padx 2 -pady 2 -sticky ew
     grid  $wap.lthe   $wap.pthe    -padx 2 -pady 2 -sticky e
     grid  $wap.lskin  $wap.bskin   -padx 2 -pady 2 -sticky e
     if {$haveOpacity} {
@@ -349,12 +346,6 @@ proc ::JPrefs::PickFontCommand {{theFont ""}} {
 	    set tmpJPrefs(chatFont) $theFont
 	}
     }
-}
-
-proc ::JPrefs::DefaultChatFont { } {
-    variable tmpJPrefs
-
-    set tmpJPrefs(chatFont) ""
 }
 
 proc ::JPrefs::SetOpacity {opacity} {

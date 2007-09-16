@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.48 2007-09-16 07:39:12 matben Exp $
+# $Id: SetupAss.tcl,v 1.49 2007-09-16 12:00:28 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -122,7 +122,8 @@ proc ::SetupAss::SetupAss {} {
     
     lappend wrapthese $plang.fr.msg1
     
-    ::balloonhelp::balloonforwindow $plang.fr.pop [mc "Requires a restart"]
+    ::balloonhelp::balloonforwindow $plang.fr.pop \
+      [mc "Requires a restart of" $prefs(appName)]
     
     # Server.
     if {$config(setupass,page,server)} {
