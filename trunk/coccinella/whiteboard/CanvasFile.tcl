@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasFile.tcl,v 1.31 2007-09-14 13:17:09 matben Exp $
+# $Id: CanvasFile.tcl,v 1.32 2007-09-16 07:39:14 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -734,7 +734,7 @@ proc ::CanvasFile::DoSaveAsItem {wcan} {
     set typelist {
 	{"Canvas"            {.can}}
     }
-    set ans [tk_getSaveFile -title [mc {Save Canvas Item}] \
+    set ans [tk_getSaveFile -title [mc "Save Canvas Item"] \
       -defaultextension ".can" -initialdir $this(altItemPath) \
       -initialfile Untitled.can]
     if {$ans eq ""} {

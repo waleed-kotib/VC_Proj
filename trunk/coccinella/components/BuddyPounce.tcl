@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.23 2007-09-15 14:27:23 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.24 2007-09-16 07:39:11 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -234,7 +234,7 @@ proc ::BuddyPounce::Build {typeselected item group} {
 	ttk::frame $wact -padding [option get . notebookPagePadding {}]
 	pack  $wact  -side top -anchor [option get . dialogAnchor {}]
 	
-	ttk::checkbutton $wact.alrt -text [mc {Show popup}] \
+	ttk::checkbutton $wact.alrt -text [mc "Show popup"] \
 	  -variable $token\($ekey,msgbox)
 	
 	ttk::checkbutton $wact.lsound -text "[mc {Play sound}]:" \
@@ -285,7 +285,7 @@ proc ::BuddyPounce::Build {typeselected item group} {
       -command [list [namespace current]::OK $token]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $token]
-    ttk::button $frbot.btoff -text [mc {Factory Settings}]  \
+    ttk::button $frbot.btoff -text [mc "Disable All"]  \
       -command [list [namespace current]::AllOff $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {

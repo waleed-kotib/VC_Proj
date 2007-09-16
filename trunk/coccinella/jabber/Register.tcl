@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.86 2007-09-13 15:53:40 matben Exp $
+# $Id: Register.tcl,v 1.87 2007-09-16 07:39:12 matben Exp $
 
 package provide Register 1.0
 
@@ -1119,8 +1119,10 @@ proc ::GenRegister::GetCB {token jlibName type subiq} {
     $state(wsearrows) stop
     
     if {[string equal $type "error"]} {
-	::UI::MessageBox -type ok -title [mc Error] -icon error \
-	  -message [mc jamesserrregget [lindex $subiq 0] [lindex $subiq 1]]
+	set str [mc jamesserrregget2]
+	append str "\n" "[mc {Error code}]: [lindex $iqchild 0]\n"
+	append str "[mc Message]: [lindex $iqchild 1]"
+	::ui::dialog -type ok -title [mc Error] -icon error -message $str
 	return
     }
     set wform $state(wform)

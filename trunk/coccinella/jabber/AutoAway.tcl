@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.9 2007-09-15 14:36:35 matben Exp $
+# $Id: AutoAway.tcl,v 1.10 2007-09-16 07:39:11 matben Exp $
 
 package require idletime
 
@@ -247,7 +247,7 @@ proc ::AutoAway::BuildPage {page} {
     set waa $wc.aa
     ttk::frame $waa
     
-    set str "[mc prefminaw] ([mc Minutes]):"
+    set str "[mc prefminaw2] ([mc Minutes]):"
     set varName [namespace current]::tmpJPrefs(autoaway)
     ttk::checkbutton $waa.lminaw -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.eminaw $waa.eawmsg] $varName]]
@@ -267,7 +267,7 @@ proc ::AutoAway::BuildPage {page} {
     grid $waa.lminaw -sticky w
     grid $waa.eawmsg -sticky ew
 
-    set str "[mc prefminea] ([mc Minutes]):"
+    set str "[mc prefminea2] ([mc Minutes]):"
     set varName [namespace current]::tmpJPrefs(xautoaway)
     ttk::checkbutton $waa.lminxa -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.eminxa $waa.examsg] $varName]]
@@ -297,7 +297,7 @@ proc ::AutoAway::BuildPage {page} {
     ttk::label $waa.llo -text [mc Message]:
     ttk::entry $waa.elomsg -font CociSmallFont -width 32  \
       -textvariable [namespace current]::tmpJPrefs(logoutmsg)
-    ttk::checkbutton $waa.cli -text [mc prefaalogin] \
+    ttk::checkbutton $waa.cli -text [mc "Relogin on activity"] \
       -variable [namespace current]::tmpJPrefs(aalogin)
 
     SetEntryState [list $waa.elomin $waa.elomsg $waa.cli] $varName

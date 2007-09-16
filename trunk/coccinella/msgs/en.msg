@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.196 2007-09-15 14:36:35 matben Exp $
+#   $Id: en.msg,v 1.197 2007-09-16 07:39:12 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -160,12 +160,14 @@
 ::msgcat::mcset en Server
 ::msgcat::mcset en Service
 ::msgcat::mcset en Services
+::msgcat::mcset en Settings
 ::msgcat::mcset en Shortcut
 ::msgcat::mcset en Shortcuts
 ::msgcat::mcset en Size
 ::msgcat::mcset en Skin
 ::msgcat::mcset en Sleep
 ::msgcat::mcset en Sounds
+::msgcat::mcset en Specific
 ::msgcat::mcset en Stop
 ::msgcat::mcset en Subject
 ::msgcat::mcset en System
@@ -183,6 +185,7 @@
 ::msgcat::mcset en Visitors
 ::msgcat::mcset en Voice
 ::msgcat::mcset en voice
+::msgcat::mcset en Volume
 ::msgcat::mcset en Warning
 ::msgcat::mcset en Website
 ::msgcat::mcset en Whiteboard
@@ -193,7 +196,7 @@
 
 # A few words that are not unambiguous and have therefore a prefix:
 # Note to translators: this means "Application" as in computer program.
-::msgcat::mcset da program-Application        Application
+::msgcat::mcset en program-Application        Application
 
 # Try to move next strings to normal strings
 # Canvas item options, names and values.
@@ -356,8 +359,10 @@
 ::msgcat::mcset en mLineSmoothness       {Line Smoothness}
 ::msgcat::mcset en mLocalTime            {Local Time...}
 ::msgcat::mcset en mLogin...             {Login...}
+::msgcat::mcset en mLoginTo              {Login to %s}
 ::msgcat::mcset en mLoginTrpt            {Login to Transport}
 ::msgcat::mcset en mLogout               {Logout}
+::msgcat::mcset en mLogoutFrom           {Logout from %s}
 ::msgcat::mcset en mLogoutTrpt           {Logout from Transport}
 ::msgcat::mcset en mLogoutWith...        {Lo&gout With Message...}
 ::msgcat::mcset en mLower                {&Lower}
@@ -429,7 +434,6 @@
 
 
 # Short texts only. Use english text as database key.
-# Replace other strings with "Coccinella" in it in a similar way?
 ::msgcat::mcset en {About %s}
 ::msgcat::mcset en {About QuickTimeTcl}
 ::msgcat::mcset en {Add Contact}
@@ -471,6 +475,7 @@
 ::msgcat::mcset en {Default group}
 ::msgcat::mcset en {Default nickname}
 ::msgcat::mcset en {Delete Profile}
+::msgcat::mcset en {Disable All}
 ::msgcat::mcset en {Discover permanently}
 ::msgcat::mcset en {Discover Server}
 ::msgcat::mcset en {Disk cache size}
@@ -496,8 +501,8 @@
 ::msgcat::mcset en {File Type}
 ::msgcat::mcset en {File Types}
 ::msgcat::mcset en {First name}
-::msgcat::mcset en {Font Size}
-::msgcat::mcset en {Font Weight}
+::msgcat::mcset en {Font size}
+::msgcat::mcset en {Font weight}
 ::msgcat::mcset en {Format: mm/dd/yyyy}
 ::msgcat::mcset en {History length}
 ::msgcat::mcset en {Import Iconset}
@@ -567,6 +572,7 @@
 ::msgcat::mcset en {Revert Panel}
 ::msgcat::mcset en {Save As}
 ::msgcat::mcset en {Save As GIF}
+::msgcat::mcset en {Save Canvas Item}
 ::msgcat::mcset en {Save File}
 ::msgcat::mcset en {Save Message}
 ::msgcat::mcset en {Save password}
@@ -600,6 +606,7 @@
 ::msgcat::mcset en {Take Snapshot}
 ::msgcat::mcset en {Tel (fax)}
 ::msgcat::mcset en {Tel (voice)}
+::msgcat::mcset en {Text-to-Speech}
 ::msgcat::mcset en {Thread started}
 ::msgcat::mcset en {Use HTTP transport}
 ::msgcat::mcset en {Use SASL authentication}
@@ -609,6 +616,7 @@
 ::msgcat::mcset en {Use proxy}
 ::msgcat::mcset en {Use secure connection}
 ::msgcat::mcset en {Use compression}
+::msgcat::mcset en {User Activity}
 ::msgcat::mcset en {User Profiles}
 ::msgcat::mcset en {Contact is offline}
 ::msgcat::mcset en {Contact is online}
@@ -698,7 +706,7 @@
 ::msgcat::mcset en messnoplugs           {There are no plugins or helper applications identified on this system.}
 ::msgcat::mcset en messpasswddifferent2  {Passwords do not match. Please try again.}
 ::msgcat::mcset en messprefschanged      {The preferences have been changed. Do you want to cancel anyway?}
-::msgcat::mcset en messprefsrestart2     {At least one setting requires a restart of Coccinella.}
+::msgcat::mcset en messprefsrestart2     {At least one setting requires a restart of %s.}
 ::msgcat::mcset en messprintnoextension2 {Cannot find necessary Tcl extension.}
 ::msgcat::mcset en messrmstandardfonts   {The standard fonts, Times, Helvetica, and Courier, may not be removed}
 ::msgcat::mcset en messsuassclose        {Are you sure you want to close the setup assistant? You may start it any time later from the menu.}
@@ -794,6 +802,7 @@
 ::msgcat::mcset en jamesstimeoutserver2  {Server %s did not respond: timeout.}
 ::msgcat::mcset en jamesstimeservstart2  {Time since server %s was started}
 ::msgcat::mcset en jamesstimeused2       {Time since client %s was last active}
+::msgcat::mcset en jamesstrptsubsc       {Your registered account with the %s service will be put in your roster to work as a transport with this service.}
 ::msgcat::mcset en jamessunsub2          {Because %s does not allow you to see his/her presence anymore, he/she is removed.}
 ::msgcat::mcset en jamessunsubask2       {%s does not allow you to see his/her presence anymore. Do you want to remove %s?}
 ::msgcat::mcset en jamessunsubpres2      {%s does not allow you to see his/her presence anymore.}
@@ -900,24 +909,23 @@
 ::msgcat::mcset en prefchactret2         {By default use active <Return> to send messages}
 ::msgcat::mcset en prefchnormal          {Treat normal messages as chat messages}
 ::msgcat::mcset en prefcu2clk            {Double click message in inbox}
-::msgcat::mcset en prefcuautologin2      {Login on Coccinella startup}
+::msgcat::mcset en prefcuautologin2      {Login on %s startup}
 ::msgcat::mcset en prefcuopen            {Open message in new window}
 ::msgcat::mcset en prefcuremdlgs2        {Remember open windows between sessions}
 ::msgcat::mcset en prefcureply           {Reply to sender}
 ::msgcat::mcset en prefcusave            {Save message inbox between sessions}
 ::msgcat::mcset en prefcushow            {Show incoming messages in new window}
-::msgcat::mcset en prefcuupdate          {Automatically check for new Coccinella version}
 ::msgcat::mcset en prefdirsame           {Store preferences in same folder as program}
 ::msgcat::mcset en prefdrivesame2        {Store preferences on same drive as program}
-::msgcat::mcset en prefdriwdef2          {You have chosen to store your preferences in the default location. If you remove or move your personal settings at %s, the preferences in the default location will be used the next time you start Coccinella. Do you want to remove the old preferences?}
+::msgcat::mcset en prefdriwdef2          {You have chosen to store your preferences in the default location. If you remove or move your personal settings at %s, the preferences in the default location will be used the next time you start %s. Do you want to remove the old preferences?}
 ::msgcat::mcset en prefdriwsame          {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible. Do you want to continue?}
 ::msgcat::mcset en preffilecache2        {The cache is an internal memory where recent files from contacts are stored to increase speed.}
 ::msgcat::mcset en preffilecache2        {Amount of cache to store recent whiteboard files to increase speed.}
 ::msgcat::mcset en preffontmsg           {Warning: by importing any other fonts than the standard three ones (Times, Helvetica or Courier), you must be confident that all remote clients also have this font installed on their system.}
 ::msgcat::mcset en preficonsel2          {The selected iconset will become the default.}
 ::msgcat::mcset en prefmidimsg           {Set command to use for playing MIDI sounds. This option is only relevant if you use a sound set with MIDI files.}
-::msgcat::mcset en prefminaw             {Away after}
-::msgcat::mcset en prefminea             {Extended Away after}
+::msgcat::mcset en prefminaw2            {Away after}
+::msgcat::mcset en prefminea2            {Extended Away after}
 ::msgcat::mcset en prefminlogout         {Logout after}
 ::msgcat::mcset en prefnatip2            {Use the following external address}
 ::msgcat::mcset en prefplugctrl2         {Select the plugins you want to be loaded.}
@@ -1002,7 +1010,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jaxformreq            {Labels with (*) are required.}
 
 # Setup assistant:
-::msgcat::mcset en suintro1a 	{This setup assistant will help you to configure the most important settings to get started with Coccinella.}
+::msgcat::mcset en suintro1a 	{This setup assistant will help you to configure the most important settings to get started with %s.}
 ::msgcat::mcset en suintro3a 	{Any time you can press Previous to go back. Press Next to proceed.}
 ::msgcat::mcset en sulang2      {Choose your language}
 ::msgcat::mcset en suservmsg2	{Select or enter a server you wish to have your account on. If you already have an account, use the server of this account.}
@@ -1126,11 +1134,11 @@ if {0} {
     ::msgcat::mcset en comfortTip		{Artificial background noise to fill silence}
     ::msgcat::mcset en Codec
     # I copied the following descriptions from the websites of these projects; do you think we should ask permission for this?
-    ::msgcat::mcset en ilbc			{iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
-    ::msgcat::mcset en speex		{Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
-    ::msgcat::mcset en alaw			{Standard used in European digital communication systems (ITU-T)}
-    ::msgcat::mcset en ulaw			{Standard used in digital communication systems in North America and Japan (ITU-T)}
-    ::msgcat::mcset en gsm			{GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
+    ::msgcat::mcset en tooltip-ilbc			{iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
+    ::msgcat::mcset en tooltip-speex		{Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
+    ::msgcat::mcset en tooltip-alaw			{Standard used in European digital communication systems (ITU-T)}
+    ::msgcat::mcset en tooltip-ulaw			{Standard used in digital communication systems in North America and Japan (ITU-T)}
+    ::msgcat::mcset en tooltip-gsm			{GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
 }
 
 # Messages for Mood XEP

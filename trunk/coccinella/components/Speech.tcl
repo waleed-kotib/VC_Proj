@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Speech.tcl,v 1.13 2007-09-12 13:37:55 matben Exp $
+# $Id: Speech.tcl,v 1.14 2007-09-16 07:39:11 matben Exp $
 
 namespace eval ::Speech:: { }
 
@@ -309,7 +309,7 @@ proc ::Speech::BuildPrefsPage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     ttk::frame $wc.head -padding {0 0 0 6}
-    ttk::label $wc.head.l -text [mc "Synthetic speech"]
+    ttk::label $wc.head.l -text [mc "Text-to-Speech"]
     ttk::separator $wc.head.s -orient horizontal
 
     grid  $wc.head.l  $wc.head.s

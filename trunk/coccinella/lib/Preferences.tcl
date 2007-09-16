@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.102 2007-09-15 14:27:27 matben Exp $
+# $Id: Preferences.tcl,v 1.103 2007-09-16 07:39:12 matben Exp $
  
 package require mnotebook
 
@@ -448,7 +448,7 @@ proc ::Preferences::SavePushBt { } {
     if {$needRestart} {
 	set ans [::UI::MessageBox -title [mc Warning]  \
 	  -type ok -parent $wDlgs(prefs) -icon info \
-	  -message [mc messprefsrestart2]]
+	  -message [mc messprefsrestart2 $prefs(appName)]]
     }
 
     # Save the preference file.

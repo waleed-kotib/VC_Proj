@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.14 2007-09-15 13:16:12 matben Exp $
+# $Id: Create.tcl,v 1.15 2007-09-16 07:39:11 matben Exp $
 
 package provide Create 1.0
 
@@ -581,7 +581,7 @@ proc ::Create::GCBuild {args} {
     
     if {0 && $chatservers == {}} {
 	::UI::MessageBox -icon error -title [mc Error] \
-	  -message [mc jamessnogroupchat]
+	  -message [mc jamessnogroupchat2]
 	return
     }
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.47 2007-09-13 15:53:40 matben Exp $
+# $Id: SetupAss.tcl,v 1.48 2007-09-16 07:39:12 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -97,7 +97,7 @@ proc ::SetupAss::SetupAss {} {
     set p1 [$su newpage "intro" -headtext [mc "Setup Assistant"]]
     ttk::frame $p1.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p1.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -anchor w -text [mc suintro1a]
+      -wraplength 260 -justify left -anchor w -text [mc suintro1a $prefs(appName)]
     ttk::label $p1.fr.msg3 -style Small.TLabel \
       -wraplength 260 -justify left -anchor w -text [mc suintro3a]
     

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.97 2007-09-15 14:27:24 matben Exp $
+# $Id: Profiles.tcl,v 1.98 2007-09-16 07:39:12 matben Exp $
 
 package require ui::megaentry
 
@@ -1859,7 +1859,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
       -text [mc {Use HTTP transport}] -variable $token\(http)  \
       -command [list ::Profiles::NotebookHttpCmd $w]
 
-    ttk::label $whttp.lurl -style Small.TLabel -text "[mc {URL}]:"
+    ttk::label $whttp.lurl -style Small.TLabel -text "URL:"
     ttk::entry $whttp.eurl -font CociSmallFont -textvariable $token\(httpurl)
     ttk::button $whttp.bproxy -style Small.TButton -text "[mc Proxy]..." \
       -command [list ::Preferences::Show {General {Network}}]
