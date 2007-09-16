@@ -3,7 +3,7 @@
 #       Creates a card game in a whiteboard canvas. 
 # 
 # 
-# $Id: CardGame.itcl,v 1.13 2005-08-26 15:02:34 matben Exp $
+# $Id: CardGame.itcl,v 1.14 2007-09-16 07:39:13 matben Exp $
 
 namespace eval CardGame {
     
@@ -314,19 +314,19 @@ if {[itcl::find classes CardGame] == ""} {
 	if {![winfo exists $cardstackMenu]} {
 	    menu $cardstackMenu -tearoff 0
 	    if {0} {
-		$cardstackMenu add command -label [mc {Mix Stack}]  \
+		$cardstackMenu add command -label [mc "Mix Stack"]  \
 		  -command [code $this MixStack]
-		$cardstackMenu add command -label [mc {New Card}]  \
+		$cardstackMenu add command -label [mc "New Card"]  \
 		  -command [code $this NewCardAutoPlace]
 	    }
 	    set cardMenu [menu ${tkCanvas}.camenu -tearoff 0]
-	    $cardMenu add radiobutton -label [mc {Show Me}]  \
+	    $cardMenu add radiobutton -label [mc "Show Me"]  \
 	      -command [code $this ShowMe] -variable [scope cardStatePopup] \
 	      -value half
-	    $cardMenu add radiobutton -label [mc {Show All}]  \
+	    $cardMenu add radiobutton -label [mc "Show All"]  \
 	      -command [code $this ShowAll] -variable [scope cardStatePopup] \
 	      -value up
-	    $cardMenu add radiobutton -label [mc {Hide}]  \
+	    $cardMenu add radiobutton -label [mc Hide]  \
 	      -command [code $this Hide] -variable [scope cardStatePopup] \
 	      -value back
 	}

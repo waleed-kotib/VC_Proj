@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.44 2007-09-15 13:16:12 matben Exp $
+# $Id: JUser.tcl,v 1.45 2007-09-16 07:39:11 matben Exp $
 
 package provide JUser 1.0
 
@@ -193,8 +193,8 @@ proc ::JUser::NewDlg {args} {
     } $wbox.msg $w]    
     after idle $script
 
-    #::balloonhelp::balloonforwindow $wbox.ltype [mc jarostadd]
-    #::balloonhelp::balloonforwindow $wbox.type [mc jarostadd]
+    #::balloonhelp::balloonforwindow $wbox.ltype [mc jarostadd2]
+    #::balloonhelp::balloonforwindow $wbox.type [mc jarostadd2]
         
     # Wait here for a button press and window to be destroyed.
     tkwait window $w
@@ -439,8 +439,7 @@ proc ::JUser::EditTransportDlg {jid} {
     set ujid [jlib::unescapejid $jid3]
     set msg [mc jamessowntrpt2 $typename $ujid $subscription]
 
-    ::UI::MessageBox -title [mc {Transport Info}] -type ok -message $msg \
-      -icon info
+    ::UI::MessageBox -title [mc Info] -type ok -message $msg -icon info
 }
 
 # JUser::EditUserDlg --

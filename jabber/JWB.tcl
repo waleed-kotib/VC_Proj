@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.83 2007-09-13 15:53:40 matben Exp $
+# $Id: JWB.tcl,v 1.84 2007-09-16 07:39:11 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1872,7 +1872,7 @@ proc ::JWB::DispatchToImporter {mime opts args} {
 	    }
 	} else {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
-	      -message [mc messfailmimeimp $mime] \
+	      -message [mc messfailmimeimp2 $mime] \
 	      -parent [winfo toplevel $wcan]
 	}
     }
@@ -1894,7 +1894,7 @@ proc ::JWB::VerifyJIDWhiteboard {w} {
     if {$jwbstate($w,send)} {
 	if {![jlib::jidvalidate $jwbstate($w,jid)]} {
 	    ::UI::MessageBox -icon warning -type ok -parent $w \
-	      -message [mc jamessinvalidjid]
+	      -message [mc jamessinvalidjid2]
 	    return 0
 	}
     }

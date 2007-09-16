@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.208 2007-09-13 08:25:38 matben Exp $
+# $Id: GroupChat.tcl,v 1.209 2007-09-16 07:39:11 matben Exp $
 
 package require Create
 package require Enter
@@ -3333,7 +3333,7 @@ proc ::GroupChat::BuildPageConf {page} {
     pack $wnick.e -fill x
     pack $wnick -side top -anchor w -pady 8 -fill x
     
-    ::balloonhelp::balloonforwindow $wnick.e [mc regitration-nick]
+    ::balloonhelp::balloonforwindow $wnick.e [mc registration-nick]
 
     ttk::checkbutton $wc.sync -text [mc jagcsyncpres2] \
       -variable [namespace current]::tmpJPrefs(gchat,syncPres)	      

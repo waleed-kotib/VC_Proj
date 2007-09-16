@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefGeneral.tcl,v 1.8 2007-09-15 13:16:12 matben Exp $
+# $Id: PrefGeneral.tcl,v 1.9 2007-09-16 07:39:12 matben Exp $
  
 package provide PrefGeneral 1.0
 
@@ -139,7 +139,7 @@ proc ::PrefGeneral::SavePrefsHook {} {
 	    set prefFile [file join [::Init::GetAppDrivePrefsPath] $this(prefsName)]
 	    if {[file exists $prefFile]} {
 		set ans [tk_messageBox -icon question -type yesno  \
-		  -message [mc prefdriwdef2 $prefFile]]
+		  -message [mc prefdriwdef2 $prefFile $prefs(appName)]]
 		if {$ans eq "yes"} {
 		    file delete $prefFile
 		}	
@@ -163,7 +163,7 @@ proc ::PrefGeneral::SavePrefsHook {} {
 	    set prefFile [file join [::Init::GetAppDirPrefsPath] $this(prefsName)]
 	    if {[file exists $prefFile]} {
 		set ans [tk_messageBox -icon question -type yesno  \
-		  -message [mc prefdriwdef2 $prefFile]]
+		  -message [mc prefdriwdef2 $prefFile $prefs(appName)]]
 		if {$ans eq "yes"} {
 		    file delete $prefFile
 		}	

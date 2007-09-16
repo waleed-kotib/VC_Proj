@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.53 2007-09-15 13:16:12 matben Exp $
+# $Id: JPrefs.tcl,v 1.54 2007-09-16 07:39:11 matben Exp $
 
 package require ui::fontselector
 
@@ -300,7 +300,7 @@ proc ::JPrefs::BuildCustomPage {page} {
          
     ttk::checkbutton $wcu.savein -text [mc prefcusave] \
       -variable [namespace current]::tmpJPrefs(inboxSave)
-    ttk::checkbutton $wcu.log -text [mc prefcuautologin2] \
+    ttk::checkbutton $wcu.log -text [mc prefcuautologin2 $prefs(appName)] \
       -variable [namespace current]::tmpJPrefs(autoLogin)
     ttk::checkbutton $wcu.rem -text [mc prefcuremdlgs2] \
       -variable [namespace current]::tmpJPrefs(rememberDialogs)

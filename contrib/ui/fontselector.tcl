@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: fontselector.tcl,v 1.7 2007-09-13 08:25:37 matben Exp $
+# $Id: fontselector.tcl,v 1.8 2007-09-16 07:39:11 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -112,7 +112,7 @@ snit::widget ui::fontselector::widget {
 	ttk::frame $frprop -padding {12 0 0 0}
 	pack  $frprop  -side top -fill y
 
-	ttk::label    $frprop.lsize -text "[::msgcat::mc {Font Size}]:"
+	ttk::label    $frprop.lsize -text "[::msgcat::mc {Font size}]:"
 	ttk::combobox $frprop.csize -width 8  \
 	  -textvariable [myvar size]  \
 	  -values {9 10 12 14 16 18 24 36 48 60 72}
@@ -122,7 +122,7 @@ snit::widget ui::fontselector::widget {
 	grid  $frprop.csize  -sticky ew
 	grid  $frprop.s      -sticky ew -pady 12
 
-	ttk::label    $frprop.lwe -text "[::msgcat::mc {Font Weight}]:"
+	ttk::label    $frprop.lwe -text "[::msgcat::mc {Font weight}]:"
 	ttk::combobox $frprop.cwe -width 10  \
 	  -textvariable [myvar weight] -state readonly \
 	  -values {normal bold italic}

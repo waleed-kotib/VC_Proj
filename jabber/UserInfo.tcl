@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.28 2007-09-15 14:27:25 matben Exp $
+# $Id: UserInfo.tcl,v 1.29 2007-09-16 07:39:12 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -125,7 +125,7 @@ proc ::UserInfo::Get {jid {node ""}} {
     
     if {[::Jabber::IsConnected]} {
 	set ujid [jlib::unescapejid $jid]
-	::JUI::SetStatusMessage "[mc vcardget $ujid]..."
+	::JUI::SetStatusMessage "[mc vcardget2 $ujid]..."
 	$priv(warrow) start
     }
     
@@ -262,7 +262,7 @@ proc ::UserInfo::TimeCB {token jlibname type subiq} {
 	AddError $token $str1
     } else {
 	set str [::Jabber::GetTimeString $subiq]
-	set priv(strtime) [mc jamesslocaltime $ujid $str]
+	set priv(strtime) [mc jamesslocaltime2 $ujid $str]
     }    
 }
 
@@ -310,7 +310,7 @@ proc ::UserInfo::VCardCB {token jlibname type subiq} {
 
     if {$type eq "error"} {
 	set errmsg "([lindex $subiq 0]) [lindex $subiq 1]"
-	set str [mc vcarderrget $errmsg]
+	set str [mc vcarderrget2 $errmsg]
 	::Jabber::AddErrorLog $jid $str
 	AddError $token $str
     } else {

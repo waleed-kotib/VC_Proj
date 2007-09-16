@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: IaxPrefs.tcl,v 1.11 2007-09-12 13:37:55 matben Exp $
+# $Id: IaxPrefs.tcl,v 1.12 2007-09-16 07:39:11 matben Exp $
 
 package provide IaxPrefs 0.1
 
@@ -269,11 +269,11 @@ proc ::IaxPrefs::CodecsFrame {win} {
     grid  x            $win.codecg  -sticky w
     grid $win.lcodec -padx 4
 
-    ::balloonhelp::balloonforwindow $win.codeci [mc ilbc]
-    ::balloonhelp::balloonforwindow $win.codecs [mc speex]
-    ::balloonhelp::balloonforwindow $win.codeca [mc alaw]
-    ::balloonhelp::balloonforwindow $win.codecu [mc ulaw]
-    ::balloonhelp::balloonforwindow $win.codecg [mc gsm]
+    ::balloonhelp::balloonforwindow $win.codeci [mc tooltip-ilbc]
+    ::balloonhelp::balloonforwindow $win.codecs [mc tooltip-speex]
+    ::balloonhelp::balloonforwindow $win.codeca [mc tooltip-alaw]
+    ::balloonhelp::balloonforwindow $win.codecu [mc tooltip-ulaw]
+    ::balloonhelp::balloonforwindow $win.codecg [mc tooltip-gsm]
     
     return $win
 }

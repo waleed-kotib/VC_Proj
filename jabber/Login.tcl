@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.130 2007-09-15 13:16:12 matben Exp $
+# $Id: Login.tcl,v 1.131 2007-09-16 07:39:11 matben Exp $
 
 package provide Login 1.0
 
@@ -672,7 +672,7 @@ proc ::Login::HighLoginCB {token jlibname status {errcode ""} {errmsg ""}} {
 	    ::JUI::SetStatusMessage "[mc jawaitxml $state(server)]..."
 	}
 	starttls {
-	    ::JUI::SetStatusMessage "[mc jatlsnegot]..."
+	    ::JUI::SetStatusMessage "[mc jatlsnegot2]..."
 	}
     }
 }

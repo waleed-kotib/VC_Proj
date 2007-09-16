@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.234 2007-09-13 15:53:40 matben Exp $
+# $Id: Jabber.tcl,v 1.235 2007-09-16 07:39:11 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -683,8 +683,8 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	if {$config(sub,subscribe-msgbox)} {
 	    set subtype [lindex [split $jidtype /] 1]
 	    set typename [::Roster::GetNameFromTrpt $subtype]
-	    ::ui::dialog -title [mc {Transport Subscription}] \
-	      -icon info -type ok -message [mc jamesstrptsubsc $typename]
+	    ::ui::dialog -title [mc Info] -icon info -type ok \
+	      -message [mc jamesstrptsubsc $typename]
 	}
     } else {
 	
@@ -1477,7 +1477,7 @@ proc ::Jabber::GetLastString {jid subiq} {
 		set msg1 [mc jamesstimeservstart2 $ujid]
 	    }
 	} else {
-	    set msg1 [mc jamessuptime]
+	    set msg1 "[mc jamessuptime2]: "
 	}
 	set str "${msg1}: $uptime. $msg"
     }
