@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.197 2007-09-16 07:39:12 matben Exp $
+#   $Id: en.msg,v 1.198 2007-09-16 12:00:28 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -567,7 +567,7 @@
 ::msgcat::mcset en {Remove Avatar}
 ::msgcat::mcset en {Remove Contact}
 ::msgcat::mcset en {Remove Item}
-::msgcat::mcset en {Requires a restart}
+::msgcat::mcset en {Requires a restart of} {Requires a restart of %s}
 ::msgcat::mcset en {Retype password}
 ::msgcat::mcset en {Revert Panel}
 ::msgcat::mcset en {Save As}
@@ -794,7 +794,7 @@
 ::msgcat::mcset en jamessremoveaccount2  {Do you really want to remove your account? This process cannot be undone.}
 ::msgcat::mcset en jamesssavemsg         {Do you want to save this message before closing?}
 ::msgcat::mcset en jamesssearcherr       {Cannot search.}
-::msgcat::mcset en jamesssearchinval     {There was an invalid field. Please correct it.}
+::msgcat::mcset en jamesssearchinval2    {There was an invalid field. Please correct it.}
 ::msgcat::mcset en jamessskipsendq2      {Contact ID %s is invalid. Do you want to skip it and send to the rest?}
 ::msgcat::mcset en jamessstatuscust2     {Select a presence state and optionally enter a message.}
 ::msgcat::mcset en jamessstatuscustdtl2  {The most frequent combinations are easily reachable as menu entries.}

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefGeneral.tcl,v 1.9 2007-09-16 07:39:12 matben Exp $
+# $Id: PrefGeneral.tcl,v 1.10 2007-09-16 12:00:28 matben Exp $
  
 package provide PrefGeneral 1.0
 
@@ -101,7 +101,7 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     ttk::frame $wc.l -padding {0 6 0 0}
     ttk::label $wl.l -text [mc Language]
     ttk::separator $wl.s -orient horizontal
-    ttk::label $wl.lr -text [mc "Requires a restart"]
+    ttk::label $wl.lr -text [mc "Requires a restart of" $prefs(appName)]
     ::Utils::LanguageMenubutton $wl.mb [namespace current]::tmpPrefs(locale)
 
     grid  $wl.l   $wl.s  -sticky w
@@ -112,7 +112,8 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
 
     pack $wl -side top -fill x -anchor w
 
-    ::balloonhelp::balloonforwindow $wl.mb [mc "Requires a restart"]
+    ::balloonhelp::balloonforwindow $wl.mb \
+      [mc "Requires a restart of" $prefs(appName)]
 
     bind $wpage <Destroy> {+::PrefGeneral::Free }
 }

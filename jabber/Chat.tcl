@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.210 2007-09-15 14:27:23 matben Exp $
+# $Id: Chat.tcl,v 1.211 2007-09-16 12:00:25 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1210,13 +1210,6 @@ proc ::Chat::Build {threadID args} {
       -text [mc History] -image $iconHistory \
       -disabledimage $iconHistoryDis \
       -command [list [namespace current]::BuildHistory $dlgtoken]
-    if {0} {
-	# Too many buttons. Skip this one.
-	$wtray newbutton settings  \
-	  -text [mc mPreferences] -image $iconSettings \
-	  -disabledimage $iconSettingsDis \
-	  -command [list [namespace current]::Settings $dlgtoken]
-    }
     $wtray newbutton print  \
       -text [mc Print] -image $iconPrint  \
       -disabledimage $iconPrintDis   \
