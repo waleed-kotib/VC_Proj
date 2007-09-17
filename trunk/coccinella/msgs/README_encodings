@@ -92,10 +92,6 @@ set dst [tk_getSaveFile -title {Save system encoded}  \
 set fddst [open $dst "w"]
 puts $fddst $txt
 close $fddst
-if {$::tcl_platform(platform) == "macintosh"} {
-    set creator [file attributes $src -creator]
-    file attributes $dst -creator $creator
-}
 
 ........................................................................
 
