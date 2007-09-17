@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Mon Sep 10 12:04:52 CEST 2007
+# Generated: Mon Sep 17 09:59:39 CEST 2007
 
 # English language version of the Coccinella message catalog.
 #
@@ -17,22 +17,23 @@
 #         fr  Guillaume Ayoub (xovni at wanadoo.fr)
 #         it  Mirko Graziani (contatto@imatica.it)
 #         kr  Dylan Park, Korea NVC Center (hanmaum@krnvc.org) 
-#         nl  Sander Devrieze (s.devrieze at pandora.be), 2004-2007,
-#             and Bart Van Hove (bartvanhove at skynet.be), 2004
+#         nl  Sander Devrieze (s.devrieze at pandora.be), 2004-2007
+#             Bart Van Hove (bartvanhove at skynet.be), 2004
 #         pl  Zbigniew Baniewski (zb at ispid.com.pl)
-#         ru  Alexander Balezin (xmmp://gescheit@jabber.ttn.ru) gescheit@list.ru
+#         ru  Alexander Balezin (xmmp:gescheit@jabber.ttn.ru) gescheit@list.ru
 #         sv  Mats Bengtsson
 #
 # General type of text, such as "OK", "Cancel", and the like. 
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
+# 
+#   $Id: pl.msg,v 1.67 2007-09-17 09:22:43 matben Exp $
 
-# Reference: {Accept}
-::msgcat::mcset pl Accept                {Akceptuję}
+# Reference: {Abort}
+# Translate, find in sources: contrib/ui/dialog.tcl:247
+::msgcat::mcset pl Abort                 {Abort}
 # Reference: {Action}
 ::msgcat::mcset pl Action                {akcja}
-# Reference: {Active}
-::msgcat::mcset pl Active                {Aktywna}
 # Reference: {Add}
 ::msgcat::mcset pl Add                   {Dodaj}
 # Reference: {Address}
@@ -41,60 +42,31 @@
 ::msgcat::mcset pl Admin                 {Administrator}
 # Reference: {admin}
 ::msgcat::mcset pl admin                 {administrator}
-# Reference: {Advanced}
-::msgcat::mcset pl Advanced              {Poszerzony}
 # Reference: {Affiliation}
 ::msgcat::mcset pl Affiliation           {Towarzystwo}
-# Reference: {Agents}
-::msgcat::mcset pl Agents                {Agenty}
-# Reference: {Allow}
-::msgcat::mcset pl Allow                 {Zezwól}
 # Reference: {Any}
 # Translate
 ::msgcat::mcset pl Any                   {Any}
 # Reference: {Appearance}
 ::msgcat::mcset pl Appearance            {Wygląd}
-# Reference: {Apply}
-::msgcat::mcset pl Apply                 {Użyj}
 # Reference: {Author}
 ::msgcat::mcset pl Author                {Author}
-# Reference: {Available}
-::msgcat::mcset pl Available             {Dostępny/a}
 # Reference: {Avatar}
-# Translate, find in sources: jabber/MegaPresence.tcl:104 jabber/MegaPresence.tcl:109 jabber/VCard.tcl:394
+# Translate, find in sources: jabber/MegaPresence.tcl:104 jabber/MegaPresence.tcl:109 jabber/VCard.tcl:400
 ::msgcat::mcset pl Avatar                {Avatar}
-# Reference: {Away}
-::msgcat::mcset pl Away                  {Nieobecny}
-# Reference: {Back}
-::msgcat::mcset pl Back                  {Cofnij}
 # Reference: {Binary}
 ::msgcat::mcset pl Binary                {Binarny}
 # Reference: {Birthday}
 ::msgcat::mcset pl Birthday              {Urodziny}
-# Reference: {Block}
-::msgcat::mcset pl Block                 {Zablokuj}
-# Reference: {Blockers}
-::msgcat::mcset pl Blockers              {Zablokować}
-# Reference: {Blocking}
-::msgcat::mcset pl Blocking              {Zabolokowany}
-# Reference: {Bookmark}
-::msgcat::mcset pl Bookmark              {Zakładka}
 # Reference: {Bookmarks}
 ::msgcat::mcset pl Bookmarks             {Zakładki}
 # Reference: {Browser}
 ::msgcat::mcset pl Browser               {Zasoby}
-# Reference: {Both}
-::msgcat::mcset pl Both                  {obustronna}
-# Reference: {Buffering}
-::msgcat::mcset pl Buffering             {buforowanie}
 # Reference: {Cancel}
 ::msgcat::mcset pl Cancel                {Zaniechaj}
-# Reference: {Change}
-::msgcat::mcset pl Change                {Zmień}
-# Reference: {Chat}
-::msgcat::mcset pl Chat                  {Rozmowa}
-# Reference: {Choose}
-::msgcat::mcset pl Choose                {Wybierz}
+# Reference: {Chatroom}
+# Translate, find in sources: jabber/Create.tcl:109 jabber/Create.tcl:635 jabber/Enter.tcl:153 jabber/GroupChat.tcl:1412 jabber/GroupChat.tcl:1414 jabber/GroupChat.tcl:3142 jabber/GroupChat.tcl:3308
+::msgcat::mcset pl Chatroom              {Chatroom}
 # Reference: {City}
 ::msgcat::mcset pl City                  {Miasto}
 # Reference: {Clear}
@@ -103,12 +75,15 @@
 ::msgcat::mcset pl Client                {Aktywność}
 # Reference: {Close}
 ::msgcat::mcset pl Close                 {Zamknij}
-# Reference: {Codecs}
-::msgcat::mcset pl Codecs                {Kodeki}
-# Reference: {Conference}
-::msgcat::mcset pl Conference            {Konferencja}
-# Reference: {Connect}
-::msgcat::mcset pl Connect               {Połącz}
+# Reference: {Color}
+# Translate, find in sources: whiteboard/CanvasUtils.tcl:1600
+::msgcat::mcset pl Color                 {Color}
+# Reference: {Company}
+# Translate
+::msgcat::mcset pl Company               {Company}
+# Reference: {Configure}
+# Translate, find in sources: jabber/Create.tcl:148 jabber/GroupChat.tcl:651
+::msgcat::mcset pl Configure             {Configure}
 # Reference: {Connection}
 ::msgcat::mcset pl Connection            {Połączenie}
 # Reference: {Contact}
@@ -135,42 +110,50 @@
 ::msgcat::mcset pl Department            {Dział}
 # Reference: {Description}
 ::msgcat::mcset pl Description           {Opis}
-# Reference: {Devices}
-::msgcat::mcset pl Devices               {Urządzenia}
-# Reference: {Drawing}
-::msgcat::mcset pl Drawing               {Rysunek}
-# Reference: {Document}
-::msgcat::mcset pl Document              {Dokument}
-# Reference: {Done}
-::msgcat::mcset pl Done                  {Gotowe}
+# Reference: {Detect}
+# Translate, find in sources: lib/Proxy.tcl:273
+::msgcat::mcset pl Detect                {Detect}
+# Reference: {Discover}
+# Translate, find in sources: jabber/Disco.tcl:1503 jabber/Disco.tcl:1683 jabber/Enter.tcl:130 jabber/MUC.tcl:1567 jabber/UserInfo.tcl:156
+::msgcat::mcset pl Discover              {Discover}
+# Reference: {Downloading}
+# Translate, find in sources: lib/HttpTrpt.tcl:166
+::msgcat::mcset pl Downloading           {Downloading}
 # Reference: {Edit}
 ::msgcat::mcset pl Edit                  {Edytuj}
 # Reference: {Email}
 ::msgcat::mcset pl Email                 {Email}
+# Reference: {Emoticons}
+# Translate, find in sources: jabber/Emoticons.tcl:582
+::msgcat::mcset pl Emoticons             {Emoticons}
+# Reference: {Encoding}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:471
+::msgcat::mcset pl Encoding              {Encoding}
 # Reference: {Enter}
 ::msgcat::mcset pl Enter                 {Wejdź}
 # Reference: {Error}
 ::msgcat::mcset pl Error                 {Błąd}
 # Reference: {Exit}
 ::msgcat::mcset pl Exit                  {Zakończ}
+# Reference: {Export}
+# Translate, find in sources: jabber/UserInfo.tcl:370 jabber/VCard.tcl:260
+::msgcat::mcset pl Export                {Export}
+# Reference: {Extensions}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:467 whiteboard/WDialogs.tcl:127
+::msgcat::mcset pl Extensions            {Extensions}
 # Reference: {File}
 ::msgcat::mcset pl File                  {Plik}
-# Reference: {File...}
-::msgcat::mcset pl File...               {Plik...}
 # Reference: {Filter}
 ::msgcat::mcset pl Filter                {Filtr}
-# Reference: {Filters}
-::msgcat::mcset pl Filters               {Filtry}
-# Reference: {Find}
-::msgcat::mcset pl Find                  {Find}
 # Reference: {Finish}
 ::msgcat::mcset pl Finish                {Koniec}
 # Reference: {Finished}
 ::msgcat::mcset pl Finished              {Zakończone}
 # Reference: {First}
 ::msgcat::mcset pl First                 {Najpierw}
-# Reference: {Friends}
-::msgcat::mcset pl Friends               {Przyjaciele}
+# Reference: {Fonts}
+# Translate, find in sources: whiteboard/WBPrefs.tcl:75
+::msgcat::mcset pl Fonts                 {Fonts}
 # Reference: {Forward}
 ::msgcat::mcset pl Forward               {Przekaż}
 # Reference: {From}
@@ -185,16 +168,15 @@
 ::msgcat::mcset pl Grant                 {Udziel prawa}
 # Reference: {Group}
 ::msgcat::mcset pl Group                 {Grupa}
-# Reference: {Groupchat}
-::msgcat::mcset pl Groupchat             {Konferencja}
-# Reference: {Handling}
-::msgcat::mcset pl Handling              {Postępowanie}
 # Reference: {Height}
 ::msgcat::mcset pl Height                {Wysokość}
 # Reference: {History}
 ::msgcat::mcset pl History               {Przebieg}
 # Reference: {Home}
 ::msgcat::mcset pl Home                  {Namiary}
+# Reference: {Host}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:151 jabber/JPubServers.tcl:96 jabber/Profiles.tcl:1833 lib/Proxy.tcl:204 whiteboard/WDialogs.tcl:178
+::msgcat::mcset pl Host                  {Host}
 # Reference: {Icon}
 ::msgcat::mcset pl Icon                  {Icon}
 # Reference: {Image}
@@ -207,6 +189,9 @@
 ::msgcat::mcset pl Info                  {Informacja}
 # Reference: {Invite}
 ::msgcat::mcset pl Invite                {Zaproś}
+# Reference: {Invitation}
+# Translate, find in sources: jabber/MUC.tcl:319
+::msgcat::mcset pl Invitation            {Invitation}
 # Reference: {Key}
 ::msgcat::mcset pl Key                   {Key}
 # Reference: {Language}
@@ -227,6 +212,9 @@
 ::msgcat::mcset pl Message               {Wiadomość}
 # Reference: {Middle}
 ::msgcat::mcset pl Middle                {drugie imię}
+# Reference: {Minutes}
+# Translate
+::msgcat::mcset pl Minutes               {Minutes}
 # Reference: {Moderator}
 ::msgcat::mcset pl Moderator             {Moderator}
 # Reference: {moderator}
@@ -235,21 +223,14 @@
 ::msgcat::mcset pl Moderators            {Moderatorzy}
 # Reference: {More}
 ::msgcat::mcset pl More                  {Więcej}
-# Reference: {Name}
-::msgcat::mcset pl Name                  {Nazwa}
 # Reference: {Network}
 ::msgcat::mcset pl Network               {Sieci}
 # Reference: {Never}
 ::msgcat::mcset pl Never                 {Nigdy}
 # Reference: {New}
 ::msgcat::mcset pl New                   {Nowy}
-# Reference: {New...}
-# Translate, find in sources: contrib/ui/openimage.tcl:99
-::msgcat::mcset pl New...                {New...}
 # Reference: {Next}
 ::msgcat::mcset pl Next                  {Dalej}
-# Reference: {Nick}
-::msgcat::mcset pl Nick                  {Pseudo}
 # Reference: {Nickname}
 ::msgcat::mcset pl Nickname              {Pseudonim}
 # Reference: {No}
@@ -270,8 +251,6 @@
 ::msgcat::mcset pl Online                {Obecni}
 # Reference: {Open}
 ::msgcat::mcset pl Open                  {Otwórz}
-# Reference: {Options}
-::msgcat::mcset pl Options               {Opcje}
 # Reference: {Owner}
 ::msgcat::mcset pl Owner                 {Właściciel}
 # Reference: {owner}
@@ -280,28 +259,24 @@
 ::msgcat::mcset pl Participants          {Uczestnicy}
 # Reference: {Password}
 ::msgcat::mcset pl Password              {Hasło}
-# Reference: {Pause}
-::msgcat::mcset pl Pause                 {Pauza}
-# Reference: {Pick}
-::msgcat::mcset pl Pick                  {Wskaż}
+# Reference: {Personal}
+# Translate, find in sources: jabber/VCard.tcl:340
+::msgcat::mcset pl Personal              {Personal}
 # Reference: {Phone}
 ::msgcat::mcset pl Phone                 {Telefon}
 # Reference: {Play}
 ::msgcat::mcset pl Play                  {Odtwórz}
-# Reference: {Plugins}
-::msgcat::mcset pl Plugins               {Wtyczki}
 # Reference: {Port}
 ::msgcat::mcset pl Port                  {Port}
-# Reference: {Preferences}
-::msgcat::mcset pl Preferences           {Preferencje}
+# Reference: {Ports}
+# Translate, find in sources: lib/PrefNet.tcl:97
+::msgcat::mcset pl Ports                 {Ports}
 # Reference: {Previous}
 ::msgcat::mcset pl Previous              {Cofnij}
 # Reference: {Print}
 ::msgcat::mcset pl Print                 {Drukuj}
 # Reference: {Priority}
 ::msgcat::mcset pl Priority              {Priorytet}
-# Reference: {Privacy}
-::msgcat::mcset pl Privacy               {Prywatność}
 # Reference: {Profile}
 ::msgcat::mcset pl Profile               {Profil}
 # Reference: {Profiles}
@@ -309,19 +284,18 @@
 # Reference: {Progress}
 ::msgcat::mcset pl Progress              {Tok}
 # Reference: {Proxy}
-# Translate, find in sources: lib/PrefNet.tcl:89 lib/Proxy.tcl:144
+# Translate, find in sources: jabber/Profiles.tcl:1864 lib/PrefNet.tcl:89 lib/Proxy.tcl:144
 ::msgcat::mcset pl Proxy                 {Proxy}
-# Reference: {Proxy...}
-# Translate, find in sources: jabber/Profiles.tcl:1859
-::msgcat::mcset pl Proxy...              {Proxy...}
 # Reference: {Quit?}
 ::msgcat::mcset pl Quit?                 {Koniec?}
 # Reference: {Quote}
 ::msgcat::mcset pl Quote                 {Cytat}
-# Reference: {Reason}
-::msgcat::mcset pl Reason                {Przyczyna}
-# Reference: {Refresh}
-::msgcat::mcset pl Refresh               {Odśwież}
+# Reference: {Rate}
+# Translate, find in sources: jabber/FTrans.tcl:618 lib/HttpTrpt.tcl:177
+::msgcat::mcset pl Rate                  {Rate}
+# Reference: {Region}
+# Translate, find in sources: components/Geolocation.tcl:81
+::msgcat::mcset pl Region                {Region}
 # Reference: {Register}
 ::msgcat::mcset pl Register              {Zarejestruj}
 # Reference: {Remaining}
@@ -332,34 +306,29 @@
 ::msgcat::mcset pl Reply                 {Odpowiedź}
 # Reference: {Resource}
 ::msgcat::mcset pl Resource              {Zasób}
-# Reference: {Restart}
-::msgcat::mcset pl Restart               {Restart}
 # Reference: {Revoke}
 ::msgcat::mcset pl Revoke                {Odbierz}
 # Reference: {Role}
 ::msgcat::mcset pl Role                  {Rola}
-# Reference: {Rosticons}
-::msgcat::mcset pl Rosticons             {Ikonki listy}
-# Reference: {Room}
-::msgcat::mcset pl Room                  {Pokój}
-# Reference: {Roster}
-::msgcat::mcset pl Roster                {Lista}
+# Reference: {Running}
+# Translate, find in sources: whiteboard/WDialogs.tcl:175
+::msgcat::mcset pl Running               {Running}
 # Reference: {Save}
 ::msgcat::mcset pl Save                  {Zapisz}
 # Reference: {Search}
 ::msgcat::mcset pl Search                {Przeszukaj}
-# Reference: {Select}
-::msgcat::mcset pl Select                {Wybierz}
+# Reference: {Secured}
+# Translate, find in sources: whiteboard/WDialogs.tcl:183
+::msgcat::mcset pl Secured               {Secured}
 # Reference: {Send}
 ::msgcat::mcset pl Send                  {Wyślij}
 # Reference: {Server}
 ::msgcat::mcset pl Server                {Serwer}
-# Reference: {Servers}
-::msgcat::mcset pl Servers               {Serwery}
 # Reference: {Service}
 ::msgcat::mcset pl Service               {Usługa}
-# Reference: {Set}
-::msgcat::mcset pl Set                   {Ustaw}
+# Reference: {Services}
+# Translate, find in sources: jabber/Disco.tcl:735
+::msgcat::mcset pl Services              {Services}
 # Reference: {Settings}
 ::msgcat::mcset pl Settings              {Ustawienia}
 # Reference: {Shortcut}
@@ -368,68 +337,62 @@
 ::msgcat::mcset pl Shortcuts             {Skróty}
 # Reference: {Size}
 ::msgcat::mcset pl Size                  {Rozmiar}
+# Reference: {Skin}
+# Translate, find in sources: jabber/JPrefs.tcl:209
+::msgcat::mcset pl Skin                  {Skin}
+# Reference: {Sleep}
+# Translate, find in sources: components/Carbon.tcl:141 components/Carbon.tcl:162
+::msgcat::mcset pl Sleep                 {Sleep}
 # Reference: {Sounds}
 ::msgcat::mcset pl Sounds                {Dźwięki}
-# Reference: {Specifications}
-::msgcat::mcset pl Specifications        {Specyfikacje}
-# Reference: {Speech}
-::msgcat::mcset pl Speech                {Mowa}
-# Reference: {Standard}
-::msgcat::mcset pl Standard              {Standard}
-# Reference: {State}
-::msgcat::mcset pl State                 {Państwo}
-# Reference: {State/Region}
-::msgcat::mcset pl State/Region          {Państwo/Region}
+# Reference: {Specific}
+# Translate, find in sources: components/UserActivity.tcl:219
+::msgcat::mcset pl Specific              {Specific}
 # Reference: {Stop}
 ::msgcat::mcset pl Stop                  {Stop}
 # Reference: {Subject}
 ::msgcat::mcset pl Subject               {Temat}
-# Reference: {Subscribe}
-::msgcat::mcset pl Subscribe             {Poproś o autoryzację}
-# Reference: {Subscribed}
-::msgcat::mcset pl Subscribed            {Autoryzowany/a}
-# Reference: {Subscription}
-::msgcat::mcset pl Subscription          {Autoryzacja}
-# Reference: {Subscriptions}
-::msgcat::mcset pl Subscriptions         {Autoryzacje}
+# Reference: {System}
+# Translate, find in sources: whiteboard/WBPrefs.tcl:150
+::msgcat::mcset pl System                {System}
 # Reference: {Text}
 ::msgcat::mcset pl Text                  {Tekst}
+# Reference: {Theme}
+# Translate, find in sources: jabber/JPrefs.tcl:198
+::msgcat::mcset pl Theme                 {Theme}
 # Reference: {Time}
 ::msgcat::mcset pl Time                  {Czas}
 # Reference: {Timeout}
 ::msgcat::mcset pl Timeout               {Czas upłynął}
 # Reference: {Title}
 ::msgcat::mcset pl Title                 {Tytuł}
-# Reference: {To}
-::msgcat::mcset pl To                    {Do}
 # Reference: {Topic}
 ::msgcat::mcset pl Topic                 {Temat}
 # Reference: {Transports}
 ::msgcat::mcset pl Transports            {Transporty}
-# Reference: {Trash}
-::msgcat::mcset pl Trash                 {Makulatura}
 # Reference: {Type}
 ::msgcat::mcset pl Type                  {Typ}
 # Reference: {Unregister}
 ::msgcat::mcset pl Unregister            {Wyrejestruj}
-# Reference: {Unsubscribe}
-::msgcat::mcset pl Unsubscribe           {Zrezygnuj z autoryzacji}
-# Reference: {Unsubscribed}
-::msgcat::mcset pl Unsubscribed          {Brak autoryzacji}
 # Reference: {Username}
 ::msgcat::mcset pl Username              {Użytkownik}
-# Reference: {Value}
-::msgcat::mcset pl Value                 {Wartość}
+# Reference: {Version}
+# Translate, find in sources: jabber/Jabber.tcl:1621 jabber/Jabber.tcl:1632 jabber/UserInfo.tcl:186 jabber/UserInfo.tcl:193 whiteboard/WDialogs.tcl:125
+::msgcat::mcset pl Version               {Version}
 # Reference: {Visitors}
 ::msgcat::mcset pl Visitors              {Goście}
 # Reference: {Voice}
 ::msgcat::mcset pl Voice                 {Głos}
 # Reference: {voice}
 ::msgcat::mcset pl voice                 {głos}
+# Reference: {Volume}
+# Translate, find in sources: components/Sounds.tcl:518
+::msgcat::mcset pl Volume                {Volume}
 # Reference: {Warning}
 ::msgcat::mcset pl Warning               {Ostrzeżenie}
-# Reference: {Welcome}
-::msgcat::mcset pl Welcome               {Witamy}
+# Reference: {Website}
+# Translate
+::msgcat::mcset pl Website               {Website}
 # Reference: {Whiteboard}
 ::msgcat::mcset pl Whiteboard            {Tablica}
 # Reference: {Width}
@@ -441,44 +404,41 @@
 # Reference: {yes}
 ::msgcat::mcset pl yes                   {tak}
 
-# A few words that are not unambiguous and have therefore a prefix.
+# A few words that are not unambiguous and have therefore a prefix:
+# Note to translators: this means "Application" as in computer program.
 # Reference: {Application}
 ::msgcat::mcset pl program-Application   {Application}
 
-
+# Try to move next strings to normal strings
 # Canvas item options, names and values.
 # Names:
 # Reference: {Anchor}
 ::msgcat::mcset pl anchor                {Osadzenie}
 # Reference: {Arrow}
 ::msgcat::mcset pl arrow                 {Strzałka}
-# Reference: {Arrow Shape}
+# Reference: {Arrow shape}
 ::msgcat::mcset pl arrowshape            {Kształt strzałki}
-# Reference: {Cap Style}
+# Reference: {Cap style}
 ::msgcat::mcset pl capstyle              {Styl Cap}
-# Reference: {Coordinates}
-::msgcat::mcset pl coordinates           {Współrzędne}
 # Reference: {Dash}
 ::msgcat::mcset pl dash                  {Kreska}
-# Reference: {File}
-::msgcat::mcset pl file                  {Plik}
 # Reference: {Fill}
 ::msgcat::mcset pl fill                  {Wypełnij}
-# Reference: {Font Familiy}
+# Reference: {Font familiy}
 ::msgcat::mcset pl fontfamily            {rodzaj czcionki}
-# Reference: {Font Size}
+# Reference: {Font size}
 ::msgcat::mcset pl fontsize              {wielkość czcionki}
-# Reference: {Font Weight}
+# Reference: {Font weight}
 ::msgcat::mcset pl fontweight            {grubość czcionki}
 # Reference: {Image}
 ::msgcat::mcset pl image                 {Grafika}
-# Reference: {Join Style}
+# Reference: {Join style}
 ::msgcat::mcset pl joinstyle             {styl join}
 # Reference: {Justify}
 ::msgcat::mcset pl justify               {Justowanie}
 # Reference: {Outline}
 ::msgcat::mcset pl outline               {Szkic}
-# Reference: {Outline Stipple}
+# Reference: {Outline stipple}
 ::msgcat::mcset pl outlinestipple        {Grawiura}
 # Reference: {Smooth}
 ::msgcat::mcset pl smooth                {gładki}
@@ -583,35 +543,20 @@
 ::msgcat::mcset pl invisible             {niewidoczny}
 # Reference: {chat}
 ::msgcat::mcset pl chat                  {pogawędzę}
-# Reference: {subscribed}
-::msgcat::mcset pl subscribed            {dopuszczony}
-# Reference: {unsubscribed}
-::msgcat::mcset pl unsubscribed          {wymeldowany}
-
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
-# Reference: {About Coccinella...}
+# Reference: {&About Coccinella}
 ::msgcat::mcset pl mAboutCoccinella      {O Coccinelli...}
-# Reference: {About QuickTimeTcl...}
-::msgcat::mcset pl mAboutQuickTimeTcl    {O QuickTimeTcl...}
-# Reference: {About Whiteboard...}
-::msgcat::mcset pl mAboutWhiteboard      {O tablicy...}
 # Reference: {Action}
-# Translate
+# Translate, find in sources: whiteboard/FilePrefs.tcl:477
 ::msgcat::mcset pl mAction               {Action}
-# Reference: {Ad-Hoc Commands}
+# Reference: {C&ommands}
 ::msgcat::mcset pl mAdHocCommands        {Ad-Hoc Commands}
-# Reference: {Add Contact...}
+# Reference: {&Add Contact...}
 # Translate
-::msgcat::mcset pl mAddContact...        {Add Contact...}
-# Reference: {Add Server...}
-::msgcat::mcset pl mAddServer...         {Inny serwer...}
+::msgcat::mcset pl mAddContact...        {&Add Contact...}
 # Reference: {Add Speech Bubble}
 ::msgcat::mcset pl mAddSpeechBubble      {Dodaj "dymek"}
-# Reference: {Addons}
-::msgcat::mcset pl mAddons               {Dodatki}
-# Reference: {&All}
-::msgcat::mcset pl mAll                  {&Wszystko}
 # Reference: {Arc}
 ::msgcat::mcset pl mArc                  {Kąt}
 # Reference: {Arcs}
@@ -623,103 +568,102 @@
 # Reference: {Away}
 ::msgcat::mcset pl mAway                 {Zaraz wracam}
 # Reference: {Background Color...}
-::msgcat::mcset pl mBackgroundColor      {Kolor tła...}
+# Translate
+::msgcat::mcset pl mBackgroundColor...   {Background Color...}
 # Reference: {Background Image}
 ::msgcat::mcset pl mBackgroundImage      {Grafika tła}
-# Reference: {Background Image...}
+# Reference: {&Background Image...}
 ::msgcat::mcset pl mBackgroundImage...   {Grafika tła...}
 # Reference: {Bold}
 ::msgcat::mcset pl mBold                 {Wytłuszczony}
 # Reference: {Brush Thickness}
 ::msgcat::mcset pl mBrushThickness       {Grubość pędzla}
-# Reference: {Report Bug...}
-::msgcat::mcset pl mBugReport            {Zgłoś błąd...}
-# Reference: {View Business Card...}
-# Translate, find in sources: jabber/JUser.tcl:613 jabber/Subscribe.tcl:154
-::msgcat::mcset pl mBusinessCard...      {View Business Card...}
-# Reference: {Call...}
+# Reference: {&Report Bug...}
+# Translate
+::msgcat::mcset pl mBugReport...         {&Report Bug...}
+# Reference: {View &Business Card...}
+# Translate
+::msgcat::mcset pl mBusinessCard...      {View &Business Card...}
+# Reference: {&Business Card...}
+# Translate
+::msgcat::mcset pl mBC...                {&Business Card...}
+# Reference: {&Call...}
 ::msgcat::mcset pl mCall                 {Rozmowa}
 # Reference: {Chat}
 ::msgcat::mcset pl mChat                 {Chętnie pogawędzę}
-# Reference: {Chat...}
+# Reference: {Cha&t...}
 ::msgcat::mcset pl mChat...              {Chętnie pogawędzę...}
-# Reference: {Chat History...}
-::msgcat::mcset pl mChatHistory          {Archiwum rozmów}
 # Reference: {Chord}
 ::msgcat::mcset pl mChord                {Cięciwa}
+# Reference: {Clear}
+# Translate
+::msgcat::mcset pl mClear                {Clear}
+# Reference: {Clear Menu}
+# Translate, find in sources: jabber/AvatarMB.tcl:486
+::msgcat::mcset pl mClearMenu            {Clear Menu}
 # Reference: {&Close Window}
 ::msgcat::mcset pl mCloseWindow          {&Zamknij okno}
-# Reference: {Coccinella Home...}
-::msgcat::mcset pl mCoccinellaHome       {Serwis Coccinelli...}
+# Reference: {&Home Page...}
+# Translate
+::msgcat::mcset pl mCoccinellaHome...    {&Home Page...}
 # Reference: {Color...}
-::msgcat::mcset pl mColor                {Kolor...}
-# Reference: {Components...}
-::msgcat::mcset pl mComponents           {Składniki...}
+# Translate
+::msgcat::mcset pl mColor...             {Color...}
+# Reference: {&Contacts...}
+# Translate
+::msgcat::mcset pl mContacts...          {&Contacts...}
 # Reference: {&Copy}
 ::msgcat::mcset pl mCopy                 {&Kopiuj}
-# Reference: {Create Room...}
-::msgcat::mcset pl mCreateRoom           {Załóż pokój...}
+# Reference: {&Create Chatroom...}
+# Translate
+::msgcat::mcset pl mCreateRoom...        {&Create Chatroom...}
 # Reference: {Custom Status...}
-::msgcat::mcset pl mCustomStatus         {Custom Status...}
-# Reference: {Cut}
+# Translate, find in sources: jabber/Status.tcl:750
+::msgcat::mcset pl mCustomStatus...      {Custom Status...}
+# Reference: {Cu&t}
 ::msgcat::mcset pl mCut                  {Wytnij}
 # Reference: {Dash}
 ::msgcat::mcset pl mDash                 {Kreska}
-# Reference: {Debug}
+# Reference: {&Debug}
 ::msgcat::mcset pl mDebug                {Debug}
-# Reference: {Decreasing}
+# Reference: {&Decreasing}
 ::msgcat::mcset pl mDecreasing           {Malejący}
-# Reference: {Directed Status}
-::msgcat::mcset pl mDirStatus            {Niech widzi inny status}
-# Reference: {Disco}
-::msgcat::mcset pl mDisco                {Disco}
-# Reference: {Discover Server}
+# Reference: {&Discover Server...}
 # Translate
-::msgcat::mcset pl mDiscoverServer       {Discover Server}
-# Reference: {Discover Server...}
-# Translate
-::msgcat::mcset pl mDiscoverServer...    {Discover Server...}
+::msgcat::mcset pl mDiscoverServer...    {&Discover Server...}
 # Reference: {Do Not Disturb}
 ::msgcat::mcset pl mDoNotDisturb         {Nie przeszkadzać}
 # Reference: {Edit}
 ::msgcat::mcset pl mEdit                 {Edycja}
-# Reference: {Edit Bookmarks...}
+# Reference: {Edit &Bookmarks...}
 ::msgcat::mcset pl mEditBookmarks...     {Edytuj zakładki...}
-# Reference: {Edit Business Card...}
+# Reference: {Edit &Business Card...}
 # Translate
-::msgcat::mcset pl mEditvCard2...        {Edit Business Card...}
-# Reference: {Edit Contact...}
+::msgcat::mcset pl mEditBC...            {Edit &Business Card...}
+# Reference: {&Edit Contact...}
 # Translate
-::msgcat::mcset pl mEditContact...       {Edit Contact...}
-# Reference: {Edit Nickname}
+::msgcat::mcset pl mEditContact...       {&Edit Contact...}
+# Reference: {&Edit Item...}
+# Translate
+::msgcat::mcset pl mEditItem...          {&Edit Item...}
+# Reference: {&Edit Nickname}
 ::msgcat::mcset pl mEditNick             {Edit Nickname}
-# Reference: {Edit Profiles}
+# Reference: {&Edit Profiles...}
 # Translate
-::msgcat::mcset pl mEditProfiles         {Edit Profiles}
-# Reference: {Edit Profiles...}
+::msgcat::mcset pl mEditProfiles...      {&Edit Profiles...}
+# Reference: {Enter Chat&room...}
 # Translate
-::msgcat::mcset pl mEditProfiles...      {Edit Profiles...}
-# Reference: {Edit User...}
-::msgcat::mcset pl mEditUser             {Uzupełnij dane...}
-# Reference: {Emoticon Set...}
-::msgcat::mcset pl mEmoticonSet          {Emoticon Set...}
-# Reference: {Enter Room...}
-::msgcat::mcset pl mEnterRoom            {Wejdź do pokoju...}
-# Reference: {Erase All}
-::msgcat::mcset pl mEraseAll             {Skasuj wszystko}
-# Reference: {Error Log...}
+::msgcat::mcset pl mEnterRoom...         {Enter Chat&room...}
+# Reference: {&Error Log...}
 ::msgcat::mcset pl mErrorLog             {Dziennik błędów...}
-# Reference: {Exit Room}
-::msgcat::mcset pl mExitRoom             {Opuść pokój}
 # Reference: {Export}
 ::msgcat::mcset pl mExport               {Export}
-# Reference: {Export...}
-# Translate, find in sources: jabber/UserInfo.tcl:369 jabber/VCard.tcl:260
-::msgcat::mcset pl mExport...            {Export...}
 # Reference: {Export Image...}
-::msgcat::mcset pl mExportImage          {Wyeksportuj grafikę...}
+# Translate
+::msgcat::mcset pl mExportImage...       {Export Image...}
 # Reference: {Export Movie...}
-::msgcat::mcset pl mExportMovie          {Wyeksportuj film...}
+# Translate
+::msgcat::mcset pl mExportMovie...       {Export Movie...}
 # Reference: {Extended Away}
 ::msgcat::mcset pl mExtendedAway         {Niedostępny}
 # Reference: {File}
@@ -727,11 +671,13 @@
 # Reference: {Fill}
 ::msgcat::mcset pl mFill                 {Wypełnij}
 # Reference: {Fill Color...}
-::msgcat::mcset pl mFillColor            {Wypełnij kolorem...}
+# Translate
+::msgcat::mcset pl mFillColor...         {Fill Color...}
 # Reference: {Find}
 ::msgcat::mcset pl mFind                 {Szukaj}
-# Reference: {Find Again}
-::msgcat::mcset pl mFindAgain            {Szukaj ponownie}
+# Reference: {Find Next}
+# Translate
+::msgcat::mcset pl mFindNext             {Find Next}
 # Reference: {Find Previous}
 ::msgcat::mcset pl mFindPrevious         {Find Previous}
 # Reference: {Flip}
@@ -740,19 +686,19 @@
 ::msgcat::mcset pl mFont                 {Czcionka}
 # Reference: {Font Size}
 ::msgcat::mcset pl mFontSize             {Font Size}
-# Reference: {Get Canvas...}
-::msgcat::mcset pl mGetCanvas            {Pobierz tło...}
 # Reference: {Grid}
 ::msgcat::mcset pl mGrid                 {Siatka}
-# Reference: {Help On}
-::msgcat::mcset pl mHelpOn               {Pomoc wł.}
-# Reference: {Hide Main}
-::msgcat::mcset pl mHideMain             {Ukryj główne okno}
+# Reference: {&History...}
+# Translate
+::msgcat::mcset pl mHistory...           {&History...}
 # Reference: {Horizontal}
 ::msgcat::mcset pl mHorizontal           {Poziomo}
 # Reference: {Huge}
 ::msgcat::mcset pl mHugeFont             {Huge}
-# Reference: {Ignore}
+# Reference: {Icon &Set...}
+# Translate
+::msgcat::mcset pl mIconSet...           {Icon &Set...}
+# Reference: {&Ignore}
 ::msgcat::mcset pl mIgnore               {Ignoruj}
 # Reference: {Image Larger}
 ::msgcat::mcset pl mImageLarger          {Powiększ obraz}
@@ -760,22 +706,20 @@
 ::msgcat::mcset pl mImageSmaller         {Zmniejsz obraz}
 # Reference: {Import}
 ::msgcat::mcset pl mImport               {Import}
-# Reference: {Increasing}
+# Reference: {&Import Image/Movie...}
+# Translate
+::msgcat::mcset pl mImportImage/Movie... {&Import Image/Movie...}
+# Reference: {&Inbox...}
+# Translate
+::msgcat::mcset pl mInbox...             {&Inbox...}
+# Reference: {&Increasing}
 ::msgcat::mcset pl mIncreasing           {Rosnący}
 # Reference: {Info}
 ::msgcat::mcset pl mInfo                 {Informacja}
-# Reference: {Inspect Item...}
-::msgcat::mcset pl mInspectItem          {Zabadaj element...}
 # Reference: {Invisible}
 ::msgcat::mcset pl mInvisible            {Niewidoczny}
 # Reference: {Italic}
 ::msgcat::mcset pl mItalic               {Kursywa}
-# Reference: {Items}
-::msgcat::mcset pl mItems                {Elementy}
-# Reference: {Jabber}
-::msgcat::mcset pl mJabber               {Jabber}
-# Reference: {Jabber Transport}
-::msgcat::mcset pl mJabberTransport      {Jabber Transport}
 # Reference: {Call}
 ::msgcat::mcset pl mJiveCall             {Rozmowa "jive"}
 # Reference: {Forward Call}
@@ -796,63 +740,57 @@
 ::msgcat::mcset pl mLocalTime            {Czas lokalny...}
 # Reference: {Login...}
 ::msgcat::mcset pl mLogin...             {Zaloguj się...}
+# Reference: {Login to %s}
+# Translate, find in sources: jabber/Roster.tcl:628
+::msgcat::mcset pl mLoginTo              {Login to %s}
 # Reference: {Login to Transport}
 ::msgcat::mcset pl mLoginTrpt            {Podłącz transport}
 # Reference: {Logout}
 ::msgcat::mcset pl mLogout               {Wyloguj się}
+# Reference: {Logout from %s}
+# Translate, find in sources: jabber/Roster.tcl:631
+::msgcat::mcset pl mLogoutFrom           {Logout from %s}
 # Reference: {Logout from Transport}
 ::msgcat::mcset pl mLogoutTrpt           {Odłącz transport}
-# Reference: {Logout With Message...}
+# Reference: {Lo&gout With Message...}
 ::msgcat::mcset pl mLogoutWith...        {Wyloguj z opisem...}
 # Reference: {&Lower}
 ::msgcat::mcset pl mLower                {&Obniż}
-# Reference: {Message...}
-::msgcat::mcset pl mMessage              {Wiadomość...}
-# Reference: {Message Inbox...}
-::msgcat::mcset pl mMessageInbox         {Skrzynka odbiorcza}
-# Reference: {Minimal}
+# Reference: {&Message...}
+# Translate
+::msgcat::mcset pl mMessage...           {&Message...}
+# Reference: {&Minimal}
 ::msgcat::mcset pl mMinimal              {Minimalny}
-# Reference: {Minimize}
-# Translate, find in sources: components/taskbar/Taskbar.tcl:324
-::msgcat::mcset pl mMinimize             {Minimize}
-# Reference: {Network Setup}
-::msgcat::mcset pl mNetworkSetup         {Ustawienia sieci}
-# Reference: {New}
-::msgcat::mcset pl mNew                  {Nowy/a}
-# Reference: {New Account...}
+# Reference: {Mi&nimize}
+# Translate, find in sources: components/taskbar/Taskbar.tcl:323 components/taskbar/TaskbarDEBUG.tcl:334
+::msgcat::mcset pl mMinimize             {Mi&nimize}
+# Reference: {&New Account...}
 ::msgcat::mcset pl mNewAccount...        {Załóż nowe konto...}
-# Reference: {New Whiteboard}
-::msgcat::mcset pl mNewWhiteboard        {Nowa Tablica}
+# Reference: {New &Window}
+# Translate
+::msgcat::mcset pl mNewWindow            {New &Window}
 # Reference: {Normal}
 ::msgcat::mcset pl mNormal               {Normalny}
-# Reference: {Normal}
-::msgcat::mcset pl mNormalFont           {Normal}
 # Reference: {Not Available}
 ::msgcat::mcset pl mNotAvailable         {Nieobecny}
-# Reference: {Notebook}
-::msgcat::mcset pl mNotebook             {Notatnik}
-# Reference: {Offline}
+# Reference: {&Offline}
 ::msgcat::mcset pl mOffline              {Nieobecny}
-# Reference: {On &Clients...}
-::msgcat::mcset pl mOnClients            {O &klientach...}
-# Reference: {On &Plugins...}
-::msgcat::mcset pl mOnPlugins            {O &wtyczkach...}
-# Reference: {On &Server...}
-::msgcat::mcset pl mOnServer             {O &serwerze...}
-# Reference: {Open Canvas...}
-::msgcat::mcset pl mOpenCanvas           {Wczytaj tło...}
-# Reference: {&Open Connection...}
-::msgcat::mcset pl mOpenConnection       {&Nawiąż połączenie...}
-# Reference: {Open &Image/Movie...}
-::msgcat::mcset pl mOpenImage/Movie      {Wczytaj &grafikę/Film...}
-# Reference: {Open URL Stream...}
-::msgcat::mcset pl mOpenURLStream        {Podłącz się do URL...}
+# Reference: {&Open File...}
+# Translate
+::msgcat::mcset pl mOpenFile...          {&Open File...}
+# Reference: {&Open Folder...}
+# Translate
+::msgcat::mcset pl mOpenFolder...        {&Open Folder...}
+# Reference: {Open St&ream...}
+# Translate
+::msgcat::mcset pl mOpenStream...        {Open St&ream...}
 # Reference: {Outline Color}
 ::msgcat::mcset pl mOutlineColor         {Kolor obrzeża}
-# Reference: {Page Setup...}
+# Reference: {Page Set&up...}
 ::msgcat::mcset pl mPageSetup            {Ustawienia strony...}
-# Reference: {Password...}
-::msgcat::mcset pl mPassword...          {Zmień hasło...}
+# Reference: {New P&assword...}
+# Translate
+::msgcat::mcset pl mNewPassword...       {New P&assword...}
 # Reference: {&Paste}
 ::msgcat::mcset pl mPaste                {&Wklej}
 # Reference: {Pieslice}
@@ -861,91 +799,83 @@
 ::msgcat::mcset pl mPlugins              {Wtyczki}
 # Reference: {Preferences}
 ::msgcat::mcset pl mPreferences          {Preferencje}
-# Reference: {Preferences...}
+# Reference: {&Preferences...}
 ::msgcat::mcset pl mPreferences...       {Preferencje...}
-# Reference: {Print Canvas...}
-::msgcat::mcset pl mPrintCanvas          {Wydrukuj tło...}
-# Reference: {Put Canvas}
-::msgcat::mcset pl mPutCanvas            {Wyślij tło}
-# Reference: {Put File...}
-::msgcat::mcset pl mPutFile              {Wyślij plik...}
+# Reference: {&Print...}
+# Translate
+::msgcat::mcset pl mPrint...             {&Print...}
 # Reference: {&Quit}
 ::msgcat::mcset pl mQuit                 {&Wyjście}
 # Reference: {&Raise}
 ::msgcat::mcset pl mRaise                {&Unieś}
-# Reference: {Redo}
+# Reference: {Re&do}
 ::msgcat::mcset pl mRedo                 {Ponów}
 # Reference: {Refresh}
 ::msgcat::mcset pl mRefresh              {Odśwież}
-# Reference: {Refresh Roster}
-::msgcat::mcset pl mRefreshRoster        {Odśwież listę}
-# Reference: {Register}
-::msgcat::mcset pl mRegister             {Zarejestruj}
-# Reference: {Reload Image}
-::msgcat::mcset pl mReloadImage          {Załaduj ponownie}
-# Reference: {Remove Account}
-::msgcat::mcset pl mRemoveAccount        {Usuń konto z serwera}
-# Reference: {Remove Account...}
+# Reference: {Register...}
 # Translate
-::msgcat::mcset pl mRemoveAccount...     {Remove Account...}
-# Reference: {Remove Contact...}
+::msgcat::mcset pl mRegister...          {Register...}
+# Reference: {&Remove Account...}
+# Translate
+::msgcat::mcset pl mRemoveAccount...     {&Remove Account...}
+# Reference: {&Remove Contact...}
 ::msgcat::mcset pl mRemoveContact        {Usuń z listy...}
-# Reference: {Remove Listing}
+# Reference: {Remove &Listing}
 ::msgcat::mcset pl mRemoveListing        {Remove Listing}
-# Reference: {Remove User...}
-::msgcat::mcset pl mRemoveUser           {Usuń użytkownika...}
-# Reference: {Restore}
-# Translate, find in sources: components/taskbar/Taskbar.tcl:330
-::msgcat::mcset pl mRestore              {Restore}
-# Reference: {Roster...}
-::msgcat::mcset pl mRoster               {Roster...}
-# Reference: {Roster/Services}
-::msgcat::mcset pl mRoster/Services      {Roster/Usługi}
-# Reference: {Save As...}
+# Reference: {&Restore}
+# Translate, find in sources: components/taskbar/Taskbar.tcl:329 components/taskbar/TaskbarDEBUG.tcl:340
+::msgcat::mcset pl mRestore              {&Restore}
+# Reference: {&Save...}
+# Translate
+::msgcat::mcset pl mSave                 {&Save...}
+# Reference: {Save &As...}
 ::msgcat::mcset pl mSaveAs               {Zapisz jako...}
 # Reference: {Save As Item...}
 ::msgcat::mcset pl mSaveAsItem           {Zapisz jako element...}
-# Reference: {&Save Canvas...}
+# Reference: {&Save...}
 ::msgcat::mcset pl mSaveCanvas           {&Zapisz tło...}
 # Reference: {Save Image As...}
 ::msgcat::mcset pl mSaveImageAs          {Zapisz grafikę jako...}
-# Reference: {Search...}
+# Reference: {&Search...}
 ::msgcat::mcset pl mSearch...            {Przeszukaj...}
-# Reference: {Send File...}
+# Reference: {Select &All}
+# Translate
+::msgcat::mcset pl mSelectAll            {Select &All}
+# Reference: {Send &File...}
 ::msgcat::mcset pl mSendFile...          {Wyślij plik...}
-# Reference: {Send Message...}
-::msgcat::mcset pl mSendMessage...       {Wyślij wiadomość do...}
-# Reference: {Servers}
-::msgcat::mcset pl mServers              {Serwery}
-# Reference: {Setup Assistant...}
+# Reference: {&Server}
+# Translate
+::msgcat::mcset pl mServer               {&Server}
+# Reference: {&Setup Assistant...}
 ::msgcat::mcset pl mSetupAssistant...    {Asystent ustawień...}
 # Reference: {Shift Constrain}
 ::msgcat::mcset pl mShiftConstrain       {Przesuń-ogranicz}
 # Reference: {Show}
 ::msgcat::mcset pl mShow                 {Pokaż}
-# Reference: {Show Main}
-::msgcat::mcset pl mShowMain             {Pokaż główne okno}
 # Reference: {Size}
 ::msgcat::mcset pl mSize                 {Wielkość}
+# Reference: {Slide Show}
+# Translate, find in sources: components/SlideShow.tcl:192
+::msgcat::mcset pl mSlideShow            {Slide Show}
 # Reference: {Smaller}
 ::msgcat::mcset pl mSmaller              {Mniejszy}
-# Reference: {Smiley Legend}
-::msgcat::mcset pl mSmileyLegend         {Panel "emotek"}
 # Reference: {Sort}
 ::msgcat::mcset pl mSort                 {Rodzaj}
-# Reference: {Start Server}
-::msgcat::mcset pl mStartServer          {Uruchom serwer}
 # Reference: {Status}
 ::msgcat::mcset pl mStatus               {Zmień swój status}
-# Reference: {Stop Put/Get/Open}
-::msgcat::mcset pl mStopPut/Get/Open     {Wstrzymaj transfery}
+# Reference: {Stop &Transactions}
+# Translate
+::msgcat::mcset pl mStopTrans            {Stop &Transactions}
 # Reference: {Straighten}
 ::msgcat::mcset pl mStraighten           {Prostowanie}
 # Reference: {Style}
 ::msgcat::mcset pl mStyle                {Styl}
 # Reference: {Sync Playback}
 ::msgcat::mcset pl mSyncPlayback         {Odtwarzanie synchr.}
-# Reference: {Take Snapshot}
+# Reference: {&Tabs}
+# Translate
+::msgcat::mcset pl mTabs                 {&Tabs}
+# Reference: {Take &Snapshot}
 ::msgcat::mcset pl mTakeSnapShot         {Zrób "zdjęcie"}
 # Reference: {Thickness}
 ::msgcat::mcset pl mThickness            {Grubość}
@@ -955,310 +885,248 @@
 ::msgcat::mcset pl mTo45degrees          {o 45 stopni}
 # Reference: {To 90 degrees}
 ::msgcat::mcset pl mTo90degrees          {o 90 stopni}
-# Reference: {Toolbar}
+# Reference: {Tool&bar}
 ::msgcat::mcset pl mToolbar              {Pasek narzędzi}
-# Reference: {Transports}
+# Reference: {&Transports}
 ::msgcat::mcset pl mTransports           {Transporty}
-# Reference: {Undo}
+# Reference: {&Undo}
 ::msgcat::mcset pl mUndo                 {Cofnij}
-# Reference: {Unregister}
+# Reference: {&Unregister}
 ::msgcat::mcset pl mUnregister           {Wyrejestruj}
-# Reference: {Update Check}
+# Reference: {&Update Check}
 ::msgcat::mcset pl mUpdateCheck          {Sprawdzenie aktualizacji}
-# Reference: {User Info...}
-::msgcat::mcset pl mUserInfo             {Dane użytkownika...}
 # Reference: {Version}
 ::msgcat::mcset pl mVersion              {Wersja}
 # Reference: {Vertical}
 ::msgcat::mcset pl mVertical             {Pionowo}
 # Reference: {Weight}
 ::msgcat::mcset pl mWeight               {Grubość}
-# Reference: {Welcome}
-::msgcat::mcset pl mWelcome              {Witamy}
-# Reference: {Whiteboard...}
+# Reference: {&Whiteboard...}
 ::msgcat::mcset pl mWhiteboard           {Tablica...}
-# Reference: {vCard...}
-::msgcat::mcset pl mvCard                {Wizytówka...}
-# Reference: {Business Card}
-# Translate
-::msgcat::mcset pl mvCard2               {Business Card}
-# Reference: {Business Card...}
-# Translate
-::msgcat::mcset pl mvCard2...            {Business Card...}
 
 
 # Short texts only. Use english text as database key.
-# Reference: {30 days}
-::msgcat::mcset pl {30 days}             {30 dni}
-# Reference: {>>Import>>}
-::msgcat::mcset pl >>Import>>            {>>Import>>}
 # Reference: {About %s}
 ::msgcat::mcset pl {About %s}            {O %s}
-# Reference: {About Coccinella}
-::msgcat::mcset pl {About Coccinella}    {O Coccinelli}
 # Reference: {About QuickTimeTcl}
 ::msgcat::mcset pl {About QuickTimeTcl}  {O QuickTimeTcl}
-# Reference: {About Whiteboard}
-::msgcat::mcset pl {About Whiteboard}    {O Tablicy}
-# Reference: {Active <Return>}
-::msgcat::mcset pl {Active <Return>}     {<Enter> wysyła}
 # Reference: {Add Contact}
 ::msgcat::mcset pl {Add Contact}         {Add Contact}
-# Reference: {Add New User}
-::msgcat::mcset pl {Add New User}        {Dodaj nową osobę}
+# Reference: {Add File Type}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:147
+::msgcat::mcset pl {Add File Type}       {Add File Type}
+# Reference: {Add/Edit File Type}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:404
+::msgcat::mcset pl {Add/Edit File Type}  {Add/Edit File Type}
 # Reference: {Add Profile}
-# Translate, find in sources: jabber/Profiles.tcl:1117 jabber/Profiles.tcl:1504
+# Translate, find in sources: jabber/Profiles.tcl:1120 jabber/Profiles.tcl:1507
 ::msgcat::mcset pl {Add Profile}         {Add Profile}
-# Reference: {Add Server}
-::msgcat::mcset pl {Add Server}          {Dodaj serwer}
-# Reference: {Add Shortcut}
-::msgcat::mcset pl {Add Shortcut}        {Dodaj skrót}
-# Reference: {Add permanently}
-::msgcat::mcset pl {Add permanently}     {Dodaj na stałe}
-# Reference: {Address 1}
-::msgcat::mcset pl {Address 1}           {Adres 1}
-# Reference: {Address 2}
-::msgcat::mcset pl {Address 2}           {Adres 2}
-# Reference: {Advanced Configuration}
-::msgcat::mcset pl {Advanced Configuration} {Konfiguracja szczegółowa}
-# Reference: {Advanced Setup}
-::msgcat::mcset pl {Advanced Setup}      {Ustawienia szczegółowe}
 # Reference: {Alert sounds}
 ::msgcat::mcset pl {Alert sounds}        {Sygnalizacja dźwiękowa}
-# Reference: {All Off}
-# Translate, find in sources: components/BuddyPounce.tcl:290
-::msgcat::mcset pl {All Off}             {All Off}
-# Reference: {Alternative Room JID}
-# Translate, find in sources: jabber/MUC.tcl:1561
-::msgcat::mcset pl {Alternative Room JID} {Alternative Room JID}
-# Reference: {As text}
-::msgcat::mcset pl {As text}             {Jako tekst}
-# Reference: {Ask each time}
-::msgcat::mcset pl {Ask each time}       {Powiadom każdorazowo}
+# Reference: {All Supported Files}
+# Translate
+::msgcat::mcset pl {All Supported Files} {All Supported Files}
+# Reference: {Alternative chatroom}
+# Translate, find in sources: jabber/MUC.tcl:1565
+::msgcat::mcset pl {Alternative chatroom} {Alternative chatroom}
+# Reference: {Always ask}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:491
+::msgcat::mcset pl {Always ask}          {Always ask}
 # Reference: {Auto Away}
 ::msgcat::mcset pl {Auto Away}           {Automatyczne ustawianie "zaraz wracam"}
-# Reference: {Auto Connect}
-::msgcat::mcset pl {Auto Connect}        {Połącz automatycznie}
 # Reference: {Auto Join}
 ::msgcat::mcset pl {Auto Join}           {Dołącz automatycznie}
+# Reference: {Auto Reply}
+# Translate, find in sources: components/BuddyPounce.tcl:572
+::msgcat::mcset pl {Auto Reply}          {Auto Reply}
 # Reference: {Auto-accept}
 ::msgcat::mcset pl Auto-accept           {autoakceptacja}
 # Reference: {Auto-reject}
 ::msgcat::mcset pl Auto-reject           {autoodmowa}
-# Reference: {Away status}
-::msgcat::mcset pl {Away status}         {Opis statusu "zaraz wracam"}
-# Reference: {Basic Info}
-::msgcat::mcset pl {Basic Info}          {Informacje podstawowe}
-# Reference: {Block JID}
-::msgcat::mcset pl {Block JID}           {Zablokuj JID}
-# Reference: {Bookmark this room}
-::msgcat::mcset pl {Bookmark this room}  {Dodaj zakładkę tego pokoju}
+# Reference: {Blocking support}
+# Translate, find in sources: whiteboard/WDialogs.tcl:182
+::msgcat::mcset pl {Blocking support}    {Blocking support}
+# Reference: {Bookmark this chatroom}
+# Translate, find in sources: jabber/GroupChat.tcl:861
+::msgcat::mcset pl {Bookmark this chatroom} {Bookmark this chatroom}
 # Reference: {Broken Image}
 ::msgcat::mcset pl {Broken Image}        {Błąd w pliku graficznym}
-# Reference: {Buddy Pouncing}
-::msgcat::mcset pl {Buddy Pouncing}      {Buddy Pouncing}
-# Reference: {Built in server port}
-::msgcat::mcset pl {Built in server port} {Domyślny port serwera}
+# Reference: {Buffering support}
+# Translate, find in sources: whiteboard/WDialogs.tcl:181
+::msgcat::mcset pl {Buffering support}   {Buffering support}
+# Reference: {Built in server}
+# Translate, find in sources: lib/PrefNet.tcl:118
+::msgcat::mcset pl {Built in server}     {Built in server}
 # Reference: {Business Card}
-# Translate, find in sources: jabber/UserInfo.tcl:335 jabber/VCard.tcl:223
+# Translate, find in sources: jabber/UserInfo.tcl:336 jabber/VCard.tcl:223
 ::msgcat::mcset pl {Business Card}       {Business Card}
 # Reference: {Cache folder}
 ::msgcat::mcset pl {Cache folder}        {Katalog buforowy}
-# Reference: {Canvas Size}
-::msgcat::mcset pl {Canvas Size}         {Rozmiar tła ("płótna") rysunku}
 # Reference: {Changes since previous release}
 # Translate, find in sources: components/AutoUpdate.tcl:240
 ::msgcat::mcset pl {Changes since previous release} {Changes since previous release}
-# Reference: {Chat History}
-::msgcat::mcset pl {Chat History}        {Zapis rozmowy}
-# Reference: {Chat System}
-::msgcat::mcset pl {Chat System}         {Chat System}
+# Reference: {Chat system}
+# Translate, find in sources: jabber/JUser.tcl:132
+::msgcat::mcset pl {Chat system}         {Chat system}
+# Reference: {Chat window}
+# Translate, find in sources: jabber/JPrefs.tcl:194
+::msgcat::mcset pl {Chat window}         {Chat window}
 # Reference: {Chat With}
 ::msgcat::mcset pl {Chat With}           {Rozmowa z}
-# Reference: {Clear Disk Cache Now}
-::msgcat::mcset pl {Clear Disk Cache Now} {Skasuj zawartość bufora}
-# Reference: {Company Name}
-::msgcat::mcset pl {Company Name}        {Nazwa firmy}
-# Reference: {Component Info}
-::msgcat::mcset pl {Component Info}      {Dane komponentu}
-# Reference: {Conference server}
-::msgcat::mcset pl {Conference server}   {Serwer konferencji}
-# Reference: {Connect using HTTP}
-::msgcat::mcset pl {Connect using HTTP}  {Połącz korzystając z HTTP}
+# Reference: {Chatroom presence change}
+# Translate
+::msgcat::mcset pl {Chatroom presence change} {Chatroom presence change}
+# Reference: {Clear Cache}
+# Translate, find in sources: lib/FileCache.tcl:630
+::msgcat::mcset pl {Clear Cache}         {Clear Cache}
+# Reference: {Close page}
+# Translate, find in sources: jabber/Chat.tcl:1841 jabber/GroupChat.tcl:1135
+::msgcat::mcset pl {Close page}          {Close page}
+# Reference: {Configure Chatroom}
+# Translate, find in sources: jabber/MUC.tcl:374 jabber/MUC.tcl:385 jabber/MUC.tcl:490 jabber/MUC.tcl:1371
+::msgcat::mcset pl {Configure Chatroom}  {Configure Chatroom}
+# Reference: {Contact Actions}
+# Translate, find in sources: components/BuddyPounce.tcl:159 components/BuddyPounce.tcl:165 components/BuddyPounce.tcl:170 components/BuddyPounce.tcl:206
+::msgcat::mcset pl {Contact Actions}     {Contact Actions}
+# Reference: {Contact Icons}
+# Translate, find in sources: jabber/Rosticons.tcl:405
+::msgcat::mcset pl {Contact Icons}       {Contact Icons}
 # Reference: {Contact ID}
-# Translate, find in sources: jabber/Chat.tcl:282 jabber/JUser.tcl:135 jabber/JWB.tcl:450 jabber/MUC.tcl:180
+# Translate, find in sources: jabber/Chat.tcl:282 jabber/JUser.tcl:135 jabber/JWB.tcl:450 jabber/Login.tcl:148 jabber/MUC.tcl:180 jabber/Profiles.tcl:1067 jabber/VCard.tcl:304
 ::msgcat::mcset pl {Contact ID}          {Contact ID}
-# Reference: {Contact Type}
-::msgcat::mcset pl {Contact Type}        {Rodzaj kontaktu}
-# Reference: {Create Room}
-::msgcat::mcset pl {Create Room}         {Otwórz pokój}
-# Reference: {Default Logout Status}
-::msgcat::mcset pl {Default Logout Status} {Domyślny opis "nieobecności"}
+# Reference: {Contact Name}
+# Translate, find in sources: jabber/RosterAvatar.tcl:324
+::msgcat::mcset pl {Contact Name}        {Contact Name}
+# Reference: {Create Chatroom}
+# Translate, find in sources: jabber/Create.tcl:59
+::msgcat::mcset pl {Create Chatroom}     {Create Chatroom}
+# Reference: {Create new item for each line of text}
+# Translate, find in sources: whiteboard/WBPrefs.tcl:124
+::msgcat::mcset pl {Create new item for each line of text} {Create new item for each line of text}
+# Reference: {Custom Status}
+# Translate, find in sources: jabber/Status.tcl:840
+::msgcat::mcset pl {Custom Status}       {Custom Status}
+# Reference: {Default Applications}
+# Translate, find in sources: lib/PrefHelpers.tcl:75 lib/PrefHelpers.tcl:107
+::msgcat::mcset pl {Default Applications} {Default Applications}
 # Reference: {Default group}
 ::msgcat::mcset pl {Default group}       {Grupa domyślna}
 # Reference: {Default nickname}
 ::msgcat::mcset pl {Default nickname}    {Domyślny pseudonim}
-# Reference: {Default status descriptions}
-::msgcat::mcset pl {Default status descriptions} {Domyślny opis statusu}
 # Reference: {Delete Profile}
 ::msgcat::mcset pl {Delete Profile}      {Usuń profil}
-# Reference: {Delete Rule}
-::msgcat::mcset pl {Delete Rule}         {Usuń regułę}
-# Reference: {Different Passwords}
-::msgcat::mcset pl {Different Passwords} {Niezgodność haseł}
-# Reference: {Disco method}
-::msgcat::mcset pl {Disco method}        {Disco method}
-# Reference: {Disk Cache}
-::msgcat::mcset pl {Disk Cache}          {Bufor dyskowy}
-# Reference: {Do Not Disturb}
-::msgcat::mcset pl {Do Not Disturb}      {Nie przeszkadzać}
-# Reference: {Do not save password}
-::msgcat::mcset pl {Do not save password} {Do not save password}
-# Reference: {Do you actually want to hang up?}
+# Reference: {Disable All}
+# Translate, find in sources: components/BuddyPounce.tcl:291
+::msgcat::mcset pl {Disable All}         {Disable All}
+# Reference: {Discover permanently}
+# Translate, find in sources: jabber/Disco.tcl:1672
+::msgcat::mcset pl {Discover permanently} {Discover permanently}
+# Reference: {Discover Server}
+# Translate, find in sources: jabber/Disco.tcl:1634 jabber/Disco.tcl:1649
+::msgcat::mcset pl {Discover Server}     {Discover Server}
+# Reference: {Disk cache size}
+# Translate, find in sources: lib/FileCache.tcl:626
+::msgcat::mcset pl {Disk cache size}     {Disk cache size}
+# Reference: {Edit Bookmarks}
+# Translate, find in sources: lib/Bookmarks.tcl:32
+::msgcat::mcset pl {Edit Bookmarks}      {Edit Bookmarks}
+# Reference: {Do you want to hang up?}
 # Translate, find in sources: components/Phone/NotifyCall.tcl:337
-::msgcat::mcset pl {Do you actually want to hang up?} {Do you actually want to hang up?}
+::msgcat::mcset pl {Do you want to hang up?} {Do you want to hang up?}
 # Reference: {Edit Business Card}
 # Translate, find in sources: jabber/VCard.tcl:220
 ::msgcat::mcset pl {Edit Business Card}  {Edit Business Card}
 # Reference: {Edit Contact}
-# Translate, find in sources: jabber/JUser.tcl:460
+# Translate, find in sources: jabber/JUser.tcl:468
 ::msgcat::mcset pl {Edit Contact}        {Edit Contact}
-# Reference: {Edit Fonts}
-::msgcat::mcset pl {Edit Fonts}          {Edycja czcionek}
+# Reference: {Edit File Type}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:145
+::msgcat::mcset pl {Edit File Type}      {Edit File Type}
 # Reference: {Edit Item}
 ::msgcat::mcset pl {Edit Item}           {Edycja składnika}
 # Reference: {Edit Profiles}
-# Translate, find in sources: jabber/Login.tcl:238 jabber/Profiles.tcl:885 jabber/Profiles.tcl:897
+# Translate, find in sources: jabber/Login.tcl:241 jabber/Profiles.tcl:885 jabber/Profiles.tcl:897
 ::msgcat::mcset pl {Edit Profiles}       {Edit Profiles}
-# Reference: {Edit Shortcut}
-::msgcat::mcset pl {Edit Shortcut}       {Edycja skrótu}
-# Reference: {Edit Shortcuts}
-::msgcat::mcset pl {Edit Shortcuts}      {Edycja skrótów}
-# Reference: {Email address}
-::msgcat::mcset pl {Email address}       {Adres e-mail}
 # Reference: {Email addresses}
 ::msgcat::mcset pl {Email addresses}     {Adresy e-mailowe}
-# Reference: {Empty Fields}
-::msgcat::mcset pl {Empty Fields}        {Pola niewypełnione}
-# Reference: {Enter Room}
-::msgcat::mcset pl {Enter Room}          {Wejdź do pokoju}
-# Reference: {Enter/Create Room}
-::msgcat::mcset pl {Enter/Create Room}   {Wejdź do/otwórz pokój}
-# Reference: {Every time}
-::msgcat::mcset pl {Every time}          {Każdorazowo}
-# Reference: {Extended Away status}
-::msgcat::mcset pl {Extended Away status} {Opis statusu "niedostępny"}
+# Reference: {Email client}
+# Translate, find in sources: lib/PrefHelpers.tcl:120
+::msgcat::mcset pl {Email client}        {Email client}
+# Reference: {Enter Chatroom}
+# Translate, find in sources: jabber/Enter.tcl:77
+::msgcat::mcset pl {Enter Chatroom}      {Enter Chatroom}
+# Reference: {Enter/Create Chatroom}
+# Translate, find in sources: jabber/Create.tcl:597
+::msgcat::mcset pl {Enter/Create Chatroom} {Enter/Create Chatroom}
+# Reference: {Exit room}
+# Translate, find in sources: jabber/History.tcl:841
+::msgcat::mcset pl {Exit room}           {Exit room}
+# Reference: {Error code}
+# Translate, find in sources: jabber/Create.tcl:430 jabber/Create.tcl:470 jabber/Create.tcl:548 jabber/Create.tcl:754 jabber/Enter.tcl:643 jabber/Enter.tcl:683 jabber/FTrans.tcl:495 jabber/FTrans.tcl:521 jabber/Jabber.tcl:620 jabber/Jabber.tcl:863 jabber/Jabber.tcl:1945 jabber/JUser.tcl:331 jabber/Login.tcl:752 jabber/Login.tcl:774 jabber/OOB.tcl:327 jabber/Profiles.tcl:1611 jabber/Register.tcl:118 jabber/Register.tcl:630 jabber/Register.tcl:1123 jabber/Register.tcl:1184 jabber/Register.tcl:1367 jabber/Search.tcl:345 jabber/Search.tcl:439 lib/HttpTrpt.tcl:243
+::msgcat::mcset pl {Error code}          {Error code}
 # Reference: {External Midi Player}
-# Translate, find in sources: components/Sounds.tcl:518
+# Translate, find in sources: components/Sounds.tcl:535
 ::msgcat::mcset pl {External Midi Player} {External Midi Player}
 # Reference: {Factory Settings}
 ::msgcat::mcset pl {Factory Settings}    {Ustawienia standardowe}
-# Reference: {Fatal Error}
-::msgcat::mcset pl {Fatal Error}         {Błąd krytyczny}
 # Reference: {File Cache}
 ::msgcat::mcset pl {File Cache}          {Bufor plikowy}
-# Reference: {File Mappings}
-::msgcat::mcset pl {File Mappings}       {Odwzorowania pliku}
 # Reference: {File Transfer}
 ::msgcat::mcset pl {File Transfer}       {Przesyłanie pliku}
 # Reference: {File Transfer Error}
 ::msgcat::mcset pl {File Transfer Error} {Błąd w trakcie przesyłania}
-# Reference: {File coding}
-::msgcat::mcset pl {File coding}         {Kodowanie pliku}
-# Reference: {File suffixes}
-::msgcat::mcset pl {File suffixes}       {Przyrostki nazw plików}
-# Reference: {File transfer port}
-::msgcat::mcset pl {File transfer port}  {Port transferu plików}
+# Reference: {File transfer}
+# Translate, find in sources: lib/PrefNet.tcl:120
+::msgcat::mcset pl {File transfer}       {File transfer}
+# Reference: {File Type}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:175
+::msgcat::mcset pl {File Type}           {File Type}
+# Reference: {File Types}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:78
+::msgcat::mcset pl {File Types}          {File Types}
 # Reference: {First name}
 ::msgcat::mcset pl {First name}          {Imię}
-# Reference: {Font Size}
-::msgcat::mcset pl {Font Size}           {Rozmiar czcionki}
-# Reference: {Font Weight}
-::msgcat::mcset pl {Font Weight}         {Grubość pisma}
-# Reference: {Format mm/dd/yyyy}
-::msgcat::mcset pl {Format mm/dd/yyyy}   {Format mm/dd/rrrr}
-# Reference: {Get File}
-::msgcat::mcset pl {Get File}            {Pobierz plik}
-# Reference: {Get File Error}
-::msgcat::mcset pl {Get File Error}      {Błąd pobierania}
-# Reference: {Get vCard}
-::msgcat::mcset pl {Get vCard}           {Pobierz wizytówkę}
-# Reference: {Getting available rooms...}
-::msgcat::mcset pl {Getting available rooms...} {Wykrywam dostępne pokoje...}
-# Reference: {Groupchat presence change}
-::msgcat::mcset pl {Groupchat presence change} {Zmiana statusu "czatownika"}
-# Reference: {Groupchat-1.0 (fallback)}
-::msgcat::mcset pl {Groupchat-1.0 (fallback)} {Groupchat-1.0 ("fallback")}
-# Reference: {HTTP port}
-::msgcat::mcset pl {HTTP port}           {port HTTP}
-# Reference: {Handled By}
-::msgcat::mcset pl {Handled By}          {Zarządzana przez}
+# Reference: {Font size}
+# Translate, find in sources: contrib/ui/fontselector.tcl:115
+::msgcat::mcset pl {Font size}           {Font size}
+# Reference: {Font weight}
+# Translate, find in sources: contrib/ui/fontselector.tcl:125
+::msgcat::mcset pl {Font weight}         {Font weight}
+# Reference: {Format: mm/dd/yyyy}
+# Translate, find in sources: jabber/VCard.tcl:374
+::msgcat::mcset pl {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 # Reference: {History length}
 ::msgcat::mcset pl {History length}      {Rozmiar dziennika}
-# Reference: {Host name}
-::msgcat::mcset pl {Host name}           {Nazwa komputera}
-# Reference: {IP address}
-::msgcat::mcset pl {IP address}          {Adres IP}
-# Reference: {Import Iconset...}
-::msgcat::mcset pl {Import Iconset...}   {Importuj zestaw ikon...}
-# Reference: {Import using}
-::msgcat::mcset pl {Import using}        {Importuj poprzez}
-# Reference: {Import/Remove fonts}
-::msgcat::mcset pl {Import/Remove fonts} {Dodaj/usuń kroje czcionek}
+# Reference: {Import Iconset}
+# Translate, find in sources: jabber/Emoticons.tcl:545 jabber/Emoticons.tcl:639 jabber/Emoticons.tcl:658
+::msgcat::mcset pl {Import Iconset}      {Import Iconset}
 # Reference: {Incoming Message}
 ::msgcat::mcset pl {Incoming Message}    {Wiadomość nadchodzi}
-# Reference: {Incoming Messages}
-::msgcat::mcset pl {Incoming Messages}   {Nadchodzą wiadomości}
-# Reference: {Incoming Presence}
-::msgcat::mcset pl {Incoming Presence}   {Odnotowano obecność}
-# Reference: {Info Room}
-::msgcat::mcset pl {Info Room}           {Info Room}
-# Reference: {Inspect Associations}
-::msgcat::mcset pl {Inspect Associations} {Zbadaj powiązania}
 # Reference: {Invite Contact}
 # Translate, find in sources: jabber/MUC.tcl:135 jabber/MUC.tcl:159
 ::msgcat::mcset pl {Invite Contact}      {Invite Contact}
-# Reference: {Invite User}
-::msgcat::mcset pl {Invite User}         {Zaproś użytkownika}
-# Reference: {Is connected}
-::msgcat::mcset pl {Is connected}        {Połączenie}
-# Reference: {Is safe}
-::msgcat::mcset pl {Is safe}             {bezpieczny}
-# Reference: {Is server up}
-::msgcat::mcset pl {Is server up}        {Serwer pracuje}
-# Reference: {Item Inspector}
-::msgcat::mcset pl {Item Inspector}      {Item Inspector}
-# Reference: {Item Options}
-::msgcat::mcset pl {Item Options}        {Item Options}
-# Reference: {Item Type}
-::msgcat::mcset pl {Item Type}           {Item Type}
-# Reference: {JID to block}
-::msgcat::mcset pl {JID to block}        {JID do zablokowania}
-# Reference: {Jabber Client}
-::msgcat::mcset pl {Jabber Client}       {klient Jabbera}
+# Reference: {Logged in}
+# Translate
+::msgcat::mcset pl {Logged in}           {Logged in}
+# Reference: {Iconset Archive}
+# Translate, find in sources: jabber/Emoticons.tcl:543 jabber/Emoticons.tcl:656
+::msgcat::mcset pl {Iconset Archive}     {Iconset Archive}
 # Reference: {Jabber ID}
 ::msgcat::mcset pl {Jabber ID}           {Jabber ID}
-# Reference: {Jabber Server}
-::msgcat::mcset pl {Jabber Server}       {serwer Jabbera}
-# Reference: {Jabber address}
-::msgcat::mcset pl {Jabber address}      {adres w sieci Jabbera}
-# Reference: {Jabber server port}
-::msgcat::mcset pl {Jabber server port}  {port serwera}
-# Reference: {Jabber user ID}
-::msgcat::mcset pl {Jabber user ID}      {Jabber-user ID}
 # Reference: {Last Activity}
 ::msgcat::mcset pl {Last Activity}       {Ostatnio działał(a)}
 # Reference: {Last name}
 ::msgcat::mcset pl {Last name}           {Nazwisko}
-# Reference: {Launch time}
-::msgcat::mcset pl {Launch time}         {Czas uruchomienia}
+# Reference: {Loading available chatrooms}
+# Translate, find in sources: jabber/Enter.tcl:463
+::msgcat::mcset pl {Loading available chatrooms} {Loading available chatrooms}
+# Reference: {Local nickname}
+# Translate, find in sources: jabber/Chat.tcl:3406
+::msgcat::mcset pl {Local nickname}      {Local nickname}
 # Reference: {Local Time}
 ::msgcat::mcset pl {Local Time}          {Czas lokalny}
 # Reference: {Logged out}
 ::msgcat::mcset pl {Logged out}          {Wylogowany}
-# Reference: {Login again on wakeup}
-# Translate, find in sources: components/Carbon.tcl:179
-::msgcat::mcset pl {Login again on wakeup} {Login again on wakeup}
 # Reference: {Login as invisible}
 ::msgcat::mcset pl {Login as invisible}  {Zaloguj się "niewidoczny"}
 # Reference: {Logout on sleep}
@@ -1266,351 +1134,272 @@
 ::msgcat::mcset pl {Logout on sleep}     {Logout on sleep}
 # Reference: {Logout With Message}
 ::msgcat::mcset pl {Logout With Message} {Wylogowanie z opisem}
-# Reference: {Machine Sleep}
-# Translate, find in sources: components/Carbon.tcl:162
-::msgcat::mcset pl {Machine Sleep}       {Machine Sleep}
 # Reference: {MIDI command}
-# Translate, find in sources: components/Sounds.tcl:519
+# Translate, find in sources: components/Sounds.tcl:537
 ::msgcat::mcset pl {MIDI command}        {MIDI command}
 # Reference: {MIDI Player}
 ::msgcat::mcset pl {MIDI Player}         {Odtwarzacz plików MIDI}
 # Reference: {MIME type}
 ::msgcat::mcset pl {MIME type}           {Typ MIME}
-# Reference: {Mailbox Error}
-::msgcat::mcset pl {Mailbox Error}       {Błąd skrzynki}
-# Reference: {Make new text item for each line}
-::msgcat::mcset pl {Make new text item for each line} {Make new text item for each line}
-# Reference: {Movie Options}
-::msgcat::mcset pl {Movie Options}       {Movie Options}
 # Reference: {Multi Connect}
 ::msgcat::mcset pl {Multi Connect}       {Połączenie wielokrotne}
-# Reference: {My Avatar}
-::msgcat::mcset pl {My Avatar}           {Mój Awatar}
 # Reference: {My Status}
 ::msgcat::mcset pl {My Status}           {Mój status}
-# Reference: {My nickname for own display}
-::msgcat::mcset pl {My nickname for own display} {My nickname for own display}
 # Reference: {NAT Address}
 ::msgcat::mcset pl {NAT Address}         {"Zewnętrzny" adres IP (NAT)}
-# Reference: {Name of list}
-::msgcat::mcset pl {Name of list}        {Nazwa listy}
-# Reference: {Network Error}
-::msgcat::mcset pl {Network Error}       {Problem w sieci}
-# Reference: {Network Setup}
-::msgcat::mcset pl {Network Setup}       {Ustawienia sieci}
 # Reference: {New Account}
 ::msgcat::mcset pl {New Account}         {Nowe konto}
 # Reference: {New Bookmark}
 ::msgcat::mcset pl {New Bookmark}        {Nowa zakładka}
-# Reference: {New Color}
-::msgcat::mcset pl {New Color}           {Nowy kolor}
+# Reference: {New Form}
+# Translate, find in sources: jabber/Search.tcl:153
+::msgcat::mcset pl {New Form}            {New Form}
 # Reference: {New Message}
 ::msgcat::mcset pl {New Message}         {Nowa wiadomość}
-# Reference: {New Nickname}
-::msgcat::mcset pl {New Nickname}        {Nowy pseudonim}
+# Reference: {New password}
+# Translate, find in sources: jabber/Jabber.tcl:1854
+::msgcat::mcset pl {New password}        {New password}
 # Reference: {New Password}
 ::msgcat::mcset pl {New Password}        {Nowe hasło}
 # Reference: {New Profile}
 ::msgcat::mcset pl {New Profile}         {Nowy profil}
-# Reference: {New Rule}
-::msgcat::mcset pl {New Rule}            {Nowa reguła}
 # Reference: {New Topic}
 ::msgcat::mcset pl {New Topic}           {Nowy temat}
-# Reference: {New User}
-::msgcat::mcset pl {New User}            {Nowy użytkownik}
 # Reference: {New Version}
 ::msgcat::mcset pl {New Version}         {Nowa wersja}
-# Reference: {New chat message}
-::msgcat::mcset pl {New chat message}    {"Odezwanie się" rozmówcy}
+# Reference: {Incoming chat}
+# Translate
+::msgcat::mcset pl {Incoming chat}       {Incoming chat}
 # Reference: {New chat thread}
 ::msgcat::mcset pl {New chat thread}     {Rozpoczęcie nowej rozmowy}
-# Reference: {New incoming message}
-::msgcat::mcset pl {New incoming message} {Nadeszła nowa wiadomość}
+# Reference: {Incoming message}
+# Translate
+::msgcat::mcset pl {Incoming message}    {Incoming message}
 # Reference: {New shortcut}
 ::msgcat::mcset pl {New shortcut}        {Nowy skrót}
-# Reference: {No Address}
-::msgcat::mcset pl {No Address}          {Brak adresu}
-# Reference: {No Available}
-::msgcat::mcset pl {No Available}        {Brak dostępności}
-# Reference: {No Inbox}
-::msgcat::mcset pl {No Inbox}            {Brak skrzynki}
-# Reference: {No Printing}
-::msgcat::mcset pl {No Printing}         {Bez drukowania}
-# Reference: {No Restriction}
-::msgcat::mcset pl {No Restriction}      {Bez ograniczeń}
-# Reference: {No registered history for %s}
-::msgcat::mcset pl {No registered history for %s} {Brak zapisów rozmów z %s}
-# Reference: {Not Available}
-::msgcat::mcset pl {Not Available}       {Brak}
-# Reference: {Not Connected}
-::msgcat::mcset pl {Not Connected}       {Brak połączenia}
-# Reference: {Not available}
-::msgcat::mcset pl {Not available}       {brak}
-# Reference: {Not older than}
-::msgcat::mcset pl {Not older than}      {Nie starsze niż}
+# Reference: {No restriction}
+# Translate, find in sources: jabber/Chat.tcl:3391
+::msgcat::mcset pl {No restriction}      {No restriction}
+# Reference: {No registered history for}
+# Translate, find in sources: jabber/History.tcl:1018
+::msgcat::mcset pl {No registered history for} {No registered history for}
+# Reference: {More recent than}
+# Translate, find in sources: jabber/Chat.tcl:3384
+::msgcat::mcset pl {More recent than}    {More recent than}
 # Reference: {Once per session}
 ::msgcat::mcset pl {Once per session}    {Raz w ciągu sesji}
-# Reference: {Open Canvas}
-::msgcat::mcset pl {Open Canvas}         {Wczytaj tło ("płótno")}
+# Reference: {Open Business Card}
+# Translate, find in sources: jabber/VCard.tcl:834
+::msgcat::mcset pl {Open Business Card}  {Open Business Card}
 # Reference: {Open Failed}
 ::msgcat::mcset pl {Open Failed}         {Wczytanie nieudane}
+# Reference: {Open File}
+# Translate, find in sources: whiteboard/CanvasFile.tcl:554
+::msgcat::mcset pl {Open File}           {Open File}
+# Reference: {Open Folder}
+# Translate, find in sources: components/SlideShow.tcl:276 lib/FileCache.tcl:662 whiteboard/GetFileIface.tcl:292
+::msgcat::mcset pl {Open Folder}         {Open Folder}
 # Reference: {Open Helpfile}
 ::msgcat::mcset pl {Open Helpfile}       {Wczytaj plik pomocy}
 # Reference: {Open Image/Movie}
 ::msgcat::mcset pl {Open Image/Movie}    {Wczytaj grafikę/film}
 # Reference: {Open Stream}
 ::msgcat::mcset pl {Open Stream}         {Pobieraj strumień danych}
-# Reference: {Outgoing Presence}
-::msgcat::mcset pl {Outgoing Presence}   {"Obecność" prezentowana}
+# Reference: {Open with}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:178 whiteboard/FilePrefs.tcl:483
+::msgcat::mcset pl {Open with}           {Open with}
 # Reference: {Peer-to-Peer}
 ::msgcat::mcset pl Peer-to-Peer          {Peer-to-Peer}
-# Reference: {Personal Info}
-::msgcat::mcset pl {Personal Info}       {Dane osob.}
-# Reference: {Personal Information}
-::msgcat::mcset pl {Personal Information} {Dane osobiste}
-# Reference: {Personal URL}
-::msgcat::mcset pl {Personal URL}        {Własny URL}
-# Reference: {Pick Directory}
-::msgcat::mcset pl {Pick Directory}      {Wskaż katalog}
-# Reference: {Pick File}
-::msgcat::mcset pl {Pick File}           {Wskaż plik}
-# Reference: {Pick Image File}
-::msgcat::mcset pl {Pick Image File}     {Wskaż plik graficzny}
-# Reference: {Pick skin}
-::msgcat::mcset pl {Pick skin}           {Wskaż "skórkę"}
-# Reference: {Play Sound}
-# Translate, find in sources: components/BuddyPounce.tcl:242
-::msgcat::mcset pl {Play Sound}          {Play Sound}
-# Reference: {Plugin Control}
-::msgcat::mcset pl {Plugin Control}      {Sterowanie wtyczką}
-# Reference: {Plugin Info}
-::msgcat::mcset pl {Plugin Info}         {Informacje o wtyczce}
-# Reference: {Port number}
-::msgcat::mcset pl {Port number}         {Numer portu}
-# Reference: {Postal Code}
-::msgcat::mcset pl {Postal Code}         {Kod pocztowy}
-# Reference: {Preferred Protocol}
-::msgcat::mcset pl {Preferred Protocol}  {Protokół preferowany}
+# Reference: {Play sound}
+# Translate, find in sources: components/BuddyPounce.tcl:243
+::msgcat::mcset pl {Play sound}          {Play sound}
+# Reference: {Postal code}
+# Translate
+::msgcat::mcset pl {Postal code}         {Postal code}
 # Reference: {Presence Error}
 ::msgcat::mcset pl {Presence Error}      {Błąd "obecności"}
 # Reference: {Presence Subscription}
-# Translate, find in sources: jabber/Jabber.tcl:748 jabber/Subscribe.tcl:80 jabber/Subscribe.tcl:109 jabber/Subscribe.tcl:299
+# Translate, find in sources: jabber/Jabber.tcl:753 jabber/Jabber.tcl:772 jabber/Jabber.tcl:777 jabber/Jabber.tcl:783 jabber/Jabber.tcl:832 jabber/Subscribe.tcl:80 jabber/Subscribe.tcl:109 jabber/Subscribe.tcl:299 jabber/Subscribe.tcl:319
 ::msgcat::mcset pl {Presence Subscription} {Presence Subscription}
-# Reference: {Privacy List}
-::msgcat::mcset pl {Privacy List}        {Lista prywatności}
 # Reference: {Profile Name}
 ::msgcat::mcset pl {Profile Name}        {Nazwa profilu}
-# Reference: {Proxy Port}
-::msgcat::mcset pl {Proxy Port}          {Port serwera proxy}
-# Reference: {Proxy Server}
-::msgcat::mcset pl {Proxy Server}        {Adres serwera proxy}
-# Reference: {Proxy Setup}
-::msgcat::mcset pl {Proxy Setup}         {Ustawienia proxy}
-# Reference: {Public Jabber Servers}
-::msgcat::mcset pl {Public Jabber Servers} {Publicznie dostępne serwery Jabbera}
-# Reference: {Put File Error}
-::msgcat::mcset pl {Put File Error}      {Błąd przy wysyłce pliku}
-# Reference: {Put Image/Movie}
-::msgcat::mcset pl {Put Image/Movie}     {Wysyłka grafiki/filmu}
-# Reference: {Register Account}
-# Translate, find in sources: jabber/Register.tcl:220 jabber/Register.tcl:235
-::msgcat::mcset pl {Register Account}    {Register Account}
-# Reference: {Register New Account}
-::msgcat::mcset pl {Register New Account} {Załóż nowe konto}
-# Reference: {Register Now}
-::msgcat::mcset pl {Register Now}        {Zarejestruj}
-# Reference: {Register Service}
-::msgcat::mcset pl {Register Service}    {Rejestracja serwisu}
-# Reference: {Reject receive}
-::msgcat::mcset pl {Reject receive}      {Odmów odbioru}
+# Reference: {Receive File}
+# Translate, find in sources: components/Growl.tcl:152 jabber/FTrans.tcl:559 jabber/OOB.tcl:378
+::msgcat::mcset pl {Receive File}        {Receive File}
+# Reference: {Recent Avatars}
+# Translate, find in sources: jabber/AvatarMB.tcl:429
+::msgcat::mcset pl {Recent Avatars}      {Recent Avatars}
+# Reference: {Reject file}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:478
+::msgcat::mcset pl {Reject file}         {Reject file}
+# Reference: {Relogin on activity}
+# Translate, find in sources: jabber/AutoAway.tcl:300
+::msgcat::mcset pl {Relogin on activity} {Relogin on activity}
+# Reference: {Relogin on wakeup}
+# Translate, find in sources: components/Carbon.tcl:179
+::msgcat::mcset pl {Relogin on wakeup}   {Relogin on wakeup}
 # Reference: {Remove Account}
-# Translate, find in sources: jabber/Register.tcl:74
+# Translate, find in sources: jabber/Register.tcl:77
 ::msgcat::mcset pl {Remove Account}      {Remove Account}
+# Reference: {Remove Avatar}
+# Translate, find in sources: jabber/VCard.tcl:403
+::msgcat::mcset pl {Remove Avatar}       {Remove Avatar}
 # Reference: {Remove Contact}
 # Translate, find in sources: jabber/Roster.tcl:499
 ::msgcat::mcset pl {Remove Contact}      {Remove Contact}
 # Reference: {Remove Item}
 ::msgcat::mcset pl {Remove Item}         {Usuń element}
-# Reference: {Remove Photo}
-::msgcat::mcset pl {Remove Photo}        {Usuń grafikę}
-# Reference: {Request To User}
-::msgcat::mcset pl {Request To User}     {Prośba do użytownika}
-# Reference: {Retype Password}
-::msgcat::mcset pl {Retype Password}     {Powtórz hasło}
-# Reference: {Revert Panel}
-::msgcat::mcset pl {Revert Panel}        {Przywróć ustawienia}
-# Reference: {Room name}
-::msgcat::mcset pl {Room name}           {Nazwa pokoju}
-# Reference: {Room name (optional)}
-::msgcat::mcset pl {Room name (optional)} {Nazwa pokoju (niekonieczna)}
-# Reference: {Roster & Services}
-::msgcat::mcset pl {Roster & Services}   {Kontakty/serwisy}
+# Reference: {Requires a restart of %s}
+# Translate, find in sources: jabber/JPrefs.tcl:203 jabber/SetupAss.tcl:126 lib/PrefGeneral.tcl:104 lib/PrefGeneral.tcl:116
+::msgcat::mcset pl {Requires a restart of} {Requires a restart of %s}
+# Reference: {Retype password}
+# Translate, find in sources: jabber/Jabber.tcl:1858 jabber/Register.tcl:693 jabber/SetupAss.tcl:168
+::msgcat::mcset pl {Retype password}     {Retype password}
 # Reference: {Save As}
 ::msgcat::mcset pl {Save As}             {Zapisz jako}
 # Reference: {Save As GIF}
 ::msgcat::mcset pl {Save As GIF}         {Zapisz w formacie GIF}
-# Reference: {Save Canvas}
-::msgcat::mcset pl {Save Canvas}         {Zapisz tło ("płótno")}
+# Reference: {Save Canvas Item}
+# Translate, find in sources: whiteboard/CanvasFile.tcl:737
+::msgcat::mcset pl {Save Canvas Item}    {Save Canvas Item}
 # Reference: {Save File}
 ::msgcat::mcset pl {Save File}           {Zapisz plik}
 # Reference: {Save Message}
 ::msgcat::mcset pl {Save Message}        {Zapisz wiadomość}
 # Reference: {Save password}
 ::msgcat::mcset pl {Save password}       {Save password}
+# Reference: {Save to disk}
+# Translate, find in sources: whiteboard/FilePrefs.tcl:480
+::msgcat::mcset pl {Save to disk}        {Save to disk}
 # Reference: {Scramble password}
 ::msgcat::mcset pl {Scramble password}   {Hasło zakodowane}
-# Reference: {Search Service}
-::msgcat::mcset pl {Search Service}      {Zbadaj serwis}
-# Reference: {Search Specifications}
-::msgcat::mcset pl {Search Specifications} {Kryteria przeszukiwania}
 # Reference: {Search results}
 ::msgcat::mcset pl {Search results}      {Rezultaty szukania}
+# Reference: {Select Avatar}
+# Translate, find in sources: jabber/AvatarMB.tcl:646 jabber/VCard.tcl:401 jabber/VCard.tcl:592
+::msgcat::mcset pl {Select Avatar}       {Select Avatar}
+# Reference: {Select File}
+# Translate, find in sources: jabber/FTrans.tcl:203 jabber/FTrans.tcl:285 jabber/OOB.tcl:130 jabber/OOB.tcl:248 jabber/OOB.tcl:271
+::msgcat::mcset pl {Select File}         {Select File}
 # Reference: {Select Font}
 ::msgcat::mcset pl {Select Font}         {Wybierz krój czcionki}
-# Reference: {Select Photo}
-::msgcat::mcset pl {Select Photo}        {Wybierz grafikę}
-# Reference: {Select a new nickname}
-::msgcat::mcset pl {Select a new nickname} {Podaj nowy pseudonim}
+# Reference: {Select Server}
+# Translate, find in sources: jabber/SetupAss.tcl:130
+::msgcat::mcset pl {Select Server}       {Select Server}
 # Reference: {Send File}
 ::msgcat::mcset pl {Send File}           {Wyślij plik}
 # Reference: {Send Live}
 ::msgcat::mcset pl {Send Live}           {Wyślij bezpośrednio}
-# Reference: {Server Info}
-::msgcat::mcset pl {Server Info}         {Serwer Info}
-# Reference: {Service server}
-::msgcat::mcset pl {Service server}      {Service-serwer}
-# Reference: {Set Directed Presence}
-::msgcat::mcset pl {Set Directed Presence} {Ustaw "obecność skierowaną"}
-# Reference: {Set New Nickname}
-::msgcat::mcset pl {Set New Nickname}    {Ustaw nowy pseudonim}
-# Reference: {Set New Topic}
-::msgcat::mcset pl {Set New Topic}       {Ustaw nowy temat}
 # Reference: {Set Status}
 ::msgcat::mcset pl {Set Status}          {Ustaw status}
-# Reference: {Set windows opacity}
-::msgcat::mcset pl {Set windows opacity} {Ustaw przezroczystość okienka}
-# Reference: {Settings Panels}
-::msgcat::mcset pl {Settings Panels}     {Panele ustawień}
 # Reference: {Setup Assistant}
 ::msgcat::mcset pl {Setup Assistant}     {Asystent ustawień}
-# Reference: {Show Image}
-::msgcat::mcset pl {Show Image}          {Show Image}
-# Reference: {Show Popup}
-# Translate, find in sources: components/BuddyPounce.tcl:239
-::msgcat::mcset pl {Show Popup}          {Show Popup}
+# Reference: {Show Icon}
+# Translate, find in sources: contrib/ttoolbar.tcl:452
+::msgcat::mcset pl {Show Icon}           {Show Icon}
+# Reference: {Show navigation buttons}
+# Translate, find in sources: components/SlideShow.tcl:206
+::msgcat::mcset pl {Show navigation buttons} {Show navigation buttons}
+# Reference: {Show popup}
+# Translate, find in sources: components/BuddyPounce.tcl:240
+::msgcat::mcset pl {Show popup}          {Show popup}
 # Reference: {Show offline users}
-# Translate, find in sources: jabber/Roster.tcl:1422
+# Translate, find in sources: jabber/Roster.tcl:1451
 ::msgcat::mcset pl {Show offline users}  {Show offline users}
 # Reference: {Show Text}
 ::msgcat::mcset pl {Show Text}           {Show Text}
-# Reference: {Show Text and Image}
-::msgcat::mcset pl {Show Text and Image} {Show Text and Image}
+# Reference: {Show Text and Icon}
+# Translate, find in sources: contrib/ttoolbar.tcl:444
+::msgcat::mcset pl {Show Text and Icon}  {Show Text and Icon}
 # Reference: {Show transports}
-# Translate, find in sources: jabber/Roster.tcl:1424
+# Translate, find in sources: jabber/Roster.tcl:1453
 ::msgcat::mcset pl {Show transports}     {Show transports}
-# Reference: {Slide Show}
-::msgcat::mcset pl {Slide Show}          {Prezentacja}
-# Reference: {Slide Show Folder}
-::msgcat::mcset pl {Slide Show Folder}   {Katalog prezentacji}
 # Reference: {Smooth freehand strokes}
 ::msgcat::mcset pl {Smooth freehand strokes} {Rozmazane pociągnięcia}
-# Reference: {Software Update}
-::msgcat::mcset pl {Software Update}     {Aktualizacja oprogramowania}
-# Reference: {Sound Set}
-::msgcat::mcset pl {Sound Set}           {Zestaw dźwięków}
-# Reference: {Sounds & Speech}
-::msgcat::mcset pl {Sounds & Speech}     {Dźwięk i mowa}
-# Reference: {Start Chat}
-::msgcat::mcset pl {Start Chat}          {Rozpocznij rozmowę}
+# Reference: {Sound set}
+# Translate, find in sources: components/Sounds.tcl:490
+::msgcat::mcset pl {Sound set}           {Sound set}
+# Reference: {Start chat}
+# Translate, find in sources: components/BuddyPounce.tcl:252
+::msgcat::mcset pl {Start chat}          {Start chat}
 # Reference: {Status message}
 ::msgcat::mcset pl {Status message}      {Opis statusu}
-# Reference: {Status when logging out}
-::msgcat::mcset pl {Status when logging out} {Opis statusu przy wylogowaniu}
 # Reference: {Subscription Failed}
 ::msgcat::mcset pl {Subscription Failed} {Nieudana autoryzacja}
 # Reference: {Subscription Pending}
 ::msgcat::mcset pl {Subscription Pending} {Oczekiwanie na zgodę}
-# Reference: {Synthetic speech}
-::msgcat::mcset pl {Synthetic speech}    {Syntetyczna mowa}
-# Reference: {System fonts}
-::msgcat::mcset pl {System fonts}        {Czcionki systemowe}
+# Reference: {Synchronise cache}
+# Translate, find in sources: lib/FileCache.tcl:647
+::msgcat::mcset pl {Synchronise cache}   {Synchronise cache}
 # Reference: {Take Snapshot}
 ::msgcat::mcset pl {Take Snapshot}       {"Zrzut" ekranu}
 # Reference: {Tel (fax)}
 ::msgcat::mcset pl {Tel (fax)}           {Fax}
 # Reference: {Tel (voice)}
 ::msgcat::mcset pl {Tel (voice)}         {Tel.}
-# Reference: {This IP number}
-::msgcat::mcset pl {This IP number}      {Ten adres IP}
+# Reference: {Text-to-Speech}
+# Translate, find in sources: components/Speech.tcl:251 components/Speech.tcl:312
+::msgcat::mcset pl Text-to-Speech        {Text-to-Speech}
 # Reference: {Thread started}
 ::msgcat::mcset pl {Thread started}      {Wątek zapoczątkowany}
-# Reference: {To Jabber ID}
-::msgcat::mcset pl {To Jabber ID}        {Do Jabber ID}
-# Reference: {To Send or Not}
-::msgcat::mcset pl {To Send or Not}      {Wysyłać - czy nie?}
-# Reference: {To/from JID}
-::msgcat::mcset pl {To/from JID}         {Od/do JID-a}
-# Reference: {Type of File}
-::msgcat::mcset pl {Type of File}        {Rodzaj pliku}
-# Reference: {Unknown: Prompt user}
-::msgcat::mcset pl {Unknown: Prompt user} {Nieznany: spytaj użytkownika}
-# Reference: {Url of homepage}
-::msgcat::mcset pl {Url of homepage}     {URL serwisu WWW}
 # Reference: {Use HTTP transport}
-# Translate, find in sources: jabber/Profiles.tcl:1854
+# Translate, find in sources: jabber/Profiles.tcl:1859
 ::msgcat::mcset pl {Use HTTP transport}  {Use HTTP transport}
+# Reference: {Use SASL authentication}
+# Translate, find in sources: jabber/Profiles.tcl:1797
+::msgcat::mcset pl {Use SASL authentication} {Use SASL authentication}
 # Reference: {Use SSL for security}
 ::msgcat::mcset pl {Use SSL for security} {Dla bezpieczeństwa korzystać z SSL}
-# Reference: {Use TLS and SASL authentication}
-::msgcat::mcset pl {Use TLS and SASL authentication} {Użyj TLS oraz uwierzytelnienia poprzez SASL}
+# Reference: {Use TLS and SASL}
+# Translate, find in sources: jabber/Profiles.tcl:1800
+::msgcat::mcset pl {Use TLS and SASL}    {Use TLS and SASL}
 # Reference: {Use TLS on separate port (old)}
 ::msgcat::mcset pl {Use TLS on separate port (old)} {Użyj TLS na osobnym porcie (przestarzałe)}
 # Reference: {Use proxy}
 ::msgcat::mcset pl {Use proxy}           {Korzystaj z serwera proxy}
 # Reference: {Use secure connection}
-# Translate, find in sources: jabber/Profiles.tcl:1789
+# Translate, find in sources: jabber/Profiles.tcl:1794
 ::msgcat::mcset pl {Use secure connection} {Use secure connection}
-# Reference: {Use stream compression}
-# Translate, find in sources: jabber/Profiles.tcl:1801
-::msgcat::mcset pl {Use stream compression} {Use stream compression}
-# Reference: {User Info}
-::msgcat::mcset pl {User Info}           {Dane użytkownika}
-# Reference: {User Profiles}
-::msgcat::mcset pl {User Profiles}       {Profile użytkownika}
-# Reference: {User is}
-::msgcat::mcset pl {User is}             {Użytkownik jest}
-# Reference: {User is offline}
-::msgcat::mcset pl {User is offline}     {Użytkownik jest wylogowany}
-# Reference: {User is online}
-::msgcat::mcset pl {User is online}      {Użytkownik jest zalogowany}
-# Reference: {User's status changed}
-::msgcat::mcset pl {User's status changed} {Status użytkownika zmieniony}
+# Reference: {Use compression}
+# Translate, find in sources: jabber/Profiles.tcl:1806
+::msgcat::mcset pl {Use compression}     {Use compression}
+# Reference: {User Activity}
+# Translate, find in sources: components/UserActivity.tcl:199
+::msgcat::mcset pl {User Activity}       {User Activity}
+# Reference: {Contact is offline}
+# Translate
+::msgcat::mcset pl {Contact is offline}  {Contact is offline}
+# Reference: {Contact is online}
+# Translate
+::msgcat::mcset pl {Contact is online}   {Contact is online}
+# Reference: {Contact presence change}
+# Translate
+::msgcat::mcset pl {Contact presence change} {Contact presence change}
 # Reference: {Username & Password}
 ::msgcat::mcset pl {Username & Password} {Login i hasło}
-# Reference: {Users Avatar}
-::msgcat::mcset pl {Users Avatar}        {Awatar użytkownika}
-# Reference: {Version Info}
-::msgcat::mcset pl {Version Info}        {Dane wersji}
-# Reference: {Whiteboard fonts}
-::msgcat::mcset pl {Whiteboard fonts}    {Czcionki Tablicy}
+# Reference: {View Business Card}
+# Translate, find in sources: jabber/JUser.tcl:629 jabber/Subscribe.tcl:154
+::msgcat::mcset pl {View Business Card}  {View Business Card}
+
+# Reference: {Windows opacity}
+# Translate, find in sources: jabber/JPrefs.tcl:231
+::msgcat::mcset pl {Windows opacity}     {Windows opacity}
 # Reference: {Writing file}
 ::msgcat::mcset pl {Writing file}        {Zapis pliku}
-# Reference: {vCard Info}
-::msgcat::mcset pl {vCard Info}          {Informacje e-wizytówki}
 
-# Rooms.
+# Chatrooms.
 # Reference: {Kick Participant}
 ::msgcat::mcset pl {Kick Participant}    {Usuń uczestnika}
 # Reference: {Ban Participant}
 ::msgcat::mcset pl {Ban Participant}     {Usuń i zabroń wstępu}
-# Reference: {Configure Room}
-::msgcat::mcset pl {Configure Room}      {Konfiguracja pokoju}
-# Reference: {Destroy Room}
-::msgcat::mcset pl {Destroy Room}        {Usuń pokój}
+# Reference: {Destroy Chatroom}
+# Translate, find in sources: jabber/MUC.tcl:492 jabber/MUC.tcl:1544
+::msgcat::mcset pl {Destroy Chatroom}    {Destroy Chatroom}
 # Reference: {Edit Lists}
 ::msgcat::mcset pl {Edit Lists}          {Sporządź listy}
-# Reference: {Edit the privilege to speak in the room, the voice.}
-::msgcat::mcset pl {Edit the privilege to speak in the room, the voice.} {Dodaj uprawnienie, by móc rozmawiać w niniejszym pokoju (głos).}
+# Reference: {Edit the voice list}
+# Translate
+::msgcat::mcset pl {Edit the voice list} {Edit the voice list}
 # Reference: {Edit the ban list}
 ::msgcat::mcset pl {Edit the ban list}   {Sporządź listę wypędków}
 # Reference: {Edit the member list}
@@ -1623,24 +1412,14 @@
 ::msgcat::mcset pl {Edit the owner list} {Sporządź listę właścicieli}
 
 # Time intervals.
-# Reference: {Ten Seconds}
-# Translate, find in sources: jabber/Chat.tcl:3393
-::msgcat::mcset pl {Ten Seconds}         {Ten Seconds}
-# Reference: {One Minute}
-# Translate, find in sources: jabber/Chat.tcl:3394
-::msgcat::mcset pl {One Minute}          {One Minute}
-# Reference: {Ten Minutes}
-# Translate, find in sources: jabber/Chat.tcl:3395
-::msgcat::mcset pl {Ten Minutes}         {Ten Minutes}
-# Reference: {One Hour}
-# Translate, find in sources: jabber/Chat.tcl:3396
-::msgcat::mcset pl {One Hour}            {One Hour}
-# Reference: {One Day}
-# Translate
-::msgcat::mcset pl {One Day}             {One Day}
-# Reference: {One Week}
-# Translate
-::msgcat::mcset pl {One Week}            {One Week}
+# Reference: {Ten seconds}
+::msgcat::mcset pl {Ten seconds}         {Dziesięć sekund}
+# Reference: {One minute}
+::msgcat::mcset pl {One minute}          {Minuta}
+# Reference: {Ten minutes}
+::msgcat::mcset pl {Ten minutes}         {Dziesięć minut}
+# Reference: {One hour}
+::msgcat::mcset pl {One hour}            {Godzina}
 
 # Language names.
 # Reference: {Danish}
@@ -1678,15 +1457,15 @@
 ::msgcat::mcset pl nativeFrench          {Français}
 # Reference: {Deutsch}
 ::msgcat::mcset pl nativeGerman          {Deutsch}
-# Reference: {nativeItalian}
+# Reference: {Italiano}
 # Translate
-::msgcat::mcset pl nativeItalian         {nativeItalian}
-# Reference: {nativeKorean}
+::msgcat::mcset pl nativeItalian         {Italiano}
+# Reference: {한국�}
 # Translate
-::msgcat::mcset pl nativeKorean          {nativeKorean}
-# Reference: {nativePolish}
+::msgcat::mcset pl nativeKorean          {한국�}
+# Reference: {Polski}
 ::msgcat::mcset pl nativePolish          {Polski}
-# Reference: {nativeRussian}
+# Reference: {русский}
 ::msgcat::mcset pl nativeRussian         {Russkij}
 # Reference: {Castellano}
 ::msgcat::mcset pl nativeSpanish         {Castellano}
@@ -1695,356 +1474,385 @@
 
 
 # Splash screen:
-# Reference: {Sourcing Tcl code...}
+# Reference: {Sourcing Tcl code}
 ::msgcat::mcset pl splashsource          {Wczytywanie kodu Tcl...}
-# Reference: {Loading Tcl packages...}
+# Reference: {Loading Tcl packages}
 ::msgcat::mcset pl splashload            {Wczytywanie pakietów Tcl...}
-# Reference: {Loading sha1 package...}
-::msgcat::mcset pl splashloadsha1        {Wczytywanie pakietu sha1...}
-# Reference: {Sourcing Jabber code...}
+# Reference: {Sourcing Jabber code}
 ::msgcat::mcset pl splashsourcejabb      {Wczytywanie kodu Jabbera...}
-# Reference: {Searching for our hostname...}
+# Reference: {Searching for our hostname}
 ::msgcat::mcset pl splashhost            {Sprawdzam nazwę komputera...}
-# Reference: {Initialize...}
+# Reference: {Initialize}
 ::msgcat::mcset pl splashinit            {Inicjacja...}
-# Reference: {Set and read preferences...}
+# Reference: {Set and read preferences}
 ::msgcat::mcset pl splashprefs           {Wczytuję i ustawiam preferencje...}
-# Reference: {Build menus...}
-::msgcat::mcset pl splashbuildmenu       {Buduję system menu...}
-# Reference: {Build user interface...}
-::msgcat::mcset pl splashbuild           {Tworzę interfejs użytkownika...}
 # Reference: {Looking for}
 ::msgcat::mcset pl splashlook            {Muszę jeszcze odnaleźć}
+
+# Subscriptions:
+# Reference: {Both you and your contact can see eachother's presence.}
+# Translate
+::msgcat::mcset pl subscriptionBoth      {Both you and your contact can see eachother's presence.}
+# Reference: {You cannot see your contact's presence, but your contact can see yours.}
+# Translate
+::msgcat::mcset pl subscriptionFrom      {You cannot see your contact's presence, but your contact can see yours.}
+# Reference: {Both you and your contact cannot see eachother's presence.}
+# Translate
+::msgcat::mcset pl subscriptionNone      {Both you and your contact cannot see eachother's presence.}
+# Reference: {You can see your contact's presence, but your contact can't see yours.}
+# Translate, find in sources: jabber/Roster.tcl:1466
+::msgcat::mcset pl subscriptionTo        {You can see your contact's presence, but your contact can't see yours.}
 
 
 # Messages for tk_messageBox:
 # Reference: {We are about to receive the file %s. Do you want to receive it?}
 ::msgcat::mcset pl messaskreceive        {Propozycja odebrania pliku %s. Czy chcesz go odebrać?}
-# Reference: {You already have the latest version available (%s)}
+# Reference: {You already have the latest version available (%s).}
 ::msgcat::mcset pl messaupdatelatest     {Korzystasz z najnowszej wersji programu (%s)}
-# Reference: {The JID "%s" is not well formed. Do you want to add it anyway?}
-::msgcat::mcset pl messblockbadjid       {Błędnie sformułowany JID "%s". Czy na pewno chcesz go tak wpisać?}
-# Reference: {Opening a canvas file erases everything in present canvas!}
-::msgcat::mcset pl messcanerasewarn      {Wczytanie pliku tła ("płótna") spowoduje skasowanie wszystkiego w bieżącym tle!}
+# Reference: {Opening a whiteboard file clears the current whiteboard!}
+# Translate, find in sources: whiteboard/CanvasFile.tcl:549
+::msgcat::mcset pl messcanerasewarn2     {Opening a whiteboard file clears the current whiteboard!}
 # Reference: {Do you actually want to quit?}
 ::msgcat::mcset pl messdoquit?           {Rzeczywiście chcesz zakończyć?}
-# Reference: {Something went wrong when opening connection. Got an eof.}
-::msgcat::mcset pl messeofconnect        {Coś nie wyszło w trakcie nawiązywania połączenia; odebrano znak EOF ("koniec pliku").}
-# Reference: {Error opening file %s.}
-::msgcat::mcset pl messerrpreffile       {Błąd przy próbie założenia pliku %s.}
-# Reference: {You are about to remove most of your customization. Do you actually want to proceed?}
-::msgcat::mcset pl messfactorydefaults   {Wiele dokonanych ustawień zostanie usuniętych. Czy na pewno tego oczekujesz?}
-# Reference: {Something went wrong when opening connection to %s}
-::msgcat::mcset pl messfailconnect       {Coś nie wyszło w trakcie nawiązywania połączenia z %s}
-# Reference: {Failed starting the internal http server: %s}
-::msgcat::mcset pl messfailedhttp        {Błąd przy próbie uruchomienia wewn. serwera HTTP: %s}
-# Reference: {Failed finding importer for the MIME type %s}
-::msgcat::mcset pl messfailmimeimp       {Nie odnaleziono programu importu typu MIME %s}
-# Reference: {Failed finding MIME type for the file %s}
-::msgcat::mcset pl messfailnomime        {Nie ustalono stosownego typu MIME dla pliku %s}
-# Reference: {Cannot open %s for reading: %s}
-::msgcat::mcset pl messfailopread        {Nieudana próba otwarcia %s w celu wczytania: %s}
-# Reference: {Cannot open %s for writing: %s}
-::msgcat::mcset pl messfailopwrite       {Nieudana próba otwarcia %s w celu zapisu: %s}
-# Reference: {We got an error when trying to send to %s}
-::msgcat::mcset pl messfailsend          {Błąd przy próbie wysyłki do %s}
-# Reference: {Couldn't start server socket. Perhaps you are not connected.}
-::msgcat::mcset pl messfailserver        {Nie można uruchomić gniazda serwera. Może brak połączenia?}
+# Reference: {Cannot open file %s.}
+# Translate, find in sources: lib/PrefUtils.tcl:218
+::msgcat::mcset pl messerrpreffile2      {Cannot open file %s.}
+# Reference: {Do you really want to reset your customization to factory defaults?}
+# Translate, find in sources: lib/Preferences.tcl:385
+::msgcat::mcset pl messfactorydefaults2  {Do you really want to reset your customization to factory defaults?}
+# Reference: {Cannot start the internal HTTP server: %s}
+# Translate, find in sources: lib/Httpd.tcl:79
+::msgcat::mcset pl messfailedhttp2       {Cannot start the internal HTTP server: %s}
+# Reference: {Cannot find importer for the MIME type %s}
+# Translate, find in sources: jabber/JWB.tcl:1875 whiteboard/Import.tcl:79 whiteboard/Whiteboard.tcl:3236
+::msgcat::mcset pl messfailmimeimp2      {Cannot find importer for the MIME type %s}
+# Reference: {Cannot read %s: %s}
+# Translate, find in sources: whiteboard/CanvasFile.tcl:52 whiteboard/CanvasFile.tcl:71 whiteboard/CanvasFile.tcl:500 whiteboard/CanvasFile.tcl:822
+::msgcat::mcset pl messfailopread2       {Cannot read %s: %s}
+# Reference: {Cannot write to %s: %s}
+# Translate, find in sources: whiteboard/CanvasCmd.tcl:437 whiteboard/CanvasFile.tcl:716 whiteboard/CanvasFile.tcl:747
+::msgcat::mcset pl messfailopwrite2      {Cannot write to %s: %s}
+# Reference: {Cannot start server socket. Perhaps you are not connected.}
+# Translate, find in sources: lib/TheServer.tcl:64
+::msgcat::mcset pl messfailserver2       {Cannot start server socket. Perhaps you are not connected.}
 # Reference: {One or more fields are missing. Try again or cancel.}
 ::msgcat::mcset pl messfieldsmissing     {Niewypełnione niektóre pola - ponów próbę, lub zaniechaj.}
 # Reference: {You need to fill in at least the server name and user name.}
 ::msgcat::mcset pl messfillserveruser    {Należy podać chociaż nazwę (adres) serwera oraz nazwę (login) użytkownika.}
-# Reference: {Due to the 'info script' bug on Mac you need to explicitly pick the 'Whiteboard-%s' folder in the following dialog.}
-::msgcat::mcset pl messinfoscript        {Błąd 'info script'-u (Mac) powoduje, że należy dalej konkretnie określić katalog Tablicy 'Whiteboard-%s'}
 # Reference: {There are no plugins or helper applications identified on this system.}
 ::msgcat::mcset pl messnoplugs           {Nie znaleziono w systemie żadnych "wtyczek" czy podobnych narzędzi pomocniczych.}
-# Reference: {You are about to open a helpfile in the canvas thereby erasing the present stuff. Do you want this to happen?}
-::msgcat::mcset pl messopenhelpfile      {Zamierzasz wczytać zawartość pliku pomocy do tła, kasując tym samym jego obecną zawartość. Czy potwierdzasz zamiar?}
-# Reference: {The two passwords do not match. Please try again.}
-::msgcat::mcset pl messpasswddifferent   {Te dwa hasła nie są jednakowe - ponów próbę.}
+# Reference: {Passwords do not match. Please try again.}
+# Translate, find in sources: jabber/Jabber.tcl:1924 jabber/Register.tcl:782 jabber/SetupAss.tcl:283
+::msgcat::mcset pl messpasswddifferent2  {Passwords do not match. Please try again.}
 # Reference: {The preferences have been changed. Do you want to cancel anyway?}
 ::msgcat::mcset pl messprefschanged      {Dokonano zmian w preferencjach. Czy na pewno ich NIE zapisywać?}
-# Reference: {For one or many of these settings to take effect you need to restart the application}
-::msgcat::mcset pl messprefsrestart      {Aby zmiana (jednego, lub więcej) tych ustawień odniosła skutek, należy zrestartować program}
-# Reference: {Is not aware of a tcl extension that helps us here :-(}
-::msgcat::mcset pl messprintnoextension  {Brakuje rozszerzenia Tcl, które mogłoby tu być pomocne :-(}
-# Reference: {This profile is already in use. Do you want to replace it?}
-::msgcat::mcset pl messprofinuse         {Korzysta się z tego profilu. Na pewno chcesz go wymienić?}
-# Reference: {You have changed the network setup. This requires that you relaunch the application to take effect. Do you actually want to continue?}
-::msgcat::mcset pl messprotocolch        {Ustawienia sieci zmienione - ich uwzględnienie wymaga ponownego uruchomienia programu. Wykonać to?}
-# Reference: {Do you actually want to remove this profile? No action is made to remove your account during this operation.}
-::msgcat::mcset pl messremoveprofile     {Czy na pewno chcesz usunąć ten profil? Twoje konto nie zostanie usunięte z serwera.}
+# Reference: {At least one setting requires a restart of %s.}
+# Translate, find in sources: lib/Preferences.tcl:447
+::msgcat::mcset pl messprefsrestart2     {At least one setting requires a restart of %s.}
+# Reference: {Cannot find necessary Tcl extension.}
+# Translate, find in sources: lib/MacintoshUtils.tcl:56 lib/MacintoshUtils.tcl:78 lib/MacintoshUtils.tcl:100 lib/UserActions.tcl:45 lib/UserActions.tcl:73 lib/UserActions.tcl:94
+::msgcat::mcset pl messprintnoextension2 {Cannot find necessary Tcl extension.}
 # Reference: {The standard fonts, Times, Helvetica, and Courier, may not be removed}
 ::msgcat::mcset pl messrmstandardfonts   {Standardowe kroje czcionek, Times, Helvetica, i Courier, nie mogą zostać usunięte.}
 # Reference: {Are you sure you want to close the setup assistant? You may start it any time later from the menu.}
 ::msgcat::mcset pl messsuassclose        {Czy chcesz wyłączyć Asystenta ustawień? Zawsze możesz go ponownie wywołać z menu.}
-# Reference: {Be sure to fill in all entries before you continue}
+# Reference: {Be sure to fill in all entries before you continue.}
 ::msgcat::mcset pl messsuassfillin       {Wypełnij wszystkie pola, zanim przejdziesz do następnego etapu}
 # Reference: {Timeout when waiting for connection to open.}
 ::msgcat::mcset pl messtimeout           {Upłynął czas próby nawiązania połączenia.}
 
 # Messages for tk_messageBox:
-# Reference: {Adding a user from a non Jabber IM system requires that you already have an account on this system, and that you have used this account to register with the corresponding server transport component %s. Do you wish to do that now?}
-::msgcat::mcset pl jamessaddforeign      {Dodając użytkownika innego niż Jabber systemu IM, musisz mieć w tymże systemie własne konto - i tego właśnie konta używać korzystając z odpowiedniego "transportu" osiągalnego na serwerze %s. Czy chcesz to załatwić teraz?}
-# Reference: {You need to fill in at least one valid address}
+# Reference: {To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?}
+# Translate, find in sources: jabber/JUser.tcl:271 jabber/JUser.tcl:393
+::msgcat::mcset pl jamessaddforeign2     {To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?}
+# Reference: {You need to fill in at least one valid address.}
 ::msgcat::mcset pl jamessaddrmiss        {Wpisz przynajmniej jeden prawidłowy adres}
-# Reference: {User %s allowed you to subscribe to its presence.}
-::msgcat::mcset pl jamessallowsub        {Użytkownik %s zezwala Ci na obserwację jego obecności (udzielił autoryzacji).}
 # Reference: {%s allows you to see his/her presence.}
-# Translate, find in sources: jabber/Jabber.tcl:749
+# Translate, find in sources: jabber/Jabber.tcl:754
 ::msgcat::mcset pl jamessallowsub2       {%s allows you to see his/her presence.}
-# Reference: {The jid "%s" is already in your roster. Do you want to continue anyway?}
-::msgcat::mcset pl jamessalreadyinrost   {Przecież masz już ma liście JID "%s". Czy kontynuować?}
+# Reference: {%s is already in your list. Do you want to continue anyway?}
+# Translate, find in sources: jabber/JUser.tcl:250 jabber/Search.tcl:255
+::msgcat::mcset pl jamessalreadyinrost2  {%s is already in your list. Do you want to continue anyway?}
 # Reference: {Do you want to register a new account?}
-# Translate, find in sources: jabber/Profiles.tcl:1536
+# Translate, find in sources: jabber/Profiles.tcl:1539
 ::msgcat::mcset pl jamessaskregister     {Do you want to register a new account?}
-# Reference: {You have just automatically accepted a subscription request from %s.}
-::msgcat::mcset pl jamessautoaccepted    {Prośba o autoryzację ze strony użytkownika %s automatycznie zaakceptowana.}
 # Reference: {%s can see your presence.}
-# Translate, find in sources: jabber/Jabber.tcl:709
+# Translate, find in sources: jabber/Jabber.tcl:714
 ::msgcat::mcset pl jamessautoaccepted2   {%s can see your presence.}
-# Reference: {Automatic away has been set at %s. Do you want to become available again?}
-::msgcat::mcset pl jamessautoawayset     {O %s automatycznie zmieniono status. Czy chcesz być znowu "dostępny(a)"?}
-# Reference: {You have just automatically rejected a subscription request from %s.}
-::msgcat::mcset pl jamessautoreject      {Prośba o autoryzację ze strony użytkownika %s automatycznie odrzucona.}
 # Reference: {%s cannot see your presence.}
-# Translate, find in sources: jabber/Jabber.tcl:713
+# Translate, find in sources: jabber/Jabber.tcl:718
 ::msgcat::mcset pl jamessautoreject2     {%s cannot see your presence.}
-# Reference: {You have just automatically subscribed to %s presence.}
-::msgcat::mcset pl jamessautosubs        {Automatycznie udzielono Ci zgody na obserwację obecności (autoryzacja) użytkownika %s.}
 # Reference: {You can see %s's presence.}
-# Translate, find in sources: jabber/Jabber.tcl:731
+# Translate, find in sources: jabber/Jabber.tcl:736
 ::msgcat::mcset pl jamessautosubs2       {You can see %s's presence.}
-# Reference: {We require that the avatar be square of size %s.}
+# Reference: {The avatar must be square of size %s.}
 # Translate, find in sources: jabber/Avatar.tcl:347
-::msgcat::mcset pl jamessavaerrsize      {We require that the avatar be square of size %s.}
-# Reference: {The jid "%s" is not well formed. Do you want to continue anyway?}
-::msgcat::mcset pl jamessbadjid          {Błędna forma adresu JID "%s". Kontynuować?}
-# Reference: {If you close this chat window you also loose the complete conversation. Do you actually like to close?}
-::msgcat::mcset pl jamesschatclose       {Zamykając okno rozmowy utracisz całą jej treść - na pewno chcesz je zamknąć?}
-# Reference: {This user is not online anymore and the message is therfore not sent.}
-::msgcat::mcset pl jamesschatoffline     {Ten użytkownik nie jest już obecny w sieci, przeto wiadomość nie została mu przekazana.}
-# Reference: {Failed enter/create room "%s". Error code %s with message: %s}
-::msgcat::mcset pl jamessconffailed      {Nieudane wejście/założenie pokoju "%s". Kod błędu %s - informacja: %s}
-# Reference: {Select a conference service and a room name. Then push Get to obtain the specification for entering the desired room since each room & server may have different requirements.}
-::msgcat::mcset pl jamessconfmsg         {Wybierz serwis konferencyjny i określony pokój. Potem kliknij "Pobierz" aby zapoznać się z warunkami wejścia do wybranego pokoju, gdyż każdy pokój i/lub serwer może stawiać odmienne wymagania.}
-# Reference: {We require the server to be filled with a valid name.}
-::msgcat::mcset pl jamessconfservempty   {Należy podać prawidłową nazwę (adres) serwera.}
+::msgcat::mcset pl jamessavaerrsize      {The avatar must be square of size %s.}
+# Reference: {%s is invalid. Do you want to continue anyway?}
+# Translate, find in sources: jabber/Chat.tcl:344 jabber/Chat.tcl:2575 jabber/Disco.tcl:1727 jabber/MUC.tcl:1194
+::msgcat::mcset pl jamessbadjid2         {%s is invalid. Do you want to continue anyway?}
+# Reference: {Do you want to close this chat window and loose the complete conversation?}
+# Translate, find in sources: jabber/Chat.tcl:2999
+::msgcat::mcset pl jamesschatclose2      {Do you want to close this chat window and loose the complete conversation?}
+# Reference: {This contact is not online anymore and the message is therfore not sent.}
+# Translate, find in sources: jabber/JWB.tcl:802
+::msgcat::mcset pl jamesschatoffline2    {This contact is not online anymore and the message is therfore not sent.}
+# Reference: {Cannot enter/create chatroom %s.}
+# Translate, find in sources: jabber/Create.tcl:547
+::msgcat::mcset pl jamessconffailed2     {Cannot enter/create chatroom %s.}
 # Reference: {The connection was unexpectedly broken.}
 ::msgcat::mcset pl jamessconnbroken      {Połączenie niespodziewanie przerwane.}
-# Reference: {Iconset "%s" already exists.}
+# Reference: {Iconset %s already exists.}
 # Translate, find in sources: jabber/Emoticons.tcl:664
-::msgcat::mcset pl jamessemoticonexists  {Iconset "%s" already exists.}
-# Reference: {Failed loading iconset "%s": %s}
-# Translate, find in sources: jabber/Emoticons.tcl:674 jabber/Emoticons.tcl:696
-::msgcat::mcset pl jamessemoticonfail    {Failed loading iconset "%s": %s}
-# Reference: {We require both the server and room name entries to be filled with valid names.}
-::msgcat::mcset pl jamessenterroomempty  {Pola nazw serwera i pokoju muszą zostać wypełnione prawidłowymi wartościami.}
-# Reference: {Error when entering room "%s": %s Do you want to retry?}
-# Translate, find in sources: jabber/Enter.tcl:626
-::msgcat::mcset pl jamessenterroomretry  {Error when entering room "%s": %s Do you want to retry?}
-# Reference: {Failed connecting server "%s" to get update info: %s}
+::msgcat::mcset pl jamessemoticonexists  {Iconset %s already exists.}
+# Reference: {Cannot load iconset %s.}
+# Translate, find in sources: jabber/Emoticons.tcl:673 jabber/Emoticons.tcl:696
+::msgcat::mcset pl jamessemoticonfail2   {Cannot load iconset %s.}
+# Reference: {Cannot enter chatroom %s: %s Do you want to retry?}
+# Translate, find in sources: jabber/Enter.tcl:634
+::msgcat::mcset pl jamessenterroomretry2 {Cannot enter chatroom %s: %s Do you want to retry?}
+# Reference: {Cannot connect to server %s to download update details: %s}
 # Translate, find in sources: components/AutoUpdate.tcl:119
-::msgcat::mcset pl jamesserrautouphttp   {Failed connecting server "%s" to get update info: %s}
-# Reference: {We got an error when browsing "%s": %s}
-::msgcat::mcset pl jamesserrbrowse       {Błąd w trakcie przeszukiwania "%s": %s}
-# Reference: {Failed obtaining info entering room. Error code %s with message: %s}
-::msgcat::mcset pl jamesserrconfget      {Przy próbie wejścia do pokoju nie uzyskano żadnych informacji. Kod błędu %s - informacja: %s}
-# Reference: {Failed obtaining info creating room. Error code %s with message: %s}
-::msgcat::mcset pl jamesserrconfgetcre   {Przy próbie założenia pokoju nie uzyskano żadnych informacji. Kod błędu %s - informacja: %s}
-# Reference: {Received an error when getting the public data from %s. The error code is %s with error message: %s}
-::msgcat::mcset pl jamesserrgetpublic    {Błąd w trakcie pobierania ogólnodostępnych danych %s. Kod błędu: %s - informacja: %s}
-# Reference: {Failed open the inbox file %s when trying to save it.}
-::msgcat::mcset pl jamesserrinboxopen    {Nieudana próba zapisu zawartości skrzynki do pliku %s.}
-# Reference: {Got an error when trying to read the Jabber message box file "%s": %s}
-::msgcat::mcset pl jamesserrinboxread    {Błąd podczas próby wczytania pliku z zawartością skrzynki: "%s": %s}
-# Reference: {We received an error when quering %s for last activity. The error was: %s}
-::msgcat::mcset pl jamesserrlastactive   {Błąd w trakcie sprawdzania ostatniej aktywności %s. Problem: %s}
-# Reference: {Client or service %s didn't return a time info.}
-::msgcat::mcset pl jamesserrnotimeinfo   {Klient lub serwis %s nie przekazał informacji "czas".}
-# Reference: {We received a presence error. The error code is %s and message: %s}
-::msgcat::mcset pl jamesserrpres         {Odebrano błąd obecności (statusu). Kod błędu: %s, informacja: %s}
-# Reference: {Failed obtaining registration info. Error code %s with message: %s}
-::msgcat::mcset pl jamesserrregget       {Nieudana próba pobrania formularza rejestracyjnego. Kod błędu: %s - informacja: %s}
-# Reference: {Failed registering with service "%s". Error code %s with message: %s}
-::msgcat::mcset pl jamesserrregset       {Nieudana rejestracja w serwisie "%s". Kod błędu: %s - informacja: %s}
-# Reference: {Failed obtaining search specification. Error code %s with message: %s}
-::msgcat::mcset pl jamesserrsearch       {Nie dało się pobrać listy kryteriów szukania. Kod błędu %s - informacja: %s}
-# Reference: {We received an error when sending a message to "%s". The error code is %s, and the error message: %s}
-::msgcat::mcset pl jamesserrsend         {W trakcie wysyłania wiadomości do "%s" zdarzył się błąd. Kod błędu: %s, informacja: %s}
-# Reference: {We received an error when quering %s for its time. The error was: %s}
-::msgcat::mcset pl jamesserrtime         {Błąd przy próbie zapytania %s o czas. Problem: %s}
-# Reference: {We received an error when trying to unregister from "%s". Code %s, and message %s}
-::msgcat::mcset pl jamesserrunreg        {Nie udało się wyrejestrować z "%s". Kod błędu: %s - informacja: %s}
-# Reference: {We received an error when quering %s for its version. The error was: %s}
-::msgcat::mcset pl jamesserrvers         {Błąd przy próbie sprawdzenia wersji %s. Problem: %s}
-# Reference: {Failed to make a subscription to %s. The user denied the subscription.}
-::msgcat::mcset pl jamessfailedsubsc     {Brak autoryzacji ze strony %s - użytkownik nie wyraził zgody.}
-# Reference: {There was a failure when setting the nickname or group of user "%s". The error code is %s with the message: %s}
-::msgcat::mcset pl jamessfailsetnick     {Błąd w trakcie nadawania pseudonimu lub przypisywania do grupy użytkownika "%s". Kod błędu: %s - informacja: %s}
+::msgcat::mcset pl jamesserrautouphttp2  {Cannot connect to server %s to download update details: %s}
+# Reference: {Cannot download the configuration form of the chatroom.}
+# Translate, find in sources: jabber/Create.tcl:429 jabber/Create.tcl:469 jabber/Enter.tcl:642
+::msgcat::mcset pl jamesserrconfgetcre2  {Cannot download the configuration form of the chatroom.}
+# Reference: {Cannot open the inbox file %s when trying to save it.}
+# Translate, find in sources: jabber/MailBox.tcl:1528 jabber/MailBox.tcl:1606
+::msgcat::mcset pl jamesserrinboxopen2   {Cannot open the inbox file %s when trying to save it.}
+# Reference: {Cannot read the inbox file %s: %s}
+# Translate, find in sources: jabber/MailBox.tcl:1713 jabber/MailBox.tcl:1747
+::msgcat::mcset pl jamesserrinboxread2   {Cannot read the inbox file %s: %s}
+# Reference: {Cannot query %s's last activity.}
+# Translate, find in sources: jabber/Jabber.tcl:1434 jabber/UserInfo.tcl:228
+::msgcat::mcset pl jamesserrlastactive2  {Cannot query %s's last activity.}
+# Reference: {Cannot query %s's local time information.}
+# Translate, find in sources: jabber/Jabber.tcl:1445 jabber/Jabber.tcl:1458 jabber/Jabber.tcl:1460
+::msgcat::mcset pl jamesserrnotimeinfo2  {Cannot query %s's local time information.}
+# Reference: {Cannot obtain registration information.}
+# Translate, find in sources: jabber/Register.tcl:629 jabber/Register.tcl:1122
+::msgcat::mcset pl jamesserrregget2      {Cannot obtain registration information.}
+# Reference: {Cannot register with service %s.}
+# Translate, find in sources: jabber/Register.tcl:1183 jabber/Register.tcl:1366
+::msgcat::mcset pl jamesserrregset2      {Cannot register with service %s.}
+# Reference: {Cannot obtain search form.}
+# Translate, find in sources: jabber/Search.tcl:344
+::msgcat::mcset pl jamesserrsearch2      {Cannot obtain search form.}
+# Reference: {Cannot send message to %s.}
+# Translate, find in sources: jabber/Jabber.tcl:619
+::msgcat::mcset pl jamesserrsend2        {Cannot send message to %s.}
+# Reference: {Cannot query %s's local time.}
+# Translate, find in sources: jabber/Jabber.tcl:1514 jabber/UserInfo.tcl:258 jabber/UserInfo.tcl:286
+::msgcat::mcset pl jamesserrtime2        {Cannot query %s's local time.}
+# Reference: {Cannot unregister from %s.}
+# Translate, find in sources: jabber/Profiles.tcl:1610 jabber/Register.tcl:117
+::msgcat::mcset pl jamesserrunreg2       {Cannot unregister from %s.}
+# Reference: {Cannot query %s's version.}
+# Translate, find in sources: jabber/Jabber.tcl:1609 jabber/UserInfo.tcl:187
+::msgcat::mcset pl jamesserrvers2        {Cannot query %s's version.}
+# Reference: {Cannot subscribe to %s's presence. The contact does not allow you to see his/her presence.}
+# Translate, find in sources: jabber/Jabber.tcl:818
+::msgcat::mcset pl jamessfailedsubsc2    {Cannot subscribe to %s's presence. The contact does not allow you to see his/her presence.}
+# Reference: {Cannot set %s's nickname or group.}
+# Translate, find in sources: jabber/JUser.tcl:330
+::msgcat::mcset pl jamessfailsetnick2    {Cannot set %s's nickname or group.}
 # Reference: {Receieved a fatal error: %s The connection is closed.}
-# Translate, find in sources: jabber/Jabber.tcl:910 jabber/Jabber.tcl:912
+# Translate, find in sources: jabber/Jabber.tcl:919 jabber/Jabber.tcl:921 jabber/Jabber.tcl:931 jabber/Jabber.tcl:933
 ::msgcat::mcset pl jamessfatalerr        {Receieved a fatal error: %s The connection is closed.}
-# Reference: {Failed to get file %s from %s: %s}
-::msgcat::mcset pl jamessfiletrpterr     {Nie udało się pobrać pliku %s od: %s: %s}
-# Reference: {We require that all fields are nonempty before entering room.}
-::msgcat::mcset pl jamessgchatfields     {Przed wejściem do pokoju należy wypełnić wszystkie pola}
-# Reference: {You have been invited to the groupchat room %s by %s. Do you want to join?}
-::msgcat::mcset pl jamessgcinvite        {Masz zaproszenie do wzięcia udziału w konferencji %s (od %s). Przyłączysz się?}
-# Reference: {You must provide a room name.}
-::msgcat::mcset pl jamessgcnoroomname    {Należy podać nazwę pokoju.}
+# Reference: {Cannot download file %s from %s.}
+# Translate, find in sources: jabber/FTrans.tcl:644
+::msgcat::mcset pl jamessfiletrpterr2    {Cannot download file %s from %s.}
+# Reference: {The selected file does not exist. Select a new one.}
+# Translate, find in sources: jabber/OOB.tcl:272
+::msgcat::mcset pl jamessfilenotexist    {The selected file does not exist. Select a new one.}
+# Reference: {The MD5 checksums did not match. The file may be corrupt.}
+# Translate, find in sources: jabber/FTrans.tcl:658
+::msgcat::mcset pl jamessfilemd5         {The MD5 checksums did not match. The file may be corrupt.}
+# Reference: {Please fill in all fields before entering chatroom.}
+# Translate, find in sources: jabber/Create.tcl:726 jabber/Enter.tcl:486
+::msgcat::mcset pl jamessgchatfields2    {Please fill in all fields before entering chatroom.}
+# Reference: {%s invited you to %s. Do you want to enter this chatroom?}
+# Translate, find in sources: jabber/GroupChat.tcl:453
+::msgcat::mcset pl jamessgcinvite2       {%s invited you to %s. Do you want to enter this chatroom?}
+# Reference: {You must provide a chatroom name.}
+# Translate
+::msgcat::mcset pl jamessgcnoroomname2   {You must provide a chatroom name.}
 # Reference: {You must provide a nickname.}
 ::msgcat::mcset pl jamessgcnoroomnick    {Należy podać pseudonim.}
-# Reference: {There are edits made to this dialog. Do you want to save them before closing?}
-# Translate, find in sources: jabber/Profiles.tcl:975 jabber/Profiles.tcl:1549
-::msgcat::mcset pl jamessgeneditwarnclose {There are edits made to this dialog. Do you want to save them before closing?}
-# Reference: {Illegal character(s) in %s: "%s"!}
+# Reference: {You changed one or more values. Do you want to save them before closing?}
+# Translate, find in sources: jabber/Profiles.tcl:975 jabber/Profiles.tcl:1552
+::msgcat::mcset pl jamessgeneditwarnclose2 {You changed one or more values. Do you want to save them before closing?}
+# Reference: {Illegal character(s) in %s: %s!}
 ::msgcat::mcset pl jamessillegalchar     {Niedozwolony znak w %s: "%s"!}
-# Reference: {The address "%s" is not well formed. Please modify it and resend.}
-::msgcat::mcset pl jamessillformresend   {Niepoprawna postać adresu "%s". Popraw go - i ponów próbę wysyłki.}
-# Reference: {Failed to create an image from "%s".}
+# Reference: {Invalid Contact ID: %s. Please correct and resend.}
+# Translate, find in sources: jabber/NewMsg.tcl:832
+::msgcat::mcset pl jamessillformresend2  {Invalid Contact ID: %s. Please correct and resend.}
+# Reference: {Cannot create an image from %s.}
 # Translate, find in sources: jabber/Avatar.tcl:340
-::msgcat::mcset pl jamessimagecreateerr  {Failed to create an image from "%s".}
-# Reference: {Do you want to erase the whiteboard before entering a new room?}
-::msgcat::mcset pl jamessinroomerasewb   {Czy przed wejściem do nowego pokoju skasować dotychczasową zawartość tablicy?}
-# Reference: {We require that all fields are nonempty before entering room}
-::msgcat::mcset pl jamessinroommiss      {Przed wejściem do pokoju należy wypełnić wszystkie pola}
-# Reference: {The JID address is not well formed. Please be sure that the entry at the bottom of the whiteboard contains a valid address before you act. It should look something like 'username@jabber.org'.}
-::msgcat::mcset pl jamessinvalidjid      {Adres JID wygląda na źle podany. Najpierw upewnij się, że pole na samym dole Tablicy zawiera prawidłowo podany JID. JID winien wyglądać w stylu 'username@jabber.org'.}
-# Reference: {The JID address is not well formed.}
-::msgcat::mcset pl jamessjidinvalid      {Adres JID wygląda na źle podany.}
-# Reference: {The local time for %s is: %s}
-::msgcat::mcset pl jamesslocaltime       {Czas lokalny %s to: %s}
-# Reference: {The login failed with the error code %s because this username is already in use by another user. If this user is you, try to login instead.}
-::msgcat::mcset pl jamesslogin409        {Nieudana próba rejestracji (kod błędu: %s), ze względu na to, że podany login jest używany przez kogoś innego. Jeśli to właśnie Ty - zaloguj się po prostu...}
-# Reference: {The login failed with the error code %s and message: %s}
-::msgcat::mcset pl jamessloginerr        {Nieudana próba rejestracji - kod błędu: %s - informacja: %s}
+::msgcat::mcset pl jamessimagecreateerr  {Cannot create an image from %s.}
+# Reference: {Invalid Contact ID. You need to enter a valid one at the bottom (e.g. username@jabber.org).}
+# Translate, find in sources: jabber/JWB.tcl:950 jabber/JWB.tcl:1897
+::msgcat::mcset pl jamessinvalidjid2     {Invalid Contact ID. You need to enter a valid one at the bottom (e.g. username@jabber.org).}
+# Reference: {Invalid Contact ID.}
+# Translate, find in sources: jabber/JUser.tcl:242
+::msgcat::mcset pl jamessjidinvalid2     {Invalid Contact ID.}
+# Reference: {%s's local time is: %s}
+# Translate, find in sources: jabber/Jabber.tcl:1521 jabber/UserInfo.tcl:265 jabber/UserInfo.tcl:293
+::msgcat::mcset pl jamesslocaltime2      {%s's local time is: %s}
+# Reference: {Cannot login because this username is already in use by someone else (%s).}
+# Translate, find in sources: jabber/Login.tcl:753
+::msgcat::mcset pl jamesslogin409b       {Cannot login because this username is already in use by someone else (%s).}
 # Reference: {There are unsaved messages. Do you still want to quit?}
-# Translate
+# Translate, find in sources: jabber/NewMsg.tcl:988
 ::msgcat::mcset pl jamessmsgwarnquit     {There are unsaved messages. Do you still want to quit?}
-# Reference: {The %s is missing or is too short!}
+# Reference: {The "%s" is missing or is too short!}
 ::msgcat::mcset pl jamessnamemissing     {Brak (lub zbyt krótki) %s !}
-# Reference: {We couldn't see that %s supports file transfer.}
-::msgcat::mcset pl jamessnofiletrpt      {Trudno powiedzieć, czy %s potrafi obsłużyć transfer pliku.}
 # Reference: {%s does not support file transfer.}
-# Translate, find in sources: jabber/FTrans.tcl:364 jabber/FTrans.tcl:400
+# Translate, find in sources: jabber/FTrans.tcl:364 jabber/FTrans.tcl:400 jabber/FTrans.tcl:453
 ::msgcat::mcset pl jamessnofiletrpt2     {%s does not support file transfer.}
-# Reference: {We could not recognize any service that provides groupchat}
-::msgcat::mcset pl jamessnogroupchat     {Nie znaleziono żadnego serwisu umożliwiającego konferencje}
-# Reference: {Failed to find any rooms at %s.}
-::msgcat::mcset pl jamessnorooms         {Nie znaleziono żadnych pokoi pod adresem %s.}
-# Reference: {Couldn't create socket to server "%s". Maybe networking is not functioning or server is down. Message: %s}
-::msgcat::mcset pl jamessnosocket        {Brak możliwości utworzenia gniazda do serwera "%s". Jakiś problem z siecią, lub może serwer nieczynny?. Informacja: %s}
-# Reference: {Could not connect to "%s". Either there are server or network issues, or you misspelled the server's name. Message: %s}
-# Translate, find in sources: jabber/Login.tcl:741
-::msgcat::mcset pl jamessnosocket2       {Could not connect to "%s". Either there are server or network issues, or you misspelled the server's name. Message: %s}
-# Reference: {Can't send when not connected to server}
-::msgcat::mcset pl jamessnotconnected    {Bez połączenia z serwerem nic nie da się wysłać}
-# Reference: {Registration with service "%s" was succesful.}
-::msgcat::mcset pl jamessokreg           {Pomyślna rejestracja w serwisie "%s".}
-# Reference: {You are now unregistered from "%s"}
-::msgcat::mcset pl jamessokunreg         {"%s" przyjął i wykonał żądanie wyrejestrowania.}
-# Reference: {The user "%s" makes the file at %s available for you. %s Do you want it?}
-::msgcat::mcset pl jamessoobask          {Użytkownik "%s" udostępnia Ci plik pod adresem: %s. %s Chcesz pobrać?}
-# Reference: {The url we got from "%s" was not wellformed. url: "%s"}
-::msgcat::mcset pl jamessoobbad          {Adres URL przekazany przez "%s" ma błędną postać. URL: "%s"}
-# Reference: {Got an error when trying to send the file %s to %s. The code was %s, and error message: %s}
-::msgcat::mcset pl jamessooberr404       {Nieudana próba przesłania pliku %s do %s. Kod błędu: %s - informacja: %s}
-# Reference: {The user %s rejected to accept the file %s.}
-::msgcat::mcset pl jamessooberr406       {Użytkownik %s odmówił przyjęcia pliku %s.}
-# Reference: {Failed opening file %s}
-::msgcat::mcset pl jamessoobfailopen     {Błąd otwarcia pliku %s}
-# Reference: {Failed getting url "%s": %s}
-::msgcat::mcset pl jamessoobgetfail      {Błąd przy wywołaniu URL-a "%s": %s}
-# Reference: {When user "%s" wanted us to fetch a file, we did not receive an url to get it from.}
-::msgcat::mcset pl jamessoobnourl        {Chociaż "%s" chciał(a), abyś odebrał(a) plik - jednak nie odebrano URL-a miejsca pobrania.}
-# Reference: {File transfer succesful}
-::msgcat::mcset pl jamessoobok           {Plik przesłany prawidłowo}
-# Reference: {File transfer of %s to "%s" went ok}
+# Reference: {You must select a file to send.}
+# Translate, find in sources: jabber/OOB.tcl:267
+::msgcat::mcset pl jamessnofile2         {You must select a file to send.}
+# Reference: {Cannot find any chatroom service.}
+# Translate, find in sources: jabber/Chat.tcl:2285 jabber/Create.tcl:584 jabber/GroupChat.tcl:338
+::msgcat::mcset pl jamessnogroupchat2    {Cannot find any chatroom service.}
+# Reference: {Cannot find any chatrooms at %s.}
+# Translate, find in sources: jabber/Enter.tcl:395 jabber/Enter.tcl:447
+::msgcat::mcset pl jamessnorooms2        {Cannot find any chatrooms at %s.}
+# Reference: {Cannot connect to %s. Either there are server or network issues, or you misspelled the server's name.}
+# Translate, find in sources: jabber/Login.tcl:745
+::msgcat::mcset pl jamessnosocket3       {Cannot connect to %s. Either there are server or network issues, or you misspelled the server's name.}
+# Reference: {Cannot send when not logged in.}
+# Translate, find in sources: jabber/Chat.tcl:2556 jabber/GroupChat.tcl:2427
+::msgcat::mcset pl jamessnotconnected2   {Cannot send when not logged in.}
+# Reference: {Registration with service %s was successful.}
+# Translate, find in sources: jabber/Register.tcl:1189 jabber/Register.tcl:1371
+::msgcat::mcset pl jamessokreg2          {Registration with service %s was successful.}
+# Reference: {You are unregistered from %s.}
+# Translate, find in sources: jabber/Register.tcl:128
+::msgcat::mcset pl jamessokunreg2        {You are unregistered from %s.}
+# Reference: {%s wants to send you this file: %sDo you want to receive this file?}
+# Translate, find in sources: components/Growl.tcl:155 jabber/FTrans.tcl:556 jabber/OOB.tcl:377
+::msgcat::mcset pl jamessoobask2         {%s wants to send you this file: %sDo you want to receive this file?}
+# Reference: {Received invallid URL from %s. URL: %s}
+# Translate, find in sources: jabber/OOB.tcl:388
+::msgcat::mcset pl jamessoobbad2         {Received invallid URL from %s. URL: %s}
+# Reference: {Cannot send the file %s to %s.}
+# Translate, find in sources: jabber/FTrans.tcl:494 jabber/FTrans.tcl:520 jabber/OOB.tcl:326
+::msgcat::mcset pl jamessooberr404b      {Cannot send the file %s to %s.}
+# Reference: {%s did not accepted the file %s.}
+# Translate, find in sources: jabber/FTrans.tcl:491 jabber/FTrans.tcl:517 jabber/OOB.tcl:323
+::msgcat::mcset pl jamessooberr406b      {%s did not accepted the file %s.}
+# Reference: {Cannot open file %s}
+# Translate, find in sources: lib/HttpTrpt.tcl:66
+::msgcat::mcset pl jamessoobfailopen2    {Cannot open file %s}
+# Reference: {%s did not sent the download location of the file.}
+# Translate, find in sources: jabber/OOB.tcl:367
+::msgcat::mcset pl jamessoobnourl2       {%s did not sent the download location of the file.}
+# Reference: {File transfer of %s to %s was successful.}
 ::msgcat::mcset pl jamessoobok2          {Pomyślna przesyłka pliku %s do "%s"}
-# Reference: {We got a timeout when getting file over http}
-::msgcat::mcset pl jamessoobtimeout      {Przekroczenie dopuszczalnego czasu pobierania pliku przy użyciu HTTP}
-# Reference: {The url we got from "%s" did not use the http protocol, but instead %s which is unsupported.}
-::msgcat::mcset pl jamessoonnohttp       {Wprawdzie URL przekazany przez "%s" nie korzysta z protokołu HTTP, a jedynie z %s - który nie może być użyty.}
-# Reference: {This is your own account at %s that acts as a server service that transports messages to that IM system. It is necessary for it to be in your roster. You have a subscription for %s: %s.}
-::msgcat::mcset pl jamessowntrpt         {To Twoje własne konto w %s, które działa jako usługa serwerowa, przekazująca wiadomości do tego systemu IM. Ono musi się znajdować na Twojej liście. Otrzymałeś autoryzację od %s: %s.}
-# Reference: {The passwords do not agree. Please check once again.}
-::msgcat::mcset pl jamesspasswddiff      {Hasła się nie zgadzają - sprawdź raz jeszcze.}
-# Reference: {Setting new password failed with the error code %s and message: "%s"}
-::msgcat::mcset pl jamesspasswderr       {Nieudana próba zmiany hasła - kod błędu: %s - informacja: "%s"}
-# Reference: {Setting new password was succesful}
+# Reference: {Cannot download file over HTTP: timeout.}
+# Translate, find in sources: lib/HttpTrpt.tcl:225
+::msgcat::mcset pl jamessoobtimeout2     {Cannot download file over HTTP: timeout.}
+# Reference: {The URL from %s does not use the HTTP protocol, but instead %s which is not supported.}
+# Translate, find in sources: jabber/OOB.tcl:396
+::msgcat::mcset pl jamessoonnohttp2      {The URL from %s does not use the HTTP protocol, but instead %s which is not supported.}
+# Reference: {This is your own account at %s that acts as a service that transports messages to that IM system. It needs to be in your list. You have a subscription for %s: %s.}
+# Translate, find in sources: jabber/JUser.tcl:440 jabber/JUser.tcl:523
+::msgcat::mcset pl jamessowntrpt2        {This is your own account at %s that acts as a service that transports messages to that IM system. It needs to be in your list. You have a subscription for %s: %s.}
+# Reference: {Cannot set new password.}
+# Translate, find in sources: jabber/Jabber.tcl:1944
+::msgcat::mcset pl jamesspasswderr2      {Cannot set new password.}
+# Reference: {Setting new password was successful.}
 ::msgcat::mcset pl jamesspasswdok        {Hasło zmienione}
-# Reference: {This will remove the selected profile. Do you also want to remove any user account for this profile? This action cannot be undone.}
-# Translate, find in sources: jabber/Profiles.tcl:1574
-::msgcat::mcset pl jamessprofaskrem      {This will remove the selected profile. Do you also want to remove any user account for this profile? This action cannot be undone.}
-# Reference: {The proxy server reported an error. The error code is "%s".}
-::msgcat::mcset pl jamessproxy-failure   {The proxy server reported an error. The error code is "%s".}
-# Reference: {The registration failed with error message: %s}
-::msgcat::mcset pl jamessregerr          {Błąd nieudanej rejestracji: %s}
-# Reference: {The registration failed because this username is already in use by another user. If this user is you, try to login instead. Error message: %s}
-::msgcat::mcset pl jamessregerrinuse     {Rejestracja nieudana, gdyż z tej nazwy użytkownika (loginu) ktoś już korzysta. Jeśli to właśnie Ty - zaloguj się po prostu. Błąd: %s}
-# Reference: {The registration to server "%s" was succesful. Now you just need to Login using the same username and password.}
-::msgcat::mcset pl jamessregisterok      {Pomyślna rejestracja na serwerze "%s" - teraz zaloguj się na nim używając tej samej nazwy i hasła.}
-# Reference: {You are now registered and automatically logged on as "%s"}
+# Reference: {The selected profile will be deleted. Do you also want to delete the account for this profile? This action cannot be undone. Press Cancel to abort deletion of account and profile.}
+# Translate, find in sources: jabber/Profiles.tcl:1577
+::msgcat::mcset pl jamessprofaskrem2     {The selected profile will be deleted. Do you also want to delete the account for this profile? This action cannot be undone. Press Cancel to abort deletion of account and profile.}
+# Reference: {The proxy server reported an error.}
+# Translate, find in sources: jabber/Login.tcl:773
+::msgcat::mcset pl jamessproxy-failure2  {The proxy server reported an error.}
+# Reference: {The registration failed.}
+# Translate, find in sources: jabber/Register.tcl:847
+::msgcat::mcset pl jamessregerr2         {The registration failed.}
+# Reference: {The registration failed because this username is already in use by someone else.}
+# Translate, find in sources: jabber/Register.tcl:844
+::msgcat::mcset pl jamessregerrinuse2    {The registration failed because this username is already in use by someone else.}
+# Reference: {The registration with %s was successful. Now you just need to Login using the same username and password.}
+# Translate, find in sources: jabber/Register.tcl:873
+::msgcat::mcset pl jamessregisterok2     {The registration with %s was successful. Now you just need to Login using the same username and password.}
+# Reference: {You are now registered and automatically logged in as %s}
 ::msgcat::mcset pl jamessregloginok      {Zarejestrowałeś się, i zostałeś automatycznie zalogowany jako "%s"}
-# Reference: {We require the server to be set.}
-::msgcat::mcset pl jamessregnoserver     {Nazwa (adres) serwera musi być podana.}
 # Reference: {Please enter or select first a server.}
-# Translate, find in sources: jabber/Register.tcl:543 jabber/Register.tcl:1083
+# Translate, find in sources: jabber/Register.tcl:552 jabber/Register.tcl:1096 jabber/Search.tcl:309
 ::msgcat::mcset pl jamessregnoserver2    {Please enter or select first a server.}
-# Reference: {You are about to remove your account from this server. This process cannot be undone. Do you really want to continue?}
-::msgcat::mcset pl jamessremoveaccount   {Zamierzasz usunąć konto z serwera, co jest operacją nieodwracalną. Czy jesteś zdecydowany?}
 # Reference: {Do you really want to remove your account? This process cannot be undone.}
-# Translate, find in sources: jabber/Register.tcl:75
+# Translate, find in sources: jabber/Register.tcl:78
 ::msgcat::mcset pl jamessremoveaccount2  {Do you really want to remove your account? This process cannot be undone.}
 # Reference: {Do you want to save this message before closing?}
 ::msgcat::mcset pl jamesssavemsg         {Czy przed zamknięciem zapisać niniejszą wiadomość?}
-# Reference: {The address "%s" is not well formed. Do you want to skip it and send to the rest?}
-::msgcat::mcset pl jamessskipsendq       {Niepoprawna postać adresu "%s". Może po prostu go pominąć - a rozesłać reszcie?}
-# Reference: {Set your message for any of the presence states.}
-::msgcat::mcset pl jamessstatuscust      {Set your message for any of the presence states.}
-# Reference: {The most frequent states and corresponding messages are easily reachable as menu entries.}
-::msgcat::mcset pl jamessstatuscustdtl   {The most frequent states and corresponding messages are easily reachable as menu entries.}
-# Reference: {Time since user "%s" was last connected: }
-::msgcat::mcset pl jamesstimeconn        {Czas, od kiedy użytkownik "%s" był ostatnio połączony: }
-# Reference: {Timeout when waiting for server "%s" to respond.}
-::msgcat::mcset pl jamesstimeoutserver   {Upłynął czas oczekiwania na odpowiedź serwera "%s".}
-# Reference: {Time since server "%s" was started: }
-::msgcat::mcset pl jamesstimeservstart   {Czas, od kiedy serwer "%s" został uruchomiony: }
-# Reference: {Time since client "%s" was last actively used: }
-::msgcat::mcset pl jamesstimeused        {Czas, od kiedy z "%s" skorzystano aktywnie: }
+# Reference: {Cannot search.}
+# Translate, find in sources: jabber/Search.tcl:438
+::msgcat::mcset pl jamesssearcherr       {Cannot search.}
+# Reference: {There was an invalid field. Please correct it.}
+# Translate, find in sources: jabber/Search.tcl:435
+::msgcat::mcset pl jamesssearchinval2    {There was an invalid field. Please correct it.}
+# Reference: {Contact ID %s is invalid. Do you want to skip it and send to the rest?}
+# Translate, find in sources: jabber/NewMsg.tcl:829
+::msgcat::mcset pl jamessskipsendq2      {Contact ID %s is invalid. Do you want to skip it and send to the rest?}
+# Reference: {Select a presence state and optionally enter a message.}
+# Translate, find in sources: jabber/Status.tcl:837
+::msgcat::mcset pl jamessstatuscust2     {Select a presence state and optionally enter a message.}
+# Reference: {The most frequent combinations are easily reachable as menu entries.}
+# Translate, find in sources: jabber/Status.tcl:838
+::msgcat::mcset pl jamessstatuscustdtl2  {The most frequent combinations are easily reachable as menu entries.}
+# Reference: {Time since %s was last connected}
+# Translate, find in sources: jabber/Jabber.tcl:1475
+::msgcat::mcset pl jamesstimeconn2       {Time since %s was last connected}
+# Reference: {Server %s did not respond: timeout.}
+# Translate, find in sources: jabber/Login.tcl:749
+::msgcat::mcset pl jamesstimeoutserver2  {Server %s did not respond: timeout.}
+# Reference: {Time since server %s was started}
+# Translate, find in sources: jabber/Jabber.tcl:1477
+::msgcat::mcset pl jamesstimeservstart2  {Time since server %s was started}
+# Reference: {Time since client %s was last active}
+# Translate, find in sources: jabber/Jabber.tcl:1473
+::msgcat::mcset pl jamesstimeused2       {Time since client %s was last active}
 # Reference: {Your registered account with the %s service will be put in your roster to work as a transport with this service.}
 ::msgcat::mcset pl jamesstrptsubsc       {Twoje konto zarejestrowane w systemie %s znajdzie się na Twojej własnej liście jako przekaźnik wiadomości ("transport") do tego systemu.}
-# Reference: {User %s has unsubscribed your presence and is removed from your roster.}
-::msgcat::mcset pl jamessunsub           {Użytkownik %s zrezygnował z Twojej autoryzacji i został usunięty z Twej listy.}
-# Reference: {User %s has unsubscribed from your presence. Do you want to remove %s from your roster?}
-::msgcat::mcset pl jamessunsubask        {Użytkownik %s cofnął Ci autoryzację. Czy chcesz go usunąć z listy kontaktów?}
-# Reference: {User %s has unsubscribed your presence.}
-::msgcat::mcset pl jamessunsubpres       {Użytkownik %s nie obserwuje już Twojej obecności (zrezygnował z autoryzacji).}
-# Reference: {You are unsubscribed from %s's presence.}
-::msgcat::mcset pl jamessunsubscribed    {Zrezygnowałeś z obserwacji obecności użytkownika %s (rezygnacja z autoryzacji).}
-# Reference: {The uptime (for services), or last activity of user is: }
-::msgcat::mcset pl jamessuptime          {Czas działania - jeśli serwis - albo ostatnia aktywność użytkownika: }
-# Reference: {Do you want to erase the whiteboard first?}
-::msgcat::mcset pl jamesswarberasewb     {Czy mam najpierw skasować zawartość Tablicy?}
-# Reference: {Do you actually like to exit the room "%s" ?}
-::msgcat::mcset pl jamesswarnexitroom    {Faktycznie chcesz opuścić pokój "%s" ?}
-# Reference: {Removing an item in your roster cannot be undone. You need add this user again if you want to add it back. Do you want to continue anyway?}
-::msgcat::mcset pl jamesswarnremove      {Usunięcia elementu listy nie da się potem cofnąć - w razie takiej potrzeby zajdzie konieczność ponownego wysłania prośby o autoryzację. Usunąć?}
-# Reference: {Do you really want to remove this contact? This process cannot be undone.}
+# Reference: {Because %s does not allow you to see his/her presence anymore, he/she is removed.}
+# Translate, find in sources: jabber/Jabber.tcl:773
+::msgcat::mcset pl jamessunsub2          {Because %s does not allow you to see his/her presence anymore, he/she is removed.}
+# Reference: {%s does not allow you to see his/her presence anymore. Do you want to remove %s?}
+# Translate, find in sources: jabber/Jabber.tcl:785
+::msgcat::mcset pl jamessunsubask2       {%s does not allow you to see his/her presence anymore. Do you want to remove %s?}
+# Reference: {%s does not allow you to see his/her presence anymore.}
+# Translate, find in sources: jabber/Jabber.tcl:778
+::msgcat::mcset pl jamessunsubpres2      {%s does not allow you to see his/her presence anymore.}
+# Reference: {You cannot see %s's presence anymore.}
+# Translate, find in sources: jabber/Jabber.tcl:833
+::msgcat::mcset pl jamessunsubscribed2   {You cannot see %s's presence anymore.}
+# Reference: {The uptime/last activity is}
+# Translate, find in sources: jabber/Jabber.tcl:1480
+::msgcat::mcset pl jamessuptime2         {The uptime/last activity is}
+# Reference: {Do you want to exit the chatroom %s?}
+# Translate, find in sources: jabber/GroupChat.tcl:2300
+::msgcat::mcset pl jamesswarnexitroom2   {Do you want to exit the chatroom %s?}
+# Reference: {Do you really want to remove this contact? This action cannot be undone.}
 # Translate, find in sources: jabber/Roster.tcl:500
-::msgcat::mcset pl jamesswarnremove2     {Do you really want to remove this contact? This process cannot be undone.}
-# Reference: {The user you are sending to, "%s", is not online, and if this message contains any images or other similar entities, this user will not get them unless you happen to be online while this message is being read. Do you want to send it anyway?}
-::msgcat::mcset pl jamesswarnsendcanoff  {Odbiorca komunikatu - "%s" - nie jest w tej chwili dostępny. Jeśli więc do wiadomości dołączone są grafiki lub inne pliki, nie dotrą do celu, jeśli nie zdarzy się, iż Ty będziesz dostępny, podczas gdy Twoja wiadomość będzie czytana przez odbiorcę. Czy mimo to chcesz ją przesłać?}
-# Reference: {The complete conversation will be lost when closing this chat whiteboard. Do you actually want to end this chat?}
-::msgcat::mcset pl jamesswbchatlost      {Po zamknięciu niniejszej tablicy całość zapisu rozmowy przepadnie. Czy na pewno chcesz ją skończyć?}
+::msgcat::mcset pl jamesswarnremove2     {Do you really want to remove this contact? This action cannot be undone.}
+# Reference: {%s is not online. If your message contains any images or other multimedia, your contact will not see them unless you are online while he/she reads your message. Do you want to send it anyway?}
+# Translate, find in sources: jabber/JWB.tcl:941
+::msgcat::mcset pl jamesswarnsendcanoff2 {%s is not online. If your message contains any images or other multimedia, your contact will not see them unless you are online while he/she reads your message. Do you want to send it anyway?}
+# Reference: {Do you want to close this whiteboard and lose the complete session?}
+# Translate, find in sources: jabber/JWB.tcl:633
+::msgcat::mcset pl jamesswbchatlost2     {Do you want to close this whiteboard and lose the complete session?}
 
 
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
 # 
 # These are much too formal to be used for user display and we therfore instead use the short forms below.
-
+# Do not translate these, just for reference.
 # Reference: {The receiving entity acknowledges an abort element sent by the initiating entity.}
 ::msgcat::mcset pl xmpp-stanzas-aborted  {Odbiorca potwierdził zamiar zaniechania zasygnalizowany przez nadawcę.}
 # Reference: {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
@@ -2071,54 +1879,55 @@
 ::msgcat::mcset pl xmpp-stanzas-short-invalid-mechanism {Błąd protokołu w trakcie procesu logowania.}
 # Reference: {Protocol error during the login process.}
 ::msgcat::mcset pl xmpp-stanzas-short-mechanism-too-weak {Błąd protokołu w trakcie procesu logowania.}
-# Reference: {Login failed because of unknown user or wrong password.}
+# Reference: {Login failed because of unknown account or wrong password.}
 ::msgcat::mcset pl xmpp-stanzas-short-not-authorized {Logowanie nieudane ze względu ma błędnie podany login i/lub hasło.}
 # Reference: {Protocol error during the login process.}
 ::msgcat::mcset pl xmpp-stanzas-short-temporary-auth-failure {Błąd protokołu w trakcie procesu logowania.}
 
 
 # Related error conditions detected by the client.
-# Reference: {The server "%s" has no support for TLS.}
+# Reference: {The server %s has no support for TLS.}
 ::msgcat::mcset pl starttls-nofeature    {Brak możliwości skorzystania z TLS na serwerze "%s".}
-# Reference: {TLS negotiating with server "%s" failed.}
+# Reference: {Cannot negotiate TLS with server %s.}
 ::msgcat::mcset pl starttls-failure      {Nieudana negocjacja TLS z serwerem "%s".}
 # Reference: {The server has no support for SASL authentication.}
 ::msgcat::mcset pl sasl-no-mechanisms    {Serwer nie ma możliwości uwierzytelniania poprzez mechanizm SASL.}
-# Reference: {Authentication failed due to internal protocol error.}
+# Reference: {Cannot authenticate due to internal protocol error.}
 ::msgcat::mcset pl sasl-protocol-error   {Authentication failed due to internal protocol error.}
 
 # A collective description of all stream errors.
-# Reference: {We received a stream error from the server with code: %s}
+# Reference: {Stream error received from the server with code: %s}
 ::msgcat::mcset pl xmpp-streams-error    {Sygnał błędu transmisji z serwera. Kod błędu: %s}
 
 
 # Account xform balloon help.
-# From: JEP-0077: In-Band Registration 
+# From: JEP-0077: In-Band Registration (http://www.xmpp.org/extensions/xep-0077.html#registrar-formtypes)
+# Note to translators: these are tooltips and has lower priority
 # Reference: {Street portion of a physical or mailing address}
 ::msgcat::mcset pl registration-address  {Ulica i nr domu/mieszkania (adres pocztowy)}
 # Reference: {Locality portion of a physical or mailing address}
 ::msgcat::mcset pl registration-city     {Miejscowość (adres pocztowy)}
 # Reference: {Some date (e.g., birth date, hire date, sign-up date)}
 ::msgcat::mcset pl registration-date     {Data (np. data urodzenia, d. podjęcia współpracy, data rejestracji...)}
-# Reference: {Email address of the user}
+# Reference: {Email address}
 ::msgcat::mcset pl registration-email    {Adres poczty elektronicznej}
-# Reference: {First name or given name of the user}
+# Reference: {First name or given name}
 ::msgcat::mcset pl registration-first    {Imię lub przezwisko użytkownika}
-# Reference: {You are already registered with this service. These are your current settings of your login parameters.}
+# Reference: {You are already registered with this service. These are your current login settings.}
 ::msgcat::mcset pl registration-is-registered {Już masz rejestrację w tym serwisie - oto Twoje bieżące ustawienia parametrów logowania.}
-# Reference: {Last name, surname, or family name of the user}
+# Reference: {Last name, surname, or family name}
 ::msgcat::mcset pl registration-last     {Nazwisko użytkownika}
-# Reference: {Full name of the user}
+# Reference: {Full name}
 ::msgcat::mcset pl registration-name     {Imię i nazwisko użytkownika}
-# Reference: {Familiar name of the user}
+# Reference: {Familiar name}
 ::msgcat::mcset pl registration-nick     {Pseudonim użytkownika, łatwy do zapamiętania}
-# Reference: {Password or secret for the user}
+# Reference: {Password or secret}
 ::msgcat::mcset pl registration-password {Hasło użytkownika}
-# Reference: {Telephone number of the user}
+# Reference: {Telephone number}
 ::msgcat::mcset pl registration-phone    {Nr telefonu użytkownika}
-# Reference: {Region portion of a physical or mailing address}
+# Reference: {An administrative region of the nation, such as a state or province}
 ::msgcat::mcset pl registration-state    {Region/państwo (adres pocztowy)}
-# Reference: {URL to web page describing the user}
+# Reference: {URL to personal website}
 ::msgcat::mcset pl registration-url      {Odnośnik do strony domowej użytkownika}
 # Reference: {Account name associated with the user}
 ::msgcat::mcset pl registration-username {Nazwa konto skojarzona z użytkownikiem}
@@ -2134,34 +1943,32 @@
 ::msgcat::mcset pl version-os            {System operacyjny}
 
 
-# Reference: {You are about to unregister a transport with a number of dependent users. Do you want to remove these users as well (Yes), keep them (No), or cancel the whole thing (Cancel).}
-::msgcat::mcset pl register-trpt-unreg   {Zamierzasz wyrejestrować się z korzystania z transportu, który umożliwia Ci komunikację z niektórymi z Twoich kontaktów. Czy chcesz te kontakty usunąć (Tak), zachować (Nie) - czy też w ogóle wycofujesz się z tego zamiaru (Anuluj)?}
+# Reference: {You are about to unregister a transport with a number of dependent contacts. Do you want to remove these contacts as well (Yes), keep them (No), or cancel everything (Cancel).}
+# Translate, find in sources: jabber/Register.tcl:86
+::msgcat::mcset pl register-trpt-unreg2  {You are about to unregister a transport with a number of dependent contacts. Do you want to remove these contacts as well (Yes), keep them (No), or cancel everything (Cancel).}
 
 
-# Reference: {Open QuickTime live stream}
-::msgcat::mcset pl openquicktime         {Podłącz się do transmisji QuickTime}
-# Reference: {Write URL or choose from shortcut:}
-::msgcat::mcset pl writeurl              {Podaj URL albo wybierz skrótem:}
-# Reference: {Open a URL which contains a SDP file with extension .mov for a QuickTime realtime live streaming sending. Can be audio (radio) or video (TV).Alternatively, use your web browser to find the SDP file for a live transmission, download it on disk and open it is an ordinary movie.}
-::msgcat::mcset pl openquicktimeurlmsg   {Wywołuje URL zawierający plik SDP z rozszerzeniem .mov jako transmisję danych w formacie QuickTime "na żywo". Może to być przekaz dźwięku (np. radio) albo obrazu (np. TV). Można również przy pomocy przeglądarki Internetowej zlokalizować plik SDP, pobrać go - a potem odczytać jak zwyczajny plik zawierający zapis "video".}
 # Reference: {Shell print command, edit if desired}
 ::msgcat::mcset pl printunixcmd          {Polecenie wydruku (to stosowane w powłoce rozkazów)}
-# Reference: {Enter the password for your account "%s"}
+# Reference: {Enter the password for your account %s}
 ::msgcat::mcset pl enterpassword         {Podaj hasło dla Twojego konta: "%s"}
 # Reference: {Lock this item from being edited}
 ::msgcat::mcset pl wblockitem            {Zablokuj możliwość modyfikacji zawartości}
 
 
 
-# Reference: {Finished getting file %s}
-::msgcat::mcset pl httptrptok            {Ukończono pobieranie pliku %s}
-# Reference: {File transport error when getting the file %s: %s}
-::msgcat::mcset pl httptrpterror         {Błąd przesyłania w trakcie pobierania pliku %s: %s}
+# Reference: {Download of file %s finished.}
+# Translate, find in sources: lib/HttpTrpt.tcl:249
+::msgcat::mcset pl httptrptok2           {Download of file %s finished.}
+# Reference: {Cannot download the file %s.\nFile transport error: %s}
+# Translate, find in sources: lib/HttpTrpt.tcl:100 lib/HttpTrpt.tcl:131 lib/HttpTrpt.tcl:230
+::msgcat::mcset pl httptrpterror2        {Cannot download the file %s.\nFile transport error: %s}
 # Reference: {The server closed the socket without replying.}
 ::msgcat::mcset pl httptrpteof           {Serwer zerwał połączenie bez dania racji.}
-# Reference: {File transport error when getting the file %s: code %s; %s}
-::msgcat::mcset pl httptrptnon200        {Błąd przesyłania w trakcie pobierania pliku %s: kod błędu %s; %s}
-# Reference: {File transport of %s was reset}
+# Reference: {Cannot download the file %s.}
+# Translate, find in sources: lib/HttpTrpt.tcl:242
+::msgcat::mcset pl httptrptnon200a       {Cannot download the file %s.}
+# Reference: {File transport of %s was reset.}
 ::msgcat::mcset pl httptrptreset         {Zresetowano transmisję pliku %s}
 
 # Reference: {Point tool, click to mark, double click to inspect, press to popup}
@@ -2186,7 +1993,7 @@
 ::msgcat::mcset pl uastatpen             {Kredka}
 # Reference: {Brush tool}
 ::msgcat::mcset pl uastatbrush           {Pędzel}
-# Reference: {Paint tool, shift-click to transparency}
+# Reference: {Paint tool, shift-click for transparency}
 ::msgcat::mcset pl uastatpaint           {Maluj, Shift+klik - jeśli z przezroczystością}
 # Reference: {Polygon tool, spacebar to cancel}
 ::msgcat::mcset pl uastatpoly            {Wielokąty: Spacja = zaniechaj}
@@ -2199,186 +2006,137 @@
 
 
 # Preferences:
-# Reference: {Login automatically if logged out}
-# Translate, find in sources: jabber/AutoAway.tcl:297
-::msgcat::mcset pl prefaalogin           {Login automatically if logged out}
-# Reference: {Set automatic away status}
-::msgcat::mcset pl prefaaset             {Ustawienia automatycznie ustawianych statusów:}
-# Reference: {Share this avatar with other users}
-::msgcat::mcset pl prefavashare          {Współdziel ten avatar z innymi}
-
-# Reference: {Block the following JID's (* wildcards possible):}
-::msgcat::mcset pl prefblbl              {Bloku następujące JID-y (można grupować znakiem * ):}
-# Reference: {Write the complete JID for the user you want to block. A JID must be of the form "joewest@jabber.org"}
-::msgcat::mcset pl prefblmsg             {Podaj JID blokowanego użytkownika. JID winien mieć postać np. "joewest@jabber.org"}
-# Reference: {Only accept messages from people in my roster}
-::msgcat::mcset pl prefblonly            {Przyjmuj wiadomości wyłącznie od kontaktów z listy}
-# Reference: {Always accept a cached file, never load a new one}
-::msgcat::mcset pl prefcaalw             {Zawsze akceptować pliki zbuforowane, nie pobierać ich od nowa}
-# Reference: {Cached file compared with remote}
-::msgcat::mcset pl prefcachecmp          {Kopia pliku w buforze porównywana z "oryginałem"}
-# Reference: {How to handle files already received:}
-::msgcat::mcset pl prefcahow             {Co robić z już pobranymi plikami:}
-# Reference: {Never accept a cached file, always load a new one}
-::msgcat::mcset pl prefcanev             {Nie akceptować plików zbuforowanych, zawsze pobierać od nowa}
-# Reference: {..or accept cached file if not older than:}
-::msgcat::mcset pl prefcaor              {...lub akceptować pliki zbuforowane, gdy nie starsze, niż:}
-# Reference: {Always use active <Return> in chat dialog}
-::msgcat::mcset pl prefchactret          {W rozmowie naciśnięcie <Enter> zawsze wysyła kwestię}
+# Reference: {By default use active <Return> to send messages}
+# Translate, find in sources: jabber/Chat.tcl:3361
+::msgcat::mcset pl prefchactret2         {By default use active <Return> to send messages}
 # Reference: {Treat normal messages as chat messages}
 ::msgcat::mcset pl prefchnormal          {Traktuj wiadomości jako rozpoczęcie rozmowy}
-# Reference: {Double click message in inbox:}
+# Reference: {Double click message in inbox}
 ::msgcat::mcset pl prefcu2clk            {"Podwójne kliknięcie" na wiadomości w skrzynce:}
-# Reference: {Always use agents method}
-::msgcat::mcset pl prefcuagent           {Zawsze używać "agentów"}
-# Reference: {Automatically login when launched}
-::msgcat::mcset pl prefcuautologin       {Po uruchomieniu połącz automatycznie}
-# Reference: {Browse services if method available}
-::msgcat::mcset pl prefcubrowse          {"Browse services" - jeśli dostępna}
-# Reference: {Preferred service discovery method:}
-::msgcat::mcset pl prefcudisc            {Preferowana metoda szukania serwisów:}
-# Reference: {Select font for chat window:}
-::msgcat::mcset pl prefcufont            {Wybierz krój czcionki w oknie rozmowy:}
+# Reference: {Login on %s startup}
+# Translate, find in sources: jabber/JPrefs.tcl:300
+::msgcat::mcset pl prefcuautologin2      {Login on %s startup}
 # Reference: {Open message in new window}
 ::msgcat::mcset pl prefcuopen            {Otwórz nowe okno z wiadomością}
-# Reference: {Remember open dialogs between sessions}
-::msgcat::mcset pl prefcuremdlgs         {Zapamiętaj niezakończone rozmowy pomiędzy sesjami}
+# Reference: {Remember open windows between sessions}
+# Translate, find in sources: jabber/JPrefs.tcl:302
+::msgcat::mcset pl prefcuremdlgs2        {Remember open windows between sessions}
 # Reference: {Reply to sender}
 ::msgcat::mcset pl prefcureply           {Odpowiedz nadawcy}
 # Reference: {Save message inbox between sessions}
 ::msgcat::mcset pl prefcusave            {Zapisuj zawartość skrzynki pomiędzy poszczególnymi sesjami}
 # Reference: {Show incoming messages in new window}
 ::msgcat::mcset pl prefcushow            {Nowe wiadomości w nowo otwieranym oknie}
-# Reference: {Automatically check for new Coccinella version}
-::msgcat::mcset pl prefcuupdate          {Automatycznie sprawdź ew. dostępność nowej wersji Coccinelli}
-# Reference: {Store preferences in same directory as program}
+# Reference: {Store preferences in same folder as program}
 # Translate, find in sources: lib/PrefGeneral.tcl:65
-::msgcat::mcset pl prefdirsame           {Store preferences in same directory as program}
-# Reference: {Always store user preferences on same drive as program}
-::msgcat::mcset pl prefdrivesame         {Ustawienia użytkownika należy zawsze przchowywać na tym samym dysku, gdzie znajduje się sam program}
-# Reference: {You have chosen to store your preferences in the default place. Unless you also remove or move your personal settings at "%s" it will automatically be used the next time you launch Coccinella. Do you want them removed now?}
-::msgcat::mcset pl prefdriwdef           {Wybrałeś zapis ustawień w lokalizacji podpowiadanej domyślnie. Dopóki nie skasujesz, lub nie przeniesiesz ustawień zapisanych w "%s" zostaną one użyte przy następnym uruchomieniu programu. Czy chcesz je teraz usunąć?}
+::msgcat::mcset pl prefdirsame           {Store preferences in same folder as program}
+# Reference: {Store preferences on same drive as program}
+# Translate, find in sources: lib/PrefGeneral.tcl:62
+::msgcat::mcset pl prefdrivesame2        {Store preferences on same drive as program}
+# Reference: {You have chosen to store your preferences in the default location. If you remove or move your personal settings at %s, the preferences in the default location will be used the next time you start %s. Do you want to remove the old preferences?}
+# Translate, find in sources: lib/PrefGeneral.tcl:143 lib/PrefGeneral.tcl:167
+::msgcat::mcset pl prefdriwdef2          {You have chosen to store your preferences in the default location. If you remove or move your personal settings at %s, the preferences in the default location will be used the next time you start %s. Do you want to remove the old preferences?}
 # Reference: {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible. Do you want to continue?}
 ::msgcat::mcset pl prefdriwsame          {Wybrałeś zapis ustawień na dysku, gdzie obecna jest aplikacja. Jeśli nie jest to dysk wymienny, Twoje osobiste ustawienia mogą być widoczne dla innych. Akceptujesz tę sytuację?}
-# Reference: {The cache is used to keep local copies of files from other users which reduces time for network transport. The size of the local disk cache is limited by user's settings below.}
-::msgcat::mcset pl preffilecache         {Bufor pozwala trzymać kopie plików innych użytkowników, dzięki czemu można ograniczyć ruch w sieci. Rozmiar bufora jest ograniczony poniższym ustawieniem.}
-# Reference: {Helper plugins for file type}
-::msgcat::mcset pl preffmhelp            {Wtyczki pomocnicze dla typów plików}
-# Reference: {Just save to disk in incoming directory}
-::msgcat::mcset pl preffmsave            {Po prostu zapisać na dysk w katalogu "incoming"}
+# Reference: {The cache is an internal memory where recent files from contacts are stored to increase speed.}
+# Translate, find in sources: lib/FileCache.tcl:635
+::msgcat::mcset pl preffilecache2        {The cache is an internal memory where recent files from contacts are stored to increase speed.}
+# Reference: {Amount of cache to store recent whiteboard files to increase speed.}
+# Translate, find in sources: lib/FileCache.tcl:635
+::msgcat::mcset pl preffilecache2        {Amount of cache to store recent whiteboard files to increase speed.}
 # Reference: {Warning: by importing any other fonts than the standard three ones (Times, Helvetica or Courier), you must be confident that all remote clients also have this font installed on their system.}
 ::msgcat::mcset pl preffontmsg           {Uwaga: importując jakiekolwiek inne kroje, niż 3 standardowe (Times, Helvetica lub Courier), należy mieć pewność, że korespondenci mają również w swoich systemach takie kroje zainstalowane.}
-# Reference: {The selected iconset will take action when you save}
-::msgcat::mcset pl preficonsel           {Wybrany zestaw ikonek zostanie uaktywniony po zapisie}
-# Reference: {Set midi command to use for playing MIDI sounds. This option is only relevant if you have a sound set with MIDI files. Your system midi player command must have the "command fileName" syntax.}
-# Translate, find in sources: components/Sounds.tcl:520
-::msgcat::mcset pl prefmidimsg           {Set midi command to use for playing MIDI sounds. This option is only relevant if you have a sound set with MIDI files. Your system midi player command must have the "command fileName" syntax.}
-# Reference: {Minutes before status Away:}
-::msgcat::mcset pl prefminaw             {Ile minut do "zaraz wracam":}
-# Reference: {Minutes before status Extended Away:}
-::msgcat::mcset pl prefminea             {Ile minut do "niedostępny":}
-# Reference: {Minutes before automatically logout:}
-# Translate, find in sources: jabber/AutoAway.tcl:289
-::msgcat::mcset pl prefminlogout         {Minutes before automatically logout:}
-# Reference: {Multi-User-Chat with Conference as fallback}
-::msgcat::mcset pl prefmucconf           {Multi-User-Chat (i "Conference" jako fallback)}
-# Reference: {Use the following ip address as seen from the outside}
-::msgcat::mcset pl prefnatip             {Użyj poniżej podanego adresu IP jako "widocznego z zewnątrz"}
-# Reference: {Your personal info is stored in your preferences file, but may also be stored on the Jabber User Directory. Server stored info is searchable by any user.}
-::msgcat::mcset pl prefpers              {Twoje dane osobiste zostały zapisane w pliku ustawień, wszakże można je także przekazać do publicznego Katalogu Użytkowników Jabbera (JUD) - gdzie mogą być przeglądane przez innych.}
-# Reference: {You may unselect any of these packages if you don't want them loaded. You must relaunch for this to take effect.}
-::msgcat::mcset pl prefplugctrl          {Każdy z poniższych pakietów może zostać "wyłączony", jeśli nie korzysta się z niego. Uwzględnienie po restarcie programu.}
-# Reference: {If checking the privacy button, you are only able to edit your own canvas items. Items created by others are not possible to edit.}
-::msgcat::mcset pl prefpriv              {"Wciskając" przycisk "prywatność", będziesz mieć możliwość zmiany zawartości jedynie swego tła ("płótna") - bez możliwości dokonywania zmian w cudzych.}
-# Reference: {If this option is enabled, you can only edit your own canvas items. Items created by others cannot be edited.}
-# Translate, find in sources: whiteboard/WBPrefs.tcl:343
-::msgcat::mcset pl prefpriv2             {If this option is enabled, you can only edit your own canvas items. Items created by others cannot be edited.}
-# Reference: {Getting filter list "%s"}
-::msgcat::mcset pl prefprivgetlist       {Pobieranie wykazu filtrów "%s"}
-# Reference: {Each user may administrate zero or many lists. Only the active or default list affect message processing. Any active list affects only the session. The default list is processed if there is no active list.}
-::msgcat::mcset pl prefprivmsg           {Każdy użytkownik może zarządzać dowolną ilością list (lub żadną). Jedynie lista w danej chwili aktywna (lub domyślna) wpływa na sposób przetwarzania wiadomości. Aktywna lista wpływa jedynie na przebieg bieżącej sesji. Z listy domyślnej korzysta się, gdy w danej chwili nie wybrano innej aktywnej.}
-# Reference: {Filter options unavailable at this server}
-::msgcat::mcset pl prefprivnotex         {Ten serwer nie udostępnia żadnych możliwości filtracji}
-# Reference: {Filter lists obtained from server}
-::msgcat::mcset pl prefprivobtained      {Serwer udostępnił wykaz filtrów}
-# Reference: {Each list contains one or many rules, each rule specify the type of events it acts on, and the action it shall take. If you specify a group to block it must exist in your roster.}
-::msgcat::mcset pl prefprivrules         {Każdy wykaz zawiera co najmniej jedną regułę, a każda taka reguła podaje typ zdarzenia, przy którym znajduje zastosowanie - oraz rodzaj podejmowanej, w przypadku jego wystąpienia, akcji. Jeśli wskażesz do zablokowania całą grupę - musi to być grupa istniejąca w Twojej liście kontaktów.}
-# Reference: {Filter options unavailable while not connected}
-::msgcat::mcset pl prefprivunav          {Bez połączenia opcje filtracji niedostępne}
-# Reference: {Here you set the necessary things that are specific to an account on a Jabber server. The server you pick here will also be the server you logon to.}
-::msgcat::mcset pl prefprof              {Tu należy wpisać informacje niezbędne do wejścia na własne konto na wskazanym serwerze Jabbera. Serwer tu wskazany będzie tym, na którym się zalogujesz.}
+# Reference: {The selected iconset will become the default.}
+# Translate, find in sources: jabber/Emoticons.tcl:608
+::msgcat::mcset pl preficonsel2          {The selected iconset will become the default.}
+# Reference: {Set command to use for playing MIDI sounds. This option is only relevant if you use a sound set with MIDI files.}
+# Translate, find in sources: components/Sounds.tcl:536
+::msgcat::mcset pl prefmidimsg           {Set command to use for playing MIDI sounds. This option is only relevant if you use a sound set with MIDI files.}
+# Reference: {Away after}
+# Translate, find in sources: jabber/AutoAway.tcl:250
+::msgcat::mcset pl prefminaw2            {Away after}
+# Reference: {Extended Away after}
+# Translate, find in sources: jabber/AutoAway.tcl:270
+::msgcat::mcset pl prefminea2            {Extended Away after}
+# Reference: {Logout after}
+# Translate, find in sources: jabber/AutoAway.tcl:290
+::msgcat::mcset pl prefminlogout         {Logout after}
+# Reference: {Use the following external address}
+# Translate, find in sources: lib/Proxy.tcl:267
+::msgcat::mcset pl prefnatip2            {Use the following external address}
+# Reference: {Select the plugins you want to be loaded.}
+# Translate, find in sources: whiteboard/Plugins.tcl:1324
+::msgcat::mcset pl prefplugctrl2         {Select the plugins you want to be loaded.}
+# Reference: {Only edit local whiteboard items}
+# Translate, find in sources: whiteboard/WBPrefs.tcl:126
+::msgcat::mcset pl prefpriv3             {Only edit local whiteboard items}
+# Reference: {Items created by others cannot be edited when enabled}
+# Translate, find in sources: whiteboard/WBPrefs.tcl:131
+::msgcat::mcset pl prefpriv4             {Items created by others cannot be edited when enabled}
 # Reference: {Edit, add or delete profiles. The selected profile will become the default.}
 # Translate, find in sources: jabber/Profiles.tcl:1046
 ::msgcat::mcset pl prefprof2             {Edit, add or delete profiles. The selected profile will become the default.}
-# Reference: {Enter desired name of user profile}
-::msgcat::mcset pl prefprofname          {Jak chcesz nazwać swój profil?}
 # Reference: {Enter the name for the new profile.}
 # Translate
 ::msgcat::mcset pl prefprofname2         {Enter the name for the new profile.}
-# Reference: {Exclude addresses (* as wildcard)}
+# Reference: {Exclude addresses (* as wildcard).}
 ::msgcat::mcset pl prefproxyexc          {Exclude addresses (* as wildcard)}
-# Reference: {Usage of the Http proxy is determined by each profile settings. File transfers wont work if you use Http proxy!}
-::msgcat::mcset pl prefproxymsg          {Możliwość korzystania z proxy HTTP określają ustawienia każdego profilu z osobna. Przy korzystaniu z takiego proxy nie ma możliwości przesyłania plików!}
-# Reference: {Allow users without subscription}
-::msgcat::mcset pl prefroallow           {Umieszczaj na liście także kontakty bez autoryzacji}
-# Reference: {Chat when double-click user, else normal message}
-::msgcat::mcset pl prefrochat            {Rozmowa przy "dwukliku" na kontakcie - jeśli nie: wyślij wiadomość}
-# Reference: {Clear roster when logout}
-::msgcat::mcset pl prefroclr             {Ukryj zawartość listy po wylogowaniu}
-# Reference: {Remove user if unsubscribed}
-::msgcat::mcset pl prefrorm              {Usuwaj z listy użytkowników, którzy cofnęli Ci autoryzację}
-# Reference: {Use background image (gif) in roster}
-::msgcat::mcset pl prefrostbgim          {Wstaw w tło listy grafikę (gif)}
-# Reference: {Use foreign IM system icons}
-::msgcat::mcset pl prefrosysicons        {Dla kontaktów z innych systemów IM używaj ich specyficznych ikonek}
-# Reference: {Here you add or edit shortcuts that are only applicable to "peer-to-peer" connections, and are not used by the Jabber system. If you haven't explicitly picked the "peer-to-peer" option in the "Network Setup" panel, these shortcuts don't apply.}
-::msgcat::mcset pl prefshortcut          {Tutaj wpisujemy/zmieniamy jedynie skróty odnoszące się do połączeń "peer-to-peer", nie wykorzystywanych w sieci Jabbera. Jeżeli w "ustawieniach sieci" nie wybrano połączenia "peer-to-peer" (P2P) - podawane tu skróty nie mają zastosowania.}
-# Reference: {Complete ip number or name}
-::msgcat::mcset pl prefshortip           {Kompletny adres IP albo nazwa}
-# Reference: {Warning: you have edited the shortcuts. Don't you want to save them?}
-::msgcat::mcset pl prefshortwa           {Uwaga: zmodyfikowano skróty. Czy na pewno ich NIE zapisać?}
-# Reference: {Pick alert sounds for the events given below:}
-::msgcat::mcset pl prefsounpick          {Wskaż sygnały poniżej wymienionych zdarzeń:}
-# Reference: {Have synthetic speech of chat}
-::msgcat::mcset pl prefsounsynch         {Czytanie głosem rozmów}
-# Reference: {Have synthetic speech of normal messages}
-::msgcat::mcset pl prefsounsynno         {Czytanie głosem wiadomości}
-# Reference: {Have synthetic speech of text written in the whiteboard}
-::msgcat::mcset pl prefsounsynwb         {Czytanie głosem tekstów pisanych w Tablicy}
-# Reference: {Pick voice for incoming text:}
-::msgcat::mcset pl prefsounvoin          {Wybierz głos, mający czytać nadchodzące wiadomości:}
-# Reference: {Pick voice for text you write:}
-::msgcat::mcset pl prefsounvoou          {Wybierz głos mający czytać wiadomości pisane przez Ciebie:}
-# Reference: {Show next and previous buttons}
-::msgcat::mcset pl prefssbts             {Pokazuj przyciski "następny" i "poprzedni"}
-# Reference: {Resize canvas automatically to fit image}
-::msgcat::mcset pl prefssresize          {Automatycznie dopasuj tło ("płótno") do rozmiaru grafiki}
-# Reference: {Use tabbed notebook interface}
-::msgcat::mcset pl prefstabui            {Korzystaj z "zakładek"}
-# Reference: {Automatically subscribe to subscribers to me}
-::msgcat::mcset pl prefsuauto            {Automatyczne żądanie autoryzacji od tych, którzy chcą autoryzacji ode mnie}
-# Reference: {Move people who add me to their roster to a group}
-# Translate, find in sources: jabber/Subscribe.tcl:352
-::msgcat::mcset pl prefsuauto2           {Move people who add me to their roster to a group}
-# Reference: {If someone wants to subscribe to my presence and...}
-::msgcat::mcset pl prefsuif              {Jeśli ktokolwiek zwraca się z prośbą o autoryzację, i...}
-# Reference: {If someone wants to see my presence and...}
+# Reference: {Usage of this HTTP proxy settings is determined by each profile's settings. File transfers will not work if you use an HTTP proxy.}
+# Translate, find in sources: lib/Proxy.tcl:196
+::msgcat::mcset pl prefproxymsg2         {Usage of this HTTP proxy settings is determined by each profile's settings. File transfers will not work if you use an HTTP proxy.}
+# Reference: {Chat on double-click instead of message}
+# Translate, find in sources: jabber/Roster.tcl:1448
+::msgcat::mcset pl prefrochat2           {Chat on double-click instead of message}
+# Reference: {Clear list of contacts on logout}
+# Translate, find in sources: jabber/Roster.tcl:1446
+::msgcat::mcset pl prefroclr2            {Clear list of contacts on logout}
+# Reference: {Remove contact without presence subscription}
+# Translate, find in sources: jabber/Roster.tcl:1444
+::msgcat::mcset pl prefrorm2             {Remove contact without presence subscription}
+# Reference: {Show contacts without any subscription}
+# Translate, find in sources: jabber/Roster.tcl:1455
+::msgcat::mcset pl prefroshowsubno       {Show contacts without any subscription}
+# Reference: {Enable or disable sounds below}
+# Translate, find in sources: components/Sounds.tcl:497
+::msgcat::mcset pl prefsounpick2         {Enable or disable sounds below}
+# Reference: {Text-to-speech for chat}
+# Translate, find in sources: components/Speech.tcl:328
+::msgcat::mcset pl prefsounsynch2        {Text-to-speech for chat}
+# Reference: {Text-to-speech for messages}
+# Translate, find in sources: components/Speech.tcl:326
+::msgcat::mcset pl prefsounsynno2        {Text-to-speech for messages}
+# Reference: {Text-to-speech for whiteboard text}
+# Translate, find in sources: components/Speech.tcl:324
+::msgcat::mcset pl prefsounsynwb2        {Text-to-speech for whiteboard text}
+# Reference: {Select voice for incoming text}
+# Translate, find in sources: components/Speech.tcl:351
+::msgcat::mcset pl prefsounvoin2         {Select voice for incoming text}
+# Reference: {Select voice for outgoing write}
+# Translate, find in sources: components/Speech.tcl:352
+::msgcat::mcset pl prefsounvoou2         {Select voice for outgoing write}
+# Reference: {Resize window to fit slides}
+# Translate, find in sources: components/SlideShow.tcl:208
+::msgcat::mcset pl prefssresize2         {Resize window to fit slides}
+# Reference: {Use tabbed interface}
+# Translate, find in sources: jabber/JPrefs.tcl:190
+::msgcat::mcset pl prefstabui2           {Use tabbed interface}
+# Reference: {Put contacts who add me to their list in}
+# Translate, find in sources: jabber/Subscribe.tcl:353
+::msgcat::mcset pl prefsuauto2           {Put contacts who add me to their list in}
+# Reference: {If someone wants to see my presence and}
 # Translate, find in sources: jabber/Subscribe.tcl:330
-::msgcat::mcset pl prefsuif2             {If someone wants to see my presence and...}
-# Reference: {...is already in my roster:}
-::msgcat::mcset pl prefsuis              {...jest już na mojej liście kontaktów:}
-# Reference: {...is not in my roster:}
-::msgcat::mcset pl prefsuisnot           {...nie mam go na liście:}
-# Reference: {Use SASL authentication method}
-::msgcat::mcset pl prefsusesasl          {Użyj metody uwierzytelnienia SASL}
-# Reference: {Pick theme, need relaunch}
-::msgcat::mcset pl preftheme             {Wybierz "skórkę" (potem restart programu) }
+::msgcat::mcset pl prefsuif2             {If someone wants to see my presence and}
+# Reference: {is in my list}
+# Translate, find in sources: jabber/Subscribe.tcl:331
+::msgcat::mcset pl prefsuis2             {is in my list}
+# Reference: {is not in my list}
+# Translate, find in sources: jabber/Subscribe.tcl:332
+::msgcat::mcset pl prefsuisnot2          {is not in my list}
 # Reference: {User has been inactive for a while}
 ::msgcat::mcset pl prefuserinactive      {Użytkownik od dłuższej chwili nieaktywny}
-# Reference: {You may set a larger size than the default %sx%s}
-::msgcat::mcset pl prefwbscroll          {Możesz wybrać większy rozmiar, niż domyślny %sx%s}
 
 
+# obsolete strings in the paragraph?
 # EditShortcuts namespace:
 namespace eval ::EditShortcuts:: {
 # Reference: {Complete ip number or name}
@@ -2390,239 +2148,188 @@ namespace eval ::EditShortcuts:: {
 }
 
 
-# Reference: {If checked Return sends message else use Ctrl/Cmd-Return}
+# Reference: {If checked Return sends message, else use Ctrl/Cmd-Return}
 ::msgcat::mcset pl jaactiveret           {Zaznaczenie tej opcji powoduje, że naciśnięcie Enter/Return wysyła wiadomość - w przeciwnym wypadku użyj Ctrl/Cmd-Return}
-# Reference: {Authorization to server "%s" was succesful. Getting the roster...}
-::msgcat::mcset pl jaauthok              {Pomyślna autoryzacja przez serwer "%s". Pobieram listę kontaktów...}
-# Reference: {Enter the JID of the server you want to add to the list of services, for instance, "jabber.org".}
-::msgcat::mcset pl jabrowseaddserver     {Podaj adres serwera, który ma być dodany do listy serwisów (np. "jabber.org").}
+# Reference: {Authorization to server %s was successful. Downloading contacts...}
+# Translate, find in sources: jabber/Login.tcl:692
+::msgcat::mcset pl jaauthok2             {Authorization to server %s was successful. Downloading contacts...}
 # Reference: {Show or hide the chat history}
 ::msgcat::mcset pl jachathist            {Pokaż lub ukryj historię rozmów}
-# Reference: {Select a conference service and optionally a room name. Then push "Get" to obtain the specification for creating the desired room since each server may have specific requirements.}
-::msgcat::mcset pl jacreateroom          {Wybierz serwis konferencyjny oraz ew. także nazwę pokoju - po czym kliknij "Pobierz", aby pobrać formularz założenia pokoju, gdyż na każdym serwerze mogą obowiązywać inne wymagania.}
-# Reference: {Send directed presence to the user "%s".}
-::msgcat::mcset pl jadirpresmsg          {Zaprezentuj "status indywidualnie dobrany" użytkownikowi "%s".}
-# Reference: {Discover another server for groupchat rooms and other services. You may add a server permanently which is then automatically discovered. The login server is always discovered.}
-::msgcat::mcset pl jadisaddserv          {Szukaj pokoi konferencyjnych (i innych serwisów) na jakimś innym serwerze - można dopisać jego adres na stałe, dzięki czemu będzie automatycznie przeszukiwany po każdym połączeniu. Serwer, na który się logujesz, jest przeglądany zawsze.}
-# Reference: {Add a server to discover and use its chatrooms and other services.}
+# Reference: {Select a service, and enter a chatroom and nickname. Optionally, you can configure the chatroom.}
+# Translate, find in sources: jabber/Create.tcl:98
+::msgcat::mcset pl jacreateroom2         {Select a service, and enter a chatroom and nickname. Optionally, you can configure the chatroom.}
+# Reference: {Enter a server to discover and use its services.}
 ::msgcat::mcset pl jadisaddserv2         {Add a server to discover and use its chatrooms and other services.}
-# Reference: {Remove all servers that are automatically and permanently discovered.}
-::msgcat::mcset pl jadisrmall            {Usuń adresy wszystkich serwerów dodanych na stałe, przeglądanych automatycznie.}
-# Reference: {Login to %s failed: %s}
-::msgcat::mcset pl jaerrlogin            {Login na %s nieudany: %s}
-# Reference: {Pick groupchat server and select a room name and your own nick}
+# Reference: {Select a chatroom service, a chatroom, and a nickname.}
 ::msgcat::mcset pl jagchatmsg            {Wskaż serwer konferencji oraz nazwę pokoju, i wymyśl sobie pseudonim}
-# Reference: {You have logged out and exited the room}
+# Reference: {You entered the chatroom}
+# Translate, find in sources: jabber/History.tcl:836
+::msgcat::mcset pl jagcloginmsg          {You entered the chatroom}
+# Reference: {You logged out and exited the chatroom}
 ::msgcat::mcset pl jagclogoutmsg         {You have logged out and exited the room}
-# Reference: {Please enter your desired nickname for the room %s}
+# Reference: {Please enter your desired nickname for the chatroom %s}
 ::msgcat::mcset pl jagcreqnick           {Please enter your desired nick name for the room %s}
-# Reference: {Synchronize chatroom with user presence}
-::msgcat::mcset pl jagcsyncpres          {Synchronizacja pokoju z obecnością użytkownika}
+# Reference: {Synchronize chatroom presence with global presence}
+# Translate, find in sources: jabber/GroupChat.tcl:3338
+::msgcat::mcset pl jagcsyncpres2         {Synchronize chatroom presence with global presence}
 # Reference: {Show incoming messages in this window}
 ::msgcat::mcset pl jainmsgshow           {W tym oknie można przejrzeć nadchodzące wiadomości}
-# Reference: {Invite a user for groupchat in room %s}
-::msgcat::mcset pl jainvitegchat         {Zaproś użytkownika do udziału w konferencji w pokoju %s}
 # Reference: {Invite contact to chatroom %s.}
 # Translate, find in sources: jabber/MUC.tcl:171
 ::msgcat::mcset pl jainvitegchat2        {Invite contact to chatroom %s.}
 # Reference: {Write Jabber server ip number or name, or choose from the popup menu. You should already have an account with this server.}
 ::msgcat::mcset pl jalogin               {Podaj nazwę lub adres IP serwera Jabbera, alb wskaż w menu. Na tym serwerze winno już być obecne Twoje konto.}
-# Reference: {Enter your JID as "joey@myjabb.org", or choose profile. You should already have an account with this server.}
-::msgcat::mcset pl jaloginjid            {Podaj swój JID w postaci "joey@myjabb.org", lub wybierz profil - zakłada się, że masz już wcześniej założone konto na wskazanym serwerze.}
-# Reference: {Enter your Jabber ID as "joey@myjabb.org", or choose a profile. You should already have a Jabber ID.}
+# Reference: {Enter your account as "user@example.org", or choose a profile. You should already have an account.}
 # Translate, find in sources: jabber/Login.tcl:123
-::msgcat::mcset pl jaloginjid2           {Enter your Jabber ID as "joey@myjabb.org", or choose a profile. You should already have a Jabber ID.}
+::msgcat::mcset pl jaloginjid3           {Enter your account as "user@example.org", or choose a profile. You should already have an account.}
 # Reference: {Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
 ::msgcat::mcset pl jaloginjidpure        {Enter your JID as "joey@myjabb.org". You should already have an account with this server.}
 # Reference: {Enter your username and password to login to %s.}
 ::msgcat::mcset pl jaloginuser           {Podaj login i hasło by zalogować się w %s.}
-# Reference: {Enter your nickname and press Enter to go into the room. You may Browse to get the available rooms for the specific service.	Members only room may require a password.}
-::msgcat::mcset pl jamucentermsg         {Aby wejść do pokoju, podaj swój pseudonim i naciśnij <Enter>. Z pomocą przeglądarki ("Zasoby") można uzyskać listę dostępnych pokoi. Pokoje "tylko dla zaproszonych" mogą wymagać hasła.}
-# Reference: {Write jabber server ip number or name. Pick your username and password.}
-::msgcat::mcset pl janewaccount          {Podaj nazwę lub adres IP serwera Jabbera, alb wskaż w menu. Wybierz nazwę użytkownika ("login"), i hasło.}
-# Reference: {Set new password for:}
+# Reference: {Select a service, and enter a chatroom and nickname. You can discover the available chatrooms on the selected service. Some chatrooms may require a password.}
+# Translate, find in sources: jabber/Enter.tcl:116
+::msgcat::mcset pl jamucentermsg2        {Select a service, and enter a chatroom and nickname. You can discover the available chatrooms on the selected service. Some chatrooms may require a password.}
+# Reference: {Set a new password for}
 ::msgcat::mcset pl janewpass             {Ustaw nowe hasło dla:}
 # Reference: {Select an image file for the background. To remove a background image press Remove and Save.}
 # Translate, find in sources: jabber/Disco.tcl:888 jabber/RosterTree.tcl:584
 ::msgcat::mcset pl jaopenbgimage         {Select an image file for the background. To remove a background image press Remove and Save.}
-# Reference: {You are already registered with this service. These are your current settings of your registration parameters.}
-::msgcat::mcset pl jaregalready          {Wygląda na to, że rejestracji dokonano już uprzednio - oto bieżące ustawienia Twoich danych rejestracyjnych.}
-# Reference: {Fill in the jabber servers name you want to register with. Then press the Get button to receive the desired registration info. Fill in that info and register.}
-::msgcat::mcset pl jaregisterex          {Podaj nazwę serwera Jabbera, gdzie zamierzasz się zarejestrować, po czym kliknij przycisk "Pobierz", aby pobrać formularz rejestracyjny. Wypełnij go, aby móc dokonać rejestracji.}
-# Reference: {Select a server from the list or manually enter one. Then press Get to retrieve the registration fields and instructions. Complete these fields and hit Register.}
-# Translate, find in sources: jabber/Register.tcl:249
-::msgcat::mcset pl jaregisterex2         {Select a server from the list or manually enter one. Then press Get to retrieve the registration fields and instructions. Complete these fields and hit Register.}
-# Reference: {Register with the service %s. You may need to press the Get button if not registration info obtained automatically.}
-::msgcat::mcset pl jaregisterexserv      {Rejestracja w serwisie %s. Możliwe, że będzie trzeba kliknąć przycisk Pobierz, jeśli nie przebiegnie automatycznie.}
-# Reference: {Registration for a specific service with this server. If already registered you may alter your personal info with this dialog.}
-::msgcat::mcset pl jaregmsg              {Rejestracja we wskazanym serwisie niniejszego serwera. Jeśli została już dokonana uprzednio - można w tym momencie zmodyfikować wpisane wtedy dane.}
+# Reference: {You are already registered with this service. These are your current registration settings.}
+# Translate, find in sources: jabber/JForms.tcl:269
+::msgcat::mcset pl jaregalready2         {You are already registered with this service. These are your current registration settings.}
+# Reference: {Select a server from the list or manually enter one. Then press Next to retrieve the registration instructions. Follow the instructions and hit Register.}
+# Translate, find in sources: jabber/Register.tcl:257
+::msgcat::mcset pl jaregisterex3         {Select a server from the list or manually enter one. Then press Next to retrieve the registration instructions. Follow the instructions and hit Register.}
+# Reference: {Register with the service %s. You may need to press the Next button to retrieve the registration instructions.}
+# Translate, find in sources: jabber/Register.tcl:255
+::msgcat::mcset pl jaregisterexserv2     {Register with the service %s. You may need to press the Next button to retrieve the registration instructions.}
+# Reference: {Register to a service. If you are already registered to this service, you can update your registration here.}
+# Translate, find in sources: jabber/Register.tcl:998 jabber/Register.tcl:1271
+::msgcat::mcset pl jaregmsg2             {Register to a service. If you are already registered to this service, you can update your registration here.}
 # Reference: {Do you want to register a new account with %s.}
 ::msgcat::mcset pl jaregnewwith          {Czy chcesz założyć nowe konto na %s.}
-# Reference: {Add a jabber user to my roster. Nickname and group may be set or changed at any time. To add a user from a foreign IM system you must have an account already on that system, and that you use it when registering with the Jabber servers transport or gateway.}
-::msgcat::mcset pl jarostadd             {Dodaj użytkownika sieci Jabber do listy. Pseudonim i grupa mogą być w dowolnej chwili nadane lub zmienione. Aby móc dodać użytkownika innego niż Jabber systemu IM, musisz mieć w tymże systemie wcześniej już założone konto, i użyć go najpierw w trakcie rejestracji w transporcie (lub bramie) do tego serwisu IM, udostępnianym przez serwera Jabbera.}
 # Reference: {Select the chat system and contact ID of the contact you would like to add. Nickname and group are optional and can be set or changed later.}
 ::msgcat::mcset pl jarostadd2            {Select the chat system and contact ID of the contact you would like to add. Nickname and group are optional and can be set or changed later.}
-# Reference: {Set nickname and group of user "%s" to what you want. They may be set or changed at any time later.}
-::msgcat::mcset pl jarostset             {Pseudonim i grupę użytkownika "%s" możesz ustawić dowolnie - w każdej chwili będzie można jeszcze to zmienić.}
-# Reference: {Edit nickname and group of contact "%s". You also can request or remove presence subscription.}
-# Translate, find in sources: jabber/JUser.tcl:517
-::msgcat::mcset pl jarostset2            {Edit nickname and group of contact "%s". You also can request or remove presence subscription.}
-# Reference: {Subscribe to this user}
-::msgcat::mcset pl jarostsub             {Wystąp o autoryzację}
+# Reference: {Edit nickname and group of %s. You also can request or remove presence subscription.}
+# Translate, find in sources: jabber/JUser.tcl:525
+::msgcat::mcset pl jarostset2            {Edit nickname and group of %s. You also can request or remove presence subscription.}
 # Reference: {Request presence subscription}
-# Translate, find in sources: jabber/JUser.tcl:570
+# Translate, find in sources: jabber/JUser.tcl:578
 ::msgcat::mcset pl jarostsub2            {Request presence subscription}
-# Reference: {Unsubscribe to this user}
-::msgcat::mcset pl jarostunsub           {Zrezygnuj z autoryzacji}
 # Reference: {Remove presence subscription}
-# Translate, find in sources: jabber/JUser.tcl:575
+# Translate, find in sources: jabber/JUser.tcl:583
 ::msgcat::mcset pl jarostunsub2          {Remove presence subscription}
 # Reference: {The roster is up to date}
 ::msgcat::mcset pl jarostupdate          {Lista kontaktów wczytana}
-# Reference: {Search user with the specified service. Press the Get button if you want a new form to fill in.}
-::msgcat::mcset pl jasearch              {Znajdź użytkownika z pomocą wybranego serwisu. Kliknij przycisk "pobierz", aby ponownie wypełnić formularz .}
-# Reference: {Search contact with the specified service. Press the Get button if you want a new form to fill in.}
+# Reference: {Search contacts with the selected service. A new search form will empty the previous one.}
 # Translate, find in sources: jabber/Search.tcl:116
-::msgcat::mcset pl jasearch2             {Search contact with the specified service. Press the Get button if you want a new form to fill in.}
+::msgcat::mcset pl jasearch2             {Search contacts with the selected service. A new search form will empty the previous one.}
 # Reference: {Waiting for Get to be pressed}
 ::msgcat::mcset pl jasearchwait          {Czekam na naciśnięcie "Pobierz"}
-# Reference: {Select iconsets to be used for each group. Each group may be deselected.}
-::msgcat::mcset pl jaseliconset          {Wybierz zestaw ikonek, które będą używane dla poszczególnych grup. Z każdej z tych grup można zdjąć zaznaczenie.}
-# Reference: {Server "%s" responded. Sending authorization information.}
-::msgcat::mcset pl jasendauth            {Odezwał się serwer "%s". Podaję dane do autoryzacji.}
-# Reference: {Server connection closed down.}
-::msgcat::mcset pl jaservclosed          {Połączenie z serwerem zakończone.}
-# Reference: {Set new topic for this room.}
-::msgcat::mcset pl jasettopic2           {Ustaw temat dyskusji w tymże pokoju.}
-# Reference: {Available}
-::msgcat::mcset pl jastatavailable       {Dostępny}
-# Reference: {Away: online, but momentarily away}
-::msgcat::mcset pl jastataway            {"Zaraz wracam": obecny w sieci - chwilowo zajęty}
-# Reference: {Chat: available for immediate contact}
-::msgcat::mcset pl jastatchat            {"Chętnie pogawędzę": można się z nim skontaktować natychmiast}
-# Reference: {DND: do not disturb}
-::msgcat::mcset pl jastatdnd             {"Nie przeszkadzać": wiadomo...}
-# Reference: {Invisible}
-::msgcat::mcset pl jastatinvisible       {Niewidoczny}
-# Reference: {Extended away: online, but inactive a while}
-::msgcat::mcset pl jastatxa              {"Niedostępny": zalogowany w sieci - ale w tej chwili (zapewne) fizycznie nieosiągalny}
-# Reference: {Add "%s" to my roster}
-::msgcat::mcset pl jasubadd              {Dodaj "%s" do listy konatktów}
-# Reference: {Allow "%s" to see my presence}
-::msgcat::mcset pl jasuballow            {Zezwól "%s" na obserwację swojej obecności}
-# Reference: {Get this persons vCard}
-::msgcat::mcset pl jasubgetvcard         {Pobierz e-wizytówkę (vCard) tej osoby}
-# Reference: {Choose from the options below. Picking a nickname and group is optional, and for your personal use only.}
-::msgcat::mcset pl jasubopts             {Wybierz z poniższych opcji - wybór pseudonimu i grupy jest opcjonalny, i wyłącznie do Twego użytku.}
+# Reference: {Select iconsets for each group. A deselected group will use the normal iconset.}
+# Translate, find in sources: jabber/Rosticons.tcl:455
+::msgcat::mcset pl jaseliconset2         {Select iconsets for each group. A deselected group will use the normal iconset.}
 # Reference: {Entering a nickname and group is optional, and for your personal use only.}
 # Translate, find in sources: jabber/Subscribe.tcl:123
 ::msgcat::mcset pl jasubopts2            {Entering a nickname and group is optional, and for your personal use only.}
-# Reference: {Send a message to this person:}
-::msgcat::mcset pl jasubsndmsg           {Wyślij tej osobie wiadomość:}
-# Reference: {The user "%s" wants to subscibe to your presence.}
-::msgcat::mcset pl jasubwant             {Użytkownik "%s" zwraca się do Ciebie z prośbą o autoryzację.}
-# Reference: {Do you want %s to see your presence?}
+# Reference: {May %s see your presence?}
 # Translate, find in sources: jabber/Subscribe.tcl:121
-::msgcat::mcset pl jasubwant2            {Do you want %s to see your presence?}
-# Reference: {The supported image formats are }
+::msgcat::mcset pl jasubwant2            {May %s see your presence?}
+# Reference: {The supported image formats are}
 # Translate, find in sources: jabber/Avatar.tcl:332 jabber/Disco.tcl:889 jabber/RosterTree.tcl:585
-::msgcat::mcset pl jasuppimagefmts       {The supported image formats are }
-# Reference: {Negotiating TLS security...}
-::msgcat::mcset pl jatlsnegot            {Negocjuję szyfrowanie TLS...}
-# Reference: {There is a new version of Coccinella available.}
-::msgcat::mcset pl jaupdatemsg           {Można pobrać nową wersję Coccinelli.}
-# Reference: {The new version is: %s}
-::msgcat::mcset pl jaupdatenewver        {Nowa wersja to: %s}
-# Reference: {This update is %s}
-::msgcat::mcset pl jaupdatepri           {Aktualizacja to %s}
-# Reference: {Don't remind me about this anymore}
-::msgcat::mcset pl jaupdateremind        {Więcej nie zawracaj mi tym głowy}
-# Reference: {The present version is: %s}
-::msgcat::mcset pl jaupdatevers          {Obecna wersja: %s}
-# Reference: {Add your personal notes about this user}
-::msgcat::mcset pl jauserinnote          {Możesz o tym użytkowniku napisać coś "od siebie"}
-# Reference: {Version information for %s}
+::msgcat::mcset pl jasuppimagefmts       {The supported image formats are}
+# Reference: {Negotiating TLS security}
+# Translate, find in sources: jabber/Login.tcl:675
+::msgcat::mcset pl jatlsnegot2           {Negotiating TLS security}
+# Reference: {Add your personal notes about this contact.}
+# Translate, find in sources: jabber/UserInfo.tcl:426
+::msgcat::mcset pl jauserinnote2         {Add your personal notes about this contact.}
+# Reference: {Version information for %s.}
 ::msgcat::mcset pl javersinfo            {Informacja o wersji: %s}
-# Reference: {Waiting for disco result...}
+# Reference: {Waiting for disco result}
 ::msgcat::mcset pl jawaitdisco           {Czekam na wyniki przeszukiwania...}
-# Reference: {Contacted %s. Waiting for response...}
+# Reference: {Contacted %s. Waiting for response}
 ::msgcat::mcset pl jawaitresp            {Nawiązujemy połączenie z %s. Czekamy na odzew...}
-# Reference: {Waiting for server response...}
+# Reference: {Waiting for server response}
 ::msgcat::mcset pl jawaitserver          {Czekam na odpowiedź serwera...}
-# Reference: {Connected to "%s". Initializing the XML stream...}
+# Reference: {Downloading configuration form}
+# Translate, find in sources: jabber/Create.tcl:341
+::msgcat::mcset pl jawaitform            {Downloading configuration form}
+# Reference: {Connected to %s. Initializing the XML stream}
 ::msgcat::mcset pl jawaitxml             {Połączony z "%s". Inicjalizacja strumienia danych XML...}
-# Reference: {Labels with (*) are required}
+# Reference: {Labels with (*) are required.}
 ::msgcat::mcset pl jaxformreq            {Wymaga się etykiet zawierających znak (*)}
 
-
-# Reference: {This dialog makes available a number of options and actions for a room. Your role and affiliation determines your privilege to act.Further restrictions may exist depending on specific room configuration.}
-::msgcat::mcset pl InfoRoomDesc          {Tu udostępnia się możliwość podejmowania rozmaitych akcji i zmiany ustawień - dostępnych w danym pokoju. Ich dostępność zależy od Twojej bieżącej roli i przypisania. Inne ograniczenia mogą zależeć od jakichś specyficznych ustawień pokoju.}
-
 # Setup assistant:
-# Reference: {This is a setup assistant to help you fill in the necessary things that is needed for a new or an existing account on a Jabber server.}
-::msgcat::mcset pl suintro1              {Pomocnik Konfiguracyjny (Asystent Ustawień) pomoże dokonać wpisów niezbędnych w celu założenia nowego konta Jabberowego, lub korzystania z już istniejącego.}
-# Reference: {Any time you may press the Previous button to go back. Follow the instructions on each page, and press the Next button until finished.}
-::msgcat::mcset pl suintro3              {W każdej chwili możesz cofnąć się klikając przycisk "Poprzedni". Kieruj się instrukcjami znalezionymi na każdej stronie, klikając przycisk "Następny" aż do zakończenia konfiguracji.}
-# Reference: {Pick a language catalog. If you change the language catalog this will only affect interface elements created after it has been set.}
-::msgcat::mcset pl sulang                {Wskaż katalog z wersjami językowymi. Jeśli dokonasz zmiany katalogu, wpłynie ona jedynie na te elementy interfejsu użytkownika, które zostały utworzone po tej zmianie.}
-# Reference: {Fill in the name of the Jabber server you wish to have your account on. If you already have an existing account on a Jabber server, fill in the name of that server.  A typical name is "jabber.org".}
-::msgcat::mcset pl suservmsg             {Podaj nazwę serwera Jabbera, na którym chcesz mieć konto; podaj tę nazwę także w przypadku, jeżeli już masz tamże założone jakieś konto. Typowa postać nazwy to np. "jabber.org".}
-# Reference: {Fill in your username and password. The username must not exist at the specified server, unless you are already registered.  If the username is already in use by another, you will receive a note about this when trying to register.}
-::msgcat::mcset pl suusermsg             {Wpisz nazwę użytkownika ("login") i hasło. Nazwa ta nie może być w użyciu na wskazanym serwerze - chyba, że chodzi o Twoje konto, wcześniej już założone. Jeśli zaś tej nazwy używa już ktoś inny, zostaniesz o tym poinformowany w trakcie próby założenia konta.}
-# Reference: {Do you want to register your account now if it is a new one? You must already be connected to a network (without firewall) to register.}
-::msgcat::mcset pl suregmsg              {Jeśli podana nazwa zostanie rozpoznana jako "nieużywana" - czy chcesz założyć nowe konto? Aby móc konto założyć, musisz uprzednio podłączyć się do sieci, usuwając ew. blokady połączenia z serwerem Jabbera.}
-# Reference: {That's all. Also, be nice to the bug ;-)}
-::msgcat::mcset pl sufinmsg              {To wszystko. Aha, i pamiętaj: bądź miły dla Biedroneczki... ;-)}
-# Reference: {Coccinella Setup Assistant}
-::msgcat::mcset pl suheadtxt             {Pomocnik Konfiguracyjny Coccinelli}
-# Reference: {Get list of public and open Jabber servers}
-::msgcat::mcset pl supubserv             {Pobierz listę publicznych, dostępnych dla każdego serwerów Jabbera}
-# Reference: {List of open Jabber servers}
-::msgcat::mcset pl suservlist            {Lista powszechnie dostępnych serwerów}
-
+# Reference: {This setup assistant will help you to configure the most important settings to get started with %s.}
+# Translate, find in sources: jabber/SetupAss.tcl:100
+::msgcat::mcset pl suintro1a             {This setup assistant will help you to configure the most important settings to get started with %s.}
+# Reference: {Any time you can press Previous to go back. Press Next to proceed.}
+# Translate, find in sources: jabber/SetupAss.tcl:102
+::msgcat::mcset pl suintro3a             {Any time you can press Previous to go back. Press Next to proceed.}
+# Reference: {Choose your language}
+# Translate, find in sources: jabber/SetupAss.tcl:113
+::msgcat::mcset pl sulang2               {Choose your language}
+# Reference: {Select or enter a server you wish to have your account on. If you already have an account, use the server of this account.}
+# Translate, find in sources: jabber/SetupAss.tcl:134 jabber/SetupAss.tcl:292
+::msgcat::mcset pl suservmsg2            {Select or enter a server you wish to have your account on. If you already have an account, use the server of this account.}
+# Reference: {Enter your username and password. If the chosen username is already in use by someone else, you will not be able to register.}
+# Translate, find in sources: jabber/SetupAss.tcl:163
+::msgcat::mcset pl suusermsg2            {Enter your username and password. If the chosen username is already in use by someone else, you will not be able to register.}
+# Reference: {Click on the button below to create a new account. You must be connected to with the Internet. Pay attention to a possible firewall!}
+# Translate, find in sources: jabber/SetupAss.tcl:191
+::msgcat::mcset pl suregmsg2             {Click on the button below to create a new account. You must be connected to with the Internet. Pay attention to a possible firewall!}
+# Reference: {That's all. Also, be nice to the bug and his friends ;-)}
+# Translate, find in sources: jabber/SetupAss.tcl:206
+::msgcat::mcset pl sufinmsg2             {That's all. Also, be nice to the bug and his friends ;-)}
 
 # Groupchat:
-# Reference: {We got an error when entering room "%s".}
-::msgcat::mcset pl mucErrEnter           {Błąd przy próbie wejścia do pokoju "%s".}
-# Reference: {The error code is %s: %s}
-::msgcat::mcset pl mucErrCode            {Kod błędu: %s: %s}
-# Reference: {Error Enter Room}
-::msgcat::mcset pl mucErrEnterTitle      {Błąd przy próbie wejścia}
-# Reference: {Invitation to %s to join room %s failed.}
-::msgcat::mcset pl mucErrInvite          {Nieudana próba zaproszenie %s do pokoju %s.}
-# Reference: {Error message: %s}
-::msgcat::mcset pl mucErrInviteCode      {Błąd: %s}
-# Reference: {You have received an invitation from %s to join a groupchat in the room %s.}
-::msgcat::mcset pl mucInviteText         {%s zaprasza Cię do konferencji w pokoju %s.}
-# Reference: {The reason: %s}
-::msgcat::mcset pl mucInviteReason       {Przyczyna: %s}
-# Reference: {The password "%s" is needed for entry.}
+# Reference: {Ban %s from the chatroom %s.}
+# Translate, find in sources: jabber/MUC.tcl:782
+::msgcat::mcset pl mucBan2               {Ban %s from the chatroom %s.}
+# Reference: {Converting Chat into Conference}
+::msgcat::mcset pl mucChat2ConfInv       {Zamiana rozmowy w konferencję}
+# Reference: {Do you want to destroy the chatroom %s? Optionally, you can point present chatroom participants to an alternative chatroom and tell why the chatroom is destroyed.}
+# Translate, find in sources: jabber/MUC.tcl:1556
+::msgcat::mcset pl mucDestroy2           {Do you want to destroy the chatroom %s? Optionally, you can point present chatroom participants to an alternative chatroom and tell why the chatroom is destroyed.}
+# Reference: {Cannot enter chatroom %s.}
+# Translate, find in sources: jabber/Create.tcl:749 jabber/Enter.tcl:678
+::msgcat::mcset pl mucErrEnter2          {Cannot enter chatroom %s.}
+# Reference: {Cannot invitate %s to %s.}
+# Translate, find in sources: jabber/MUC.tcl:261
+::msgcat::mcset pl mucErrInvite2         {Cannot invitate %s to %s.}
+# Reference: {%s invites you to join chatroom %s.}
+# Translate, find in sources: jabber/MUC.tcl:309
+::msgcat::mcset pl mucInviteText2        {%s invites you to join chatroom %s.}
+# Reference: {The password %s is needed for entry.}
 ::msgcat::mcset pl mucInvitePass         {Do wejścia będzie potrzebne podanie hasła: "%s".}
 # Reference: {Do you want to join right away?}
 ::msgcat::mcset pl mucInviteQuest        {Chcesz się przyłączyć teraz-zaraz?}
-# Reference: {Invitation}
-::msgcat::mcset pl mucInvite             {Zaproszenie}
-# Reference: {You are about to destroy the room "%s". Optionally you may give any present room participants an alternative room JID and a reason.}
-::msgcat::mcset pl mucDestroy            {Zamierzasz zlikwidować pokój "%s". Możesz również przekazać któremukolwiek z obecnych uczestników alternatywny adres JID pokoju, wyjaśniając, o co chodzi.}
-# Reference: {We received an error when interaction with the room "%s": %s}
-::msgcat::mcset pl mucIQError            {Problem przy próbie podjęcia działania. Pokój: "%s", błąd: %s}
-# Reference: {Converting Chat into Conference}
-::msgcat::mcset pl mucChat2ConfInv       {Zamiana rozmowy w konferencję}
+# Reference: {Cannot interact with the chatroom %s.}
+# Translate, find in sources: jabber/GroupChat.tcl:2416 jabber/MUC.tcl:1668 jabber/MUC.tcl:1689
+::msgcat::mcset pl mucIQError2           {Cannot interact with the chatroom %s.}
+# Reference: {Kick %s from the chatroom %s.}
+# Translate
+::msgcat::mcset pl mucKick               {Kick %s from the chatroom %s.}
 
-# Reference: {Getting vCard from user %s. Waiting for server response...}
-::msgcat::mcset pl vcardget              {Pobieranie e-wizytówki (vCard) użytkownika %s. Czekam na odzew serwera...}
-# Reference: {Failed getting the vCard. The result was: %s}
-::msgcat::mcset pl vcarderrget           {Nieudane pobranie e-wizytówki. Rezultat: %s}
-# Reference: {vCard data received.}
-::msgcat::mcset pl vcardrec              {Odebrano dane e-wizytówki (vCard).}
+# Reference: {Downloading business card from %s}
+# Translate, find in sources: jabber/UserInfo.tcl:128 jabber/VCard.tcl:80
+::msgcat::mcset pl vcardget2             {Downloading business card from %s}
+# Reference: {Cannot download business card.}
+# Translate, find in sources: jabber/UserInfo.tcl:313 jabber/VCard.tcl:100
+::msgcat::mcset pl vcarderrget2          {Cannot download business card.}
+# Reference: {Business card downloaded.}
+# Translate, find in sources: jabber/VCard.tcl:107
+::msgcat::mcset pl vcardrec2             {Business card downloaded.}
 
 
 
 # Reference: {Automatically check for updates}
 # Translate, find in sources: components/AutoUpdate.tcl:255
 ::msgcat::mcset pl autoupdatedo          {Automatically check for updates}
-# Reference: {Let user %s download a file from your built in server. The description is optional.}
-::msgcat::mcset pl oobmsg                {Pozwól użytkownikowi %s pobrać plik z Twojego serwera wewnętrznego. Ewentualnie możesz opisać zdarzenie.}
+# Reference: {Send a file to %s. A description is optional.}
+# Translate, find in sources: jabber/FTrans.tcl:197 jabber/OOB.tcl:122
+::msgcat::mcset pl oobmsg2               {Send a file to %s. A description is optional.}
 
 # Composing events
 # Reference: {%s is composing a reply}
@@ -2640,30 +2347,32 @@ namespace eval ::EditShortcuts:: {
 
 
 # Get file
+# Note to translators: these strings are marked EOL (EndOfLife) since the file transfer protocol will be changed.
 # Reference: {Contacting %s. Waiting for response...}
 ::msgcat::mcset pl getcontacting         {Nawiązywanie kontaktu z %s. Czekam na odzew...}
 # Reference: {Connection to %s failed: received an eof.}
 ::msgcat::mcset pl geteoferr             {Nieudane połączenie z %s: odebrano znak EOF.}
 # Reference: {Connection to %s failed.}
 ::msgcat::mcset pl getconnerr            {Nieudane połączenie z %s.}
-# Reference: {Client contacted: %s; negotiating...}
+# Reference: {Contacted %s. Negotiating...}
 ::msgcat::mcset pl getnegotiate          {Nawiązano kontakt z %s; negocjacja połączenia...}
-# Reference: {Error reading server response from %s.}
+# Reference: {Cannot read server response from %s.}
 ::msgcat::mcset pl getreaderr            {Błędy w trakcie odbioru odpowiedzi serwera %s.}
-# Reference: {The server at %s didn't respond with a well formed protocol.}
+# Reference: {The server at %s did not respond with a well formed protocol.}
 ::msgcat::mcset pl getunknownprot        {Serwer %s nie posłużył się znanym mi protokołem}
-# Reference: {The server at %s responded with a code %s: "%s"}
+# Reference: {Received response of the server %s.\n Error code %s\nMessage: %s}
 ::msgcat::mcset pl getnot200             {Serwer %s odpowiedział kodem %s: "%s"}
-# Reference: {Client at %s accepted file "%s". Starts transfer...}
+# Reference: {%s accepted file %s. Initiating file transfer...}
 ::msgcat::mcset pl getstarts             {Klient %s udostępnił plik "%s". Uruchamiam transfer...}
 # Reference: {Transfer from %s ended prematurely.}
 ::msgcat::mcset pl getended              {Przesyłka od %s przedwcześnie zakończona.}
-# Reference: {Finished getting file "%s" from %s.}
+# Reference: {Finished downloading file %s from %s.}
 ::msgcat::mcset pl getfinished           {Zakończono pobieranie pliku "%s" od %s.}
-# Reference: {Network error when getting from %s.}
+# Reference: {Cannot download from %s: network error.}
 ::msgcat::mcset pl getneterr             {Błąd sieciowy w trakcie pobierania od %s.}
 
 # Put file
+# Note to translators: these strings are marked EOL (EndOfLife) since the file transfer protocol will be changed.
 # Reference: {Contacting %s. Waiting for response...}
 ::msgcat::mcset pl putcontacting         {Próba kontaktu z %s. Czekam na odzew...}
 # Reference: {Connection to %s failed: received an eof.}
@@ -2674,7 +2383,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl putnegotiate          {Nawiązano kontakt z %s; negocjacja połączenia...}
 # Reference: {Error reading server response from %s.}
 ::msgcat::mcset pl putreaderr            {Błędy w trakcie odbioru odpowiedzi serwera %s.}
-# Reference: {The server at %s didn't respond with a well formed protocol.}
+# Reference: {The server at %s did not respond with a well formed protocol.}
 ::msgcat::mcset pl putunknownprot        {Serwer %s nie posłużył się znanym mi protokołem.}
 # Reference: {The server at %s responded with a code %s: "%s"}
 ::msgcat::mcset pl putnot200             {Serwer %s odpowiedział kodem %s: "%s"}
@@ -2707,6 +2416,7 @@ namespace eval ::EditShortcuts:: {
 # Reference: {Forward to...}
 ::msgcat::mcset pl phoneDialerForward    {Przekaż do...}
 
+# Note to translators: these strings are not yet activated
 # Reference: {Address Book}
 ::msgcat::mcset pl AddressBook           {Książka adresowa}
 # Reference: {New address book}
@@ -2745,37 +2455,82 @@ namespace eval ::EditShortcuts:: {
 # Reference: {Call VM?}
 ::msgcat::mcset pl callVM                {Call VM?}
 
-# Fore some of these generic names could be used?
+# IAX Phone
+# Note to translators: these strings are not yet activated
+if {0} {
+# Reference: {Codecs}
+::msgcat::mcset pl Codecs                {Kodeki}
+# Reference: {Devices}
+::msgcat::mcset pl Devices               {Urządzenia}
+# Reference: {Filters}
+::msgcat::mcset pl Filters               {Filtry}
 # Reference: {IAX Phone}
-::msgcat::mcset pl iaxPhone              {Telefon IAX}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:101
+::msgcat::mcset pl {IAX Phone}           {IAX Phone}
 # Reference: {IAX Account}
-::msgcat::mcset pl iaxPhoneAccount       {Konto IAX}
-# Reference: {User}
-::msgcat::mcset pl iaxPhoneUser          {Użytkownik}
-# Reference: {Password}
-::msgcat::mcset pl iaxPhonePassword      {Hasło}
-# Reference: {Host}
-::msgcat::mcset pl iaxPhoneHost          {Serwer}
-# Reference: {Cid Number}
-::msgcat::mcset pl iaxPhoneCidNum        {Numer Cid}
-# Reference: {Cid Name}
-::msgcat::mcset pl iaxPhoneCidName       {Nazwa Cid}
-# Reference: {Input Device}
-::msgcat::mcset pl iaxPhoneInputDev      {Urządzenie wejściowe}
-# Reference: {Output Device}
-::msgcat::mcset pl iaxPhoneOutputDev     {Urządzenie wyjściowe}
-# Reference: {AGC}
-::msgcat::mcset pl iaxPhoneAGC           {AGC}
-# Reference: {AAGC}
-::msgcat::mcset pl iaxPhoneAAGC          {AAGC}
-# Reference: {Noise}
-::msgcat::mcset pl iaxPhoneNoise         {Poziom szumu}
-# Reference: {Comfort}
-::msgcat::mcset pl iaxPhoneComfort       {Komfort}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:137
+::msgcat::mcset pl {IAX Account}         {IAX Account}
+    # translation help: http://en.wikipedia.org/wiki/Caller_id
+# Reference: {Caller ID number}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:154
+::msgcat::mcset pl {Caller ID number}    {Caller ID number}
+# Reference: {Caller ID name}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:157
+::msgcat::mcset pl {Caller ID name}      {Caller ID name}
+# Reference: {Microphone}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:193
+::msgcat::mcset pl Microphone            {Microphone}
+# Reference: {Speakers}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:200
+::msgcat::mcset pl Speakers              {Speakers}
+    # translation help: http://en.wikipedia.org/wiki/Automatic_gain_control
+# Reference: {Automatic gain control (AGC)}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:223
+::msgcat::mcset pl {Automatic gain control (AGC)} {Automatic gain control (AGC)}
+# Reference: {Automatically adjust volume levels}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:240
+::msgcat::mcset pl agcTip                {Automatically adjust volume levels}
+    # translation help: http://lists.xiph.org/pipermail/speex-dev/2007-May/005565.html
+# Reference: {Analog automatic gain control (AAGC)}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:225
+::msgcat::mcset pl {Analog automatic gain control (AAGC)} {Analog automatic gain control (AAGC)}
+# Reference: {Can prevent clipping}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:241
+::msgcat::mcset pl {Can prevent clipping} {Can prevent clipping}
+    # translation help: http://en.wikipedia.org/wiki/Noise_reduction
+# Reference: {Noise reduction}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:227
+::msgcat::mcset pl {Noise reduction}     {Noise reduction}
+    # translation help: http://en.wikipedia.org/wiki/Comfort_noise
+# Reference: {Comfort noise}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:229
+::msgcat::mcset pl {Comfort noise}       {Comfort noise}
+# Reference: {Artificial background noise to fill silence}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:242
+::msgcat::mcset pl comfortTip            {Artificial background noise to fill silence}
 # Reference: {Codec}
-::msgcat::mcset pl iaxPhoneCodec         {Kodek}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:256
+::msgcat::mcset pl Codec                 {Codec}
+    # I copied the following descriptions from the websites of these projects; do you think we should ask permission for this?
+# Reference: {iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:272
+::msgcat::mcset pl tooltip-ilbc          {iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
+# Reference: {Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:273
+::msgcat::mcset pl tooltip-speex         {Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
+# Reference: {Standard used in European digital communication systems (ITU-T)}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:274
+::msgcat::mcset pl tooltip-alaw          {Standard used in European digital communication systems (ITU-T)}
+# Reference: {Standard used in digital communication systems in North America and Japan (ITU-T)}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:275
+::msgcat::mcset pl tooltip-ulaw          {Standard used in digital communication systems in North America and Japan (ITU-T)}
+# Reference: {GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
+# Translate, find in sources: components/Phone/IAX/IaxPrefs.tcl:276
+::msgcat::mcset pl tooltip-gsm           {GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
+}
 
 # Messages for Mood XEP
+# bug: this should be M&ood..., but this does not work!
 # Reference: {Mood}
 ::msgcat::mcset pl mMood                 {Samopoczucie}
 # Reference: {Angry}
@@ -2853,29 +2608,66 @@ namespace eval ::EditShortcuts:: {
 # Reference: {worried}
 ::msgcat::mcset pl worried               {zmartwiony}
 
-# Reference: {Mood}
-::msgcat::mcset pl moodDlg               {Samopoczucie}
-# Reference: {Select a mood}
-::msgcat::mcset pl selectCustomMood      {Wskaż nastrój}
-# Reference: {Reason for mood}
-::msgcat::mcset pl moodMessage           {Przyczyna nastroju}
-# Reference: {Custom mood}
-::msgcat::mcset pl mCustomMood           {Inny rodzaj nastroju}
-
-# Reference: {Pick your mood that will be shown to other users.}
-# Translate, find in sources: components/Mood.tcl:278
-::msgcat::mcset pl moodPickMsg           {Pick your mood that will be shown to other users.}
-# Reference: {Only users with clients that understand this protocol will be able to display your mood.}
+# Reference: {Custom Mood}
+# Translate, find in sources: components/Mood.tcl:281
+::msgcat::mcset pl {Custom Mood}         {Custom Mood}
+# Reference: {&Custom Mood...}
 # Translate
-::msgcat::mcset pl moodPickDtl           {Only users with clients that understand this protocol will be able to display your mood.}
+::msgcat::mcset pl mCustomMood...        {&Custom Mood...}
+# Reference: {Select your mood to show to your contacts.}
+# Translate, find in sources: components/Mood.tcl:278
+::msgcat::mcset pl moodPickMsg           {Select your mood to show to your contacts.}
+# Reference: {Only contacts with compatible software will see your mood.}
+# Translate
+::msgcat::mcset pl moodPickDtl           {Only contacts with compatible software will see your mood.}
+
+# More balloonhelp stuff.
+# Reference: {Chat address}
+# Translate, find in sources: jabber/JUser.tcl:150 jabber/Login.tcl:197 jabber/Profiles.tcl:1107 jabber/VCard.tcl:317
+::msgcat::mcset pl tooltip-contactid     {Chat address}
+# Reference: {Group to which this contact should belong to}
+# Translate, find in sources: jabber/JUser.tcl:152
+::msgcat::mcset pl tooltip-group         {Group to which this contact should belong to}
+# Reference: {Your nickname for local display}
+# Translate, find in sources: jabber/Chat.tcl:3412
+::msgcat::mcset pl tooltip-localnick     {Your nickname for local display}
+# Reference: {Number of messages to display}
+# Translate, find in sources: jabber/Chat.tcl:3400
+::msgcat::mcset pl tooltip-historymessages {Number of messages to display}
+# Reference: {Select or manually enter a chatroom service}
+# Translate, find in sources: jabber/Create.tcl:123 jabber/Enter.tcl:177
+::msgcat::mcset pl tooltip-chatroomservice {Select or manually enter a chatroom service}
+# Reference: {Select or manually enter the name of a chatroom}
+# Translate, find in sources: jabber/Create.tcl:124 jabber/Enter.tcl:179
+::msgcat::mcset pl tooltip-chatroomselect {Select or manually enter the name of a chatroom}
+# Reference: {Support for mp3, wav, and a few other audio formats}
+# Translate
+::msgcat::mcset pl tooltip-snack         {Support for mp3, wav, and a few other audio formats}
+# Reference: {Support for common image formats}
+# Translate
+::msgcat::mcset pl tooltip-img           {Support for common image formats}
+# Reference: {Support for PNG images}
+# Translate
+::msgcat::mcset pl tooltip-tkpng         {Support for PNG images}
+# Reference: {Support for several animation, video and audio formats}
+# Translate
+::msgcat::mcset pl tooltip-xanim         {Support for several animation, video and audio formats}
+# Reference: {Support for several animation, image, video and audio formats}
+# Translate
+::msgcat::mcset pl tooltip-QuickTimeTcl  {Support for several animation, image, video and audio formats}
+# Me knows :-)
+# Reference: {Not yet implemented.}
+# Translate, find in sources: jabber/MUC.tcl:1304
+::msgcat::mcset pl matsShouldReplaceThis {Not yet implemented.}
+
 
 # Messages for User Activity XEP
-# Reference: {User Activity}
-# Translate, find in sources: components/UserActivity.tcl:198 components/UserActivity.tcl:431
-::msgcat::mcset pl {User Activity}       {User Activity}
-# Reference: {User Activity...}
+# Reference: {Activity}
+# Translate, find in sources: components/UserActivity.tcl:432
+::msgcat::mcset pl Activity              {Activity}
+# Reference: {Acti&vity...}
 # Translate
-::msgcat::mcset pl mUserActivity...      {User Activity...}
+::msgcat::mcset pl mActivity...          {Acti&vity...}
 
 # Reference: {Traveling}
 # Translate
@@ -2987,7 +2779,7 @@ namespace eval ::EditShortcuts:: {
 # Translate
 ::msgcat::mcset pl {Playing sports}      {Playing sports}
 # Reference: {Running}
-# Translate
+# Translate, find in sources: whiteboard/WDialogs.tcl:175
 ::msgcat::mcset pl Running               {Running}
 # Reference: {Skiing}
 # Translate
@@ -3104,77 +2896,71 @@ namespace eval ::EditShortcuts:: {
 # Translate
 ::msgcat::mcset pl {Having appointment}  {Having appointment}
 
-# Reference: {Set your activity that will be shown to other users.}
-# Translate, find in sources: components/UserActivity.tcl:194
-::msgcat::mcset pl activityPickMsg       {Set your activity that will be shown to other users.}
-# Reference: {Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add an descriptive text.}
+# Reference: {Set your activity that will be shown to your contacts.}
 # Translate, find in sources: components/UserActivity.tcl:195
-::msgcat::mcset pl activityPickDtl       {Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add an descriptive text.}
+::msgcat::mcset pl activityPickMsg       {Set your activity that will be shown to your contacts.}
+# Reference: {Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add a descriptive text.}
+# Translate, find in sources: components/UserActivity.tcl:196
+::msgcat::mcset pl activityPickDtl       {Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add a descriptive text.}
 
 # XEP-0080: User Location
-# Reference: {User Location}
-# Translate, find in sources: components/Geolocation.tcl:156
-::msgcat::mcset pl {User Location}       {User Location}
-# Reference: {Set your geographic location that will be shown to other users.}
-# Translate, find in sources: components/Geolocation.tcl:152
-::msgcat::mcset pl locationPickMsg       {Set your geographic location that will be shown to other users.}
-# Reference: {Enter the information you have available below. A minimal list contains only latitude and longitude.}
+# Reference: {Location}
+# Translate, find in sources: components/fsdialog.tcl:440 components/Geolocation.tcl:157
+::msgcat::mcset pl Location              {Location}
+# Reference: {Locat&ion...}
+# Translate
+::msgcat::mcset pl mLocation...          {Locat&ion...}
+# Reference: {Set your location that will be shown to your contacts.}
 # Translate, find in sources: components/Geolocation.tcl:153
-::msgcat::mcset pl locationPickDtl       {Enter the information you have available below. A minimal list contains only latitude and longitude.}
+::msgcat::mcset pl locationPickMsg       {Set your location that will be shown to your contacts.}
+# Reference: {Enter your location details below. At least you should set latitude and longitude.}
+# Translate, find in sources: components/Geolocation.tcl:154
+::msgcat::mcset pl locationPickDtl       {Enter your location details below. At least you should set latitude and longitude.}
 
+# Note to translators: The commented strings are just there for completeness with the protocol, still not in UI
 # Reference: {Altitude}
-# Translate, find in sources: components/Geolocation.tcl:67
+# Translate, find in sources: components/Geolocation.tcl:68
 ::msgcat::mcset pl Altitude              {Altitude}
 # Reference: {Named Area}
-# Translate, find in sources: components/Geolocation.tcl:68
+# Translate, find in sources: components/Geolocation.tcl:69
 ::msgcat::mcset pl {Named Area}          {Named Area}
 # Reference: {GPS Bearing}
-# Translate, find in sources: components/Geolocation.tcl:69
+# Translate, find in sources: components/Geolocation.tcl:70
 ::msgcat::mcset pl {GPS Bearing}         {GPS Bearing}
 # Reference: {Building}
-# Translate, find in sources: components/Geolocation.tcl:70
+# Translate, find in sources: components/Geolocation.tcl:71
 ::msgcat::mcset pl Building              {Building}
-# Reference: {Country}
-::msgcat::mcset pl Country               {Kraj}
 # Reference: {GPS Datum}
-# Translate, find in sources: components/Geolocation.tcl:72
+# Translate, find in sources: components/Geolocation.tcl:73
 ::msgcat::mcset pl {GPS Datum}           {GPS Datum}
-# Reference: {Description}
-::msgcat::mcset pl Description           {Opis}
 # Reference: {GPS Error}
-# Translate, find in sources: components/Geolocation.tcl:74
+# Translate, find in sources: components/Geolocation.tcl:75
 ::msgcat::mcset pl {GPS Error}           {GPS Error}
 # Reference: {Floor}
-# Translate, find in sources: components/Geolocation.tcl:75
+# Translate, find in sources: components/Geolocation.tcl:76
 ::msgcat::mcset pl Floor                 {Floor}
 # Reference: {Latitude}
-# Translate, find in sources: components/Geolocation.tcl:76
+# Translate, find in sources: components/Geolocation.tcl:77
 ::msgcat::mcset pl Latitude              {Latitude}
 # Reference: {Locality}
-# Translate, find in sources: components/Geolocation.tcl:77
+# Translate, find in sources: components/Geolocation.tcl:78
 ::msgcat::mcset pl Locality              {Locality}
 # Reference: {Longitude}
-# Translate, find in sources: components/Geolocation.tcl:78
-::msgcat::mcset pl Longitude             {Longitude}
-# Reference: {Postalcode}
 # Translate, find in sources: components/Geolocation.tcl:79
-::msgcat::mcset pl Postalcode            {Postalcode}
-# Reference: {Region}
-# Translate, find in sources: components/Geolocation.tcl:80
-::msgcat::mcset pl Region                {Region}
+::msgcat::mcset pl Longitude             {Longitude}
 # Reference: {Room}
 ::msgcat::mcset pl Room                  {Pokój}
 # Reference: {Street}
-# Translate, find in sources: components/Geolocation.tcl:82
+# Translate, find in sources: components/Geolocation.tcl:83
 ::msgcat::mcset pl Street                {Street}
 # Reference: {Text}
 ::msgcat::mcset pl Text                  {Tekst}
 # Reference: {Timestamp}
-# Translate, find in sources: components/Geolocation.tcl:84
+# Translate, find in sources: components/Geolocation.tcl:85
 ::msgcat::mcset pl Timestamp             {Timestamp}
 
-
 # Help strings:
+# Note to translators: The commented strings are just there for completeness with the protocol, still not in UI
 # Reference: {GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north}
 # Translate
 ::msgcat::mcset pl locationBearing       {GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north}
@@ -3230,53 +3016,200 @@ namespace eval ::EditShortcuts:: {
 # Translate
 ::msgcat::mcset pl locationCountry       {The nation where the user is located}
 
-# Reference: {Synchronize your data with Google Earth}
-# Translate, find in sources: components/Geolocation.tcl:189
-::msgcat::mcset pl {Synchronize your data with Google Earth} {Synchronize your data with Google Earth}
+# Reference: {Synchronize with Google Earth}
+# Translate, find in sources: components/Geolocation.tcl:190
+::msgcat::mcset pl {Synchronize with Google Earth} {Synchronize with Google Earth}
 # Reference: {This is location data for}
-# Translate, find in sources: components/Geolocation.tcl:362
+# Translate, find in sources: components/Geolocation.tcl:363
 ::msgcat::mcset pl {This is location data for} {This is location data for}
 
 # Buddy pouncing:
-# Reference: {Set a specific action when something happens with "%s", which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
-# Translate, find in sources: components/BuddyPounce.tcl:157
-::msgcat::mcset pl budpounce-user        {Set a specific action when something happens with "%s", which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
-# Reference: {Set a specific action when something happens with any contact belonging to the group "%s", which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
-# Translate, find in sources: components/BuddyPounce.tcl:163
-::msgcat::mcset pl budpounce-group       {Set a specific action when something happens with any contact belonging to the group "%s", which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
-# Reference: {Set a specific action when something happens with any contact in your contact list, which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
-# Translate, find in sources: components/BuddyPounce.tcl:168
-::msgcat::mcset pl budpounce-any         {Set a specific action when something happens with any contact in your contact list, which can be a changed status, or if you receive a message etc. Pick events using the tabs below.}
-# Reference: {The contact "%s" just went online!}
+# Reference: {Set a specific action for events related to %s. Select events using the tabs below.}
+# Translate, find in sources: components/BuddyPounce.tcl:158
+::msgcat::mcset pl budpounce-user        {Set a specific action for events related to %s. Select events using the tabs below.}
+# Reference: {Set a specific action for events related to any contact belonging to the group %s. Select events using the tabs below.}
+# Translate, find in sources: components/BuddyPounce.tcl:164
+::msgcat::mcset pl budpounce-group       {Set a specific action for events related to any contact belonging to the group %s. Select events using the tabs below.}
+# Reference: {Set a specific action for events related to any contact in your contact list. Select events using the tabs below.}
+# Translate, find in sources: components/BuddyPounce.tcl:169
+::msgcat::mcset pl budpounce-any         {Set a specific action for events related to any contact in your contact list. Select events using the tabs below.}
+# Reference: {%s just went online!}
 # Translate
-::msgcat::mcset pl budpounce-available   {The contact "%s" just went online!}
-# Reference: {The contact "%s" just went offline!}
+::msgcat::mcset pl budpounce-available   {%s just went online!}
+# Reference: {%s just went offline!}
 # Translate
-::msgcat::mcset pl budpounce-unavailable {The contact "%s" just went offline!}
-# Reference: {The contact "%s" just sent you a message!}
+::msgcat::mcset pl budpounce-unavailable {%s just went offline!}
+# Reference: {%s just sent you a message!}
 # Translate
-::msgcat::mcset pl budpounce-msg         {The contact "%s" just sent you a message!}
-# Reference: {The contact "%s" just started a chat!}
+::msgcat::mcset pl budpounce-msg         {%s just sent you a message!}
+# Reference: {%s just started a chat!}
 # Translate
-::msgcat::mcset pl budpounce-chat        {The contact "%s" just started a chat!}
+::msgcat::mcset pl budpounce-chat        {%s just started a chat!}
 # Reference: {Send message with subject}
-# Translate, find in sources: components/BuddyPounce.tcl:259
+# Translate, find in sources: components/BuddyPounce.tcl:260
 ::msgcat::mcset pl budpounce-sendmsg     {Send message with subject}
-# Reference: {Buddy Pouncing}
+# Reference: {&Contact Actions...}
 # Translate
-::msgcat::mcset pl mBuddyPouncing        {Buddy Pouncing}
+::msgcat::mcset pl mContactActions...    {&Contact Actions...}
 
 # Image magic:
-# Reference: {Click on a window in the desktop or drag a rectangular area to import into the current whiteboard.}
-# Translate, find in sources: components/ImageMagic.tcl:111
-::msgcat::mcset pl immagic-msg           {Click on a window in the desktop or drag a rectangular area to import into the current whiteboard.}
-# Reference: {Dangerous in-box path name "%s"}
-# Translate, find in sources: components/ImageMagic.tcl:176
-::msgcat::mcset pl immagic-warn          {Dangerous in-box path name "%s"}
+# Reference: {Click on a window or drag a rectangular area to import a snapshot into the current whiteboard.}
+# Translate, find in sources: components/ImageMagic.tcl:110
+::msgcat::mcset pl immagic-msg           {Click on a window or drag a rectangular area to import a snapshot into the current whiteboard.}
+# Reference: {Dangerous in-box path name: %s}
+# Translate, find in sources: components/ImageMagic.tcl:175
+::msgcat::mcset pl immagic-warn          {Dangerous in-box path name: %s}
 # Reference: {Click OK to remove files: %s}
-# Translate, find in sources: components/ImageMagic.tcl:188
+# Translate, find in sources: components/ImageMagic.tcl:187
 ::msgcat::mcset pl immagic-rem           {Click OK to remove files: %s}
 
+# File Types
+# translation help: http://en.wikipedia.org/wiki/List_of_file_formats
+# Note to translators: these strings have very low priority since the English names can be taken as definitions
+# Reference: {World Application}
+# Translate
+::msgcat::mcset pl {World Application}   {World Application}
+# Reference: {QuickDraw 3D Metafile}
+# Translate
+::msgcat::mcset pl {QuickDraw 3D Metafile} {QuickDraw 3D Metafile}
+# Reference: {Tcl File}
+# Translate
+::msgcat::mcset pl {Tcl File}            {Tcl File}
+# Reference: {Itcl File}
+# Translate
+::msgcat::mcset pl {Itcl File}           {Itcl File}
+# Reference: {Session Description Protocol}
+# Translate
+::msgcat::mcset pl {Session Description Protocol} {Session Description Protocol}
+# Reference: {Adobe Flash Media}
+# Translate
+::msgcat::mcset pl {Adobe Flash Media}   {Adobe Flash Media}
+# Reference: {Mac Binary}
+# Translate
+::msgcat::mcset pl {Mac Binary}          {Mac Binary}
+# Reference: {VTK 3D}
+# Translate
+::msgcat::mcset pl {VTK 3D}              {VTK 3D}
+# Reference: {Generic File}
+# Translate
+::msgcat::mcset pl {Generic File}        {Generic File}
+# Reference: {PDF Document}
+# Translate
+::msgcat::mcset pl {PDF Document}        {PDF Document}
+# Reference: {PostScript Document}
+# Translate
+::msgcat::mcset pl {PostScript Document} {PostScript Document}
+# Reference: {JavaScript File}
+# Translate
+::msgcat::mcset pl {JavaScript File}     {JavaScript File}
+# Reference: {TeX File}
+# Translate
+::msgcat::mcset pl {TeX File}            {TeX File}
+# Reference: {Archive Tar}
+# Translate
+::msgcat::mcset pl {Archive Tar}         {Archive Tar}
+# Reference: {Abi Word Document}
+# Translate
+::msgcat::mcset pl {Abi Word Document}   {Abi Word Document}
+# Reference: {Microsoft Excel Spreadsheet}
+# Translate
+::msgcat::mcset pl {Microsoft Excel Spreadsheet} {Microsoft Excel Spreadsheet}
+# Reference: {Microsoft PowerPoint Presentation}
+# Translate
+::msgcat::mcset pl {Microsoft PowerPoint Presentation} {Microsoft PowerPoint Presentation}
+# Reference: {Microsoft Word Document}
+# Translate
+::msgcat::mcset pl {Microsoft Word Document} {Microsoft Word Document}
+# Reference: {MPEG Audio}
+# Translate
+::msgcat::mcset pl {MPEG Audio}          {MPEG Audio}
+# Reference: {AIFF/Amiga Audio}
+# Translate
+::msgcat::mcset pl {AIFF/Amiga Audio}    {AIFF/Amiga Audio}
+# Reference: {ULAW (Sun) Audio}
+# Translate
+::msgcat::mcset pl {ULAW (Sun) Audio}    {ULAW (Sun) Audio}
+# Reference: {Streaming Audio}
+# Translate
+::msgcat::mcset pl {Streaming Audio}     {Streaming Audio}
+# Reference: {WAV Audio}
+# Translate
+::msgcat::mcset pl {WAV Audio}           {WAV Audio}
+# Reference: {QCP Audio}
+# Translate
+::msgcat::mcset pl {QCP Audio}           {QCP Audio}
+# Reference: {MIDI Audio}
+# Translate
+::msgcat::mcset pl {MIDI Audio}          {MIDI Audio}
+# Reference: {BMP Image}
+# Translate
+::msgcat::mcset pl {BMP Image}           {BMP Image}
+# Reference: {FlashPix Image}
+# Translate
+::msgcat::mcset pl {FlashPix Image}      {FlashPix Image}
+# Reference: {GIF Image}
+# Translate
+::msgcat::mcset pl {GIF Image}           {GIF Image}
+# Reference: {JPEG Image}
+# Translate
+::msgcat::mcset pl {JPEG Image}          {JPEG Image}
+# Reference: {Macpaint Image}
+# Translate
+::msgcat::mcset pl {Macpaint Image}      {Macpaint Image}
+# Reference: {Adobe Photoshop Image}
+# Translate
+::msgcat::mcset pl {Adobe Photoshop Image} {Adobe Photoshop Image}
+# Reference: {PNG Image}
+# Translate
+::msgcat::mcset pl {PNG Image}           {PNG Image}
+# Reference: {PICT Image}
+# Translate
+::msgcat::mcset pl {PICT Image}          {PICT Image}
+# Reference: {SGI Image}
+# Translate
+::msgcat::mcset pl {SGI Image}           {SGI Image}
+# Reference: {Truevision Targa Image}
+# Translate
+::msgcat::mcset pl {Truevision Targa Image} {Truevision Targa Image}
+# Reference: {TIFF Image}
+# Translate
+::msgcat::mcset pl {TIFF Image}          {TIFF Image}
+# Reference: {X PixMap Image}
+# Translate
+::msgcat::mcset pl {X PixMap Image}      {X PixMap Image}
+# Reference: {Plain Text Document}
+# Translate
+::msgcat::mcset pl {Plain Text Document} {Plain Text Document}
+# Reference: {XML Document}
+# Translate
+::msgcat::mcset pl {XML Document}        {XML Document}
+# Reference: {RTF Document}
+# Translate
+::msgcat::mcset pl {RTF Document}        {RTF Document}
+# Reference: {HTML Document}
+# Translate
+::msgcat::mcset pl {HTML Document}       {HTML Document}
+# Reference: {Cascading Style Sheet}
+# Translate
+::msgcat::mcset pl {Cascading Style Sheet} {Cascading Style Sheet}
+# Reference: {QuickTime Video}
+# Translate
+::msgcat::mcset pl {QuickTime Video}     {QuickTime Video}
+# Reference: {MPEG-4 Video}
+# Translate
+::msgcat::mcset pl {MPEG-4 Video}        {MPEG-4 Video}
+# Reference: {DV Video}
+# Translate
+::msgcat::mcset pl {DV Video}            {DV Video}
+# Reference: {MPEG Video}
+# Translate
+::msgcat::mcset pl {MPEG Video}          {MPEG Video}
+# Reference: {Microsoft AVI Video}
+# Translate
+::msgcat::mcset pl {Microsoft AVI Video} {Microsoft AVI Video}
+# Reference: {Autodesk's FLIC File}
+# Translate
+::msgcat::mcset pl {Autodesk's FLIC File} {Autodesk's FLIC File}
 
 # END --------------------------------------------------------------------------
 
