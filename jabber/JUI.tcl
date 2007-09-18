@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.211 2007-09-15 07:43:05 matben Exp $
+# $Id: JUI.tcl,v 1.212 2007-09-18 08:21:46 matben Exp $
 
 package provide JUI 1.0
 
@@ -95,7 +95,8 @@ namespace eval ::JUI:: {
     # Configurations:
     set ::config(url,home) "http://thecoccinella.org"
     set ::config(url,bugs)  \
-      "http://sourceforge.net/tracker/?group_id=68334&atid=520863"
+      "http://sourceforge.net/tracker/?group_id=68334&atid=520863"    
+    #set ::config(url,bugs) "https://bugs.launchpad.net/coccinella"
         
     set ::config(ui,status,menu)        dynamic   ;# plain|dynamic
     set ::config(ui,main,infoLabel)     server    ;# mejid|mejidres|status|server
@@ -921,7 +922,7 @@ proc ::JUI::SetToolbarButtonState {name state} {
     $jwapp(wtbar) buttonconfigure $name -state $state      
 }
 
-proc ::JUI::RosterMoveFromPage { } {
+proc ::JUI::RosterMoveFromPage {} {
     variable jwapp
     upvar ::Jabber::jprefs jprefs
     
@@ -936,7 +937,7 @@ proc ::JUI::RosterMoveFromPage { } {
     set jprefs(ui,main,show,notebook) 0
 }
 
-proc ::JUI::RosterMoveToPage { } {
+proc ::JUI::RosterMoveToPage {} {
     variable jwapp
     upvar ::Jabber::jprefs jprefs
     
@@ -954,7 +955,7 @@ proc ::JUI::RosterMoveToPage { } {
     set jprefs(ui,main,show,notebook) 1
 }
 
-proc ::JUI::OnMenuToggleToolbar { } {
+proc ::JUI::OnMenuToggleToolbar {} {
     variable jwapp
     variable state
     
@@ -967,7 +968,7 @@ proc ::JUI::OnMenuToggleToolbar { } {
     ::hooks::run uiMainToggleToolbar $state(show,toolbar)
 }
 
-proc ::JUI::HideToolbar { } {
+proc ::JUI::HideToolbar {} {
     variable jwapp
     upvar ::Jabber::jprefs jprefs
     
@@ -976,7 +977,7 @@ proc ::JUI::HideToolbar { } {
     set jprefs(ui,main,show,toolbar) 0
 }
 
-proc ::JUI::ShowToolbar { } {
+proc ::JUI::ShowToolbar {} {
     variable jwapp
     upvar ::Jabber::jprefs jprefs
     
@@ -987,7 +988,7 @@ proc ::JUI::ShowToolbar { } {
     set jprefs(ui,main,show,toolbar) 1
 }
 
-proc ::JUI::OnMenuToggleNotebook { } {
+proc ::JUI::OnMenuToggleNotebook {} {
     variable jwapp
     variable state
     
@@ -1000,7 +1001,7 @@ proc ::JUI::OnMenuToggleNotebook { } {
     ::hooks::run uiMainToggleNotebook $state(show,notebook)
 }
 
-proc ::JUI::OnMenuToggleMinimal { } {
+proc ::JUI::OnMenuToggleMinimal {} {
     variable jwapp
     variable state
     upvar ::Jabber::jprefs jprefs
@@ -1012,13 +1013,13 @@ proc ::JUI::OnMenuToggleMinimal { } {
     ::hooks::run uiMainToggleMinimal $state(show,minimal)
 }
 
-proc ::JUI::GetMainWindow { } {
+proc ::JUI::GetMainWindow {} {
     global wDlgs
     
     return $wDlgs(jmain)
 }
 
-proc ::JUI::GetMainMenu { } {
+proc ::JUI::GetMainMenu {} {
     variable jwapp
     
     return $jwapp(wmenu)
@@ -1105,7 +1106,7 @@ proc ::JUI::CloseHook {wclose} {
     return $result
 }
 
-proc ::JUI::QuitHook { } {
+proc ::JUI::QuitHook {} {
     variable jwapp
 
     if {[info exists jwapp(jmain)]} {
@@ -1118,7 +1119,7 @@ proc ::JUI::SetPresenceHook {type args} {
     # empty for the moment
 }
 
-proc ::JUI::RosterIconsChangedHook { } {
+proc ::JUI::RosterIconsChangedHook {} {
     variable jwapp
     upvar ::Jabber::jstate jstate
     
@@ -1128,7 +1129,7 @@ proc ::JUI::RosterIconsChangedHook { } {
     }
 }
 
-proc ::JUI::RosterSelectionHook { } {
+proc ::JUI::RosterSelectionHook {} {
     variable jwapp
     
     set wtbar $jwapp(wtbar)
@@ -1145,7 +1146,7 @@ proc ::JUI::RosterSelectionHook { } {
     $wtbar buttonconfigure chat -state $state    
 }
 
-proc ::JUI::LoginHook { } {
+proc ::JUI::LoginHook {} {
     variable jwapp
     
     # The Login/Logout button strings may have different widths.
@@ -1155,7 +1156,7 @@ proc ::JUI::LoginHook { } {
     wm minsize $w $minW 300    
 }
 
-proc ::JUI::LogoutHook { } {
+proc ::JUI::LogoutHook {} {
     
     SetStatusMessage [mc {Logged out}]
     FixUIWhen "disconnect"
@@ -1165,25 +1166,25 @@ proc ::JUI::LogoutHook { } {
     StartStopAnimatedWave 0
 }
     
-proc ::JUI::GetRosterWmenu { } {
+proc ::JUI::GetRosterWmenu {} {
     variable jwapp
 
     return $jwapp(wmenu)
 }
 
-proc ::JUI::OpenCoccinellaURL { } {
+proc ::JUI::OpenCoccinellaURL {} {
     global  config
     
     ::Utils::OpenURLInBrowser $config(url,home)
 }
 
-proc ::JUI::OpenBugURL { } {
+proc ::JUI::OpenBugURL {} {
     global  config
     
     ::Utils::OpenURLInBrowser $config(url,bugs)
 }
 
-proc ::JUI::GetNotebook { } {
+proc ::JUI::GetNotebook {} {
     variable jwapp
     
     return $jwapp(notebook)
@@ -1553,7 +1554,7 @@ proc ::JUI::FixUIWhen {what} {
     }
 }
 
-proc ::JUI::InitPrefsHook { } {
+proc ::JUI::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
 
     set jprefs(ui,main,show,toolbar)  1

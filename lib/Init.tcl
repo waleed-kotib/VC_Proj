@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.73 2007-09-14 08:11:46 matben Exp $
+# $Id: Init.tcl,v 1.74 2007-09-18 08:21:46 matben Exp $
 
 namespace eval ::Init {
     
@@ -465,7 +465,7 @@ proc ::Init::SetThisVersion {} {
     # default file, never read.
     set this(vers,major)    0
     set this(vers,minor)   96
-    set this(vers,release)  1
+    set this(vers,release)  2
     set this(vers,full) $this(vers,major).$this(vers,minor).$this(vers,release)
 
     # This is used only to track upgrades.

@@ -67,24 +67,9 @@ Additional Notes:
       data may "get stuck" in the server if karma is too low. This only
       happend if you does a lot of drawings in a short period of time.
 
-Removable Drives:
-
-    You can have the Coccinella application on a USB stick, or similar device,
-    and keep the complete preferences etc. on this device without touching
-    the normal drive (not implemented on linux). If you want this to be 
-    effective already when you start Coccinella, just make an empty file on this
-    drive as indicated below:
-
-    G:\CoccinellaPrefs\WBPREFS.TXT        (Windows)
-    "/CoccinellaPrefs/Whiteboard Prefs"   (Mac OS X; no quotes)
-
-    You may also do this switch from the Preferences settings, the General
-    panel.
-
 Documentation:
 
-    The source code is the only documentation. At least so far ;-)
-    See also the Info/Help menu.
+    See the home site for current info: http://coccinella.im
 
     There are a few additional README files, README-sounds, README-resources,
     which may be helpful if you want to do customization.
@@ -180,14 +165,14 @@ XML/SVG:
 Distribution:
 
     It is distributed under the standard GPL license.
-    (c) Copyright by Mats Bengtsson (1999-2005).
+    (c) Copyright by Mats Bengtsson (1999-2007).
     Whiteboard tool buttons are stolen from Gimp and slightly changed (Thank You!).
     Other graphics elements, see README-Crystal-icons.
 
 Home:
 
     The present home of the Coccinella is at
-    "http://thecoccinella.org", where links to the extensions also 
+    "http://coccinella.im", where links to the extensions also 
     can be found.
     Look at "http://coccinella.sourceforge.net" which is the official
     developer home.
@@ -201,7 +186,5 @@ Who:
     It has been developed by:
     Mats Bengtsson   
     matben@users.sourceforge.net
-
-    MADE IN SWEDEN
 
 --------------------------------------------------------------------------------
