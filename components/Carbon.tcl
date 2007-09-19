@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.10 2007-09-15 13:16:12 matben Exp $
+# $Id: Carbon.tcl,v 1.11 2007-09-19 07:21:30 matben Exp $
 # 
 # @@@ Move the sleep stuff to something more generic.
 
@@ -113,7 +113,11 @@ proc ::Carbon::Sleep {type} {
 	wakeup {
 	    if {$wasSleepLoggedOut && $jprefs(sleeplogin)} {
 		if {![::Jabber::IsConnected]} {
-		    ::Login::LoginCmd
+		    
+		    # We must give the system (WiFi) some time to setup the
+		    # network before loggin in. Some kind of trying multiple
+		    # times would be better...
+		    after 5000 ::Login::LoginCmd
 		}
 	    }
 	}
