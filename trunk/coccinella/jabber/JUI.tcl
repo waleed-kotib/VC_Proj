@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.212 2007-09-18 08:21:46 matben Exp $
+# $Id: JUI.tcl,v 1.213 2007-09-19 12:52:43 matben Exp $
 
 package provide JUI 1.0
 
@@ -1380,13 +1380,13 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	
 	switch -- [GetConnectState] {
 	    connectinit {
-		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
-		  -label [mc mLogout]
+		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal \
+		  -label mLogout
 	    }
 	    connectfin - connect {
 		::UI::MenuMethod $wmenu entryconfigure mRegister... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
-		  -label [mc mLogout]
+		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal \
+		  -label mLogout
 		::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state normal
 		::UI::MenuMethod $wmenu entryconfigure mSearch... -state normal
 		::UI::MenuMethod $wmenu entryconfigure mAddContact... -state normal
@@ -1402,10 +1402,10 @@ proc ::JUI::ActionPostCommand {wmenu} {
 		::UI::MenuMethod $wmenu entryconfigure mRegister... -state disabled
 		if {[llength [ui::findalltoplevelwithclass JProfiles]]} {
 		    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state disabled  \
-		      -label [mc mLogin...]
+		      -label mLogin...
 		} else {
 		    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
-		      -label [mc mLogin...]
+		      -label mLogin...
 		}
 		::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state disabled
 		::UI::MenuMethod $wmenu entryconfigure mSearch... -state disabled

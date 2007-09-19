@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AMenu.tcl,v 1.8 2007-09-12 07:20:46 matben Exp $
+# $Id: AMenu.tcl,v 1.9 2007-09-19 12:52:43 matben Exp $
 
 package provide AMenu 1.0
 
@@ -148,14 +148,22 @@ proc ::AMenu::GetMenuIndexArray {m} {
 proc ::AMenu::EntryConfigure {m mLabel args} {
     variable menuIndex
     
+    array set argsA $args
     if {[tk windowingsystem] eq "aqua"} {
-	set idx [lsearch $args -image]
-	if {$idx >= 0} {
-	    set args [lreplace $args $idx [expr {$idx+1}]]
+	unset -nocomplain argsA(-image)
+    }
+    if {[info exists argsA(-label)]} {
+	set name $argsA(-label)
+	set lname [mc $name]
+	set ampersand [string first & $lname]
+	if {$ampersand != -1} {
+	    regsub -all & $lname "" lname
+	    set argsA(-underline) $ampersand
 	}
+	set argsA(-label) $lname
     }
     set index $menuIndex($m,$mLabel)
-    eval {$m entryconfigure $index} $args
+    eval {$m entryconfigure $index} [array get argsA]
 }
 
 proc ::AMenu::EntryExists {m mLabel} {
