@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.83 2007-09-14 13:17:09 matben Exp $
+# $Id: Whiteboard.tcl,v 1.84 2007-09-19 07:12:15 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -196,7 +196,7 @@ namespace eval ::WB:: {
 #       There is a global 'state' array which contains a generic state
 #       that is inherited by instance specific 'state' array '::WB::${w}::state'
 
-proc ::WB::InitPrefsHook { } {
+proc ::WB::InitPrefsHook {} {
     global  prefs this
     variable gstate
     
@@ -364,7 +364,7 @@ proc ::WB::InitIcons {w} {
     set wbicons(bwrect)  [::WB::GetThemeImage [option get $w bwrectImage {}]]
 }
 
-proc ::WB::CreateToolImages { } {
+proc ::WB::CreateToolImages {} {
     global  this
     variable iconsPreloaded
     variable btName2No
@@ -386,7 +386,7 @@ proc ::WB::CreateToolImages { } {
 # 
 #       The menu organization.
 
-proc ::WB::InitMenuDefs { } {
+proc ::WB::InitMenuDefs {} {
     global  prefs this
     variable menuDefs
     
@@ -637,7 +637,7 @@ proc ::WB::InitMenuDefs { } {
     }
 }
 
-proc ::WB::QuitAppHook { } {
+proc ::WB::QuitAppHook {} {
     global  wDlgs
     
     ::UI::SaveWinPrefixGeom $wDlgs(wb) whiteboard
@@ -666,7 +666,7 @@ proc ::WB::NewWhiteboard {args} {
     return $w
 }
 
-proc ::WB::GetNewToplevelPath { } {
+proc ::WB::GetNewToplevelPath {} {
     global wDlgs
     variable uidmain
     
@@ -694,7 +694,7 @@ proc ::WB::BuildWhiteboard {w args} {
     
     Debug 2 "::WB::BuildWhiteboard w=$w, args='$args'"
     
-    namespace eval ::WB::${w}:: { }
+    namespace eval ::WB::${w}:: {}
     
     upvar ::WB::${w}::wapp wapp
     upvar ::WB::${w}::state state
@@ -1094,7 +1094,7 @@ proc ::WB::SaveWhiteboardState {w} {
     array set gstate [array get ::WB::${w}::state]
 }
 
-proc ::WB::SaveAnyState { } {
+proc ::WB::SaveAnyState {} {
     
     set win ""
     set wbs [GetAllWhiteboards]
@@ -1239,7 +1239,7 @@ proc ::WB::GetMenuDefs {key} {
     return $menuDefs(main,$key)
 }
 
-proc ::WB::LoginHook { } {
+proc ::WB::LoginHook {} {
     
     foreach w [GetAllWhiteboards] {
 
@@ -1248,7 +1248,7 @@ proc ::WB::LoginHook { } {
     }
 }
 
-proc ::WB::LogoutHook { } {
+proc ::WB::LogoutHook {} {
     
     # Multiinstance whiteboard UI stuff.
     foreach w [GetAllWhiteboards] {
@@ -1319,7 +1319,7 @@ proc ::WB::GetMenu {w} {
 # 
 #       Return all whiteboard's toplevel widget paths as a list. 
 
-proc ::WB::GetAllWhiteboards { } {    
+proc ::WB::GetAllWhiteboards {} {    
     global  wDlgs
 
     return [lsort -dictionary \
@@ -1592,6 +1592,7 @@ proc ::WB::SetToolUI {wcan btName} {
     global  this
 
     set w [winfo toplevel $wcan]
+    SetStatusMessage $w [mc uastat$btName]
 
     switch -- $btName {
 	point {
@@ -1606,46 +1607,15 @@ proc ::WB::SetToolUI {wcan btName} {
 	}
 	move {
 	    $wcan config -cursor fleur
-	    SetStatusMessage $w [mc uastatmove]
-	}
-	line {
-	    SetStatusMessage $w [mc uastatline]
-	}
-	arrow {
-	    SetStatusMessage $w [mc uastatarrow]
-	}
-	rect {
-	    SetStatusMessage $w [mc uastatrect]
-	}
-	oval {
-	    SetStatusMessage $w [mc uastatoval]
 	}
 	text {
 	    $wcan config -cursor xterm
-	    SetStatusMessage $w [mc uastattext]
-	}
-	del {
-	    SetStatusMessage $w [mc uastatdel]
 	}
 	pen {
 	    $wcan config -cursor pencil
-	    SetStatusMessage $w [mc uastatpen]
-	}
-	brush {
-	    SetStatusMessage $w [mc uastatbrush]
-	}
-	paint {
-	    SetStatusMessage $w [mc uastatpaint]	      
-	}
-	poly {
-	    SetStatusMessage $w [mc uastatpoly]	      
-	}       
-	arc {
-	    SetStatusMessage $w [mc uastatarc]	      
 	}
 	rot {
 	    $wcan config -cursor exchange
-	    SetStatusMessage $w [mc uastatrot]	      
 	}
     }
 }
@@ -2406,6 +2376,11 @@ proc ::WB::CreateAllButtons {w} {
 		}
 		bind $wlabel <<ButtonPopup>> [list [namespace current]::DoToolPopup $w %W $name]
 	    }
+	    set str [mc uastat$name]
+	    if {($name eq "point") && ($this(platform) eq "macosx")} {
+		set str [mc uastatpointmac]
+	    }
+	    ::balloonhelp::balloonforwindow $wlabel $str
 	}
     }
     
@@ -2510,7 +2485,7 @@ proc ::WB::StartTimerToToolPopup {w wbutton name} {
       [list [namespace current]::DoToolPopup $w $wbutton $name]]
 }
 
-proc ::WB::StopTimerToToolPopup { } {
+proc ::WB::StopTimerToToolPopup {} {
     
     variable toolPopupId
 
@@ -3331,7 +3306,7 @@ proc ::WB::RegisterHandler {prefix cmd} {
 #       the present handlers, and to add the 'whiteboardRegisterHandlerHook'
 #       to get subsequent handlers.
 
-proc ::WB::GetRegisteredHandlers { } {
+proc ::WB::GetRegisteredHandlers {} {
     variable handler
 
     return [array get handler]
