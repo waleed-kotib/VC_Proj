@@ -5,7 +5,12 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.96.? (200709??)
+Coccinella-0.96.4 (2007????)
+
+ o
+
+
+Coccinella-0.96.2 (20070919)
 
  o added support for XEP-0172: User Nickname
  o added autoaway which detects any system inactivity like mouse and keyboard

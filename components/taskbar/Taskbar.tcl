@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.32 2007-09-12 13:37:55 matben Exp $
+# $Id: Taskbar.tcl,v 1.33 2007-09-19 12:52:43 matben Exp $
 
 package require balloonhelp
 
@@ -319,14 +319,14 @@ proc ::Taskbar::Update {w} {
 	zoomed - normal {
 	    set state1 disabled
 	    set state2 normal
-	    $m entryconfigure $menuIndex(mMinimize)  \
-	      -label [mc mMinimize] -command ::Taskbar::HideMain
+	    ::AMenu::EntryConfigure $m mMinimize -label mMinimize \
+	      -command ::Taskbar::HideMain
 	}
 	default {
 	    set state1 normal
 	    set state2 disabled
-	    $m entryconfigure $menuIndex(mMinimize)  \
-	      -label [mc mRestore] -command ::Taskbar::ShowMain
+	    ::AMenu::EntryConfigure $m mMinimize -label mRestore \
+	      -command ::Taskbar::ShowMain
 	}
     }
 }

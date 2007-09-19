@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.169 2007-09-14 08:11:47 matben Exp $
+# $Id: UI.tcl,v 1.170 2007-09-19 12:52:43 matben Exp $
 
 package require alertbox
 package require ui::dialog
@@ -1300,6 +1300,22 @@ proc ::UI::MenuMethod {wmenu cmd key args} {
     # Be silent about nonexistent entries?
     if {[info exists menuKeyToIndex($wmenu,$key)]} {
 	set mind  $menuKeyToIndex($wmenu,$key)
+	if {[string match "entrycon*" $cmd]} {
+	    if {[expr {[llength $args] % 2 == 0}]} {
+		array set argsA $args
+		if {[info exists argsA(-label)]} {
+		    set name $argsA(-label)
+		    set lname [mc $name]
+		    set ampersand [string first & $lname]
+		    if {$ampersand != -1} {
+			regsub -all & $lname "" lname
+			set argsA(-underline) $ampersand
+		    }
+		    set argsA(-label) $lname
+		    set args [array get argsA]
+		}
+	    }
+	}
 	eval {$wmenu $cmd $mind} $args
     }
 }
