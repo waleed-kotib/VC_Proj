@@ -5,11 +5,11 @@
 #      side and server side.
 #      Modelled after the http package with modifications.
 #      
-#  Copyright (c) 2002-2005  Mats Bengtsson only for the new and rewritten parts.
+#  Copyright (c) 2002-2007  Mats Bengtsson only for the new and rewritten parts.
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: httpex.tcl,v 1.23 2007-07-19 06:28:11 matben Exp $
+# $Id: httpex.tcl,v 1.24 2007-09-20 12:04:38 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -160,6 +160,12 @@ namespace eval httpex {
     variable encodings [string tolower [encoding names]]
     # This can be changed, but iso8859-1 is the RFC standard.
     variable defaultCharset "iso8859-1"
+    
+    # @@ Unclear: let certain Content-Type (MIME type) set the charset.
+    variable typeCharsetMap
+    array set typeCharsetMap {
+	application/xml   utf-8
+    }
     
     array set codeToText {
 	100 Continue
@@ -838,8 +844,8 @@ proc httpex::readrequest {s callback args} {
 
 proc httpex::Event {token} {    
     variable $token
-    variable locals
     upvar 0 $token state
+    variable locals
     
     Debug 1 "httpex::Event state(state)=$state(state)"
     
@@ -860,6 +866,7 @@ proc httpex::Event {token} {
 	Finish $token $n
     } elseif {$n == 0} {
 	variable encodings
+	variable defaultCharset
 	
 	Debug 2 "\tn=$n"
 	fileevent $s readable {}
@@ -880,8 +887,15 @@ proc httpex::Event {token} {
 	    }
 	}
 	
-	if {$state(-binary) || ![regexp -nocase ^text $state(type)] || \
-	  [regexp gzip|compress $state(coding)]} {
+	# Figure out translation and encoding issues.
+	set binary 0
+	if {$state(-binary) || [regexp gzip|compress $state(coding)]} {
+	    set binary 1
+	} elseif {![regexp -nocase ^text $state(type)] && \
+	  [string equal $state(charset) $defaultCharset]} {
+	    set binary 1
+	}	
+	if {$binary} {
 	    Debug 2 "\tfconfigure $s -translation binary"
 	    
 	    # Turn off conversions for non-text data
@@ -895,10 +909,10 @@ proc httpex::Event {token} {
 	    # encoding correctly.  iso8859-1 is the RFC default, but
 	    # this could be any IANA charset.  However, we only know
 	    # how to convert what we have encodings for.
-	    set idx [lsearch -exact $encodings \
-	      [string tolower $state(charset)]]
+	    set idx [lsearch -exact $encodings [string tolower $state(charset)]]
 	    if {$idx >= 0} {
 		fconfigure $s -encoding [lindex $encodings $idx]
+		# @@@ -channel ?
 		Debug 2 "\tfconfigure -encoding [lindex $encodings $idx]"
 	    }
 	}
@@ -931,11 +945,16 @@ proc httpex::Event {token} {
 	    }
 	}
     } elseif {$n > 0} {
+	variable typeCharsetMap
 	Debug 2 "\tline=$line"
 	
 	if {[regexp -nocase {^content-type:(.+)$} $line x type]} {
-	    set state(type) [string trim $type]
-	    
+	    set type [string trim $type]
+	    set state(type) $type	    
+	    parray typeCharsetMap
+	    if {[info exists typeCharsetMap($type)]} {
+		set state(charset) $typeCharsetMap($type)
+	    }
 	    # grab the optional charset information
 	    regexp -nocase {charset\s*=\s*(\S+)} $type x state(charset)
 	} elseif {[regexp -nocase {^content-length:(.+)$} $line x length]} {
@@ -949,7 +968,7 @@ proc httpex::Event {token} {
 	    set state(chunked) 1
 	} elseif {[regexp -nocase {^range: *bytes=(.+)$} $line x byteSet]} {
 	    set state(haveranges) 1
-	    set ranges {}
+	    set ranges [list]
 	    foreach byteSpec [split $byteSet ,] {
 		if {[regexp -- {^([0-9]+)-([0-9]+)$} $byteSpec x lower upper]} {
 		    lappend ranges [list $lower $upper]
@@ -964,8 +983,8 @@ proc httpex::Event {token} {
 	}
 	if {[regexp -nocase {^([^:]+):(.+)$} $line x key value]} {
 	    lappend state(meta) $key [string trim $value]
-	} elseif {[regexp {^HTTP/([0-9]+\.[0-9]+) +([0-9]{3})} $line  \
-	  match httpvers ncode]} {
+	} elseif {[regexp {^HTTP/([0-9]+\.[0-9]+) +([0-9]{3})} $line \
+	  - httpvers ncode]} {
 	    
 	    # Only clients.
 	    set state(http) $line

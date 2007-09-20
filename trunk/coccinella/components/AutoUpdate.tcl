@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoUpdate.tcl,v 1.24 2007-09-12 13:37:55 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.25 2007-09-20 12:04:38 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -28,6 +28,7 @@ namespace eval ::AutoUpdate:: {
     # Allow the update url to be set via the option database.
     set urlEN     "http://coccinella.sourceforge.net/updates/update_en.xml"
     set urlFormat "http://coccinella.sourceforge.net/updates/update_%s.xml"
+    #set urlFormat "http://coccinella.sourceforge.net/updates/update_test_%s.xml"
     #set url "http://coccinella.sourceforge.net/updates/update_test.xml"
 
     set ::config(autoupdate,do)        1
@@ -112,7 +113,7 @@ proc ::AutoUpdate::GetURL {args} {
     ::Debug 2 "\t url=$url"
     set tmopts [list -timeout $prefs(timeoutMillis)]
     if {[catch {eval {
-	::http::geturl $url -command [namespace code [list Command $opts(-locale)]]
+	::httpex::get $url -command [namespace code [list Command $opts(-locale)]]
     } $tmopts} token]} {
 	if {!$opts(-silent)} {
 	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
@@ -127,18 +128,22 @@ proc ::AutoUpdate::Command {locale token} {
     variable opts
     variable newVersion
 
-    set prefs(autoupdate,lastTime) [clock seconds]
-
     # Investigate 'state' for any exceptions.
-    set status [::http::status $token]
-    set ncode  [::http::ncode $token]
+    set hstate [::httpex::state $token]
+    set status [::httpex::status $token]
+    set ncode  [::httpex::ncode $token]
+    if {$hstate ne "final"} {
+	return
+    }
+
+    set prefs(autoupdate,lastTime) [clock seconds]
     
     ::Debug 2 "::AutoUpdate::Command status=$status, ncode=$ncode, locale=$locale"
     
     if {($status eq "ok") && ($ncode eq "200")} {
 
 	# Get and parse xml.
-	set xml [::http::data $token]   
+	set xml [::httpex::data $token]   
 	set token [tinydom::parse $xml]
 	set xmllist [tinydom::documentElement $token]
 	set releaseElem [lindex [tinydom::children $xmllist] 0]
@@ -174,7 +179,7 @@ proc ::AutoUpdate::Command {locale token} {
 	# Try get the English catalog as a fallback.
 	GetURL -locale 0
     }
-    ::http::cleanup $token
+    ::httpex::cleanup $token
 }
 
 proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
