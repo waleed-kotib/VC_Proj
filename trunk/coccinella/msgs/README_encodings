@@ -33,7 +33,7 @@ Instructions (for unix systems):
     current directory. Move it to the msg/ directory for testing. 
     Make sure you don't overwrite any existing catalog you want to save:
 
-    mv template-xx.msg msgs/
+    mv template-xx.msg msgs/xx.msg
 
 4.  Now you need an editor that has the capabilities to handle utf-8
     encoding because that is what is used throughout. There are some scripts
@@ -45,6 +45,13 @@ Instructions (for unix systems):
         ::msgcat::mcset langCode key ?translatedString?
     Add the 'translatedString' if missing, and do translate if exists.
     Be sure that the 'translatedString' is enclosed in "{" and "}".
+
+    Note that some of the menu strings, typically of the form mMenuEntry, have 
+    an ampersand "&" in their text string. This says that the character
+    following it will be underlined and the "&" be removed from display text.
+    The underlined character corresponds to a keyboard shortcut for that entry.
+    You are free to pick the underlined character which suits your language 
+    yourself.
 
 6.  Your new language catalog should now be loaded automatically.
 
