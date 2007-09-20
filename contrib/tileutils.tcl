@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.65 2007-09-11 13:53:00 matben Exp $
+# $Id: tileutils.tcl,v 1.66 2007-09-20 14:47:43 matben Exp $
 #
 
 package require treeutil
@@ -466,6 +466,8 @@ proc tileutils::TreeCtrlThemeChanged {win} {
     $win configure -background $treeStyle(-background) \
       -usetheme $treeStyle(-usetheme) -showlines $treeStyle(-showlines)
     
+    set fillT {white {selected focus} black {selected !focus}}
+    
     # Column options:
     set columnOpts [list]
     if {[info exists style(-background)]} {
@@ -486,7 +488,8 @@ proc tileutils::TreeCtrlThemeChanged {win} {
     if {[info exists treeStyle(-itemfill)]} {
 	set fill $treeStyle(-itemfill)
     }    
-    treeutil::configureelementtype $win text -fill $fill
+    set stateFill [concat $fillT [list $fill {}]]
+    treeutil::configureelementtype $win text -fill $stateFill
 }
 
 proc tileutils::WaveLabelThemeChanged {win} {

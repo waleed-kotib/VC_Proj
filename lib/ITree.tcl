@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ITree.tcl,v 1.23 2007-09-06 13:20:47 matben Exp $
+# $Id: ITree.tcl,v 1.24 2007-09-20 14:47:43 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -39,13 +39,16 @@ namespace eval ::ITree {
 proc ::ITree::New {T wxsc wysc args} {
     global  this
     variable options
+    variable fillT
+    variable fillB
+    
+    set fillT {white {selected focus} black {selected !focus}}
+    set fillB [list $this(sysHighlight) {selected focus} gray {selected !focus}]
 
     set options($T,-backgroundimage) ""
     foreach {key value} $args {
 	set options($T,$key) $value
     }
-    set fillT {white {selected focus} black {selected !focus}}
-    set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
 
     treectrl $T -selectmode extended  \
       -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 0  \
@@ -57,10 +60,12 @@ proc ::ITree::New {T wxsc wysc args} {
       -borderwidth 0 -highlightthickness 0            \
       -height 0 -width 0
     
-    # This is a dummy option.
-    set itemBackground [option get $T itemBackground {}]
-    set itemFill [option get $T itemFill {}]
+    array set style [list -foreground black -itembackground {}]
+    array set style [style configure .]
+    array set style [style configure TreeCtrl]
 
+    set itemBackground $style(-itembackground)
+    
     $T column create -tags cTree  \
       -itembackground $itemBackground -resize 0 -expand 1
     $T column create -tags cTag -visible 0
@@ -69,7 +74,7 @@ proc ::ITree::New {T wxsc wysc args} {
     $T element create eImage image
     $T element create eText text -lines 1 -fill $fillT
     $T element create eBorder rect -open new -outline white -outlinewidth 1 \
-      -fill $fill -showfocus 1
+      -fill $fillB -showfocus 1
  
     set S [$T style create styStd]
     $T style elements $S {eBorder eImage eText}
@@ -100,9 +105,12 @@ proc ::ITree::New {T wxsc wysc args} {
     }
     bindtags $T [concat RosterTreeTag [bindtags $T]]
 
-    if {$itemFill ne ""} {
-	treeutil::configureelementtype $T text -fill $itemFill
-    }
+    set itemFill $style(-foreground)
+    if {[info exists style(-itemfill)]} {
+	set itemFill $style(-itemfill)
+    }  
+    set stateFill [concat $fillT [list $itemFill {}]]
+    treeutil::configureelementtype $T text -fill $stateFill
 }
 
 proc ::ITree::GetStyle {T} {
