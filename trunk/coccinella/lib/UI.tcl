@@ -18,9 +18,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.170 2007-09-19 12:52:43 matben Exp $
+# $Id: UI.tcl,v 1.171 2007-09-21 09:15:41 matben Exp $
 
-package require alertbox
 package require ui::dialog
 package require ui::entryex
 
@@ -1504,37 +1503,6 @@ proc ::UI::PruneMenusFromConfig {name menuDefVar} {
 	    }
 	}
     }
-}
-
-# Wrapper for alertbox package to enable png icons.
-# A bit hacky!
-
-namespace eval ::UI:: {
-    
-    variable alertInit 0
-    variable alertArgs ""
-    
-    #option add *alertImage  alert  widgetDefault
-    option add *alertImage  light  widgetDefault
-}
-
-proc ::UI::AlertBoxInit { } {
-    variable alertInit 
-    variable alertArgs
-    
-    set alertArgs  \
-      [list -image [::Theme::GetImage [option get . alertImage {}]]]
-    set alertInit 1
-}
-
-proc ::UI::AlertBox {msg args} {
-    variable alertInit 
-    variable alertArgs
-
-    if {!$alertInit} {
-	::UI::AlertBoxInit
-    }
-    eval {::alertbox::alertbox $msg} $alertArgs $args
 }
 
 # UI::LabelButton --
