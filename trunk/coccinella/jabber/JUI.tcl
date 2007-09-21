@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.213 2007-09-19 12:52:43 matben Exp $
+# $Id: JUI.tcl,v 1.214 2007-09-21 13:13:50 matben Exp $
 
 package provide JUI 1.0
 
@@ -60,7 +60,6 @@ namespace eval ::JUI:: {
     option add *JMain.head.relief                 flat            50
 
     # Other icons.
-    option add *JMain.waveImage                   wave            widgetDefault
     option add *JMain.resizeHandleImage           resizehandle    widgetDefault
 
     option add *JMain.cociEs32                    coci-es-32      widgetDefault
@@ -203,9 +202,7 @@ proc ::JUI::Init {} {
 	    {-variable ::JUI::state(show,toolbar)}}
 	    {check   mTabs          {::JUI::OnMenuToggleNotebook}     {} 
 	    {-variable ::JUI::state(show,notebook)}}
-	    {check   mMinimal       {::JUI::OnMenuToggleMinimal}      {} 
-	    {-variable ::JUI::state(show,minimal)}} }
-	}
+	} }
 	{separator}
 	{command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
 	{checkbutton mDebug         {::Jabber::DebugCmd}            {} \
@@ -1001,18 +998,6 @@ proc ::JUI::OnMenuToggleNotebook {} {
     ::hooks::run uiMainToggleNotebook $state(show,notebook)
 }
 
-proc ::JUI::OnMenuToggleMinimal {} {
-    variable jwapp
-    variable state
-    upvar ::Jabber::jprefs jprefs
-
-    if {[llength [grab current]]} { return }
-
-    # Handle via hooks since we can't know which tab pages we have.
-    set jprefs(ui,main,show,minimal) $state(show,minimal)
-    ::hooks::run uiMainToggleMinimal $state(show,minimal)
-}
-
 proc ::JUI::GetMainWindow {} {
     global wDlgs
     
@@ -1161,9 +1146,6 @@ proc ::JUI::LogoutHook {} {
     SetStatusMessage [mc {Logged out}]
     FixUIWhen "disconnect"
     SetConnectState "disconnect"
-    
-    # Be sure to kill the wave; could end up here when failing to connect.
-    StartStopAnimatedWave 0
 }
     
 proc ::JUI::GetRosterWmenu {} {
@@ -1190,14 +1172,10 @@ proc ::JUI::GetNotebook {} {
     return $jwapp(notebook)
 }
 
-proc ::JUI::StartStopAnimatedWave {start} {
-
-    ::Roster::Animate $start
-}
-
 proc ::JUI::SetStatusMessage {msg} {
 
-    ::Roster::TimedMessage $msg
+    # @@@ We keep this for future use since we may want a method
+    #     to display feedback details.
 }
 
 # JUI::MailBoxState --
@@ -1476,11 +1454,6 @@ proc ::JUI::InfoPostCommand {wmenu} {
 	    } else {
 		set state(show,notebook) 0
 	    }
-	    if {[::Roster::StyleGet] eq "minimal"} {
-		set state(show,minimal) 1
-	    } else {
-		set state(show,minimal) 0
-	    }
 	} else {
 	    ::UI::MenuMethod $wmenu entryconfigure mShow -state disabled
 	}
@@ -1559,10 +1532,9 @@ proc ::JUI::InitPrefsHook {} {
 
     set jprefs(ui,main,show,toolbar)  1
     set jprefs(ui,main,show,notebook) 1
-    set jprefs(ui,main,show,minimal)  1
     
-    set plist {}
-    foreach key {toolbar notebook minimal} {
+    set plist [list]
+    foreach key {toolbar notebook} {
 	set name ::Jabber::jprefs(ui,main,show,$key)
 	set rsrc jprefs_ui_main_show_$key
 	set val  [set $name]

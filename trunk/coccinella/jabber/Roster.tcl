@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.217 2007-09-15 13:16:12 matben Exp $
+# $Id: Roster.tcl,v 1.218 2007-09-21 13:13:50 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -39,7 +39,6 @@ namespace eval ::Roster:: {
     ::hooks::register earlyInitHook          ::Roster::EarlyInitHook
     ::hooks::register loginHook              ::Roster::LoginCmd
     ::hooks::register logoutHook             ::Roster::LogoutHook
-    ::hooks::register uiMainToggleMinimal    ::Roster::ToggleMinimalHook
     ::hooks::register jabberInitHook         ::Roster::JabberInitHook
     
     # Define all hooks for preference settings.
@@ -55,12 +54,9 @@ namespace eval ::Roster:: {
     # Standard widgets and standard options.
     option add *Roster.borderWidth          0               50
     option add *Roster.relief               flat            50    
-    option add *Roster.padding              4               50
-    option add *Roster*WaveLabel.borderWidth  0             50
+    option add *Roster.padding              0               50
         
     # Specials.
-    option add *Roster.waveImage            wave            widgetDefault
-    option add *Roster.minimalPadding       {0}             widgetDefault
     option add *Roster.whiteboard12Image    whiteboard12    widgetDefault
     
     variable wtree -
@@ -288,43 +284,27 @@ proc ::Roster::MapShowToText {show} {
 
 proc ::Roster::Build {w} {
     global  this prefs
-        
+	
     variable wtree    
     variable wroster
     variable wbox
-    variable wwave
-    variable rstyle
     variable icons
     upvar ::Jabber::jprefs jprefs
-        
+	
     # The frame of class Roster.
     ttk::frame $w -class Roster
-        
+	
     # Tree frame with scrollbars.
     set wroster $w
     set wbox    $w.box
-    set wwave   $w.wa
-    set rstyle  "normal"
-    
-    # DIdn't help the grid bug.
-    #ttk::label $w.pad -compound image -image [::UI::GetIcon blank-1x1]
-    #pack $w.pad -side bottom -fill x    
-    
-    set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
-    ::wavelabel::wavelabel $wwave -type image -image $waveImage
-    pack $wwave -side bottom -fill x -padx 8 -pady 2
-        
+		
     # @@@ We shall have a more generic interface here than just a tree.
     set wtree [::RosterTree::New $wbox]
     pack $wbox -side top -fill both -expand 1
     
     # Cache any expensive stuff.
     set icons(whiteboard12) [::Theme::GetImage [option get $w whiteboard12Image {}]]
-   
-    # Handle the prefs "Show" state.
-    if {$jprefs(ui,main,show,minimal)} {
-	StyleMinimal
-    }
+
     return $w
 }
 
@@ -341,51 +321,6 @@ proc ::Roster::FindAgain {dir} {
     ::RosterTree::FindAgain $dir
 }
 
-proc ::Roster::ToggleMinimalHook {minimal} {
-    variable wroster
-    variable rstyle
-    
-    if {[winfo exists $wroster]} {
-	if {$minimal && ($rstyle eq "normal")} {
-	    StyleMinimal
-	} elseif {!$minimal && ($rstyle eq "minimal")} {
-	    StyleNormal
-	}
-    }
-}
-
-proc ::Roster::StyleMinimal {} {
-    variable wroster
-    variable wbox
-    variable wwave
-    variable rstyle
-    
-    $wroster configure -padding [option get $wroster minimalPadding {}]
-    $wbox configure -bd 0
-    pack forget $wwave
-    set rstyle "minimal"
-}
-
-proc ::Roster::StyleNormal {} {
-    variable wroster
-    variable wbox
-    variable wwave
-    variable rstyle
-    
-    set padding [option get $wroster padding {}]
-    $wroster configure -padding $padding
-    set bd [option get $wbox borderWidth {}]
-    $wbox configure -bd $bd
-    pack $wwave -side bottom -fill x -padx 8 -pady 2
-    set rstyle "normal"
-}
-
-proc ::Roster::StyleGet {} {
-    variable rstyle
-
-    return $rstyle
-}
-
 proc ::Roster::GetRosterWindow {} {
     variable wroster
     
@@ -394,44 +329,6 @@ proc ::Roster::GetRosterWindow {} {
 
 proc ::Roster::BackgroundImage {} {
     ::RosterTree::BackgroundImageCmd
-}
-
-proc ::Roster::Animate {{step 1}} {
-    variable wwave
-    
-    $wwave animate $step
-}
-
-proc ::Roster::Message {str} {
-    variable wwave
-    
-    $wwave message $str
-}
-
-proc ::Roster::TimedMessage {str} {
-    variable timer
-    
-    if {[info exists timer(msg)]} {
-	after cancel $timer(msg)
-    }
-    Message $str
-    after $timer(msg,ms) [namespace current]::CancelTimedMessage
-}
-
-proc ::Roster::CancelTimedMessage {} {
-
-    Message ""
-}
-
-proc ::Roster::SetPresenceMessage {jid presence args} {
-    
-    array set argsA $args
-    set show $presence
-    if {[info exists argsA(-show)]} {
-	set show $argsA(-show)
-    }
-    set name [GetDisplayName $jid]
-    TimedMessage "$name [mc $show]"
 }
 
 # Roster::LoginCmd --
@@ -463,14 +360,12 @@ proc ::Roster::LogoutHook {} {
 }
 
 proc ::Roster::Refresh {} {
-    variable wwave
     upvar ::Jabber::jstate jstate
 
     ::RosterTree::GetClosed
     
     # Get my roster.
     $jstate(jlib) roster send_get
-    $wwave animate 1
 }
 
 proc ::Roster::SortAtIdle {{item root}} {
@@ -857,13 +752,11 @@ proc ::Roster::RepopulateTree {} {
 }
 
 proc ::Roster::ExitRoster {} {
-    variable wwave
     variable timer
 
     SortAtIdle
     #Sort
     ::JUI::SetStatusMessage [mc jarostupdate]
-    $wwave animate -1
     set timer(exitroster,secs) [clock seconds]
 }
 
@@ -1021,11 +914,6 @@ proc ::Roster::Presence {jid presence args} {
 	# If more than one item pick the parent of the first (group).
 	set pitem [::RosterTree::GetParent [lindex $items 0]]
 	::RosterTree::SortAtIdle $pitem $jprefs(rost,sort)
-    }
-    
-    # We set timed messages for presences only if significantly after login.
-    if {[expr [clock seconds] - $timer(exitroster,secs)] > $timer(pres,secs)} {
-	eval {SetPresenceMessage $jid $presence} $args
     }
 }
 

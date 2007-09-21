@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.130 2007-09-15 14:27:23 matben Exp $
+# $Id: Disco.tcl,v 1.131 2007-09-21 13:13:50 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -34,7 +34,6 @@ namespace eval ::Disco:: {
     ::hooks::register loginHook              ::Disco::LoginHook     20
     ::hooks::register logoutHook             ::Disco::LogoutHook
     ::hooks::register presenceHook           ::Disco::PresenceHook
-    ::hooks::register uiMainToggleMinimal    ::Disco::ToggleMinimalHook
     ::hooks::register menuPostCommand        ::Disco::MainMenuPostHook
     ::hooks::register menuJMainFilePostHook  ::Disco::FileMenuPostHook
     ::hooks::register onMenuVCardExport      ::Disco::OnMenuExportVCardHook
@@ -45,15 +44,11 @@ namespace eval ::Disco:: {
     # Standard widgets and standard options.
     option add *Disco.borderWidth           0               50
     option add *Disco.relief                flat            50
-    option add *Disco*box.borderWidth       1               50
-    option add *Disco*box.relief            sunken          50
-    option add *Disco.padding               4               50
+    option add *Disco.padding               0               50
 
     # Specials.
     option add *Disco*TreeCtrl.backgroundImage    cociexec        widgetDefault
-    option add *Disco.waveImage                   wave            widgetDefault
     option add *Disco.fontStyleMixed              0               widgetDefault    
-    option add *Disco.minimalPadding             {0}             widgetDefault
     
     # If number children smaller than this do disco#info.
     variable discoInfoLimit 12
@@ -61,9 +56,9 @@ namespace eval ::Disco:: {
     # Common xml namespaces.
     variable xmlns
     array set xmlns {
-	disco           http://jabber.org/protocol/disco 
-	items           http://jabber.org/protocol/disco#items 
-	info            http://jabber.org/protocol/disco#info
+	disco           "http://jabber.org/protocol/disco"
+	items           "http://jabber.org/protocol/disco#items"
+	info            "http://jabber.org/protocol/disco#info"
     }
     
     # Disco catagories from Jabber :: Registrar determines if dir or not.
@@ -386,7 +381,6 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 
 proc ::Disco::ItemsCB {cmd jlibname type from queryE args} {
     variable tstate
-    variable wwave
     variable wtree
     variable wtab
     variable discoInfoLimit
@@ -402,14 +396,12 @@ proc ::Disco::ItemsCB {cmd jlibname type from queryE args} {
 	# We have no fallback.
 	::Jabber::AddErrorLog $from "Failed disco $from"
 	AddServerErrorCheck $from
-	catch {$wwave animate -1}
     } else {
 	
 	# It is at this stage we are confident that a Disco page is needed.
 	if {![winfo exists $wtab]} {
 	    NewPage
 	}
-	$wwave animate -1
 	
 	# Add to tree:
 	#       vstruct = {item item ...}  with item = {jid node}
@@ -748,13 +740,9 @@ proc ::Disco::NewPage { } {
 #       w
 
 proc ::Disco::Build {w} {
-    global  this prefs
-    
+    global  this prefs    
     variable wtree
-    variable wwave
     variable wdisco
-    variable wbox
-    variable dstyle
     upvar ::Jabber::jprefs jprefs
     
     # The frame of class Disco.
@@ -762,26 +750,13 @@ proc ::Disco::Build {w} {
     
     # Tree frame with scrollbars.
     set wdisco  $w
-    set wbox    $w.box
-    set wxsc    $wbox.xsc
-    set wysc    $wbox.ysc
-    set wtree   $wbox.tree
-    set wwave   $w.wa
-    set dstyle  "normal"
-
-    # D = -padx 0 -pady 0
-    set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
-    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
-      -type image -image $waveImage
-    pack $wwave -side bottom -fill x -padx 8 -pady 2
-    
-    # D = -border 1 -relief sunken
-    frame $wbox
-    pack  $wbox -side top -fill both -expand 1
+    set wxsc    $w.xsc
+    set wysc    $w.ysc
+    set wtree   $w.tree
 
     ttk::scrollbar $wxsc -command [list $wtree xview] -orient horizontal
     ttk::scrollbar $wysc -command [list $wtree yview] -orient vertical
-    ::ITree::New $wtree $wxsc $wysc   \
+    ::ITree::New $wtree $wxsc $wysc       \
       -selection   ::Disco::Selection     \
       -open        ::Disco::OpenTreeCmd   \
       -close       ::Disco::CloseTreeCmd  \
@@ -794,61 +769,9 @@ proc ::Disco::Build {w} {
     grid  $wtree  -row 0 -column 0 -sticky news
     grid  $wysc   -row 0 -column 1 -sticky ns
     grid  $wxsc   -row 1 -column 0 -sticky ew
-    grid columnconfigure $wbox 0 -weight 1
-    grid rowconfigure    $wbox 0 -weight 1
-
-    # Handle the prefs "Show" state.
-    if {$jprefs(ui,main,show,minimal)} {
-	StyleMinimal
-    }
-    return $w
+    grid columnconfigure $w 0 -weight 1
+    grid rowconfigure    $w 0 -weight 1
 }
-
-proc ::Disco::ToggleMinimalHook {minimal} {
-    variable wdisco
-    variable dstyle
-    
-    if {[winfo exists $wdisco]} {
-	if {$minimal && ($dstyle eq "normal")} {
-	    StyleMinimal
-	} elseif {!$minimal && ($dstyle eq "minimal")} {
-	    StyleNormal
-	}
-    }
-}
-
-proc ::Disco::StyleMinimal { } {
-    variable wdisco
-    variable wbox
-    variable wwave
-    variable dstyle
-    
-    $wdisco configure -padding [option get $wdisco minimalPadding {}]
-    $wbox configure -bd 0
-    pack forget $wwave
-    set dstyle "minimal"
-}
-
-proc ::Disco::StyleNormal { } {
-    variable wdisco
-    variable wbox
-    variable wwave
-    variable dstyle
-    
-    set padding [option get $wdisco padding {}]
-    $wdisco configure -padding $padding
-    set bd [option get $wbox borderWidth {}]
-    $wbox configure -bd $bd
-    pack $wwave -side bottom -fill x -padx 8 -pady 2
-    set dstyle "normal"
-}
-
-proc ::Disco::StyleGet { } {
-    variable dstyle
-
-    return $dstyle
-}
-
 
 # BackgroundImage... Try to make as generic as possible! 
 # Too much duplicate from roster :-(
@@ -1180,7 +1103,6 @@ proc ::Disco::Selection {T v} {
 
 proc ::Disco::OpenTreeCmd {w vstruct} {   
     variable wtree
-    variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
@@ -1194,7 +1116,6 @@ proc ::Disco::OpenTreeCmd {w vstruct} {
 	# We should have a method to tell if children have been added to tree!!!
 	if {![$jstate(jlib) disco isdiscoed items $jid $node]} {
 	    set tstate(run,$vstruct) 1
-	    $wwave animate 1
 	    
 	    # Discover services available.
 	    GetItems $jid -node $node
@@ -1211,14 +1132,12 @@ proc ::Disco::OpenTreeCmd {w vstruct} {
 }
 
 proc ::Disco::CloseTreeCmd {w vstruct} {
-    variable wwave
     variable tstate
     
     ::Debug 2 "::Disco::CloseTreeCmd vstruct=$vstruct"
 
     if {[info exists tstate(run,$vstruct)]} {
 	unset tstate(run,$vstruct)
-	$wwave animate -1
     }
 }
 
@@ -1362,7 +1281,6 @@ proc ::Disco::MakeBalloonHelp {vstruct} {
 
 proc ::Disco::Refresh {vstruct} {    
     variable wtree
-    variable wwave
     variable tstate
     upvar ::Jabber::jstate jstate
     
@@ -1379,7 +1297,6 @@ proc ::Disco::Refresh {vstruct} {
 	
     # Disco once more, let callback manage rest.
     set tstate(run,$vstruct) 1
-    $wwave animate 1
     GetInfo  $jid -node $node
     GetItems $jid -node $node
 }
