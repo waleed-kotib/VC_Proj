@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: fr.msg,v 1.88 2007-09-17 09:22:42 matben Exp $
+#   $Id: fr.msg,v 1.89 2007-09-21 06:30:28 matben Exp $
 
 # Reference: {Abort}
 # Translate, find in sources: contrib/ui/dialog.tcl:247
@@ -408,6 +408,7 @@
 # Note to translators: this means "Application" as in computer program.
 # Reference: {Application}
 ::msgcat::mcset fr program-Application   {Application}
+::msgcat::mcset fr machine-Sleep              Sleep
 
 # Try to move next strings to normal strings
 # Canvas item options, names and values.
