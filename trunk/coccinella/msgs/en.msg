@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.199 2007-09-16 14:55:27 matben Exp $
+#   $Id: en.msg,v 1.200 2007-09-21 06:30:27 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -197,6 +197,7 @@
 # A few words that are not unambiguous and have therefore a prefix:
 # Note to translators: this means "Application" as in computer program.
 ::msgcat::mcset en program-Application        Application
+::msgcat::mcset en machine-Sleep              Sleep
 
 # Try to move next strings to normal strings
 # Canvas item options, names and values.

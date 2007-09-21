@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.129 2007-09-17 09:22:43 matben Exp $
+#   $Id: sv.msg,v 1.130 2007-09-21 06:30:29 matben Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:247
@@ -515,6 +515,7 @@
 # Reference: {Application}
 # Find in sources: jabber/Rosticons.tcl:556
 ::msgcat::mcset sv program-Application   {Program}
+::msgcat::mcset sv machine-Sleep              Sleep
 
 # Try to move next strings to normal strings
 # Canvas item options, names and values.

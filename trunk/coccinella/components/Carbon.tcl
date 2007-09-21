@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.11 2007-09-19 07:21:30 matben Exp $
+# $Id: Carbon.tcl,v 1.12 2007-09-21 06:27:34 matben Exp $
 # 
 # @@@ Move the sleep stuff to something more generic.
 
@@ -142,7 +142,7 @@ proc ::Carbon::InitPrefsHook {} {
 
 proc ::Carbon::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Sleep} [mc Sleep]
+    ::Preferences::NewTableItem {Jabber Sleep} [mc machine-Sleep]
     
     set wpage [$nbframe page Sleep]    
     BuildPage $wpage
@@ -163,7 +163,7 @@ proc ::Carbon::BuildPage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
     
     ttk::frame $wc.head -padding {0 0 0 6}
-    ttk::label $wc.head.l -text [mc Sleep]
+    ttk::label $wc.head.l -text [mc machine-Sleep]
     ttk::separator $wc.head.s -orient horizontal
 
     grid  $wc.head.l  $wc.head.s
