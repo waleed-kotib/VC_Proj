@@ -8,7 +8,6 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded alertbox 1.0 [list source [file join $dir alertbox.tcl]]
 package ifneeded anigif 1.4 [list source [file join $dir anigif.tcl]]
 package ifneeded autoproxy 1.2.1 [list source [file join $dir autoproxy.tcl]]
 package ifneeded autosocks 0.1 [list source [file join $dir autosocks.tcl]]
