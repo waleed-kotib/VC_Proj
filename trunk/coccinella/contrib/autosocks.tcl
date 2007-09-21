@@ -10,7 +10,7 @@
 #
 #  This source file is distributed under the BSD license.
 #  
-# $Id: autosocks.tcl,v 1.8 2007-07-19 06:28:11 matben Exp $
+# $Id: autosocks.tcl,v 1.9 2007-09-21 09:42:48 matben Exp $
 
 package provide autosocks 0.1
 
@@ -108,6 +108,16 @@ proc autosocks::socket {host port args} {
     # Connect ahost + aport.
     if {[info exists argsA(-command)]} {
 	set sock [eval ::socket -async [array get optsA] {$ahost $aport}]
+	
+	# Take some precautions here since WiFi behaves odd.
+	if {[catch {eof $sock} iseof] || $iseof} {
+	    return -code error eof
+	}
+	set err [fconfigure $sock -error]
+	if {$err ne ""} {
+	    return -code error $err
+	}
+	
 	set token [namespace current]::$sock
 	variable $token
 	upvar 0 $token state
