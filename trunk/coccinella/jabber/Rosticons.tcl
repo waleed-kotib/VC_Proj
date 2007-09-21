@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.36 2007-09-13 15:53:40 matben Exp $
+# $Id: Rosticons.tcl,v 1.37 2007-09-21 06:32:48 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -35,9 +35,8 @@
 #                
 #  The 'status' type is the usual jabber icons. The 'application' type is 
 #  special since it sets the other icons used in the roster tree.
-#  Each group must have a default dir or default.jisp archive.
-#  The set named 'default' is a fallback set. The actual default set is
-#  defined in the 'defaultSet' array.
+#  Each group must have a default dir as a fallback set. 
+#  The actual default set is defined in the 'defaultSet' array.
 #
 #  From disco-categories:
 #
@@ -90,7 +89,7 @@ namespace eval ::Rosticons:: {
     set priv(types) [array names defaultSet]
 }
 
-proc ::Rosticons::Init { } {
+proc ::Rosticons::Init {} {
     global  this
     
     variable priv
@@ -129,6 +128,7 @@ proc ::Rosticons::Init { } {
 	set name $jprefs(rost,icons,$type)
 	if {![info exists state(path,$type,$name)]} {
 	    set name $defaultSet($type)
+	    set jprefs(rost,icons,$type) $name
 	}
 	LoadTmpIconSet $type $name
 	SetFromTmp $type $name
@@ -146,7 +146,7 @@ proc ::Rosticons::Exists {key} {
     }
 }
 
-proc ::Rosticons::GetTypes { } {
+proc ::Rosticons::GetTypes {} {
     variable state
    
     return $state(types)
@@ -166,7 +166,7 @@ proc ::Rosticons::GetTypes { } {
 #       type is typically:
 #       aim application gadu-gadu icq msn status yahoo
 
-proc ::Rosticons::GetAllTypeSets { } {
+proc ::Rosticons::GetAllTypeSets {} {
     global  this
     variable priv
     variable state
@@ -372,7 +372,7 @@ proc ::Rosticons::SetFromTmp {type name} {
 
 # Preference hooks -------------------------------------------------------------
 
-proc ::Rosticons::InitPrefsHook { } {
+proc ::Rosticons::InitPrefsHook {} {
     
     variable priv
     variable defaultSet
@@ -382,7 +382,7 @@ proc ::Rosticons::InitPrefsHook { } {
     
     # @@@ Find all types dynamically...
     # Do NOT store the complete path!
-    set plist {}
+    set plist [list]
     foreach type $priv(types) {
 	set jprefs(rost,icons,$type) $defaultSet($type)
 	set name  ::Jabber::jprefs(rost,icons,$type)
