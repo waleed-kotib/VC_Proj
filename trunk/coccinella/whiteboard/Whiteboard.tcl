@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.84 2007-09-19 07:12:15 matben Exp $
+# $Id: Whiteboard.tcl,v 1.85 2007-09-21 07:16:11 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -908,53 +908,70 @@ proc ::WB::NewCanvas {w args} {
 
 # Testing Pages...
 
+namespace eval ::WB {
+    
+    variable pageuid 0
+}
+
 proc ::WB::NewCanvasPage {w name} {
     upvar ::WB::${w}::wapp wapp
     upvar ::WB::${w}::state state
+    variable pageuid
     
     if {[string equal [winfo class [pack slaves $wapp(ccon)]] "WBCanvas"]} {
 	
 	# Repack the WBCanvas in notebook page.
 	MoveCanvasToPage $w $name
     } else {
-	set wpage [$wapp(nb) newpage $name]
+	set wnb $wapp(nb)
+	set wpage $wnb.p[incr pageuid]
+	ttk::frame $wpage
+	$wnb add $wpage -text $name
+
 	set frcan $wpage.fc
 	NewCanvas $frcan -background $state(bgColCan)
 	pack $frcan -fill both -expand true -side right
 	set wapp(can,$name) $frcan.can
+	set wapp(page,$name) $wpage
     }
 }
 
 proc ::WB::MoveCanvasToPage {w name} {
     upvar ::WB::${w}::wapp wapp
+    variable pageuid
     
     # Repack the WBCanvas in notebook page.
     pack forget $wapp(frcan)
     
-    # Has to be remade using ttk::notebook
-    #::mactabnotebook::mactabnotebook $wapp(nb)  \
-    #  -selectcommand [namespace current]::SelectPageCmd  \
-    #  -closebutton 1
-    pack $wapp(nb) -in $wapp(ccon) -fill both -expand true -side right
-    set wpage [$wapp(nb) newpage $name]	
-    pack $wapp(frcan) -in $wpage -fill both -expand true -side right
+    set wnb $wapp(nb)
+    ttk::notebook $wnb
+    pack $wnb -in $wapp(ccon) -fill both -expand 1
+
+    #bind $wnb <<NotebookTabChanged>> \
+    #  [list [namespace current]::TabChanged $w]
+    #ttk::notebook::enableTraversal $wnb
+
+    set wpage $wnb.p[incr pageuid]
+    ttk::frame $wpage
+    $wnb add $wpage -text $name
+    
+    pack $wapp(frcan) -in $wpage -fill both -expand 1
     raise $wapp(frcan)
     set wapp(can,$name) $wapp(can,)
+    set wapp(page,$name) $wpage
 }
 
 proc ::WB::DeleteCanvasPage {w name} {
     upvar ::WB::${w}::wapp wapp
     
-    $wapp(nb) deletepage $name
+    $wapp(nb) forget $wapp(page,$name)
 }
 
-proc ::WB::SelectPageCmd {wpage name} {
-    
-    set w [winfo toplevel $wpage]
+proc ::WB::TabChanged {w} {
     upvar ::WB::${w}::wapp wapp
     upvar ::WB::${w}::state state
 
-    Debug 3 "::WB::SelectPageCmd name=$name"
+    Debug 3 "::WB::TabChanged name=$name"
     
     set wapp(can) $wapp(can,$name)
     
