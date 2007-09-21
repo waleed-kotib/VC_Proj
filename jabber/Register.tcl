@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.87 2007-09-16 07:39:12 matben Exp $
+# $Id: Register.tcl,v 1.88 2007-09-21 13:13:50 matben Exp $
 
 package provide Register 1.0
 
@@ -367,7 +367,6 @@ proc ::RegisterEx::New {args} {
     tkwait variable $token\(finished)
     
     ::JUI::SetStatusMessage ""
-    ::JUI::StartStopAnimatedWave 0
 
     ::UI::SaveWinPrefixGeom $wDlgs(jreg)
     ::UI::GrabRelease $w
@@ -516,7 +515,6 @@ proc ::RegisterEx::NotBusy {token} {
     $state(wprog) stop
     set state(status) ""
     ::JUI::SetStatusMessage ""
-    ::JUI::StartStopAnimatedWave 0
 }
 
 proc ::RegisterEx::SetState {token theState} {

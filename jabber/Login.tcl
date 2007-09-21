@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.131 2007-09-16 07:39:11 matben Exp $
+# $Id: Login.tcl,v 1.132 2007-09-21 13:13:50 matben Exp $
 
 package provide Login 1.0
 
@@ -426,7 +426,6 @@ proc ::Login::Reset { } {
     $jstate(jlib) connect reset
 
     ::JUI::SetStatusMessage ""
-    ::JUI::StartStopAnimatedWave 0
     ::JUI::FixUIWhen "disconnect"
     ::JUI::SetConnectState "disconnect"
 }
@@ -634,7 +633,6 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     set highstate(pending) 1
 
     ::JUI::SetStatusMessage "[mc jawaitresp $server]..."
-    ::JUI::StartStopAnimatedWave 1
     ::JUI::FixUIWhen "connectinit"
     ::JUI::SetConnectState "connectinit"
     
@@ -705,7 +703,6 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
 	}
     }        
     ::JUI::SetStatusMessage $msg
-    ::JUI::StartStopAnimatedWave 0
 
     uplevel #0 $highstate(cmd) [list $token $errcode $errmsg]
 
