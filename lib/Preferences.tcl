@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.104 2007-09-16 14:55:27 matben Exp $
+# $Id: Preferences.tcl,v 1.105 2007-09-21 05:57:04 matben Exp $
  
 package require mnotebook
 
@@ -283,12 +283,22 @@ proc ::Preferences::TreeCtrl {T wysc} {
       -borderwidth 0 -highlightthickness 0 -indent 0 -width 140
 
     # This is a dummy option.
-    set itemBackground [option get $T itemBackground {}]
     set itemFill [option get $T itemFill {}]
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
     set fg [option get $T textColor {}]
     set fillT {white {selected focus} black {selected !focus}}
+
+    array set style [list -foreground black -itembackground {}]
+    array set style [style configure .]
+    array set style [style configure TreeCtrl]
+
+    set itemBackground $style(-itembackground)    
+    set itemFill $style(-foreground)
+    if {[info exists style(-itemfill)]} {
+	set itemFill $style(-itemfill)
+    }  
+    set stateFill [concat $fillT [list $itemFill {}]]
 
      $T column create -tags cTree  \
       -itembackground $itemBackground -resize 0 -expand 1 -borderwidth $bd  \
@@ -296,7 +306,7 @@ proc ::Preferences::TreeCtrl {T wysc} {
      $T configure -treecolumn cTree
 
     set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
-    $T element create eText text -lines 1 -fill $fillT
+    $T element create eText text -lines 1 -fill $stateFill
     $T element create eBorder rect -open new -outline gray -outlinewidth 1 \
       -fill $fill -showfocus 1
 
@@ -308,7 +318,7 @@ proc ::Preferences::TreeCtrl {T wysc} {
     $T notify bind $T <Selection>  [list [namespace current]::Selection %T]
     
     if {$itemFill ne ""} {
-	treeutil::configureelementtype $T text -fill $itemFill
+	#treeutil::configureelementtype $T text -fill $itemFill
     }
 }
 
