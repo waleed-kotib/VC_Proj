@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.85 2007-09-22 06:49:28 matben Exp $
+# $Id: JWB.tcl,v 1.86 2007-09-22 14:31:05 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -63,7 +63,7 @@ proc ::JWB::Init {jlibName} {
     ::hooks::register whiteboardCloseHook          ::JWB::CloseHook        20
     ::hooks::register whiteboardSendMessageHook    ::JWB::SendMessageListHook
     ::hooks::register whiteboardSendGenMessageHook ::JWB::SendGenMessageListHook
-    ::hooks::register whiteboardPutFileHook        ::JWB::PutFileOrScheduleHook
+    ::hooks::register whiteboardPutFileHook        ::JWB::PutFileHook
     ::hooks::register whiteboardConfigureHook      ::JWB::Configure
     ::hooks::register serverPutRequestHook         ::JWB::HandlePutRequest
     ::hooks::register presenceHook                 ::JWB::PresenceHook
@@ -72,7 +72,7 @@ proc ::JWB::Init {jlibName} {
     ::hooks::register logoutHook                   ::JWB::LogoutHook
     ::hooks::register groupchatEnterRoomHook       ::JWB::EnterRoomHook
     ::hooks::register groupchatExitRoomHook        ::JWB::ExitRoomHook
-
+    
     # Configure the Tk->SVG translation to use http.
     # Must be reconfigured when we know our address after connecting???
     set ip [::Network::GetThisPublicIP]
@@ -707,7 +707,7 @@ proc ::JWB::SendMessageHook {w msg args} {
 	    # Perhaps we should give some aid here; set focus?
 	}
     }
-    return {}
+    return
 }
 
 # JWB::SendMessageListHook --
@@ -740,7 +740,7 @@ proc ::JWB::SendMessageListHook {w msgList args} {
 	    # Perhaps we should give some aid here; set focus?
 	}
     }
-    return {}
+    return
 }
 
 # JWB::SendGenMessageListHook --
@@ -771,7 +771,7 @@ proc ::JWB::SendGenMessageListHook {w msgList args} {
 	    eval {SendRawMessageList $jid $msgList} $argsList
 	}    
     }
-    return {}
+    return
 }
 
 proc ::JWB::SendArgs {w} {
@@ -901,6 +901,18 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
     # Needs more testing...
     # lappend xlist $ampElem
     return $xlist
+}
+
+proc ::JWB::SVGPutFile {w fileName opts} {
+    variable jwbstate
+
+    puts "::JWB::SVGPutFile"
+    
+    # Create an image element directly from can2svgwb
+    
+    GetOneLiner...
+    
+    
 }
 
 # JWB::SVGImageImportElem --
@@ -1207,13 +1219,111 @@ proc ::JWB::GetSVGWBMessageList {w xlist} {
 #       It takes care of any si element for getting the image.
 
 proc ::JWB::SVGImageHandlerEx {w xmllist opts} {
+    variable jwbstate
+    variable xmlns
+    upvar ::Jabber::jstate jstate
     
     puts "\n::JWB::SVGImageHandlerEx"
     puts "xmllist=$xmllist"
     puts "opts=$opts\n"
+        
+    set imageE $xmllist
+
+    # @@@ Need to check file cache, MIME types etc.
+    set url [wrapper::getattribute $imageE xlink:href]
     
     
+    set siE [wrapper::getfirstchild $imageE x $xmlns(svg)]
+    if {![llength $siE]} {
+	# error
+	return
+    }
+    set sid  [wrapper::getattribute $siE id]
+    set mime [wrapper::getattribute $siE mime-type] 
     
+    # @@@ bare JID vs. full JID ??? Must sort out. Always full JID since
+    #     capabilities may differ ???
+    
+    set jid $jwbstate($w,jid)
+
+    set fileTail [::uriencode::decodefile [file tail  \
+      [::Utils::GetFilePathFromUrl $url]]]
+    set dstPath [::FileCache::MakeCacheFileName $fileTail]
+
+    if {[catch {open $dstPath w} fd]} {
+	# error
+	return
+    }
+    
+    # Relate this sid to our whiteboard token 'w'.
+    set jwbstate($w,sid,$sid) $sid
+
+    # State array which is our object.
+    variable $sid
+    upvar 0 $sid state
+
+    set state(w)      $w
+    set state(sid)    $sid
+    set state(url)    $url
+    set state(opts)   $opts
+    set state(path)   $dstPath
+    set state(imageE) $imageE
+    
+        
+    set fopts [list -channel $fd \
+      -progress [namespace code [list SVGImageStreamProgress $w]] \
+      -command  [namespace code [list SVGImageStreamCmd $w]]]
+
+    eval {$jstate(jlib) filetransfer t_constructor $sid $jid $siE} $fopts
+}
+
+proc ::JWB::SVGImageStreamProgress {w jlib sid size bytes} {
+    variable jwbstate
+    
+    puts "::JWB::SVGImageStreamProgress $sid $size $bytes"
+    
+    # @@@ We shouldn't call this too often.
+    ::Import::ProgressEx $w $sid $size $bytes
+  
+}
+
+proc ::JWB::SVGImageStreamCmd {w jlib sid status {err ""}} {
+    variable jwbstate
+    variable $sid
+    upvar 0 $sid state
+    
+    puts "::JWB::SVGImageStreamCmd $sid $result $err"
+
+    set wcan [::WB::GetCanvasFromWtop $w]
+
+    if {$status eq "ok"} {
+	::Import::DoImport $wcan $state(opts) -file $state(path) -where local
+
+    }
+
+
+    unset -nocomplain jwbstate($w,sid,$sid)
+    ::timing::free $sid
+    unset -nocomplain state
+}
+
+# JWB::SVGImageStreamFree --
+# 
+#       Destroy all our target SVG objects for file transfer.
+
+proc ::JWB::SVGImageStreamFree {w} {
+    variable jwbstate
+    upvar ::Jabber::jstate jstate
+
+    foreach {key sid} [array get jwbstate $w,sid,*] {
+	variable $sid
+	upvar 0 $sid state
+    
+	$jstate(jlib) filetransfer treset $sid
+	::timing::free $sid
+	unset -nocomplain state
+	unset -nocomplain jwbstate($w,sid,$sid)
+    }
 }
 
 # JWB::SVGForeignObjectHandler --
@@ -1396,6 +1506,8 @@ proc ::JWB::Free {w} {
     
     ::Debug 2 "::JWB::Free"
     
+    SVGImageStreamFree $w
+    
     catch {
 	unset -nocomplain jwbstate($jwbstate($w,thread),thread,w) \
 	  jwbstate($jwbstate($w,jid),jid,w)
@@ -1547,6 +1659,16 @@ proc ::JWB::PresenceHook {jid type args} {
 		set ipCache(ip,$mjid) $ip
 	    }
 	}
+    }
+}
+
+proc ::JWB::PutFileHook {w fileName opts} {
+    upvar ::Jabber::jprefs jprefs
+
+    if {$jprefs(useSVGT)} {
+	SVGPutFile $w $fileName $opts
+    } else {
+	PutFileOrScheduleHook $w $fileName $opts
     }
 }
 
