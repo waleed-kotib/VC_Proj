@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.84 2007-09-16 07:39:11 matben Exp $
+# $Id: JWB.tcl,v 1.85 2007-09-22 06:49:28 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -41,12 +41,13 @@ namespace eval ::JWB:: {
     set ipCache(getid) 1000
             
     variable initted 0
-    variable xmlnsSVGWB "http://jabber.org/protocol/svgwb"
+    variable xmlns
+    set xmlns(svg) "http://jabber.org/protocol/svgwb"
 }
 
 proc ::JWB::Init {jlibName} {
     global  this prefs
-    variable xmlnsSVGWB
+    variable xmlns
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     upvar ::Jabber::xmppxmlns xmppxmlns
@@ -100,9 +101,9 @@ proc ::JWB::Init {jlibName} {
       [namespace current]::HandleRawGroupchatMessage
 
     # Not completed SVG protocol...
-    $jlib message_register chat $xmlnsSVGWB \
+    $jlib message_register chat $xmlns(svg) \
       [namespace current]::HandleSVGWBChatMessage
-    $jlib message_register groupchat $xmlnsSVGWB \
+    $jlib message_register groupchat $xmlns(svg) \
       [namespace current]::HandleSVGWBGroupchatMessage
 
     set E [list]
@@ -865,7 +866,7 @@ proc ::JWB::SendRawMessageList {jid msgList args} {
 #                   no CANVAS:
 
 proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
-    variable xmlnsSVGWB
+    variable xmlns
     variable ampElem
     upvar ::Jabber::jprefs jprefs
     
@@ -882,7 +883,7 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
 	      -importimagehandler [namespace code [list SVGImageImportElem $w]]]]
 	}
 	set xlist [list [wrapper::createtag x -attrlist  \
-	  [list xmlns $xmlnsSVGWB] -subtags $subx]]
+	  [list xmlns $xmlns(svg)] -subtags $subx]]
     } else {
     
 	# Form an <x xmlns='coccinella:wb'><raw> element in message.
@@ -902,6 +903,10 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
     return $xlist
 }
 
+# JWB::SVGImageImportElem --
+# 
+#       Callback for images from 'can2svgwb::svgasxmllist'.
+
 proc ::JWB::SVGImageImportElem {w cmd args} {
     variable jwbstate
     
@@ -913,7 +918,8 @@ proc ::JWB::SVGImageImportElem {w cmd args} {
     set url [lindex $cmd [incr idx]]
     set dir [can2svg::config -httpbasedir]
     array set uri [::uri::split $url http]
-    set fileName [file normalize [file join $dir $uri(path)]]
+    set path [uriencode::decodeurl $uri(path)]
+    set fileName [file normalize [file join $dir $path]]
     if {![file exists $fileName]} {
 	return
     }    
@@ -1138,8 +1144,8 @@ proc ::JWB::GetRawMessageList {xlist xmlns} {
     set rawElemList [list]
     
     foreach xelem $xlist {
-	array set attrArr [wrapper::getattrlist $xelem]
-	if {[string equal $attrArr(xmlns) $xmlns]} {
+	array set attrA [wrapper::getattrlist $xelem]
+	if {[string equal $attrA(xmlns) $xmlns]} {
 	    foreach xraw [wrapper::getchildren $xelem] {
 		if {[string equal [wrapper::gettag $xraw] "raw"]} {
 		    lappend rawElemList [wrapper::getcdata $xraw]
@@ -1159,8 +1165,8 @@ proc ::JWB::GetRawCanvasMessageList {xlist xmlns} {
     set cmdList [list]
     
     foreach xelem $xlist {
-	array set attrArr [wrapper::getattrlist $xelem]
-	if {[string equal $attrArr(xmlns) $xmlns]} {
+	array set attrA [wrapper::getattrlist $xelem]
+	if {[string equal $attrA(xmlns) $xmlns]} {
 	    foreach xraw [wrapper::getchildren $xelem] {
 		if {[string equal [wrapper::gettag $xraw] "raw"]} {
 		    lappend cmdList [lrange [wrapper::getcdata $xraw] 1 end]
@@ -1178,21 +1184,21 @@ proc ::JWB::GetRawCanvasMessageList {xlist xmlns} {
 #       of the Tk canvas (-fill/-outline needs type when item configure).
 
 proc ::JWB::GetSVGWBMessageList {w xlist} {
-    variable xmlnsSVGWB
+    variable xmlns
 
     set wcan [::WB::GetCanvasFromWtop $w]
     set cmdList [list]
     
-    foreach xelem $xlist {
-	array set attrArr [wrapper::getattrlist $xelem]
-	if {[string equal $attrArr(xmlns) $xmlnsSVGWB]} {
-	    set cmdList [svgwb2can::parsesvgdocument $xelem -canvas $wcan \
+    foreach xE $xlist {
+	array set attrA [wrapper::getattrlist $xE]
+	if {[string equal $attrA(xmlns) $xmlns(svg)]} {
+	    set cmdL [svgwb2can::parsesvgdocument $xE -canvas $wcan \
 	      -foreignobjecthandler [namespace code [list SVGForeignObjectHandler $w]] \
 	      -httphandler [namespace code [list SVGHttpHandler $w]] \
 	      -imagehandlerex [namespace code [list SVGImageHandlerEx $w]]]
 	}
     }
-    return $cmdList
+    return $cmdL
 }
 
 # JWB::SVGImageHandlerEx --
@@ -1202,7 +1208,9 @@ proc ::JWB::GetSVGWBMessageList {w xlist} {
 
 proc ::JWB::SVGImageHandlerEx {w xmllist opts} {
     
-    puts "::JWB::SVGImageHandlerEx"
+    puts "\n::JWB::SVGImageHandlerEx"
+    puts "xmllist=$xmllist"
+    puts "opts=$opts\n"
     
     
     
@@ -1212,12 +1220,12 @@ proc ::JWB::SVGImageHandlerEx {w xmllist opts} {
 # 
 #       The only excuse for this is to add '-where local'.
 
-proc ::JWB::SVGForeignObjectHandler {w xmllist paropts transformList args} {
+proc ::JWB::SVGForeignObjectHandler {w xmllist paropts transformL args} {
     
     array set argsA $args
     set argsA(-where) local
     eval {::CanvasUtils::SVGForeignObjectHandler $w $xmllist $paropts \
-      $transformList} [array get argsA]
+      $transformL} [array get argsA]
 }
 
 # JWB::SVGHttpHandler --
