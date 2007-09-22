@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.19 2007-09-01 07:49:05 matben Exp $
+# $Id: ftrans.tcl,v 1.20 2007-09-22 06:49:28 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -140,7 +140,7 @@ proc jlib::ftrans::element {jlibname jid cmd args} {
     set fileE [eval {i_constructor $jlibname $sid $jid $cmd} $args]
     set cmd [namespace current]::open_cb
 
-    set siE [jlib::si::i_constructor $jlibname $jid $sid $istate($sid,-mime) \
+    set siE [jlib::si::i_constructor $jlibname $sid $jid $istate($sid,-mime) \
       $xmlns(ftrans) $fileE $cmd -block-size $istate($sid,-block-size)]
     
     return $siE

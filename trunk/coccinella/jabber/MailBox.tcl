@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.123 2007-09-15 14:27:24 matben Exp $
+# $Id: MailBox.tcl,v 1.124 2007-09-22 06:49:28 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -112,6 +112,9 @@ namespace eval ::MailBox:: {
 	message     5
 	opts        6
     }
+    
+    variable xmlns
+    set xmlns(svg) "http://jabber.org/protocol/svgwb"
 }
 
 # MailBox::Init --
@@ -140,6 +143,7 @@ proc ::MailBox::InitPrefsHook {} {
 proc ::MailBox::InitHandler {jlibName} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
+    variable xmlns
     
     # Register for the whiteboard messages we want. Duplicate protocols.
     if {[::Jabber::HaveWhiteboard]} {
@@ -147,7 +151,7 @@ proc ::MailBox::InitHandler {jlibName} {
 	  [namespace current]::HandleRawWBMessage
 	$jstate(jlib) message_register normal $coccixmlns(whiteboard)  \
 	  [namespace current]::HandleRawWBMessage
-	$jstate(jlib) message_register normal "http://jabber.org/protocol/svgwb" \
+	$jstate(jlib) message_register normal $xmlns(svg) \
 	  [namespace current]::HandleSVGWBMessage
     }
 }
@@ -344,9 +348,6 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns xmldata args} {
 	    set secs [clock seconds]
 	}
 	set time [clock format $secs -format "%Y%m%dT%H:%M:%S"]
-	
-	# @@@ We don't detect the svgwb part of xml as a whiteboard.
-	#     Fix when adapting SVG.
 	MKAdd $uuid $time 0 $xmldata ""
 	if {$w ne ""} {
 	    MKInsertRow $uuid $time 0 $xmldata ""
@@ -756,14 +757,13 @@ proc ::MailBox::InsertRow {wtbl row i} {
     set uidmsg  [lindex $row $mailboxindex(uidmsg)]
     set secs    [clock scan $date]
     set smartdate [::Utils::SmartClockFormat $secs -showsecs 0]
-    
-    set from [jlib::unescapejid $from]
+    set ujid2 [jlib::unescapejid [jlib::barejid $from]]
 
     set T $wtbl
     set item [$T item create -tags $uidmsg]
     $T item text $item  \
-      cSubject $subject cFrom $from   cDate $smartdate  \
-      cSecs    $secs    cRead $isread
+      cSubject $subject  cFrom $ujid2   cDate $smartdate  \
+      cSecs    $secs     cRead $isread
     $T item lastchild root $item
     
     if {$haswb} {
@@ -1196,13 +1196,13 @@ proc ::MailBox::TrashMsg {} {
 }
 
 proc ::MailBox::GetAnySVGElements {row} {
+    variable xmlns
     
     set svgElem {}
     set idx [lsearch $row -x]
     if {$idx > 0} {
 	set xlist [lindex $row [expr $idx+1]]
-	set svgElem [wrapper::getnamespacefromchilds $xlist x \
-	  "http://jabber.org/protocol/svgwb"]
+	set svgElem [wrapper::getnamespacefromchilds $xlist x $xmlns(svg)]
     }
     return $svgElem
 }
@@ -1357,6 +1357,7 @@ proc ::MailBox::MsgDisplayClear {} {
 
 proc ::MailBox::DisplayAny {item} {
     variable locals
+    variable xmlns
     
     set T $locals(wtbl)
 
@@ -1371,14 +1372,21 @@ proc ::MailBox::DisplayAny {item} {
 	if {[MKHaveMetakit]} {
 	    array set v [MKGet $uid]
 	    if {$v(file) ne ""} {
+		# Raw wb protocol:
 		DisplayWhiteboardFile $jid3 $v(file)
+	    } else {
+		# SVG protocol:
+		set svgE [wrapper::getfirstchild $v(xmldata) x $xmlns(svg)]
+		if {[llength $svgE]} {
+		    DisplayXElementSVG $jid3 [list $svgE]
+		}
 	    }
 	} else {
 	    variable mailbox
 	    variable mailboxindex
 	    
 	    set uidcan [GetCanvasHexUID $uid]
-	    set svgElem [GetAnySVGElements $mailbox($uid)]
+	    set svgEs [GetAnySVGElements $mailbox($uid)]
 	    
 	    # The "raw" protocol stores the canvas in a separate file indicated by
 	    # the -canvasuid key in the message list.
@@ -1388,8 +1396,8 @@ proc ::MailBox::DisplayAny {item} {
 	    # The "raw" protocol.
 	    if {[string length $uidcan] > 0} {	
 		DisplayWhiteboardFile $jid3 $uidcan.can
-	    } elseif {[llength $svgElem]} {
-		DisplayXElementSVG $jid3 $svgElem
+	    } elseif {[llength $svgEs]} {
+		DisplayXElementSVG $jid3 $svgEs
 	    }
 	}
     }
@@ -1928,7 +1936,8 @@ proc ::MailBox::MKInsertAll {} {
 
 proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
     variable locals
-    
+    variable xmlns
+        
     set secs [clock scan $time]
     set smartdate [::Utils::SmartClockFormat $secs -showsecs 0]
     
@@ -1936,18 +1945,22 @@ proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
     set subjectE [wrapper::getfirstchildwithtag $xmldata subject]
     set bodyE    [wrapper::getfirstchildwithtag $xmldata body]
     set subject [wrapper::getcdata $subjectE]
-    set body    [wrapper::getcdata $bodyE]
-    
-    set from [jlib::unescapejid $from]
+    set body    [wrapper::getcdata $bodyE]    
+    set ujid2 [jlib::unescapejid [jlib::barejid $from]]
     
     set iswb 0
     if {[file extension $file] eq ".can"} {
 	set iswb 1
-    }
+    } else {
+	set svgE [wrapper::getfirstchild $xmldata x $xmlns(svg)]
+	if {[llength $svgE]} {
+	    set iswb 1
+	}
+    }    
     set T $locals(wtbl)
     set item [$T item create -tags $uuid]
     $T item text $item  \
-      cSubject $subject cFrom $from   cDate $smartdate  \
+      cSubject $subject cFrom $ujid2  cDate $smartdate  \
       cSecs    $secs    cRead $isread
     $T item lastchild root $item
     
