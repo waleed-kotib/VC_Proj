@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.87 2007-09-23 07:39:31 matben Exp $
+# $Id: JWB.tcl,v 1.88 2007-09-23 14:32:21 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -901,6 +901,7 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
     return $xlist
 }
 
+# skip ????????????????
 proc ::JWB::SVGGetImageXElem {w fileName opts} {
     variable jwbstate
     variable xmlns
@@ -1000,6 +1001,7 @@ proc ::JWB::PutFileHook {w fileName opts} {
     }
 }
 
+# skip ????????????????
 proc ::JWB::SVGSendFile {w fileName opts} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
@@ -1186,7 +1188,7 @@ proc ::JWB::PutFile {w fileName mime opts jid} {
 }
 
 # Various message handlers......................................................
-# Target side.
+# Target side ---
 
 # JWB::HandleSpecialMessage --
 # 
@@ -1431,37 +1433,43 @@ proc ::JWB::GetSVGWBMessageList {w xlist} {
 #       It takes care of any si element for getting the image.
 #       This is a target handler.
 
-proc ::JWB::SVGImageHandlerEx {w xmllist opts} {
+proc ::JWB::SVGImageHandlerEx {w imageE opts} {
     variable jwbstate
-    variable xmlns
     upvar ::Jabber::jstate jstate
+    upvar ::Jabber::xmppxmlns xmppxmlns
     
     puts "\n::JWB::SVGImageHandlerEx"
-    puts "xmllist=$xmllist"
+    puts "imageE=$imageE"
     puts "opts=$opts\n"
-        
-    set imageE $xmllist
-
+    
     # @@@ Need to check file cache, MIME types etc.
-    set url [wrapper::getattribute $imageE xlink:href]
-    
-    
-    set siE [wrapper::getfirstchild $imageE x $xmlns(svg)]
+
+
+    set url [wrapper::getattribute $imageE xlink:href]  
+    set siE [wrapper::getfirstchild $imageE si $xmppxmlns(si)]
     if {![llength $siE]} {
 	# error
 	return
     }
     set sid  [wrapper::getattribute $siE id]
     set mime [wrapper::getattribute $siE mime-type] 
+    array set attrA [wrapper::getattrlist $imageE]
+    
+    set aopts [list]
+    lappend aopts -coords [list $attrA(x) $attrA(y)] \
+      -width $attrA(width) -height $attrA(height) \
+      -url $attrA(xlink:href) -tags $attrA(id)
+    set aopts [concat $aopts $opts]
+    array set aoptsA $aopts
     
     # @@@ bare JID vs. full JID ??? Must sort out. Always full JID since
     #     capabilities may differ ???
     
     set jid $jwbstate($w,jid)
 
-    set fileTail [::uriencode::decodefile [file tail  \
+    set tail [::uriencode::decodefile [file tail  \
       [::Utils::GetFilePathFromUrl $url]]]
-    set dstPath [::FileCache::MakeCacheFileName $fileTail]
+    set dstPath [::FileCache::MakeCacheFileName $tail]
 
     if {[catch {open $dstPath w} fd]} {
 	# error
@@ -1471,25 +1479,13 @@ proc ::JWB::SVGImageHandlerEx {w xmllist opts} {
     # Relate this sid to our whiteboard token 'w'.
     set jwbstate($w,sid,$sid) $sid
     
-    ::Import::ObjectNew $w $sid
-
-    # State array which is our object.
-    variable $sid
-    upvar 0 $sid state
-
-    set state(w)      $w
-    set state(sid)    $sid
-    set state(url)    $url
-    set state(opts)   $opts
-    set state(path)   $dstPath
-    set state(imageE) $imageE
-    
-        
+    ::Import::ObjectNew $sid $w $dstPath [array get aoptsA]
+            
     set fopts [list -channel $fd \
       -progress [namespace code [list SVGImageStreamProgress $w]] \
       -command  [namespace code [list SVGImageStreamCmd $w]]]
 
-    eval {$jstate(jlib) filetransfer t_constructor $sid $jid $siE} $fopts
+    #eval {$jstate(jlib) filetransfer t_constructor $sid $jid $siE} $fopts
 }
 
 proc ::JWB::SVGImageStreamProgress {w jlib sid size bytes} {
@@ -1497,18 +1493,17 @@ proc ::JWB::SVGImageStreamProgress {w jlib sid size bytes} {
     
     puts "::JWB::SVGImageStreamProgress $sid $size $bytes"
     
-  
+    ::Import::ObjectProgress $sid $size $bytes
 }
 
 proc ::JWB::SVGImageStreamCmd {w jlib sid status {err ""}} {
     variable jwbstate
 
+    puts "::JWB::SVGImageStreamCmd status=$status, err=$err"
     
-    
+    ::Import::ObjectCommand $sid $status $err
 
     unset -nocomplain jwbstate($w,sid,$sid)
-    ::timing::free $sid
-    unset -nocomplain state
 }
 
 # JWB::SVGImageStreamFree --
