@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Import.tcl,v 1.31 2007-09-22 14:31:05 matben Exp $
+# $Id: Import.tcl,v 1.32 2007-09-23 14:32:22 matben Exp $
 
 package require http
 package require httpex
@@ -332,12 +332,12 @@ proc ::Import::DoImport {wcan opts args} {
 		    }
 		    eval {::WB::PutFile $w $fileName $putOpts} $putArgs
 		}
-		http {
+		http - si {
 		    set id [$wcan find withtag $useTag]
 		    set line [::CanvasUtils::GetOneLinerForAny $wcan $id  \
 		      -uritype http]
 		    
-		    # There are a few things we should add from $opts.
+		    # There are a few things we should add from opts.
 		    array set impArr [lrange $line 3 end]
 		    foreach key {-above -below -size} {
 			if {[info exists optsA($key)]} {
@@ -500,7 +500,7 @@ proc ::Import::DrawQuickTimeTcl {wcan optsVar args} {
     }
     
     # Extract coordinates and tags which must be there. error checking?
-    foreach {x y} $optsA(-coords) break
+    lassign $optsA(-coords) x y
     set utag [::CanvasUtils::GetUtagFromTagList $optsA(-tags)]
     set w [winfo toplevel $wcan]
     set wtopname [winfo name [winfo toplevel $wcan]]
@@ -844,37 +844,87 @@ proc ::Import::HttpProgress2 {gettoken str} {
     ::WB::SetStatusMessage $getstate(w) $str
 }
 
-# Import::CommandEx --
+# Import::ObjectNew --
 # 
-# 
+#       Constructor for an import object (svg).
 
-proc ::Import::CommandEx {w status} {
+proc ::Import::ObjectNew {token w dstPath opts} {
     
-    puts "::Import::CommandEx"
+    # State array which is our object.
+    variable $token
+    upvar 0 $token state
     
-    set wcan [::WB::GetCanvasFromWtop $w]
+    puts "::Import::ObjectNew"
     
-    if {$status eq "ok"} {
-	
-	
-    } else {
-	
-	
-    }
+    array set optsA $opts
+    set url $optsA(-url)
+    set tail [::uriencode::decodefile [file tail [::Utils::GetFilePathFromUrl $url]]]
+    set ms [clock clicks -milliseconds]
+    
+    set state(w)        $w
+    set state(dstPath)  $dstPath
+    set state(opts)     $opts
+    set state(url)      $url
+    set state(tail)     $tail
+    set state(last)     $ms
+    
+    return $token
 }
 
-# Import::ProgressEx --
+# Import::ObjectProgress --
 # 
 #       Generic progress handler (SVG).
 
-proc ::Import::ProgressEx {w key size bytes} {
+proc ::Import::ObjectProgress {token size bytes} {
+    global  prefs
+    variable $token
+    upvar 0 $token state
     
-    ::timing::setbytes $key $bytes
-    set tmsg [::timing::getmessage $key $total]
-    set tail "xxxxxxxx"
-    set msg "Getting \"$tail\", $tmsg"
-    puts "\t msg=$msg"
-    ::WB::SetStatusMessage $w $msg
+    set w $state(w)
+    
+    ::timing::setbytes $token $bytes
+    set ms [clock clicks -milliseconds]
+    
+    if {[expr $ms - $state(last)] > $prefs(progUpdateMillis)} {
+	set tmsg [::timing::getmessage $token $total]	
+	set msg [mc progress-Receiving $state(tail) $tmsg]
+	puts "\t msg=$msg"
+	::WB::SetStatusMessage $w $msg
+	set state(last) $ms
+    }
+}
+
+proc ::Import::ObjectCommand {token status {err ""}} {
+    variable $token
+    upvar 0 $token state
+    
+    set w $state(w)
+    set wcan [::WB::GetCanvasFromWtop $w]
+
+    switch -- $status {
+	ok {
+	    ::WB::SetStatusMessage $w ""
+	    
+	    # Add to the lists of known files.
+	    ::FileCache::Set $state(url) $state(dstPath)
+	    
+	    # This should delegate the actual drawing to the correct proc.
+	    DoImport $wcan $state(opts) -file $state(dstPath) -where local
+	}
+	default {
+	    ::WB::SetStatusMessage $w $err
+	    array set opts $getstate(opts)
+	    eval {
+		NewBrokenImage $wcan $opts(-coords) -url $state(url)
+	    } $state(opts)
+	}
+    }
+    
+    # Evaluate any commands affecting this item.
+    #TrptCachePostImport $gettoken
+
+    # Destruction of this object.
+    unset -nocomplain state
 }
 
 # Import::ImportProgress --

@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.54 2007-07-19 06:28:18 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.55 2007-09-23 14:32:22 matben Exp $
 
 package provide FactoryDefaults 1.0
 
@@ -68,9 +68,10 @@ proc FactoryDefaults { } {
     # ip numbers, port numbers, and names.
     set prefs(remotePort) 8235
         
-    # File transport method: put/get or http.
+    # File transport method: putget, http, or si.
+    # http and si identical from the whiteboards perspective.
     set prefs(trptMethod) putget
-    #set prefs(trptMethod) http
+    #set prefs(trptMethod) si
         
     # so no server delay is needed
     set prefs(afterStartServer) 0   
