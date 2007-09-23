@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.86 2007-09-22 14:31:05 matben Exp $
+# $Id: JWB.tcl,v 1.87 2007-09-23 07:39:31 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -662,6 +662,7 @@ proc ::JWB::ExitRoomHook {roomJid} {
 }
 
 # Various procs for sending wb messages ........................................
+# Initiator side.
 
 # JWB::SendMessageHook --
 #
@@ -698,10 +699,10 @@ proc ::JWB::SendMessageHook {w msg args} {
 	    
 	    # Here we shall decide the 'type' of message sent (normal, chat, groupchat)
 	    # depending on the type of whiteboard (via w).
-	    set argsList [SendArgs $w]
+	    set argsL [SendArgs $w]
 	    set jid $jwbstate($w,jid)
 	    
-	    eval {SendMessage $w $jid $msg} $argsList
+	    eval {SendMessage $w $jid $msg} $argsL
 	} else {
 	    
 	    # Perhaps we should give some aid here; set focus?
@@ -767,8 +768,8 @@ proc ::JWB::SendGenMessageListHook {w msgList args} {
     if {$jwbstate($w,send) || $opts(-force)} {
 	if {[VerifyJIDWhiteboard $w]} {
 	    set jid $jwbstate($w,jid)
-	    set argsList [SendArgs $w]
-	    eval {SendRawMessageList $jid $msgList} $argsList
+	    set argsL [SendArgs $w]
+	    eval {SendRawMessageList $jid $msgList} $argsL
 	}    
     }
     return
@@ -777,18 +778,18 @@ proc ::JWB::SendGenMessageListHook {w msgList args} {
 proc ::JWB::SendArgs {w} {
     variable jwbstate
 
-    set argsList {}
+    set argsL [list]
     set type $jwbstate($w,type)
     if {[string equal $type "normal"]} {
 	set type ""
     }
     if {[llength $type] > 0} {
-	lappend argsList -type $type
+	lappend argsL -type $type
 	if {[string equal $type "chat"]} {
-	    lappend argsList -thread $jwbstate($w,thread)
+	    lappend argsL -thread $jwbstate($w,thread)
 	}
     }
-    return $argsList
+    return $argsL
 }
 
 proc ::JWB::CheckIfOnline {w} {
@@ -822,7 +823,6 @@ proc ::JWB::SendMessage {w jid msg args} {
     upvar ::Jabber::jstate jstate
     
     set xlist [CanvasCmdListToMessageXElement $w [list $msg]]
-
     eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
 }
 
@@ -834,7 +834,6 @@ proc ::JWB::SendMessageList {w jid msgList args} {
     upvar ::Jabber::jstate jstate
     
     set xlist [CanvasCmdListToMessageXElement $w $msgList]
-
     eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
 }
 
@@ -852,7 +851,6 @@ proc ::JWB::SendRawMessageList {jid msgList args} {
     }
     set xlist [list [wrapper::createtag x -attrlist  \
       {xmlns coccinella:wb} -subtags $subx]]
-
     eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
 }
 
@@ -882,8 +880,8 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
 	      -unknownimporthandler ::CanvasUtils::GetSVGForeignFromImportCmd \
 	      -importimagehandler [namespace code [list SVGImageImportElem $w]]]]
 	}
-	set xlist [list [wrapper::createtag x -attrlist  \
-	  [list xmlns $xmlns(svg)] -subtags $subx]]
+	set xlist [list [wrapper::createtag x \
+	  -attrlist [list xmlns $xmlns(svg)] -subtags $subx]]
     } else {
     
 	# Form an <x xmlns='coccinella:wb'><raw> element in message.
@@ -891,8 +889,8 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
 	foreach cmd $cmdList {
 	    lappend subx [wrapper::createtag "raw" -chdata "CANVAS: $cmd"]
 	}
-	set xlist [list [wrapper::createtag x -attrlist  \
-	  {xmlns coccinella:wb} -subtags $subx]]
+	set xlist [list [wrapper::createtag x \
+	  -attrlist {xmlns coccinella:wb} -subtags $subx]]
     }
     
     # amp element for message processing directives.
@@ -903,16 +901,31 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
     return $xlist
 }
 
-proc ::JWB::SVGPutFile {w fileName opts} {
+proc ::JWB::SVGGetImageXElem {w fileName opts} {
     variable jwbstate
-
-    puts "::JWB::SVGPutFile"
+    variable xmlns
+    
+    array set optsA $opts
     
     # Create an image element directly from can2svgwb
+    set wcan [::WB::GetCanvasFromWtop $w]
+    set id [$wcan find withtag $optsA(-tags)]
+    set line [::CanvasUtils::GetOnelinerForImage $wcan $id -uritype http]
     
-    GetOneLiner...
+    # There are a few things we should add from opts.
+    array set impA [lrange $line 3 end]
+    foreach key {-above -below -size} {
+	if {[info exists optsA($key)]} {
+	    set impA($key) $optsA($key)
+	}
+    }
+    set line [concat [lrange $line 0 2] [array get impA]]
     
-    
+    set imageE [can2svgwb::svgasxmllist $line -canvas $wcan \
+      -importimagehandler [namespace code [list SVGImageImportElem $w]]]
+    set xE [list [wrapper::createtag x \
+      -attrlist [list xmlns $xmlns(svg)] -subtags $imageE]]
+    return $xE
 }
 
 # JWB::SVGImageImportElem --
@@ -936,7 +949,9 @@ proc ::JWB::SVGImageImportElem {w cmd args} {
 	return
     }    
     set jid $jwbstate($w,jid)
-    set siE [::Jabber::JlibCmd filetransfer element $jid ftrans -file $fileName]
+    set mime [::Types::GetMimeTypeForFileName $fileName]
+    set siE [::Jabber::JlibCmd filetransfer element $jid ftrans -file $fileName \
+      -mime $mime]
     return $siE
 }
 
@@ -970,11 +985,208 @@ proc ::JWB::DoSendCanvas {w} {
 }
 
 proc ::JWB::FilterTags {tags} {
-    
     return [::CanvasUtils::GetUtagFromTagList $tags]
 }
 
+# Sending files...
+
+proc ::JWB::PutFileHook {w fileName opts} {
+    upvar ::Jabber::jprefs jprefs
+
+    if {$jprefs(useSVGT)} {
+	SVGSendFile $w $fileName $opts
+    } else {
+	PutFileOrScheduleHook $w $fileName $opts
+    }
+}
+
+proc ::JWB::SVGSendFile {w fileName opts} {
+    variable jwbstate
+    upvar ::Jabber::jstate jstate
+
+    # @@@ Not working for groupchats !!! Each participant needs different sid !
+
+    puts "::JWB::SVGSendFile"
+    
+    if {!$jwbstate($w,send)} {
+	return
+    }
+    set xE [SVGGetImageXElem $w $fileName $opts]
+    set jid $jwbstate($w,jid)
+    set argsL [SendArgs $w]
+    
+    eval {$jstate(jlib) send_message $jid -xlist $xE} $argsL
+}
+
+# JWB::PutFileOrScheduleHook --
+# 
+#       Handles everything needed to put a file to the jid's corresponding
+#       to the 'w'. Users that we haven't got ip number from are scheduled
+#       for delivery as a callback.
+#       
+# Arguments:
+#       w           toplevel widget path
+#       fileName    the path to the file to be put.
+#       opts        a list of '-key value' pairs, where most keys correspond 
+#                   to a valid "canvas create" option, and everything is on 
+#                   a single line.
+#       
+# Results:
+#       none.
+
+proc ::JWB::PutFileOrScheduleHook {w fileName opts} {    
+    variable ipCache
+    variable jwbstate
+    upvar ::Jabber::jstate jstate
+    
+    ::Debug 2 "::JWB::PutFileOrScheduleHook: \
+      w=$w, fileName=$fileName, opts='$opts'"
+    
+    # Before doing anything check that the Send checkbutton is on. ???
+    if {!$jwbstate($w,send)} {
+	::Debug 2 "    doSend=0 => return"
+	return
+    }
+    
+    # Verify that jid is well formed.
+    if {![VerifyJIDWhiteboard $w]} {
+	return
+    }
+    
+    # This must never fail (application/octet-stream as fallback).
+    set mime [::Types::GetMimeTypeForFileName $fileName]
+    
+    # Need to add jabber specific info to the 'optList', such as
+    # -to, -from, -type, -thread etc.
+    lappend opts -type $jwbstate($w,type)
+    if {[info exists jwbstate($w,thread)]} {
+	lappend opts -thread $jwbstate($w,thread)
+    }
+    
+    set tojid $jwbstate($w,jid)
+    jlib::splitjid $tojid jid2 res
+    set isRoom 0
+    
+    if {[string length $res] > 0} {
+	
+	# The 'tojid' is already complete with resource.
+	set allJid3 $tojid
+	lappend opts -from $jstate(mejidresmap)
+    } else {
+	
+	# If 'tojid' is without a resource, it can be a room.
+	if {[$jstate(jlib) service isroom $tojid]} {
+	    set isRoom 1
+	    set allJid3 [$jstate(jlib) service roomparticipants $tojid]
+	    
+	    # Exclude ourselves.
+	    set nick [$jstate(jlib) service mynick $tojid]
+	    set meRoomJid $tojid/$nick
+	    set ind [lsearch $allJid3 $meRoomJid]
+	    if {$ind >= 0} {
+		set allJid3 [lreplace $allJid3 $ind $ind]
+	    }
+	    
+	    # Be sure to have our room jid and not the real one.
+	    lappend opts -from $meRoomJid
+	} else {
+	    
+	    # Else put to resource with highest priority.
+	    set res [$jstate(jlib) roster gethighestresource $tojid]
+	    if {$res eq ""} {
+		
+		# This is someone we haven't got presence from.
+		set allJid3 $tojid
+	    } else {
+		set allJid3 $tojid/$res
+	    }
+	    lappend opts -from $jstate(mejidresmap)
+	}
+    }
+    
+    ::Debug 2 "\t allJid3=$allJid3"
+    
+    # We shall put to all resources. Treat each in turn.
+    foreach jid3 $allJid3 {
+	
+	# If we are in a room all must be available, else check.
+	if {$isRoom} {
+	    set avail 1
+	} else {
+	    set avail [$jstate(jlib) roster isavailable $jid3]
+	}
+	set mjid3 [jlib::jidmap $jid3]
+	
+	# Each jid must get its own -to attribute.
+	set optjidList [concat $opts -to $jid3]
+	
+	::Debug 2 "\t jid3=$jid3, avail=$avail"
+	
+	if {$avail} {
+	    if {[info exists ipCache(ip,$mjid3)]} {
+		
+		# This one had already told us its ip number, good!
+		PutFile $w $fileName $mime $optjidList $jid3
+	    } else {
+		
+		# This jid is online but has not told us its ip number.
+		# We need to get this jid's ip number and register the
+		# PutFile as a callback when receiving this ip.
+		GetCoccinellaServers $jid3  \
+		  [list ::JWB::PutFile $w $fileName $mime  \
+		  $optjidList $jid3]
+	    }
+	} else {
+	    
+	    # We are silent about this.
+	}
+    }
+}
+
+# JWB::PutFile --
+#
+#       Puts the file to the given jid provided the client has
+#       told us its ip number.
+#       Calls '::PutFileIface::PutFile' to do the real work for us.
+#
+# Arguments:
+#       w           toplevel widget path
+#       fileName    the path to the file to be put.
+#       opts        a list of '-key value' pairs, where most keys correspond 
+#                   to a valid "canvas create" option, and everything is on 
+#                   a single line.
+#       jid         fully qualified  "username@host/resource"
+#       
+# Results:
+
+proc ::JWB::PutFile {w fileName mime opts jid} {
+    global  prefs
+    variable ipCache
+    upvar ::Jabber::jstate jstate
+    
+    ::Debug 2 "::JWB::PutFile: fileName=$fileName, opts='$opts', jid=$jid"
+
+    set mjid [jlib::jidmap $jid]
+    if {![info exists ipCache(ip,$mjid)]} {
+	puts "::JWB::PutFile: Houston, we have a problem. \
+	  ipCache(ip,$mjid) not there"
+	return
+    }
+    
+    # Check first that the user has not closed the window since this
+    # call may be async.
+    if {![winfo exists $w]} {
+	return
+    }
+    
+    # Translate tcl type '-key value' list to 'Key: value' option list.
+    set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
+
+    ::PutFileIface::PutFile $w $fileName $ipCache(ip,$mjid) $optList
+}
+
 # Various message handlers......................................................
+# Target side.
 
 # JWB::HandleSpecialMessage --
 # 
@@ -1217,6 +1429,7 @@ proc ::JWB::GetSVGWBMessageList {w xlist} {
 # 
 #       Gets called for each image element we find in the document.
 #       It takes care of any si element for getting the image.
+#       This is a target handler.
 
 proc ::JWB::SVGImageHandlerEx {w xmllist opts} {
     variable jwbstate
@@ -1257,6 +1470,8 @@ proc ::JWB::SVGImageHandlerEx {w xmllist opts} {
     
     # Relate this sid to our whiteboard token 'w'.
     set jwbstate($w,sid,$sid) $sid
+    
+    ::Import::ObjectNew $w $sid
 
     # State array which is our object.
     variable $sid
@@ -1282,25 +1497,14 @@ proc ::JWB::SVGImageStreamProgress {w jlib sid size bytes} {
     
     puts "::JWB::SVGImageStreamProgress $sid $size $bytes"
     
-    # @@@ We shouldn't call this too often.
-    ::Import::ProgressEx $w $sid $size $bytes
   
 }
 
 proc ::JWB::SVGImageStreamCmd {w jlib sid status {err ""}} {
     variable jwbstate
-    variable $sid
-    upvar 0 $sid state
+
     
-    puts "::JWB::SVGImageStreamCmd $sid $result $err"
-
-    set wcan [::WB::GetCanvasFromWtop $w]
-
-    if {$status eq "ok"} {
-	::Import::DoImport $wcan $state(opts) -file $state(path) -where local
-
-    }
-
+    
 
     unset -nocomplain jwbstate($w,sid,$sid)
     ::timing::free $sid
@@ -1660,187 +1864,6 @@ proc ::JWB::PresenceHook {jid type args} {
 	    }
 	}
     }
-}
-
-proc ::JWB::PutFileHook {w fileName opts} {
-    upvar ::Jabber::jprefs jprefs
-
-    if {$jprefs(useSVGT)} {
-	SVGPutFile $w $fileName $opts
-    } else {
-	PutFileOrScheduleHook $w $fileName $opts
-    }
-}
-
-# JWB::PutFileOrScheduleHook --
-# 
-#       Handles everything needed to put a file to the jid's corresponding
-#       to the 'w'. Users that we haven't got ip number from are scheduled
-#       for delivery as a callback.
-#       
-# Arguments:
-#       w           toplevel widget path
-#       fileName    the path to the file to be put.
-#       opts        a list of '-key value' pairs, where most keys correspond 
-#                   to a valid "canvas create" option, and everything is on 
-#                   a single line.
-#       
-# Results:
-#       none.
-
-proc ::JWB::PutFileOrScheduleHook {w fileName opts} {    
-    variable ipCache
-    variable jwbstate
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::JWB::PutFileOrScheduleHook: \
-      w=$w, fileName=$fileName, opts='$opts'"
-    
-    # Before doing anything check that the Send checkbutton is on. ???
-    if {!$jwbstate($w,send)} {
-	::Debug 2 "    doSend=0 => return"
-	return
-    }
-    
-    # Verify that jid is well formed.
-    if {![VerifyJIDWhiteboard $w]} {
-	return
-    }
-    
-    # This must never fail (application/octet-stream as fallback).
-    set mime [::Types::GetMimeTypeForFileName $fileName]
-    
-    # Need to add jabber specific info to the 'optList', such as
-    # -to, -from, -type, -thread etc.
-    lappend opts -type $jwbstate($w,type)
-    if {[info exists jwbstate($w,thread)]} {
-	lappend opts -thread $jwbstate($w,thread)
-    }
-    
-    set tojid $jwbstate($w,jid)
-    jlib::splitjid $tojid jid2 res
-    set isRoom 0
-    
-    if {[string length $res] > 0} {
-	
-	# The 'tojid' is already complete with resource.
-	set allJid3 $tojid
-	lappend opts -from $jstate(mejidresmap)
-    } else {
-	
-	# If 'tojid' is without a resource, it can be a room.
-	if {[$jstate(jlib) service isroom $tojid]} {
-	    set isRoom 1
-	    set allJid3 [$jstate(jlib) service roomparticipants $tojid]
-	    
-	    # Exclude ourselves.
-	    set nick [$jstate(jlib) service mynick $tojid]
-	    set meRoomJid $tojid/$nick
-	    set ind [lsearch $allJid3 $meRoomJid]
-	    if {$ind >= 0} {
-		set allJid3 [lreplace $allJid3 $ind $ind]
-	    }
-	    
-	    # Be sure to have our room jid and not the real one.
-	    lappend opts -from $meRoomJid
-	} else {
-	    
-	    # Else put to resource with highest priority.
-	    set res [$jstate(jlib) roster gethighestresource $tojid]
-	    if {$res eq ""} {
-		
-		# This is someone we haven't got presence from.
-		set allJid3 $tojid
-	    } else {
-		set allJid3 $tojid/$res
-	    }
-	    lappend opts -from $jstate(mejidresmap)
-	}
-    }
-    
-    ::Debug 2 "\t allJid3=$allJid3"
-    
-    # We shall put to all resources. Treat each in turn.
-    foreach jid3 $allJid3 {
-	
-	# If we are in a room all must be available, else check.
-	if {$isRoom} {
-	    set avail 1
-	} else {
-	    set avail [$jstate(jlib) roster isavailable $jid3]
-	}
-	set mjid3 [jlib::jidmap $jid3]
-	
-	# Each jid must get its own -to attribute.
-	set optjidList [concat $opts -to $jid3]
-	
-	::Debug 2 "\t jid3=$jid3, avail=$avail"
-	
-	if {$avail} {
-	    if {[info exists ipCache(ip,$mjid3)]} {
-		
-		# This one had already told us its ip number, good!
-		PutFile $w $fileName $mime $optjidList $jid3
-	    } else {
-		
-		# This jid is online but has not told us its ip number.
-		# We need to get this jid's ip number and register the
-		# PutFile as a callback when receiving this ip.
-		GetCoccinellaServers $jid3  \
-		  [list ::JWB::PutFile $w $fileName $mime  \
-		  $optjidList $jid3]
-	    }
-	} else {
-	    
-	    # We are silent about this.
-	}
-    }
-	
-    # This is an activity that may not be registered with jabberlib's auto away
-    # functions, and must therefore schedule it here. ???????
-    $jstate(jlib) schedule_auto_away
-}
-
-# JWB::PutFile --
-#
-#       Puts the file to the given jid provided the client has
-#       told us its ip number.
-#       Calls '::PutFileIface::PutFile' to do the real work for us.
-#
-# Arguments:
-#       w           toplevel widget path
-#       fileName    the path to the file to be put.
-#       opts        a list of '-key value' pairs, where most keys correspond 
-#                   to a valid "canvas create" option, and everything is on 
-#                   a single line.
-#       jid         fully qualified  "username@host/resource"
-#       
-# Results:
-
-proc ::JWB::PutFile {w fileName mime opts jid} {
-    global  prefs
-    variable ipCache
-    upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::JWB::PutFile: fileName=$fileName, opts='$opts', jid=$jid"
-
-    set mjid [jlib::jidmap $jid]
-    if {![info exists ipCache(ip,$mjid)]} {
-	puts "::JWB::PutFile: Houston, we have a problem. \
-	  ipCache(ip,$mjid) not there"
-	return
-    }
-    
-    # Check first that the user has not closed the window since this
-    # call may be async.
-    if {![winfo exists $w]} {
-	return
-    }
-    
-    # Translate tcl type '-key value' list to 'Key: value' option list.
-    set optList [::Import::GetTransportSyntaxOptsFromTcl $opts]
-
-    ::PutFileIface::PutFile $w $fileName $ipCache(ip,$mjid) $optList
 }
 
 # JWB::HandlePutRequest --
