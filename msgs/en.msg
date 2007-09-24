@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.200 2007-09-21 06:30:27 matben Exp $
+#   $Id: en.msg,v 1.201 2007-09-24 09:23:05 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -742,7 +742,7 @@
 ::msgcat::mcset en jamesserrvers2        {Cannot query %s's version.}
 ::msgcat::mcset en jamessfailedsubsc2    {Cannot subscribe to %s's presence. The contact does not allow you to see his/her presence.}
 ::msgcat::mcset en jamessfailsetnick2    {Cannot set %s's nickname or group.}
-::msgcat::mcset en jamessfatalerr        {Receieved a fatal error: %s The connection is closed.}
+::msgcat::mcset en jamessfatalerr        {Received a fatal error: %s The connection is closed.}
 ::msgcat::mcset en jamessfiletrpterr2    {Cannot download file %s from %s.}
 ::msgcat::mcset en jamessfilenotexist	 {The selected file does not exist. Select a new one.}
 ::msgcat::mcset en jamessfilemd5	 {The MD5 checksums did not match. The file may be corrupt.}
@@ -769,7 +769,7 @@
 ::msgcat::mcset en jamessokreg2          {Registration with service %s was successful.}
 ::msgcat::mcset en jamessokunreg2        {You are unregistered from %s.}
 ::msgcat::mcset en jamessoobask2         {%s wants to send you this file: %sDo you want to receive this file?}
-::msgcat::mcset en jamessoobbad2         {Received invallid URL from %s. URL: %s}
+::msgcat::mcset en jamessoobbad2         {Received invalid URL from %s. URL: %s}
 ::msgcat::mcset en jamessooberr404b      {Cannot send the file %s to %s.}
 ::msgcat::mcset en jamessooberr406b      {%s did not accepted the file %s.}
 ::msgcat::mcset en jamessoobfailopen2    {Cannot open file %s}
