@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.33 2007-09-19 12:52:43 matben Exp $
+# $Id: Taskbar.tcl,v 1.34 2007-09-24 12:44:07 matben Exp $
 
 package require balloonhelp
 
@@ -133,7 +133,12 @@ proc ::Taskbar::X11Init {} {
 }
 
 proc ::Taskbar::BuildMainHook {} {
+    variable tprefs
     
+    # Not sure how this workd.
+    if {$tprefs(quitMini)} {
+	::UI::WithdrawAllToplevels
+    }
     bind [::UI::GetMainWindow] <Map> [list [namespace current]::Update %W]
 }
 
@@ -141,6 +146,11 @@ proc ::Taskbar::InitHook {} {
     global  prefs this
     variable wmenu
     variable menuIndex
+    variable tprefs
+    
+    set tprefs(quitMini) 0
+    ::PrefUtils::Add [list  \
+      [list ::Taskbar::tprefs(quitMini)   tprefs_quitMini  $tprefs(quitMini)]]
      
     # Build popup menu.
     set m $wmenu
@@ -369,7 +379,13 @@ proc ::Taskbar::CloseHook {wclose} {
 
 proc ::Taskbar::QuitAppHook {} {
     variable icon
+    variable tprefs
     
+    set tprefs(quitMini) 1
+    set wmstate [wm state [::UI::GetMainWindow]]
+    if {($wmstate eq "normal") || ($wmstate eq "zoomed")} {
+	set tprefs(quitMini) 0
+    }
     if {[tk windowingsystem] eq "win32"} {
 	if {$icon ne ""} {
 	    winico taskbar delete $icon
