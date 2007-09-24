@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.201 2007-09-24 09:23:05 matben Exp $
+#   $Id: en.msg,v 1.202 2007-09-24 12:49:17 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -868,7 +868,7 @@
 ::msgcat::mcset en version-os                   {Operating system}
 
 
-::msgcat::mcset en register-trpt-unreg2         {You are about to unregister a transport with a number of dependent contacts. Do you want to remove these contacts as well (Yes), keep them (No), or cancel everything (Cancel).}
+::msgcat::mcset en register-trpt-unreg2         {You are about to unregister a transport with a number of dependent contacts. Do you want to remove these contacts as well (Yes), keep them (No), or cancel everything (Cancel)?}
 
 
 ::msgcat::mcset en printunixcmd                 {Shell print command, edit if desired}
