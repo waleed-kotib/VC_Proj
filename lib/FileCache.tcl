@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: FileCache.tcl,v 1.26 2007-09-14 08:11:45 matben Exp $
+# $Id: FileCache.tcl,v 1.27 2007-09-25 12:46:27 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -101,7 +101,7 @@ namespace eval ::FileCache:: {
     
 }
 
-proc ::FileCache::InitHook { } {
+proc ::FileCache::InitHook {} {
     global  prefs this
         
     # Init the file cache settings.
@@ -110,7 +110,7 @@ proc ::FileCache::InitHook { } {
     SetCacheDir $prefs(incomingPath)
 }
 
-proc ::FileCache::QuitHook { } {
+proc ::FileCache::QuitHook {} {
     global  prefs this
     
     # Should we clean up our 'incoming' directory?
@@ -414,7 +414,7 @@ proc ::FileCache::HasCacheName {fileName} {
 # An alternative would be to store 'Set $key $value' and
 # then source the file when reading the table.
 
-proc ::FileCache::WriteTable { } {
+proc ::FileCache::WriteTable {} {
     variable indexFile
     variable cache
     variable readcache
@@ -441,7 +441,7 @@ proc ::FileCache::WriteTable { } {
 # 
 #       Reads the cache table and sets our internal state variables.
 
-proc ::FileCache::ReadTable { } {
+proc ::FileCache::ReadTable {} {
     variable indexFile
     variable cache
     variable readcache
@@ -544,7 +544,7 @@ proc ::FileCache::Accept {fileName} {
     return $accept
 }
 
-proc ::FileCache::ClearCache { } {
+proc ::FileCache::ClearCache {} {
     global  prefs
     variable cache
     variable totbytes
@@ -563,7 +563,7 @@ proc ::FileCache::ClearCache { } {
     cd $oldcwd
 }
 
-proc ::FileCache::Dump { } {
+proc ::FileCache::Dump {} {
     variable cache
     
     puts "::FileCache::Dump:"
@@ -574,7 +574,7 @@ proc ::FileCache::Dump { } {
 
 #--- UI part etc ---------------------------------------------------------------
 
-proc ::FileCache::InitPrefsHook { } {
+proc ::FileCache::InitPrefsHook {} {
     global  prefs
     variable maxbytes
     
@@ -666,14 +666,14 @@ proc ::FileCache::SetCachePath {} {
     }
 }
 
-proc ::FileCache::UserDefaultsHook { } {
+proc ::FileCache::UserDefaultsHook {} {
     global  prefs
     variable tmpPrefs
     
     
 }
 
-proc ::FileCache::SaveHook { } {
+proc ::FileCache::SaveHook {} {
     global  prefs
     variable tmpPrefs
     variable maxbytes
@@ -686,7 +686,7 @@ proc ::FileCache::SaveHook { } {
     SetBestBefore $prefs(checkCache) $prefs(incomingPath)
 }
 
-proc ::FileCache::CancelHook { } {
+proc ::FileCache::CancelHook {} {
     global  prefs
     variable tmpPrefs
     
@@ -697,7 +697,7 @@ proc ::FileCache::CancelHook { } {
     }
 }
 
-proc ::FileCache::UserDefaultsHook { } {
+proc ::FileCache::UserDefaultsHook {} {
     global  prefs
     variable tmpPrefs
     

@@ -18,14 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Import.tcl,v 1.32 2007-09-23 14:32:22 matben Exp $
+# $Id: Import.tcl,v 1.33 2007-09-25 12:46:27 matben Exp $
 
 package require http
 package require httpex
 
 package provide Import 1.0
 
-namespace eval ::Import:: {
+namespace eval ::Import {
     
     # Filter all canvas commands to see if anyone related to anything
     # just being transported but not yet in canvas.
@@ -527,8 +527,7 @@ proc ::Import::DrawQuickTimeTcl {wcan optsVar args} {
     
     # 'fileName' can be the cached name. If -url use its tail instead.
     if {[info exists optsA(-url)]} {
-	set name [::uriencode::decodefile [file tail  \
-	  [::Utils::GetFilePathFromUrl $optsA(-url)]]]
+	set name [::uriencode::decodefile [file tail $optsA(-url)]]
     } else {
 	set name $fileName
     }
@@ -633,8 +632,7 @@ proc ::Import::DrawSnack {wcan optsVar args} {
     
     # 'fileName' can be the cached name. If -url use its tail instead.
     if {[info exists optsA(-url)]} {
-	set name [::uriencode::decodefile [file tail  \
-	  [::Utils::GetFilePathFromUrl $optsA(-url)]]]
+	set name [::uriencode::decodefile [file tail $optsA(-url)]]
     } else {
 	set name $fileName
     }
@@ -775,8 +773,7 @@ proc ::Import::HttpGet2 {w url opts} {
     upvar 0 $gettoken getstate
 
     # We store file names with cached names to avoid name clashes.
-    set fileTail [::uriencode::decodefile [file tail  \
-      [::Utils::GetFilePathFromUrl $url]]]
+    set fileTail [::uriencode::decodefile [file tail $url]]
     set dstPath [::FileCache::MakeCacheFileName $fileTail]
 
     set getstate(w)          $w
@@ -844,6 +841,8 @@ proc ::Import::HttpProgress2 {gettoken str} {
     ::WB::SetStatusMessage $getstate(w) $str
 }
 
+#...............................................................................
+
 # Import::ObjectNew --
 # 
 #       Constructor for an import object (svg).
@@ -854,11 +853,9 @@ proc ::Import::ObjectNew {token w dstPath opts} {
     variable $token
     upvar 0 $token state
     
-    puts "::Import::ObjectNew"
-    
     array set optsA $opts
     set url $optsA(-url)
-    set tail [::uriencode::decodefile [file tail [::Utils::GetFilePathFromUrl $url]]]
+    set tail [::uriencode::decodefile [file tail $url]]
     set ms [clock clicks -milliseconds]
     
     set state(w)        $w
@@ -888,7 +885,6 @@ proc ::Import::ObjectProgress {token size bytes} {
     if {[expr $ms - $state(last)] > $prefs(progUpdateMillis)} {
 	set tmsg [::timing::getmessage $token $total]	
 	set msg [mc progress-Receiving $state(tail) $tmsg]
-	puts "\t msg=$msg"
 	::WB::SetStatusMessage $w $msg
 	set state(last) $ms
     }
@@ -903,7 +899,8 @@ proc ::Import::ObjectCommand {token status {err ""}} {
 
     switch -- $status {
 	ok {
-	    ::WB::SetStatusMessage $w ""
+	    set msg [mc progress-Receiving $state(tail) "Final"]
+	    ::WB::SetStatusMessage $w $msg
 	    
 	    # Add to the lists of known files.
 	    ::FileCache::Set $state(url) $state(dstPath)
@@ -920,12 +917,20 @@ proc ::Import::ObjectCommand {token status {err ""}} {
 	}
     }
     
-    # Evaluate any commands affecting this item.
+    # @@@ Evaluate any commands affecting this item.
     #TrptCachePostImport $gettoken
 
-    # Destruction of this object.
-    unset -nocomplain state
+    ObjectFree $token
 }
+
+# Destruction of this object.
+
+proc ::Import::ObjectFree {token} {
+    variable $token
+    unset -nocomplain $token
+}
+
+#...............................................................................
 
 # Import::ImportProgress --
 # 
@@ -1151,8 +1156,7 @@ proc ::Import::HttpGetQuickTimeTcl {w url opts args} {
     set getstate(transport) quicktimehttp
     set getstate(qtstate) ""
     set getstate(mapped) 0
-    set getstate(tail)  \
-      [::uriencode::decodefile [file tail [::Utils::GetFilePathFromUrl $url]]]
+    set getstate(tail)   [::uriencode::decodefile [file tail $url]]
     
     # Here we should do this connection async!!!
     set callback [list [namespace current]::QuickTimeTclCallback $gettoken]

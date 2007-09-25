@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.88 2007-09-23 14:32:21 matben Exp $
+# $Id: JWB.tcl,v 1.89 2007-09-25 12:46:27 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -901,34 +901,6 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
     return $xlist
 }
 
-# skip ????????????????
-proc ::JWB::SVGGetImageXElem {w fileName opts} {
-    variable jwbstate
-    variable xmlns
-    
-    array set optsA $opts
-    
-    # Create an image element directly from can2svgwb
-    set wcan [::WB::GetCanvasFromWtop $w]
-    set id [$wcan find withtag $optsA(-tags)]
-    set line [::CanvasUtils::GetOnelinerForImage $wcan $id -uritype http]
-    
-    # There are a few things we should add from opts.
-    array set impA [lrange $line 3 end]
-    foreach key {-above -below -size} {
-	if {[info exists optsA($key)]} {
-	    set impA($key) $optsA($key)
-	}
-    }
-    set line [concat [lrange $line 0 2] [array get impA]]
-    
-    set imageE [can2svgwb::svgasxmllist $line -canvas $wcan \
-      -importimagehandler [namespace code [list SVGImageImportElem $w]]]
-    set xE [list [wrapper::createtag x \
-      -attrlist [list xmlns $xmlns(svg)] -subtags $imageE]]
-    return $xE
-}
-
 # JWB::SVGImageImportElem --
 # 
 #       Callback for images from 'can2svgwb::svgasxmllist'.
@@ -951,9 +923,16 @@ proc ::JWB::SVGImageImportElem {w cmd args} {
     }    
     set jid $jwbstate($w,jid)
     set mime [::Types::GetMimeTypeForFileName $fileName]
-    set siE [::Jabber::JlibCmd filetransfer element $jid ftrans -file $fileName \
+    set cmd [namespace code [list SVGImageSendCB $w]]
+    set siE [::Jabber::JlibCmd filetransfer element $jid $cmd -file $fileName \
       -mime $mime]
     return $siE
+}
+
+proc ::JWB::SVGImageSendCB {w jlib status sid {subiq ""}} {
+    
+    #puts "::JWB::SVGImageSendCB w=$w"
+    
 }
 
 # JWB::DoSendCanvas --
@@ -989,38 +968,7 @@ proc ::JWB::FilterTags {tags} {
     return [::CanvasUtils::GetUtagFromTagList $tags]
 }
 
-# Sending files...
-
-proc ::JWB::PutFileHook {w fileName opts} {
-    upvar ::Jabber::jprefs jprefs
-
-    if {$jprefs(useSVGT)} {
-	SVGSendFile $w $fileName $opts
-    } else {
-	PutFileOrScheduleHook $w $fileName $opts
-    }
-}
-
-# skip ????????????????
-proc ::JWB::SVGSendFile {w fileName opts} {
-    variable jwbstate
-    upvar ::Jabber::jstate jstate
-
-    # @@@ Not working for groupchats !!! Each participant needs different sid !
-
-    puts "::JWB::SVGSendFile"
-    
-    if {!$jwbstate($w,send)} {
-	return
-    }
-    set xE [SVGGetImageXElem $w $fileName $opts]
-    set jid $jwbstate($w,jid)
-    set argsL [SendArgs $w]
-    
-    eval {$jstate(jlib) send_message $jid -xlist $xE} $argsL
-}
-
-# JWB::PutFileOrScheduleHook --
+# JWB::PutFileHook --
 # 
 #       Handles everything needed to put a file to the jid's corresponding
 #       to the 'w'. Users that we haven't got ip number from are scheduled
@@ -1036,13 +984,12 @@ proc ::JWB::SVGSendFile {w fileName opts} {
 # Results:
 #       none.
 
-proc ::JWB::PutFileOrScheduleHook {w fileName opts} {    
+proc ::JWB::PutFileHook {w fileName opts} {    
     variable ipCache
     variable jwbstate
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::JWB::PutFileOrScheduleHook: \
-      w=$w, fileName=$fileName, opts='$opts'"
+    ::Debug 2 "::JWB::PutFileHook w=$w, fileName=$fileName, opts='$opts'"
     
     # Before doing anything check that the Send checkbutton is on. ???
     if {!$jwbstate($w,send)} {
@@ -1188,7 +1135,8 @@ proc ::JWB::PutFile {w fileName mime opts jid} {
 }
 
 # Various message handlers......................................................
-# Target side ---
+#
+# Target side ------------------------------------------------------------------
 
 # JWB::HandleSpecialMessage --
 # 
@@ -1432,27 +1380,15 @@ proc ::JWB::GetSVGWBMessageList {w xlist} {
 #       Gets called for each image element we find in the document.
 #       It takes care of any si element for getting the image.
 #       This is a target handler.
+#       
+#       NB: It wont work for groupchat since we need a sid for each target.
 
 proc ::JWB::SVGImageHandlerEx {w imageE opts} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
-    
-    puts "\n::JWB::SVGImageHandlerEx"
-    puts "imageE=$imageE"
-    puts "opts=$opts\n"
-    
-    # @@@ Need to check file cache, MIME types etc.
-
-
-    set url [wrapper::getattribute $imageE xlink:href]  
-    set siE [wrapper::getfirstchild $imageE si $xmppxmlns(si)]
-    if {![llength $siE]} {
-	# error
-	return
-    }
-    set sid  [wrapper::getattribute $siE id]
-    set mime [wrapper::getattribute $siE mime-type] 
+            
+    set wcan [::WB::GetCanvasFromWtop $w]
     array set attrA [wrapper::getattrlist $imageE]
     
     set aopts [list]
@@ -1462,47 +1398,129 @@ proc ::JWB::SVGImageHandlerEx {w imageE opts} {
     set aopts [concat $aopts $opts]
     array set aoptsA $aopts
     
+    set siE [wrapper::getfirstchild $imageE si $xmppxmlns(si)]
+    if {![llength $siE]} {
+	# error
+	eval {::Import::NewBrokenImage $wcan $aoptsA(-coords)} [array get aoptsA]
+	return
+    }
+    set url  [wrapper::getattribute $imageE xlink:href]  
+    set sid  [wrapper::getattribute $siE id]
+    set mime [wrapper::getattribute $siE mime-type] 
+    
+
+    # Need to check file cache, MIME types etc.
+    set prep [SVGPrepare $wcan $url $mime [array get aoptsA]]
+    if {$prep ne ""} {
+	return
+    }
+    
     # @@@ bare JID vs. full JID ??? Must sort out. Always full JID since
     #     capabilities may differ ???
     
     set jid $jwbstate($w,jid)
 
-    set tail [::uriencode::decodefile [file tail  \
-      [::Utils::GetFilePathFromUrl $url]]]
+    set tail [::uriencode::decodefile [file tail $url]]
     set dstPath [::FileCache::MakeCacheFileName $tail]
-
-    if {[catch {open $dstPath w} fd]} {
-	# error
-	return
-    }
+    set fd [open $dstPath w]
     
     # Relate this sid to our whiteboard token 'w'.
     set jwbstate($w,sid,$sid) $sid
     
+    # 'sid' is our token here.
     ::Import::ObjectNew $sid $w $dstPath [array get aoptsA]
             
+    # State array which is our object. 
+    # Keep only until we get an iq-response (::JWB::SVGStreamCB).
+    variable $sid
+    upvar 0 $sid state
+    
+    set state(w)     $w
+    set state(opts)  [array get aoptsA]
+
+    set cmd [namespace code [list SVGStreamCB $sid]]
     set fopts [list -channel $fd \
       -progress [namespace code [list SVGImageStreamProgress $w]] \
       -command  [namespace code [list SVGImageStreamCmd $w]]]
 
-    #eval {$jstate(jlib) filetransfer t_constructor $sid $jid $siE} $fopts
+    set err [eval {$jstate(jlib) si t_handler $jid $siE $cmd} $fopts]
+    if {$err ne ""} {
+	close $fd
+	eval {::Import::NewBrokenImage $wcan $aoptsA(-coords)} [array get aoptsA]
+    }
+}
+
+proc ::JWB::SVGStreamCB {sid type args} {
+    variable $sid
+    upvar 0 $sid state
+    upvar ::Jabber::jstate jstate
+    
+    if {$type eq "error"} {
+	$jstate(jlib) si stream_closed $sid
+	array set optsA $state(opts)
+	set wcan [::WB::GetCanvasFromWtop $state(w)]
+	eval {::Import::NewBrokenImage $wcan $optsA(-coords)} $state(opts)
+    }
+    unset -nocomplain state
+}
+
+# JWB::SVGPrepare --
+# 
+#       Checks if the 'url' shall be received. 
+#       Rejects if: 
+#            1): mime type not supported, 
+#            2): user rejects it
+#            3): if cached
+#       If for some reason it shall not be received it takes care of
+#       drawing "broken image" or imports from cache.
+#       
+# Arguments:
+#
+#                 
+# Results:
+#       empty if the file should be fetched but otherwise a string token.
+
+proc ::JWB::SVGPrepare {wcan url mime opts} {
+    
+    set prep ""
+    array set optsA $opts
+    set tail [::uriencode::decodefile [file tail $url]]
+    set do [::Plugins::GetDoWhatForMime $mime]
+    if {($do eq "") || ($do eq "unavailable")} {
+	set prep "mime-unsupported"
+    } elseif {$do eq "reject"} {
+	set prep "rejected"
+    } elseif {![::Plugins::HaveImporterForMime $mime]} {
+	set prep "mime-unsupported"
+    } elseif {$do eq "ask"} {
+	set ans [::UI::MessageBox -title [mc "Request To User"] \
+	  -type yesno -default yes -message [mc messaskreceive $tail]]
+	if {$ans eq "no"} {
+	    set prep "rejected"
+	}
+    }
+    if {[::FileCache::IsCached $url]} {
+	set cachedFile [::FileCache::Get $url]
+	set errMsg [::Import::DoImport $wcan $opts -file $cachedFile \
+	  -where local]
+	if {$errMsg ne ""} {
+	    set prep "err"
+	} else {
+	    set prep "cached"
+	}
+    } elseif {$prep ne ""} {
+	eval {::Import::NewBrokenImage $wcan $optsA(-coords)} [array get optsA]
+    }
+    return $prep
 }
 
 proc ::JWB::SVGImageStreamProgress {w jlib sid size bytes} {
-    variable jwbstate
-    
-    puts "::JWB::SVGImageStreamProgress $sid $size $bytes"
-    
     ::Import::ObjectProgress $sid $size $bytes
 }
 
 proc ::JWB::SVGImageStreamCmd {w jlib sid status {err ""}} {
     variable jwbstate
-
-    puts "::JWB::SVGImageStreamCmd status=$status, err=$err"
-    
     ::Import::ObjectCommand $sid $status $err
-
     unset -nocomplain jwbstate($w,sid,$sid)
 }
 
@@ -1515,12 +1533,9 @@ proc ::JWB::SVGImageStreamFree {w} {
     upvar ::Jabber::jstate jstate
 
     foreach {key sid} [array get jwbstate $w,sid,*] {
-	variable $sid
-	upvar 0 $sid state
-    
 	$jstate(jlib) filetransfer treset $sid
 	::timing::free $sid
-	unset -nocomplain state
+	::Import::ObjectFree $sid
 	unset -nocomplain jwbstate($w,sid,$sid)
     }
 }
@@ -1886,33 +1901,33 @@ proc ::JWB::HandlePutRequest {channel fileName opts} {
 
 proc ::JWB::MakeWhiteboardExist {opts} {
 
-    array set optArr $opts
+    array set optsA $opts
     
     ::Debug 2 "::JWB::MakeWhiteboardExist"
 
-    switch -- $optArr(-type) {
+    switch -- $optsA(-type) {
 	chat {
 	    set w [eval {GetWtopFromMessage chat \
-	      $optArr(-from)} $opts]
+	      $optsA(-from)} $opts]
 	    if {$w eq ""} {
-		set w [NewWhiteboardTo $optArr(-from)  \
-		  -thread $optArr(-thread)]
+		set w [NewWhiteboardTo $optsA(-from)  \
+		  -thread $optsA(-thread)]
 	    }
 	}
 	groupchat {
-	    jlib::splitjid $optArr(-from) roomjid resource
+	    jlib::splitjid $optsA(-from) roomjid resource
 	    if {[string length $roomjid] == 0} {
 		return -code error  \
-		  "The jid we got \"$optArr(-from)\" was not well-formed!"
+		  "The jid we got \"$optsA(-from)\" was not well-formed!"
 	    }
-	    set w [GetWtopFromMessage groupchat $optArr(-from)]
+	    set w [GetWtopFromMessage groupchat $optsA(-from)]
 	    if {$w eq ""} {
 		set w [NewWhiteboardTo $roomjid -force 1]
 	    }
 	}
 	default {
 	    # Normal message. Shall go in inbox ???????????
-	    set w [GetWtopFromMessage normal $optArr(-from)]
+	    set w [GetWtopFromMessage normal $optsA(-from)]
 	}
     }
     return $w
@@ -1995,12 +2010,12 @@ proc ::JWB::DispatchToImporter {mime opts args} {
 	
     ::Debug 2 "::JWB::DispatchToImporter"
 
-    array set optArr $opts
+    array set optsA $opts
 
     # Creates WB if not exists.
     set w [MakeWhiteboardExist $opts]
 
-    switch -- $optArr(-type) {
+    switch -- $optsA(-type) {
 	chat - groupchat {
 	    set display 1
 	}

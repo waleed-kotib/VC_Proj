@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: OOB.tcl,v 1.57 2007-09-13 15:53:40 matben Exp $
+# $Id: OOB.tcl,v 1.58 2007-09-25 12:46:27 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -367,7 +367,7 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
 	  -message [mc jamessoobnourl2 $from]
 	return $ishandled
     }
-    set tail [file tail [::Utils::GetFilePathFromUrl $url]]
+    set tail [file tail $url]
     set tailDec [uriencode::decodefile $tail]
     
     set str "[mc File]: $tailDec"

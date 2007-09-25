@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.20 2007-09-22 06:49:28 matben Exp $
+# $Id: ftrans.tcl,v 1.21 2007-09-25 12:46:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -122,7 +122,7 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
 
     # The 'block-size' is crucial here; must tell the stream in question.
     set cmd [namespace current]::open_cb
-    jlib::si::send_set $jlibname $jid $sid $istate($sid,-mime) $xmlns(ftrans)  \
+    jlib::si::send_set $jlibname $jid $sid $istate($sid,-mime) $xmlns(ftrans) \
       $fileE $cmd -block-size $istate($sid,-block-size)
     
     return $sid
@@ -131,6 +131,7 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
 # jlib::ftrans::element --
 # 
 #       Makes an ftrans instance and returns the si element.
+#       It is like 'send' but made for embedding.
 
 proc jlib::ftrans::element {jlibname jid cmd args} {
     variable xmlns
@@ -171,7 +172,7 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
       && ![info exists opts(-base64)]} {
 	return -code error "must have any of -data, -file, or -base64"
     }
-    #puts "jlib::ftrans::i_constructor $args"
+    #puts "jlib::ftrans::i_constructor (i) $args"
     
     # @@@ TODO
     if {![info exists opts(-file)]} {return -code error "todo"}    
@@ -450,7 +451,7 @@ proc jlib::ftrans::t_constructor {jlibname sid jid siE args} {
     variable handler
     variable xmlns
     upvar ${jlibname}::ftrans::tstate tstate
-    #puts "jlib::ftrans::t_constructor"
+    #puts "jlib::ftrans::t_constructor (t)"
 
     array set opts {
 	-channel    ""
@@ -468,6 +469,9 @@ proc jlib::ftrans::t_constructor {jlibname sid jid siE args} {
     set tstate($sid,mime) [wrapper::getattribute $siE "mime-type"]
     foreach {key value} [array get opts] {
 	set tstate($sid,$key) $value
+    }
+    if {[string length $opts(-channel)]} {
+	fconfigure $opts(-channel) -translation binary
     }
     
     # File element attributes 'name' and 'size' are required!
@@ -518,7 +522,8 @@ proc jlib::ftrans::accept {jlibname sid accepted args} {
     if {$accepted} {
 	set type ok
 	if {[string length $opts(-channel)]} {
-	    fconfigure $opts(-channel) -translation binary -buffersize 4096
+	    fconfigure $opts(-channel) -translation binary
+	    # -buffersize 4096
 	}
     } else {
 	set type error

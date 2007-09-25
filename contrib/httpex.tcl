@@ -9,7 +9,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: httpex.tcl,v 1.24 2007-09-20 12:04:38 matben Exp $
+# $Id: httpex.tcl,v 1.25 2007-09-25 12:46:27 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -951,7 +951,6 @@ proc httpex::Event {token} {
 	if {[regexp -nocase {^content-type:(.+)$} $line x type]} {
 	    set type [string trim $type]
 	    set state(type) $type	    
-	    parray typeCharsetMap
 	    if {[info exists typeCharsetMap($type)]} {
 		set state(charset) $typeCharsetMap($type)
 	    }
