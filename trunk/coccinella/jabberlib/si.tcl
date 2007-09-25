@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: si.tcl,v 1.21 2007-09-06 13:20:47 matben Exp $
+# $Id: si.tcl,v 1.22 2007-09-25 12:46:27 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -561,10 +561,11 @@ proc jlib::si::t_handler {jlibname from siE cmd args} {
     set tstate($sid,profile)   $profile
     set tstate($sid,stream)    $stream
     set tstate($sid,mime-type) $attr(mime-type)
+    set tstate($sid,-from)     $from
     foreach {key val} $args {
 	set tstate($sid,$key)  $val
     }
-    set jid $tstate($sid,-from)
+    set jid $from
     
     # We invoke the target handler without requesting any response.
     eval $prof($profile,open) [list $jlibname $sid $jid $siE {}] $args
@@ -573,7 +574,7 @@ proc jlib::si::t_handler {jlibname from siE cmd args} {
     # iq-result/si.
     set siE [t_element $jlibname $sid $profileE]
     jlib::send_iq $jlibname get [list $siE] -to $jid -command $cmd
-
+    
     return
 }
 
@@ -585,7 +586,7 @@ proc jlib::si::pick_stream {siE} {
     
     variable xmlns
     variable trpt
-
+    
     # Extract all streams and pick one with highest priority.
     set values [list]
     set fieldE [wrapper::getchilddeep $siE [list  \
@@ -664,7 +665,7 @@ proc jlib::si::t_element {jlibname sid profileE} {
 	lappend siChilds $profileE
     }
     set siE [wrapper::createtag "si"  \
-      -attrlist [list xmlns $xmlns(si)] -subtags $siChilds]
+      -attrlist [list xmlns $xmlns(si) id $sid] -subtags $siChilds]
     return $siE
 }
 

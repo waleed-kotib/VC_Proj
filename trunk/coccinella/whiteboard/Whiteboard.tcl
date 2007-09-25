@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.85 2007-09-21 07:16:11 matben Exp $
+# $Id: Whiteboard.tcl,v 1.86 2007-09-25 12:46:27 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -1007,6 +1007,8 @@ proc ::WB::CloseWhiteboard {w} {
     # I think we let put operations go on.
     #::PutFileIface::CancelAllWtop $w
     ::GetFileIface::CancelAllWtop $w
+    
+    # These should be handled internally in Import ???
     ::Import::HttpResetAll $w
     ::Import::Free $w
     DestroyMain $w

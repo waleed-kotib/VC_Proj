@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: HttpTrpt.tcl,v 1.11 2007-09-15 13:16:12 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.12 2007-09-25 12:46:27 matben Exp $
 
 package require httpex
 package require timing
@@ -85,7 +85,7 @@ proc ::HttpTrpt::Get {url fileName args} {
     set state(timetok)      $fd
     set state(url)          $url
     set state(fileName)     $fileName
-    set state(fileTailEnc)  [file tail [::Utils::GetFilePathFromUrl $url]]
+    set state(fileTailEnc)  [file tail $url]
     set state(fileTail)     [uriencode::decodefile $state(fileTailEnc)]
     set state(first)        1
     foreach {key value} [array get opts] {
