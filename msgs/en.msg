@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.202 2007-09-24 12:49:17 matben Exp $
+#   $Id: en.msg,v 1.203 2007-09-25 09:07:13 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -1238,7 +1238,8 @@ if {0} {
 ::msgcat::mcset en {Writing}
 
 ::msgcat::mcset en {Exercising}
-::msgcat::mcset en {Cycling}
+# Duplicate:
+# ::msgcat::mcset en {Cycling}
 ::msgcat::mcset en {Hiking}
 ::msgcat::mcset en {Jogging}
 ::msgcat::mcset en {Playing sports}
