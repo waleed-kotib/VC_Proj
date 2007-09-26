@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.9 2007-09-12 13:37:55 matben Exp $
+#  $Id: UserActivity.tcl,v 1.10 2007-09-26 13:46:41 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -135,6 +135,13 @@ proc ::UserActivity::Init {} {
     
     variable allActivities    
     set allActivities [lsort [array names subActivities]]
+    
+    variable allSpecific
+    set allSpecific [list]
+    foreach {key value} [array get subActivities] {
+	set allSpecific [concat $allSpecific $value]
+    }
+    set allSpecific [lsort -unique $allSpecific]
 }
 
 # UserActivity::JabberInitHook --
@@ -207,6 +214,7 @@ proc ::UserActivity::Dlg {} {
     set state(activity) [lindex $allActivities 0]
     set state(specific) -
     set state(text) ""
+    set state(all) 0
 
     set mDef [list]
     foreach name $allActivities {
@@ -221,12 +229,15 @@ proc ::UserActivity::Dlg {} {
       -variable $token\(specific)
     ttk::label $fr.lt -text "[mc Message]:"
     ttk::entry $fr.text -textvariable $token\(text)
-    
+    ttk::checkbutton $fr.all -text "Show all specific activities" \
+      -variable $token\(all) -command [namespace code [list DlgAll $w]]
+        
     set maxw [$fr.activity maxwidth]
 
     grid  $fr.la  $fr.activity  -sticky e -pady 1
     grid  $fr.ls  $fr.specific  -sticky e -pady 1
     grid  $fr.lt  $fr.text      -sticky e -pady 1
+    grid  x       $fr.all       -sticky e -pady 1
     grid $fr.activity  $fr.specific  $fr.text  -sticky ew
     grid columnconfigure $fr 1 -minsize $maxw
 
@@ -257,19 +268,49 @@ proc ::UserActivity::Trace {w name1 name2 op} {
     ConfigSpecificMenu $w $state(activity)
 }
 
+proc ::UserActivity::DlgAll {w} {
+    variable $w
+    upvar 0 $w state
+ 
+    ConfigSpecificMenu $w $state(activity)
+}
+
 proc ::UserActivity::ConfigSpecificMenu {w activity} {
+    variable $w
+    upvar 0 $w state
     variable subActivities
+    variable allSpecific
         
     set fr [$w clientframe]
     
     set mDef [list]
     lappend mDef [list [mc None] -value "-"]
     lappend mDef [list separator]
-    foreach name $subActivities($activity) {
-	set dname [string totitle [string map {_ " "} $name]]
-	lappend mDef [list [mc $dname] -value $name]
+    if {$state(all)} {
+	foreach name $allSpecific {
+	    set dname [string totitle [string map {_ " "} $name]]
+	    lappend mDef [list [mc $dname] -value $name]
+	}
+    } else {
+	foreach name $subActivities($activity) {
+	    set dname [string totitle [string map {_ " "} $name]]
+	    lappend mDef [list [mc $dname] -value $name]
+	}
     }
     $fr.specific configure -menulist $mDef
+}
+
+proc ::UserActivity::DlgCmd {w bt} {
+    variable $w
+    upvar 0 $w state
+    variable xmlns
+    
+    if {$bt eq "ok"} {
+	Publish $w
+    } elseif {$bt eq "remove"} {
+	Retract $w
+    }
+    unset -nocomplain state
 }
 
 proc ::UserActivity::ItemsCB {w type subiq args} {
@@ -320,19 +361,6 @@ proc ::UserActivity::ItemsCB {w type subiq args} {
 	    }
 	}
     }
-}
-
-proc ::UserActivity::DlgCmd {w bt} {
-    variable $w
-    upvar 0 $w state
-    variable xmlns
-    
-    if {$bt eq "ok"} {
-	Publish $w
-    } elseif {$bt eq "remove"} {
-	Retract $w
-    }
-    unset -nocomplain state
 }
 
 proc ::UserActivity::Publish {w} {
