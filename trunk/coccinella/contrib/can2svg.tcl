@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: can2svg.tcl,v 1.24 2007-09-01 07:49:05 matben Exp $
+# $Id: can2svg.tcl,v 1.25 2007-09-26 12:10:44 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -197,7 +197,7 @@ proc can2svg::svgasxmllist {cmd args} {
     variable defsStipplePatternArr
     variable defaultFont
     variable grayStipples
-    
+        
     set nonum_ {[^0-9]}
     set wsp_ {[ ]+}
     set xmlLL [list]
@@ -816,7 +816,7 @@ proc can2svg::MakeStyleList {type opts args} {
     if {[info exists dashValue]} {
 		
 	# Two different syntax here.		
-	if {[regexp {[\.,\-_ ]} $dashValue]} {
+	if {[regexp {[\.,\-_]} $dashValue]} {
 	    
 	    # .=2 ,=4 -=6 space=4    times stroke width.
 	    # A space enlarges the... space.
@@ -841,13 +841,15 @@ proc can2svg::MakeStyleList {type opts args} {
 	    }
 	    set styleArr(stroke-dasharray) [string trim $dash]
 	} else {
-	    set styleArr(stroke-dasharray) $value
+	    set dashValue [string trim $dashValue]
+	    if {$dashValue ne ""} {
+		set styleArr(stroke-dasharray) $dashValue
+	    }
 	}
     }
     if {[string equal $type "polygon"]} {
 	set styleArr(fill-rule) "evenodd"
-    }
-        
+    }        
     return [array get styleArr]
 }
 
