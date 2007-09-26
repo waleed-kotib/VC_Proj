@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: svg2can.tcl,v 1.40 2007-09-01 07:49:05 matben Exp $
+# $Id: svg2can.tcl,v 1.41 2007-09-26 12:10:44 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -95,10 +95,13 @@ namespace eval svg2can {
     
     variable priv
     set priv(havetkpath) 0
-    if {![catch {package require tkpath 0.2.4}]} {
+    if {![catch {package require tkpath 0.2.8}]} {
 	set priv(havetkpath) 1
     }
-    
+
+    # We don't want it now.
+    set priv(havetkpath) 0
+
     variable chache
     variable cache_key ""
 }
