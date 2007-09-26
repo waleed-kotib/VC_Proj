@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.157 2007-09-25 13:04:03 sdevrieze Exp $
+#   $Id: nl.msg,v 1.158 2007-09-26 08:16:39 sdevrieze Exp $
 
 # Reference: {Abort}
 # Translate, find in sources: contrib/ui/dialog.tcl:247
@@ -214,7 +214,7 @@
 ::msgcat::mcset nl Middle                {Tussennaam}
 # Reference: {Minutes}
 # Translate
-::msgcat::mcset nl Minutes               {Minutes}
+::msgcat::mcset nl Minutes               {minuten}
 # Reference: {Moderator}
 ::msgcat::mcset nl Moderator             {Moderatorprivileges}
 # Reference: {moderator}
@@ -297,7 +297,7 @@
 # Translate, find in sources: components/Geolocation.tcl:81
 ::msgcat::mcset nl Region                {Regio}
 # Reference: {Register}
-::msgcat::mcset nl Register              {Aanmaken}
+::msgcat::mcset nl Register              {Registreren}
 # Reference: {Remaining}
 ::msgcat::mcset nl Remaining             {Resterend}
 # Reference: {Remove}
@@ -373,7 +373,7 @@
 # Reference: {Type}
 ::msgcat::mcset nl Type                  {Soort}
 # Reference: {Unregister}
-::msgcat::mcset nl Unregister            {Account verwijderen}
+::msgcat::mcset nl Unregister            {Registratie verwijderen}
 # Reference: {Username}
 ::msgcat::mcset nl Username              {Gebruikersnaam}
 # Reference: {Version}
@@ -584,7 +584,7 @@
 ::msgcat::mcset nl mBugReport...         {Bug &rapporteren...}
 # Reference: {View &Business Card...}
 # Translate
-::msgcat::mcset nl mBusinessCard...      {&Visitekaart weergeven...}
+::msgcat::mcset nl mBusinessCard...      {Visite&kaart weergeven...}
 # Reference: {&Business Card...}
 # Translate
 ::msgcat::mcset nl mBC...                {&Visitekaart...}
@@ -631,7 +631,7 @@
 ::msgcat::mcset nl mDecreasing           {&Aflopend}
 # Reference: {&Discover Server...}
 # Translate
-::msgcat::mcset nl mDiscoverServer...    {Server &waarnemen...}
+::msgcat::mcset nl mDiscoverServer...    {&Server waarnemen...}
 # Reference: {Do Not Disturb}
 ::msgcat::mcset nl mDoNotDisturb         {Niet storen}
 # Reference: {Edit}
@@ -643,7 +643,7 @@
 ::msgcat::mcset nl mEditBC...            {Visite&kaart bewerken...}
 # Reference: {&Edit Contact...}
 # Translate
-::msgcat::mcset nl mEditContact...       {Contact &bewerken...}
+::msgcat::mcset nl mEditContact...       {C&ontact bewerken...}
 # Reference: {&Edit Item...}
 # Translate
 ::msgcat::mcset nl mEditItem...          {Item &bewerken...}
@@ -709,7 +709,7 @@
 ::msgcat::mcset nl mImport               {Importeren}
 # Reference: {&Import Image/Movie...}
 # Translate
-::msgcat::mcset nl mImportImage/Movie... {Afbeelding/Film i&mporteren...}
+::msgcat::mcset nl mImportImage/Movie... {Afbeelding/Film &importeren...}
 # Reference: {&Inbox...}
 # Translate
 ::msgcat::mcset nl mInbox...             {&Postvak in...}
@@ -769,7 +769,7 @@
 ::msgcat::mcset nl mNewAccount...        {&Nieuwe account...}
 # Reference: {New &Window}
 # Translate
-::msgcat::mcset nl mNewWindow            {Nieu&w venster}
+::msgcat::mcset nl mNewWindow            {&Nieuw venster}
 # Reference: {Normal}
 ::msgcat::mcset nl mNormal               {Normaal}
 # Reference: {Not Available}
@@ -788,7 +788,7 @@
 # Reference: {Outline Color}
 ::msgcat::mcset nl mOutlineColor         {Omlijningskleur}
 # Reference: {Page Set&up...}
-::msgcat::mcset nl mPageSetup            {Pagina-&instellingen...}
+::msgcat::mcset nl mPageSetup            {&Pagina-instellingen...}
 # Reference: {New P&assword...}
 # Translate
 ::msgcat::mcset nl mNewPassword...       {Nieuw &Wachtwoord...}
@@ -815,14 +815,14 @@
 ::msgcat::mcset nl mRefresh              {&Verversen}
 # Reference: {Register...}
 # Translate
-::msgcat::mcset nl mRegister...          {Account aanmaken...}
+::msgcat::mcset nl mRegister...          {Re&gistreren...}
 # Reference: {&Remove Account...}
 # Translate
 ::msgcat::mcset nl mRemoveAccount...     {Account ve&rwijderen...}
 # Reference: {&Remove Contact...}
 ::msgcat::mcset nl mRemoveContact        {Contactpersoon ve&rwijderen...}
 # Reference: {Remove &Listing}
-::msgcat::mcset nl mRemoveListing        {Weergave ve&rwijderen}
+::msgcat::mcset nl mRemoveListing        {Waarneming verwijderen}
 # Reference: {&Restore}
 # Translate, find in sources: components/taskbar/Taskbar.tcl:329 components/taskbar/TaskbarDEBUG.tcl:340
 ::msgcat::mcset nl mRestore              {He&rstellen}
@@ -843,7 +843,7 @@
 # Translate
 ::msgcat::mcset nl mSelectAll            {&Alles selecteren}
 # Reference: {Send &File...}
-::msgcat::mcset nl mSendFile...          {&Bestand verzenden...}
+::msgcat::mcset nl mSendFile...          {Bestand ver&zenden...}
 # Reference: {&Server}
 # Translate
 ::msgcat::mcset nl mServer               {&Server}
@@ -893,7 +893,7 @@
 # Reference: {&Undo}
 ::msgcat::mcset nl mUndo                 {&Ongedaan maken}
 # Reference: {&Unregister}
-::msgcat::mcset nl mUnregister           {&Account verwijderen}
+::msgcat::mcset nl mUnregister           {Registratie verwij&deren}
 # Reference: {&Update Check}
 ::msgcat::mcset nl mUpdateCheck          {&Controle op updates}
 # Reference: {Version}
@@ -1342,7 +1342,7 @@
 # Translate, find in sources: components/Speech.tcl:251 components/Speech.tcl:312
 ::msgcat::mcset nl Text-to-Speech        {Tekst-naar-Spraak}
 # Reference: {Thread started}
-::msgcat::mcset nl {Thread started}      {Conversatie begonnen}
+::msgcat::mcset nl {Thread started}      {Conversatie begonnen op}
 # Reference: {Use HTTP transport}
 # Translate, find in sources: jabber/Profiles.tcl:1859
 ::msgcat::mcset nl {Use HTTP transport}  {HTTP-transport gebruiken}
@@ -1564,7 +1564,7 @@
 # Messages for tk_messageBox:
 # Reference: {To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?}
 # Translate, find in sources: jabber/JUser.tcl:271 jabber/JUser.tcl:393
-::msgcat::mcset nl jamessaddforeign2     {Voor een contactpersoon op een chatsysteem zonder open federatie hebt u een account nodig op dit gesloten systeem. Daarnaast moet u deze account toevoegen aan het transport %s. Wilt u dit nu doen?}
+::msgcat::mcset nl jamessaddforeign2     {Voor een contactpersoon op een chatsysteem zonder open federatie hebt u een account nodig op dit gesloten systeem. Daarnaast moet u deze account registreren op het transport %s. Wilt u dit nu doen?}
 # Reference: {You need to fill in at least one valid address.}
 ::msgcat::mcset nl jamessaddrmiss        {U moet minstens één geldig adres opgeven.}
 # Reference: {%s allows you to see his/her presence.}
@@ -1634,7 +1634,7 @@
 ::msgcat::mcset nl jamesserrregget2      {Kan instructies niet verkrijgen.}
 # Reference: {Cannot register with service %s.}
 # Translate, find in sources: jabber/Register.tcl:1183 jabber/Register.tcl:1366
-::msgcat::mcset nl jamesserrregset2      {Kan account niet toevoegen aan de dienst %s.}
+::msgcat::mcset nl jamesserrregset2      {Kan niet registreren op de dienst %s.}
 # Reference: {Cannot obtain search form.}
 # Translate, find in sources: jabber/Search.tcl:344
 ::msgcat::mcset nl jamesserrsearch2      {Kan zoekformulier niet verkrijgen.}
@@ -1646,7 +1646,7 @@
 ::msgcat::mcset nl jamesserrtime2        {Kan %s's lokale tijd niet opvragen.}
 # Reference: {Cannot unregister from %s.}
 # Translate, find in sources: jabber/Profiles.tcl:1610 jabber/Register.tcl:117
-::msgcat::mcset nl jamesserrunreg2       {Kan account op %s niet verwijderen.}
+::msgcat::mcset nl jamesserrunreg2       {Kan registratie op %s niet verwijderen.}
 # Reference: {Cannot query %s's version.}
 # Translate, find in sources: jabber/Jabber.tcl:1609 jabber/UserInfo.tcl:187
 ::msgcat::mcset nl jamesserrvers2        {Kan %s's versie opvragen.}
@@ -1727,10 +1727,10 @@
 ::msgcat::mcset nl jamessnotconnected2   {Kan niet verzenden wanneer niet aangemeld.}
 # Reference: {Registration with service %s was successful.}
 # Translate, find in sources: jabber/Register.tcl:1189 jabber/Register.tcl:1371
-::msgcat::mcset nl jamessokreg2          {Uw account is toegevoegd aan de dienst %s.}
+::msgcat::mcset nl jamessokreg2          {Uw registratie op %s is geslaagd.}
 # Reference: {You are unregistered from %s.}
 # Translate, find in sources: jabber/Register.tcl:128
-::msgcat::mcset nl jamessokunreg2        {Uw account op %s is verwijderd.}
+::msgcat::mcset nl jamessokunreg2        {Uw registratie op %s is verwijderd.}
 # Reference: {%s wants to send you this file: %sDo you want to receive this file?}
 # Translate, find in sources: components/Growl.tcl:155 jabber/FTrans.tcl:556 jabber/OOB.tcl:377
 ::msgcat::mcset nl jamessoobask2         {%s wilt u dit bestand verzenden: %sWilt u het ontvangen?}
@@ -1773,10 +1773,10 @@
 ::msgcat::mcset nl jamessproxy-failure2  {De proxyserver rapporteerde een fout.}
 # Reference: {The registration failed.}
 # Translate, find in sources: jabber/Register.tcl:847
-::msgcat::mcset nl jamessregerr2         {Kan account niet aanmaken.}
+::msgcat::mcset nl jamessregerr2         {Kan niet registreren.}
 # Reference: {The registration failed because this username is already in use by someone else.}
 # Translate, find in sources: jabber/Register.tcl:844
-::msgcat::mcset nl jamessregerrinuse2    {Kan account niet aanmaken omdat deze gebruikersnaam al door iemand anders gebruikt wordt.}
+::msgcat::mcset nl jamessregerrinuse2    {Kan niet registreren omdat deze gebruikersnaam al door iemand anders gebruikt wordt.}
 # Reference: {The registration with %s was successful. Now you just need to Login using the same username and password.}
 # Translate, find in sources: jabber/Register.tcl:873
 ::msgcat::mcset nl jamessregisterok2     {Uw account op %s werd aangemaakt. U moet nu Aanmelden met dezelfde account en wachtwoord.}
@@ -1804,7 +1804,7 @@
 ::msgcat::mcset nl jamessstatuscust2     {Selecteer uw aanwezigheid en voer eventueel een bericht in.}
 # Reference: {The most frequent combinations are easily reachable as menu entries.}
 # Translate, find in sources: jabber/Status.tcl:838
-::msgcat::mcset nl jamessstatuscustdtl2  {De meesvoorkomende combinaties zijn makkelijk bereikbaar als menu-ingangen.}
+::msgcat::mcset nl jamessstatuscustdtl2  {De meestvoorkomende combinaties zijn makkelijk bereikbaar als menu-ingangen.}
 # Reference: {Time since %s was last connected}
 # Translate, find in sources: jabber/Jabber.tcl:1475
 ::msgcat::mcset nl jamesstimeconn2       {Tijd sinds laatste verbinding van %s}
@@ -2202,12 +2202,12 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jaregisterex3         {Selecteer een server of voer er zelf een in. Druk daarna op Volgende om de instructies op te halen. Volg de instructies op en druk op Aanmaken.}
 # Reference: {Register with the service %s. You may need to press the Next button to retrieve the registration instructions.}
 # Translate, find in sources: jabber/Register.tcl:255
-::msgcat::mcset nl jaregisterexserv2     {Maak een account aan op de dienst %s. U moet misschien op Volgende drukken om de instructies op te halen.}
+::msgcat::mcset nl jaregisterexserv2     {Registreer op de dienst %s. U moet misschien op Volgende drukken om de instructies op te halen.}
 # Reference: {Register to a service. If you are already registered to this service, you can update your registration here.}
 # Translate, find in sources: jabber/Register.tcl:998 jabber/Register.tcl:1271
-::msgcat::mcset nl jaregmsg2             {Maak een account aan op deze dienst. Als u al een account hebt op deze dienst, kunt u uw instellingen hier bijwerken.}
+::msgcat::mcset nl jaregmsg2             {Registreer op deze dienst. Als u al geregistreerd bent, kunt u hier uw instellingen bijwerken.}
 # Reference: {Do you want to register a new account with %s.}
-::msgcat::mcset nl jaregnewwith          {Wilt u een nieuwe account aanmaken op %s?}
+::msgcat::mcset nl jaregnewwith          {Wilt u registreren op %s?}
 # Reference: {Select the chat system and contact ID of the contact you would like to add. Nickname and group are optional and can be set or changed later.}
 ::msgcat::mcset nl jarostadd2            {Selecteer het chatsysteem en de contact ID van de contactpersoon die u wilt toevoegen. Een bijnaam en een groep zijn optioneel en kunnen later ingesteld of veranderd worden.}
 # Reference: {Edit nickname and group of %s. You also can request or remove presence subscription.}
@@ -3049,7 +3049,7 @@ if {0} {
 ::msgcat::mcset nl budpounce-sendmsg     {Verzend bericht met onderwerp}
 # Reference: {&Contact Actions...}
 # Translate
-::msgcat::mcset nl mContactActions...    {Contactpersoona&cties...}
+::msgcat::mcset nl mContactActions...    {Contactpersoon&acties...}
 
 # Image magic:
 # Reference: {Click on a window or drag a rectangular area to import a snapshot into the current whiteboard.}
