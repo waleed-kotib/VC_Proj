@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.203 2007-09-25 09:07:13 matben Exp $
+#   $Id: en.msg,v 1.204 2007-09-26 12:48:42 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -596,6 +596,8 @@
 ::msgcat::mcset en {Smooth freehand strokes}
 ::msgcat::mcset en {Sound set}
 ::msgcat::mcset en {Start chat}
+::msgcat::mcset en {Start minimized in system tray}
+::msgcat::mcset en {Start minimized in taskbar}
 ::msgcat::mcset en {Status message}
 ::msgcat::mcset en {Subscription Failed}
 ::msgcat::mcset en {Subscription Pending}
