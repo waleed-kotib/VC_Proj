@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.55 2007-09-16 12:00:28 matben Exp $
+# $Id: JPrefs.tcl,v 1.56 2007-09-26 12:48:42 matben Exp $
 
 package require ui::fontselector
 
@@ -312,6 +312,9 @@ proc ::JPrefs::BuildCustomPage {page} {
     if {[string equal $this(platform) "windows"]} {
 	grid  $wcu.not  -sticky w
     }
+    
+    # Components that use this hook must now what they are doing!
+    ::hooks::run prefsBuildCustomHook $wcu
     
     pack  $wcu  -side top -fill x
 }

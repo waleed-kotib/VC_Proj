@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.34 2007-09-24 12:44:07 matben Exp $
+# $Id: Taskbar.tcl,v 1.35 2007-09-26 12:48:42 matben Exp $
 
 package require balloonhelp
 
@@ -50,13 +50,18 @@ proc ::Taskbar::Load {} {
     component::register Taskbar "Creates a system tray icon"
     
     # Add all event hooks.
-    ::hooks::register initHook           ::Taskbar::InitHook
-    ::hooks::register quitAppHook        ::Taskbar::QuitAppHook
-    ::hooks::register setPresenceHook    ::Taskbar::SetPresenceHook
-    ::hooks::register loginHook          ::Taskbar::LoginHook
-    ::hooks::register logoutHook         ::Taskbar::LogoutHook
-    ::hooks::register preCloseWindowHook ::Taskbar::CloseHook        20
-    ::hooks::register jabberBuildMain    ::Taskbar::BuildMainHook
+    ::hooks::register initHook              ::Taskbar::InitHook
+    ::hooks::register quitAppHook           ::Taskbar::QuitAppHook
+    ::hooks::register setPresenceHook       ::Taskbar::SetPresenceHook
+    ::hooks::register loginHook             ::Taskbar::LoginHook
+    ::hooks::register logoutHook            ::Taskbar::LogoutHook
+    ::hooks::register preCloseWindowHook    ::Taskbar::CloseHook        20    
+    ::hooks::register jabberBuildMain       ::Taskbar::BuildMainHook
+    
+    ::hooks::register prefsInitHook         ::Taskbar::InitPrefsHook
+    ::hooks::register prefsBuildCustomHook  ::Taskbar::BuildCustomPrefsHook
+    ::hooks::register prefsSaveHook         ::Taskbar::SavePrefsHook
+    ::hooks::register prefsCancelHook       ::Taskbar::CancelPrefsHook
     
     return 1
 }
@@ -136,7 +141,7 @@ proc ::Taskbar::BuildMainHook {} {
     variable tprefs
     
     # Not sure how this workd.
-    if {$tprefs(quitMini)} {
+    if {$tprefs(quitMini) || $tprefs(startMini)} {
 	::UI::WithdrawAllToplevels
     }
     bind [::UI::GetMainWindow] <Map> [list [namespace current]::Update %W]
@@ -146,11 +151,6 @@ proc ::Taskbar::InitHook {} {
     global  prefs this
     variable wmenu
     variable menuIndex
-    variable tprefs
-    
-    set tprefs(quitMini) 0
-    ::PrefUtils::Add [list  \
-      [list ::Taskbar::tprefs(quitMini)   tprefs_quitMini  $tprefs(quitMini)]]
      
     # Build popup menu.
     set m $wmenu
@@ -390,6 +390,54 @@ proc ::Taskbar::QuitAppHook {} {
 	if {$icon ne ""} {
 	    winico taskbar delete $icon
 	}
+    }
+}
+
+# Preference page --------------------------------------------------------------
+
+proc ::Taskbar::InitPrefsHook {} {
+    variable tprefs
+    
+    set tprefs(quitMini)  0
+    set tprefs(startMini) 0
+    ::PrefUtils::Add [list  \
+      [list ::Taskbar::tprefs(quitMini)   taskbar_quitMini   $tprefs(quitMini)] \
+      [list ::Taskbar::tprefs(startMini)  taskbar_startMini  $tprefs(startMini)]]
+}
+
+proc ::Taskbar::BuildCustomPrefsHook {win} {
+    variable tprefs
+    variable tmpPrefs
+    
+    set tmpPrefs(startMini) $tprefs(startMini)
+
+    switch -- [tk windowingsystem] {
+	win32 {
+	    set str [mc "Start minimized in taskbar"]
+	}
+	x11 {
+	    set str [mc "Start minimized in system tray"]
+	}
+    }
+    ttk::checkbutton $win.tskbmini -text $str \
+      -variable [namespace current]::tmpPrefs(startMini)
+
+    grid  $win.tskbmini  -sticky w
+}
+
+proc ::Taskbar::SavePrefsHook {} {
+    variable tprefs
+    variable tmpPrefs
+    
+    set tprefs(startMini) $tmpPrefs(startMini)
+}
+
+proc ::Taskbar::CancelPrefsHook {} {
+    variable tprefs
+    variable tmpPrefs
+    
+    if {$tprefs(startMini) ne $tmpPrefs(startMini)} {
+	::Preferences::HasChanged
     }
 }
 
