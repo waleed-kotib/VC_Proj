@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.158 2007-09-26 08:16:39 sdevrieze Exp $
+#   $Id: nl.msg,v 1.159 2007-09-26 17:33:00 sdevrieze Exp $
 
 # Reference: {Abort}
 # Translate, find in sources: contrib/ui/dialog.tcl:247
@@ -643,7 +643,7 @@
 ::msgcat::mcset nl mEditBC...            {Visite&kaart bewerken...}
 # Reference: {&Edit Contact...}
 # Translate
-::msgcat::mcset nl mEditContact...       {C&ontact bewerken...}
+::msgcat::mcset nl mEditContact...       {C&ontactpersoon bewerken...}
 # Reference: {&Edit Item...}
 # Translate
 ::msgcat::mcset nl mEditItem...          {Item &bewerken...}
@@ -722,7 +722,7 @@
 # Reference: {Italic}
 ::msgcat::mcset nl mItalic               {Cursief}
 # Reference: {Call}
-::msgcat::mcset nl mJiveCall             {Telefoneer}
+::msgcat::mcset nl mJiveCall             {Telefoneren}
 # Reference: {Forward Call}
 ::msgcat::mcset nl mJiveForward          {Telefoongesprek omleiden}
 # Reference: {Large}
@@ -815,14 +815,14 @@
 ::msgcat::mcset nl mRefresh              {&Verversen}
 # Reference: {Register...}
 # Translate
-::msgcat::mcset nl mRegister...          {Re&gistreren...}
+::msgcat::mcset nl mRegister...          {Registreren...}
 # Reference: {&Remove Account...}
 # Translate
 ::msgcat::mcset nl mRemoveAccount...     {Account ve&rwijderen...}
 # Reference: {&Remove Contact...}
 ::msgcat::mcset nl mRemoveContact        {Contactpersoon ve&rwijderen...}
 # Reference: {Remove &Listing}
-::msgcat::mcset nl mRemoveListing        {Waarneming verwijderen}
+::msgcat::mcset nl mRemoveListing        {Waarneming verwijdere&n}
 # Reference: {&Restore}
 # Translate, find in sources: components/taskbar/Taskbar.tcl:329 components/taskbar/TaskbarDEBUG.tcl:340
 ::msgcat::mcset nl mRestore              {He&rstellen}
@@ -1202,6 +1202,8 @@
 ::msgcat::mcset nl {Open Folder}         {Map openen}
 # Reference: {Open Helpfile}
 ::msgcat::mcset nl {Open Helpfile}       {Helpbestand openen}
+# Reference: {Open Image}
+::msgcat::mcset nl {Open Image}    {Afbeelding openen}
 # Reference: {Open Image/Movie}
 ::msgcat::mcset nl {Open Image/Movie}    {Afbeelding/film openen}
 # Reference: {Open Stream}
@@ -1323,6 +1325,8 @@
 # Reference: {Start chat}
 # Translate, find in sources: components/BuddyPounce.tcl:252
 ::msgcat::mcset nl {Start chat}          {Chatsessie starten}
+::msgcat::mcset nl {Start minimized in taskbar}		{Geminimaliseerd in de taakbalk starten}
+::msgcat::mcset nl {Start minimized in system tray}	{Geminimaliseerd in het systeemvak starten}
 # Reference: {Status message}
 ::msgcat::mcset nl {Status message}      {Bericht}
 # Reference: {Subscription Failed}
@@ -1492,13 +1496,13 @@
 # Subscriptions:
 # Reference: {Both you and your contact can see eachother's presence.}
 # Translate
-::msgcat::mcset nl subscriptionBoth      {Zowel u als uw contactpersoon kunt elkaars aanwezigheid zien.}
+::msgcat::mcset nl subscriptionBoth      {U en uw contactpersoon kunnen elkaars aanwezigheid zien.}
 # Reference: {You cannot see your contact's presence, but your contact can see yours.}
 # Translate
 ::msgcat::mcset nl subscriptionFrom      {U kunt de aanwezigheid van uw contactpersoon niet zien, maar uw contactpersoon kan de jouwe wel zien.}
 # Reference: {Both you and your contact cannot see eachother's presence.}
 # Translate
-::msgcat::mcset nl subscriptionNone      {Zowel u als uw contactpersoon kunt elkaars aanwezigheid niet zien.}
+::msgcat::mcset nl subscriptionNone      {U en uw contactpersoon kunnen elkaars aanwezigheid niet zien.}
 # Reference: {You can see your contact's presence, but your contact can't see yours.}
 # Translate, find in sources: jabber/Roster.tcl:1466
 ::msgcat::mcset nl subscriptionTo        {U kunt de aanwezigheid van uw contactpersoon zien, maar uw contactpersoon kan de jouwe niet zien.}
@@ -1904,35 +1908,35 @@
 # From: JEP-0077: In-Band Registration (http://www.xmpp.org/extensions/xep-0077.html#registrar-formtypes)
 # Note to translators: these are tooltips and has lower priority
 # Reference: {Street portion of a physical or mailing address}
-::msgcat::mcset nl registration-address  {Uw straat}
+::msgcat::mcset nl registration-address  {Straat}
 # Reference: {Locality portion of a physical or mailing address}
-::msgcat::mcset nl registration-city     {Uw stad/gemeente}
+::msgcat::mcset nl registration-city     {Stad/gemeente}
 # Reference: {Some date (e.g., birth date, hire date, sign-up date)}
 ::msgcat::mcset nl registration-date     {Een datum (bv.: geboortedatum, inschrijvingsdatum)}
 # Reference: {Email address}
-::msgcat::mcset nl registration-email    {Uw e-mailadres}
+::msgcat::mcset nl registration-email    {E-mailadres}
 # Reference: {First name or given name}
-::msgcat::mcset nl registration-first    {Uw voornaam}
+::msgcat::mcset nl registration-first    {Voornaam}
 # Reference: {You are already registered with this service. These are your current login settings.}
 ::msgcat::mcset nl registration-is-registered {U hebt al een account op deze dienst. Dit zijn uw huidige instellingen.}
 # Reference: {Last name, surname, or family name}
-::msgcat::mcset nl registration-last     {Uw achternaam}
+::msgcat::mcset nl registration-last     {Achternaam}
 # Reference: {Full name}
-::msgcat::mcset nl registration-name     {Uw volledige naam}
+::msgcat::mcset nl registration-name     {Volledige naam}
 # Reference: {Familiar name}
-::msgcat::mcset nl registration-nick     {Uw bijnaam}
+::msgcat::mcset nl registration-nick     {Bijnaam}
 # Reference: {Password or secret}
-::msgcat::mcset nl registration-password {Uw wachtwoord}
+::msgcat::mcset nl registration-password {Wachtwoord}
 # Reference: {Telephone number}
-::msgcat::mcset nl registration-phone    {Uw telefoonnummer}
+::msgcat::mcset nl registration-phone    {Telefoonnummer}
 # Reference: {An administrative region of the nation, such as a state or province}
-::msgcat::mcset nl registration-state    {Uw regio/provincie}
+::msgcat::mcset nl registration-state    {Regio/provincie}
 # Reference: {URL to personal website}
-::msgcat::mcset nl registration-url      {Het adres van uw website}
+::msgcat::mcset nl registration-url      {Het adres van de persoonlijke website}
 # Reference: {Account name associated with the user}
-::msgcat::mcset nl registration-username {Uw gebruikersnaam}
+::msgcat::mcset nl registration-username {De gebruikersnaam van de gebruiker}
 # Reference: {Postal code portion of a physical or mailing address}
-::msgcat::mcset nl registration-zip      {Uw postcode}
+::msgcat::mcset nl registration-zip      {Postcode}
 
 # Map version info tags to display names.
 # Reference: {Name}
@@ -2193,7 +2197,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl janewpass             {Nieuw wachtwoord instellen voor}
 # Reference: {Select an image file for the background. To remove a background image press Remove and Save.}
 # Translate, find in sources: jabber/Disco.tcl:888 jabber/RosterTree.tcl:584
-::msgcat::mcset nl jaopenbgimage         {Selecteer een achtergrondafbeelding. U kunt een achtergrondafbeelding verwijderen door op Leegmaken en OK te drukken.}
+::msgcat::mcset nl jaopenbgimage         {Selecteer een achtergrondafbeelding. U kunt de achtergrondafbeelding verwijderen door op Leegmaken en OK te drukken.}
 # Reference: {You are already registered with this service. These are your current registration settings.}
 # Translate, find in sources: jabber/JForms.tcl:269
 ::msgcat::mcset nl jaregalready2         {U hebt al een account op deze dienst. Dit zijn uw huidige instellingen.}
@@ -2212,7 +2216,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jarostadd2            {Selecteer het chatsysteem en de contact ID van de contactpersoon die u wilt toevoegen. Een bijnaam en een groep zijn optioneel en kunnen later ingesteld of veranderd worden.}
 # Reference: {Edit nickname and group of %s. You also can request or remove presence subscription.}
 # Translate, find in sources: jabber/JUser.tcl:525
-::msgcat::mcset nl jarostset2            {Bewerk bijnaam en groep van %s. U kunt ook een abonnement aanvragen op de aanwzigheid van deze contactpersoon of dit abonnement verwijderen.}
+::msgcat::mcset nl jarostset2            {Bewerk bijnaam en groep van %s. U kunt ook een abonnement aanvragen op de aanwezigheid van deze contactpersoon of dit abonnement verwijderen.}
 # Reference: {Request presence subscription}
 # Translate, find in sources: jabber/JUser.tcl:578
 ::msgcat::mcset nl jarostsub2            {Abonnement op aanwezigheid aanvragen}
@@ -2225,7 +2229,7 @@ namespace eval ::EditShortcuts:: {
 # Translate, find in sources: jabber/Search.tcl:116
 ::msgcat::mcset nl jasearch2             {Zoek contactpersonen met de geselecteerde dienst. Een nieuw zoekformulier zal het vorige leegmaken.}
 # Reference: {Waiting for Get to be pressed}
-::msgcat::mcset nl jasearchwait          {Klik nu op "Nieuw formulier"}
+::msgcat::mcset nl jasearchwait          {Klik nu op Volgende}
 # Reference: {Select iconsets for each group. A deselected group will use the normal iconset.}
 # Translate, find in sources: jabber/Rosticons.tcl:455
 ::msgcat::mcset nl jaseliconset2         {Selecteer pictogrammen voor elke groep. Een gedeselecteerde groep zal de standaard pictogrammen gebruiken.}
@@ -2237,7 +2241,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jasubwant2            {Mag %s uw aanwezigheid zien?}
 # Reference: {The supported image formats are}
 # Translate, find in sources: jabber/Avatar.tcl:332 jabber/Disco.tcl:889 jabber/RosterTree.tcl:585
-::msgcat::mcset nl jasuppimagefmts       {De ondersteunde afbeeldingsformaten zijn}
+::msgcat::mcset nl jasuppimagefmts       {Ondersteunde afbeeldingsformaten:}
 # Reference: {Negotiating TLS security}
 # Translate, find in sources: jabber/Login.tcl:675
 ::msgcat::mcset nl jatlsnegot2           {Bezig met beveiligd verbinden via TLS}
@@ -2398,7 +2402,7 @@ namespace eval ::EditShortcuts:: {
 
 # These are specific for phones (VoIP)
 # Reference: {Call}
-::msgcat::mcset nl phoneMakeCall         {Telefoneer}
+::msgcat::mcset nl phoneMakeCall         {Telefoneren}
 # Reference: {Forward current call to...}
 ::msgcat::mcset nl phoneMakeForward      {Huidig telefoongesprek omleiden naar...}
 # Reference: {Ring, ring...}
