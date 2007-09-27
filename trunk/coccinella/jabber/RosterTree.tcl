@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.73 2007-09-21 13:13:50 matben Exp $
+# $Id: RosterTree.tcl,v 1.74 2007-09-27 12:31:07 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1372,35 +1372,34 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
     set istrpt [::Roster::IsTransportHeuristics $jid]
     set server $jstate(server)
 
+    if {[info exists argsA(-name)] && ($argsA(-name) ne "")} {
+	set str $argsA(-name)
+    } else {
+	set str [::Nickname::Get [jlib::barejid $jid]]
+	if {$str eq ""} {	
+	    jlib::splitjidex $jid node domain res
+	    if {$domain eq $jstate(server)} {
+		set str [jlib::unescapestr $node]
+	    } else {
+		set ujid [jlib::unescapejid $jid]
+		set str [jlib::barejid $ujid]
+	    }
+	}
+    }
     if {$istrpt} {
-	set str [jlib::unescapejid $jid]
+	# @@@ A bit ad hoc...
 	if {[info exists argsA(-show)]} {
 	    set sstr [::Roster::MapShowToText $argsA(-show)]
 	    append str " ($sstr)" 
 	} elseif {[info exists argsA(-status)]} {
 	    append str " ($argsA(-status))"
 	}
-    } else {
-	if {[info exists argsA(-name)] && ($argsA(-name) ne "")} {
-	    set str $argsA(-name)
-	} else {
-	    set str [::Nickname::Get [jlib::barejid $jid]]
-	    if {$str eq ""} {	
-		jlib::splitjidex $jid node domain res
-		if {$domain eq $jstate(server)} {
-		    set str [jlib::unescapestr $node]
-		} else {
-		    set ujid [jlib::unescapejid $jid]
-		    set str [jlib::barejid $ujid]
-		}
-	    }
-	}
-	if {$presence eq "available"} {
-	    if {[info exists argsA(-resource)] && ($argsA(-resource) ne "")} {
-
-		# Configurable?
-		#append str " ($argsA(-resource))"
-	    }
+    }
+    if {$presence eq "available"} {
+	if {[info exists argsA(-resource)] && ($argsA(-resource) ne "")} {
+	    
+	    # Configurable?
+	    #append str " ($argsA(-resource))"
 	}
     }
     return $str
