@@ -2,7 +2,7 @@
 #  
 #      Implements platform independent synthetic speech.
 #      
-#  Copyright (c) 2003-2004  Mats Bengtsson
+#  Copyright (c) 2003-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -17,15 +17,15 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Speech.tcl,v 1.14 2007-09-16 07:39:11 matben Exp $
+# $Id: Speech.tcl,v 1.15 2007-09-27 14:19:26 matben Exp $
 
-namespace eval ::Speech:: { }
+namespace eval ::Speech:: {}
 
 # Speech::Load --
 # 
 #       Tries to load the speech component.
 
-proc ::Speech::Load { } {
+proc ::Speech::Load {} {
     global  this
     variable sprefs
     
@@ -35,7 +35,7 @@ proc ::Speech::Load { } {
     set sprefs(haveSpeech) 0
     
     switch -- $this(platform) {
-	macosx - macintosh {
+	macosx {
 	    if {[catch {package require TclSpeech}]} {
 		return
 	    }
@@ -55,14 +55,14 @@ proc ::Speech::Load { } {
     }
     
     # Set up all hooks.
-    ::Speech::Init
+    Init
     
     # We should register ourselves.
     component::register Speech \
       "Text-to-speech on Macs using TclSpeech and on Windows using MSSpeech"
 }
 
-proc ::Speech::Init { } {
+proc ::Speech::Init {} {
         
     ::Debug 2 "::Speech::Init"
 
@@ -78,7 +78,6 @@ proc ::Speech::Init { } {
     ::hooks::register prefsSaveHook          ::Speech::SavePrefsHook
     ::hooks::register prefsCancelHook        ::Speech::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Speech::UserDefaultsPrefsHook
-    ::hooks::register prefsDestroyHook       ::Speech::DestroyPrefsHook
 }
 
 # Speech::Verify --
@@ -87,33 +86,22 @@ proc ::Speech::Init { } {
 #       Also checks voices available.
 
 proc ::Speech::Verify {} {
+    global  this
     variable sprefs
-    
+  
+    set plat $this(platform)
+    set voices [SpeakGetVoices]
+
     # Voices consistency check.
-    if {$sprefs(package) eq "TclSpeech"} {
-	set voices [speech::speakers]
-	if {([lsearch $voices $sprefs(voiceUs)] < 0) || \
-	  ($sprefs(voiceUs) eq "")} {
-	    set sprefs(voiceUs) Victoria
-	}
-	if {([lsearch $voices $sprefs(voiceOther)] < 0) || \
-	  ($sprefs(voiceOther) eq "")} {
-	    set sprefs(voiceOther) Zarvox
-	}
+    if {([lsearch $voices $sprefs(voiceUs-$plat)] < 0) || \
+      ($sprefs(voiceUs-$plat) eq "")} {
+	set sprefs(voiceUs-$plat) [lindex $voices 0]
     }
-    if {$sprefs(package) eq "MSSpeech"} {
-	set voices [::MSSpeech::GetVoices]
-	if {([lsearch $voices $sprefs(voiceUs)] < 0) || \
-	  ($sprefs(voiceUs) eq "")} {
-	    set sprefs(voiceUs) [lindex $voices 0]
-	}
-	if {([lsearch $voices $sprefs(voiceOther)] < 0) || \
-	  ($sprefs(voiceOther) eq "")} {
-	    set sprefs(voiceOther) [lindex $voices 1]
-	}
+    if {([lsearch $voices $sprefs(voiceOther-$plat)] < 0) || \
+      ($sprefs(voiceOther-$plat) eq "")} {
+	set sprefs(voiceOther-$plat) [lindex $voices 1]
     }
 }
-
 
 proc ::Speech::SpeakMessage {type body args} {
     variable sprefs
@@ -133,7 +121,7 @@ proc ::Speech::SpeakMessage {type body args} {
 		    append txt "Subject is $argsArr(-subject). "
 		}
 		append txt $body
-		::Speech::Speak $txt $sprefs(voiceOther)
+		Speak $txt $sprefs(voiceOther)
 	    }
 	}
 	chat {
@@ -148,7 +136,7 @@ proc ::Speech::SpeakMessage {type body args} {
 		    set txt " , "
 		}
 		append txt $body
-		::Speech::Speak $txt $voice
+		Speak $txt $voice
 	    }
 	}
 	groupchat {
@@ -156,9 +144,9 @@ proc ::Speech::SpeakMessage {type body args} {
 		jlib::splitjid $from roomjid res
 		set myjid [::Jabber::GetMyJid $roomjid]
 		if {[string equal $myjid $from]} {
-		    ::Speech::Speak $body $sprefs(voiceUs)
+		    Speak $body $sprefs(voiceUs)
 		} else {
-		    ::Speech::Speak $body $sprefs(voiceOther)
+		    Speak $body $sprefs(voiceOther)
 		}
 	    }
 	}
@@ -180,7 +168,7 @@ proc ::Speech::SpeakWBText {who str} {
 	}
     }
     if {$sprefs(speakWBText) && [string match *${punct}* $str] && ($str ne "")} {
-	::Speech::Speak $str $voice
+	Speak $str $voice
     }
 }
 
@@ -188,7 +176,7 @@ proc ::Speech::Speak {msg {voice {}}} {
     global  this
     
     switch -- $this(platform) {
-	macintosh - macosx {
+	macosx {
 	    ::Mac::Speech::Speak $msg $voice
 	}
 	windows {
@@ -204,14 +192,14 @@ proc ::Speech::SpeakGetVoices {} {
     global  this
     
     switch -- $this(platform) {
-	macintosh - macosx {
-	    return [::Mac::Speech::GetVoices]
+	macosx {
+	    return [speech::speakers]
 	}
 	windows {
 	    return [::MSSpeech::GetVoices]
 	}
 	unix {
-	    return {}
+	    return
 	}
     }
 }
@@ -221,13 +209,14 @@ proc ::Speech::SpeakGetVoices {} {
 proc ::Speech::InitPrefsHook {} {
     
     variable sprefs
-    variable allprefskeys {speakWBText speakMsg speakChat voiceUs voiceOther}
        
     ::Debug 2 "::Speech::InitPrefsHook sprefs(haveSpeech)=$sprefs(haveSpeech)"
     
     # Default in/out voices.
-    set sprefs(voiceUs)    ""
-    set sprefs(voiceOther) ""
+    set sprefs(voiceUs-macosx)     ""
+    set sprefs(voiceOther-macosx)  ""
+    set sprefs(voiceUs-windows)    ""
+    set sprefs(voiceOther-windows) ""
 
     set sprefs(speakMsg)      0
     set sprefs(speakChat)     0
@@ -237,11 +226,14 @@ proc ::Speech::InitPrefsHook {} {
       [list ::Speech::sprefs(speakMsg)    speakMsg        $sprefs(speakMsg)]    \
       [list ::Speech::sprefs(speakChat)   speakChat       $sprefs(speakChat)]   \
       [list ::Speech::sprefs(speakWBText) speakWBText     $sprefs(speakWBText)] \
-      [list ::Speech::sprefs(voiceUs)     speakVoiceUs    $sprefs(voiceUs)]     \
-      [list ::Speech::sprefs(voiceOther)  speakVoiceOther $sprefs(voiceOther)]]
+      [list ::Speech::sprefs(voiceUs-macosx)     speakVoiceUs-macosx    $sprefs(voiceUs-macosx)]     \
+      [list ::Speech::sprefs(voiceOther-macosx)  speakVoiceOther-macosx $sprefs(voiceOther-macosx)] \
+      [list ::Speech::sprefs(voiceUs-windows)     speakVoiceUs-windows    $sprefs(voiceUs-windows)]     \
+      [list ::Speech::sprefs(voiceOther-windows)  speakVoiceOther-windows $sprefs(voiceOther-windows)] \
+      ]
 
     #
-    ::Speech::Verify
+    Verify
 }
 
 proc ::Speech::BuildPrefsHook {wtree nbframe} {
@@ -251,44 +243,36 @@ proc ::Speech::BuildPrefsHook {wtree nbframe} {
 	::Preferences::NewTableItem {General {Speech}} [mc "Text-to-Speech"]
 
 	set wpage [$nbframe page {Speech}]    
-	::Speech::BuildPrefsPage $wpage
+	BuildPrefsPage $wpage
     }
 }
 
 proc ::Speech::SavePrefsHook {} {
     variable sprefs
     variable tmpPrefs
-    variable allprefskeys
 
     if {$sprefs(haveSpeech)} {
-	foreach key $allprefskeys {
+	array set sprefs [array get tmpPrefs]
+	foreach {key value} [array get tmpPrefs] {
 	    set sprefs($key) $tmpPrefs($key)
 	}
-	unset -nocomplain tmpPrefs
     }
 }
 
 proc ::Speech::CancelPrefsHook {} {
     variable sprefs
     variable tmpPrefs
-    variable allprefskeys
     
     if {$sprefs(haveSpeech)} {
 
 	# Detect any changes.
-	foreach key $allprefskeys {
+	foreach {key value} [array get tmpPrefs] {
 	    if {![string equal $sprefs($key) $tmpPrefs($key)]} {
 		::Preferences::HasChanged
 		return
 	    }
 	}
     }
-}
-
-proc ::Speech::DestroyPrefsHook {} {
-    variable tmpPrefs
-    
-    unset -nocomplain tmpPrefs
 }
 
 proc ::Speech::UserDefaultsPrefsHook {} {
@@ -299,10 +283,12 @@ proc ::Speech::UserDefaultsPrefsHook {} {
 }
 
 proc ::Speech::BuildPrefsPage {page} {
+    global  this
     variable sprefs
     variable tmpPrefs
         
     array set tmpPrefs [array get sprefs]
+    set plat $this(platform)
     
     set wc $page.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
@@ -335,7 +321,7 @@ proc ::Speech::BuildPrefsPage {page} {
     if {$sprefs(haveSpeech)} {
 	
 	# Get a list of voices
-	set voicelist [concat None [::Speech::SpeakGetVoices]]
+	set voicelist [concat None [SpeakGetVoices]]
     } else {
 	set voicelist {None}
 	$wfr.speak     state {disabled}
@@ -351,9 +337,9 @@ proc ::Speech::BuildPrefsPage {page} {
     ttk::label $wfvo.in  -text "[mc prefsounvoin2]:"
     ttk::label $wfvo.out -text "[mc prefsounvoou2]:" 
     eval {ttk::optionmenu $wfvo.pin \
-      [namespace current]::tmpPrefs(voiceOther)} $voicelist
+      [namespace current]::tmpPrefs(voiceOther-$plat)} $voicelist
     eval {ttk::optionmenu $wfvo.pout   \
-      [namespace current]::tmpPrefs(voiceUs)} $voicelist
+      [namespace current]::tmpPrefs(voiceUs-$plat)} $voicelist
     
     grid  $wfvo.in   $wfvo.pin   -sticky e -padx 2 -pady 1
     grid  $wfvo.out  $wfvo.pout  -sticky e -padx 2 -pady 1
@@ -363,6 +349,13 @@ proc ::Speech::BuildPrefsPage {page} {
 	$wfvo.pin  state {disabled}
 	$wfvo.pout state {disabled}
     }    
+    
+    bind $page <Destroy> +::Speech::Free
+}
+
+proc ::Speech::Free {} {
+    variable tmpPrefs
+    unset -nocomplain tmpPrefs
 }
 
 #-------------------------------------------------------------------------------
