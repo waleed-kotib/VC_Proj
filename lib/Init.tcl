@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.75 2007-09-19 07:12:15 matben Exp $
+# $Id: Init.tcl,v 1.76 2007-09-27 13:39:56 matben Exp $
 
 namespace eval ::Init {
     
@@ -86,18 +86,21 @@ proc ::Init::SetThis {mainScript} {
     # Path where preferences etc are stored.
     set this(prefsDefPath) [GetDefaultPrefsPath]
     set this(prefsPath)    $this(prefsDefPath)
+    set this(prefsName)    "preferences.rdb"
 
+    # Old prefs name (changed 0.96.3)
     switch -- $this(platform) {
 	macosx {
-	    set this(prefsName) "Whiteboard Prefs"
+	    set this(oldPrefsName) "Whiteboard Prefs"
 	}
 	unix {
-	    set this(prefsName) "whiteboard"
+	    set this(oldPrefsName) "whiteboard"
 	}
 	windows {
-	    set this(prefsName) "WBPREFS.TXT"
+	    set this(oldPrefsName) "WBPREFS.TXT"
 	}
     }
+
     if {$config(prefs,sameDrive)} {
 
 	# Handle the situation where the app lives on a removable drive (USB stick).
@@ -107,7 +110,9 @@ proc ::Init::SetThis {mainScript} {
 	if {[IsAppOnRemovableDrive]} {
 	    set prefsPathDrive [GetAppDrivePrefsPath]
 	    set prefFile [file join $prefsPathDrive $this(prefsName)]
-	    if {[file exists $prefFile] && [file writable $prefFile]} {
+	    set oldFile [file join $prefsPathDir $this(oldPrefsName)]
+	    if {([file exists $prefFile] && [file writable $prefFile]) || \
+	      ([file exists $oldFile] && [file writable $oldFile])} {
 		set this(prefsPathRemovable) 1
 		set this(prefsPath) $prefsPathDrive
 	    }    
@@ -118,10 +123,19 @@ proc ::Init::SetThis {mainScript} {
 	set this(prefsPathAppDir) 0
 	set prefsPathDir [GetAppDirPrefsPath]
 	set prefFile [file join $prefsPathDir $this(prefsName)]
-	if {[file exists $prefFile] && [file writable $prefFile]} {
+	set oldFile [file join $prefsPathDir $this(oldPrefsName)]
+	if {([file exists $prefFile] && [file writable $prefFile]) || \
+	  ([file exists $oldFile] && [file writable $oldFile])} {
 	    set this(prefsPathAppDir) 1
 	    set this(prefsPath) $prefsPathDir
 	}
+    }
+    
+    # Import any old (pre 0.96.3) prefs file.
+    set oldPrefs [file join $this(prefsPath) $this(oldPrefsName)]
+    if {[file exists $oldPrefs]} {
+	set newPrefs [file join $this(prefsPath) $this(prefsName)]
+	file rename -force $oldPrefs $newPrefs
     }
     
     # Sets all paths that are dependent on this(prefsPath).
