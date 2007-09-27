@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.159 2007-09-26 17:33:00 sdevrieze Exp $
+#   $Id: nl.msg,v 1.160 2007-09-27 14:20:50 sdevrieze Exp $
 
 # Reference: {Abort}
 # Translate, find in sources: contrib/ui/dialog.tcl:247
@@ -1332,7 +1332,7 @@
 # Reference: {Subscription Failed}
 ::msgcat::mcset nl {Subscription Failed} {Abonneren mislukte}
 # Reference: {Subscription Pending}
-::msgcat::mcset nl {Subscription Pending} {Onbekend}
+::msgcat::mcset nl {Subscription Pending} {Wachtend op abonnement}
 # Reference: {Synchronise cache}
 # Translate, find in sources: lib/FileCache.tcl:647
 ::msgcat::mcset nl {Synchronise cache}   {Cache synchroniseren}
