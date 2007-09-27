@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.30 2007-09-26 16:31:24 matben Exp $
+# $Id: UserInfo.tcl,v 1.31 2007-09-27 11:59:54 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -255,11 +255,11 @@ proc ::UserInfo::TimeCB {token jlibname type subiq} {
 
     if {$type eq "error"} {
 	set str [mc "Local Time"]
-	set str1 "\n" "[mc jamesserrtime2 $ujid]\n"
-	append str1 "[mc Error]: [lindex $subiq 1]"
+	append str "\n" "[mc jamesserrtime2 $ujid]\n"
+	append str "[mc Error]: [lindex $subiq 1]"
 
-	::Jabber::AddErrorLog $jid $str1
-	AddError $token $str1
+	::Jabber::AddErrorLog $jid $str
+	AddError $token $str
     } else {
 	set str [::Jabber::GetTimeString $subiq]
 	set priv(strtime) [mc jamesslocaltime2 $ujid $str]
