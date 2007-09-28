@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.31 2007-09-27 11:59:54 matben Exp $
+# $Id: UserInfo.tcl,v 1.32 2007-09-28 07:48:47 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -188,7 +188,6 @@ proc ::UserInfo::VersionCB {token jlibname type subiq} {
 	append str "[mc Error]: [lindex $subiq 1]"
 
 	::Jabber::AddErrorLog $jid $str
-	AddError $token $str
     } else {
 	set str [mc Version]:
 	set f $priv(wpageversion)
@@ -229,7 +228,6 @@ proc ::UserInfo::LastCB {token jlibname type subiq} {
 	append str "[mc Error]: [lindex $subiq 1]"
 
 	::Jabber::AddErrorLog $jid $str
-	AddError $token $str
     } else {
 	if {![info exists priv(wpageversion)]} {
 	    LastAndVersionPage $token
@@ -259,7 +257,6 @@ proc ::UserInfo::TimeCB {token jlibname type subiq} {
 	append str "[mc Error]: [lindex $subiq 1]"
 
 	::Jabber::AddErrorLog $jid $str
-	AddError $token $str
     } else {
 	set str [::Jabber::GetTimeString $subiq]
 	set priv(strtime) [mc jamesslocaltime2 $ujid $str]
@@ -287,7 +284,6 @@ proc ::UserInfo::EntityTimeCB {token jlibname type subiq} {
 	append str "[mc Error]: [lindex $subiq 1]"
 
 	::Jabber::AddErrorLog $jid $str
-	AddError $token $str
     } else {
 	set str [::Jabber::GetEntityTimeString $subiq]
 	set priv(strtime) [mc jamesslocaltime2 $ujid $str]
@@ -312,7 +308,6 @@ proc ::UserInfo::VCardCB {token jlibname type subiq} {
 	set errmsg "([lindex $subiq 0]) [lindex $subiq 1]"
 	set str [mc vcarderrget2 $errmsg]
 	::Jabber::AddErrorLog $jid $str
-	AddError $token $str
     } else {
 	set priv(subiq) $subiq
 	set ${token}::elem(jid) [jlib::unescapejid $priv(jid)]
@@ -501,21 +496,6 @@ proc ::UserInfo::BuildErrorPage {token} {
     pack  $wpage  -side top -anchor [option get . dialogAnchor {}]
     
     set priv(wpageerr) $wpage
-}
-
-proc ::UserInfo::AddError {token str} {
-    global  this
-    upvar ${token}::priv priv
-    
-    set wnb $priv(wnb)
-
-    if {[lsearch [$wnb tabs] $wnb.err] < 0} {
-	BuildErrorPage $token
-    }
-    set wpage $priv(wpageerr)
-    set uid [incr priv(erruid)]
-    ttk::label $wpage.$uid -text $str -wraplength 300 -justify left
-    grid $wpage.$uid -sticky w -pady 2
 }
 
 proc ::UserInfo::SaveNotes {token} {
