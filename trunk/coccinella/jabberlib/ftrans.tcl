@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.21 2007-09-25 12:46:27 matben Exp $
+# $Id: ftrans.tcl,v 1.22 2007-09-28 07:50:10 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -189,13 +189,10 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
 	0,0,1 {
 	    set dtype file
 	    set fileName $opts(-file)
-	    
-	    # @@@ Maybe we should delay this until the file is requested?
-	    # open_cb
-	    if {[catch {open $fileName {RDONLY}} fd]} {
-		return -code error "failed open file \"$fileName\""
+	    if {![file readable $fileName]} {
+		return -code error "file \"$fileName\" is not readable"
 	    }
-	    fconfigure $fd -translation binary -buffersize $opts(-block-size)
+	    # File open is not done until we get the 'open_cb'.
 	    set size [file size $fileName]
 	    set name [file tail $fileName]
 	}
@@ -208,7 +205,6 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
     set istate($sid,cmd)    $cmd
     set istate($sid,dtype)  $dtype
     set istate($sid,size)   $size
-    set istate($sid,name)   $name
     set istate($sid,status) ""
     set istate($sid,bytes)  0
     foreach {key value} [array get opts] {
@@ -216,7 +212,8 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
     }
     switch -- $dtype {
 	file {
-	    set istate($sid,fd) $fd
+	    set istate($sid,name)     $name
+	    set istate($sid,fileName) $fileName
 	}
     }
     set subElems [list]
@@ -236,6 +233,10 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
     return $fileE
 }
 
+# jlib::ftrans::open_cb --
+# 
+#       This is a transports way of reporting result from it's 'open' method.
+
 proc jlib::ftrans::open_cb {jlibname type sid subiq} {
     
     #puts "jlib::ftrans::open_cb (i)"
@@ -250,6 +251,11 @@ proc jlib::ftrans::open_cb {jlibname type sid subiq} {
     } else {
     
 	# @@@ assuming -file type
+	# This must never fail since tested if 'readable' before.
+	set fd [open $istate($sid,fileName) {RDONLY}]
+	fconfigure $fd -translation binary
+	set istate($sid,fd) $fd
+
 	send_file_chunk $jlibname $sid
     }
 }
