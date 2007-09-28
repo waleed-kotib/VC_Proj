@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.88 2007-09-21 13:13:50 matben Exp $
+# $Id: Register.tcl,v 1.89 2007-09-28 13:02:19 matben Exp $
 
 package provide Register 1.0
 
@@ -80,15 +80,18 @@ proc ::Register::Remove {{jid {}}} {
 	    set remove 1
 	}
     } else {
-	set jidlist [::Roster::GetUsersWithSameHost $jid]
-	if {[llength $jidlist]} {
+	set jidL [::Roster::GetUsersWithSameHost $jid]
+	if {[llength $jidL]} {
 	    set ans [::UI::MessageBox -icon warning -title [mc Warning] \
 	      -type yesnocancel -default no -message [mc register-trpt-unreg2]]
 	    if {$ans eq "cancel"} {
 		return
 	    } elseif {$ans eq "yes"} {
-		::Roster::RemoveUsers $jidlist
+		::Roster::RemoveUsers $jidL
 	    }
+	    set remove 1
+	} else {
+	    # Can be conference room etc.
 	    set remove 1
 	}
     }
