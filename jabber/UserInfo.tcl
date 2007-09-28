@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.32 2007-09-28 07:48:47 matben Exp $
+# $Id: UserInfo.tcl,v 1.33 2007-09-28 07:56:56 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -31,6 +31,8 @@ namespace eval ::UserInfo::  {
     ::hooks::register onMenuVCardExport          ::UserInfo::OnMenuExportHook
 
     variable uid 0
+    
+    set ::config(userinfo,disco) 0
 }
 
 # UserInfo::Get --
@@ -45,7 +47,7 @@ namespace eval ::UserInfo::  {
 #       token.
 
 proc ::UserInfo::Get {jid {node ""}} {
-    global  wDlgs
+    global  wDlgs config
     variable uid
     upvar ::Jabber::jstate jstate
    
@@ -110,7 +112,7 @@ proc ::UserInfo::Get {jid {node ""}} {
     }
     
     # disco
-    if {[::Disco::HaveTree]} {
+    if {$config(userinfo,disco) && [::Disco::HaveTree]} {
 	set opts {}
 	if {$node != ""} {
 	    lappend opts -node $node
