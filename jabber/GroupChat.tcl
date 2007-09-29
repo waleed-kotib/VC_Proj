@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.209 2007-09-16 07:39:11 matben Exp $
+# $Id: GroupChat.tcl,v 1.210 2007-09-29 06:53:30 matben Exp $
 
 package require Create
 package require Enter
@@ -220,7 +220,7 @@ proc ::GroupChat::InitMenus {} {
     variable regPopMenuType {}
 }
 
-proc ::GroupChat::QuitAppHook { } {
+proc ::GroupChat::QuitAppHook {} {
     global  wDlgs
     
     ::UI::SaveWinPrefixGeom $wDlgs(jgc)
@@ -1568,7 +1568,7 @@ proc ::GroupChat::GetAllTokensFrom {type key pattern} {
     return $alltokens
 }
 
-proc ::GroupChat::GetFirstDlgToken { } {
+proc ::GroupChat::GetFirstDlgToken {} {
  
     set token ""
     set dlgtokens [GetTokenList dlg]
@@ -1627,7 +1627,7 @@ namespace eval ::GroupChat {
     variable initedTreeDB 0
 }
 
-proc ::GroupChat::TreeInitDB { } {
+proc ::GroupChat::TreeInitDB {} {
     global  this
     variable initedTreeDB
     
@@ -2911,7 +2911,7 @@ proc ::GroupChat::Print {dlgtoken} {
 #
 #       Sets logged out status on all groupchats, that is, disable all buttons.
 
-proc ::GroupChat::LogoutHook { } {    
+proc ::GroupChat::LogoutHook {} {    
     variable autojoinDone
 
     set autojoinDone 0
@@ -2926,7 +2926,7 @@ proc ::GroupChat::LogoutHook { } {
     }
 }
 
-proc ::GroupChat::LoginHook { } {
+proc ::GroupChat::LoginHook {} {
     
     # @@@ Perhaps we should autojoin any open groupchat dialogs?
     
@@ -2938,7 +2938,7 @@ proc ::GroupChat::LoginHook { } {
     }
 }
 
-proc ::GroupChat::GetFirstPanePos { } {
+proc ::GroupChat::GetFirstPanePos {} {
     global  wDlgs
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jgc)]
@@ -2986,18 +2986,18 @@ namespace eval ::GroupChat:: {
     ::hooks::register logoutHook ::GroupChat::BookmarkLogoutHook
 }
 
-proc ::GroupChat::BookmarkLoginHook { } {
+proc ::GroupChat::BookmarkLoginHook {} {
     
     BookmarkSendGet [namespace current]::BookmarkExtractFromCB
 }
 
-proc ::GroupChat::BookmarkLogoutHook { } {
+proc ::GroupChat::BookmarkLogoutHook {} {
     variable bookmarks
     
     set bookmarks {}
 }
 
-proc ::GroupChat::BookmarkGet { } {
+proc ::GroupChat::BookmarkGet {} {
     variable bookmarks
     
     return $bookmarks
@@ -3072,7 +3072,7 @@ proc ::GroupChat::BookmarkRoom {chattoken} {
 # 
 #       Store the complete 'bookmarks' state on server.
 
-proc ::GroupChat::BookmarkSendSet { } {
+proc ::GroupChat::BookmarkSendSet {} {
     variable bookmarks
     upvar ::Jabber::jstate jstate
     
@@ -3183,7 +3183,7 @@ proc ::GroupChat::BookmarkSendGetCB {type queryElem args} {
     }
 }
 
-proc ::GroupChat::BookmarksDlgSave { } {
+proc ::GroupChat::BookmarksDlgSave {} {
     variable bookmarks
     variable bookmarksVar
     	
@@ -3286,12 +3286,21 @@ proc ::GroupChat::BookmarkAutoJoinCB {args} {
 
 # Prefs page ...................................................................
 
-proc ::GroupChat::InitPrefsHook { } {
+namespace eval ::GroupChat {
+    
+    option add *GroupChatPrefs*cols.Label.borderWidth     0          50
+    option add *GroupChatPrefs*cols.Label.background      white      50
+    option add *GroupChatPrefs.schemeSize                 12         50
+}
+
+proc ::GroupChat::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     
     # Defaults...    
     set jprefs(defnick)         ""
     set jprefs(gchat,syncPres)  0
+    set jprefs(gchat,useScheme) 0
+    set jprefs(gchat,colScheme) "Test"
     
     # Unused but keep it if we want client stored bookmarks.
     set jprefs(gchat,bookmarks) {}
@@ -3299,6 +3308,8 @@ proc ::GroupChat::InitPrefsHook { } {
     ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(defnick)          jprefs_defnick           $jprefs(defnick)]  \
       [list ::Jabber::jprefs(gchat,syncPres)   jprefs_gchat_syncPres    $jprefs(gchat,syncPres)]  \
+      [list ::Jabber::jprefs(gchat,useScheme)  jprefs_gchat_useScheme   $jprefs(gchat,useScheme)]  \
+      [list ::Jabber::jprefs(gchat,colScheme)  jprefs_gchat_colScheme   $jprefs(gchat,colScheme)]  \
       [list ::Jabber::jprefs(gchat,bookmarks)  jprefs_gchat_bookmarks   $jprefs(gchat,bookmarks)]  \
       ]   
 }
@@ -3315,15 +3326,67 @@ proc ::GroupChat::BuildPrefsHook {wtree nbframe} {
 proc ::GroupChat::BuildPageConf {page} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
+    variable pimage
+    variable schemes
     
-    set tmpJPrefs(gchat,syncPres) $jprefs(gchat,syncPres)
-    set tmpJPrefs(defnick)        $jprefs(defnick)
+    set tmpJPrefs(gchat,syncPres)  $jprefs(gchat,syncPres)
+    set tmpJPrefs(gchat,useScheme) $jprefs(gchat,useScheme)
+    set tmpJPrefs(gchat,colScheme) $jprefs(gchat,colScheme)
+    set tmpJPrefs(defnick)         $jprefs(defnick)
     
     # Conference (groupchat) stuff.
     set wc $page.c
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
+    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}] \
+      -class GroupChatPrefs
     pack $wc -side top -anchor [option get . dialogAnchor {}]
+
+    ttk::checkbutton $wc.sync -text [mc jagcsyncpres2] \
+      -variable [namespace current]::tmpJPrefs(gchat,syncPres)	      
+    pack $wc.sync -side top -anchor w
     
+    # Color schemes, see http://kuler.adobe.com/ Make your own!
+    array set schemes {
+	"Test"              {"#e8b710" "#0eff06" "#ff2100" "#680ce8" "#0debff"}
+	"Naive"             {"#ff0000" "#00ff00" "#0000ff" "#ffff00" "#000000"}
+	"Christmas"         {"#015437" "#1b8f45" "#d6e040" "#f04e5e" "#ae2542"}
+	"Brighties"         {"#ffbb54" "#ae02be" "#fe08bc" "#00daff" "#44e46c"}
+	"Jamba Juice"       {"#ca3995" "#f58220" "#ffdf05" "#bed73d" "#61bc46"}
+	"Sunny"             {"#c1d301" "#76ab01" "#0e6a00" "#083500" "#042200"}
+	"Crazy Rainbow"     {"#f83531" "#f8952b" "#b2cb0a" "#2187f7" "#f82bbd"}
+	"Boys vs. Girls"    {"#a80064" "#ed48aa" "#e8e300" "#568bd6" "#0044a6"}
+	"Green Day"         {"#133800" "#1b4f1b" "#398133" "#5c9548" "#93e036"}
+    }
+    set menuDef [list]
+    foreach name [array names schemes] {
+	lappend menuDef [list $name]
+    }
+    set size [option get $wc schemeSize {}]
+
+    set wcols $wc.cols
+    ttk::checkbutton $wc.col -text [mc "Use color scheme for names"] \
+      -variable [namespace current]::tmpJPrefs(gchat,useScheme)	      
+    ttk::frame $wc.cols
+    ui::optionmenu $wcols.mb -menulist $menuDef \
+      -variable [namespace current]::tmpJPrefs(gchat,colScheme) \
+      -command [namespace code PrefsColScheme]
+    set maxwidth [$wcols.mb maxwidth]
+    for {set n 0} {$n < 5} {incr n} {
+	set im [image create photo -width $size -height $size]
+	$im blank
+	set pimage($n) $im
+	label $wcols.$n -image $im
+    }
+    PrefsColScheme $tmpJPrefs(gchat,colScheme)
+    
+    pack $wc.col  -side top -anchor w
+    pack $wc.cols -side top -anchor w
+    
+    grid  x $wcols.mb  $wcols.0 $wcols.1 $wcols.2 $wcols.3 $wcols.4 -padx 4
+    grid $wcols.mb -sticky ew
+    grid columnconfigure $wcols 0 -minsize 24
+    grid columnconfigure $wcols 1 -minsize $maxwidth
+    
+    # Nickname
     set wnick $wc.n
     ttk::frame $wnick
     ttk::label $wnick.l -text "[mc {Default nickname}]:"
@@ -3334,21 +3397,32 @@ proc ::GroupChat::BuildPageConf {page} {
     pack $wnick -side top -anchor w -pady 8 -fill x
     
     ::balloonhelp::balloonforwindow $wnick.e [mc registration-nick]
-
-    ttk::checkbutton $wc.sync -text [mc jagcsyncpres2] \
-      -variable [namespace current]::tmpJPrefs(gchat,syncPres)	      
-    pack $wc.sync -side top -anchor w
+    
+    bind $page <Destroy> ::GroupChat::PrefsFree
 }
 
-proc ::GroupChat::SavePrefsHook { } {
+proc ::GroupChat::PrefsColScheme {value} {
+    variable pimage
+    variable schemes
+
+    set size [$pimage(0) cget -width]
+    for {set n 0} {$n < 5} {incr n} {
+	set col [lindex $schemes($value) $n]
+	set name $pimage($n)
+	$name blank
+	set data [$name data -background $col]
+	$name put $data
+    }
+}
+
+proc ::GroupChat::SavePrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
     array set jprefs [array get tmpJPrefs]
-    unset tmpJPrefs
 }
 
-proc ::GroupChat::CancelPrefsHook { } {
+proc ::GroupChat::CancelPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	
@@ -3360,13 +3434,21 @@ proc ::GroupChat::CancelPrefsHook { } {
     }
 }
 
-proc ::GroupChat::UserDefaultsHook { } {
+proc ::GroupChat::UserDefaultsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	
     foreach key [array names tmpJPrefs] {
 	set tmpJPrefs($key) $jprefs($key)
     }
+}
+
+proc ::GroupChat::PrefsFree {} {
+    variable tmpJPrefs
+    variable pimage
+    
+    unset -nocomplain tmpJPrefs
+    image delete $pimage(0) $pimage(1) $pimage(2) $pimage(3) $pimage(4) 
 }
 
 #-------------------------------------------------------------------------------
