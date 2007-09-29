@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.23 2007-09-12 13:37:55 matben Exp $
+# $Id: Growl.tcl,v 1.24 2007-09-29 07:15:24 matben Exp $
 
 namespace eval ::Growl:: { }
 
@@ -62,7 +62,7 @@ proc ::Growl::MessageHook {body args} {
     set jid [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $jid]
     set ujid [jlib::unescapejid $jid2]
-    set title "Message From: $ujid"
+    set title "[mc Message]: $ujid"
     if {[info exists argsA(-subject)]} {
 	set subject $argsA(-subject)
     } else {
@@ -88,7 +88,7 @@ proc ::Growl::ChatMessageHook {body args} {
     if {[::Chat::HaveChat $jid]} {
 	return
     }
-    set title "Message From: $ujid"
+    set title "[mc Message]: $ujid"
     
     # Not sure if only new subjects should be added.
     # If we've got a threadid we can always geta a handle on to
