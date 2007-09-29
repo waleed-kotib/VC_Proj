@@ -18,9 +18,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.24 2007-09-29 07:15:24 matben Exp $
+# $Id: Growl.tcl,v 1.25 2007-09-29 10:25:05 matben Exp $
 
-namespace eval ::Growl:: { }
+namespace eval ::Growl { 
+
+    # TODO
+    #option add *growlImage            send     widgetDefault
+}
 
 proc ::Growl::Init { } {
     global  this    
@@ -38,8 +42,9 @@ proc ::Growl::Init { } {
     # There are some nice 64x64 error & info icons as well.
     set cociFile [file join $this(imagePath) Coccinella.png]
     
-    growl register Coccinella  \
-      {newMessage changeStatus fileTransfer phoneRings moodEvent} $cociFile
+    # Use translated strings as keys, else Growls settings wont be translatable.
+    set all {"Message" "Status" "File" "Phone" "Mood"}
+    growl register Coccinella [lapply mc $all] $cociFile
     
     # Add event hooks.
     ::hooks::register newMessageHook      ::Growl::MessageHook
@@ -68,7 +73,7 @@ proc ::Growl::MessageHook {body args} {
     } else {
 	set subject ""
     }
-    growl post newMessage $title $subject $cociFile
+    growl post [mc Message] $title $subject $cociFile
 }
 
 proc ::Growl::ChatMessageHook {body args} {    
@@ -99,7 +104,7 @@ proc ::Growl::ChatMessageHook {body args} {
     if {[info exists argsA(-subject)]} {
 	append title "\n$argsA(-subject)"
     }
-    growl post newMessage $title $body $cociFile
+    growl post [mc Message] $title $body $cociFile
 }
 
 proc ::Growl::PresenceHook {jid type args} {
@@ -141,7 +146,7 @@ proc ::Growl::PresenceHook {jid type args} {
 	if {$status ne ""} {
 	    append msg "\n$status"
 	}
-	growl post changeStatus $title $msg $cociFile
+	growl post [mc Status] $title $msg $cociFile
     }
 }
 
@@ -153,7 +158,7 @@ proc ::Growl::FileTransferRecvHook {jid name size} {
 	set str "\n[mc File]: $name\n[mc Size]: [::Utils::FormatBytes $size]\n\n"
 	set ujid [jlib::unescapejid $jid]
 	set msg [mc jamessoobask2 $ujid $str]
-	growl post fileTransfer $title $msg $cociFile
+	growl post [mc File] $title $msg $cociFile
     }
 }
 
@@ -163,7 +168,7 @@ proc ::Growl::JivePhoneEventHook {type cid callID args} {
     if {$type eq "RING"} {
 	set title [mc phoneRing]
 	set msg [mc phoneRingFrom $cid]
-	growl post phoneRings $title $msg $cociFile
+	growl post [mc Phone] $title $msg $cociFile
     }
 }
 
@@ -181,7 +186,7 @@ proc ::Growl::MoodEventHook {xmldata mood text} {
     } else {
 	set msg "$ujid [mc moodRetracted]"
     }
-    growl post moodEvent $title $msg $cociFile
+    growl post [mc Mood] $title $msg $cociFile
 } 
 
 #-------------------------------------------------------------------------------

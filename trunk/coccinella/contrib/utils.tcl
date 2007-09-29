@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: utils.tcl,v 1.10 2007-08-23 13:01:29 matben Exp $
+# $Id: utils.tcl,v 1.11 2007-09-29 10:25:05 matben Exp $
 
 package provide utils 1.0
     
@@ -38,6 +38,18 @@ proc min {args} {
     lindex [lsort -real $args] 0
 }
 
+# lapply --
+# 
+#       Applies a command to each list element.
+
+proc lapply {cmd alist} {
+    set applied [list]
+    foreach e $alist {
+	lappend applied [uplevel $cmd [list $e]]
+    }
+    return $applied
+}
+
 # lprune --
 # 
 #       Removes element from list, silently.
@@ -56,7 +68,7 @@ proc lprune {listName elem} {
 #       Revert the order of the list elements.
 
 proc lrevert {args} {
-    set tmp {}
+    set tmp [list]
     set args [lindex $args 0]
     for {set i [expr [llength $args] - 1]} {$i >= 0} {incr i -1} {
 	lappend tmp [lindex $args $i]
