@@ -2,7 +2,11 @@
 # 
 #       Tip of today.
 
-namespace eval ::Totd {}
+namespace eval ::Totd {
+    
+    option add *Totd.icon       Coccinella       widgetDefault
+    option add *Totd*Text.font  CociDefaultFont  50
+}
 
 proc ::Totd::Init {} {
     
@@ -19,6 +23,12 @@ proc ::Totd::Init {} {
     }
     ::hooks::register launchFinalHook ::Totd::LaunchHook
     ::hooks::register prefsInitHook   ::Totd::InitPrefsHook
+
+    # Message catalog.
+    set msgdir [file join $::this(msgcatCompPath) Totd]
+    if {[file isdirectory $msgdir]} {
+	uplevel #0 [list ::msgcat::mcload $msgdir]
+    }
 
     component::register Totd "Useful tips"
 }
@@ -56,6 +66,7 @@ proc ::Totd::Build {} {
     wm title $w [mc "Useful Tips"]
     
     ::UI::SetWindowPosition $w
+    set icon [::Theme::GetImage [option get $w icon {}]]
 
     ttk::frame $w.frall
     pack  $w.frall  -fill x
@@ -63,21 +74,7 @@ proc ::Totd::Build {} {
     set wbox $w.frall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack  $wbox  -fill both -expand 1
-
-    set wtext $wbox.t
-    text $wbox.t -width 60 -height 8
-    pack $wbox.t -fill both -expand 1
-    
-    set wnav $wbox.nav
-    ttk::frame $wbox.nav
-    pack $wbox.nav -side top -anchor e
-    
-    ttk::button $wnav.prev -style Small.TButton -text [mc Previous] \
-      -command [namespace code [list Navigate -1]]
-    ttk::button $wnav.next -style Small.TButton -text [mc Next] \
-      -command [namespace code [list Navigate 1]]
-    grid  $wnav.prev  $wnav.next  -padx 4 -pady 4
-    
+            
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::checkbutton $frbot.c -style Small.TCheckbutton \
@@ -85,10 +82,21 @@ proc ::Totd::Build {} {
       -variable [namespace current]::opts(show)
     ttk::button $frbot.btok -text [mc OK] -default active \
       -command [list destroy $w]
-    pack $frbot.btok -side right
+    ttk::button $frbot.next -text [mc Next] \
+      -command [namespace code [list Navigate 1]]
+    ttk::button $frbot.prev -text [mc Previous] \
+      -command [namespace code [list Navigate -1]]
+    pack $frbot.btok $frbot.next $frbot.prev -side right -padx 4
     pack $frbot.c -side left
     pack $frbot -side bottom -fill x
+
+    set wtext $wbox.t
+    text $wbox.t -width 52 -height 12
+    pack $wbox.t -side right -fill both -expand 1
     
+    ttk::label $wbox.icon -compound image -image $icon -padding 6
+    pack $wbox.icon -side top
+
     # Pick random message.
     set len [llength $all]
     set idx [expr {int($len*rand())}]
