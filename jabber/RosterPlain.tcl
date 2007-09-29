@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.40 2007-09-11 13:53:00 matben Exp $
+# $Id: RosterPlain.tcl,v 1.41 2007-09-29 14:10:12 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -412,7 +412,7 @@ proc ::RosterPlain::CreateItem {jid presence args} {
     set jimage [eval {GetPresenceIcon $jid $presence} $args]
     set items  [list]
     set jitems [list]
-        
+            
     # Creates a list {item tag ?item tag? ...} for items.
     set itemTagList [eval {::RosterTree::CreateItemBase $jid $presence} $args]
 

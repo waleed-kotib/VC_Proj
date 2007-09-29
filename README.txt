@@ -4,7 +4,10 @@
 
 		       by Mats Bengtsson
 
+First:
 
+    The most recent and up to data information you probably find at the
+    Coccinella home http://coccinella.im
 
 What is this?
 
@@ -51,22 +54,6 @@ Installation:
       Tcl/Tk installation can be obtained from http://tcl.activestate.com.
       Be sure to have at least 8.4.6 for Coccinella 0.95.9 or later.
 
-Testing:
-
-    It is to be considered as a developer release, so beware.  *It is far 
-    from being bug free*.  The current releases get tested on Mac OS X 10.2,
-    Linux RH 9, Windows 2000, and Windows XP. 
-
-    I would judge this as a beta quality application, which is 
-    reflected in the version number ( < 1.0). No instabilities are known, 
-    however.
-
-Additional Notes:
-    
-    * This client delivers more data than an ordinary Jabber client, and 
-      data may "get stuck" in the server if karma is too low. This only
-      happend if you does a lot of drawings in a short period of time.
-
 Documentation:
 
     See the home site for current info: http://coccinella.im
@@ -90,63 +77,6 @@ Translations:
     Russian:    Gescheit
     Korean:     Dylan Park
 
-Bug Reports:
-
-    Either send them to me directly: matben@users.sourceforge.net , or report them
-    at Source Forge: http://sourceforge.net/tracker/?group_id=68334&atid=520863
-    This address can be reached via the Info/Report Bug menu.
-
-Known Bugs:
-
-    * Althogh the server is using a safe interpreter for the critical parts
-      of canvas drawings which uses the dangerous eval, it probably does not 
-      cover all possible attacks from an evil client.
-
-    * If large items are transported between clients, such as images, or
-      movies, operations on these items before they have been completely 
-      received by remote clients are lost.
-
-    * There are synchronization issues if two users happen to edit an item
-      exactly simultanously. This applies only to some operations, and is 
-      not very likely to happen, but must anyway be considered.
-
-      Similar synchronization problems exist in some other areas, applets
-      for instance.
-
-    * It may sometimes happen that the internal settings become confused 
-      which results in a corrupt preference file. If you suspect this then
-      delete this file:
-          Unix/Linux       ~/.coccinella/whiteboard
-	  Windows          .../Coccinella/WBPREFS.TXT     (search for it)
-	  Mac OS X         ~/Library/Preferences/Coccinella/Whiteboard Prefs
-
-    * Printer support is still in its infacy. You may export the canvas to
-      XML/SVG format which can be imported into a web browser using the free
-      plugin from www.adobe.com, and print from inside your browser.
-
-    * There are numerous "details" that need to be fixed. After all, it is an 
-      alpha quality software!
-
-    * If you run from sources: some versions of the ActiveState distro (8.4.10->)
-      have problems with the Img package which can cause a startup crash.
-      The solutions is to trash /usr/local/ActiveState/lib/Img. These versions
-      may also create problems with the emoticon sets. If this happens try to
-      run the single file executable tclkit for your platform instead, see:
-      http://coccinella.sf.net for a link.
-
-    As always, the code needs cleaning and restructuring.  If you want to see
-    what is happening "inside" you may set the debug level to a nonzero value.
-    You set this either in the source file Coccinella.tcl, or specified
-    at the command line as:
-
-    set argv "-debugLevel 4"
-
-    and launch it. You need to have the source distribution and a Tcl/Tk
-    installation to do this.
-    As an alternative on mac and windows, pick the Jabber/Debug menu, and do:
-
-    set debugLevel 4
-
 Developers:
 
     The main SourceForge page: http://coccinella.sourceforge.net/
@@ -155,12 +85,6 @@ Developers:
 
     o It is possible to run and build the Coccinella without whiteboard support.
       You just drag out the coccinella/whiteboard/ folder.
-
-XML/SVG:
-
-    You may try using SVG for drawing. Start Coccinella with arguments:
-    "-jprefs_useSVGT 1 -jprefs_getIPraw 0 -prefs_trptMethod http"
-    Still in its infancy, though.
 
 Distribution:
 

@@ -10,6 +10,10 @@ namespace eval ::Totd {
 
 proc ::Totd::Init {} {
     
+    if {$::this(vers,full) eq "0.96.4"} {
+	return
+    }
+    
     set mDef {
 	command  mTotd...  ::Totd::Build  {} {}
     }

@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.188 2007-09-08 14:39:56 matben Exp $
+# $Id: jabberlib.tcl,v 1.189 2007-09-29 14:10:12 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3581,6 +3581,8 @@ proc jlib::schedule_keepalive {jlibname} {
 	}
     }
 }
+
+# OUTDATED !!!!!!!!!!!!!!!!!!!!
 
 # jlib::schedule_auto_away, cancel_auto_away, auto_away_cmd
 #
