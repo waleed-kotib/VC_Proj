@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.66 2007-09-20 14:47:43 matben Exp $
+# $Id: tileutils.tcl,v 1.67 2007-09-29 06:56:01 matben Exp $
 #
 
 package require treeutil
@@ -1020,6 +1020,45 @@ if {0} {
       $w.bp1 $w.es $w.ess $w.f \
       -padx 20 -pady 10
     
+    # Extra test:
+    if {0} {
+	package require tkpath
+
+	set size 32
+	set tkpath::antialias 1
+	set S [::tkpath::surface new $size $size]
+	$S create prect 1.5 1.5 30.5 30.5 -rx 10 -fill white -stroke blue \
+	  -strokewidth 1
+	set image [$S copy [image create photo]]
+	$S destroy
+
+	style element create RR.background image $image \
+	  -border {12 12 12 12} -padding {0} -sticky news	    	
+	style layout RR.TEntry {
+	    RR.background -sticky news -children {
+		Entry.padding -sticky news -children {
+		    Entry.textarea -sticky news
+		}
+	    }
+	}
+	style map RR.TEntry  \
+	  -foreground {{background} "#363636" {} black}
+
+	toplevel .tt
+	set f .tt.f
+	ttk::frame $f -padding 20
+	pack $f
+	ttk::frame $f.cont -style RR.TEntry
+	pack $f.cont
+	text $f.t -wrap word -borderwidth 0 -highlightthickness 0 \
+	  -width 40 -height 8
+	bind $f.t <FocusIn>  [list $f.cont state focus]
+	bind $f.t <FocusOut> [list $f.cont state {!focus}]
+	pack $f.t -in $f.cont -padx 5 -pady 5 -fill both -expand 1
+	
+	$f.t insert end "All MSN Messenger wannabies:\nDid you know how to make text widgets with rounded corners?"
+	
+    }
 }
 
 #-------------------------------------------------------------------------------
