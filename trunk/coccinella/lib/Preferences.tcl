@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.105 2007-09-21 05:57:04 matben Exp $
+# $Id: Preferences.tcl,v 1.106 2007-09-29 14:10:12 matben Exp $
  
 package require mnotebook
 
@@ -66,7 +66,7 @@ namespace eval ::Preferences:: {
 #         
 # Note: it may prove useful to have the versions numbers as the first elements!
 
-proc ::Preferences::SetMiscPrefs { } {
+proc ::Preferences::SetMiscPrefs {} {
     global  prefs this
     
     ::Debug 2 "::Preferences::SetMiscPrefs"
@@ -107,7 +107,7 @@ proc ::Preferences::SetMiscPrefs { } {
     set this(vers,previous) $this(vers,full)
 }
 
-proc ::Preferences::Upgraded { } {
+proc ::Preferences::Upgraded {} {
     global  this
     
     set vcomp [package vcompare $this(vers,old) $this(vers,full)]
@@ -124,13 +124,13 @@ proc ::Preferences::UpgradedFromVersion {version} {
     }
 }
 
-proc ::Preferences::FirstLaunch { } {
+proc ::Preferences::FirstLaunch {} {
     global  prefs
     
     return $prefs(wasFirstLaunch)
 }
 
-proc ::Preferences::QuitAppHook { } {
+proc ::Preferences::QuitAppHook {} {
     global  wDlgs
 
     ::UI::SaveWinGeom $wDlgs(prefs)
@@ -424,7 +424,7 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
 #
 #       Revert panels to the state when dialog showed.
 
-proc ::Preferences::ResetToUserDefaults { } {
+proc ::Preferences::ResetToUserDefaults {} {
     
     # Run hook for the components.
     ::hooks::run prefsUserDefaultsHook
@@ -435,7 +435,7 @@ proc ::Preferences::ResetToUserDefaults { } {
 #       Saving all settings of panels to the applications state and
 #       its preference file.
 
-proc ::Preferences::SavePushBt { } {
+proc ::Preferences::SavePushBt {} {
     global  prefs wDlgs
     
     variable wtoplevel
@@ -480,7 +480,7 @@ proc ::Preferences::CloseHook {wclose} {
 #
 #       User presses the cancel button. Warn if anything changed.
 
-proc ::Preferences::Cancel { } {
+proc ::Preferences::Cancel {} {
     global  prefs wDlgs
     
     variable wtoplevel
@@ -512,7 +512,7 @@ proc ::Preferences::Cancel { } {
     return $ans
 }
 
-proc ::Preferences::CleanUp { } {
+proc ::Preferences::CleanUp {} {
     variable wtoplevel
     variable wtree
     variable lastPage
@@ -533,13 +533,13 @@ proc ::Preferences::CleanUp { } {
 #       
 #       @@@ We could add an option text explaining what was changed.
 
-proc ::Preferences::HasChanged { } {
+proc ::Preferences::HasChanged {} {
     variable changed
 
     set changed 1
 }
 
-proc ::Preferences::NeedRestart { } {
+proc ::Preferences::NeedRestart {} {
     variable needRestart
 
     set needRestart 1

@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: si.tcl,v 1.22 2007-09-25 12:46:27 matben Exp $
+# $Id: si.tcl,v 1.23 2007-09-29 14:10:12 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -76,9 +76,10 @@
 #      jlibName si send_close ...
 #      jlibName si getstate sid
 #      
-############################# CHANGES ##########################################
+################################################################################
 #
-#       0.1         first version
+# TODO Maybe we should have a 'kind' entry that keeps track if iq-send/si
+#      or embedded si element.
 
 package require jlib			   
 package require jlib::disco
@@ -197,7 +198,7 @@ proc jlib::si::send_set {jlibname jid sid mime profile profileE cmd args} {
 
 # jlib::si::i_constructor --
 # 
-#       Makes a new si instance. Does everything except deleivering it.
+#       Makes a new si instance. Does everything except delivering it.
 #       Returns the si element.
 
 proc jlib::si::i_constructor {jlibname sid jid mime profile profileE cmd args} {
@@ -211,6 +212,9 @@ proc jlib::si::i_constructor {jlibname sid jid mime profile profileE cmd args} {
     foreach {key val} $args {
 	set istate($sid,$key) $val
     }
+    
+    # @@@ Maybe we should have a 'kind' entry that keeps track of iq-send/si
+    #     or embedded si element.
     return [element $sid $mime $profile $profileE]
 }
 

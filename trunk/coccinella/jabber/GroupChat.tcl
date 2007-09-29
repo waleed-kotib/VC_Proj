@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.210 2007-09-29 06:53:30 matben Exp $
+# $Id: GroupChat.tcl,v 1.211 2007-09-29 14:10:12 matben Exp $
 
 package require Create
 package require Enter
@@ -26,6 +26,7 @@ package require History
 package require Bookmarks
 package require UI::WSearch
 package require colorutils
+package require mstack
 
 package provide GroupChat 1.0
 
@@ -3364,7 +3365,8 @@ proc ::GroupChat::BuildPageConf {page} {
 
     set wcols $wc.cols
     ttk::checkbutton $wc.col -text [mc "Use color scheme for names"] \
-      -variable [namespace current]::tmpJPrefs(gchat,useScheme)	      
+      -variable [namespace current]::tmpJPrefs(gchat,useScheme)	\
+      -command [namespace code [list PrefsSchemeCmd $wcols.mb]]
     ttk::frame $wc.cols
     ui::optionmenu $wcols.mb -menulist $menuDef \
       -variable [namespace current]::tmpJPrefs(gchat,colScheme) \
@@ -3377,6 +3379,7 @@ proc ::GroupChat::BuildPageConf {page} {
 	label $wcols.$n -image $im
     }
     PrefsColScheme $tmpJPrefs(gchat,colScheme)
+    PrefsSchemeCmd $wcols.mb
     
     pack $wc.col  -side top -anchor w
     pack $wc.cols -side top -anchor w
@@ -3399,6 +3402,15 @@ proc ::GroupChat::BuildPageConf {page} {
     ::balloonhelp::balloonforwindow $wnick.e [mc registration-nick]
     
     bind $page <Destroy> ::GroupChat::PrefsFree
+}
+
+proc ::GroupChat::PrefsSchemeCmd {mb} {
+    variable tmpJPrefs
+    if {$tmpJPrefs(gchat,useScheme)} {
+	$mb state {!disabled}
+    } else {
+	$mb state {disabled}
+    }
 }
 
 proc ::GroupChat::PrefsColScheme {value} {

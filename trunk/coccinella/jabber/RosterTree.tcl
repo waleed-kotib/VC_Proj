@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.74 2007-09-27 12:31:07 matben Exp $
+# $Id: RosterTree.tcl,v 1.75 2007-09-29 14:10:12 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -369,15 +369,15 @@ proc ::RosterTree::New {w} {
     $T configure -backgroundimage [BackgroundImageGet]
     $T notify bind $T <Selection> {+::RosterTree::Selection }
     
+    # RosterTreeTag will be first.
+    bindtags $T [concat RosterTreeTag [bindtags $T]]
+    
     # This automatically cleans up the tag array.
     $T notify bind RosterTreeTag <ItemDelete> {
 	foreach item %i {
 	    ::RosterTree::RemoveTags $item
 	} 
     }
-    
-    # RosterTreeTag will be first.
-    bindtags $T [concat RosterTreeTag [bindtags $T]]
     
     # Need a post TreeCtrl bind tag for ThemeChanged.
     set idx [lsearch [bindtags $T] TreeCtrl]
@@ -401,17 +401,18 @@ proc ::RosterTree::New {w} {
 proc ::RosterTree::SetBinds {} {
     variable T
 
+    # @@@ perhaps a new bindtag instead?
     # We need to do this each time a new style is loaded since all binds
     # have been removed to allow for 'EditSetBinds'.
-    bind $T <Button-1>        {+::RosterTree::ButtonPress %x %y }        
-    bind $T <ButtonRelease-1> {+::RosterTree::ButtonRelease %x %y }        
-    bind $T <Double-1>        {+::RosterTree::DoubleClick %x %y }        
-    bind $T <<ButtonPopup>>   {+::RosterTree::Popup %x %y }
+    bind $T <Button-1>        {+::RosterTree::OnButtonPress %x %y }        
+    bind $T <ButtonRelease-1> {+::RosterTree::OnButtonRelease %x %y }        
+    bind $T <Double-1>        {+::RosterTree::OnDoubleClick %x %y }        
+    bind $T <<ButtonPopup>>   {+::RosterTree::OnPopup %x %y }
     bind $T <Destroy>         {+::RosterTree::OnDestroy }
     bind $T <Key-Return>      {+::RosterTree::OnReturn }
     bind $T <KP_Enter>        {+::RosterTree::OnReturn }
     bind $T <Key-BackSpace>   {+::RosterTree::OnBackSpace }
-    bind $T <Button1-Motion>  {+::RosterTree::OnButtonMotion }
+    bind $T <Button1-Motion>  {+::RosterTree::OnButtonMotion %x %y }
 }
 
 proc ::RosterTree::DBOptions {rosterStyle} {
@@ -729,7 +730,7 @@ proc ::RosterTree::OnBackSpace {} {
     }
 }
 
-proc ::RosterTree::ButtonPress {x y} {
+proc ::RosterTree::OnButtonPress {x y} {
     variable T
     variable buttonAfterId
     variable buttonPressMillis
@@ -738,7 +739,7 @@ proc ::RosterTree::ButtonPress {x y} {
 	if {[info exists buttonAfterId]} {
 	    catch {after cancel $buttonAfterId}
 	}
-	set cmd [list ::RosterTree::Popup $x $y]
+	set cmd [list ::RosterTree::OnPopup $x $y]
 	set buttonAfterId [after $buttonPressMillis $cmd]
     }
     set id [$T identify $x $y]
@@ -747,7 +748,7 @@ proc ::RosterTree::ButtonPress {x y} {
     }
 }
 
-proc ::RosterTree::ButtonRelease {x y} {
+proc ::RosterTree::OnButtonRelease {x y} {
     variable T
     variable buttonAfterId
     
@@ -757,7 +758,7 @@ proc ::RosterTree::ButtonRelease {x y} {
     }    
 }
 
-proc ::RosterTree::DoubleClick {x y} {
+proc ::RosterTree::OnDoubleClick {x y} {
     variable T
 
     ::balloonhelp::cancel
@@ -794,13 +795,30 @@ proc ::RosterTree::ActionDoubleClick {jid} {
     }
 }
 
-proc ::RosterTree::OnButtonMotion {} {
+proc ::RosterTree::OnButtonMotion {x y} {
+    variable T
     variable buttonAfterId
     
     if {[info exists buttonAfterId]} {
 	catch {after cancel $buttonAfterId}
 	unset buttonAfterId
     }    
+    return
+    
+    puts "::RosterTree::OnButtonMotion $x $y"
+    set id [$T identify $x $y]
+    puts "id=$id"
+    if {[lindex $id 0] ne "item"} {
+	return
+    }
+    set item [lindex $id 1]
+    set selection [$T selection get]
+    puts "selection=$selection"
+    foreach item $selection {
+	$T dragimage add $item
+    }
+    
+    
 }
 
 proc ::RosterTree::GetSelected {} {
@@ -827,15 +845,15 @@ proc ::RosterTree::GetSelectedJID {} {
     return $jidL
 }
 
-# RosterTree::Popup --
+# RosterTree::OnPopup --
 # 
 #       Treectrl binding for popup event.
 
-proc ::RosterTree::Popup {x y} {
+proc ::RosterTree::OnPopup {x y} {
     variable T
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::RosterTree::Popup"
+    ::Debug 2 "::RosterTree::OnPopup"
 
     ::balloonhelp::cancel
     

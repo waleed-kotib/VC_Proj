@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.67 2007-09-29 06:56:01 matben Exp $
+# $Id: tileutils.tcl,v 1.68 2007-09-29 14:10:12 matben Exp $
 #
 
 package require treeutil
@@ -1027,8 +1027,8 @@ if {0} {
 	set size 32
 	set tkpath::antialias 1
 	set S [::tkpath::surface new $size $size]
-	$S create prect 1.5 1.5 30.5 30.5 -rx 10 -fill white -stroke blue \
-	  -strokewidth 1
+	$S create prect 2 2 30 30 -rx 10 -fill white -stroke "#a19de2" \
+	  -strokewidth 2
 	set image [$S copy [image create photo]]
 	$S destroy
 
