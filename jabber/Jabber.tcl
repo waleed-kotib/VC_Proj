@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.240 2007-09-29 14:12:11 matben Exp $
+# $Id: Jabber.tcl,v 1.241 2007-09-30 14:56:18 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -275,6 +275,11 @@ namespace eval ::Jabber:: {
     set ::config(version,show-head) 1
     set ::config(logout,show-head)  1
     set ::config(sub,subscribe-msgbox) 0
+    
+    # This is a method to show fake caps responses.
+    set ::config(caps,fake) 0
+    set ::config(caps,node) ""
+    set ::config(caps,vers) ""
 }
 
 # If the whiteboard/ complete dir is there we get whiteboard support.
@@ -1357,14 +1362,20 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
 #       are not instance specific (can't send ip addresses).
 
 proc ::Jabber::CreateCapsPresElement { } {
-    global  this
+    global  this config
     variable coccixmlns
     variable xmppxmlns
 
-    set node $coccixmlns(caps)
+    if {$config(caps,fake)} {
+	set node $config(caps,node)
+	set vers $config(caps,vers)
+    } else {
+	set node $coccixmlns(caps)
+	set vers $this(vers,full)
+    }
     set exts [JlibCmd caps getexts]
     set xmllist [wrapper::createtag c -attrlist \
-      [list xmlns $xmppxmlns(caps) node $node ver $this(vers,full) ext $exts]]
+      [list xmlns $xmppxmlns(caps) node $node ver $vers ext $exts]]
 
     return $xmllist
 }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.131 2007-09-21 13:13:50 matben Exp $
+# $Id: Disco.tcl,v 1.132 2007-09-30 14:56:17 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -97,6 +97,11 @@ namespace eval ::Disco:: {
     
     set ::config(disco,show-head-on-result)  1
     set ::config(disco,show-head-add-server) 1
+    
+    # This is a method to show fake caps responses.
+    set ::config(caps,fake) 1
+    set ::config(caps,name) ""
+    set ::config(caps,vers) ""
 }
 
 proc ::Disco::InitPrefsHook {} {
