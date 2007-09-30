@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.211 2007-09-29 14:10:12 matben Exp $
+# $Id: GroupChat.tcl,v 1.212 2007-09-30 08:00:55 matben Exp $
 
 package require Create
 package require Enter
@@ -29,7 +29,6 @@ package require colorutils
 package require mstack
 
 package provide GroupChat 1.0
-
 
 namespace eval ::GroupChat:: {
 
@@ -794,6 +793,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set chatstate(wpaneh)       $wpaneh
 
     set chatstate(active)       $cprefs(lastActiveRet)
+    set chatstate(mstack)       [mstack::init 4]
 	
     # Use an extra frame that contains everything room specific.
     ttk::frame $wroom -class GroupChatRoom
@@ -1086,6 +1086,8 @@ proc ::GroupChat::OnDestroyChat {chattoken} {
     foreach id $chatstate(afterids) {
 	after cancel $id
     }
+    mstack::free $chatstate(mstack)
+
     unset -nocomplain $chattoken
 }
 
@@ -2141,10 +2143,19 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     if {$history} {
 	set htag -history
     }
+    set pretags ${whom}pre${htag}
     
+    if {$whom eq "me"} {
+	lappend pretags scheme-0
+    } else {
+	set idx [mstack::get $chatstate(mstack) $from]
+	if {$idx >= 0} {
+	    lappend pretags scheme-[incr idx]
+	}
+    }
     $wtext mark set insert end
     $wtext configure -state normal
-    $wtext insert end $prefix ${whom}pre${htag}
+    $wtext insert end $prefix $pretags
     
     ::Text::ParseMsg groupchat $from $wtext "  $body" ${whom}text${htag}
     $wtext insert end \n
@@ -2377,6 +2388,7 @@ proc ::GroupChat::ConfigureTextTags {w wtext} {
     foreach tag $alltags {
 	eval {$wtext tag configure $tag} $opts($tag)
     }
+    ConfigureSchemeTags $wtext
     
     # History tags.
     foreach tag $alltags {
@@ -2385,6 +2397,32 @@ proc ::GroupChat::ConfigureTextTags {w wtext} {
 	array set arr $opts($tag)
 	set arr(-foreground) [::colorutils::getlighter $arr(-foreground)]
 	eval {$wtext tag configure $htag} [array get arr]
+    }
+}
+
+proc ::GroupChat::ConfigureSchemeTags {wtext} {
+    variable schemes
+    upvar ::Jabber::jprefs jprefs
+    
+    # Color scheme tags.
+    set use $jprefs(gchat,useScheme)
+    set name $jprefs(gchat,colScheme)
+    for {set n 0} {$n < 5} {incr n} {
+	if {$use} {
+	    set col [lindex $schemes($name) $n]
+	} else {
+	    set col ""
+	}
+	$wtext tag configure scheme-$n -foreground $col
+    }
+}
+
+proc ::GroupChat::SetSchemeAll {} {    
+
+    foreach chattoken [GetTokenList chat] {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+	ConfigureSchemeTags $chatstate(wtext)
     }
 }
 
@@ -2649,6 +2687,17 @@ proc ::GroupChat::SetUser {roomjid jid3} {
     if {![info exists chatstate(ignore,$jid3)]} {
 	set chatstate(ignore,$jid3) 0
     }
+    
+    # Associate a color sceme index for each user except ourself.
+    # The first scheme color is reserved for ourself, and 0-3 for other.
+    set mynick [::Jabber::JlibCmd service mynick $roomjid]
+    set myroomjid $roomjid/$mynick
+    if {![jlib::jidequal $myroomjid $jid3]} {
+	set mstack $chatstate(mstack)
+	if {![mstack::exists $mstack $jid3]} {
+	    set idx [mstack::add $mstack $jid3]
+	}
+    }    
     TreeCreateUserItem $chattoken $jid3
 }
 
@@ -2831,6 +2880,8 @@ proc ::GroupChat::RemoveUser {roomjid jid3} {
     set roomjid [jlib::jidmap $roomjid]
     set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
     if {$chattoken ne ""} {
+	upvar 0 $chattoken chatstate
+	set idx [mstack::remove $chatstate(mstack) $jid3]
 	TreeRemoveUser $chattoken $jid3
     }
 }
@@ -3292,10 +3343,25 @@ namespace eval ::GroupChat {
     option add *GroupChatPrefs*cols.Label.borderWidth     0          50
     option add *GroupChatPrefs*cols.Label.background      white      50
     option add *GroupChatPrefs.schemeSize                 12         50
+    
+    # Color schemes, see http://kuler.adobe.com/ Make your own!
+    variable schemes
+    array set schemes {
+	"Test"              {"#e8b710" "#0eff06" "#ff2100" "#680ce8" "#0debff"}
+	"Naive"             {"#ff0000" "#00ff00" "#0000ff" "#ffff00" "#000000"}
+	"Christmas"         {"#015437" "#1b8f45" "#d6e040" "#f04e5e" "#ae2542"}
+	"Brighties"         {"#ffbb54" "#ae02be" "#fe08bc" "#00daff" "#44e46c"}
+	"Jamba Juice"       {"#ca3995" "#f58220" "#ffdf05" "#bed73d" "#61bc46"}
+	"Sunny"             {"#c1d301" "#76ab01" "#0e6a00" "#083500" "#042200"}
+	"Crazy Rainbow"     {"#f83531" "#f8952b" "#b2cb0a" "#2187f7" "#f82bbd"}
+	"Boys vs. Girls"    {"#a80064" "#ed48aa" "#e8e300" "#568bd6" "#0044a6"}
+	"Green Day"         {"#133800" "#1b4f1b" "#398133" "#5c9548" "#93e036"}
+    }
 }
 
 proc ::GroupChat::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
+    variable schemes
     
     # Defaults...    
     set jprefs(defnick)         ""
@@ -3313,6 +3379,10 @@ proc ::GroupChat::InitPrefsHook {} {
       [list ::Jabber::jprefs(gchat,colScheme)  jprefs_gchat_colScheme   $jprefs(gchat,colScheme)]  \
       [list ::Jabber::jprefs(gchat,bookmarks)  jprefs_gchat_bookmarks   $jprefs(gchat,bookmarks)]  \
       ]   
+    
+    if {![info exists scheme($jprefs(gchat,colScheme))]} {
+	set jprefs(gchat,colScheme) "Naive"
+    }
 }
 
 proc ::GroupChat::BuildPrefsHook {wtree nbframe} {
@@ -3345,18 +3415,6 @@ proc ::GroupChat::BuildPageConf {page} {
       -variable [namespace current]::tmpJPrefs(gchat,syncPres)	      
     pack $wc.sync -side top -anchor w
     
-    # Color schemes, see http://kuler.adobe.com/ Make your own!
-    array set schemes {
-	"Test"              {"#e8b710" "#0eff06" "#ff2100" "#680ce8" "#0debff"}
-	"Naive"             {"#ff0000" "#00ff00" "#0000ff" "#ffff00" "#000000"}
-	"Christmas"         {"#015437" "#1b8f45" "#d6e040" "#f04e5e" "#ae2542"}
-	"Brighties"         {"#ffbb54" "#ae02be" "#fe08bc" "#00daff" "#44e46c"}
-	"Jamba Juice"       {"#ca3995" "#f58220" "#ffdf05" "#bed73d" "#61bc46"}
-	"Sunny"             {"#c1d301" "#76ab01" "#0e6a00" "#083500" "#042200"}
-	"Crazy Rainbow"     {"#f83531" "#f8952b" "#b2cb0a" "#2187f7" "#f82bbd"}
-	"Boys vs. Girls"    {"#a80064" "#ed48aa" "#e8e300" "#568bd6" "#0044a6"}
-	"Green Day"         {"#133800" "#1b4f1b" "#398133" "#5c9548" "#93e036"}
-    }
     set menuDef [list]
     foreach name [array names schemes] {
 	lappend menuDef [list $name]
@@ -3432,6 +3490,7 @@ proc ::GroupChat::SavePrefsHook {} {
     variable tmpJPrefs
     
     array set jprefs [array get tmpJPrefs]
+    SetSchemeAll
 }
 
 proc ::GroupChat::CancelPrefsHook {} {

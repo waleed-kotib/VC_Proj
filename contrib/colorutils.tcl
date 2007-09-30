@@ -3,11 +3,11 @@
 #       Collection of various utility procedures to deal with colors.
 #       Algorithm from Tcl/Tk: tkUnix3d.c
 #       
-#  Copyright (c) 2004
+#  Copyright (c) 2004  Mats Bengtsson
 #  
 #  This file is distributed under BSD style license.
 #  
-#  $Id: colorutils.tcl,v 1.5 2007-07-19 06:28:11 matben Exp $
+#  $Id: colorutils.tcl,v 1.6 2007-09-30 08:00:55 matben Exp $
 
 package provide colorutils 1.0
 
