@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.212 2007-09-30 08:00:55 matben Exp $
+# $Id: GroupChat.tcl,v 1.213 2007-09-30 14:06:17 matben Exp $
 
 package require Create
 package require Enter
@@ -94,13 +94,17 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*theyTextFont         ""               widgetDefault
     option add *GroupChat*sysPreForeground     "#26b412"        widgetDefault
     option add *GroupChat*sysTextForeground    "#26b412"        widgetDefault
+    option add *GroupChat*sysPreFontSlant      ""               widgetDefault
+    option add *GroupChat*sysTextFontSlant     "italic"         widgetDefault
     option add *GroupChat*histHeadForeground   ""               widgetDefault
     option add *GroupChat*histHeadBackground   gray80           widgetDefault
     option add *GroupChat*histHeadFont         ""               widgetDefault
+    option add *GroupChat*histHeadFontSlant    "italic"         widgetDefault
     option add *GroupChat*clockFormat          "%H:%M"          widgetDefault
     option add *GroupChat*clockFormatNotToday  "%b %d %H:%M"    widgetDefault
     
     # List of: {tagName optionName resourceName resourceClass}
+    # -fontSlant is special!
     variable groupChatOptions {
 	{mepre       -foreground          mePreForeground       Foreground}
 	{mepre       -background          mePreBackground       Background}
@@ -116,9 +120,12 @@ namespace eval ::GroupChat:: {
 	{theytext    -font                theyTextFont          Font}
 	{syspre      -foreground          sysPreForeground      Foreground}
 	{systext     -foreground          sysTextForeground     Foreground}
+	{syspre      -fontSlant           sysPreFontSlant       ""}
+	{systext     -fontSlant           sysTextFontSlant      ""}
 	{histhead    -foreground          histHeadForeground    Foreground}
 	{histhead    -background          histHeadBackground    Background}
 	{histhead    -font                histHeadFont          Font}
+	{histhead    -fontSlant           sysPreFontSlant       ""}
     }
     
     # Standard wigets.
@@ -2145,12 +2152,10 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     }
     set pretags ${whom}pre${htag}
     
-    if {$whom eq "me"} {
-	lappend pretags scheme-0
-    } else {
+    if {$whom ne "me"} {
 	set idx [mstack::get $chatstate(mstack) $from]
 	if {$idx >= 0} {
-	    lappend pretags scheme-[incr idx]
+	    lappend pretags scheme-$idx
 	}
     }
     $wtext mark set insert end
@@ -2364,21 +2369,30 @@ proc ::GroupChat::ConfigureTextTags {w wtext} {
 	
     if {[string length $jprefs(chatFont)]} {
 	set chatFont $jprefs(chatFont)
-	set boldChatFont [lreplace $jprefs(chatFont) 2 2 bold]
+    } else {
+	set chatFont [$wtext cget -font]
     }
     set foreground [$wtext cget -foreground]
     foreach tag $alltags {
 	set opts($tag) [list -spacing1 $space -foreground $foreground]
     }
     foreach spec $groupChatOptions {
-	foreach {tag optName resName resClass} $spec break
+	lassign $spec tag optName resName resClass
 	set value [option get $w $resName $resClass]
-	if {[string length $jprefs(chatFont)] && [string equal $optName "-font"]} {
+	if {$optName eq "-fontSlant"} {
+	    if {$value eq "italic"} {
+		lappend opts($tag) -font [::Utils::FontItalic $chatFont]
+	    }
+	} elseif {$optName eq "-font"} {
 	    set value $chatFont
+	    if {$value ne ""} {
+		lappend opts($tag) $optName $value
+	    }
+	} else {
+	    if {$value ne ""} {
+		lappend opts($tag) $optName $value
+	    }
 	}
-	if {[string length $value]} {
-	    lappend opts($tag) $optName $value
-	}   
     }
     lappend opts(metext)   -spacing3 $space -lmargin1 20 -lmargin2 20
     lappend opts(theytext) -spacing3 $space -lmargin1 20 -lmargin2 20
@@ -2689,13 +2703,12 @@ proc ::GroupChat::SetUser {roomjid jid3} {
     }
     
     # Associate a color sceme index for each user except ourself.
-    # The first scheme color is reserved for ourself, and 0-3 for other.
     set mynick [::Jabber::JlibCmd service mynick $roomjid]
     set myroomjid $roomjid/$mynick
     if {![jlib::jidequal $myroomjid $jid3]} {
 	set mstack $chatstate(mstack)
 	if {![mstack::exists $mstack $jid3]} {
-	    set idx [mstack::add $mstack $jid3]
+	    mstack::add $mstack $jid3
 	}
     }    
     TreeCreateUserItem $chattoken $jid3
@@ -3356,6 +3369,8 @@ namespace eval ::GroupChat {
 	"Crazy Rainbow"     {"#f83531" "#f8952b" "#b2cb0a" "#2187f7" "#f82bbd"}
 	"Boys vs. Girls"    {"#a80064" "#ed48aa" "#e8e300" "#568bd6" "#0044a6"}
 	"Green Day"         {"#133800" "#1b4f1b" "#398133" "#5c9548" "#93e036"}
+	"Psi"               {"#0000ff" "#00ff00" "#ffa500" "#a020f0" "#ff0000"}
+	"custom"            {"#ff0000" "#00ff00" "#0000ff" "#ffff00" "#000000"}
     }
 }
 
@@ -3368,6 +3383,7 @@ proc ::GroupChat::InitPrefsHook {} {
     set jprefs(gchat,syncPres)  0
     set jprefs(gchat,useScheme) 0
     set jprefs(gchat,colScheme) "Test"
+    set jprefs(gchat,cusScheme) {"#ff0000" "#00ff00" "#0000ff" "#ffff00" "#000000"}
     
     # Unused but keep it if we want client stored bookmarks.
     set jprefs(gchat,bookmarks) {}
@@ -3377,12 +3393,14 @@ proc ::GroupChat::InitPrefsHook {} {
       [list ::Jabber::jprefs(gchat,syncPres)   jprefs_gchat_syncPres    $jprefs(gchat,syncPres)]  \
       [list ::Jabber::jprefs(gchat,useScheme)  jprefs_gchat_useScheme   $jprefs(gchat,useScheme)]  \
       [list ::Jabber::jprefs(gchat,colScheme)  jprefs_gchat_colScheme   $jprefs(gchat,colScheme)]  \
+      [list ::Jabber::jprefs(gchat,cusScheme)  jprefs_gchat_cusScheme   $jprefs(gchat,cusScheme)]  \
       [list ::Jabber::jprefs(gchat,bookmarks)  jprefs_gchat_bookmarks   $jprefs(gchat,bookmarks)]  \
       ]   
     
     if {![info exists scheme($jprefs(gchat,colScheme))]} {
 	set jprefs(gchat,colScheme) "Naive"
     }
+    set schemes(custom) $jprefs(gchat,cusScheme)
 }
 
 proc ::GroupChat::BuildPrefsHook {wtree nbframe} {
@@ -3403,6 +3421,7 @@ proc ::GroupChat::BuildPageConf {page} {
     set tmpJPrefs(gchat,syncPres)  $jprefs(gchat,syncPres)
     set tmpJPrefs(gchat,useScheme) $jprefs(gchat,useScheme)
     set tmpJPrefs(gchat,colScheme) $jprefs(gchat,colScheme)
+    set tmpJPrefs(gchat,cusScheme) $jprefs(gchat,cusScheme)
     set tmpJPrefs(defnick)         $jprefs(defnick)
     
     # Conference (groupchat) stuff.
@@ -3416,13 +3435,15 @@ proc ::GroupChat::BuildPageConf {page} {
     pack $wc.sync -side top -anchor w
     
     set menuDef [list]
-    foreach name [array names schemes] {
+    foreach name [lsearch -all -inline -not [array names schemes] custom] {
 	lappend menuDef [list $name]
     }
+    lappend menuDef separator
+    lappend menuDef [list [mc Custom] -value custom]
     set size [option get $wc schemeSize {}]
 
     set wcols $wc.cols
-    ttk::checkbutton $wc.col -text [mc "Use color scheme for names"] \
+    ttk::checkbutton $wc.col -text [mc "Enable nickname coloring"] \
       -variable [namespace current]::tmpJPrefs(gchat,useScheme)	\
       -command [namespace code [list PrefsSchemeCmd $wcols.mb]]
     ttk::frame $wc.cols
@@ -3435,6 +3456,8 @@ proc ::GroupChat::BuildPageConf {page} {
 	$im blank
 	set pimage($n) $im
 	label $wcols.$n -image $im
+	bind $wcols.$n <Button-1> \
+	  [namespace code [list PrefsCustomCol $wcols.$n $n]]
     }
     PrefsColScheme $tmpJPrefs(gchat,colScheme)
     PrefsSchemeCmd $wcols.mb
@@ -3462,6 +3485,25 @@ proc ::GroupChat::BuildPageConf {page} {
     bind $page <Destroy> ::GroupChat::PrefsFree
 }
 
+proc ::GroupChat::PrefsCustomCol {win n} {
+    variable tmpJPrefs
+    variable schemes
+
+    if {$tmpJPrefs(gchat,colScheme) eq "custom"} {
+	set name [$win cget -image]
+	lassign [$name get 1 1] r g b
+	set present [format "#%02x%02x%02x" $r $g $b]
+	set col [tk_chooseColor -initialcolor $present -title [mc "Choose color"]]
+	if {$col ne ""} {
+	    $name blank
+	    set data [$name data -background $col]
+	    $name put $data
+	    set tmpJPrefs(gchat,cusScheme) \
+	      [lreplace $tmpJPrefs(gchat,cusScheme) $n $n $col]
+	}
+    }
+}
+
 proc ::GroupChat::PrefsSchemeCmd {mb} {
     variable tmpJPrefs
     if {$tmpJPrefs(gchat,useScheme)} {
@@ -3472,12 +3514,17 @@ proc ::GroupChat::PrefsSchemeCmd {mb} {
 }
 
 proc ::GroupChat::PrefsColScheme {value} {
+    variable tmpJPrefs
     variable pimage
     variable schemes
 
-    set size [$pimage(0) cget -width]
+    if {$value eq "custom"} {
+	set cols $tmpJPrefs(gchat,cusScheme)
+    } else {
+	set cols $schemes($value)
+    }
     for {set n 0} {$n < 5} {incr n} {
-	set col [lindex $schemes($value) $n]
+	set col [lindex $cols $n]
 	set name $pimage($n)
 	$name blank
 	set data [$name data -background $col]
@@ -3488,8 +3535,10 @@ proc ::GroupChat::PrefsColScheme {value} {
 proc ::GroupChat::SavePrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
+    variable schemes
     
     array set jprefs [array get tmpJPrefs]
+    set schemes(custom) $jprefs(gchat,cusScheme)
     SetSchemeAll
 }
 
