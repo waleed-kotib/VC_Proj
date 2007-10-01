@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.56 2007-09-26 12:48:42 matben Exp $
+# $Id: JPrefs.tcl,v 1.57 2007-10-01 07:11:05 matben Exp $
 
 package require ui::fontselector
 
@@ -367,7 +367,7 @@ proc ::JPrefs::SavePrefsHook { } {
     variable tmpJPrefs
     variable tmpPrefs
     
-    if {$tmpPrefs(themeName) == [mc None]} {
+    if {$tmpPrefs(themeName) eq [mc None]} {
 	set tmpPrefs(themeName) ""
     }
     foreach key {themeName} {
@@ -378,11 +378,18 @@ proc ::JPrefs::SavePrefsHook { } {
     if {$prefs(opacity) != $tmpPrefs(opacity)} {
 	SetOpacity $tmpPrefs(opacity)
     }
+    set newFont 0
+    if {$jprefs(chatFont) ne $tmpJPrefs(chatFont)} {
+	set newFont 1
+    }
     
     array set jprefs [array get tmpJPrefs]
     array set prefs  [array get tmpPrefs]
 
-    ::Chat::SetFont $jprefs(chatFont)
+    if {$newFont} {
+	::Chat::SetFont $jprefs(chatFont)
+	::GroupChat::SetFontAll
+    }
 }
 
 proc ::JPrefs::CancelPrefsHook { } {

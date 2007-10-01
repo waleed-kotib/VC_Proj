@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.213 2007-09-30 14:06:17 matben Exp $
+# $Id: GroupChat.tcl,v 1.214 2007-10-01 07:11:04 matben Exp $
 
 package require Create
 package require Enter
@@ -2370,7 +2370,7 @@ proc ::GroupChat::ConfigureTextTags {w wtext} {
     if {[string length $jprefs(chatFont)]} {
 	set chatFont $jprefs(chatFont)
     } else {
-	set chatFont [$wtext cget -font]
+	set chatFont [option get $wtext font Font]
     }
     set foreground [$wtext cget -foreground]
     foreach tag $alltags {
@@ -2437,6 +2437,22 @@ proc ::GroupChat::SetSchemeAll {} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 	ConfigureSchemeTags $chatstate(wtext)
+    }
+}
+
+proc ::GroupChat::SetFontAll {} {
+    
+    foreach chattoken [GetTokenList chat] {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+
+	ConfigureTextTags $chatstate(w) $chatstate(wtext)
+	if {$jprefs(chatFont) eq ""} {
+	    $chatstate(wtextsend) configure -font \
+	      [option get $chatstate(wtext) font Font]		
+	} else {
+	    $chatstate(wtextsend) configure -font $jprefs(chatFont)
+	}
     }
 }
 
