@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.68 2007-09-30 14:06:17 matben Exp $
+# $Id: Utils.tcl,v 1.69 2007-10-01 09:48:45 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -708,7 +708,7 @@ proc ::Text::ParseURI {w word} {
 
     foreach {re cmd} $reguri {
 	if {[regexp $re $word]} {
-	    set urltag url${idurl}
+	    set urltag url$idurl
 	    set urlfg       [option get $w urlForeground       Text]
 	    set urlactivefg [option get $w urlActiveForeground Text]
 	    if {$urlfg eq ""} {
@@ -724,7 +724,8 @@ proc ::Text::ParseURI {w word} {
 	      [list ::Text::UrlEnter $w $urltag $activefg]
 	    $w tag bind $urltag <Any-Leave>  \
 	      [list ::Text::UrlLeave $w $urltag $urlfg]
-	    $w insert insert $word $urltag
+	    set tags [$w tag names "insert - 1 chars"]
+	    $w insert insert $word [concat $tags $urltag]
 	    incr idurl
 	    return 1
 	}
