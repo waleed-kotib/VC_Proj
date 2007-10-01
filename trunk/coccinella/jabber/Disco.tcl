@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.132 2007-09-30 14:56:17 matben Exp $
+# $Id: Disco.tcl,v 1.133 2007-10-01 07:11:04 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -97,11 +97,6 @@ namespace eval ::Disco:: {
     
     set ::config(disco,show-head-on-result)  1
     set ::config(disco,show-head-add-server) 1
-    
-    # This is a method to show fake caps responses.
-    set ::config(caps,fake) 1
-    set ::config(caps,name) ""
-    set ::config(caps,vers) ""
 }
 
 proc ::Disco::InitPrefsHook {} {
@@ -553,7 +548,7 @@ proc ::Disco::IsBranchNode {jid node} {
 #       none
 
 proc ::Disco::ParseGetInfo {from queryE args} {
-    global  prefs this
+    global  prefs this config
     variable xmlns
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
@@ -566,6 +561,14 @@ proc ::Disco::ParseGetInfo {from queryE args} {
     set type "result"
     set found 0
     set jlib $jstate(jlib)
+    
+    if {$config(caps,fake)} {
+	set capsNode $config(caps,node)
+	set capsVers $config(caps,vers)
+    } else {
+	set capsNode $coccixmlns(caps)
+	set capsVers $this(vers,full)
+    }
     
     # Return any id!
     set opts [list]
@@ -594,7 +597,7 @@ proc ::Disco::ParseGetInfo {from queryE args} {
 	      -attrlist [list var $var]]
 	}	
 	set found 1
-    } elseif {[string equal $node "$coccixmlns(caps)#$this(vers,full)"]} {
+    } elseif {[string equal $node "$capsNode#$capsVers"]} {
 	
 	# Return 'basic' features that are not related to any 'ext' token.
 	set elem [list]
@@ -613,7 +616,7 @@ proc ::Disco::ParseGetInfo {from queryE args} {
 	# Find any matching exts.
 	set exts [$jlib caps getexts]
 	foreach ext $exts {
-	    if {[string equal $node "$coccixmlns(caps)#$ext"]} {
+	    if {[string equal $node "$capsNode#$ext"]} {
 		set found 1
 		set elem [$jlib caps getxmllist $ext]
 		break
@@ -650,7 +653,7 @@ proc ::Disco::ParseGetInfo {from queryE args} {
 #       none
 
 proc ::Disco::ParseGetItems {from queryE args} {
-    global  prefs this
+    global  prefs this config
     variable xmlns
     upvar ::Jabber::jstate jstate    
     upvar ::Jabber::coccixmlns coccixmlns
@@ -661,7 +664,15 @@ proc ::Disco::ParseGetItems {from queryE args} {
     set ishandled 0
     set found 0
     set jlib $jstate(jlib)
-    
+
+    if {$config(caps,fake)} {
+	set capsNode $config(caps,node)
+	set capsVers $config(caps,vers)
+    } else {
+	set capsNode $coccixmlns(caps)
+	set capsVers $this(vers,full)
+    }
+
     # Return any id!
     set opts [list]
     if {[info exists argsA(-id)]} {
@@ -679,12 +690,12 @@ proc ::Disco::ParseGetItems {from queryE args} {
 	    set myjid [::Jabber::GetMyJid]
 	}
 	set subtags {}
-	set cnode "$coccixmlns(caps)#$this(vers,full)"
+	set cnode "$capsNode#$capsVers"
 	lappend subtags [wrapper::createtag "item" \
 	  -attrlist [list jid $myjid node $cnode]]
 	set exts [$jlib caps getexts]
 	foreach ext $exts {
-	    set cnode "$coccixmlns(caps)#$ext"
+	    set cnode "$capsNode#$ext"
 	    lappend subtags [wrapper::createtag "item" \
 	      -attrlist [list jid $myjid node $cnode]]
 	}
