@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.214 2007-10-01 07:11:04 matben Exp $
+# $Id: GroupChat.tcl,v 1.215 2007-10-01 08:20:13 matben Exp $
 
 package require Create
 package require Enter
@@ -94,7 +94,9 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*theyTextFont         ""               widgetDefault
     option add *GroupChat*sysPreForeground     "#26b412"        widgetDefault
     option add *GroupChat*sysTextForeground    "#26b412"        widgetDefault
+    option add *GroupChat*sysPreFont           ""               widgetDefault
     option add *GroupChat*sysPreFontSlant      ""               widgetDefault
+    option add *GroupChat*sysTextFont          ""               widgetDefault
     option add *GroupChat*sysTextFontSlant     "italic"         widgetDefault
     option add *GroupChat*histHeadForeground   ""               widgetDefault
     option add *GroupChat*histHeadBackground   gray80           widgetDefault
@@ -119,8 +121,10 @@ namespace eval ::GroupChat:: {
 	{theytext    -background          theyTextBackground    Background}
 	{theytext    -font                theyTextFont          Font}
 	{syspre      -foreground          sysPreForeground      Foreground}
-	{systext     -foreground          sysTextForeground     Foreground}
+	{syspre      -font                sysPreFont            Font}
 	{syspre      -fontSlant           sysPreFontSlant       ""}
+	{systext     -foreground          sysTextForeground     Foreground}
+	{systext     -font                sysTextFont           Font}
 	{systext     -fontSlant           sysTextFontSlant      ""}
 	{histhead    -foreground          histHeadForeground    Foreground}
 	{histhead    -background          histHeadBackground    Background}
@@ -896,12 +900,12 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     # Text send.
     if {$config(ui,aqua-text)} {
 	frame $wfrsend -height 40 -width 300
-	set wscont [::UI::Text $wtextsend -height 2 -width 1 -font CociSmallFont -wrap word \
+	set wscont [::UI::Text $wtextsend -height 2 -width 1 -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wyscsend \
 	  [list grid $wyscsend -column 1 -row 0 -sticky ns]]]
     } else {
 	frame $wfrsend -height 40 -width 300 -bd 1 -relief sunken
-	text  $wtextsend -height 2 -width 1 -font CociSmallFont -wrap word \
+	text  $wtextsend -height 2 -width 1 -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wyscsend \
 	  [list grid $wyscsend -column 1 -row 0 -sticky ns]]
 	set wscont $wtextsend
@@ -956,6 +960,9 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     
     # The tags.
     ConfigureTextTags $w $wtext
+    if {$jprefs(chatFont) ne ""} {
+	$chatstate(wtextsend) configure -font $jprefs(chatFont)
+    }
 	
     set chatstate(wbtsend)      $wbtsend
     set chatstate(wbtstatus)    $wbtstatus
@@ -2362,7 +2369,7 @@ proc ::GroupChat::ConfigureTextTags {w wtext} {
     variable groupChatOptions
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::GroupChat::ConfigureTextTags"
+    ::Debug 2 "::GroupChat::ConfigureTextTags wtext=$wtext"
     
     set space 2
     set alltags {mepre metext theypre theytext syspre systext histhead}
@@ -2441,6 +2448,7 @@ proc ::GroupChat::SetSchemeAll {} {
 }
 
 proc ::GroupChat::SetFontAll {} {
+    upvar ::Jabber::jprefs jprefs
     
     foreach chattoken [GetTokenList chat] {
 	variable $chattoken
