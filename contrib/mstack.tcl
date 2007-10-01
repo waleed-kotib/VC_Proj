@@ -9,7 +9,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-#  $Id: mstack.tcl,v 1.3 2007-09-30 08:00:55 matben Exp $
+#  $Id: mstack.tcl,v 1.4 2007-10-01 07:56:46 matben Exp $
 
 package provide mstack 1.0
 
@@ -49,7 +49,7 @@ proc mstack::get {token key} {
     variable $token
     upvar 0 $token state
     
-    set indices [Apply [list lsearch -exact] [Avalues state] $key]
+    set indices [Apply [list lsearch -exact] [Avalues state] [list $key]]
     return [lsearch -exact -not $indices -1]
 }
 
@@ -57,7 +57,7 @@ proc mstack::remove {token key} {
     variable $token
     upvar 0 $token state
 
-    set indices [Apply [list lsearch -exact] [Avalues state] $key]
+    set indices [Apply [list lsearch -exact] [Avalues state] [list $key]]
     set idx [lsearch -not $indices -1]
     if {$idx >= 0} {
 	set i [lsearch -exact $state($idx) $key]
@@ -95,7 +95,7 @@ proc mstack::free {token} {
 # Test:
 if {0} {
     set tok [mstack::init 5]
-    mstack::add $tok a
+    mstack::add $tok "a a"
     mstack::add $tok b
     mstack::add $tok c
     mstack::add $tok d
@@ -104,14 +104,14 @@ if {0} {
     mstack::add $tok g
     mstack::add $tok h
     parray $tok
-    mstack::get $tok a
+    mstack::get $tok "a a"
     mstack::get $tok d
     mstack::get $tok h
     mstack::get $tok x
     mstack::remove $tok d
     mstack::remove $tok g
     mstack::remove $tok y
-    mstack::exists $tok a
+    mstack::exists $tok "a a"
     mstack::exists $tok X
     parray $tok
     mstack::add $tok A
