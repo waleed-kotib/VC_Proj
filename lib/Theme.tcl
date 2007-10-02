@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.44 2007-10-02 13:34:43 matben Exp $
+# $Id: Theme.tcl,v 1.45 2007-10-02 14:53:50 matben Exp $
 
 package provide Theme 1.0
 
@@ -231,6 +231,13 @@ proc ::Theme::FontConfigSize {increase} {
 	set size [expr {$fontopts(smallsize) - $increase}]
     }
     font configure CociSmallFont -size $size
+
+    if {$fontopts(size) > 0} {
+	set size [expr {$fontopts(size) + $increase}]
+    } else {
+	set size [expr {$fontopts(size) - $increase}]
+    }
+    font configure CociDefaultFont -size $size
 }
 
 # Theme::PostProcessFontDefs --
