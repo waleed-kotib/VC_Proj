@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.23 2007-09-13 08:25:38 matben Exp $
+# $Id: FTrans.tcl,v 1.24 2007-10-02 08:18:07 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -464,7 +464,7 @@ proc ::FTrans::DoSend {win jid fileName desc} {
 	
 	# Different options for oob!
 	set url [::Utils::GetHttpFromFile $fileName]
-	set opts {}
+	set opts [list]
 	if {[string length $desc]} {
 	    lappend opts -desc $desc
 	}

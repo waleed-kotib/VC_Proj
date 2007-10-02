@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.241 2007-09-30 14:56:18 matben Exp $
+# $Id: Jabber.tcl,v 1.242 2007-10-02 08:18:07 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -535,6 +535,7 @@ proc ::Jabber::Init { } {
 	jlib::disco::registerfeature $xmlns
     }
     jlib::disco::registerfeature {jid\20escaping}
+    $jlibname disco registeridentity client pc Coccinella
 	
     ::JUI::Build $wDlgs(jmain)    
         
@@ -1374,8 +1375,10 @@ proc ::Jabber::CreateCapsPresElement { } {
 	set vers $this(vers,full)
     }
     set exts [JlibCmd caps getexts]
+    set ver  [JlibCmd caps generate_ver]
+    # Need to switch to "$node#$vers" some time
     set xmllist [wrapper::createtag c -attrlist \
-      [list xmlns $xmppxmlns(caps) node $node ver $vers ext $exts]]
+      [list xmlns $xmppxmlns(caps) node $node ver $ver ext $exts]]
 
     return $xmllist
 }

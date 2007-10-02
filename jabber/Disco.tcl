@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.133 2007-10-01 07:11:04 matben Exp $
+# $Id: Disco.tcl,v 1.134 2007-10-02 08:18:07 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -590,8 +590,15 @@ proc ::Disco::ParseGetInfo {from queryE args} {
 	set vars [concat [$jlib caps getallfeatures] \
 	  [jlib::disco::getregisteredfeatures]]
 	set elem [list]
-	lappend elem [wrapper::createtag "identity" -attrlist  \
-	  [list category client type pc name Coccinella]]
+	set identities [$jlib disco getidentities]
+	foreach identL $identities {
+	    lassign $identL icat itype iname
+	    set iattr [list category $icat type $itype]
+	    if {$iname ne ""} {
+		lappend iattr name $iname
+	    }
+	    lappend elem [wrapper::createtag "identity" -attrlist $iattr]
+	}	
 	foreach var $vars {
 	    lappend elem [wrapper::createtag "feature" \
 	      -attrlist [list var $var]]
@@ -602,8 +609,15 @@ proc ::Disco::ParseGetInfo {from queryE args} {
 	# Return 'basic' features that are not related to any 'ext' token.
 	set elem [list]
 	set vars [jlib::disco::getregisteredfeatures]
-	lappend elem [wrapper::createtag "identity" -attrlist  \
-	  [list category client type pc name Coccinella]]
+	set identities [$jlib disco getidentities]
+	foreach identL $identities {
+	    lassign $identL icat itype iname
+	    set iattr [list category $icat type $itype]
+	    if {$iname ne ""} {
+		lappend iattr name $iname
+	    }
+	    lappend elem [wrapper::createtag "identity" -attrlist $iattr]
+	}	
 	lappend elem [wrapper::createtag "identity" -attrlist  \
 	  [list category hierarchy type leaf name Coccinella]]
 	foreach var $vars {

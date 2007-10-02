@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: disco.tcl,v 1.51 2007-09-06 13:20:47 matben Exp $
+# $Id: disco.tcl,v 1.52 2007-10-02 08:18:08 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -119,6 +119,7 @@ proc jlib::disco::init {jlibname args} {
 	variable rooms
 	variable handler
 	variable state
+	variable identities [list]
     }
     upvar ${jlibname}::disco::items items
     upvar ${jlibname}::disco::info  info
@@ -187,6 +188,23 @@ proc jlib::disco::getregisteredfeatures {} {
     variable features
 
     return $features
+}
+
+# jlib::disco::registeridentity --
+#
+#       <identity category='client' type='pc' name='Coccinella'/> 
+#       as 'category type ?name?'
+
+proc jlib::disco::registeridentity {jlibname category type {name ""}} {
+    upvar ${jlibname}::identities identities
+
+    lappend identities [list $category $type $name]
+}
+
+proc jlib::disco::getidentities {jlibname} {
+    upvar ${jlibname}::identities identities
+ 
+    return $identities
 }
 
 # jlib::disco::registerhandler --
