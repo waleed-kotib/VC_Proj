@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.52 2007-09-15 14:27:24 matben Exp $
+# $Id: Emoticons.tcl,v 1.53 2007-10-02 12:54:30 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -588,7 +588,7 @@ proc ::Emoticons::BuildPrefsHook {wtree nbframe} {
 proc ::Emoticons::BuildPrefsPage {wpage} {
     variable wprefpage $wpage
     variable wpreftext
-    variable wiconsetmenu
+    variable wprefmb
     variable tmpSet
     variable priv
     upvar ::Jabber::jprefs jprefs
@@ -609,6 +609,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     pack  $wc.l  -side top -anchor w -pady 4
     
     set wmb $wc.mb    
+    set wprefmb $wmb
     set menuDef [list]
     foreach name $allSets {
 	if {$name eq "default"} {
@@ -620,7 +621,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     ui::optionmenu $wmb -menulist $menuDef -variable [namespace current]::tmpSet \
       -command [namespace code PrefsSetCmd]
     pack $wmb -side top -anchor w
-
+    
     set wfr $wc.fr
     ttk::frame $wfr -padding [option get . groupSmallPadding {}]
     pack $wfr -side top -anchor w -fill both -expand 1
@@ -651,7 +652,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
 proc ::Emoticons::ImportSetToPrefs {} {
     global  this
     variable wprefpage
-    variable wiconsetmenu
+    variable wprefmb
     
     set types [list [list [mc "Iconset Archive"] {.jisp}]]
     set fileName [tk_getOpenFile -parent [winfo toplevel $wprefpage] \
@@ -675,8 +676,11 @@ proc ::Emoticons::ImportSetToPrefs {} {
 	    ::UI::MessageBox -icon error -title [mc Error] \
 	      -message $str -parent [winfo toplevel $wprefpage]
 	} else {
-	    $wiconsetmenu add radiobutton -label $name  \
-	      -variable [namespace current]::tmpSet
+	    if {[winfo exists $wprefmb]} {
+		set mDef [$wprefmb cget -menulist]
+		lappend mDef [list $name -value $name]
+		$wprefmb configure -menulist $mDef
+	    }
 	}
     }
 }
