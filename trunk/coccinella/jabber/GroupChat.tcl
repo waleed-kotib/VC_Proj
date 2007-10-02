@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.215 2007-10-01 08:20:13 matben Exp $
+# $Id: GroupChat.tcl,v 1.216 2007-10-02 09:58:04 matben Exp $
 
 package require Create
 package require Enter
@@ -3394,6 +3394,7 @@ namespace eval ::GroupChat {
 	"Boys vs. Girls"    {"#a80064" "#ed48aa" "#e8e300" "#568bd6" "#0044a6"}
 	"Green Day"         {"#133800" "#1b4f1b" "#398133" "#5c9548" "#93e036"}
 	"Psi"               {"#0000ff" "#00ff00" "#ffa500" "#a020f0" "#ff0000"}
+	"Blue"              {"#000030" "#00a0c0" "#0000c0" "#8040c0" "#d040c0"}
 	"custom"            {"#ff0000" "#00ff00" "#0000ff" "#ffff00" "#000000"}
     }
 }
