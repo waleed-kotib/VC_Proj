@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ParseStyledText.tcl,v 1.4 2007-09-12 13:37:55 matben Exp $
+# $Id: ParseStyledText.tcl,v 1.5 2007-10-02 09:36:28 matben Exp $
 
 namespace eval ::ParseStyledText:: {
     
@@ -54,7 +54,7 @@ proc ::ParseStyledText::ParseWordHook {type jid w word tagList} {
 		}
 	    }
 	    if {$font ne ""} {
-		array set fopts [font configure $font]
+		array set fopts [font actual $font]
 		set fopts($name) $value
 		$w tag configure $ftag -font [array get fopts]
 		$w insert insert $new [concat $tagList $ftag]
