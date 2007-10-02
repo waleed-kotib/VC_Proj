@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.189 2007-09-29 14:10:12 matben Exp $
+# $Id: jabberlib.tcl,v 1.190 2007-10-02 13:34:43 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -352,8 +352,9 @@ proc jlib::new {clientcmd args} {
       [namespace current]::handle_get_last
     iq_register $jlibname get jabber:iq:time    \
       [namespace current]::handle_get_time
-    iq_register $jlibname get jabber:iq:version \
-      [namespace current]::handle_get_version
+    # This overrides any client handler which is bad.
+    #iq_register $jlibname get jabber:iq:version \
+    #  [namespace current]::handle_get_version
 
     iq_register $jlibname get $jxmlns(entitytime) \
       [namespace current]::handle_entity_time

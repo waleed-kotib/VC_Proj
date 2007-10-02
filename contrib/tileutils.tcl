@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.68 2007-09-29 14:10:12 matben Exp $
+# $Id: tileutils.tcl,v 1.69 2007-10-02 13:34:43 matben Exp $
 #
 
 package require treeutil
@@ -837,14 +837,14 @@ proc tileutils::MakeFonts {} {
     
     # Underline default font.
     set underlineDefault [font create]
-    array set opts [font configure CociDefaultFont]
+    array set opts [font actual CociDefaultFont]
     set opts(-underline) 1
     eval {font configure $underlineDefault} [array get opts]
     set fonts(underlineDefault) $underlineDefault
 
     # Underline small font.
     set underlineSmall [font create]
-    array set opts [font configure CociSmallFont]
+    array set opts [font actual CociSmallFont]
     set opts(-underline) 1
     eval {font configure $underlineSmall} [array get opts]
     set fonts(underlineSmall) $underlineSmall    

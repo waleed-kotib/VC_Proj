@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.43 2007-08-25 07:36:52 matben Exp $
+# $Id: Theme.tcl,v 1.44 2007-10-02 13:34:43 matben Exp $
 
 package provide Theme 1.0
 
@@ -214,7 +214,7 @@ proc ::Theme::FontConfigStandard {} {
 	if {[string length $spec]} {
 	    eval {font configure $name} $spec
 	    if {$name eq "CociSmallFont"} {
-		array set fontA [font configure $name]
+		array set fontA [font actual $name]
 		set fontopts(smallsize) $fontA(-size)
 	    }
 	}
