@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.218 2007-09-21 13:13:50 matben Exp $
+# $Id: Roster.tcl,v 1.219 2007-10-02 08:18:08 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -938,7 +938,7 @@ proc ::Roster::IsCoccinella {jid3} {
     set ans 0
     if {![IsTransportHeuristics $jid3]} {
 	set node [$jstate(jlib) roster getcapsattr $jid3 node]
-	if {[string equal $node $coccixmlns(caps)]} {
+	if {$node eq $coccixmlns(caps)} {
 	    set ans 1
 	}
     }

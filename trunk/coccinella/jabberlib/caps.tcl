@@ -20,11 +20,19 @@
 #     
 #  NB: The ext must be consistent over all versions (ver).
 #  
+#  UPDATE version 1.4:
+#  
+#  <presence from='romeo@montague.lit/orchard'>
+#      <c xmlns='http://jabber.org/protocol/caps' 
+#         node='http://exodus.jabberstudio.org/#0.9.1'
+#         ver='8RovUdtOmiAjzj+xI7SK5BCw3A8='/>
+#  </presence> 
+#  
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: caps.tcl,v 1.22 2007-07-19 06:28:17 matben Exp $
+# $Id: caps.tcl,v 1.23 2007-10-02 08:18:08 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -41,16 +49,17 @@
 #           
 #      The 'name' is here the ext token.
 
+package require base64     ; # tcllib
+package require sha1       ; # tcllib                           
 package require jlib::disco
 package require jlib::roster
 
-package provide jlib::caps 0.2
+package provide jlib::caps 0.3
 
 namespace eval jlib::caps {
     
     variable xmlns
-    set xmlns(caps) "http://jabber.org/protocol/caps"
-    
+    set xmlns(caps) "http://jabber.org/protocol/caps"    
     
     # Note: jlib::ensamble_register is last in this file!
 }
@@ -62,6 +71,7 @@ proc jlib::caps::init {jlibname args} {
 	variable ext
 	variable options
     }
+    
     upvar ${jlibname}::caps::options options
     array set options {
 	-autodisco 0
@@ -127,6 +137,7 @@ proc jlib::caps::cmdproc {jlibname cmd args} {
 #       Register an 'ext' token and associated disco#info element.
 #       The 'name' is the ext token.
 #       The 'features' must be the 'var' attributes in 'xmllist'.
+#       <feature var='http://jabber.org/protocol/disco#info'/> 
 
 proc jlib::caps::register {jlibname name xmllist features} {
     upvar ${jlibname}::caps::ext ext
@@ -134,6 +145,12 @@ proc jlib::caps::register {jlibname name xmllist features} {
     set ext(name,$name)     $name
     set ext(xmllist,$name)  $xmllist
     set ext(features,$name) $features
+}
+
+proc jlib::caps::getallidentities {jlibname} {
+    upvar ${jlibname}::caps::ext ext
+    
+    return $ext(identities)
 }
 
 proc jlib::caps::getexts {jlibname} {
@@ -152,7 +169,7 @@ proc jlib::caps::getxmllist {jlibname name} {
     if {[info exists ext(xmllist,$name)]} {
 	return $ext(xmllist,$name)
     } else {
-	return [list]
+	return
     }
 }
 
@@ -162,7 +179,7 @@ proc jlib::caps::getfeatures {jlibname name} {
     if {[info exists ext(features,$name)]} {
 	return $ext(features,$name)
     } else {
-	return [list]
+	return
     }
 }
 
@@ -174,6 +191,53 @@ proc jlib::caps::getallfeatures {jlibname} {
 	set featureL [concat $featureL $features]
     }
     return [lsort -unique $featureL]
+}
+
+# jlib::caps::generate_ver --
+# 
+#       This just takes the internal identities and features into account.
+
+proc jlib::caps::generate_ver {jlibname} {
+    
+    set identities [jlib::disco::getidentities $jlibname]
+    set features [concat [getallfeatures $jlibname] \
+      [jlib::disco::getregisteredfeatures]]
+    return [create_ver $identities $features]
+}
+
+proc jlib::caps::create_ver {identityL featureL} {
+
+    set ver ""
+    append ver [join [lsort -unique $identityL] <]
+    append ver <
+    append ver [join [lsort -unique $featureL] <]
+    append ver <
+    set hex [::sha1::sha1 $ver]
+    
+    # Inverse to: [format %0.8x%0.8x%0.8x%0.8x%0.8x $H0 $H1 $H2 $H3 $H4]
+    set parts ""
+    for {set i 0} {$i < 5} {incr i} {
+	append parts "0x"
+	append parts [string range $hex [expr {8*$i}] [expr {8*$i + 7}]]
+	append parts " "
+    }
+    # Works independent on machine Endian order!
+    set bin [eval binary format IIIII $parts]
+    return [::base64::encode $bin]
+}
+
+# Test case:
+if {0} {
+    set S "client/pc<http://jabber.org/protocol/disco#info<http://jabber.org/protocol/disco#items<http://jabber.org/protocol/muc<"
+    # 8RovUdtOmiAjzj+xI7SK5BCw3A8=
+
+    set identityL {client/pc}
+    set featureL {
+	"http://jabber.org/protocol/disco#info"
+	"http://jabber.org/protocol/disco#items"
+	"http://jabber.org/protocol/muc"
+    }
+    jlib::caps::create_ver $identityL $featureL
 }
 
 #--- Second, handle all users caps stuff ---------------------------------------
