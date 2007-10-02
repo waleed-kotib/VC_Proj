@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.242 2007-10-02 08:18:07 matben Exp $
+# $Id: Jabber.tcl,v 1.243 2007-10-02 13:34:43 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -280,6 +280,12 @@ namespace eval ::Jabber:: {
     set ::config(caps,fake) 0
     set ::config(caps,node) ""
     set ::config(caps,vers) ""
+    
+    if {0} {
+	set ::config(caps,fake) 1
+	set ::config(caps,node) "http://www.microsoft.com/msn"
+	set ::config(caps,vers) "9"
+    }
 }
 
 # If the whiteboard/ complete dir is there we get whiteboard support.
@@ -1362,7 +1368,7 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
 #       Note that this doesn't replace the 'coccinella' element since caps
 #       are not instance specific (can't send ip addresses).
 
-proc ::Jabber::CreateCapsPresElement { } {
+proc ::Jabber::CreateCapsPresElement {} {
     global  this config
     variable coccixmlns
     variable xmppxmlns
@@ -1740,7 +1746,7 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     array set argsA $args
     
     # Return any id!
-    set opts {}
+    set opts [list]
     if {[info exists argsA(-id)]} {
 	set opts [list -id $argsA(-id)]
     }
@@ -1752,7 +1758,7 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     }
     set version $this(vers,full)
     set subtags [list  \
-      [wrapper::createtag name    -chdata "Coccinella"]  \
+      [wrapper::createtag name    -chdata $prefs(appName)]  \
       [wrapper::createtag version -chdata $version]      \
       [wrapper::createtag os      -chdata $os]]
     set xmllist [wrapper::createtag query -subtags $subtags  \
