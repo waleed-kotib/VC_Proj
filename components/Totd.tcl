@@ -4,8 +4,8 @@
 
 namespace eval ::Totd {
     
-    option add *Totd.icon       coci-es-128      widgetDefault
-    option add *Totd*Text.font  CociDefaultFont  50
+    option add *Totd.icon       coci-es-shadow-128      widgetDefault
+    option add *Totd*Text.font  CociDefaultFont         50
 }
 
 proc ::Totd::Init {} {
