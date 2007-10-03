@@ -4,7 +4,7 @@
 
 namespace eval ::Totd {
     
-    option add *Totd.icon       Coccinella       widgetDefault
+    option add *Totd.icon       coci-es-128      widgetDefault
     option add *Totd*Text.font  CociDefaultFont  50
 }
 
@@ -98,7 +98,7 @@ proc ::Totd::Build {} {
     text $wbox.t -width 52 -height 12
     pack $wbox.t -side right -fill both -expand 1
     
-    ttk::label $wbox.icon -compound image -image $icon -padding 6
+    ttk::label $wbox.icon -compound image -image $icon -padding {0 0 12 0}
     pack $wbox.icon -side top
 
     # Pick random message.
