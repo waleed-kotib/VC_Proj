@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.18 2007-07-26 14:18:52 matben Exp $
+# $Id: optionmenu.tcl,v 1.19 2007-10-03 06:48:16 matben Exp $
 
 package require snit 1.0
 package require tile
@@ -50,6 +50,17 @@ snit::widgetadaptor ui::optionmenu::widget {
 	menu $m -tearoff 0
 
 	$self configurelist $args
+	
+	# Be sure to set nameVar and menuValue to first entry by default.
+	if {[llength $options(-menulist)]} {
+	    set nameVar [lindex $options(-menulist) 0 0]
+	    set value $nameVar
+	    array set opts [lrange [lindex $options(-menulist) 0] 1 end]
+	    if {[info exists opts(-value)]} {
+		set value $opts(-value)
+	    }
+	    set menuValue $value
+	}
 		
 	# If the variable exists must set our own nameVar.
 	if {[info exists $options(-variable)]} {
@@ -110,7 +121,6 @@ snit::widgetadaptor ui::optionmenu::widget {
 	menu $m -tearoff 0
 
 	set maxLen 0
-	set nameVar [lindex $options(-menulist) 0 0]
 	set longest ""
 
 	# Build the menu.
@@ -128,9 +138,6 @@ snit::widgetadaptor ui::optionmenu::widget {
 		}
 		set name2val($name) $value
 		set val2name($value) $name
-		if {![info exists firstValue]} {
-		    set firstValue $value
-		}
 		if {[info exists opts(-image)]} {
 		    set val2im($value) $opts(-image)
 		}
@@ -146,10 +153,6 @@ snit::widgetadaptor ui::optionmenu::widget {
 		  -command [list $self Command] -compound left} [array get opts]
 	    }
 	}
-	if {![info exists firstValue]} {
-	    set firstValue ""
-	}
-	set menuValue $firstValue	
     }
     
     method set {value} {
@@ -190,7 +193,7 @@ if {0} {
 	{"One hour"        -value 3600}
 	{"No restriction"  -value 0}
     }
-    set menuDef {
+    set xmenuDef {
 	{AIM    -value aim}
 	{MSN    -value msn1}
 	{MSN    -value msn2}
@@ -205,6 +208,10 @@ if {0} {
       -variable ::var -command Cmd
     pack .t.mb
     .t.mb maxwidth
+    
+    set mlist [.t.mb cget -menulist]
+    lappend mlist {"Extra" -value extra}
+    .t.mb configure -menulist $mlist
 }
 
 #-------------------------------------------------------------------------------
