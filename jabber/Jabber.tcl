@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.244 2007-10-03 07:20:01 matben Exp $
+# $Id: Jabber.tcl,v 1.245 2007-10-03 12:08:44 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -284,10 +284,14 @@ namespace eval ::Jabber:: {
     set ::config(caps,node) ""
     set ::config(caps,vers) ""
     
+    # Method to fake jabber:iq.version response.
+    set ::config(vers,full) ""
+    
     if {0} {
 	set ::config(caps,fake) 1
 	set ::config(caps,node) "http://www.microsoft.com/msn"
-	set ::config(caps,vers) "9"
+	set ::config(caps,vers) "9.9"
+	set ::config(vers,full) "9.9"
     }
 }
 
@@ -1741,7 +1745,7 @@ proc ::Jabber::CacheGroupchatType {confjid jlibname type subiq} {
 #       Respond to an incoming 'jabber:iq:version' get query.
 
 proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
-    global  prefs tcl_platform this
+    global  prefs tcl_platform this config
     variable jstate
     
     ::Debug 2 "Jabber::ParseGetVersion args='$args'"
@@ -1759,7 +1763,12 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     if {[info exists tcl_platform(osVersion)]} {
 	append os " $tcl_platform(osVersion)"
     }
-    set version $this(vers,full)
+    if {$config(vers,full) eq ""} {
+	set version $this(vers,full)
+    } else {
+	set version $config(vers,full)
+    }
+
     set subtags [list  \
       [wrapper::createtag name    -chdata $prefs(appName)]  \
       [wrapper::createtag version -chdata $version]      \
