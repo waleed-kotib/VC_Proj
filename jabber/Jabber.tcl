@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.243 2007-10-02 13:34:43 matben Exp $
+# $Id: Jabber.tcl,v 1.244 2007-10-03 07:20:01 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -169,9 +169,12 @@ namespace eval ::Jabber:: {
     }    
     
     # XML namespaces defined here.
+    # NB: The caps XEP 1.4 introduces an incompatibility here and it is
+    #     necessary to understand both versions!
     variable coccixmlns
     array set coccixmlns {
 	caps            "http://coccinella.sourceforge.net/protocol/caps"
+	caps14          "http://coccinella.sourceforge.net/"
 	servers         "http://coccinella.sourceforge.net/protocol/servers"
 	whiteboard      "http://coccinella.sourceforge.net/protocol/whiteboard"
     }
