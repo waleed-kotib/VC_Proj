@@ -20,7 +20,7 @@
 #     
 #  NB: The ext must be consistent over all versions (ver).
 #  
-#  UPDATE version 1.4:
+#  UPDATE version 1.4: ---------------------------------------------------------
 #  
 #  <presence from='romeo@montague.lit/orchard'>
 #      <c xmlns='http://jabber.org/protocol/caps' 
@@ -28,11 +28,15 @@
 #         ver='8RovUdtOmiAjzj+xI7SK5BCw3A8='/>
 #  </presence> 
 #  
+#  The 'ver' map to a unique combination of disco identities+features.
+#  
+#  -----------------------------------------------------------------------------
+#  
 #  Copyright (c) 2005-2007  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: caps.tcl,v 1.23 2007-10-02 08:18:08 matben Exp $
+# $Id: caps.tcl,v 1.24 2007-10-03 06:48:59 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -196,6 +200,8 @@ proc jlib::caps::getallfeatures {jlibname} {
 # jlib::caps::generate_ver --
 # 
 #       This just takes the internal identities and features into account.
+#       NB: A client MUST synchronize the disco identity amd feature elements
+#           here else we respond with a false ver attribute!
 
 proc jlib::caps::generate_ver {jlibname} {
     
@@ -336,6 +342,8 @@ proc jlib::caps::disco_cb {node what value jlibname type from queryE args} {
     }
 }
 
+# OBSOLETE IN 1.4
+
 # jlib::caps::avail_cb --
 # 
 #       Registered available presence callback.
@@ -401,6 +409,8 @@ proc jlib::caps::avail_cb {jlibname xmldata} {
     return 0
 }
 
+# OBSOLETE IN 1.4
+
 # jlib::caps::get_random_jid_ver, get_random_jid_ext --
 # 
 #       Methods to pick a random JID from node+ver or node+ext.
@@ -432,6 +442,8 @@ proc jlib::caps::get_random_jid_ext {node ext} {
 	return 
     }
 }
+
+# OBSOLETE IN 1.4
 
 # jlib::caps::unavail_cb --
 # 
@@ -466,6 +478,8 @@ proc jlib::caps::reset {jlibname} {
     
     unset -nocomplain state
 }
+
+# OBSOLETE IN 1.4
 
 proc jlib::caps::writecache {fileName} {
     variable caps
