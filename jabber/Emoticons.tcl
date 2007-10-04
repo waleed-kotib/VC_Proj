@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.54 2007-10-04 13:36:30 matben Exp $
+# $Id: Emoticons.tcl,v 1.55 2007-10-04 14:49:20 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -705,6 +705,9 @@ proc ::Emoticons::ImportSetToPrefs {} {
 }
 
 proc ::Emoticons::ImportFileToPrefs {fileName} {
+    global  this
+    variable wprefpage
+    variable wprefmb
     
     set tail [file tail $fileName]
     set name [file rootname $tail]
