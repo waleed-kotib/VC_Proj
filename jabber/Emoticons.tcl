@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.53 2007-10-02 12:54:30 matben Exp $
+# $Id: Emoticons.tcl,v 1.54 2007-10-04 13:36:30 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -647,6 +647,48 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
 	set tmpSet $jprefs(emoticonSet)
     }
     PrefsSetCmd $tmpSet
+    
+    if {![catch {package require tkdnd}]} {
+	DnDInit $wpreftext
+    }
+}
+
+proc ::Emoticons::DnDInit {win} {
+    
+    dnd bindtarget $win text/uri-list <Drop> \
+      [namespace code [list DnDDrop %W %D %T]]
+    dnd bindtarget $win text/uri-list <DragEnter> \
+      [namespace code [list DnDEnter %W %A %D %T]]
+    dnd bindtarget $win text/uri-list <DragLeave> \
+      [namespace code [list DnDLeave %W %D %T]]
+}
+
+proc ::Emoticons::DnDDrop {win data dndtype} {
+    
+    # Take only first file.
+    set f [lindex $data 0]
+    if {[file extension $f] eq ".jisp"} {
+	
+	# Strip off any file:// prefix.
+	set f [string map {file:// ""} $f]
+	set f [uriencode::decodefile $f]
+	ImportFileToPrefs $f
+    }
+}
+
+proc ::Emoticons::DnDEnter {win action data dndtype} {
+    set f [lindex $data 0]
+    if {[file extension $f] eq ".jisp"} {
+	focus $win
+	set act "none"
+    } else {
+	set act "none"
+    }
+    return $act
+}
+
+proc ::Emoticons::DnDLeave {win data dndtype} {	
+    focus [winfo toplevel $win] 
 }
 
 proc ::Emoticons::ImportSetToPrefs {} {
@@ -658,29 +700,34 @@ proc ::Emoticons::ImportSetToPrefs {} {
     set fileName [tk_getOpenFile -parent [winfo toplevel $wprefpage] \
       -filetypes $types -title [mc "Import Iconset"]]
     if {[file exists $fileName]} {
-	set tail [file tail $fileName]
-	set name [file rootname $tail]
-	if {[lsearch [GetAllSets] $name] >= 0} {
-	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message [mc jamessemoticonexists $name] \
-	      -parent [winfo toplevel $wprefpage]
-	    return
-	}
-	file copy $fileName $this(altEmoticonsPath)
-	set dst [file join $this(altEmoticonsPath) $tail]
-	if {[catch {
-	    LoadTmpIconSet $dst
-	} err]} {
-	    set str [mc jamessemoticonfail2 $name]
-	    append str "\n" "[mc Error]: $err"
-	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message $str -parent [winfo toplevel $wprefpage]
-	} else {
-	    if {[winfo exists $wprefmb]} {
-		set mDef [$wprefmb cget -menulist]
-		lappend mDef [list $name -value $name]
-		$wprefmb configure -menulist $mDef
-	    }
+	ImportFileToPrefs $fileName
+    }
+}
+
+proc ::Emoticons::ImportFileToPrefs {fileName} {
+    
+    set tail [file tail $fileName]
+    set name [file rootname $tail]
+    if {[lsearch [GetAllSets] $name] >= 0} {
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message [mc jamessemoticonexists $name] \
+	  -parent [winfo toplevel $wprefpage]
+	return
+    }
+    file copy $fileName $this(altEmoticonsPath)
+    set dst [file join $this(altEmoticonsPath) $tail]
+    if {[catch {
+	LoadTmpIconSet $dst
+    } err]} {
+	set str [mc jamessemoticonfail2 $name]
+	append str "\n" "[mc Error]: $err"
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message $str -parent [winfo toplevel $wprefpage]
+    } else {
+	if {[winfo exists $wprefmb]} {
+	    set mDef [$wprefmb cget -menulist]
+	    lappend mDef [list $name -value $name]
+	    $wprefmb configure -menulist $mDef
 	}
     }
 }
