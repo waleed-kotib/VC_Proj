@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.126 2007-10-04 06:55:28 matben Exp $
+# $Id: MailBox.tcl,v 1.127 2007-10-04 07:33:18 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1025,6 +1025,7 @@ proc ::MailBox::GetNextMsgID {uid} {
     } else {
 	variable mailbox
 	
+	set next ""
 	set nextid $uid
 	set sorted [lsort -integer [array names mailbox]]
 	set ind [lsearch $sorted $uid]
