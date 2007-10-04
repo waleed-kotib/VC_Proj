@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.91 2007-09-13 15:53:40 matben Exp $
+# $Id: NewMsg.tcl,v 1.92 2007-10-04 13:39:34 matben Exp $
 
 package require ui::entryex
 
@@ -56,6 +56,8 @@ namespace eval ::NewMsg:: {
     option add *NewMsg*TMenubutton.padding        {1}             50
     option add *NewMsg*Text.borderWidth           0               50
     option add *NewMsg*Text.relief                flat            50
+    
+    option add *NewMsg.replyTimeFormat     "%c"             widgetDefault
 
     option add *JMultiAddress.background        "#999999"         60
 
@@ -900,15 +902,22 @@ proc ::NewMsg::DoSend {w} {
     destroy $w
 }
 
-proc ::NewMsg::DoQuote {w message to time} {
-    
+proc ::NewMsg::DoQuote {w message to time} {    
     variable locals
 
     set wtext $locals($w,wtext)
+    set secs [clock scan $time]
+    set tfmt [option get $w replyTimeFormat {}]
+    set date [clock format $secs -format $tfmt]
+    set name [::Roster::GetShortName $to]
+    set prefix [mc reply-prefix $date $name "<$to>"]    
     regsub -all "\n" $message "\n> " quoteMsg
-    set quoteMsg "\nAt $time, $to wrote:\n> $quoteMsg"
+
+    $wtext insert end "$prefix"
+    $wtext insert end "\n"
+    $wtext insert end "> "
     $wtext insert end $quoteMsg
-    $wtext insert end \n
+    $wtext insert end "\n"
     
     # Quote only once.
     $locals($w,wtray) buttonconfigure quote -state disabled
