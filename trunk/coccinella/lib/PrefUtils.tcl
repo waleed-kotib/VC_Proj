@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: PrefUtils.tcl,v 1.13 2007-09-14 08:11:46 matben Exp $
+# $Id: PrefUtils.tcl,v 1.14 2007-10-04 14:01:07 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -70,7 +70,7 @@ namespace eval ::PrefUtils:: {
 # Results:
 #       updates the internal option database.
 
-proc ::PrefUtils::Init { } {
+proc ::PrefUtils::Init {} {
     global  this prefs
     
     set prefs(master,default)  {}
@@ -206,7 +206,7 @@ proc ::PrefUtils::GetValue {varName resName defValue} {
 # Results:
 #       preference file written. 
 
-proc ::PrefUtils::SaveToFile { } {
+proc ::PrefUtils::SaveToFile {} {
     global prefs this
     
     set userPrefsFile $this(userPrefsFilePath)	
@@ -308,7 +308,7 @@ proc ::PrefUtils::ResetToFactoryDefaults {maxPriority} {
 # Results:
 #       prefs values may change, and user interface stuff updated. 
 
-proc ::PrefUtils::ResetToUserDefaults { } {
+proc ::PrefUtils::ResetToUserDefaults {} {
     global  prefs
 	
     # Need to make a temporary storage in order not to duplicate items.

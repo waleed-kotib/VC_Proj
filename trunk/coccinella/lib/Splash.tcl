@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Splash.tcl,v 1.14 2007-07-19 06:28:18 matben Exp $
+# $Id: Splash.tcl,v 1.15 2007-10-04 14:01:07 matben Exp $
    
 package provide Splash 1.0
 
@@ -56,7 +56,7 @@ array set wDlgs {
 # Results:
 #       none
 
-proc ::Splash::SplashScreen { } {
+proc ::Splash::SplashScreen {} {
     global  this prefs wDlgs this
     variable topwin
     variable canwin

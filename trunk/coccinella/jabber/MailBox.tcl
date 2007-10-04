@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.128 2007-10-04 07:42:10 matben Exp $
+# $Id: MailBox.tcl,v 1.129 2007-10-04 14:01:07 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1500,8 +1500,11 @@ proc ::MailBox::ForwardTo {} {
 	set xmldata [list]
     }
     set subject "Fwd: $subject"
+    
+    # @@@ Perhaps we shall instead design the complete message here?
+    
     ::NewMsg::Build -subject $subject -forwardmessage $body -time $date \
-      -forwardxmldata $xmldata
+      -forwardxmldata $xmldata -from $from
 }
 
 proc ::MailBox::DoPrint {} {

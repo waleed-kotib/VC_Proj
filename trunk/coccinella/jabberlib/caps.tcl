@@ -36,7 +36,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: caps.tcl,v 1.24 2007-10-03 06:48:59 matben Exp $
+# $Id: caps.tcl,v 1.25 2007-10-04 14:01:07 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -52,6 +52,9 @@
 #      jlibname caps getfeatures name
 #           
 #      The 'name' is here the ext token.
+
+# TODO: make a static cache (variable cache) which maps the hashed ver attribute
+#       to a list of disco identities and features.
 
 package require base64     ; # tcllib
 package require sha1       ; # tcllib                           

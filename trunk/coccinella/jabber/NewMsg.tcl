@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.92 2007-10-04 13:39:34 matben Exp $
+# $Id: NewMsg.tcl,v 1.93 2007-10-04 14:01:07 matben Exp $
 
 package require ui::entryex
 
@@ -57,6 +57,7 @@ namespace eval ::NewMsg:: {
     option add *NewMsg*Text.borderWidth           0               50
     option add *NewMsg*Text.relief                flat            50
     
+    option add *NewMsg.forwardTimeFormat   "%c"             widgetDefault
     option add *NewMsg.replyTimeFormat     "%c"             widgetDefault
 
     option add *JMultiAddress.background        "#999999"         60
@@ -192,6 +193,7 @@ proc ::NewMsg::Build {args} {
 	return
     }
     array set opts {
+	-from           ""
 	-to             ""
 	-tolist         ""
 	-subject        ""
@@ -414,9 +416,24 @@ proc ::NewMsg::Build {args} {
     set locals($w,wtray)    $wtray
     
     if {$opts(-forwardmessage) ne ""} {
-	$wtext insert end "\nForwarded message from $opts(-to) written at $opts(-time)\n\
---------------------------------------------------------------------\n\
-$opts(-forwardmessage)"
+	set from $opts(-from)
+	set secs [clock scan $opts(-time)]
+	set tfmt [option get $w forwardTimeFormat {}]
+	set date [clock format $secs -format $tfmt]
+	set name [::Roster::GetShortName $from]
+	set origSubject [string map {"Fwd: " ""} $opts(-subject)]
+	
+	$wtext insert end "---------- "
+	$wtext insert end [mc "Forwarded message"]
+	$wtext insert end " ----------"
+	$wtext insert end "\n"
+	$wtext insert end "[mc From]: $name <$from>"
+	$wtext insert end "\n"
+	$wtext insert end "[mc Date]: $date"
+	$wtext insert end "\n"
+	$wtext insert end "[mc Subject]: $origSubject"
+	$wtext insert end "\n\n"
+	$wtext insert end $opts(-forwardmessage)
     }
     if {$opts(-message) ne ""} {
 	$wtext insert end $opts(-message)
@@ -906,6 +923,7 @@ proc ::NewMsg::DoQuote {w message to time} {
     variable locals
 
     set wtext $locals($w,wtext)
+
     set secs [clock scan $time]
     set tfmt [option get $w replyTimeFormat {}]
     set date [clock format $secs -format $tfmt]

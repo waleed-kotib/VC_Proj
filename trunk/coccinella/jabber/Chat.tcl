@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.211 2007-09-16 12:00:25 matben Exp $
+# $Id: Chat.tcl,v 1.212 2007-10-04 14:01:07 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1699,7 +1699,6 @@ proc ::Chat::DnDDrop {chattoken win data dndtype} {
 }
 
 proc ::Chat::DnDEnter {chattoken win action data dndtype} {
-
     focus $win
     set act "none"
     return $act
