@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GotMsg.tcl,v 1.51 2007-07-19 06:28:12 matben Exp $
+# $Id: GotMsg.tcl,v 1.52 2007-10-04 07:33:18 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -40,7 +40,7 @@ namespace eval ::GotMsg:: {
     set locals(updateDatems)  [expr 1000*60]
 }
 
-proc ::GotMsg::QuitAppHook { } {
+proc ::GotMsg::QuitAppHook {} {
     global  wDlgs
     
     ::UI::SaveWinGeom $wDlgs(jgotmsg)
@@ -172,7 +172,7 @@ proc ::GotMsg::Show {thisMsgId} {
 # Results:
 #       shows window.
 
-proc ::GotMsg::Build { } {
+proc ::GotMsg::Build {} {
     global  this prefs wDlgs
 
     variable w
@@ -298,7 +298,7 @@ proc ::GotMsg::Build { } {
     focus $w
 }
 
-proc ::GotMsg::UpdateDate { } {
+proc ::GotMsg::UpdateDate {} {
     variable w
     variable locals
     variable date
@@ -353,16 +353,18 @@ proc ::GotMsg::PresenceHook {pjid2 type args} {
     }
 }
 
-proc ::GotMsg::NextMsg { } {
+proc ::GotMsg::NextMsg {} {
     
     variable msgIdDisplay
     
     # Query the mailbox for next message id.
     set nextid [::MailBox::GetNextMsgID $msgIdDisplay]
-    Show $nextid  
+    if {$nextid ne ""} {
+	Show $nextid  
+    }
 }
 
-proc ::GotMsg::Reply { } {
+proc ::GotMsg::Reply {} {
     variable jid
     variable subject
     variable date
