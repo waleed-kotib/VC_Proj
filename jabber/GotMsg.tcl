@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements a dialog for jabber messages.
 #      
-#  Copyright (c) 2002  Mats Bengtsson
+#  Copyright (c) 2002-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GotMsg.tcl,v 1.52 2007-10-04 07:33:18 matben Exp $
+# $Id: GotMsg.tcl,v 1.53 2007-10-04 07:54:05 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -222,16 +222,15 @@ proc ::GotMsg::Build {} {
     set wbtnext $frbot.btnext
     ttk::button $wbtnext -text [mc Next] -default active \
       -width -8 -command [list ::GotMsg::NextMsg]
+    ttk::button $frbot.btfwd -text [mc Forward]   \
+      -width -8 -command [list ::GotMsg::Forward]
     ttk::button $frbot.btreply -text [mc Reply]   \
       -width -8 -command [list ::GotMsg::Reply]
     set padx [option get . buttonPadX {}]
-    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-	pack $wbtnext -side right
-	pack $frbot.btreply -side right -padx $padx
-    } else {
-	pack $frbot.btreply -side right
-	pack $wbtnext -side right -padx $padx
-    }
+
+    pack $wbtnext -side right
+    pack $frbot.btfwd -side right -padx $padx
+    pack $frbot.btreply -side right
     pack $frbot -side bottom -fill x
 
     ttk::checkbutton $wbox.ch -style Small.TCheckbutton \
@@ -362,6 +361,20 @@ proc ::GotMsg::NextMsg {} {
     if {$nextid ne ""} {
 	Show $nextid  
     }
+}
+
+proc ::GotMsg::Forward {} {
+    variable jid
+    variable subject
+    variable date
+    variable body
+    
+    if {![regexp -nocase {^ *fwd:} $subject]} {
+	set fwdsubject "Fwd: $subject"
+    } else {
+	set fwdsubject $subject
+    }
+    ::NewMsg::Build -subject $fwdsubject -forwardmessage $body -time $date
 }
 
 proc ::GotMsg::Reply {} {
