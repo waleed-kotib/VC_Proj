@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.124 2007-09-22 06:49:28 matben Exp $
+# $Id: MailBox.tcl,v 1.125 2007-10-04 06:44:30 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -758,7 +758,7 @@ proc ::MailBox::InsertRow {wtbl row i} {
     set secs    [clock scan $date]
     set smartdate [::Utils::SmartClockFormat $secs -showsecs 0]
     set ujid2 [jlib::unescapejid [jlib::barejid $from]]
-
+    
     set T $wtbl
     set item [$T item create -tags $uidmsg]
     $T item text $item  \
@@ -914,7 +914,7 @@ proc ::MailBox::MarkMsgAsRead {uid} {
 	}
     }
     if {[winfo exists $wDlgs(jinbox)]} {
-	$locals(wtbl) item state set $uid read
+	$locals(wtbl) item state set [list tag $uid] read
     }
 }
 
@@ -1857,6 +1857,8 @@ proc ::MailBox::MKGetFile {} {
 
 proc ::MailBox::MKHaveMetakit {} {
     variable mkhavemetakit
+    
+    return 0
     
     if {[info exists mkhavemetakit]} {
 	return $mkhavemetakit
