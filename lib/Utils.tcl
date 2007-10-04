@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.69 2007-10-01 09:48:45 matben Exp $
+# $Id: Utils.tcl,v 1.70 2007-10-04 09:33:25 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -517,7 +517,7 @@ proc ::Utils::LanguageMenubutton {w varName args} {
 	es {Spanish} 
 	sv {Swedish} 
     }
-    set langs {}
+    set langs [list]
     foreach f [glob -nocomplain -tails -directory $this(msgcatPath) *.msg] {
 	set code [file rootname $f]
 	if {[info exists code2Name($code)]} {
@@ -539,10 +539,11 @@ proc ::Utils::LanguageMenubutton {w varName args} {
     } else {
 	set $varName $prefs(messageLocale)
     }
-    set menuDef {}
+    set menuDef [list]
     foreach {code str} [array get langCode2Str] {
 	lappend menuDef [list $str -value $code]
     }
+    set menuDef [lsort -index 0 $menuDef]
     ui::optionmenu $w -menulist $menuDef -direction flush -variable $varName
 
     return $w
