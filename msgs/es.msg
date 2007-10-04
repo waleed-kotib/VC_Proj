@@ -27,11 +27,11 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: es.msg,v 1.99 2007-09-21 06:30:28 matben Exp $
+#   $Id: es.msg,v 1.100 2007-10-04 14:22:58 antoniofcano Exp $
 
 # Reference: {Abort}
 # Translate, find in sources: contrib/ui/dialog.tcl:247
-::msgcat::mcset es Abort                 {Abort}
+::msgcat::mcset es Abort                 {Cancelar}
 # Reference: {Action}
 ::msgcat::mcset es Action                {Acción}
 # Reference: {Add}
@@ -46,7 +46,7 @@
 ::msgcat::mcset es Affiliation           {Afiliación}
 # Reference: {Any}
 # Translate
-::msgcat::mcset es Any                   {Any}
+::msgcat::mcset es Any                   {Cualquier}
 # Reference: {Appearance}
 ::msgcat::mcset es Appearance            {Apariencia}
 # Reference: {Author}
@@ -66,7 +66,7 @@
 ::msgcat::mcset es Cancel                {Cancelar}
 # Reference: {Chatroom}
 # Translate, find in sources: jabber/Create.tcl:109 jabber/Create.tcl:635 jabber/Enter.tcl:153 jabber/GroupChat.tcl:1412 jabber/GroupChat.tcl:1414 jabber/GroupChat.tcl:3142 jabber/GroupChat.tcl:3308
-::msgcat::mcset es Chatroom              {Chatroom}
+::msgcat::mcset es Chatroom              {Sala}
 # Reference: {City}
 ::msgcat::mcset es City                  {Ciudad}
 # Reference: {Clear}
@@ -80,10 +80,10 @@
 ::msgcat::mcset es Color                 {Color}
 # Reference: {Company}
 # Translate
-::msgcat::mcset es Company               {Company}
+::msgcat::mcset es Company               {Compañía}
 # Reference: {Configure}
 # Translate, find in sources: jabber/Create.tcl:148 jabber/GroupChat.tcl:651
-::msgcat::mcset es Configure             {Configure}
+::msgcat::mcset es Configure             {Configurar}
 # Reference: {Connection}
 ::msgcat::mcset es Connection            {Conexión}
 # Reference: {Contact}
@@ -112,13 +112,13 @@
 ::msgcat::mcset es Description           {Descripción}
 # Reference: {Detect}
 # Translate, find in sources: lib/Proxy.tcl:273
-::msgcat::mcset es Detect                {Detect}
+::msgcat::mcset es Detect                {Detectar}
 # Reference: {Discover}
 # Translate, find in sources: jabber/Disco.tcl:1503 jabber/Disco.tcl:1683 jabber/Enter.tcl:130 jabber/MUC.tcl:1567 jabber/UserInfo.tcl:156
-::msgcat::mcset es Discover              {Discover}
+::msgcat::mcset es Discover              {Descubrir}
 # Reference: {Downloading}
 # Translate, find in sources: lib/HttpTrpt.tcl:166
-::msgcat::mcset es Downloading           {Downloading}
+::msgcat::mcset es Downloading           {Descargar}
 # Reference: {Edit}
 ::msgcat::mcset es Edit                  {Editar}
 # Reference: {Email}
@@ -128,7 +128,7 @@
 ::msgcat::mcset es Emoticons             {Emoticons}
 # Reference: {Encoding}
 # Translate, find in sources: whiteboard/FilePrefs.tcl:471
-::msgcat::mcset es Encoding              {Encoding}
+::msgcat::mcset es Encoding              {Codificar}
 # Reference: {Enter}
 ::msgcat::mcset es Enter                 {Entrar}
 # Reference: {Error}
@@ -137,10 +137,10 @@
 ::msgcat::mcset es Exit                  {Salir}
 # Reference: {Export}
 # Translate, find in sources: jabber/UserInfo.tcl:370 jabber/VCard.tcl:260
-::msgcat::mcset es Export                {Export}
+::msgcat::mcset es Export                {Exportar}
 # Reference: {Extensions}
 # Translate, find in sources: whiteboard/FilePrefs.tcl:467 whiteboard/WDialogs.tcl:127
-::msgcat::mcset es Extensions            {Extensions}
+::msgcat::mcset es Extensions            {Extensiones}
 # Reference: {File}
 ::msgcat::mcset es File                  {Archivo}
 # Reference: {Filter}
@@ -153,7 +153,7 @@
 ::msgcat::mcset es First                 {Primero}
 # Reference: {Fonts}
 # Translate, find in sources: whiteboard/WBPrefs.tcl:75
-::msgcat::mcset es Fonts                 {Fonts}
+::msgcat::mcset es Fonts                 {Tipografía}
 # Reference: {Forward}
 ::msgcat::mcset es Forward               {Avanzar}
 # Reference: {From}
@@ -270,7 +270,7 @@
 ::msgcat::mcset es Port                  {Puerto}
 # Reference: {Ports}
 # Translate, find in sources: lib/PrefNet.tcl:97
-::msgcat::mcset es Ports                 {Ports}
+::msgcat::mcset es Ports                 {Puertos}
 # Reference: {Previous}
 ::msgcat::mcset es Previous              {Anterior}
 # Reference: {Print}
@@ -292,10 +292,10 @@
 ::msgcat::mcset es Quote                 {Citar}
 # Reference: {Rate}
 # Translate, find in sources: jabber/FTrans.tcl:618 lib/HttpTrpt.tcl:177
-::msgcat::mcset es Rate                  {Rate}
+::msgcat::mcset es Rate                  {Valorar}
 # Reference: {Region}
 # Translate, find in sources: components/Geolocation.tcl:81
-::msgcat::mcset es Region                {Region}
+::msgcat::mcset es Region                {Región}
 # Reference: {Register}
 ::msgcat::mcset es Register              {Registrarse}
 # Reference: {Remaining}
@@ -312,14 +312,14 @@
 ::msgcat::mcset es Role                  {Rol}
 # Reference: {Running}
 # Translate, find in sources: whiteboard/WDialogs.tcl:175
-::msgcat::mcset es Running               {Running}
+::msgcat::mcset es Running               {Ejecutando}
 # Reference: {Save}
 ::msgcat::mcset es Save                  {Guardar}
 # Reference: {Search}
 ::msgcat::mcset es Search                {Buscar}
 # Reference: {Secured}
 # Translate, find in sources: whiteboard/WDialogs.tcl:183
-::msgcat::mcset es Secured               {Secured}
+::msgcat::mcset es Secured               {Seguro}
 # Reference: {Send}
 ::msgcat::mcset es Send                  {Enviar}
 # Reference: {Server}
@@ -328,7 +328,7 @@
 ::msgcat::mcset es Service               {Servicio}
 # Reference: {Services}
 # Translate, find in sources: jabber/Disco.tcl:735
-::msgcat::mcset es Services              {Services}
+::msgcat::mcset es Services              {Servicios}
 # Reference: {Settings}
 ::msgcat::mcset es Settings              {Opciones}
 # Reference: {Shortcut}
@@ -347,19 +347,19 @@
 ::msgcat::mcset es Sounds                {Sonidos}
 # Reference: {Specific}
 # Translate, find in sources: components/UserActivity.tcl:219
-::msgcat::mcset es Specific              {Specific}
+::msgcat::mcset es Specific              {Especifique}
 # Reference: {Stop}
 ::msgcat::mcset es Stop                  {Parar}
 # Reference: {Subject}
 ::msgcat::mcset es Subject               {Asunto}
 # Reference: {System}
 # Translate, find in sources: whiteboard/WBPrefs.tcl:150
-::msgcat::mcset es System                {System}
+::msgcat::mcset es System                {Sistema}
 # Reference: {Text}
 ::msgcat::mcset es Text                  {Texto}
 # Reference: {Theme}
 # Translate, find in sources: jabber/JPrefs.tcl:198
-::msgcat::mcset es Theme                 {Theme}
+::msgcat::mcset es Theme                 {Tema}
 # Reference: {Time}
 ::msgcat::mcset es Time                  {Hora}
 # Reference: {Timeout}
@@ -378,7 +378,7 @@
 ::msgcat::mcset es Username              {Nombre}
 # Reference: {Version}
 # Translate, find in sources: jabber/Jabber.tcl:1621 jabber/Jabber.tcl:1632 jabber/UserInfo.tcl:186 jabber/UserInfo.tcl:193 whiteboard/WDialogs.tcl:125
-::msgcat::mcset es Version               {Version}
+::msgcat::mcset es Version               {Versión}
 # Reference: {Visitors}
 ::msgcat::mcset es Visitors              {Visitantes}
 # Reference: {Voice}
@@ -474,7 +474,7 @@
 ::msgcat::mcset es center                {Centrado}
 # arrow
 # Reference: {Last}
-::msgcat::mcset es last                  {ÚltimoL}
+::msgcat::mcset es last                  {Último}
 # Reference: {First}
 ::msgcat::mcset es first                 {Primero}
 # Reference: {Both}
@@ -555,7 +555,7 @@
 ::msgcat::mcset es mAdHocCommands        {Ad-Hoc Commands}
 # Reference: {&Add Contact...}
 # Translate
-::msgcat::mcset es mAddContact...        {&Add Contact...}
+::msgcat::mcset es mAddContact...        {&Añadir contacto...}
 # Reference: {Add Speech Bubble}
 ::msgcat::mcset es mAddSpeechBubble      {Añadir un bocadillo}
 # Reference: {Arc}
@@ -581,13 +581,13 @@
 ::msgcat::mcset es mBrushThickness       {Grosor de la brocha}
 # Reference: {&Report Bug...}
 # Translate
-::msgcat::mcset es mBugReport...         {&Report Bug...}
+::msgcat::mcset es mBugReport...         {&Informar de un error...}
 # Reference: {View &Business Card...}
 # Translate
-::msgcat::mcset es mBusinessCard...      {View &Business Card...}
+::msgcat::mcset es mBusinessCard...      {Ver &Tarjeta de visita...}
 # Reference: {&Business Card...}
 # Translate
-::msgcat::mcset es mBC...                {&Business Card...}
+::msgcat::mcset es mBC...                {&Tarjeta de visita...}
 # Reference: {&Call...}
 ::msgcat::mcset es mCall                 {Llamar a...}
 # Reference: {Chat}
@@ -598,40 +598,40 @@
 ::msgcat::mcset es mChord                {Cuerda}
 # Reference: {Clear}
 # Translate
-::msgcat::mcset es mClear                {Clear}
+::msgcat::mcset es mClear                {Limpiar}
 # Reference: {Clear Menu}
 # Translate, find in sources: jabber/AvatarMB.tcl:486
-::msgcat::mcset es mClearMenu            {Clear Menu}
+::msgcat::mcset es mClearMenu            {Limpiar Menu}
 # Reference: {&Close Window}
 ::msgcat::mcset es mCloseWindow          {&Cerrar la ventana}
 # Reference: {&Home Page...}
 # Translate
-::msgcat::mcset es mCoccinellaHome...    {&Home Page...}
+::msgcat::mcset es mCoccinellaHome...    {&Página principal...}
 # Reference: {Color...}
 # Translate
 ::msgcat::mcset es mColor...             {Color...}
 # Reference: {&Contacts...}
 # Translate
-::msgcat::mcset es mContacts...          {&Contacts...}
+::msgcat::mcset es mContacts...          {&Contactos...}
 # Reference: {&Copy}
 ::msgcat::mcset es mCopy                 {&Copiar}
 # Reference: {&Create Chatroom...}
 # Translate
-::msgcat::mcset es mCreateRoom...        {&Create Chatroom...}
+::msgcat::mcset es mCreateRoom...        {&Crear una sala...}
 # Reference: {Custom Status...}
 # Translate, find in sources: jabber/Status.tcl:750
-::msgcat::mcset es mCustomStatus...      {Custom Status...}
+::msgcat::mcset es mCustomStatus...      {Estado personalizado...}
 # Reference: {Cu&t}
 ::msgcat::mcset es mCut                  {Cortar}
 # Reference: {Dash}
 ::msgcat::mcset es mDash                 {Punteado}
 # Reference: {&Debug}
-::msgcat::mcset es mDebug                {Debug}
+::msgcat::mcset es mDebug                {Depurar}
 # Reference: {&Decreasing}
 ::msgcat::mcset es mDecreasing           {Descendente}
 # Reference: {&Discover Server...}
 # Translate
-::msgcat::mcset es mDiscoverServer...    {&Discover Server...}
+::msgcat::mcset es mDiscoverServer...    {&Buscar servidores...}
 # Reference: {Do Not Disturb}
 ::msgcat::mcset es mDoNotDisturb         {No molestar}
 # Reference: {Edit}
@@ -640,31 +640,31 @@
 ::msgcat::mcset es mEditBookmarks...     {Editar favoritos}
 # Reference: {Edit &Business Card...}
 # Translate
-::msgcat::mcset es mEditBC...            {Edit &Business Card...}
+::msgcat::mcset es mEditBC...            {Editar &Tarjeta de visita...}
 # Reference: {&Edit Contact...}
 # Translate
-::msgcat::mcset es mEditContact...       {&Edit Contact...}
+::msgcat::mcset es mEditContact...       {&Editar Contacto...}
 # Reference: {&Edit Item...}
 # Translate
-::msgcat::mcset es mEditItem...          {&Edit Item...}
+::msgcat::mcset es mEditItem...          {&Editar Item...}
 # Reference: {&Edit Nickname}
 ::msgcat::mcset es mEditNick             {Editar nick}
 # Reference: {&Edit Profiles...}
 # Translate
-::msgcat::mcset es mEditProfiles...      {&Edit Profiles...}
+::msgcat::mcset es mEditProfiles...      {&Editar Perfiles...}
 # Reference: {Enter Chat&room...}
 # Translate
-::msgcat::mcset es mEnterRoom...         {Enter Chat&room...}
+::msgcat::mcset es mEnterRoom...         {Entrar sa&la...}
 # Reference: {&Error Log...}
 ::msgcat::mcset es mErrorLog             {Mensajes de error...}
 # Reference: {Export}
 ::msgcat::mcset es mExport               {Exportar}
 # Reference: {Export Image...}
 # Translate
-::msgcat::mcset es mExportImage...       {Export Image...}
+::msgcat::mcset es mExportImage...       {Exportar Imagen...}
 # Reference: {Export Movie...}
 # Translate
-::msgcat::mcset es mExportMovie...       {Export Movie...}
+::msgcat::mcset es mExportMovie...       {Exportar video...}
 # Reference: {Extended Away}
 ::msgcat::mcset es mExtendedAway         {Alejado por mucho tiempo}
 # Reference: {File}
@@ -673,29 +673,29 @@
 ::msgcat::mcset es mFill                 {Rellenar}
 # Reference: {Fill Color...}
 # Translate
-::msgcat::mcset es mFillColor...         {Fill Color...}
+::msgcat::mcset es mFillColor...         {Color de relleno...}
 # Reference: {Find}
 ::msgcat::mcset es mFind                 {Buscar}
 # Reference: {Find Next}
 # Translate
-::msgcat::mcset es mFindNext             {Find Next}
+::msgcat::mcset es mFindNext             {Buscar siguiente}
 # Reference: {Find Previous}
-::msgcat::mcset es mFindPrevious         {Buscar siguiente}
+::msgcat::mcset es mFindPrevious         {Buscar anterior}
 # Reference: {Flip}
 ::msgcat::mcset es mFlip                 {Reflejar}
 # Reference: {Font}
 ::msgcat::mcset es mFont                 {Fuente}
 # Reference: {Font Size}
-::msgcat::mcset es mFontSize             {Tamano de la fuente}
+::msgcat::mcset es mFontSize             {Tamaño de la fuente}
 # Reference: {Grid}
 ::msgcat::mcset es mGrid                 {Rejilla}
 # Reference: {&History...}
 # Translate
-::msgcat::mcset es mHistory...           {&History...}
+::msgcat::mcset es mHistory...           {&Historial...}
 # Reference: {Horizontal}
 ::msgcat::mcset es mHorizontal           {Horizontal}
 # Reference: {Huge}
-::msgcat::mcset es mHugeFont             {Huge}
+::msgcat::mcset es mHugeFont             {Enorme}
 # Reference: {Icon &Set...}
 # Translate
 ::msgcat::mcset es mIconSet...           {Icon &Set...}
@@ -3222,5 +3222,3 @@ if {0} {
 ::msgcat::mcset es {Autodesk's FLIC File} {Autodesk's FLIC File}
 
 # END --------------------------------------------------------------------------
-
-
