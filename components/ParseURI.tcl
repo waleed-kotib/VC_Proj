@@ -70,16 +70,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ParseURI.tcl,v 1.41 2007-09-15 14:27:23 matben Exp $
+# $Id: ParseURI.tcl,v 1.42 2007-10-05 07:00:14 matben Exp $
 
 package require uriencode
 
-namespace eval ::ParseURI:: { 
+namespace eval ::ParseURI { 
 
     variable uid 0
 }
 
-proc ::ParseURI::Init { } {
+proc ::ParseURI::Init {} {
 
     ::Debug 2 "::ParseURI::Init"
     
