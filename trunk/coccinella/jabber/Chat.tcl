@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.212 2007-10-04 14:01:07 matben Exp $
+# $Id: Chat.tcl,v 1.213 2007-10-05 14:10:22 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -187,6 +187,8 @@ namespace eval ::Chat:: {
     variable allowMultiThreadPerJID 0
     
     set ::config(chat,show-head) 1
+    set ::config(chat,compose-notify-send) 1
+    set ::config(chat,compose-notify-recv) 1
 }
 
 # Chat::OnToolButton --
@@ -197,7 +199,7 @@ proc ::Chat::OnToolButton { } {
     OnMenu
 }
 
-proc ::Chat::OnMenu { } {
+proc ::Chat::OnMenu {} {
     
     if {[llength [grab current]]} { return }
 
@@ -3123,12 +3125,12 @@ proc ::Chat::XEventRecv {chattoken xeventE args} {
     set composeE [wrapper::getfirstchildwithtag $xeventE "composing"]
     set idE      [wrapper::getfirstchildwithtag $xeventE "id"]
         
-    if {($msgid ne "") && ($composeE != {}) && ($idE == {})} {
+    if {($msgid ne "") && [llength $composeE] && ($idE == {})} {
 	
 	# 1) Request for event notification
 	set chatstate(xevent,msgid) $msgid
 	
-    } elseif {($composeE != {}) && ($idE != {})} {
+    } elseif {[llength $composeE] && [llength $idE]} {
 	
 	# 2) Notification of message composing
 	jlib::splitjid $chatstate(jid) jid2 res
@@ -3199,6 +3201,7 @@ proc ::Chat::KeyPressEvent {chattoken char} {
 }
 
 proc ::Chat::XEventSendCompose {chattoken} {
+    global  config
     variable $chattoken
     upvar 0 $chattoken chatstate
     variable cprefs
@@ -3215,17 +3218,19 @@ proc ::Chat::XEventSendCompose {chattoken} {
     if {$chatstate(xevent,type) eq "chat"} {
 	set opts [list -thread $chatstate(threadid) -type chat]
     }
-    
-    set xelems [list \
-      [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
-      -subtags [list  \
-      [wrapper::createtag "composing"] \
-      [wrapper::createtag "id" -chdata $id]]]]
-
-    eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
+    if {$config(chat,compose-notify-send)} {
+	set xelems [list \
+	  [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
+	  -subtags [list  \
+	  [wrapper::createtag "composing"] \
+	  [wrapper::createtag "id" -chdata $id]]]]
+	
+	eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
+    }
 }
 
 proc ::Chat::XEventSendCancelCompose {chattoken} {
+    global  config
     variable $chattoken
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
@@ -3260,12 +3265,13 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
     if {$chatstate(xevent,type) eq "chat"} {
 	set opts [list -thread $chatstate(threadid) -type chat]
     }
-
-    set xelems [list \
-      [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
-      -subtags [list [wrapper::createtag "id" -chdata $id]]]]
-
-    eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
+    if {$config(chat,compose-notify-send)} {
+	set xelems [list \
+	  [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
+	  -subtags [list [wrapper::createtag "id" -chdata $id]]]]
+	
+	eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
+    }
 }
 
 proc ::Chat::BuildHistory {dlgtoken} {
