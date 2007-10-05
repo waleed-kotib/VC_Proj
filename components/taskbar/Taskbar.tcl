@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.35 2007-09-26 12:48:42 matben Exp $
+# $Id: Taskbar.tcl,v 1.36 2007-10-05 12:49:10 matben Exp $
 
 package require balloonhelp
 
@@ -254,6 +254,7 @@ proc ::Taskbar::Post {m} {
 	    set state2 disabled
 	}
     }
+    Update [::UI::GetMainWindow]
     
     # {available away chat dnd xa invisible unavailable}
     set status [::Jabber::GetMyStatus]
