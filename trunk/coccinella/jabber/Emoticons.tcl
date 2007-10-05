@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements handling and parsing of emoticons (smileys).
 #      
-#  Copyright (c) 2004-2005  Mats Bengtsson
+#  Copyright (c) 2004-2007  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.55 2007-10-04 14:49:20 matben Exp $
+# $Id: Emoticons.tcl,v 1.56 2007-10-05 07:00:15 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -31,6 +31,8 @@ namespace eval ::Emoticons:: {
     ::hooks::register prefsCancelHook        ::Emoticons::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Emoticons::UserDefaultsHook
     ::hooks::register initHook               ::Emoticons::Init
+
+    ::hooks::register launchFinalHook        ::Emoticons::ParseCommandLine
 
     variable priv
     set priv(defaultSet) "default"
@@ -91,6 +93,31 @@ proc ::Emoticons::Init {} {
 	LoadTmpIconSet [GetPrefSetPathExists]
     }
     SetPermanentSet $jprefs(emoticonSet)
+
+    if {[tk windowingsystem] eq "win32"} {
+	InitWin
+    }
+}
+
+proc ::Emoticons::InitWin {} {
+    global  this
+    
+    if {[catch {package require RegisterFileType}]} {
+	return
+    }
+    # Find the exe we are running. Starkits?
+    if {[info exists ::starkit::topdir]} {
+	set exe [file nativename [info nameofexecutable]]
+	set cmd "\"$exe\" -file \"%1\""
+    } else {
+	set exe [file nativename [info nameofexecutable]]
+	set app [file nativename $this(script)]
+	set cmd "\"$exe\" \"$app\" -file \"%1\""
+    }
+    catch {
+	RegisterFileType::RegisterFileType .jisp jispArchive \
+	  "Emoticon Archive"  $cmd
+    }
 }
 
 proc ::Emoticons::Exists {word} {
@@ -544,24 +571,52 @@ proc ::Emoticons::ImportSet {} {
     set fileName [tk_getOpenFile -filetypes $types \
       -title [mc "Import Iconset"]]
     if {[file exists $fileName]} {
-	set tail [file tail $fileName]
-	set name [file rootname $tail]
-	if {[lsearch [GetAllSets] $name] >= 0} {
-	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message "Iconset \"$name\" already exists."
-	    return
-	}
-	file copy $fileName $this(altEmoticonsPath)
-	set dst [file join $this(altEmoticonsPath) $tail]
-	if {[catch {
-	    LoadTmpIconSet $dst
-	} err]} {
-	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message "Failed loading iconset \"$name\". $err"
-	    return
-	}
+	ImportFile $fileName
     }    
     return $fileName
+}
+
+proc ::Emoticons::ImportFile {fileName} {
+    global  this
+    
+    set tail [file tail $fileName]
+    set name [file rootname $tail]
+    if {[lsearch [GetAllSets] $name] >= 0} {
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message "Iconset \"$name\" already exists."
+	return
+    }
+    file copy $fileName $this(altEmoticonsPath)
+    set dst [file join $this(altEmoticonsPath) $tail]
+    if {[catch {
+	LoadTmpIconSet $dst
+    } err]} {
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message "Failed loading iconset \"$name\". $err"
+	return
+    }
+}
+
+# Emoticons::ParseCommandLine --
+# 
+#       A launchFinalHook that detects any jisp archive files on the command
+#       line.
+
+proc ::Emoticons::ParseCommandLine {args} {
+    global  argv
+   
+    if {$args eq {}} {
+	set args $argv
+    }
+    set idx [lsearch $args -file]
+    if {$idx < 0} {
+	return
+    }
+    set fileName [lindex $args [incr idx]]
+    if {[file extension $fileName] ne ".jisp"} {
+	return
+    }
+    ImportFile $fileName
 }
 
 # Preference page --------------------------------------------------------------

@@ -19,11 +19,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# $Id: URIRegistry.tcl,v 1.8 2007-07-18 09:40:10 matben Exp $
+# $Id: URIRegistry.tcl,v 1.9 2007-10-05 07:00:14 matben Exp $
 
-namespace eval ::URIRegistry:: { }
+namespace eval ::URIRegistry {}
 
-proc ::URIRegistry::Init { } {
+proc ::URIRegistry::Init {} {
     global  tcl_platform this
 
     if {![string equal $tcl_platform(platform) "windows"]} {
