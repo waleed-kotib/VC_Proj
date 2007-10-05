@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.134 2007-10-02 08:18:07 matben Exp $
+# $Id: Disco.tcl,v 1.135 2007-10-05 13:23:05 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -96,7 +96,8 @@ namespace eval ::Disco:: {
     variable wdisco -
     
     set ::config(disco,show-head-on-result)  1
-    set ::config(disco,show-head-add-server) 1
+    set ::config(disco,add-server-show-head) 1
+    set ::config(disco,add-server-autolist)  1
 }
 
 proc ::Disco::InitPrefsHook {} {
@@ -122,7 +123,7 @@ proc ::Disco::InitPrefsHook {} {
       ]
 }
 
-proc ::Disco::InitHook { } {
+proc ::Disco::InitHook {} {
     upvar ::Jabber::jprefs jprefs
 
     set jprefs(disco,tmpServers) [list]
@@ -210,7 +211,7 @@ proc ::Disco::NewJlibHook {jlibName} {
 # 
 #       This must be before most other login hooks, at least other doing disco.
 
-proc ::Disco::LoginHook { } {
+proc ::Disco::LoginHook {} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
@@ -218,7 +219,7 @@ proc ::Disco::LoginHook { } {
     DiscoServer $jstate(server)
 }
 
-proc ::Disco::LogoutHook { } {
+proc ::Disco::LogoutHook {} {
     variable wtab
     
     if {[winfo exists $wtab]} {
@@ -229,7 +230,7 @@ proc ::Disco::LogoutHook { } {
     Clear
 }
 
-proc ::Disco::HaveTree { } {    
+proc ::Disco::HaveTree {} {    
     upvar ::Jabber::jstate jstate
     
     if {[$jstate(jlib) disco isdiscoed items $jstate(server)]} {
@@ -741,7 +742,7 @@ proc ::Disco::ParseGetItems {from queryE args} {
 #  in the disco tree, we MUST keep the complete tree structure for an item
 #  in order to uniquely identify it in the tree.
 
-proc ::Disco::NewPage { } {
+proc ::Disco::NewPage {} {
     variable wtab
     
     set wnb [::JUI::GetNotebook]
@@ -1331,7 +1332,7 @@ proc ::Disco::Refresh {vstruct} {
     GetItems $jid -node $node
 }
 
-proc ::Disco::Clear { } {    
+proc ::Disco::Clear {} {    
     upvar ::Jabber::jstate jstate
     
     $jstate(jlib) disco reset
@@ -1532,7 +1533,7 @@ proc ::Disco::BuildInfoPage {win jid {node ""}} {
     return $win
 }
 
-proc ::Disco::AutoDiscoServers { } {
+proc ::Disco::AutoDiscoServers {} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
@@ -1546,7 +1547,7 @@ proc ::Disco::AutoDiscoServers { } {
     }
 }
 
-proc ::Disco::OnMenuAddServer { } {
+proc ::Disco::OnMenuAddServer {} {
     if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	AddServerDlg
@@ -1562,10 +1563,11 @@ namespace eval ::Disco {
 
 }
 
-proc ::Disco::AddServerDlg { } {
+proc ::Disco::AddServerDlg {} {
     global  wDlgs config
     variable dlgaddjid ""
     variable dlgpermanent 0
+    variable waddservlist
     upvar ::Jabber::jprefs jprefs
     
     set w $wDlgs(jdisaddserv)
@@ -1588,7 +1590,7 @@ proc ::Disco::AddServerDlg { } {
     ttk::frame $wall
     pack $wall -fill both -expand 1
 
-    if {$config(disco,show-head-add-server)} {	
+    if {$config(disco,add-server-show-head)} {	
 	set im  [::Theme::GetImage [option get $w settingsImage {}]]
 	set imd [::Theme::GetImage [option get $w settingsDisImage {}]]
 
@@ -1610,11 +1612,16 @@ proc ::Disco::AddServerDlg { } {
     pack $wbox.msg -side top -anchor w
     
     set wfr $wbox.fr
+    set waddservlist $wfr.e
     ttk::frame $wfr
     pack $wfr -side top -fill x -pady 4
     ttk::label $wfr.l -text "[mc Server]:"
-    ttk::entry $wfr.e -textvariable [namespace current]::dlgaddjid
-    #  -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
+    if {$config(disco,add-server-autolist)} {
+	ttk::combobox $wfr.e -textvariable [namespace current]::dlgaddjid
+    } else {
+	ttk::entry $wfr.e -textvariable [namespace current]::dlgaddjid
+	#  -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
+    }
     ttk::checkbutton $wfr.ch -style Small.TCheckbutton \
       -text [mc "Discover permanently"] \
       -variable [namespace current]::dlgpermanent
@@ -1645,6 +1652,50 @@ proc ::Disco::AddServerDlg { } {
     bind $w <Return> [list $frbot.btok invoke]
 
     focus $wfr.e
+    
+    if {$config(disco,add-server-autolist)} {
+	::httpex::get $jprefs(urlServersList) \
+	  -command [namespace code AddHttpCommand]
+    }
+}
+
+proc ::Disco::AddHttpCommand {token} {
+    global  wDlgs config
+    variable waddservlist
+    
+    set w $wDlgs(jdisaddserv)
+    
+    if {![winfo exists $w]} {
+	return
+    }
+    if {[::httpex::state $token] ne "final"} {
+	return
+    }
+    if {[::httpex::status $token] eq "ok"} {
+	
+	# Get and parse xml.
+	set xml [::httpex::data $token]    
+	set xtoken [tinydom::parse $xml -package qdxml]
+	set xmllist [tinydom::documentElement $xtoken]
+	set jidL [list]
+	
+	foreach elem [tinydom::children $xmllist] {
+	    switch -- [tinydom::tagname $elem] {
+		item {
+		    unset -nocomplain attrArr
+		    array set attrArr [tinydom::attrlist $elem]
+		    if {[info exists attrArr(jid)]} {
+			lappend jidL [list $attrArr(jid)]
+		    }
+		}
+	    }
+	}
+	if {[winfo exists $waddservlist]} {
+	    $waddservlist configure -values $jidL
+	}
+	tinydom::cleanup $xtoken
+    }
+    ::httpex::cleanup $token
 }
 
 proc ::Disco::AddCloseCmd {w} {
