@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.56 2007-10-05 07:00:15 matben Exp $
+# $Id: Emoticons.tcl,v 1.57 2007-10-05 08:15:15 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -33,7 +33,10 @@ namespace eval ::Emoticons:: {
     ::hooks::register initHook               ::Emoticons::Init
 
     ::hooks::register launchFinalHook        ::Emoticons::ParseCommandLine
-
+    if {[tk windowingsystem] eq "aqua"} {
+	::hooks::register macOpenDocument    ::Emoticons::MacOpenDocument
+    }
+    
     variable priv
     set priv(defaultSet) "default"
 }
@@ -617,6 +620,15 @@ proc ::Emoticons::ParseCommandLine {args} {
 	return
     }
     ImportFile $fileName
+}
+
+proc ::Emoticons::MacOpenDocument {args} {
+    
+    foreach fileName $args {
+	if {[file extension $fileName] eq ".jisp"} {
+	    ImportFile $fileName
+	}
+    }
 }
 
 # Preference page --------------------------------------------------------------

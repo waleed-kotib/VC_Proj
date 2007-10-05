@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.171 2007-09-21 09:15:41 matben Exp $
+# $Id: UI.tcl,v 1.172 2007-10-05 08:15:15 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -118,7 +118,7 @@ namespace eval ::UI:: {
     set ::config(ui,pruneMenus) {}
 }
 
-proc ::UI::FirstLaunchHook { } {
+proc ::UI::FirstLaunchHook {} {
     SetupAss
 }
 
@@ -138,7 +138,7 @@ proc ::UI::Init {} {
     ::Theme::GetImageWithNameEx [option get . buttonTrayImage {}]
 }
 
-proc ::UI::InitFinalHook { } {
+proc ::UI::InitFinalHook {} {
         
     # Dialog images.
     foreach name {info error warning question internet} {
@@ -153,9 +153,23 @@ proc ::UI::InitFinalHook { } {
 
     # For ui::openimage
     option add *Dialog*image.style  Sunken.TLabel  widgetDefault
+    
+    if {[tk windowingsystem] eq "aqua"} {
+	InitMac
+    }
 }
 
-proc ::UI::InitCommonBinds { } {
+proc ::UI::InitMac {} {
+    
+    proc ::tk::mac::OpenDocument {args} {
+	Debug 2 "::tk::mac::OpenDocument args=$args"
+	# args will be a list of all the documents dropped on your app, 
+	# or double-clicked 
+	eval {::hooks::run macOpenDocument} $args
+    }
+}
+
+proc ::UI::InitCommonBinds {} {
     global  this
     
     # Read only text widget bindings.
