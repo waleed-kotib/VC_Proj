@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.75 2007-09-29 14:10:12 matben Exp $
+# $Id: RosterTree.tcl,v 1.76 2007-10-06 15:22:40 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -395,8 +395,368 @@ proc ::RosterTree::New {w} {
     grid columnconfigure $w 0 -weight 1
     grid rowconfigure    $w 0 -weight 1
     
+    # Testing DnD:
+    set idx [lsearch [bindtags $T] TreeCtrl]
+    bindtags $T [linsert [bindtags $T] $idx TreeCtrlDnD]
+    
+    $T notify install <Drag-begin>
+    $T notify install <Drag-end>
+    $T notify install <Drag-receive>
+    
+    $T notify bind $T <Drag-receive> {
+	::RosterTree::NotifyDragReceive %W %l %I
+    }
+
+    bind TreeCtrlDnD <Control-ButtonPress-1> {
+	set TreeCtrl::Priv(selectMode) toggle
+	::RosterTree::DnDButton1 %W %x %y
+	break
+    }
+    bind TreeCtrlDnD <Shift-ButtonPress-1> {
+	set TreeCtrl::Priv(selectMode) add
+	::RosterTree::DnDButton1 %W %x %y
+	break
+    }
+    bind TreeCtrlDnD <ButtonPress-1> {
+	set TreeCtrl::Priv(selectMode) set
+	::RosterTree::DnDButton1 %W %x %y
+	break
+    }
+    bind TreeCtrlDnD <Button1-Motion> {
+	::RosterTree::DnDMotion1 %W %x %y
+	break
+    }
+    bind TreeCtrlDnD <ButtonRelease-1> {
+	::RosterTree::DnDRelease1 %W %x %y
+	break
+    }
+    bind TreeCtrlDnD <Destroy> {
+	::RosterTree::DnDFree %W
+    }
+    
     return $T
 }
+
+proc ::RosterTree::NotifyDragReceive {T dragged target} {
+    upvar ::Jabber::jstate jstate
+    
+    set jlib $jstate(jlib)
+    
+    #puts "::RosterTree::NotifyDragReceive dragged=$dragged, target=$target"
+    
+    # Protect for a situation where items have disapperared.
+    if {[$T item id $target] eq ""} {
+	return
+    }
+    
+    set tag [GetTagOfItem $target]
+    if {[lindex $tag 0] eq "group"} {
+	set groups [list [lindex $tag 1]]
+    } elseif {[lindex $tag 0] eq "head"} {
+	set groups ""
+    } else {
+	return
+    }
+    foreach item $dragged {
+	if {[$T item id $item] eq ""} {
+	    continue
+	}
+	set tag [GetTagOfItem $item]
+	if {[lindex $tag 0] eq "jid"} {
+	    set jid [lindex $tag 1]
+	    set jid [$jlib roster getrosterjid $jid]
+	    set rostA(-groups) [list]
+	    array set rostA [$jlib roster getrosteritem $jid]
+	    if {$rostA(-groups) ne $groups} {
+		unset -nocomplain rostA(-subscription)
+		set rostA(-groups) $groups
+		eval {$jlib roster send_set $jid} [array get rostA]    
+	    }
+	}
+    }
+}
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+proc ::RosterTree::DnDSetDragSources {T listOfLists} {
+    variable dnd
+    
+    foreach list $listOfLists {
+	set column [lindex $list 0]
+	set style [lindex $list 1]
+	set elements [lrange $list 2 end]
+	if {[$T column id $column] eq ""} {
+	    error "column \"$column\" doesn't exist"
+	}
+	if {[lsearch -exact [$T style names] $style] == -1} {
+	    error "style \"$style\" doesn't exist"
+	}
+	foreach element $elements {
+	    if {[lsearch -exact [$T element names] $element] == -1} {
+		error "element \"$element\" doesn't exist"
+	    }
+	}
+    }
+    set dnd(dragSources,$T) $listOfLists
+}
+
+proc ::RosterTree::DnDIsDragSource {T x y} {
+    variable dnd
+    
+    set id [$T identify $x $y]
+    if {[lindex $id 0] ne "item" || [llength $id] != 6} {
+	return 0
+    }
+    lassign $id where item arg1 arg2 arg3 arg4
+    if {![$T item enabled $item]} {
+	return 0
+    }
+    foreach list $dnd(dragSources,$T) {
+	set C [lindex $list 0]
+	set S [lindex $list 1]
+	set eList [lrange $list 2 end]
+	if {[$T column compare $arg2 != $C]} continue
+	if {[$T item style set $item $C] ne $S} continue
+	if {[lsearch -exact $eList $arg4] == -1} continue
+	return 1
+    }
+    return 0
+}
+
+proc ::RosterTree::DnDSetDropTargets {T listOfLists} {
+    variable dnd
+    
+    foreach list $listOfLists {
+	set column [lindex $list 0]
+	set style [lindex $list 1]
+	set elements [lrange $list 2 end]
+	if {[$T column id $column] eq ""} {
+	    error "column \"$column\" doesn't exist"
+	}
+	if {[lsearch -exact [$T style names] $style] == -1} {
+	    error "style \"$style\" doesn't exist"
+	}
+	foreach element $elements {
+	    if {[lsearch -exact [$T element names] $element] == -1} {
+		error "element \"$element\" doesn't exist"
+	    }
+	}
+    }
+    set dnd(dropTargets,$T) $listOfLists
+}
+
+proc ::RosterTree::DnDIsDropTarget {T x y} {
+    variable dnd
+    
+    set id [$T identify $x $y]
+    if {[lindex $id 0] ne "item" || [llength $id] != 6} {
+	return 0
+    }
+    lassign $id where item arg1 arg2 arg3 arg4
+    if {![$T item enabled $item]} {
+	return 0
+    }
+    foreach list $dnd(dropTargets,$T) {
+	set C [lindex $list 0]
+	set S [lindex $list 1]
+	set eList [lrange $list 2 end]
+	if {[$T column compare $arg2 != $C]} continue
+	if {[$T item style set $item $C] ne $S} continue
+	if {[lsearch -exact $eList $arg4] == -1} continue
+	return 1
+    }
+    return 0
+}
+
+proc ::RosterTree::DnDButton1 {T x y} {
+    upvar TreeCtrl::Priv Priv
+    variable dnd
+    
+    focus $T
+    set id [$T identify $x $y]
+    set dnd(buttonMode) ""
+
+    # Click outside any item
+    if {$id eq ""} {
+	$T selection clear
+
+    # Click in header
+    } elseif {[lindex $id 0] eq "header"} {
+	TreeCtrl::ButtonPress1 $T $x $y
+
+    # Click in item
+    } else {
+	lassign $id where item arg1 arg2 arg3 arg4
+	switch $arg1 {
+	    button {
+		$T item toggle $item
+	    }
+	    line {
+		$T item toggle $arg2
+	    }
+	    column {
+		set dnd(drag,motion) 0
+		set dnd(drag,click,x) $x
+		set dnd(drag,click,y) $y
+		set dnd(drag,x) [$T canvasx $x]
+		set dnd(drag,y) [$T canvasy $y]
+		set dnd(drop) ""
+
+		if {$Priv(selectMode) eq "add"} {
+		    TreeCtrl::BeginExtend $T $item
+		} elseif {$Priv(selectMode) eq "toggle"} {
+		    TreeCtrl::BeginToggle $T $item
+		} elseif {![$T selection includes $item]} {
+		    TreeCtrl::BeginSelect $T $item
+		}
+		$T activate $item
+
+		if {[$T selection includes $item]} {
+		    set dnd(buttonMode) drag
+		}
+	    }
+	}
+    }
+    return
+}
+
+proc ::RosterTree::DnDMotion1 {T x y} {
+    upvar TreeCtrl::Priv Priv
+    variable dnd
+
+    switch $dnd(buttonMode) {
+	"drag" {
+	    set Priv(autoscan,command,$T) {::RosterTree::DnDMotion %T %x %y}
+	    TreeCtrl::AutoScanCheck $T $x $y
+	    DnDMotion $T $x $y
+	}
+	default {
+	    TreeCtrl::Motion1 $T $x $y
+	}
+    }
+    return
+}
+
+proc ::RosterTree::DnDMotion {T x y} {
+    upvar TreeCtrl::Priv Priv
+    variable dnd
+
+    switch $dnd(buttonMode) {
+	"drag" {
+	    if {!$dnd(drag,motion)} {
+		
+		# Detect initial mouse movement
+		if {(abs($x - $dnd(drag,click,x)) <= 4) &&
+		    (abs($y - $dnd(drag,click,y)) <= 4)} return
+
+		set Priv(selection) [$T selection get]
+		set dnd(drop) ""
+		$T dragimage clear
+		
+		# For each selected item, add 2nd and 3rd elements of
+		# column "item" to the dragimage
+		foreach I $Priv(selection) {
+		    foreach list $Priv(dragimage,$T) {
+			set C [lindex $list 0]
+			set S [lindex $list 1]
+			if {[$T item style set $I $C] eq $S} {
+			    eval $T dragimage add $I $C [lrange $list 2 end]
+			}
+		    }
+		}
+		set dnd(drag,motion) 1
+		::TreeCtrl::TryEvent $T Drag begin {}
+	    }
+
+	    # Find the item under the cursor
+	    set cursor X_cursor
+	    set drop ""
+	    set id [$T identify $x $y]
+	    if {[DnDIsDropTarget $T $x $y]} {
+		set item [lindex $id 1]
+		
+		# If the item is not in the pre-drag selection
+		# (i.e. not being dragged) see if we can drop on it
+		if {[lsearch -exact $Priv(selection) $item] == -1} {
+		    set drop $item
+		    
+		    # We can drop if dragged item isn't an ancestor
+		    foreach item2 $Priv(selection) {
+			if {[$T item isancestor $item2 $item]} {
+			    set drop ""
+			    break
+			}
+		    }
+		    if {$drop ne ""} {
+			scan [$T item bbox $drop] "%d %d %d %d" x1 y1 x2 y2
+			if {$y < $y1 + 3} {
+			    set cursor top_side
+			    set dnd(drop,pos) prevsibling
+			} elseif {$y >= $y2 - 3} {
+			    set cursor bottom_side
+			    set dnd(drop,pos) nextsibling
+			} else {
+			    set cursor ""
+			    set dnd(drop,pos) lastchild
+			}
+		    }
+		}
+	    }
+
+	    if {[$T cget -cursor] ne $cursor} {
+		$T configure -cursor $cursor
+	    }
+
+	    # Select the item under the cursor (if any) and deselect
+	    # the previous drop-item (if any)
+	    $T selection modify $drop $dnd(drop)
+	    set dnd(drop) $drop
+
+	    # Show the dragimage in its new position
+	    set x [expr {[$T canvasx $x] - $dnd(drag,x)}]
+	    set y [expr {[$T canvasy $y] - $dnd(drag,y)}]
+	    $T dragimage offset $x $y
+	    $T dragimage configure -visible yes
+	}
+	default {
+	    TreeCtrl::Motion1 $T $x $y
+	}
+    }
+    return
+}
+
+proc ::RosterTree::DnDRelease1 {T x y} {
+    upvar TreeCtrl::Priv Priv
+    variable dnd
+
+    if {![info exists dnd(buttonMode)]} return
+    
+    switch $dnd(buttonMode) {
+	"drag" {
+	    TreeCtrl::AutoScanCancel $T
+	    $T dragimage configure -visible no
+	    $T selection modify {} $dnd(drop)
+	    $T configure -cursor ""
+	    if {$dnd(drop) ne ""} {
+		::TreeCtrl::TryEvent $T Drag receive \
+		    [list I $dnd(drop) l $Priv(selection)]
+	    }
+	    ::TreeCtrl::TryEvent $T Drag end {}
+	    unset dnd(buttonMode)
+	}
+	default {
+	    TreeCtrl::Release1 $T $x $y
+	}
+    }
+    return
+}
+
+proc ::RosterTree::DnDFree {T} {
+    variable dnd
+    array unset dnd *,$T
+}
+
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 proc ::RosterTree::SetBinds {} {
     variable T
@@ -803,22 +1163,6 @@ proc ::RosterTree::OnButtonMotion {x y} {
 	catch {after cancel $buttonAfterId}
 	unset buttonAfterId
     }    
-    return
-    
-    puts "::RosterTree::OnButtonMotion $x $y"
-    set id [$T identify $x $y]
-    puts "id=$id"
-    if {[lindex $id 0] ne "item"} {
-	return
-    }
-    set item [lindex $id 1]
-    set selection [$T selection get]
-    puts "selection=$selection"
-    foreach item $selection {
-	$T dragimage add $item
-    }
-    
-    
 }
 
 proc ::RosterTree::GetSelected {} {

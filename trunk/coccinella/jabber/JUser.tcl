@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.46 2007-09-16 14:55:26 matben Exp $
+# $Id: JUser.tcl,v 1.47 2007-10-06 15:22:40 matben Exp $
 
 package provide JUser 1.0
 
@@ -678,9 +678,6 @@ proc ::JUser::DoEdit {token} {
 
     set haveName 0
     set haveGroup 0
-
-    puts "::JUser::DoEdit"
-    parray state
 	
     # This is the only situation when a client "sets" a roster item.
     # The actual roster item is pushed back to us, and not set from here.
