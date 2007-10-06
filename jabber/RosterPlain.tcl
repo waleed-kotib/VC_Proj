@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.41 2007-09-29 14:10:12 matben Exp $
+# $Id: RosterPlain.tcl,v 1.42 2007-10-06 15:22:40 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -233,6 +233,24 @@ proc ::RosterPlain::Configure {_T} {
     bind TreeCtrlPost <<ThemeChanged>> {::RosterPlain::ThemeChanged }
     
     ConfigureStyles
+    
+    # List of lists: {column style element ...} specifying elements
+    # the user can click on or select with the selection rectangle
+    ::RosterTree::DnDSetDragSources $T {
+	{cTree styAvailable   eText eImage}
+	{cTree styUnavailable eText eImage}
+    }
+    ::RosterTree::DnDSetDropTargets $T {
+	{cTree styFolder eText eImage eNumText}
+	{cTree styHead   eText eImage eNumText}
+    }
+
+    # List of lists: {column style element ...} specifying elements
+    # added to the drag image when dragging selected items
+    TreeCtrl::SetDragImage $T {
+	{cTree styAvailable   eText eImage}
+	{cTree styUnavailable eText eImage}
+    }
 }
 
 proc ::RosterPlain::ThemeChanged {} {
