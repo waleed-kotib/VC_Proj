@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.245 2007-10-03 12:08:44 matben Exp $
+# $Id: Jabber.tcl,v 1.246 2007-10-06 13:23:28 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -286,6 +286,11 @@ namespace eval ::Jabber:: {
     
     # Method to fake jabber:iq.version response.
     set ::config(vers,full) ""
+    
+    # XEP-0092: Software Version; 
+    # ...an application MUST provide a way for a human user or administrator to
+    # disable sharing of information about the operating system. 
+    set ::config(vers,show-os) 0
     
     if {0} {
 	set ::config(caps,fake) 1
@@ -1759,20 +1764,21 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     }
     lappend opts -to $from
    
-    set os $tcl_platform(os)
-    if {[info exists tcl_platform(osVersion)]} {
-	append os " $tcl_platform(osVersion)"
-    }
     if {$config(vers,full) eq ""} {
 	set version $this(vers,full)
     } else {
 	set version $config(vers,full)
     }
-
     set subtags [list  \
       [wrapper::createtag name    -chdata $prefs(appName)]  \
-      [wrapper::createtag version -chdata $version]      \
-      [wrapper::createtag os      -chdata $os]]
+      [wrapper::createtag version -chdata $version]]
+    if {$config(vers,show-os)} {
+	set os $tcl_platform(os)
+	if {[info exists tcl_platform(osVersion)]} {
+	    append os " $tcl_platform(osVersion)"
+	}
+	lappend subtags [wrapper::createtag os -chdata $os]
+    }
     set xmllist [wrapper::createtag query -subtags $subtags  \
       -attrlist {xmlns jabber:iq:version}]
     eval {$jstate(jlib) send_iq "result" [list $xmllist]} $opts
