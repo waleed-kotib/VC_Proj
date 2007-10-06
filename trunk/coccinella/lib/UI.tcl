@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.172 2007-10-05 08:15:15 matben Exp $
+# $Id: UI.tcl,v 1.173 2007-10-06 15:13:46 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -1195,7 +1195,14 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
 
     # A trick to make this work for popup menus, which do not have a Menu parent.
     if {!$exists && [string equal [winfo class $wparent] "Menu"]} {
-	$wparent add cascade -label [mc $mLabel] -menu $m
+	set locname [mc $mLabel]
+	set ampersand [string first & $locname]
+	set mopts [list]
+	if {$ampersand != -1} {
+	    regsub -all & $locname "" locname
+	    lappend mopts -underline $ampersand
+	}
+	eval {$wparent add cascade -label $locname -menu $m} $mopts
     }
     
     # If we don't have a menubar, for instance, if embedded toplevel.
