@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.214 2007-09-21 13:13:50 matben Exp $
+# $Id: JUI.tcl,v 1.215 2007-10-07 10:32:42 matben Exp $
 
 package provide JUI 1.0
 
@@ -1583,6 +1583,16 @@ proc ::JUI::FindAgain {dir} {
     } else {
 	::Roster::FindAgain $dir
     }
+}
+
+# Support functions for <<Copy>> events to translate emoticons to :-)
+# See tk_textCopy
+
+proc ::JUI::CopyEvent {w} {
+    if {![catch {set data [$w get sel.first sel.last]}]} {
+	clipboard clear -displayof $w
+	clipboard append -displayof $w [::Text::TransformSelToPureText $w]
+    }   
 }
 
 #-------------------------------------------------------------------------------

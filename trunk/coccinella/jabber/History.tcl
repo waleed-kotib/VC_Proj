@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: History.tcl,v 1.33 2007-09-15 14:27:24 matben Exp $
+# $Id: History.tcl,v 1.34 2007-10-07 10:32:42 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -1026,6 +1026,11 @@ proc ::History::BuildHistory {jid dlgtype args} {
     bind $w <<FindAgain>>    [namespace code [list FindAgain $w]]
     bind $w <<FindPrevious>> [namespace code [list FindAgain $w -1]]
     bind $w <Destroy>       +[list [namespace code OnDestroy] $w]
+
+    bind $wtext <<Copy>> {
+	::JUI::CopyEvent %W
+	break
+    }
 
     set script [format {
 	update idletasks

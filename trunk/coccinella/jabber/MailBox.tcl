@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.129 2007-10-04 14:01:07 matben Exp $
+# $Id: MailBox.tcl,v 1.130 2007-10-07 10:32:42 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -576,7 +576,11 @@ proc ::MailBox::Build {args} {
     grid  $wyscmsg  -column 1 -row 0 -sticky ns
     grid columnconfigure $wfrmsg 0 -weight 1
     grid rowconfigure $wfrmsg 0 -weight 1
-    
+
+    bind $wtextmsg <<Copy>> {
+	::JUI::CopyEvent %W
+	break
+    }
     $wpane add $wfrmbox -weight 1
     $wpane add $wfrmsg  -weight 1
     

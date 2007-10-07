@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.213 2007-10-05 14:10:22 matben Exp $
+# $Id: Chat.tcl,v 1.214 2007-10-07 10:32:41 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1484,6 +1484,11 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     
     # The tags.
     ConfigureTextTags $w $wtext
+    
+    bind $wtext <<Copy>> {
+	::JUI::CopyEvent %W
+	break
+    }
 
     # Text send.
     if {$config(ui,aqua-text)} {

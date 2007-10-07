@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.70 2007-10-04 09:33:25 matben Exp $
+# $Id: Utils.tcl,v 1.71 2007-10-07 10:32:42 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -783,12 +783,20 @@ proc ::Text::InsertURL {w str url tag} {
     incr idurl
 }
 
+proc ::Text::TransformSelToPureText {w } {
+    variable puretext
+    
+    unset -nocomplain puretext($w)
+    set puretext($w) ""
+    foreach {key value index} [$w dump sel.first sel.last] {
+	TransformToPureTextCallback $w $key $value $index
+    }
+    return $puretext($w)
+}
+
 proc ::Text::TransformToPureText {w args} {    
     variable puretext
     
-    if {[winfo class $w] ne "Text"} {
-	error {TransformToPureText needs a text widget here}
-    }
     unset -nocomplain puretext($w)
     set puretext($w) ""
     foreach {key value index} [$w dump 1.0 end] {
