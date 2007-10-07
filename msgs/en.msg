@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.205 2007-10-04 13:39:34 matben Exp $
+#   $Id: en.msg,v 1.206 2007-10-07 14:27:41 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -277,7 +277,7 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset en mAboutCoccinella      {&About Coccinella}
-::msgcat::mcset en mAction               {Action}
+::msgcat::mcset en mAction               {&Action}
 ::msgcat::mcset en mAdHocCommands        {C&ommands}
 ::msgcat::mcset en mAddContact...        {&Add Contact...}
 ::msgcat::mcset en mAddSpeechBubble      {Add Speech Bubble}
@@ -313,7 +313,7 @@
 ::msgcat::mcset en mDecreasing           {&Decreasing}
 ::msgcat::mcset en mDiscoverServer...    {&Discover Server...}
 ::msgcat::mcset en mDoNotDisturb         {Do Not Disturb}
-::msgcat::mcset en mEdit                 {Edit}
+::msgcat::mcset en mEdit                 {&Edit}
 ::msgcat::mcset en mEditBookmarks...     {Edit &Bookmarks...}
 ::msgcat::mcset en mEditBC...            {Edit &Business Card...}
 ::msgcat::mcset en mEditContact...       {&Edit Contact...}
@@ -326,7 +326,7 @@
 ::msgcat::mcset en mExportImage...       {Export Image...}
 ::msgcat::mcset en mExportMovie...       {Export Movie...}
 ::msgcat::mcset en mExtendedAway         {Extended Away}
-::msgcat::mcset en mFile                 {File}
+::msgcat::mcset en mFile                 {&File}
 ::msgcat::mcset en mFill                 {Fill}
 ::msgcat::mcset en mFillColor...         {Fill Color...}
 ::msgcat::mcset en mFind                 {Find}
@@ -347,7 +347,7 @@
 ::msgcat::mcset en mImportImage/Movie... {&Import Image/Movie...}
 ::msgcat::mcset en mInbox...             {&Inbox...}
 ::msgcat::mcset en mIncreasing           {&Increasing}
-::msgcat::mcset en mInfo                 {Info}
+::msgcat::mcset en mInfo                 {&Info}
 ::msgcat::mcset en mInvisible            {Invisible}
 ::msgcat::mcset en mItalic               {Italic}
 ::msgcat::mcset en mJiveCall             {Call}
@@ -356,7 +356,7 @@
 ::msgcat::mcset en mLarger               {Larger}
 ::msgcat::mcset en mLargerFont           {Larger}
 ::msgcat::mcset en mLastLogin/Activity   {Last Login/Activity}
-::msgcat::mcset en mLibrary              {Library}
+::msgcat::mcset en mLibrary              {&Library}
 ::msgcat::mcset en mLineSmoothness       {Line Smoothness}
 ::msgcat::mcset en mLocalTime            {Local Time...}
 ::msgcat::mcset en mLogin...             {Login...}
@@ -383,8 +383,8 @@
 ::msgcat::mcset en mNewPassword...       {New P&assword...}
 ::msgcat::mcset en mPaste                {&Paste}
 ::msgcat::mcset en mPieslice             {Pieslice}
-::msgcat::mcset en mPlugins              {Plugins}
-::msgcat::mcset en mPreferences          {Preferences}
+::msgcat::mcset en mPlugins              {Plu&gins}
+::msgcat::mcset en mPreferences          {&Preferences}
 ::msgcat::mcset en mPreferences...       {&Preferences...}
 ::msgcat::mcset en mPrint...             {&Print...}
 ::msgcat::mcset en mQuit                 {&Quit}
