@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.76 2007-09-27 13:39:56 matben Exp $
+# $Id: Init.tcl,v 1.77 2007-10-07 08:23:41 matben Exp $
 
 namespace eval ::Init {
     
@@ -699,6 +699,9 @@ proc ::Init::LoadPackages {} {
     # tile may be statically linked (Windows).
     if {[lsearch -exact [info loaded] {{} tile}] >= 0} {
 	package require tile 0.7
+    } elseif {[llength [info commands ttk::style]]} {
+	# 8.5b1+
+	# interp alias {} style {} ttk::style
     } else {
     
 	# We must be sure script libraries for tile come from us (tcl_findLibrary).

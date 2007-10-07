@@ -48,6 +48,7 @@ package ifneeded tinyfileutils 1.0 [list source [file join $dir tinyfileutils.tc
 package ifneeded tinyhttpd 1.0 [list source [file join $dir tinyhttpd.tcl]]
 package ifneeded TkInteractor 1.0 [list source [file join $dir TkInteractorPackage.tcl]]
 package ifneeded tree 1.0 [list source [file join $dir tree.tcl]]
+package ifneeded TreeCtrlDnD 0.1 [list source [file join $dir TreeCtrlDnD.tcl]]
 package ifneeded treeutil 1.0 [list source [file join $dir treeutil.tcl]]
 package ifneeded ttoolbar 1.0 [list source [file join $dir ttoolbar.tcl]]
 package ifneeded undo 0.1 [list source [file join $dir undo.tcl]]
