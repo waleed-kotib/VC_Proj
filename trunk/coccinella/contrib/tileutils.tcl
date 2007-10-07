@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.69 2007-10-02 13:34:43 matben Exp $
+# $Id: tileutils.tcl,v 1.70 2007-10-07 08:23:40 matben Exp $
 #
 
 package require treeutil
@@ -1024,6 +1024,7 @@ if {0} {
     if {0} {
 	package require tkpath
 
+	set str "All MSN Messenger wannabies:\nDid you know how to make text widgets with rounded corners?"
 	set size 32
 	set tkpath::antialias 1
 	set S [::tkpath::surface new $size $size]
@@ -1047,16 +1048,58 @@ if {0} {
 	toplevel .tt
 	set f .tt.f
 	ttk::frame $f -padding 20
-	pack $f
+	pack $f -fill x
 	ttk::frame $f.cont -style RR.TEntry
-	pack $f.cont
+	pack $f.cont 
 	text $f.t -wrap word -borderwidth 0 -highlightthickness 0 \
-	  -width 40 -height 8
+	  -width 40 -height 6
 	bind $f.t <FocusIn>  [list $f.cont state focus]
 	bind $f.t <FocusOut> [list $f.cont state {!focus}]
-	pack $f.t -in $f.cont -padx 5 -pady 5 -fill both -expand 1
+	pack $f.t -in $f.cont -padx 6 -pady 6 -fill both -expand 1
 	
-	$f.t insert end "All MSN Messenger wannabies:\nDid you know how to make text widgets with rounded corners?"
+	$f.t insert end $str
+	
+	# WIth Aqua style focus ring.
+	set S [::tkpath::surface new $size $size]
+	$S create prect 3 3 29 29 -rx 10 -fill white -stroke "#c3c3c3" \
+	  -strokewidth 2
+	set imborder [$S copy [image create photo]]
+	$S destroy
+
+	set S [::tkpath::surface new $size $size]
+	$S create prect 3 3 29 29 -rx 10 -fill white -stroke "#c3c3c3" \
+	  -strokewidth 2
+	$S create prect 0.5 0.5 31.5 31.5 -rx 12 -stroke "#afc9e1"
+	$S create prect 1.5 1.5 30.5 30.5 -rx 11 -stroke "#93b8d9"
+	$S create prect 2.5 2.5 29.5 29.5 -rx 10 -stroke "#81a7ca"
+	set imfocus [$S copy [image create photo]]
+	$S destroy
+	
+	style element create RRAqua.background image $imborder \
+	  -border {12 12 12 12} -padding {0} -sticky news \
+	  -map [list {focus} $imfocus]
+	style layout RRAqua.TEntry {
+	    RRAqua.background -sticky news -children {
+		Entry.padding -sticky news -children {
+		    Entry.textarea -sticky news
+		}
+	    }
+	}
+	style map RRAqua.TEntry  \
+	  -foreground {{background} "#363636" {} black}
+
+	set f .tt.aqua
+	ttk::frame $f -padding 20
+	pack $f -fill x
+	ttk::frame $f.cont -style RRAqua.TEntry
+	pack $f.cont
+	text $f.t -wrap word -borderwidth 0 -highlightthickness 0 \
+	  -width 40 -height 6 -font {{Lucida Grande} 16}
+	bind $f.t <FocusIn>  [list $f.cont state focus]
+	bind $f.t <FocusOut> [list $f.cont state {!focus}]
+	pack $f.t -in $f.cont -padx 7 -pady 7 -fill both -expand 1
+	
+	$f.t insert end $str
 	
     }
 }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.42 2007-10-06 15:22:40 matben Exp $
+# $Id: RosterPlain.tcl,v 1.43 2007-10-07 08:23:41 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -190,7 +190,8 @@ proc ::RosterPlain::Configure {_T} {
 
     set S [$T style create styAvailable]
     $T style elements $S {eBorder eNotify eImage eText eAltImage1 eAltImage0}
-    $T style layout $S eText     -squeeze x -iexpand xy -sticky w
+    #$T style layout $S eText     -squeeze x -iexpand xy -sticky w
+    $T style layout $S eText     -squeeze x -iexpand y -sticky w
     $T style layout $S eImage    -expand ns -minheight $minH
     $T style layout $S eAltImage0 -expand ns
     $T style layout $S eAltImage1 -expand ns
@@ -199,7 +200,8 @@ proc ::RosterPlain::Configure {_T} {
 
     set S [$T style create styUnavailable]
     $T style elements $S {eBorder eNotify eImage eText eAltImage1 eAltImage0}
-    $T style layout $S eText     -squeeze x -iexpand xy -sticky w
+    #$T style layout $S eText     -squeeze x -iexpand xy -sticky w
+    $T style layout $S eText     -squeeze x -iexpand y -sticky w
     $T style layout $S eImage    -expand ns -minheight $minH
     $T style layout $S eAltImage0 -expand ns
     $T style layout $S eAltImage1 -expand ns
@@ -235,21 +237,17 @@ proc ::RosterPlain::Configure {_T} {
     ConfigureStyles
     
     # List of lists: {column style element ...} specifying elements
-    # the user can click on or select with the selection rectangle
-    ::RosterTree::DnDSetDragSources $T {
+    # added to the drag image when dragging selected items.
+    ::TreeCtrl::DnDSetDragSources $T {
 	{cTree styAvailable   eText eImage}
 	{cTree styUnavailable eText eImage}
-    }
-    ::RosterTree::DnDSetDropTargets $T {
-	{cTree styFolder eText eImage eNumText}
-	{cTree styHead   eText eImage eNumText}
     }
 
     # List of lists: {column style element ...} specifying elements
-    # added to the drag image when dragging selected items
-    TreeCtrl::SetDragImage $T {
-	{cTree styAvailable   eText eImage}
-	{cTree styUnavailable eText eImage}
+    # the user can drop items on.
+    ::TreeCtrl::DnDSetDropTargets $T {
+	{cTree styFolder eText eImage eNumText}
+	{cTree styHead   eText eImage eNumText}
     }
 }
 

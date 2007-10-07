@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.160 2007-09-12 13:37:55 matben Exp $	
+# $Id: Coccinella.tcl,v 1.161 2007-10-07 08:23:40 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -70,7 +70,7 @@ switch -- $this(platform) {
     }
     macosx {
 	
-	# CoreGraphics don't align to pixwl boundaries by default!
+	# CoreGraphics don't align to pixel boundaries by default!
 	set tk::mac::useCGDrawing 0
     }
 }
