@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.77 2007-10-07 08:23:41 matben Exp $
+# $Id: RosterTree.tcl,v 1.78 2007-10-07 15:27:35 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -404,11 +404,13 @@ proc ::RosterTree::New {w} {
     $T notify install <Drag-begin>
     $T notify install <Drag-end>
     $T notify install <Drag-receive>
+    $T notify install <Drag-enter>
+    $T notify install <Drag-leave>
     
     $T notify bind $T <Drag-receive> {
 	::RosterTree::NotifyDragReceive %W %l %I
     }
-    
+
     return $T
 }
 
@@ -417,7 +419,7 @@ proc ::RosterTree::NotifyDragReceive {T dragged target} {
     
     set jlib $jstate(jlib)
     
-    puts "::RosterTree::NotifyDragReceive dragged=$dragged, target=$target"
+    #puts "::RosterTree::NotifyDragReceive dragged=$dragged, target=$target"
     
     # Protect for a situation where items have disapperared.
     if {[$T item id $target] eq ""} {
