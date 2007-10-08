@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.78 2007-10-07 15:27:35 matben Exp $
+# $Id: RosterTree.tcl,v 1.79 2007-10-08 06:21:14 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -418,22 +418,34 @@ proc ::RosterTree::NotifyDragReceive {T dragged target} {
     upvar ::Jabber::jstate jstate
     
     set jlib $jstate(jlib)
-    
-    #puts "::RosterTree::NotifyDragReceive dragged=$dragged, target=$target"
-    
+        
     # Protect for a situation where items have disapperared.
     if {[$T item id $target] eq ""} {
 	return
     }
     
+    # Find target group or empty.
     set tag [GetTagOfItem $target]
-    if {[lindex $tag 0] eq "group"} {
+    set tag0 [lindex $tag 0]
+    if {$tag0 eq "jid"} {
+	set parent [$T item parent $target]
+	set ptag [GetTagOfItem $parent]
+	set ptag0 [lindex $ptag 0]
+	if {$ptag0 eq "group"} {
+	    set groups [list [lindex $ptag 1]]
+	} elseif {$ptag0 eq "head"} {
+	    set groups ""
+	} else {
+	    return
+	}
+    } elseif {$tag0 eq "group"} {
 	set groups [list [lindex $tag 1]]
-    } elseif {[lindex $tag 0] eq "head"} {
-	set groups ""
+    } elseif {$tag0 eq "head"} {
+	set groups ""	
     } else {
 	return
     }
+    
     foreach item $dragged {
 	if {[$T item id $item] eq ""} {
 	    continue

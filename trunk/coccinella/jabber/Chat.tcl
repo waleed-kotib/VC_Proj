@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.214 2007-10-07 10:32:41 matben Exp $
+# $Id: Chat.tcl,v 1.215 2007-10-08 06:21:14 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -187,8 +187,9 @@ namespace eval ::Chat:: {
     variable allowMultiThreadPerJID 0
     
     set ::config(chat,show-head) 1
-    set ::config(chat,compose-notify-send) 1
-    set ::config(chat,compose-notify-recv) 1
+    set ::config(chat,notify-send) 1
+    set ::config(chat,notify-recv) 1
+    set ::config(chat,notify-show) 1
 }
 
 # Chat::OnToolButton --
@@ -461,7 +462,7 @@ proc ::Chat::NewChat {threadID jid args} {
 #       updates UI.
 
 proc ::Chat::GotMsg {body args} {
-    global  prefs
+    global  prefs config
 
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
@@ -512,7 +513,7 @@ proc ::Chat::GotMsg {body args} {
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
 
-            #First ChatState is active
+            # First ChatState is active
             set chatstate(chatstate) active
 	    
 	    eval {::hooks::run newChatThreadHook $body} $args
@@ -555,7 +556,7 @@ proc ::Chat::GotMsg {body args} {
         }
     }
 
-    if {$chatstate(havecs) eq "true"} {
+    if {$chatstate(havecs) eq "true" && $config(chat,notify-show)} {
         if { $msgChatState ne "" } {
 	    set jid2 [jlib::barejid $chatstate(jid)]
             set name [::Jabber::RosterCmd getname $jid2]
@@ -3087,6 +3088,11 @@ proc ::Chat::GetFirstSashPos { } {
 # Handle incoming jabber:x:event (XEP-0022).
 
 proc ::Chat::XEventHandleAnyXElem {chattoken args} {
+    global  config
+    
+    if {!$config(chat,notify-recv)} {
+	return
+    }
 
     # See if we've got a jabber:x:event (XEP-0022).
     # 
@@ -3223,7 +3229,7 @@ proc ::Chat::XEventSendCompose {chattoken} {
     if {$chatstate(xevent,type) eq "chat"} {
 	set opts [list -thread $chatstate(threadid) -type chat]
     }
-    if {$config(chat,compose-notify-send)} {
+    if {$config(chat,notify-send)} {
 	set xelems [list \
 	  [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
 	  -subtags [list  \
@@ -3270,7 +3276,7 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
     if {$chatstate(xevent,type) eq "chat"} {
 	set opts [list -thread $chatstate(threadid) -type chat]
     }
-    if {$config(chat,compose-notify-send)} {
+    if {$config(chat,notify-send)} {
 	set xelems [list \
 	  [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
 	  -subtags [list [wrapper::createtag "id" -chdata $id]]]]
@@ -3311,14 +3317,17 @@ proc ::Chat::ChangeChatState {chattoken trigger} {
 }
 
 proc ::Chat::SendChatState {chattoken state} {
+    global  config
     upvar 0 $chattoken chatstate
     upvar ::Jabber::xmppxmlns xmppxmlns
 
-    set cselems [list  \
-      [wrapper::createtag $state -attrlist [list xmlns $xmppxmlns(chatstates)]]]
+    if {$config(chat,notify-send)} {
+	set csE [list [wrapper::createtag $state \
+	  -attrlist [list xmlns $xmppxmlns(chatstates)]]]
 
-    eval {::Jabber::JlibCmd send_message $chatstate(jid)  \
-      -thread $chatstate(threadid) -type chat -xlist $cselems}
+	::Jabber::JlibCmd send_message $chatstate(jid)  \
+	  -thread $chatstate(threadid) -type chat -xlist $csE
+    }
 }
 
 # Preference page --------------------------------------------------------------

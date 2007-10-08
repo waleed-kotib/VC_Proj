@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.43 2007-10-07 08:23:41 matben Exp $
+# $Id: RosterPlain.tcl,v 1.44 2007-10-08 06:21:14 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -246,8 +246,10 @@ proc ::RosterPlain::Configure {_T} {
     # List of lists: {column style element ...} specifying elements
     # the user can drop items on.
     ::TreeCtrl::DnDSetDropTargets $T {
-	{cTree styFolder eText eImage eNumText}
-	{cTree styHead   eText eImage eNumText}
+	{cTree styAvailable   eText eImage}
+	{cTree styUnavailable eText eImage}
+	{cTree styFolder      eText eImage eNumText}
+	{cTree styHead        eText eImage eNumText}
     }
 }
 
