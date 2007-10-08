@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.79 2007-10-08 06:21:14 matben Exp $
+# $Id: RosterTree.tcl,v 1.80 2007-10-08 15:00:09 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -410,8 +410,87 @@ proc ::RosterTree::New {w} {
     $T notify bind $T <Drag-receive> {
 	::RosterTree::NotifyDragReceive %W %l %I
     }
+    
+    if {[tk windowingsystem] ne "aqua"} {
+	if {![catch {package require tkdnd}]} {
+	    InitDnD $T
+	}
+    }
 
     return $T
+}
+
+# DnD files to roster items.
+
+proc ::RosterTree::InitDnD {win} {
+    
+    dnd bindtarget $win text/uri-list <Drop> {
+	::RosterTree::DnDDrop %W %D %T %x %y
+    }
+    dnd bindtarget $win text/uri-list <Drag> {
+	::RosterTree::DnDDrag %W %A %a %D %T %x %y
+    }
+    dnd bindtarget $win text/uri-list <DragEnter> {
+	set act [::RosterTree::DnDEnter %W %A %D %T]
+	#return -code break $act
+    }
+    dnd bindtarget $win text/uri-list <DragLeave> {
+	::RosterTree::DnDLeave %W %D %T
+    }
+}
+
+proc ::RosterTree::DnDDrop {win data dndtype x y} {
+
+    set f [lindex $data 0]
+    set f [string map {file:// ""} $f]
+    set f [uriencode::decodefile $f]
+    puts "::RosterTree::DnDDrop $data $dndtype"
+    set id [$T identify $x $y]
+    if {[lindex $id 0] eq "Item"} {
+	lassign $id where item arg1 arg2 arg3 arg4
+	if {($arg1 eq "column") && ($arg3 eq "element")} {
+	    set item [lindex $id 1]
+	    set tag [GetTagOfItem $item]
+	    if {[lindex $tag 0] eq "jid"} {
+		set jid [lindex $item 1]
+		::FTrans::Send $jid -filename $f
+	    }
+	}
+    }
+}
+
+proc ::RosterTree::DnDDrag {win action actions data dndtype x y} {
+    
+    set T $win
+    puts "::RosterTree::DnDDrag action=$action actions=$actions, data=$data dndtype=$dndtype"
+    set id [$T identify $x $y]
+    puts "id=$id"
+    set act "none"
+    $T selection clear
+
+    if {[lindex $id 0] eq "Item"} {
+	lassign $id where item arg1 arg2 arg3 arg4
+	if {($arg1 eq "column") && ($arg3 eq "element")} {
+	    set item [lindex $id 1]
+	    set tag [GetTagOfItem $item]
+	    if {[lindex $tag 0] eq "jid"} {
+		$T selection add $item
+		set act "copy"
+	    }
+	}
+    }
+    return $act
+}
+
+proc ::RosterTree::DnDEnter {win action data dndtype} {
+    puts "::RosterTree::DnDEnter $action $data $dndtype"
+    focus $win
+    set act "none"
+    return $act
+}
+
+proc ::RosterTree::DnDLeave {win data dndtype} {	
+    focus [winfo toplevel $win] 
 }
 
 proc ::RosterTree::NotifyDragReceive {T dragged target} {
@@ -885,7 +964,7 @@ proc ::RosterTree::OnFocusOut {} {
 proc ::RosterTree::GetSelected {} {
     variable T
     
-    set selected {}
+    set selected [list]
     foreach item [$T selection get] {
 	set tags [GetTagOfItem $item]
 	lappend selected $tags
