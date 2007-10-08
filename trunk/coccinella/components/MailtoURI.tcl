@@ -17,14 +17,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: MailtoURI.tcl,v 1.4 2007-09-12 13:37:55 matben Exp $
+# $Id: MailtoURI.tcl,v 1.5 2007-10-08 12:09:17 matben Exp $
 
 package require uri
 package require uriencode
 
 namespace eval ::MailtoURI {}
 
-proc ::MailtoURI::Init { } {
+proc ::MailtoURI::Init {} {
 
     # Perhaps we shal simplify this to: {^mailto:.+}
     variable mailtoRE $::uri::mailto::url
@@ -35,14 +35,19 @@ proc ::MailtoURI::Init { } {
 
 proc ::MailtoURI::TextCmd {uri} {
     global  this
-        
+    
     switch -- $this(platform) {
 	macosx {
 	    exec open $uri
 	}
 	unix {
+	    # Special.
 	    set mail [::Utils::UnixGetEmailClient]
-	    catch {exec $mail $uri &}
+	    if {$mail eq "gmail"} {
+		::Utils::UnixOpenUrl "gmail.com"
+	    } else {
+		catch {exec $mail $uri &}
+	    }
 	}
 	windows {
 	    ::Windows::OpenURI $uri

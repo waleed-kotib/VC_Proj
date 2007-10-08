@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.57 2007-10-05 08:15:15 matben Exp $
+# $Id: Emoticons.tcl,v 1.58 2007-10-08 12:09:17 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -715,8 +715,10 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     }
     PrefsSetCmd $tmpSet
     
-    if {![catch {package require tkdnd}]} {
-	DnDInit $wpreftext
+    if {[tk windowingsystem] ne "aqua"} {
+	if {![catch {package require tkdnd}]} {
+	    DnDInit $wpreftext
+	}
     }
 }
 

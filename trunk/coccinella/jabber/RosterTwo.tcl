@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTwo.tcl,v 1.23 2007-08-21 14:12:20 matben Exp $
+# $Id: RosterTwo.tcl,v 1.24 2007-10-08 12:09:17 matben Exp $
 
 package require RosterTree
 
@@ -100,6 +100,9 @@ proc ::RosterTwo::Configure {_T} {
 
     set S [$T style create styTag]
     $T style elements $S {eText}
+    
+    ::TreeCtrl::DnDSetDragSources $T {}
+    ::TreeCtrl::DnDSetDropTargets $T {}
 }
 
 # RosterTwo::Init --

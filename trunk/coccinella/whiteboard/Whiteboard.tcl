@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.86 2007-09-25 12:46:27 matben Exp $
+# $Id: Whiteboard.tcl,v 1.87 2007-10-08 12:09:17 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -316,9 +316,11 @@ proc ::WB::Init {} {
         
     # Drag and Drop support...
     set prefs(haveTkDnD) 0
-    if {![catch {package require tkdnd}]} {
-	set prefs(haveTkDnD) 1
-    }    
+    if {[tk windowingsystem] ne "aqua"} {
+	if {![catch {package require tkdnd}]} {
+	    set prefs(haveTkDnD) 1
+	}    
+    }
 
     variable animateWave
     

@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.206 2007-10-07 14:27:41 matben Exp $
+#   $Id: en.msg,v 1.207 2007-10-08 12:09:17 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -134,6 +134,7 @@
 ::msgcat::mcset en Play
 ::msgcat::mcset en Port
 ::msgcat::mcset en Ports
+::msgcat::mcset en Preferences
 ::msgcat::mcset en Previous
 ::msgcat::mcset en Print
 ::msgcat::mcset en Priority
@@ -608,6 +609,7 @@
 ::msgcat::mcset en {Tel (voice)}
 ::msgcat::mcset en {Text-to-Speech}
 ::msgcat::mcset en {Thread started}
+::msgcat::mcset en {Update Check}
 ::msgcat::mcset en {Use HTTP transport}
 ::msgcat::mcset en {Use SASL authentication}
 ::msgcat::mcset en {Use SSL for security}
