@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.215 2007-10-08 06:21:14 matben Exp $
+# $Id: Chat.tcl,v 1.216 2007-10-08 12:09:17 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1091,9 +1091,11 @@ proc ::Chat::BuildInit {} {
     variable buildInited
     variable havednd
     
-    if {![catch {package require tkdnd}]} {
-	set havednd 1
-    }       
+    if {[tk windowingsystem] ne "aqua"} {
+	if {![catch {package require tkdnd}]} {
+	    set havednd 1
+	}       
+    }
     set buildInited 1
 }
 

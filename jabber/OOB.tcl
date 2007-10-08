@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: OOB.tcl,v 1.58 2007-09-25 12:46:27 matben Exp $
+# $Id: OOB.tcl,v 1.59 2007-10-08 12:09:17 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -52,9 +52,11 @@ proc ::OOB::InitHook { } {
     
     # Drag and Drop support...
     set locals(haveTkDnD) 0
-    if {![catch {package require tkdnd}]} {
-	set locals(haveTkDnD) 1
-    }       
+    if {[tk windowingsystem] ne "aqua"} {
+	if {![catch {package require tkdnd}]} {
+	    set locals(haveTkDnD) 1
+	}      
+    }
 }
 
 proc ::OOB::InitJabberHook {jlibname} {

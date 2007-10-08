@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.106 2007-09-29 14:10:12 matben Exp $
+# $Id: Preferences.tcl,v 1.107 2007-10-08 12:09:17 matben Exp $
  
 package require mnotebook
 
@@ -171,7 +171,7 @@ proc ::Preferences::Build {args} {
     ::UI::Toplevel $w -class Preferences \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::Preferences::CloseHook
-    wm title $w [mc mPreferences]
+    wm title $w [mc Preferences]
     wm withdraw $w
     ::UI::SetWindowPosition $w
     

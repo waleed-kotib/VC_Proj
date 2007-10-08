@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.71 2007-10-07 10:32:42 matben Exp $
+# $Id: Utils.tcl,v 1.72 2007-10-08 12:09:17 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -294,7 +294,10 @@ proc ::Utils::UnixGetAllWebBrowsers {} {
 proc ::Utils::UnixGetEmailClient {} {
     global  prefs
     
-    set mail {}
+    set mail ""
+    if {$prefs(mailClient) eq "gmail"} {
+	return "gmail"
+    }
     set e [auto_execok $prefs(mailClient)]
     if {[llength $e]} {
 	set mail [lindex $e 0]
@@ -315,6 +318,8 @@ proc ::Utils::UnixGetAllEmailClients {} {
 	    lappend mailers [lindex $e 0]
 	}
     }
+    # Special.
+    lappend mailers gmail
     return [lsort -unique $mailers]
 }
 
@@ -332,7 +337,7 @@ proc ::Utils::KDEGetEmailClient {} {
     if {[llength [set e [auto_execok $name]]]} {
 	return $e
     } else {
-	return {}
+	return
     }
 }
 

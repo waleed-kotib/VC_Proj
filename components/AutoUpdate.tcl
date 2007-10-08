@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoUpdate.tcl,v 1.25 2007-09-20 12:04:38 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.26 2007-10-08 12:09:17 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -170,7 +170,7 @@ proc ::AutoUpdate::Command {locale token} {
 	if {[package vcompare $this(vers,full) $releaseA(version)] == -1} {
 	    Dialog $releaseAttr $message $changesL
 	} elseif {!$opts(-silent)} {
-	    ::UI::MessageBox -title [mc mUpdateCheck] -icon info -type ok \
+	    ::UI::MessageBox -title [mc "Update Check"] -icon info -type ok \
 	      -message [mc messaupdatelatest $this(vers,full)]
 	}
 	tinydom::cleanup $token

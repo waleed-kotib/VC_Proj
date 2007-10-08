@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.41 2007-09-15 14:27:24 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.42 2007-10-08 12:09:17 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -88,6 +88,7 @@ namespace eval ::RosterAvatar {
     # Event hooks.
     ::hooks::register  discoInfoHook        ::RosterAvatar::DiscoInfoHook
     ::hooks::register  rosterTreeConfigure  ::RosterAvatar::TreeConfigureHook
+    ::hooks::register  prefsInitHook        ::RosterAvatar::InitPrefsHook
 
     # We should have a set of sizes to choose from: 32, 48 and 64
     variable avatarSize 32
@@ -105,6 +106,16 @@ namespace eval ::RosterAvatar {
 	invisible     5
 	unavailable   6
     }
+}
+
+proc ::RosterAvatar::InitPrefsHook {} {
+    upvar ::Jabber::jprefs jprefs
+
+    set jprefs(rost,avatar-sortColumn) cTree
+    
+    ::PrefUtils::Add [list  \
+      [list ::Jabber::jprefs(rost,avatar-sortColumn)   jprefs_rost_avatar-sortColumn $jprefs(rost,avatar-sortColumn)]  \
+      ]
 }
 
 proc ::RosterAvatar::InitDB { } {
@@ -202,6 +213,7 @@ proc ::RosterAvatar::InitDB { } {
 
     option add *Roster.avatar:styFolder:eImage-padx             2       widgetDefault
     option add *Roster.avatar:styFolder:eImage-pady             {1 2}   widgetDefault
+    option add *Roster.avatar:styFolder:eFolderImage-padx       {4 0}   widgetDefault
     option add *Roster.avatar:styFolder:eFolderText-padx        4       widgetDefault
     option add *Roster.avatar:styFolder:eNumText-padx           4       widgetDefault
 
@@ -216,10 +228,12 @@ proc ::RosterAvatar::InitDB { } {
     option add *Roster.flatsmall:eOffText-font        CociSmallFont     widgetDefault
     option add *Roster.flatsmall:eFolderText-font     $fontFS           widgetDefault    
 
+    option add *Roster.flat:styFolder:eFolderImage-padx         {4 0}   widgetDefault
     option add *Roster.flat:styFolder:eFolderImage-pady         {1 2}   widgetDefault
     option add *Roster.flat:styFolder:eFolderText-padx          4       widgetDefault
     option add *Roster.flat:styFolder:eFolderText-pady          4       widgetDefault
 
+    option add *Roster.flatsmall:styFolder:eFolderImage-padx    {4 0}   widgetDefault
     option add *Roster.flatsmall:styFolder:eFolderImage-pady    {1 2}   widgetDefault
     option add *Roster.flatsmall:styFolder:eFolderText-padx     4       widgetDefault
     option add *Roster.flatsmall:styFolder:eFolderText-pady     4       widgetDefault
@@ -261,7 +275,6 @@ proc ::RosterAvatar::Configure {_T} {
     variable avatarSize
     variable avatarDefault 
     variable rosterBaseStyle
-    variable sortColumn
     variable initedDB
     
     set T $_T
@@ -318,7 +331,8 @@ proc ::RosterAvatar::Configure {_T} {
 
     $T column create -tags cStatus  \
       -itembackground $itemBackground -resize 0 -minwidth 24 -button 1  \
-      -borderwidth $bd -background $bg -image $simage -textcolor $fg
+      -borderwidth $bd -background $bg -image $simage -textcolor $fg \
+      -imagepadx {6 14}
     $T column create -tags cTree    \
       -itembackground $itemBackground -resize 0 -expand 1 -squeeze 1  \
       -text [mc "Contact Name"] -button 1 -arrow up -borderwidth $bd \
@@ -447,8 +461,9 @@ proc ::RosterAvatar::Configure {_T} {
     $T notify bind $T <ColumnDrag-receive> {
 	%T column move %C %b
     }
-    
-    set sortColumn cTree
+        
+    ::TreeCtrl::DnDSetDragSources $T {}
+    ::TreeCtrl::DnDSetDropTargets $T {}
 
     ::RosterTree::DBOptions $rosterBaseStyle
     ::RosterTree::DBOptions $optionClass
@@ -535,8 +550,10 @@ proc ::RosterAvatar::EditEnd {item} {
 
 proc ::RosterAvatar::Sort {item order} {
     variable T
-    variable sortColumn
-    
+    upvar ::Jabber::jprefs jprefs
+
+    set sortColumn $jprefs(rost,avatar-sortColumn)
+
     array set arrowMap {
 	-increasing   up
 	-decreasing   down
@@ -549,7 +566,11 @@ proc ::RosterAvatar::Sort {item order} {
 }
 
 proc ::RosterAvatar::HeaderCmd {T C} {
-    variable sortColumn
+    upvar ::Jabber::jprefs jprefs
+    
+    set sortColumn $jprefs(rost,avatar-sortColumn)
+    set ctag [$T column cget $C -tags]
+    #puts "::RosterAvatar::HeaderCmd C=$C, sortColumn=$sortColumn, ctag=$ctag"    
     
     if {[$T column compare $C == $sortColumn]} {
 	if {[$T column cget $sortColumn -arrow] eq "down"} {
@@ -568,7 +589,7 @@ proc ::RosterAvatar::HeaderCmd {T C} {
 	    set arrow up
 	}
 	$T column configure $sortColumn -arrow none
-	set sortColumn $C
+	set jprefs(rost,avatar-sortColumn) $ctag
     }
     $T column configure $C -arrow $arrow
     
