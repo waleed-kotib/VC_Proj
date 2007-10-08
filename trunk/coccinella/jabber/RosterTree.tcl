@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.80 2007-10-08 15:00:09 matben Exp $
+# $Id: RosterTree.tcl,v 1.81 2007-10-08 15:19:59 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -441,19 +441,21 @@ proc ::RosterTree::InitDnD {win} {
 
 proc ::RosterTree::DnDDrop {win data dndtype x y} {
 
+    set T $win
     set f [lindex $data 0]
     set f [string map {file:// ""} $f]
     set f [uriencode::decodefile $f]
     puts "::RosterTree::DnDDrop $data $dndtype"
     set id [$T identify $x $y]
-    if {[lindex $id 0] eq "Item"} {
+    if {[lindex $id 0] eq "item"} {
 	lassign $id where item arg1 arg2 arg3 arg4
-	if {($arg1 eq "column") && ($arg3 eq "element")} {
-	    set item [lindex $id 1]
+	if {($arg1 eq "column") && ($arg3 eq "elem")} {
 	    set tag [GetTagOfItem $item]
 	    if {[lindex $tag 0] eq "jid"} {
-		set jid [lindex $item 1]
-		::FTrans::Send $jid -filename $f
+		set jid [lindex $tag 1]
+		if {[::Jabber::JlibCmd roster isavailable $jid]} {
+		    ::FTrans::Send $jid -filename $f
+		}
 	    }
 	}
     }
@@ -468,14 +470,16 @@ proc ::RosterTree::DnDDrag {win action actions data dndtype x y} {
     set act "none"
     $T selection clear
 
-    if {[lindex $id 0] eq "Item"} {
+    if {[lindex $id 0] eq "item"} {
 	lassign $id where item arg1 arg2 arg3 arg4
-	if {($arg1 eq "column") && ($arg3 eq "element")} {
-	    set item [lindex $id 1]
+	if {($arg1 eq "column") && ($arg3 eq "elem")} {
 	    set tag [GetTagOfItem $item]
 	    if {[lindex $tag 0] eq "jid"} {
-		$T selection add $item
-		set act "copy"
+		set jid [lindex $tag 1]
+		if {[::Jabber::JlibCmd roster isavailable $jid]} {
+		    $T selection add $item
+		    set act "copy"
+		}
 	    }
 	}
     }
