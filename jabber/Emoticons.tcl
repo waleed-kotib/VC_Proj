@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.58 2007-10-08 12:09:17 matben Exp $
+# $Id: Emoticons.tcl,v 1.59 2007-10-09 12:59:03 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -82,21 +82,25 @@ proc ::Emoticons::Init {} {
 	set priv(pngformat) {}
     }
     ::Debug 4 "sets=[GetAllSets]"
-    ::Debug 4 "\t [GetPrefSetPathExists]"
     
     # Load set.
     # Even if we succeed to get the vfs::zip package, it doesn't check
     # the Memchan package, and can therefore still fail.
-    if {[catch {
-	LoadTmpIconSet [GetPrefSetPathExists]
-    } err]} {
-	::Debug 4 "\t catch: $err"
-	set priv(havezip) 0
-	set jprefs(emoticonSet) $priv(defaultSet)
-	LoadTmpIconSet [GetPrefSetPathExists]
-    }
-    SetPermanentSet $jprefs(emoticonSet)
+    # NB: We may have "None" set which has a value "-".
 
+    if {$jprefs(emoticonSet) ne "-"} {
+	if {[catch {
+	    LoadTmpIconSet [GetPrefSetPathExists]
+	} err]} {
+	    ::Debug 4 "\t catch: $err"
+	    set priv(havezip) 0
+	    set jprefs(emoticonSet) $priv(defaultSet)
+	    LoadTmpIconSet [GetPrefSetPathExists]
+	}
+	SetPermanentSet $jprefs(emoticonSet)
+    } else {
+	# empty
+    }
     if {[tk windowingsystem] eq "win32"} {
 	InitWin
     }
@@ -125,12 +129,7 @@ proc ::Emoticons::InitWin {} {
 
 proc ::Emoticons::Exists {word} {
     variable smiley
-    
-    if {[info exists smiley($word)]} {
-	return 1
-    } else {
-	return 0
-    }
+    return [info exists smiley($word)]
 }
 
 proc ::Emoticons::Make {w word} {
@@ -146,7 +145,7 @@ proc ::Emoticons::GetAllSets {} {
     variable priv
     variable state
     
-    set setList {}
+    set setList [list]
     foreach path [list $this(emoticonsPath) $this(altEmoticonsPath)] {
 	foreach f [glob -nocomplain -directory $path *] {
 	    set name [file tail $f]
@@ -335,8 +334,8 @@ proc ::Emoticons::ParseIcon {name dir xmllist} {
 proc ::Emoticons::SetPermanentSet {selected} {
     variable state
     variable smiley
-
-    set setsLoaded {}
+    
+    set setsLoaded [list]
     foreach ind [array names state *,loaded] {
 	set name [string map [list ",loaded" ""] $ind]
 	lappend setsLoaded $name
@@ -385,7 +384,7 @@ proc ::Emoticons::FreeTmpSet {name} {
     variable tmpicons
     variable tmpiconsInv
     
-    set ims {}
+    set ims [list]
     foreach ind [array names tmpiconsInv $name,*] {
 	lappend ims [string map [list "$name," ""] $ind]
     }
@@ -685,6 +684,8 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
 	    lappend menuDef [list $name -value $name]
 	}
     }
+    lappend menuDef separator
+    lappend menuDef [list [mc None] -value "-"]
     ui::optionmenu $wmb -menulist $menuDef -variable [namespace current]::tmpSet \
       -command [namespace code PrefsSetCmd]
     pack $wmb -side top -anchor w
@@ -708,7 +709,9 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
       -command [namespace current]::ImportSetToPrefs
     pack $wc.imp -side top -anchor w -pady 4
     
-    if {[lsearch $allSets $jprefs(emoticonSet)] < 0} {
+    if {$jprefs(emoticonSet) eq "-"} {
+	set tmpSet "-"
+    } elseif {[lsearch $allSets $jprefs(emoticonSet)] < 0} {
 	set tmpSet $priv(defaultSet)
     } else {
 	set tmpSet $jprefs(emoticonSet)
@@ -718,6 +721,83 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     if {[tk windowingsystem] ne "aqua"} {
 	if {![catch {package require tkdnd}]} {
 	    DnDInit $wpreftext
+	}
+    }
+}
+
+proc ::Emoticons::PrefsSetCmd {value} {
+    variable wprefpage
+    variable wpreftext 
+    variable state
+    variable tmpSet
+    variable priv
+    upvar ::Jabber::jprefs jprefs
+    
+    if {$tmpSet eq "-"} {
+	$wpreftext configure -state normal
+	$wpreftext delete 1.0 end
+	$wpreftext configure -state disabled
+    } else {
+	if {![info exists state($tmpSet,loaded)]} {
+	    if {[catch {
+		LoadTmpIconSet $state($tmpSet,path)
+	    } err]} {
+		set str [mc jamessemoticonfail2 $tmpSet]
+		append str "\n" "[mc Error]: $err"
+		::UI::MessageBox -icon error -title [mc Error] \
+		  -message $str -parent [winfo toplevel $wprefpage]
+		set priv(havezip) 0
+		set jprefs(emoticonSet) $priv(defaultSet)
+		set tmpSet $priv(defaultSet)
+		LoadTmpIconSet [GetPrefSetPathExists]
+		return
+	    }
+	}
+	InsertTextLegend $wpreftext $tmpSet
+    }
+}
+
+proc ::Emoticons::ImportSetToPrefs {} {
+    global  this
+    variable wprefpage
+    variable wprefmb
+    
+    set types [list [list [mc "Iconset Archive"] {.jisp}]]
+    set fileName [tk_getOpenFile -parent [winfo toplevel $wprefpage] \
+      -filetypes $types -title [mc "Import Iconset"]]
+    if {[file exists $fileName]} {
+	ImportFileToPrefs $fileName
+    }
+}
+
+proc ::Emoticons::ImportFileToPrefs {fileName} {
+    global  this
+    variable wprefpage
+    variable wprefmb
+    
+    set tail [file tail $fileName]
+    set name [file rootname $tail]
+    if {[lsearch [GetAllSets] $name] >= 0} {
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message [mc jamessemoticonexists $name] \
+	  -parent [winfo toplevel $wprefpage]
+	return
+    }
+    file copy $fileName $this(altEmoticonsPath)
+    set dst [file join $this(altEmoticonsPath) $tail]
+    if {[catch {
+	LoadTmpIconSet $dst
+    } err]} {
+	set str [mc jamessemoticonfail2 $name]
+	append str "\n" "[mc Error]: $err"
+	::UI::MessageBox -icon error -title [mc Error] \
+	  -message $str -parent [winfo toplevel $wprefpage]
+    } else {
+	if {[winfo exists $wprefmb]} {
+	    set mDef [$wprefmb cget -menulist]
+	    set idx [lsearch $mDef separator]
+	    set mDef [linsert $mDef $idx [list $name -value $name]]
+	    $wprefmb configure -menulist $mDef
 	}
     }
 }
@@ -760,76 +840,6 @@ proc ::Emoticons::DnDLeave {win data dndtype} {
     focus [winfo toplevel $win] 
 }
 
-proc ::Emoticons::ImportSetToPrefs {} {
-    global  this
-    variable wprefpage
-    variable wprefmb
-    
-    set types [list [list [mc "Iconset Archive"] {.jisp}]]
-    set fileName [tk_getOpenFile -parent [winfo toplevel $wprefpage] \
-      -filetypes $types -title [mc "Import Iconset"]]
-    if {[file exists $fileName]} {
-	ImportFileToPrefs $fileName
-    }
-}
-
-proc ::Emoticons::ImportFileToPrefs {fileName} {
-    global  this
-    variable wprefpage
-    variable wprefmb
-    
-    set tail [file tail $fileName]
-    set name [file rootname $tail]
-    if {[lsearch [GetAllSets] $name] >= 0} {
-	::UI::MessageBox -icon error -title [mc Error] \
-	  -message [mc jamessemoticonexists $name] \
-	  -parent [winfo toplevel $wprefpage]
-	return
-    }
-    file copy $fileName $this(altEmoticonsPath)
-    set dst [file join $this(altEmoticonsPath) $tail]
-    if {[catch {
-	LoadTmpIconSet $dst
-    } err]} {
-	set str [mc jamessemoticonfail2 $name]
-	append str "\n" "[mc Error]: $err"
-	::UI::MessageBox -icon error -title [mc Error] \
-	  -message $str -parent [winfo toplevel $wprefpage]
-    } else {
-	if {[winfo exists $wprefmb]} {
-	    set mDef [$wprefmb cget -menulist]
-	    lappend mDef [list $name -value $name]
-	    $wprefmb configure -menulist $mDef
-	}
-    }
-}
-
-proc ::Emoticons::PrefsSetCmd {value} {
-    variable wprefpage
-    variable wpreftext 
-    variable state
-    variable tmpSet
-    variable priv
-    upvar ::Jabber::jprefs jprefs
-    
-    if {![info exists state($tmpSet,loaded)]} {
-	if {[catch {
-	    LoadTmpIconSet $state($tmpSet,path)
-	} err]} {
-	    set str [mc jamessemoticonfail2 $tmpSet]
-	    append str "\n" "[mc Error]: $err"
-	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message $str -parent [winfo toplevel $wprefpage]
-	    set priv(havezip) 0
-	    set jprefs(emoticonSet) $priv(defaultSet)
-	    set tmpSet $priv(defaultSet)
-	    LoadTmpIconSet [GetPrefSetPathExists]
-	    return
-	}
-    }
-    InsertTextLegend $wpreftext $tmpSet
-}
-
 proc ::Emoticons::FreePrefsPage {} {
     
 }
@@ -837,10 +847,9 @@ proc ::Emoticons::FreePrefsPage {} {
 proc ::Emoticons::SavePrefsHook {} {
     variable tmpSet
     upvar ::Jabber::jprefs jprefs
-
+    
     if {![string equal $jprefs(emoticonSet) $tmpSet]} {
 	SetPermanentSet $tmpSet
-
     }
     FreePrefsPage
     set jprefs(emoticonSet) $tmpSet
