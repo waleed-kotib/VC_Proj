@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.81 2007-10-08 15:19:59 matben Exp $
+# $Id: RosterTree.tcl,v 1.82 2007-10-09 06:25:54 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -409,8 +409,7 @@ proc ::RosterTree::New {w} {
     
     $T notify bind $T <Drag-receive> {
 	::RosterTree::NotifyDragReceive %W %l %I
-    }
-    
+    }    
     if {[tk windowingsystem] ne "aqua"} {
 	if {![catch {package require tkdnd}]} {
 	    InitDnD $T
@@ -431,8 +430,7 @@ proc ::RosterTree::InitDnD {win} {
 	::RosterTree::DnDDrag %W %A %a %D %T %x %y
     }
     dnd bindtarget $win text/uri-list <DragEnter> {
-	set act [::RosterTree::DnDEnter %W %A %D %T]
-	#return -code break $act
+	::RosterTree::DnDEnter %W %A %D %T
     }
     dnd bindtarget $win text/uri-list <DragLeave> {
 	::RosterTree::DnDLeave %W %D %T
@@ -445,7 +443,6 @@ proc ::RosterTree::DnDDrop {win data dndtype x y} {
     set f [lindex $data 0]
     set f [string map {file:// ""} $f]
     set f [uriencode::decodefile $f]
-    puts "::RosterTree::DnDDrop $data $dndtype"
     set id [$T identify $x $y]
     if {[lindex $id 0] eq "item"} {
 	lassign $id where item arg1 arg2 arg3 arg4
@@ -464,9 +461,7 @@ proc ::RosterTree::DnDDrop {win data dndtype x y} {
 proc ::RosterTree::DnDDrag {win action actions data dndtype x y} {
     
     set T $win
-    puts "::RosterTree::DnDDrag action=$action actions=$actions, data=$data dndtype=$dndtype"
     set id [$T identify $x $y]
-    puts "id=$id"
     set act "none"
     $T selection clear
 
@@ -487,7 +482,6 @@ proc ::RosterTree::DnDDrag {win action actions data dndtype x y} {
 }
 
 proc ::RosterTree::DnDEnter {win action data dndtype} {
-    puts "::RosterTree::DnDEnter $action $data $dndtype"
     focus $win
     set act "none"
     return $act
