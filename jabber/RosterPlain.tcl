@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.44 2007-10-08 06:21:14 matben Exp $
+# $Id: RosterPlain.tcl,v 1.45 2007-10-09 07:09:27 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -190,21 +190,19 @@ proc ::RosterPlain::Configure {_T} {
 
     set S [$T style create styAvailable]
     $T style elements $S {eBorder eNotify eImage eText eAltImage1 eAltImage0}
-    #$T style layout $S eText     -squeeze x -iexpand xy -sticky w
-    $T style layout $S eText     -squeeze x -iexpand y -sticky w
+    $T style layout $S eText     -squeeze x -iexpand xy -sticky w
     $T style layout $S eImage    -expand ns -minheight $minH
-    $T style layout $S eAltImage0 -expand ns
-    $T style layout $S eAltImage1 -expand ns
+    $T style layout $S eAltImage0 -expand ns -sticky e
+    $T style layout $S eAltImage1 -expand ns -sticky e
     $T style layout $S eBorder   -detach 1 -iexpand xy -indent 0
     $T style layout $S eNotify   -detach 1 -iexpand xy -indent 0 -padx 2 -pady 2
 
     set S [$T style create styUnavailable]
     $T style elements $S {eBorder eNotify eImage eText eAltImage1 eAltImage0}
-    #$T style layout $S eText     -squeeze x -iexpand xy -sticky w
-    $T style layout $S eText     -squeeze x -iexpand y -sticky w
+    $T style layout $S eText     -squeeze x -iexpand xy -sticky w
     $T style layout $S eImage    -expand ns -minheight $minH
-    $T style layout $S eAltImage0 -expand ns
-    $T style layout $S eAltImage1 -expand ns
+    $T style layout $S eAltImage0 -expand ns -sticky e
+    $T style layout $S eAltImage1 -expand ns -sticky e
     $T style layout $S eBorder   -detach 1 -iexpand xy -indent 0
     $T style layout $S eNotify   -detach 1 -iexpand xy -indent 0 -padx 2 -pady 2
 
