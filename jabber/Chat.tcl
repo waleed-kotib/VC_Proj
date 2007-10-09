@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.216 2007-10-08 12:09:17 matben Exp $
+# $Id: Chat.tcl,v 1.217 2007-10-09 14:43:53 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -186,7 +186,10 @@ namespace eval ::Chat:: {
     # Shall we allow multiple chast threads (and dialogs) per JID?
     variable allowMultiThreadPerJID 0
     
+    # Show the head label.
     set ::config(chat,show-head) 1
+    
+    # Control how chat state notification is handled.
     set ::config(chat,notify-send) 1
     set ::config(chat,notify-recv) 1
     set ::config(chat,notify-show) 1
