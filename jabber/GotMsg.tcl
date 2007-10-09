@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GotMsg.tcl,v 1.54 2007-10-07 10:32:42 matben Exp $
+# $Id: GotMsg.tcl,v 1.55 2007-10-09 13:05:17 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -379,7 +379,8 @@ proc ::GotMsg::Forward {} {
     } else {
 	set fwdsubject $subject
     }
-    ::NewMsg::Build -subject $fwdsubject -forwardmessage $body -time $date
+    ::NewMsg::Build -subject $fwdsubject -forwardmessage $body -time $date \
+      -from $jid
 }
 
 proc ::GotMsg::Reply {} {
