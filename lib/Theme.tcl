@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.45 2007-10-02 14:53:50 matben Exp $
+# $Id: Theme.tcl,v 1.46 2007-10-10 07:25:29 matben Exp $
 
 package provide Theme 1.0
 
@@ -108,7 +108,7 @@ proc ::Theme::ReadTileResources {} {
     } else {
 	set priority startupFile
     }
-    set f [file join $this(resourcePath) $tile::currentTheme.rdb]
+    set f [file join $this(resourcePath) [GetCurrentTheme].rdb]
     if {[file exists $f]} {
 	option readfile $f $priority
     }

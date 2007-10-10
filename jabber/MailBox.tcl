@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.130 2007-10-07 10:32:42 matben Exp $
+# $Id: MailBox.tcl,v 1.131 2007-10-10 07:25:29 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1865,7 +1865,7 @@ proc ::MailBox::MKGetFile {} {
 
 proc ::MailBox::MKHaveMetakit {} {
     variable mkhavemetakit
-        
+            
     if {[info exists mkhavemetakit]} {
 	return $mkhavemetakit
     } else {

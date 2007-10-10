@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.57 2007-10-01 07:11:05 matben Exp $
+# $Id: JPrefs.tcl,v 1.58 2007-10-10 07:25:29 matben Exp $
 
 package require ui::fontselector
 
@@ -169,7 +169,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	    lappend menuDef [list $name -value $theme]
 	}
     }
-    set tmpPrefs(tileTheme) $::tile::currentTheme
+    set tmpPrefs(tileTheme) [GetCurrentTheme]
 
     set wc $page.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
@@ -208,9 +208,10 @@ proc ::JPrefs::BuildAppearancePage {page} {
     #   ::tile::currentTheme and prefs(tileTheme)
     ttk::label $wap.lskin -text "[mc Skin]:"
     
-    ui::optionmenu $wap.bskin -menulist $menuDef -variable ::tile::currentTheme \
+    ui::optionmenu $wap.bskin -menulist $menuDef \
+      -variable [namespace current]::tmpPrefs(tileTheme) \
       -command tile::setTheme
-	
+
     # This has been disabled since it starts a child interpreter which needs
     # another ::tileqt::library.
     set tileqt 0
@@ -253,7 +254,7 @@ proc ::JPrefs::OnDestroyAppearancePage {} {
     variable tmpPrefs
     variable tmpJPrefs
 
-    set prefs(tileTheme) $::tile::currentTheme
+    set prefs(tileTheme) [GetCurrentTheme]
     
     unset -nocomplain tmpPrefs
     unset -nocomplain tmpJPrefs
@@ -438,7 +439,7 @@ proc ::JPrefs::DestroyPrefsHook { } {
 
 proc ::JPrefs::QuitAppHook {} {
     global  prefs
-    set prefs(tileTheme) $::tile::currentTheme
+    set prefs(tileTheme) [GetCurrentTheme]
 }
 
 #-------------------------------------------------------------------------------
