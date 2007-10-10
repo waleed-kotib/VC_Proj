@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.218 2007-10-10 12:41:35 matben Exp $
+# $Id: Chat.tcl,v 1.219 2007-10-10 13:00:15 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -183,8 +183,8 @@ namespace eval ::Chat:: {
         composing,send       active
     }
     
-    # Shall we allow multiple chast threads (and dialogs) per JID?
-    variable allowMultiThreadPerJID 0
+    # Shall we allow multiple chat threads (and dialogs, tabs) per JID?
+    set ::config(chat,allow-multi-thread-per-jid) 0
     
     # Show the head label.
     set ::config(chat,show-head) 1
@@ -469,7 +469,6 @@ proc ::Chat::GotMsg {body args} {
 
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-    variable allowMultiThreadPerJID
     
     ::Debug 2 "::Chat::GotMsg args='$args'"
 
@@ -484,7 +483,7 @@ proc ::Chat::GotMsg {body args} {
     
     # We must follow the thread...
     # There are several cases to deal with: Have thread page, have dialog?
-    if {[info exists argsA(-thread)] && $allowMultiThreadPerJID} {
+    if {[info exists argsA(-thread)] && $config(chat,allow-multi-thread-per-jid)} {
 	set threadID $argsA(-thread)
 	set chattoken [GetTokenFrom chat threadid $threadID]
     } else {
