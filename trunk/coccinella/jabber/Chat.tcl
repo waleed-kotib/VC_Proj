@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.217 2007-10-09 14:43:53 matben Exp $
+# $Id: Chat.tcl,v 1.218 2007-10-10 12:41:35 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2105,7 +2105,9 @@ proc ::Chat::SetState {chattoken state} {
     }	
     $chatstate(wtextsnd) configure -state $state
     $chatstate(wsubject) configure -state $state
-    $chatstate(wsmile)   configure -state $state
+    if {![::Emoticons::None]} {
+	$chatstate(wsmile)   configure -state $state
+    }
     set chatstate(state) $state
 }
 
@@ -2601,7 +2603,7 @@ proc ::Chat::Send {dlgtoken} {
     }
    
     # Have hook for complete text.
-    if {[hooks::run sendTextChatHook $jid $text] eq "stop"} {	    
+    if {[hooks::run sendTextChatHook $chattoken $jid $text] eq "stop"} {	    
 	return
     }
 

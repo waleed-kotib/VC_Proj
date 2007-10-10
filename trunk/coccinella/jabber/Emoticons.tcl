@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.59 2007-10-09 12:59:03 matben Exp $
+# $Id: Emoticons.tcl,v 1.60 2007-10-10 12:41:36 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -138,6 +138,11 @@ proc ::Emoticons::Make {w word} {
     if {[info exists smiley($word)]} {
 	$w image create insert -image $smiley($word) -name $word
     }
+}
+
+proc ::Emoticons::None {} {
+    upvar ::Jabber::jprefs jprefs
+    return [expr {$jprefs(emoticonSet) eq "-"}]
 }
 
 proc ::Emoticons::GetAllSets {} {
@@ -411,6 +416,13 @@ proc ::Emoticons::FreeAllTmpSets {} {
     unset -nocomplain meta state tmpicons tmpiconsInv
 }
 
+namespace eval ::Emoticons {
+    
+    # Keep track of all menu buttons to be able to do "live updates" when
+    # the emoticon set changes.
+    variable allButtons [list]
+}
+
 # Emoticons::MenuButton --
 # 
 #       A kind of general menubutton for inserting smileys into a text widget.
@@ -426,6 +438,7 @@ proc ::Emoticons::FreeAllTmpSets {} {
 proc ::Emoticons::MenuButton {w args} {
     global  prefs this    
     variable smiley
+    variable allButtons
 
     # If we have -compound left -image ... -label ... working.
     set prefs(haveMenuImage) 0
@@ -447,8 +460,18 @@ proc ::Emoticons::MenuButton {w args} {
     
     eval {BuildMenu $wmenu} $args
     $w configure -menu $wmenu
-
+    if {[None]} {
+	$w state {disabled}
+    }
+    lappend allButtons $w
+    bind $w <Destroy> +[namespace code [list MenuButtonFree %W]]
+    
     return $w
+}
+
+proc ::Emoticons::MenuButtonFree {w} {
+    variable allButtons
+    lprune allButtons $w
 }
 
 proc ::Emoticons::BuildMenu {wmenu args} {
