@@ -6,13 +6,14 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.70 2007-10-07 08:23:40 matben Exp $
+# $Id: tileutils.tcl,v 1.71 2007-10-10 07:25:29 matben Exp $
 #
 
 package require treeutil
 
 package provide tileutils 0.1
 
+namespace eval ::tileutils {}
 
 if {[tk windowingsystem] eq "aqua"} {
     interp alias {} ttk::scrollbar {} scrollbar
@@ -22,10 +23,13 @@ if {[tk windowingsystem] eq "aqua"} {
 
 proc ::ttk::deprecated'warning {old new} { } 
 
+set ::tileutils::ns tile::theme
+
 namespace eval ::tile {} 
 if {![info exists ::tile::currentTheme]} { 
     if {[info exists ::ttk::currentTheme]} { 
 	upvar \#0 ::ttk::currentTheme ::tile::currentTheme 
+	set ::tileutils::ns ttk::theme
     } 
 }
 
@@ -33,9 +37,11 @@ if {![info exists ::tile::currentTheme]} {
 namespace eval tile {
     
     foreach name [tile::availableThemes] {
+	
+	puts "package require ${::tileutils::ns}::$name"
 
 	# @@@ We could be more economical here and load theme only when needed.
-	if {[catch {package require tile::theme::$name}]} {
+	if {[catch {package require ${::tileutils::ns}::$name}]} {
 	    continue
 	}
 
@@ -69,7 +75,7 @@ namespace eval tile {
 	    
 	    switch $name {
 		alt {
-		    array set colors [array get tile::theme::alt::colors]
+		    array set colors [array get ${::tileutils::ns}::alt::colors]
 		    style configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
@@ -78,25 +84,25 @@ namespace eval tile {
 		      -itembackground {"#dedeff" {}} -usetheme 1
 		}
 		clam {
-		    array set colors [array get tile::theme::clam::colors]
+		    array set colors [array get ${::tileutils::ns}::clam::colors]
 		    style configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		classic {
-		    array set colors [array get tile::theme::classic::colors]
+		    array set colors [array get ${::tileutils::ns}::classic::colors]
 		    style configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		default {
-		    array set colors [array get tile::theme::default::colors]
+		    array set colors [array get ${::tileutils::ns}::default::colors]
 		}
 		keramik {
-		    array set colors [array get tile::theme::keramik::colors]
+		    array set colors [array get ${::tileutils::ns}::keramik::colors]
 		    style configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		step {
-		    array set colors [array get tile::theme::step::colors]
+		    array set colors [array get ${::tileutils::ns}::step::colors]
 		    style configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
@@ -585,9 +591,11 @@ proc tileutils::configstyles {name} {
 	} 
 	
 	# @@@ These shall be removed when library/tile is updated!
-	if {[package vcompare $::tile::version 0.7.3] >= 0} {
-	    style configure TCheckbutton -padding {2}
-	    style configure TRadiobutton -padding {2}
+	if {[info exists ::tile::version]} {
+	    if {[package vcompare $::tile::version 0.7.3] >= 0} {
+		style configure TCheckbutton -padding {2}
+		style configure TRadiobutton -padding {2}
+	    }
 	}
 	
 	# My custom styles.
@@ -858,7 +866,7 @@ tileutils::MakeFonts
 foreach name [tile::availableThemes] {
     
     # @@@ We could be more economical here and load theme only when needed.
-    if {[catch {package require tile::theme::$name}]} {
+    if {[catch {package require ${::tileutils::ns}::$name}]} {
 	continue
     }
     tileutils::configstyles $name    

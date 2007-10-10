@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.161 2007-10-07 08:23:40 matben Exp $	
+# $Id: Coccinella.tcl,v 1.162 2007-10-10 07:25:29 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -178,6 +178,15 @@ if {[lsearch -exact [tile::availableThemes] $prefs(tileTheme)] >= 0} {
     # We use the 'clam' theme as a fallback (and default in resources).
     catch {tile::setTheme clam}
 }
+# To help the transition from tile pre 0.8.0
+proc GetCurrentTheme {} {
+    if {[info exists ttk::currentTheme]} {
+	return $ttk::currentTheme
+    } else {
+	return $tile::currentTheme
+    }
+}
+
 ::Theme::ReadTileResources
 
 # The packages are divided into categories depending on their degree
