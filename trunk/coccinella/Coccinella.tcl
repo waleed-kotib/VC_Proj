@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.162 2007-10-10 07:25:29 matben Exp $	
+# $Id: Coccinella.tcl,v 1.163 2007-10-11 12:11:55 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -153,8 +153,15 @@ package require Theme
 # Find our language and load message catalog.
 ::Init::Msgcat
 
-if {[tk windowingsystem] eq "windows"} {
-    wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
+switch [tk windowingsystem] {
+    "windows" {
+	wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
+    }
+    "x11" {
+	if {[package vcompare [info patchlevel] 8.4.8] >= 0} {
+	    wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
+	}
+    }
 }
 
 # Splash! Need a full update here, at least on Windows.
