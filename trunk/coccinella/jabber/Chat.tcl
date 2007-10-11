@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.220 2007-10-11 06:30:04 matben Exp $
+# $Id: Chat.tcl,v 1.221 2007-10-11 06:32:16 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -409,6 +409,8 @@ proc ::Chat::StartThread {jid args} {
     } else {
 	if {$config(chat,start-jid-same)} {
 	    if {$isroom} {
+		set mjid [jlib::jidmap $jid]
+		set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid]]
 	    } else {
 		set mjid2 [jlib::jidmap $jid2]
 		set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
