@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.42 2007-10-08 12:09:17 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.43 2007-10-11 12:19:53 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -833,6 +833,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     variable T
     variable jidStatus
     variable rosterBaseStyle
+    upvar ::Jabber::jstate  jstate
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 6 "::RosterAvatar::CreateItem jid=$jid, presence=$presence"
@@ -840,12 +841,28 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
     }
+    
+    # Filter out those we don't want to see.
     set istrpt [::Roster::IsTransportHeuristics $jid]
-    if {!$istrpt && !$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
-	return
-    }
-    if {$istrpt && !$jprefs(rost,showTrpts)} {
-	return
+    if {$istrpt} {
+	if {!$jprefs(rost,showTrpts)} {
+	    return
+	}	
+    } else {
+	if {$presence eq "available"} {
+	    set show [$jstate(jlib) roster getshow $jid]
+	    if {$show ne ""} {
+		if {[info exists jprefs(rost,show-$show)]} {
+		    if {!$jprefs(rost,show-$show)} {
+			return
+		    }
+		}
+	    }
+	} else {
+	    if {!$jprefs(rost,showOffline)} {
+		return
+	    }	    
+	}
     }
     array set argsArr $args
 
