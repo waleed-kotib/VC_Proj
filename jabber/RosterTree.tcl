@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.82 2007-10-09 06:25:54 matben Exp $
+# $Id: RosterTree.tcl,v 1.83 2007-10-11 09:15:41 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1323,12 +1323,28 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
     }
+    
+    # Filter out those we don't want to see.
     set istrpt [::Roster::IsTransportHeuristics $jid]
-    if {!$istrpt && !$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
-	return
-    }
-    if {$istrpt && !$jprefs(rost,showTrpts)} {
-	return
+    if {$istrpt} {
+	if {!$jprefs(rost,showTrpts)} {
+	    return
+	}	
+    } else {
+	if {$presence eq "available"} {
+	    set show [$jstate(jlib) roster getshow $jid]
+	    if {$show ne ""} {
+		if {[info exists jprefs(rost,show-$show)]} {
+		    if {!$jprefs(rost,show-$show)} {
+			return
+		    }
+		}
+	    }
+	} else {
+	    if {!$jprefs(rost,showOffline)} {
+		return
+	    }	    
+	}
     }
     array set argsA $args
     set itemTagL [list]

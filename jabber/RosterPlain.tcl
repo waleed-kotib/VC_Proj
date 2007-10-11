@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.45 2007-10-09 07:09:27 matben Exp $
+# $Id: RosterPlain.tcl,v 1.46 2007-10-11 09:15:41 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -352,7 +352,7 @@ proc ::RosterPlain::SetJIDState {mjid state} {
 #       Creates the items for the initial logged out state.
 #       It starts by removing all content.
 
-proc ::RosterPlain::Init { } {
+proc ::RosterPlain::Init {} {
     variable T
     upvar ::Jabber::jprefs jprefs
     
