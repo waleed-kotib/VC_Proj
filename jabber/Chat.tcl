@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.219 2007-10-10 13:00:15 matben Exp $
+# $Id: Chat.tcl,v 1.220 2007-10-11 06:30:04 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -186,6 +186,9 @@ namespace eval ::Chat:: {
     # Shall we allow multiple chat threads (and dialogs, tabs) per JID?
     set ::config(chat,allow-multi-thread-per-jid) 0
     
+    # If we initiate a chat when already have one, keep same window.
+    set ::config(chat,start-jid-same) 1
+    
     # Show the head label.
     set ::config(chat,show-head) 1
     
@@ -199,7 +202,7 @@ namespace eval ::Chat:: {
 # 
 #       Toolbar button command.
 
-proc ::Chat::OnToolButton { } {
+proc ::Chat::OnToolButton {} {
     OnMenu
 }
 
@@ -381,6 +384,7 @@ proc ::Chat::DoStart {w} {
 #       args        -message, -thread
 
 proc ::Chat::StartThread {jid args} {
+    global  config
 
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
@@ -390,6 +394,7 @@ proc ::Chat::StartThread {jid args} {
     array set argsA $args
     set havedlg 0
     set jid2 [jlib::barejid $jid]
+    set isroom [::Jabber::JlibCmd service isroom $jid2]
 
     # Make unique thread id.
     if {[info exists argsA(-thread)]} {
@@ -402,7 +407,22 @@ proc ::Chat::StartThread {jid args} {
 	    upvar 0 $chattoken chatstate
 	}
     } else {
-	set threadID [jlib::generateuuid]
+	if {$config(chat,start-jid-same)} {
+	    if {$isroom} {
+	    } else {
+		set mjid2 [jlib::jidmap $jid2]
+		set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
+	    }
+	    if {$chattoken ne ""} {
+		set havedlg 1
+		upvar 0 $chattoken chatstate
+		raise $chatstate(w)
+		SelectPage $chattoken
+	    }	    
+	} 
+	if {!$havedlg} {
+	    set threadID [jlib::generateuuid]
+	}
     }
     
     if {!$havedlg} {
@@ -414,12 +434,11 @@ proc ::Chat::StartThread {jid args} {
     }
   
     # Since we initated this thread need to set recipient to jid2 unless room.
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
+    if {$isroom} {
 	set chatstate(fromjid) $jid
     } else {
 	set chatstate(fromjid) $jid2
     }
-
     return $chattoken
 }
 
@@ -2866,7 +2885,7 @@ proc ::Chat::GetWindow {jid} {
 }
 
 proc ::Chat::HaveChat {jid} {
- 
+    
     if {[GetWindow $jid] eq ""} {
 	return 0
     } else {
