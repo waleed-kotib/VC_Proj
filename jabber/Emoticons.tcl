@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.60 2007-10-10 12:41:36 matben Exp $
+# $Id: Emoticons.tcl,v 1.61 2007-10-11 13:00:38 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -356,6 +356,8 @@ proc ::Emoticons::SetPermanentSet {selected} {
 	}
     }
     unset -nocomplain state
+    
+    MenuButtonsUpdate
 }
 
 proc ::Emoticons::SetSmileyArr {name} {
@@ -437,29 +439,21 @@ namespace eval ::Emoticons {
 
 proc ::Emoticons::MenuButton {w args} {
     global  prefs this    
-    variable smiley
     variable allButtons
 
+    variable $w
+    upvar 0 $w state    
+
+    set state(w)    $w
+    set state(args) $args
+    
     # If we have -compound left -image ... -label ... working.
     set prefs(haveMenuImage) 0
     if {![string equal $this(platform) "macosx"]} {
 	set prefs(haveMenuImage) 1
-    }
-    
-    # Button image.
-    set btim ""
-    foreach key {:) :-) ;) ;-) :( :-(} {
-	if {[info exists smiley($key)]} {
-	    set btim $smiley($key)
-	    break
-	}
-    }
-    set wmenu $w.m
-    ttk::menubutton $w -style MiniMenubutton \
-      -compound image -image $btim
-    
-    eval {BuildMenu $wmenu} $args
-    $w configure -menu $wmenu
+    }    
+    ttk::menubutton $w -style MiniMenubutton -compound image
+    eval {MenuButtonConfigure $w} $args
     if {[None]} {
 	$w state {disabled}
     }
@@ -469,9 +463,46 @@ proc ::Emoticons::MenuButton {w args} {
     return $w
 }
 
+proc ::Emoticons::MenuButtonConfigure {w args} {
+    variable smiley
+    
+    # Button image.
+    set btim ""
+    foreach key {:) :-) ;) ;-) :( :-(} {
+	if {[info exists smiley($key)]} {
+	    set btim $smiley($key)
+	    break
+	}
+    }
+    $w configure -image $btim
+    set wmenu $w.m
+    destroy $wmenu
+    eval {BuildMenu $wmenu} $args
+    $w configure -menu $wmenu
+    if {[None]} {
+	$w state {disabled}
+    } else {
+	$w state {!disabled}
+    }
+}
+
 proc ::Emoticons::MenuButtonFree {w} {
+    variable $w
     variable allButtons
+    
     lprune allButtons $w
+    unset -nocomplain $w
+}
+
+proc ::Emoticons::MenuButtonsUpdate {} {
+    variable allButtons
+
+    foreach w $allButtons {
+	variable $w
+	upvar 0 $w state    
+
+	eval {MenuButtonConfigure $w} $state(args)
+    }
 }
 
 proc ::Emoticons::BuildMenu {wmenu args} {
@@ -871,11 +902,15 @@ proc ::Emoticons::SavePrefsHook {} {
     variable tmpSet
     upvar ::Jabber::jprefs jprefs
     
+    set new 0
     if {![string equal $jprefs(emoticonSet) $tmpSet]} {
-	SetPermanentSet $tmpSet
+	set new 1
     }
     FreePrefsPage
     set jprefs(emoticonSet) $tmpSet
+    if {$new} {
+	SetPermanentSet $tmpSet
+    }
 }
 
 proc ::Emoticons::CancelPrefsHook {} {
