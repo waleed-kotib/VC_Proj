@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.61 2007-09-11 07:07:44 matben Exp $
+# $Id: roster.tcl,v 1.62 2007-10-11 09:12:59 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -1357,7 +1357,6 @@ proc jlib::roster::gettype {jlibname jid} {
     upvar ${jlibname}::roster::presA presA
        
     set jid [jlib::jidmap $jid]    
-
     if {[info exists presA($jid,type)]} {
 	return $presA($jid,type)
     } else {
@@ -1365,12 +1364,22 @@ proc jlib::roster::gettype {jlibname jid} {
     }
 }
 
+proc jlib::roster::getshow {jlibname jid} {
+      
+    upvar ${jlibname}::roster::presA presA
+       
+    set jid [jlib::jidmap $jid]    
+    if {[info exists presA($jid,show)]} {
+	return $presA($jid,show)
+    } else {
+	return ""
+    }
+}
 proc jlib::roster::getstatus {jlibname jid} {
       
     upvar ${jlibname}::roster::presA presA
        
     set jid [jlib::jidmap $jid]    
-
     if {[info exists presA($jid,status)]} {
 	return $presA($jid,status)
     } else {
