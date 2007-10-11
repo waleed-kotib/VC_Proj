@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.221 2007-10-07 08:23:40 matben Exp $
+# $Id: Roster.tcl,v 1.222 2007-10-11 09:15:41 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -124,6 +124,9 @@ proc ::Roster::InitMenus {} {
 	{separator}
 	{cascade     mShow            {
 	    {check     mOffline       {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)} }
+	    {check     mDoNotDisturb  {::Roster::ShowDnD}        {-variable ::Jabber::jprefs(rost,show-dnd)} }
+	    {check     mAway          {::Roster::ShowAway}       {-variable ::Jabber::jprefs(rost,show-away)} }
+	    {check     mExtendedAway  {::Roster::ShowXAway}      {-variable ::Jabber::jprefs(rost,show-xa)} }
 	    {check     mTransports    {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)} }
 	    {command   mBackgroundImage...  {::Roster::BackgroundImage} }
 	} }
@@ -1045,6 +1048,18 @@ proc ::Roster::ShowOffline {} {
     RepopulateTree
 }
 
+proc ::Roster::ShowDnD {} {
+    RepopulateTree
+}
+
+proc ::Roster::ShowAway {} {
+    RepopulateTree
+}
+
+proc ::Roster::ShowXAway {} {
+    RepopulateTree
+}
+
 proc ::Roster::ShowTransports {} {
     RepopulateTree
 }
@@ -1285,6 +1300,9 @@ proc ::Roster::InitPrefsHook {} {
     set jprefs(rost,dblClk)         chat
     set jprefs(rost,showOffline)    1
     set jprefs(rost,showTrpts)      1
+    set jprefs(rost,show-dnd)        1
+    set jprefs(rost,show-away)       1
+    set jprefs(rost,show-xa)         1
     set jprefs(rost,showSubNone)    1
     set jprefs(rost,sort)           -increasing
     
@@ -1304,6 +1322,9 @@ proc ::Roster::InitPrefsHook {} {
       [list ::Jabber::jprefs(rost,showSubNone) jprefs_rost_showSubNone  $jprefs(rost,showSubNone)]  \
       [list ::Jabber::jprefs(rost,showOffline) jprefs_rost_showOffline  $jprefs(rost,showOffline)]  \
       [list ::Jabber::jprefs(rost,showTrpts)   jprefs_rost_showTrpts    $jprefs(rost,showTrpts)]  \
+      [list ::Jabber::jprefs(rost,show-dnd)    jprefs_rost_show-dnd     $jprefs(rost,show-dnd)]  \
+      [list ::Jabber::jprefs(rost,show-away)   jprefs_rost_show-away    $jprefs(rost,show-away)]  \
+      [list ::Jabber::jprefs(rost,show-xa)     jprefs_rost_show-xa      $jprefs(rost,show-xa)]  \
       [list ::Jabber::jprefs(rost,closedItems) jprefs_rost_closedItems  $jprefs(rost,closedItems)]  \
       [list ::Jabber::jprefs(rost,sort)        jprefs_rost_sort         $jprefs(rost,sort)]  \
       [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
