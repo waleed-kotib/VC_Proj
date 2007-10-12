@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.246 2007-10-06 13:23:28 matben Exp $
+# $Id: Jabber.tcl,v 1.247 2007-10-12 06:56:29 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -1352,7 +1352,7 @@ proc ::Jabber::SyncStatus { } {
 #  
 #  Now <x .../> instead.
 
-proc ::Jabber::CreateCoccinellaPresElement { } {
+proc ::Jabber::CreateCoccinellaPresElement {} {
     global  prefs this
     
     variable jstate
@@ -1369,6 +1369,55 @@ proc ::Jabber::CreateCoccinellaPresElement { } {
     # Switch to x-element.
     set xmllist [wrapper::createtag x -subtags $subelem \
       -attrlist [list xmlns $coccixmlns(servers) ver $this(vers,full)]]
+
+    return $xmllist
+}
+
+# Jabber::CreateCoccinellaDiscoExt --
+# 
+#       Better is to supply an extension to disoc info accoring to:
+#       XEP-0128: Service Discovery Extensions
+#       
+#       <x xmlns='jabber:x:data' type='result'>
+#           <field var='FORM_TYPE' type='hidden'>
+#               <value>http://coccinella.sourceforge.net/protocol/servers</value>
+#           </field>
+#           <field var='putget_port'>
+#               <value>8235</value>
+#           </field>
+#           <field var='http_port'>
+#               <value>8077</value>
+#           </field>
+#           <field var='ip'>
+#               <value>192.168.0.5</value>
+#           </field>
+#       </x>
+
+proc ::Jabber::CreateCoccinellaDiscoExt {} {
+    global  prefs this
+    variable coccixmlns
+    
+    set ip [::Network::GetThisPublicIP]
+    set fieldEs [list]
+    
+    set valueE [wrapper::createtag "value" -chdata $coccixmlns(servers)]
+    lappend fieldEs [wrapper::createtag "field" \
+      -attrlist [list var FORM_TYPE type hidden] -subtags [list $valueE]]
+    
+    # Wrap up ip and ports:
+    set spec [list  \
+      putget_port  $prefs(thisServPort) \
+      http_port    $prefs(httpdPort)    \
+      ip           $ip]
+    
+    foreach {var value} $spec {
+	set valueE [wrapper::createtag "value" -chdata $value]
+	lappend fieldEs [wrapper::createtag "field" \
+	  -attrlist [list var $var] -subtags [list $valueE]]
+    }
+    
+    set xmllist [wrapper::createtag x -subtags $fieldEs \
+      -attrlist [list xmlns "jabber:x:data" type "result"]]
 
     return $xmllist
 }

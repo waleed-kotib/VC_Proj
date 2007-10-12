@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.135 2007-10-05 13:23:05 matben Exp $
+# $Id: Disco.tcl,v 1.136 2007-10-12 06:56:29 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -98,6 +98,9 @@ namespace eval ::Disco:: {
     set ::config(disco,show-head-on-result)  1
     set ::config(disco,add-server-show-head) 1
     set ::config(disco,add-server-autolist)  1
+    
+    # Shall we return private ip info in disco info?
+    set ::config(disco,info-ip) 1
 }
 
 proc ::Disco::InitPrefsHook {} {
@@ -651,6 +654,10 @@ proc ::Disco::ParseGetInfo {from queryE args} {
 	set attr [list xmlns $xmlns(info)]
     } else {
 	set attr [list xmlns $xmlns(info) node $node]
+    }
+    if {$config(disco,info-ip)} {
+	set xE [::Jabber::CreateCoccinellaDiscoExt]
+	lappend elem $xE
     }
     set xmllist [wrapper::createtag "query" -subtags $elem -attrlist $attr]
     eval {$jstate(jlib) send_iq $type [list $xmllist] -to $from} $opts

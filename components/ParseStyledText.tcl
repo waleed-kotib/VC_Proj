@@ -18,13 +18,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ParseStyledText.tcl,v 1.5 2007-10-02 09:36:28 matben Exp $
+# $Id: ParseStyledText.tcl,v 1.6 2007-10-12 06:56:29 matben Exp $
 
-namespace eval ::ParseStyledText:: {
-    
-}
+namespace eval ::ParseStyledText {}
 
-proc ::ParseStyledText::Init { } {
+proc ::ParseStyledText::Init {} {
     
     component::register ParseStyledText \
       "Simplified text font style parsing: *bold*, /italic/, and _underline_."
