@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.71 2007-10-10 07:25:29 matben Exp $
+# $Id: tileutils.tcl,v 1.72 2007-10-12 06:56:29 matben Exp $
 #
 
 package require treeutil
@@ -38,8 +38,6 @@ namespace eval tile {
     
     foreach name [tile::availableThemes] {
 	
-	puts "package require ${::tileutils::ns}::$name"
-
 	# @@@ We could be more economical here and load theme only when needed.
 	if {[catch {package require ${::tileutils::ns}::$name}]} {
 	    continue
