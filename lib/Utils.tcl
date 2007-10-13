@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.72 2007-10-08 12:09:17 matben Exp $
+# $Id: Utils.tcl,v 1.73 2007-10-13 15:12:20 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -838,6 +838,50 @@ proc ::Text::TransformToPureTextCallback {w key value index} {
 		}
 		append puretext($w) {]}
 	    }
+	}
+    }
+}
+
+namespace eval ::Text {
+    
+    variable tagOptions
+    set tagOptions {
+	-background
+	-borderwidth
+	-font
+	-foreground
+	-justify
+	-lmargin1
+	-lmargin2
+	-offset
+	-overstrike
+	-relief
+	-rmargin
+	-spacing1
+	-spacing2
+	-spacing3
+	-tabs
+	-underline
+	-wrap
+    }
+}
+
+proc ::Text::ConfigureTags {w} {
+    variable tagOptions
+
+    set tags [$w tag names]
+
+    foreach tag $tags {
+	set optsL [list]
+	foreach opt $tagOptions {
+	    set optName [string totitle [string trimleft $opt "-"]]
+	    set value [option get $w $tag$optName {}]
+	    if {$value ne ""} {
+		lappend optsL $opt $value
+	    }
+	}
+	if {[llength $optsL]} {
+	    eval {$w tag configure $tag} $optsL
 	}
     }
 }
