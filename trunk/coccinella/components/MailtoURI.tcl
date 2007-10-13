@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: MailtoURI.tcl,v 1.7 2007-10-12 07:37:09 matben Exp $
+# $Id: MailtoURI.tcl,v 1.8 2007-10-13 12:58:20 matben Exp $
 
 package require uri
 package require uriencode
@@ -34,31 +34,31 @@ proc ::MailtoURI::Init {} {
 }
 
 proc ::MailtoURI::TextCmd {uri} {
-    global  this
+    global  this prefs
     
-    switch -- $this(platform) {
-	macosx {
-	    exec open $uri
-	}
-	unix {
-	    # Special.
-	    set mail [::Utils::UnixGetEmailClient]
-	    if {$mail eq "gmail"} {
-		
-		# http://gentoo-wiki.com/HOWTO_Open_mailto:_links_in_gmail
-		# http://www.howtogeek.com/howto/ubuntu/set-gmail-as-default-mail-client-in-ubuntu/#comment-16706
-		set base "https://mail.google.com/mail/?view=cm&tf=0&to="
-		regsub {^mailto:([^&?]+)[&?]?(.*)$} $uri {\1\&\2} guri
-		regsub {subject=} $guri {su=} guri
-		set gmailuri $base$guri
-		
-		::Utils::UnixOpenUrl $gmailuri
-	    } else {
+    if {$prefs(mailClient) eq "gmail"} {
+
+	# http://gentoo-wiki.com/HOWTO_Open_mailto:_links_in_gmail
+	# http://www.howtogeek.com/howto/ubuntu/set-gmail-as-default-mail-client-in-ubuntu/#comment-16706
+	set base "https://mail.google.com/mail/?view=cm&tf=0&to="
+	regsub {^mailto:([^&?]+)[&?]?(.*)$} $uri {\1\&\2} guri
+	regsub {subject=} $guri {su=} guri
+	set gmailuri $base$guri
+	
+	::Utils::OpenURLInBrowser $gmailuri
+    } else {
+	switch -- $this(platform) {
+	    macosx {
+		exec open $uri
+	    }
+	    unix {
+		# Special.
+		set mail [::Utils::UnixGetEmailClient]
 		catch {exec $mail $uri &}
 	    }
-	}
-	windows {
-	    ::Windows::OpenURI $uri
+	    windows {
+		::Windows::OpenURI $uri
+	    }
 	}
     }
 }

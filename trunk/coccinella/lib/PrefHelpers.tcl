@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefHelpers.tcl,v 1.5 2007-09-14 14:16:16 matben Exp $
+# $Id: PrefHelpers.tcl,v 1.6 2007-10-13 12:58:20 matben Exp $
  
 package provide PrefHelpers 1.0
 
@@ -28,15 +28,13 @@ namespace eval ::PrefHelpers:: {
     ::hooks::register earlyInitHook          ::PrefHelpers::InitPrefsHook
 
     # Unix only. Not MacOSX.
-    if {$::this(platform) eq "unix"} {
-	::hooks::register prefsBuildHook         ::PrefHelpers::BuildPrefsHook
-	::hooks::register prefsSaveHook          ::PrefHelpers::SavePrefsHook
-	::hooks::register prefsCancelHook        ::PrefHelpers::CancelPrefsHook
-	::hooks::register prefsUserDefaultsHook  ::PrefHelpers::UserDefaultsHook
-    }
+    ::hooks::register prefsBuildHook         ::PrefHelpers::BuildPrefsHook
+    ::hooks::register prefsSaveHook          ::PrefHelpers::SavePrefsHook
+    ::hooks::register prefsCancelHook        ::PrefHelpers::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook  ::PrefHelpers::UserDefaultsHook
 }
 
-proc ::PrefHelpers::InitPrefsHook { } {
+proc ::PrefHelpers::InitPrefsHook {} {
     global  prefs this
 	
     # Note that thes are execution paths from 'auto_execok'. Not names.
@@ -78,23 +76,34 @@ proc ::PrefHelpers::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::PrefHelpers::BuildPage {wpage} {
-    global  prefs
+    global  prefs this
     variable tmp
     
-    set tmp(webBrowser) [::Utils::UnixGetWebBrowser]
-    set tmp(mailClient) [::Utils::UnixGetEmailClient]
+    if {$this(platform) eq "unix"} {
+	set tmp(webBrowser) [::Utils::UnixGetWebBrowser]
+	set tmp(mailClient) [::Utils::UnixGetEmailClient]
+	set browsers [::Utils::UnixGetAllWebBrowsers]
+	set mailapps [::Utils::UnixGetAllEmailClients]
 
-    set browsers [::Utils::UnixGetAllWebBrowsers]
-    set mailapps [::Utils::UnixGetAllEmailClients]
-    set menuBrowsers [list]
-    foreach path $browsers {
-	set name [string totitle [lindex [file split $path] end]]
-	lappend menuBrowsers [list $name -value $path]
-    }
-    set menuMail [list]
-    foreach path $mailapps {
-	set name [string totitle [lindex [file split $path] end]]
-	lappend menuMail [list $name -value $path]
+	set menuBrowsers [list]
+	foreach path $browsers {
+	    set name [string totitle [lindex [file split $path] end]]
+	    lappend menuBrowsers [list $name -value $path]
+	}
+	set menuMail [list]
+	foreach path $mailapps {
+	    set name [string totitle [lindex [file split $path] end]]
+	    lappend menuMail [list $name -value $path]
+	}
+    } else {
+	set tmp(mailClient) $prefs(mailClient)
+	if {$tmp(mailClient) eq ""} {
+	    set tmp(mailClient) "-"
+	}
+	set menuMail [list]
+	foreach {name value} [list [mc Default] "-" GMail gmail] {
+	    lappend menuMail [list $name -value $value]
+	}
     }
 
     set anchor [option get . dialogAnchor {}]
@@ -114,21 +123,31 @@ proc ::PrefHelpers::BuildPage {wpage} {
     grid columnconfigure $wc 1 -weight 1
     
     set f $wc.f
-    ttk::label $f.lbrowser -text "[mc Browser]:"
-    ui::optionmenu $f.mbrowser -menulist $menuBrowsers \
-      -variable [namespace current]::tmp(webBrowser)
+    if {$this(platform) eq "unix"} {
+	ttk::label $f.lbrowser -text "[mc Browser]:"
+	ui::optionmenu $f.mbrowser -menulist $menuBrowsers \
+	  -variable [namespace current]::tmp(webBrowser)
+    }
     ttk::label $f.lmail -text "[mc {Email client}]:"
     ui::optionmenu $f.mmail -menulist $menuMail \
       -variable [namespace current]::tmp(mailClient)
     
-    set maxw [max [$f.mbrowser maxwidth] [$f.mmail maxwidth]]
-
-    grid  $f.lbrowser  $f.mbrowser  -padx 2 -pady 2 -sticky e
-    grid  $f.lmail     $f.mmail     -padx 2 -pady 2 -sticky e
-    grid $f.lbrowser $f.lmail -sticky e
-    grid $f.mbrowser $f.mmail -sticky ew
+    if {$this(platform) eq "unix"} {
+	set maxw [max [$f.mbrowser maxwidth] [$f.mmail maxwidth]]
+	
+	grid  $f.lbrowser  $f.mbrowser  -padx 2 -pady 2 -sticky e
+	grid  $f.lmail     $f.mmail     -padx 2 -pady 2 -sticky e
+	grid $f.lbrowser $f.lmail -sticky e
+	grid $f.mbrowser $f.mmail -sticky ew
+    } else {
+	set maxw [$f.mmail maxwidth]
+	
+	grid  $f.lmail     $f.mmail     -padx 2 -pady 2 -sticky e
+	grid $f.lmail -sticky e
+	grid $f.mmail -sticky ew
+    }
     grid columnconfigure $f 1 -minsize [expr {$maxw + 10}]
-   
+
     return $wpage
 }
 
@@ -136,8 +155,11 @@ proc ::PrefHelpers::SavePrefsHook {} {
     global  prefs
     variable tmp
     
-    foreach name [array names tmp] {
-	set prefs($name) $tmp($name)
+    foreach {name value} [array get tmp] {
+	if {$value eq "-"} {
+	    set value ""
+	}
+	set prefs($name) $value
     }
 }
 
@@ -145,8 +167,11 @@ proc ::PrefHelpers::CancelPrefsHook {} {
     global  prefs
     variable tmp
     
-    foreach name [array names tmp] {
-	if {$tmp($name) ne $prefs($name)} {
+    foreach {name value} [array get tmp] {
+	if {$value eq "-"} {
+	    set value ""
+	}
+	if {$value ne $prefs($name)} {
 	    ::Preferences::HasChanged
 	}
     }

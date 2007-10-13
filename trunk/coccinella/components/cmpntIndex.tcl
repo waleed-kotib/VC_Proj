@@ -28,6 +28,7 @@ component::attempt URIRegistry      [file join $dir URIRegistry.tcl]    ::URIReg
 component::attempt URIRegisterKDE   [file join $dir URIRegisterKDE.tcl] ::URIRegisterKDE::Init
 component::attempt UserActivity     [file join $dir UserActivity.tcl]   ::UserActivity::Init
 component::attempt WhiteboardMK     [file join $dir WhiteboardMK.tcl]   ::WhiteboardMK::Init
+component::attempt XMLConsole       [file join $dir XMLConsole.tcl]     ::XMLConsole::Init
 
 if {[tk windowingsystem] eq "aqua"} {
     component::attempt Carbon       [file join $dir Carbon.tcl]         ::Carbon::Init

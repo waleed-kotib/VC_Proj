@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.173 2007-10-06 15:13:46 matben Exp $
+# $Id: UI.tcl,v 1.174 2007-10-13 12:58:21 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -233,7 +233,7 @@ proc ::UI::InitCommonBinds {} {
     }
 }
 
-proc ::UI::InitVirtualEvents { } {
+proc ::UI::InitVirtualEvents {} {
     global  this
       
     # Virtual events.
@@ -260,7 +260,7 @@ proc ::UI::InitVirtualEvents { } {
     }
 }
 
-proc ::UI::InitDlgs { } {
+proc ::UI::InitDlgs {} {
     global  wDlgs
     
     # Define the toplevel windows here so they don't collide.
@@ -352,7 +352,7 @@ proc ::UI::RegisterDlgName {nameDlgFlatA} {
 #       The menu organization. Only least common parts here,
 #       that is, the Apple menu.
 
-proc ::UI::InitMenuDefs { } {
+proc ::UI::InitMenuDefs {} {
     global  prefs this
     variable menuDefs
 	
@@ -383,7 +383,7 @@ proc ::UI::InitMenuDefs { } {
 # 
 #       Setup assistant. Must be called after initing the jabber stuff.
 
-proc ::UI::SetupAss { } {
+proc ::UI::SetupAss {} {
     global wDlgs
     
     package require SetupAss
@@ -396,11 +396,11 @@ proc ::UI::SetupAss { } {
     tkwait window $wDlgs(setupass)
 }
 
-proc ::UI::GetMainWindow { } {
+proc ::UI::GetMainWindow {} {
     return [::JUI::GetMainWindow]
 }
 
-proc ::UI::GetMainMenu { } {
+proc ::UI::GetMainMenu {} {
     return [::JUI::GetMainMenu]
 }
 
@@ -419,7 +419,7 @@ proc ::UI::GetIcon {name} {
     }
 }
 
-proc ::UI::GetScreenSize { } {
+proc ::UI::GetScreenSize {} {
     
     return [list [winfo vrootwidth .] [winfo vrootheight .]]
 }
@@ -429,7 +429,7 @@ proc ::UI::GetScreenSize { } {
 #       Tells if application is frontmost (active).
 #       [focus] is not reliable so it is better called after idle.
 
-proc ::UI::IsAppInFront { } {
+proc ::UI::IsAppInFront {} {
     global  this
     
     if {[tk windowingsystem] eq "aqua" \
@@ -768,7 +768,7 @@ proc ::UI::GetCloseWindowType {} {
 # 
 #       Returns a list of all existing toplevel windows created using Toplevel.
 
-proc ::UI::GetAllToplevels { } {
+proc ::UI::GetAllToplevels {} {
     variable topcache
 
     foreach {key w} [array get topcache *,w] {
@@ -779,7 +779,7 @@ proc ::UI::GetAllToplevels { } {
     return $tmp
 }
 
-proc ::UI::WithdrawAllToplevels { } {
+proc ::UI::WithdrawAllToplevels {} {
     variable topcache
     
     if {[string equal $topcache(state) "show"]} {
@@ -791,7 +791,7 @@ proc ::UI::WithdrawAllToplevels { } {
     }
 }
 
-proc ::UI::ShowAllToplevels { } {
+proc ::UI::ShowAllToplevels {} {
     variable topcache
     
     if {[string equal $topcache(state) "hide"]} {
@@ -805,7 +805,7 @@ proc ::UI::ShowAllToplevels { } {
     }
 }
 
-proc ::UI::GetToplevelState { } {
+proc ::UI::GetToplevelState {} {
     variable topcache
     
     return $topcache(state)
@@ -1411,7 +1411,7 @@ proc ::UI::BuildAppleMenu {w wmenuapple state} {
     NewMenu $w $wmenuapple {} $menuDefs(main,apple) $state
     
     if {[tk windowingsystem] eq "aqua"} {
-	proc ::tk::mac::ShowPreferences { } {
+	proc ::tk::mac::ShowPreferences {} {
 	    ::Preferences::Build
 	}
     }
