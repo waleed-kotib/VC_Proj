@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.83 2007-10-11 09:15:41 matben Exp $
+# $Id: RosterTree.tcl,v 1.84 2007-10-13 12:58:20 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -435,6 +435,18 @@ proc ::RosterTree::InitDnD {win} {
     dnd bindtarget $win text/uri-list <DragLeave> {
 	::RosterTree::DnDLeave %W %D %T
     }
+
+    dnd bindsource $win text/plain { 
+      ::RosterTree::DnDSource %W
+    }
+    bind $win <1> {dnd drag %W}
+}
+
+proc ::RosterTree::DnDSource {win} {
+
+
+    puts "::RosterTree::DnDSource $win"
+    return "test"
 }
 
 proc ::RosterTree::DnDDrop {win data dndtype x y} {

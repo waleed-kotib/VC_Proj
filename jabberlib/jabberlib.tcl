@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.190 2007-10-02 13:34:43 matben Exp $
+# $Id: jabberlib.tcl,v 1.191 2007-10-13 12:58:20 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -341,6 +341,9 @@ proc jlib::new {clientcmd args} {
 
     set lib(socketfilter,out) [list]
     set lib(socketfilter,in)  [list]
+
+    set lib(tee,out) [list]
+    set lib(tee,in)  [list]
 
     init_inst $jlibname
             
@@ -820,6 +823,32 @@ proc jlib::ipsocket {jlibname} {
 
 # standard socket transport layer end ------------------------------------------
 
+proc jlib::tee_recv {jlibname cmd procName} {
+    
+    upvar ${jlibname}::lib lib
+
+    if {$cmd eq "add"} {
+	lappend lib(tee,recv) $procName
+    } elseif {$cmd eq "remove"} {
+	set lib(tee,recv) [lsearch -all -inline -not $lib(tee,recv) $procName]
+    } else {
+	return -code error "unknown sub command \"$cmd\""
+    }
+}
+
+proc jlib::tee_send {jlibname cmd procName} {
+    
+    upvar ${jlibname}::lib lib
+
+    if {$cmd eq "add"} {
+	lappend lib(tee,send) $procName
+    } elseif {$cmd eq "remove"} {
+	set lib(tee,send) [lsearch -all -inline -not $lib(tee,send) $procName]
+    } else {
+	return -code error "unknown sub command \"$cmd\""
+    }
+}
+
 # jlib::recv --
 #
 # 	Feed the XML parser. When the end of a command element tag is reached,
@@ -1074,6 +1103,7 @@ proc jlib::isinstream {jlibname} {
 #       none.
 
 proc jlib::dispatcher {jlibname xmldata} {
+    upvar ${jlibname}::lib    lib
 
     # Which method?
     set tag [wrapper::gettag $xmldata]
@@ -1098,6 +1128,11 @@ proc jlib::dispatcher {jlibname xmldata} {
 	    element_run_hook $jlibname $xmldata
 	}
     }
+    
+    foreach cmd $lib(tee,recv) {
+	uplevel #0 $cmd [list $jlibname $xmldata]
+    }
+    
     # Will have to wait...
     #general_run_hook $jlibname $xmldata
 }
@@ -3264,6 +3299,9 @@ proc jlib::send {jlibname xmllist} {
     }
     set locals(last) [clock seconds]
     set xml [wrapper::createxml $xmllist]
+    foreach cmd $lib(tee,send) {
+	uplevel #0 $cmd [list $jlibname $xmllist]
+    }
     
     # We fail only if already in stream.
     # The first failure reports the network error, closes the stream,
