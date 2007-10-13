@@ -18,14 +18,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: XMLConsole.tcl,v 1.1 2007-10-13 12:58:20 matben Exp $
+# $Id: XMLConsole.tcl,v 1.2 2007-10-13 15:12:20 matben Exp $
 
 namespace eval ::XMLConsole { 
 
     # TODO
-    option add *XMLConsole*Text.tabsX                   4        widgetDefault
-    option add *XMLConsole*Text.recvForeground          blue     widgetDefault
-    option add *XMLConsole*Text.sendForeground          red      widgetDefault
+    option add *XMLConsole*Text.tabsX                    4        widgetDefault
+    option add *XMLConsole*Text.trecvBackground          gray90   widgetDefault
+    option add *XMLConsole*Text.trecvForeground          blue     widgetDefault
+    option add *XMLConsole*Text.tsendBackground          gray80   widgetDefault
+    option add *XMLConsole*Text.tsendForeground          red      widgetDefault
 }
 
 proc ::XMLConsole::Init {} {
@@ -119,12 +121,12 @@ proc ::XMLConsole::Build {} {
     set sendfg [option get $wtext sendForeground {}]
 
     set font [$wtext cget -font]
-    set tab [font measure $font [string repeat x $tabsx]]
-    
+    set tab [font measure $font [string repeat x $tabsx]]    
     $wtext configure -tabs [list $tab left]
+    $wtext tag configure trecv
+    $wtext tag configure tsend
     
-    $wtext tag configure trecv -foreground $recvfg
-    $wtext tag configure tsend -foreground $sendfg
+    ::Text::ConfigureTags $wtext
     
     set state(text)   $wtext
     set state(pretty) $opts(pretty)
