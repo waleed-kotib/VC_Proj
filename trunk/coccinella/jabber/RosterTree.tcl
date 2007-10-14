@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.84 2007-10-13 12:58:20 matben Exp $
+# $Id: RosterTree.tcl,v 1.85 2007-10-14 14:21:24 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -423,6 +423,7 @@ proc ::RosterTree::New {w} {
 
 proc ::RosterTree::InitDnD {win} {
     
+    # Targets:
     dnd bindtarget $win text/uri-list <Drop> {
 	::RosterTree::DnDDrop %W %D %T %x %y
     }
@@ -436,7 +437,8 @@ proc ::RosterTree::InitDnD {win} {
 	::RosterTree::DnDLeave %W %D %T
     }
 
-    dnd bindsource $win text/plain { 
+    # Sources:
+    dnd bindsource $win text/plain;charset=UTF-8 { 
       ::RosterTree::DnDSource %W
     }
     bind $win <1> {dnd drag %W}
@@ -444,9 +446,17 @@ proc ::RosterTree::InitDnD {win} {
 
 proc ::RosterTree::DnDSource {win} {
 
-
     puts "::RosterTree::DnDSource $win"
-    return "test"
+    
+    # We shall export a format other applications have a chance to understand.
+    # Our own targets must also understand this format.
+    set jidL [join [lapply jlib::barejid [GetSelectedJID]] ", "]
+    set data ""
+    foreach jid $jidL {
+	append data "xmpp:$jid "
+    }
+    puts "data=$data"
+    return $data
 }
 
 proc ::RosterTree::DnDDrop {win data dndtype x y} {
