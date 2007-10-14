@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.93 2007-10-04 14:01:07 matben Exp $
+# $Id: NewMsg.tcl,v 1.94 2007-10-14 13:54:25 matben Exp $
 
 package require ui::entryex
 
@@ -416,7 +416,7 @@ proc ::NewMsg::Build {args} {
     set locals($w,wtray)    $wtray
     
     if {$opts(-forwardmessage) ne ""} {
-	set from $opts(-from)
+	set from [jlib::barejid $opts(-from)]
 	set secs [clock scan $opts(-time)]
 	set tfmt [option get $w forwardTimeFormat {}]
 	set date [clock format $secs -format $tfmt]
