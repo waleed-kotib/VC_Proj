@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.191 2007-10-13 12:58:20 matben Exp $
+# $Id: jabberlib.tcl,v 1.192 2007-10-14 09:34:25 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -342,8 +342,8 @@ proc jlib::new {clientcmd args} {
     set lib(socketfilter,out) [list]
     set lib(socketfilter,in)  [list]
 
-    set lib(tee,out) [list]
-    set lib(tee,in)  [list]
+    set lib(tee,send) [list]
+    set lib(tee,recv) [list]
 
     init_inst $jlibname
             
