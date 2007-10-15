@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.72 2007-10-08 12:09:17 matben Exp $
+# $Id: VCard.tcl,v 1.73 2007-10-15 12:06:12 matben Exp $
 
 package provide VCard 1.0
 
@@ -406,8 +406,8 @@ proc ::VCard::Pages {nbframe etoken type} {
       -command [list ::VCard::DeletePhoto $etoken]
         
     grid  $wp1.l   -sticky ne
-    grid  $wp1.b   -sticky se -pady 8
-    grid  $wp1.br  -sticky se
+    grid  $wp1.b   -sticky ew -pady 8
+    grid  $wp1.br  -sticky ew
     grid rowconfigure $wp1 0 -weight 1
 
     set wp2 $wbot.2
