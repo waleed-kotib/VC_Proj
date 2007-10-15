@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.215 2007-10-07 10:32:42 matben Exp $
+# $Id: JUI.tcl,v 1.216 2007-10-15 14:02:53 matben Exp $
 
 package provide JUI 1.0
 
@@ -1593,6 +1593,77 @@ proc ::JUI::CopyEvent {w} {
 	clipboard clear -displayof $w
 	clipboard append -displayof $w [::Text::TransformSelToPureText $w]
     }   
+}
+
+# Some DnD support.
+
+proc ::JUI::DnDXmppBindTarget {win} {
+    
+    if {([tk windowingsystem] ne "aqua") && ![catch {package require tkdnd}]} {
+
+	# We must try to handle UTF-8 as well as system encoded xmpp uris.
+	foreach type {{text/plain} {text/plain;charset=UTF-8}} {
+	    
+	    dnd bindtarget $win $type <DragEnter> {
+		::JUI::DnDXmppDragEnter %W %D %T
+	    }
+	    dnd bindtarget $win $type <DragLeave> {
+		::JUI::DnDXmppDragLeave %W
+	    }
+	    dnd bindtarget $win $type <Drop> {
+		::JUI::DnDXmppDrop %W %D %T
+	    }	    
+	}
+    }
+}
+
+proc ::JUI::DnDXmppDragEnter {win data type} {
+    if {[DnDXmppVerify $data $type]} {
+	if {[winfo class $win] eq "TEntry"} {
+	    $win state {focus}
+	} else {
+	    focus $win
+	}
+    }
+}
+
+proc ::JUI::DnDXmppDragLeave {win} {
+    if {[winfo class $win] eq "TEntry"} {
+	$win state {!focus}
+    } else {
+	focus [winfo toplevel $win]
+    }
+}
+
+proc ::JUI::DnDXmppDrop {win data type} {
+    if {[DnDXmppVerify $win $type]} {
+	set data [::JUI::DnDXmppExtractJID $win $type]
+	$win insert end $data
+    }
+}
+
+proc ::JUI::DnDXmppVerify {data type} {
+    
+    # We must try to handle UTF-8 as well as system encoded xmpp uris.
+    if {$type eq "text/plain"} {
+	set data [encoding convertfrom $data]
+    }
+    set ans 1
+    set parts [split $data ", "]
+    foreach part $parts {
+	if {[string match "xmpp:*" $part]} {
+	    continue
+	}
+    }
+    return $ans
+}
+
+proc ::JUI::DnDXmppExtractJID {data type} {
+
+    # Pick only first. Bad?
+    set jid ""
+    regexp {^xmpp:([^ ]+)(, |$)?} $data - jid
+    return $jid
 }
 
 #-------------------------------------------------------------------------------

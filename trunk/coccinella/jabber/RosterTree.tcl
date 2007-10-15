@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.85 2007-10-14 14:21:24 matben Exp $
+# $Id: RosterTree.tcl,v 1.86 2007-10-15 14:02:53 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -438,24 +438,21 @@ proc ::RosterTree::InitDnD {win} {
     }
 
     # Sources:
-    dnd bindsource $win text/plain;charset=UTF-8 { 
+    dnd bindsource $win {text/plain;charset=UTF-8} { 
       ::RosterTree::DnDSource %W
     }
-    bind $win <1> {dnd drag %W}
+    
+    # Need to bind on Leave else we destroy the TreeCtrl DnD bindings.
+    bind $win <Button1-Leave> { dnd drag %W }
 }
 
 proc ::RosterTree::DnDSource {win} {
-
-    puts "::RosterTree::DnDSource $win"
     
     # We shall export a format other applications have a chance to understand.
     # Our own targets must also understand this format.
-    set jidL [join [lapply jlib::barejid [GetSelectedJID]] ", "]
-    set data ""
-    foreach jid $jidL {
-	append data "xmpp:$jid "
-    }
-    puts "data=$data"
+    #set jidL [lapply {format "xmpp:%s?message"} [lapply jlib::barejid [GetSelectedJID]]]
+    set jidL [lapply {format "xmpp:%s"} [lapply jlib::barejid [GetSelectedJID]]]
+    set data [join $jidL ", "]
     return $data
 }
 

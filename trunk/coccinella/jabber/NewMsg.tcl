@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.94 2007-10-14 13:54:25 matben Exp $
+# $Id: NewMsg.tcl,v 1.95 2007-10-15 14:02:53 matben Exp $
 
 package require ui::entryex
 
@@ -565,6 +565,9 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     grid  $wentry   -padx 1 -pady 1 -column 1 -row $n -sticky news
     grid columnconfigure $wfr 1 -weight 1
     grid rowconfigure $wfr $n -minsize [expr $locals(minheight) + 2]
+    
+    ::JUI::DnDXmppBindTarget $wentry
+    
     set locals($w,addrline) $n
 }
 
@@ -575,13 +578,13 @@ proc ::NewMsg::FillAddrLine {w wfr n} {
     set bg1   [option get $wfr entry1Background {}]
     set bgpop [option get $wfr popup1Background {}]
 
-    $wfr.f${n}.trpt configure -disabledbackground $bg1
+    $wfr.f$n.trpt configure -disabledbackground $bg1
     # D = -bg #adadad
     $wfr.f${n}.la configure -image $locals(popupbt) -bg $bgpop
     $wfr.addr${n} configure -state normal
     
-    bind $wfr.f${n}.la <Button-1> [list ::NewMsg::TrptPopup $w $n %X %Y]
-    bind $wfr.f${n}.la <ButtonRelease-1> [list ::NewMsg::TrptPopupRelease $w $n]
+    bind $wfr.f$n.la <Button-1> [list ::NewMsg::TrptPopup $w $n %X %Y]
+    bind $wfr.f$n.la <ButtonRelease-1> [list ::NewMsg::TrptPopupRelease $w $n]
     set locals($w,fillline) $n
     set locals($w,poptrpt$n) jabber
     set locals($w,enttrpt$n) [::Gateway::GetPrompt xmpp]
