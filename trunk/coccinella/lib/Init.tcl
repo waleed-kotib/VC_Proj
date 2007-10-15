@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.79 2007-10-10 07:25:29 matben Exp $
+# $Id: Init.tcl,v 1.80 2007-10-15 06:36:29 matben Exp $
 
 namespace eval ::Init {
     
@@ -693,8 +693,6 @@ proc ::Init::LoadPackages {} {
     
     # Take precautions and load only our own tile, treectrl.
     # Side effects??? It fools statically linked tile in tclkits
-    #set autoPath $auto_path
-    #set auto_path [list $this(binLibPath) $this(binPath)]
         
     # tile may be statically linked (Windows).
     if {[lsearch -exact [info loaded] {{} tile}] >= 0} {
