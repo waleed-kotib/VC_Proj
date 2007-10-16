@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.222 2007-10-16 12:10:16 matben Exp $
+# $Id: Chat.tcl,v 1.223 2007-10-16 14:26:44 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1253,7 +1253,7 @@ proc ::Chat::Build {threadID args} {
     $wtray newbutton invite \
       -text [mc Invite] -image $iconInvite \
       -disabledimage $iconInviteDis  \
-      -command [list [namespace current]::Invite $dlgtoken]
+      -command [list [namespace current]::InviteCmd $dlgtoken]
     
     # D =
     ttk::separator $w.frall.divt -orient horizontal
@@ -1573,6 +1573,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
       [list [namespace current]::CommandReturnKeyPress $chattoken]
     if {$havednd} {
 	InitDnD $chattoken $wtextsnd
+	::JUI::DnDXmppBindTarget $wtextsnd \
+	  -command [namespace code [list DnDXmppDrop $chattoken]]
     }
     
     set chatstate(wthread)  $wthread
@@ -1596,6 +1598,16 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     after idle [list raise [winfo toplevel $wthread]]
     
     return $chattoken
+}
+
+proc ::Chat::DnDXmppDrop {chattoken win data type} {
+    
+    puts "::Chat::DnDXmppDrop $win $data $type"
+    
+    set jidL [::JUI::DnDXmppExtractJID $data $type]
+    set jidL [split $jidL ", "]
+    puts "jidL=$jidL"
+    Invite $chattoken
 }
 
 proc ::Chat::NicknameEventHook {xmldata jid nickname} {
@@ -1711,12 +1723,14 @@ proc ::Chat::FindAgain {dlgtoken {dir 1}} {
 
 proc ::Chat::InitDnD {chattoken win} {
     
+    # Important to register with lower priority (than 50) when dropping
+    # JID from roster.
     dnd bindtarget $win text/uri-list <Drop>      \
-     [list ::Chat::DnDDrop $chattoken %W %D %T]
+     [list ::Chat::DnDDrop $chattoken %W %D %T] 80
     dnd bindtarget $win text/uri-list <DragEnter> \
-     [list ::Chat::DnDEnter $chattoken %W %A %D %T]
+     [list ::Chat::DnDEnter $chattoken %W %A %D %T] 80
     dnd bindtarget $win text/uri-list <DragLeave> \
-     [list ::Chat::DnDLeave $chattoken %W %D %T]
+     [list ::Chat::DnDLeave $chattoken %W %D %T] 80
 }
 
 proc ::Chat::DnDDrop {chattoken win data dndtype} {
@@ -2302,16 +2316,18 @@ proc ::Chat::LogoutHook { } {
 # Arguments:
 #       dlgtoken    topwindow token
 
-proc ::Chat::Invite {dlgtoken} {
+proc ::Chat::InviteCmd {dlgtoken} {
+    Invite [GetActiveChatToken $dlgtoken]
+}
+
+proc ::Chat::Invite {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
  
-    set chattoken [GetActiveChatToken $dlgtoken]
-    variable $chattoken
-    upvar 0 $chattoken chatstate
-
     # First Create the Room 
-    set timeStamp [clock format [clock seconds] -format %m%j%Y]
+    set timeStamp [clock format [clock seconds] -format "%j%H%S"]
     set myjid [::Jabber::GetMyJid]
     jlib::splitjidex $myjid node host res 
 
@@ -2322,7 +2338,7 @@ proc ::Chat::Invite {dlgtoken} {
 	return
     }
     set server [lindex $chatservers 0]
-    set roomName "$node$timeStamp"
+    set roomName "$node$timeStamp[pid]"
     set roomjid [jlib::joinjid $roomName $server ""]
 
     set result [::Create::Build -nickname $node -server $server \
@@ -2349,12 +2365,12 @@ proc ::Chat::Invite {dlgtoken} {
 		set xattr [list xmlns jabber:x:delay from $from stamp $time]
 		set xelem [wrapper::createtag "x" -attrlist $xattr]
 		set bodyE [tinydom::getfirstchildwithtag $xmppE body]
-		if {$bodyE ne {}} {
+		if {[llength $bodyE]} {
 		    set body [tinydom::chdata $bodyE]
 		} else {
 		    set body ""
 		}
-		$jstate(jlib) send_message $roomjid -type groupchat  \
+		$jstate(jlib) send_message $roomjid -type groupchat \
 		  -body $body -xlist [list $xelem]
 	    }
 	}

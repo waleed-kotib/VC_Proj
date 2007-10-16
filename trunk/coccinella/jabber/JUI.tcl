@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.218 2007-10-16 12:10:16 matben Exp $
+# $Id: JUI.tcl,v 1.219 2007-10-16 14:26:44 matben Exp $
 
 package provide JUI 1.0
 
@@ -1597,10 +1597,12 @@ proc ::JUI::CopyEvent {w} {
 
 # Some DnD support for entry widgets as drop targets ---------------------------
 
-proc ::JUI::DnDXmppBindTarget {win} {
+proc ::JUI::DnDXmppBindTarget {win args} {
     
     if {([tk windowingsystem] ne "aqua") && ![catch {package require tkdnd}]} {
-
+	set argsA(-command) ""
+	array set argsA $args
+	
 	# We must try to handle UTF-8 as well as system encoded xmpp uris. (?)
 	foreach type {{text/plain} {text/plain;charset=UTF-8}} {
 	    
@@ -1610,9 +1612,8 @@ proc ::JUI::DnDXmppBindTarget {win} {
 	    dnd bindtarget $win $type <DragLeave> {
 		::JUI::DnDXmppDragLeave %W
 	    }
-	    dnd bindtarget $win $type <Drop> {
-		::JUI::DnDXmppDrop %W %D %T
-	    }	    
+	    dnd bindtarget $win $type <Drop> \
+	      [list ::JUI::DnDXmppDrop %W %D %T $argsA(-command)]
 	}
     }
 }
@@ -1640,10 +1641,14 @@ proc ::JUI::DnDXmppDragLeave {win} {
     }
 }
 
-proc ::JUI::DnDXmppDrop {win data type} {
+proc ::JUI::DnDXmppDrop {win data type cmd} {
     if {[DnDXmppVerify $data $type]} {
-	set data [::JUI::DnDXmppExtractJID $data $type]
-	$win insert end $data
+	set data [DnDXmppExtractJID $data $type]
+	if {$cmd eq ""} {
+	    $win insert end $data
+	} else {
+	    uplevel #0 $cmd [list $win $data $type]
+	}
     }
 }
 

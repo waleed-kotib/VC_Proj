@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.88 2007-10-16 12:10:16 matben Exp $
+# $Id: RosterTree.tcl,v 1.89 2007-10-16 14:26:44 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -455,6 +455,8 @@ proc ::RosterTree::InitDnD {win} {
 
 proc ::RosterTree::DnDSource {win} {
     global  config
+    
+    # @@@ Perhaps we shall try to identify groups/heads as well?
     
     # We shall export a format other applications have a chance to understand.
     # Our own targets must also understand this format.
