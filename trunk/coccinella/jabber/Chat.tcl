@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.221 2007-10-11 06:32:16 matben Exp $
+# $Id: Chat.tcl,v 1.222 2007-10-16 12:10:16 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -295,6 +295,8 @@ proc ::Chat::StartThreadDlg {args} {
 
     grid  $frmid.luser  $frmid.euser  -sticky e -padx 2
     grid  $frmid.euser  -sticky w
+    
+    ::JUI::DnDXmppBindTarget $frmid.euser
     
     # Button part.
     set frbot $wbox.b

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.217 2007-10-16 08:14:08 matben Exp $
+# $Id: JUI.tcl,v 1.218 2007-10-16 12:10:16 matben Exp $
 
 package provide JUI 1.0
 
@@ -1619,7 +1619,8 @@ proc ::JUI::DnDXmppBindTarget {win} {
 
 proc ::JUI::DnDXmppDragEnter {win data type} {
     if {[DnDXmppVerify $data $type]} {
-	if {[winfo class $win] eq "TEntry"} {
+	set wclass [winfo class $win]
+	if {($wclass eq "TEntry") || ($wclass eq "TCombobox")} {
 	    $win state {focus}
 	} else {
 	    focus $win
@@ -1631,7 +1632,8 @@ proc ::JUI::DnDXmppDragEnter {win data type} {
 }
 
 proc ::JUI::DnDXmppDragLeave {win} {
-    if {[winfo class $win] eq "TEntry"} {
+    set wclass [winfo class $win]
+    if {($wclass eq "TEntry") || ($wclass eq "TCombobox")} {
 	$win state {!focus}
     } else {
 	focus [winfo toplevel $win]

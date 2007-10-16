@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.164 2007-10-11 13:41:53 matben Exp $	
+# $Id: Coccinella.tcl,v 1.165 2007-10-16 12:10:16 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -154,10 +154,10 @@ package require Theme
 ::Init::Msgcat
 
 switch [tk windowingsystem] {
-    "windows" {
+    windows - win32 {
 	wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
     }
-    "x11" {
+    x11 {
 	if {[package vcompare [info patchlevel] 8.4.8] >= 0} {
 	    wm iconphoto . -default [::Theme::GetImage coccinella22]
 	}
