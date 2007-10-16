@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.216 2007-10-15 14:02:53 matben Exp $
+# $Id: JUI.tcl,v 1.217 2007-10-16 08:14:08 matben Exp $
 
 package provide JUI 1.0
 
@@ -1595,13 +1595,13 @@ proc ::JUI::CopyEvent {w} {
     }   
 }
 
-# Some DnD support.
+# Some DnD support for entry widgets as drop targets ---------------------------
 
 proc ::JUI::DnDXmppBindTarget {win} {
     
     if {([tk windowingsystem] ne "aqua") && ![catch {package require tkdnd}]} {
 
-	# We must try to handle UTF-8 as well as system encoded xmpp uris.
+	# We must try to handle UTF-8 as well as system encoded xmpp uris. (?)
 	foreach type {{text/plain} {text/plain;charset=UTF-8}} {
 	    
 	    dnd bindtarget $win $type <DragEnter> {
@@ -1624,6 +1624,9 @@ proc ::JUI::DnDXmppDragEnter {win data type} {
 	} else {
 	    focus $win
 	}
+	return "default"
+    } else {
+	return "none"
     }
 }
 
@@ -1636,8 +1639,8 @@ proc ::JUI::DnDXmppDragLeave {win} {
 }
 
 proc ::JUI::DnDXmppDrop {win data type} {
-    if {[DnDXmppVerify $win $type]} {
-	set data [::JUI::DnDXmppExtractJID $win $type]
+    if {[DnDXmppVerify $data $type]} {
+	set data [::JUI::DnDXmppExtractJID $data $type]
 	$win insert end $data
     }
 }
@@ -1648,6 +1651,8 @@ proc ::JUI::DnDXmppVerify {data type} {
     if {$type eq "text/plain"} {
 	set data [encoding convertfrom $data]
     }
+    
+    # Seems we accept anything here. Good or bad?
     set ans 1
     set parts [split $data ", "]
     foreach part $parts {
@@ -1660,10 +1665,12 @@ proc ::JUI::DnDXmppVerify {data type} {
 
 proc ::JUI::DnDXmppExtractJID {data type} {
 
-    # Pick only first. Bad?
-    set jid ""
-    regexp {^xmpp:([^ ]+)(, |$)?} $data - jid
-    return $jid
+    if {$type eq "text/plain"} {
+	set data [encoding convertfrom $data]
+    }
+
+    # Strip off any xmpp: and return a comma separated list.
+    return [lapply {string map {"xmpp:" ""}} $data]
 }
 
 #-------------------------------------------------------------------------------

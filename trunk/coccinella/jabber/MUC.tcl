@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.94 2007-09-16 14:55:26 matben Exp $
+# $Id: MUC.tcl,v 1.95 2007-10-16 08:14:08 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -177,6 +177,8 @@ proc ::MUC::Invite {roomjid {continue ""}} {
     ttk::frame $wmid
     pack $wmid -side top -fill x -expand 1
     
+    # Allow comma separated list here.
+    # @@@ Problem if whitespace in resource?
     ttk::label $wmid.la -text "[mc {Contact ID}]:"
     ui::comboboxex $wmid.ejid -library $jidlist -textvariable $token\(jid)  \
       -values $jidlist
@@ -186,6 +188,8 @@ proc ::MUC::Invite {roomjid {continue ""}} {
     grid  $wmid.la   $wmid.ejid  -sticky e -padx 2 -pady 2
     grid  $wmid.lre  $wmid.ere   -sticky e -padx 2 -pady 2
     grid $wmid.ejid $wmid.ere -sticky ew
+    
+    ::JUI::DnDXmppBindTarget $wmid.ejid
     
     # Button part.
     set frbot $wbox.b
@@ -232,7 +236,9 @@ proc ::MUC::DoInvite {token} {
     upvar 0 $token invite
     upvar ::Jabber::jstate jstate
 
-    set jid      $invite(jid)
+    # This can be a comma separated list, from DnD or user entered.
+    # @@@ Problem if whitespace in resource?
+    set jidL     $invite(jid)
     set reason   $invite(reason)
     set roomjid  $invite(roomjid)
     set continue $invite(continue)
@@ -240,25 +246,29 @@ proc ::MUC::DoInvite {token} {
     set invite(finished) 1
     InviteClose $token
 
-    set opts [list -command [list [namespace current]::InviteCB $token]]
+    set opts [list]
     if {$reason ne ""} {
-	set opts [list -reason $reason]
+	lappend opts -reason $reason
     }
     if {$continue ne ""} {
         lappend opts -continue 1 
     }
 
-    eval {$jstate(jlib) muc invite $roomjid $jid} $opts
+    # We want it stateless so that multiple contacts can be invited.
+    foreach jid [split $jidL ", "] {
+	set aopts [concat $opts \
+	  [list -command [namespace code [list InviteCB $roomjid $jid]]]]
+	eval {$jstate(jlib) muc invite $roomjid $jid} $aopts
+    }
+    unset -nocomplain invite
 }
 
-proc ::MUC::InviteCB {token jlibname type args} {
-    variable $token
-    upvar 0 $token invite
+proc ::MUC::InviteCB {roomjid jid jlibname type args} {
     
     array set argsA $args
     
     if {$type eq "error"} {
-	set msg [mc mucErrInvite2 $invite(jid) $invite(roomjid)]
+	set msg [mc mucErrInvite2 $jid $roomjid]
 	if {[info exists argsA(-error)]} {
 	    set errcode [lindex $argsA(-error) 0]
 	    set errmsg [lindex $argsA(-error) 1]
@@ -266,7 +276,6 @@ proc ::MUC::InviteCB {token jlibname type args} {
 	}
 	::UI::MessageBox -icon error -title [mc Error] -type ok -message $msg
     }
-    unset -nocomplain invite
 }
 
 # MUC::MUCMessage --
