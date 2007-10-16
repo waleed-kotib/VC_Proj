@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.86 2007-10-15 14:02:53 matben Exp $
+# $Id: RosterTree.tcl,v 1.87 2007-10-16 08:14:08 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -64,6 +64,10 @@ namespace eval ::RosterTree {
       unavailable   [mc Offline]        \
       transport     [mc Transports]     \
       pending       [mc {Subscription Pending}]]
+    
+    # How should JIDs be formatted before export to DnD?
+    # Alternative "xmpp:%s?message"
+    set ::config(rost,dnd-xmpp-uri-format) "xmpp:%s"
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -447,11 +451,12 @@ proc ::RosterTree::InitDnD {win} {
 }
 
 proc ::RosterTree::DnDSource {win} {
+    global  config
     
     # We shall export a format other applications have a chance to understand.
     # Our own targets must also understand this format.
-    #set jidL [lapply {format "xmpp:%s?message"} [lapply jlib::barejid [GetSelectedJID]]]
-    set jidL [lapply {format "xmpp:%s"} [lapply jlib::barejid [GetSelectedJID]]]
+    set fmt $config(rost,dnd-xmpp-uri-format)
+    set jidL [lapply [list format $fmt] [lapply jlib::barejid [GetSelectedJID]]]
     set data [join $jidL ", "]
     return $data
 }
