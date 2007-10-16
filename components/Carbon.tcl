@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.12 2007-09-21 06:27:34 matben Exp $
+# $Id: Carbon.tcl,v 1.13 2007-10-16 12:10:16 matben Exp $
 # 
 # @@@ Move the sleep stuff to something more generic.
 
@@ -48,7 +48,7 @@ proc ::Carbon::Init {} {
     ::hooks::register appInFrontHook      [namespace code AppInFrontHook]
     ::hooks::register quitAppHook         [namespace code QuitHook]
     ::hooks::register fileTransferReceiveHook  [namespace code NotifyHook]
-    ::hooks::register  loginHook          [namespace code LoginHook]
+    ::hooks::register loginHook           [namespace code LoginHook]
 
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          [namespace code InitPrefsHook]

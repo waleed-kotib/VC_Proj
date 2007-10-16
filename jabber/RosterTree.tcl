@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.87 2007-10-16 08:14:08 matben Exp $
+# $Id: RosterTree.tcl,v 1.88 2007-10-16 12:10:16 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -445,6 +445,9 @@ proc ::RosterTree::InitDnD {win} {
     dnd bindsource $win {text/plain;charset=UTF-8} { 
       ::RosterTree::DnDSource %W
     }
+    dnd bindsource $win text/uri-list { 
+      ::RosterTree::DnDFileSource %W
+    }
     
     # Need to bind on Leave else we destroy the TreeCtrl DnD bindings.
     bind $win <Button1-Leave> { dnd drag %W }
@@ -459,6 +462,34 @@ proc ::RosterTree::DnDSource {win} {
     set jidL [lapply [list format $fmt] [lapply jlib::barejid [GetSelectedJID]]]
     set data [join $jidL ", "]
     return $data
+}
+
+namespace eval ::RosterTree {
+    
+    variable dndSrc
+    array set dndSrc {
+	suffix,win32    .URL
+	suffix,x11      .desktop
+	content,win32   "\[InternetShortcut\]\nURL=%s"
+	content,x11     "\[Desktop Entry\]\nEncoding=UTF-8\nIcon=xmpp\nType=Link\nURL=%s"
+    }    
+}
+
+proc ::RosterTree::DnDFileSource {win} {
+    global  this
+    variable dndSrc
+
+    set os [tk windowingsystem]
+    set jidL [lapply jlib::jidmap [lapply jlib::barejid [GetSelectedJID]]]
+    set fileL [list]
+    foreach jid $jidL {
+	set fileName [file join $this(tmpPath) [uriencode::quote $jid]]$dndSrc(suffix,$os)
+	lappend fileL $fileName
+	set fd [open $fileName w]
+	puts $fd [format $dndSrc(content,$os) "xmpp:$jid?message"]
+ 	close $fd
+    }
+    return $fileL
 }
 
 proc ::RosterTree::DnDDrop {win data dndtype x y} {
