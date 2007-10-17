@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.90 2007-10-17 06:33:21 matben Exp $
+# $Id: RosterTree.tcl,v 1.91 2007-10-17 13:18:24 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -456,21 +456,21 @@ proc ::RosterTree::InitDnD {win} {
 
     # Sources:
     dnd bindsource $win {text/plain;charset=UTF-8} { 
-      ::RosterTree::DnDSource %W
+	::RosterTree::DnDTextSource %W
     }
     dnd bindsource $win text/uri-list { 
-      ::RosterTree::DnDFileSource %W
+	::RosterTree::DnDFileSource %W
     }
     
     # Need to bind on Leave else we destroy the TreeCtrl DnD bindings.
     bind $win <Button1-Leave> { dnd drag %W }
 }
 
-# RosterTree::DnDSource --
+# RosterTree::DnDTextSource --
 # 
 #       Defines what to "export" from roster when dragging to the desktop.
 
-proc ::RosterTree::DnDSource {win} {
+proc ::RosterTree::DnDTextSource {win} {
     global  config
         
     # We shall export a format other applications have a chance to understand.
@@ -506,7 +506,7 @@ proc ::RosterTree::DnDDrop {win data dndtype x y} {
 
     set T $win
     set f [lindex $data 0]
-    set f [string map {file:// ""} $f]
+    set f [string map {"file://" ""} $f]
     set f [uriencode::decodefile $f]
     set id [$T identify $x $y]
     if {[lindex $id 0] eq "item"} {

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.247 2007-10-12 06:56:29 matben Exp $
+# $Id: Jabber.tcl,v 1.248 2007-10-17 13:18:24 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -193,6 +193,7 @@ namespace eval ::Jabber:: {
 	muc             "http://jabber.org/protocol/muc"
 	muc,admin       "http://jabber.org/protocol/muc#admin"
 	muc,owner       "http://jabber.org/protocol/muc#owner"
+	muc,unique      "http://jabber.org/protocol/muc#unique"
 	muc,user        "http://jabber.org/protocol/muc#user"
 	oob             "jabber:iq:oob"
 	si              "http://jabber.org/protocol/si"
