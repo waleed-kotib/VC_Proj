@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.89 2007-10-16 14:26:44 matben Exp $
+# $Id: RosterTree.tcl,v 1.90 2007-10-17 06:33:21 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -68,6 +68,19 @@ namespace eval ::RosterTree {
     # How should JIDs be formatted before export to DnD?
     # Alternative "xmpp:%s?message"
     set ::config(rost,dnd-xmpp-uri-format) "xmpp:%s"
+}
+
+namespace eval ::RosterTree {
+    
+    variable dndSrc
+    array set dndSrc {
+	suffix,win32    .URL
+	suffix,x11      .desktop
+	content,win32   "\[InternetShortcut\]\nURL=%s"
+	content,x11     "\[Desktop Entry\]\nEncoding=UTF-8\nIcon=xmpp\nType=Link\nURL=%s"
+	suffix,aqua     .xxx
+	content,aqua    ""
+    }    
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -453,36 +466,31 @@ proc ::RosterTree::InitDnD {win} {
     bind $win <Button1-Leave> { dnd drag %W }
 }
 
+# RosterTree::DnDSource --
+# 
+#       Defines what to "export" from roster when dragging to the desktop.
+
 proc ::RosterTree::DnDSource {win} {
     global  config
-    
-    # @@@ Perhaps we shall try to identify groups/heads as well?
-    
+        
     # We shall export a format other applications have a chance to understand.
     # Our own targets must also understand this format.
     set fmt $config(rost,dnd-xmpp-uri-format)
-    set jidL [lapply [list format $fmt] [lapply jlib::barejid [GetSelectedJID]]]
+    set jidL [lapply [list format $fmt] [lapply jlib::barejid [GetExtSelectedJID]]]
     set data [join $jidL ", "]
     return $data
 }
 
-namespace eval ::RosterTree {
-    
-    variable dndSrc
-    array set dndSrc {
-	suffix,win32    .URL
-	suffix,x11      .desktop
-	content,win32   "\[InternetShortcut\]\nURL=%s"
-	content,x11     "\[Desktop Entry\]\nEncoding=UTF-8\nIcon=xmpp\nType=Link\nURL=%s"
-    }    
-}
+# RosterTree::DnDFileSource --
+# 
+#       Defines what to "export" from roster when dragging to the desktop.
 
 proc ::RosterTree::DnDFileSource {win} {
     global  this
     variable dndSrc
 
     set os [tk windowingsystem]
-    set jidL [lapply jlib::jidmap [lapply jlib::barejid [GetSelectedJID]]]
+    set jidL [lapply jlib::jidmap [lapply jlib::barejid [GetExtSelectedJID]]]
     set fileL [list]
     foreach jid $jidL {
 	set fileName [file join $this(tmpPath) [uriencode::quote $jid]]$dndSrc(suffix,$os)
@@ -707,12 +715,14 @@ proc ::RosterTree::EditButtonPress {x y} {
     variable editBind
     
     if {[info exists editTimer(after)]} {
-	set id [$T identify $x $y]
-	if {$id eq $editTimer(id)} {
-	    
-	    # The balloonhelp window on Mac takes focus. Stop it.
-	    ::balloonhelp::cancel
-	    uplevel #0 $editBind(cmd) [list $id]
+	if {[$T selection count] == 1} {
+	    set id [$T identify $x $y]
+	    if {$id eq $editTimer(id)} {
+		
+		# The balloonhelp window on Mac takes focus. Stop it.
+		::balloonhelp::cancel
+		uplevel #0 $editBind(cmd) [list $id]
+	    }
 	}
     }
 }
@@ -1016,28 +1026,59 @@ proc ::RosterTree::OnFocusOut {} {
     }    
 }
 
+# RosterTree::GetSelected --
+# 
+#       Returns a list of tags of selected items.
+
 proc ::RosterTree::GetSelected {} {
     variable T
     
     set selected [list]
     foreach item [$T selection get] {
-	set tags [GetTagOfItem $item]
-	lappend selected $tags
+	lappend selected [GetTagOfItem $item]
     }
     return $selected
 }
+
+# RosterTree::GetSelectedJID --
+# 
+#       Returns a list of JIDs of selected contacts.
 
 proc ::RosterTree::GetSelectedJID {} {
     
     set jidL [list]
     set tags [GetSelected]
     foreach tag $tags {
-	lassign $tag mtag jid
-	if {$mtag eq "jid"} {
-	    lappend jidL $jid
+	if {[lindex $tag 0] eq "jid"} {
+	    lappend jidL [lindex $tag 1]
 	}
     }
     return $jidL
+}
+
+# RosterTree::GetExtSelectedJID --
+# 
+#       As 'GetSelectedJID' but searches recursively selected parents as well.
+
+proc ::RosterTree::GetExtSelectedJID {} {
+    variable T
+    
+    set jidL [list]
+    foreach item [$T selection get] {
+	set tag [GetTagOfItem $item]
+	if {[lindex $tag 0] eq "jid"} {
+	    lappend jidL [lindex $tag 1]
+	} else {
+	    set all [$T item descendants $item]
+	    foreach aitem $all {
+		set tag [GetTagOfItem $aitem]
+		if {[lindex $tag 0] eq "jid"} {
+		    lappend jidL [lindex $tag 1]
+		}
+	    }
+	}
+    }
+    return [lsort -unique $jidL]
 }
 
 # RosterTree::OnPopup --
