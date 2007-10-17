@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.219 2007-10-16 14:26:44 matben Exp $
+# $Id: JUI.tcl,v 1.220 2007-10-17 13:18:24 matben Exp $
 
 package provide JUI 1.0
 
@@ -1661,7 +1661,7 @@ proc ::JUI::DnDXmppVerify {data type} {
     
     # Seems we accept anything here. Good or bad?
     set ans 1
-    set parts [split $data ", "]
+    set parts [string map {"," ""} $data]
     foreach part $parts {
 	if {[string match "xmpp:*" $part]} {
 	    continue

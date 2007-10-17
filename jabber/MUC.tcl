@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.95 2007-10-16 08:14:08 matben Exp $
+# $Id: MUC.tcl,v 1.96 2007-10-17 13:18:24 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -116,34 +116,40 @@ namespace eval ::MUC:: {
 #       NB: Keep the 'invite' state array untile we close/cancel or until
 #           we get a response.
 
-proc ::MUC::Invite {roomjid {continue ""}} {
+proc ::MUC::Invite {roomjid args} {
     global this wDlgs config
     
     variable inviteuid
     variable dlguid
     upvar ::Jabber::jstate jstate
-
-    # State variable to collect instance specific variables.
-    set token [namespace current]::invite[incr inviteuid]
-    variable $token
-    upvar 0 $token invite
+    
+    array set argsA {
+	-continue 0
+	-jidlist  {}
+    }
+    array set argsA $args
+    set jidL $argsA(-jidlist)
     
     set w $wDlgs(jmucinvite)[incr dlguid]
     ::UI::Toplevel $w -class JMUCInvite \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
-      -closecommand [list [namespace current]::InviteCloseCmd $token]
-    wm title $w [mc {Invite Contact}]
+      -closecommand [list [namespace current]::InviteCloseCmd $w]
+    wm title $w [mc "Invite Contact"]
+
+    # State variable to collect instance specific variables.
+    set token [namespace current]::$w
+    variable $w
+    upvar 0 $w invite
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucinvite)]]
     if {$nwin == 1} {
 	::UI::SetWindowPosition $w $wDlgs(jmucinvite)
     }
     jlib::splitjidex $roomjid node domain res
-    set jidlist [$jstate(jlib) roster getusers -type available]
 
     set invite(w)        $w
     set invite(reason)   ""
-    set invite(continue) $continue
+    set invite(continue) $argsA(-continue)
     set invite(finished) -1
     set invite(roomjid)  $roomjid
 
@@ -156,7 +162,7 @@ proc ::MUC::Invite {roomjid {continue ""}} {
 	set imd  [::Theme::GetImage [option get $w inviteDisImage {}]]
 
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc {Invite Contact}] -compound left \
+	  -text [mc "Invite Contact"] -compound left \
 	  -image [list $im background $imd]
 	pack $w.frall.head -side top -anchor w
 	
@@ -176,28 +182,28 @@ proc ::MUC::Invite {roomjid {continue ""}} {
     set wmid $wbox.fr
     ttk::frame $wmid
     pack $wmid -side top -fill x -expand 1
+
+    set invite(wmid) $wmid
+
+    InviteMakeContactWidgets $w $jidL
     
-    # Allow comma separated list here.
-    # @@@ Problem if whitespace in resource?
-    ttk::label $wmid.la -text "[mc {Contact ID}]:"
-    ui::comboboxex $wmid.ejid -library $jidlist -textvariable $token\(jid)  \
-      -values $jidlist
     ttk::label $wmid.lre -text "[mc Message]:"
     ttk::entry $wmid.ere -textvariable $token\(reason)
     
-    grid  $wmid.la   $wmid.ejid  -sticky e -padx 2 -pady 2
-    grid  $wmid.lre  $wmid.ere   -sticky e -padx 2 -pady 2
-    grid $wmid.ejid $wmid.ere -sticky ew
+    grid  $wmid.lre  $wmid.ere   -sticky e -padx 2 -pady 2 -row 100
+    grid $wmid.ere -sticky ew
     
-    ::JUI::DnDXmppBindTarget $wmid.ejid
-    
+    # Allow dropping a comma separated list of JIDs.
+    ::JUI::DnDXmppBindTarget $wmid.ejid0 \
+      -command [namespace code [list InviteDrop $w]]
+
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btok -text [mc OK]  \
-      -default active -command [list [namespace current]::DoInvite $token]
+      -default active -command [list [namespace current]::DoInvite $w]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
-      -command [list [namespace current]::InviteClose $token]
+      -command [list [namespace current]::InviteClose $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btok -side right
@@ -210,16 +216,56 @@ proc ::MUC::Invite {roomjid {continue ""}} {
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
-    focus $wmid.ejid
+    focus $wmid.ejid0
+    
+    return $w
 }
 
-proc ::MUC::InviteClose {token} {    
+proc ::MUC::InviteMakeContactWidgets {w jidL} {
+    variable $w
+    upvar 0 $w invite
+    upvar ::Jabber::jstate jstate
+    
+    set token [namespace current]::$w
+    set users [$jstate(jlib) roster getusers -type available]
+    set wmid $invite(wmid)
+    set n 0
+    
+    # We must make at least one row if jidL is empty.
+    if {![llength $jidL]} {
+	set jidL -
+    }
+    foreach jid $jidL {
+	if {$jid eq "-"} {
+	    set jid ""
+	}
+	set invite(jid$n) $jid
+	if {![winfo exists $wmid.la$n]} {
+	    ttk::label $wmid.la$n -text "[mc {Contact ID}]:"
+	    ui::comboboxex $wmid.ejid$n -library $users \
+	      -textvariable $token\(jid$n) -values $users
+	
+	    grid  $wmid.la$n   $wmid.ejid$n  -sticky e -padx 2 -pady 2 -row $n
+	    grid $wmid.ejid$n -sticky ew
+	}
+	incr n
+    }
+}
+
+proc ::MUC::InviteDrop {w win data type} {
+    
+    set jidL [::JUI::DnDXmppExtractJID $data $type]
+    set jidL [string map {"," ""} $jidL]
+    InviteMakeContactWidgets $w $jidL
+}
+
+proc ::MUC::InviteClose {w} {    
     global  wDlgs
-    variable $token
-    upvar 0 $token invite
+    variable $w
+    upvar 0 $w invite
 
     ::UI::SaveWinPrefixGeom $wDlgs(jmucinvite)
-    destroy $invite(w)
+    destroy $w
     
     # Be sure to keep state array if sent out an invitation.
     if {$invite(finished) != 1} {
@@ -227,38 +273,38 @@ proc ::MUC::InviteClose {token} {
     }
 }
 
-proc ::MUC::InviteCloseCmd {token wclose} {
-    InviteClose $token
+proc ::MUC::InviteCloseCmd {w wclose} {
+    InviteClose $w
 }
 
-proc ::MUC::DoInvite {token} {
-    variable $token
-    upvar 0 $token invite
+proc ::MUC::DoInvite {w} {
+    variable $w
+    upvar 0 $w invite
     upvar ::Jabber::jstate jstate
 
-    # This can be a comma separated list, from DnD or user entered.
-    # @@@ Problem if whitespace in resource?
-    set jidL     $invite(jid)
     set reason   $invite(reason)
     set roomjid  $invite(roomjid)
     set continue $invite(continue)
 
     set invite(finished) 1
-    InviteClose $token
+    InviteClose $w
 
     set opts [list]
     if {$reason ne ""} {
 	lappend opts -reason $reason
     }
-    if {$continue ne ""} {
+    if {$continue} {
         lappend opts -continue 1 
     }
 
     # We want it stateless so that multiple contacts can be invited.
-    foreach jid [split $jidL ", "] {
-	set aopts [concat $opts \
-	  [list -command [namespace code [list InviteCB $roomjid $jid]]]]
-	eval {$jstate(jlib) muc invite $roomjid $jid} $aopts
+    foreach {key jid} [array get invite jid*] {
+	set jid [string trim $jid]
+	if {$jid ne ""} {
+	    set aopts [concat $opts \
+	      [list -command [namespace code [list InviteCB $roomjid $jid]]]]
+	    eval {$jstate(jlib) muc invite $roomjid $jid} $aopts
+	}
     }
     unset -nocomplain invite
 }

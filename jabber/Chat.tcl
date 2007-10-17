@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.223 2007-10-16 14:26:44 matben Exp $
+# $Id: Chat.tcl,v 1.224 2007-10-17 13:18:24 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1573,6 +1573,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
       [list [namespace current]::CommandReturnKeyPress $chattoken]
     if {$havednd} {
 	InitDnD $chattoken $wtextsnd
+	::JUI::DnDXmppBindTarget $wtext \
+	  -command [namespace code [list DnDXmppDrop $chattoken]]
 	::JUI::DnDXmppBindTarget $wtextsnd \
 	  -command [namespace code [list DnDXmppDrop $chattoken]]
     }
@@ -1601,13 +1603,15 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 }
 
 proc ::Chat::DnDXmppDrop {chattoken win data type} {
+        
+    set ans [tk_messageBox -title [mc Warning] -type yesno \
+      -message "Do you actually want to invite these users to a new chat room?"]
     
-    puts "::Chat::DnDXmppDrop $win $data $type"
-    
-    set jidL [::JUI::DnDXmppExtractJID $data $type]
-    set jidL [split $jidL ", "]
-    puts "jidL=$jidL"
-    Invite $chattoken
+    if {$ans eq "yes"} {
+	set jidL [::JUI::DnDXmppExtractJID $data $type]
+	set jidL [split $jidL ","]
+	Invite $chattoken -jidlist $jidL
+    }
 }
 
 proc ::Chat::NicknameEventHook {xmldata jid nickname} {
@@ -2296,7 +2300,7 @@ proc ::Chat::LogoutHook { } {
 
 # Chat::Invite --
 #
-#      MUC 6.8. Converting One-to-One Chat Into a Conference 
+#      MUC 7.6. Converting One-to-One Chat Into a Conference 
 #      
 #      0: Creates a new room (which SHOULD be non-anonymous and MAY be an 
 #         instant room as specified below) 
@@ -2320,16 +2324,34 @@ proc ::Chat::InviteCmd {dlgtoken} {
     Invite [GetActiveChatToken $dlgtoken]
 }
 
-proc ::Chat::Invite {chattoken} {
+proc ::Chat::Invite {chattoken args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
- 
+
+    array set argsA $args
+
     # First Create the Room 
-    set timeStamp [clock format [clock seconds] -format "%j%H%S"]
-    set myjid [::Jabber::GetMyJid]
-    jlib::splitjidex $myjid node host res 
+    set result [InviteCreateRoom roomjid]
+    
+    if { $result eq "create" } {
+	
+	# Second Send History to MUC
+	InviteSendHistory $chattoken $roomjid
+	
+	# Third Invite the second user
+	set opts [list -reason [mc mucChat2ConfInv] -continue 1]
+	eval {$jstate(jlib) muc invite $roomjid $chatstate(fromjid)} $opts
+
+	# Third and Invite the third user
+	eval {::MUC::Invite $roomjid -continue 1} $args
+    }
+}
+
+proc ::Chat::InviteCreateRoom {roomjidVar} {
+    upvar $roomjidVar roomjid
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::xmppxmlns xmppxmlns
 
     set chatservers [$jstate(jlib) disco getconferences]
     if {0 && $chatservers eq {}} {
@@ -2338,49 +2360,65 @@ proc ::Chat::Invite {chattoken} {
 	return
     }
     set server [lindex $chatservers 0]
+
+    # @@@ Test: 10.1.4 Requesting a Unique Room Name
+    
+    set unique [$jstate(jlib) disco hasfeature $xmppxmlns(muc,unique) $server]
+    #puts "\t unique=$unique"
+    
+    if {$unique} {
+	set uniqueE [wrapper::createtag "unique" \
+	  -attrlist [list xmlns $xmppxmlns(muc,unique)]]
+	$jstate(jlib) send_iq get [list $uniqueE] -to $server
+	
+    }
+    
+    set timeStamp [clock format [clock seconds] -format "%j%H%S"]
+    set myjid [::Jabber::GetMyJid]
+    jlib::splitjidex $myjid node host res 
+    
     set roomName "$node$timeStamp[pid]"
     set roomjid [jlib::joinjid $roomName $server ""]
 
+    # @@@ Instant room?
     set result [::Create::Build -nickname $node -server $server \
       -roomname $roomName]
-    if { $result eq "create" } {
-	
-	# Second Send History to MUC
 
-	set jid2 $chatstate(jid2)
-	if {[::Jabber::JlibCmd service isroom $jid2]} {
-	    set jidH $chatstate(jid)	
-	} else {
-	    set jidH $jid2	
-	}
+    return $result
+}
 
-	# We must reparse the history to get the latest.
-	set itemL [::History::XFastParseFiles $jidH  \
-	  $jprefs(chat,histLen) $jprefs(chat,histAge)]
-	foreach itemE $itemL {
-	    set xmppE [lindex [tinydom::children $itemE] 0]
-	    if {[tinydom::tagname $xmppE] eq "message"} {
-		set time [tinydom::getattribute $itemE time]
-		set from [tinydom::getattribute $xmppE from]
-		set xattr [list xmlns jabber:x:delay from $from stamp $time]
-		set xelem [wrapper::createtag "x" -attrlist $xattr]
-		set bodyE [tinydom::getfirstchildwithtag $xmppE body]
-		if {[llength $bodyE]} {
-		    set body [tinydom::chdata $bodyE]
-		} else {
-		    set body ""
-		}
-		$jstate(jlib) send_message $roomjid -type groupchat \
-		  -body $body -xlist [list $xelem]
+proc ::Chat::InviteSendHistory {chattoken roomjid} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+    
+    set jid2 $chatstate(jid2)
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	set jidH $chatstate(jid)	
+    } else {
+	set jidH $jid2	
+    }
+
+    # We must reparse the history to get the latest.
+    set itemL [::History::XFastParseFiles $jidH  \
+      $jprefs(chat,histLen) $jprefs(chat,histAge)]
+    foreach itemE $itemL {
+	set xmppE [lindex [tinydom::children $itemE] 0]
+	if {[tinydom::tagname $xmppE] eq "message"} {
+	    set time [tinydom::getattribute $itemE time]
+	    set from [tinydom::getattribute $xmppE from]
+	    set xattr [list xmlns jabber:x:delay from $from stamp $time]
+	    set xelem [wrapper::createtag "x" -attrlist $xattr]
+	    set bodyE [tinydom::getfirstchildwithtag $xmppE body]
+	    if {[llength $bodyE]} {
+		set body [tinydom::chdata $bodyE]
+	    } else {
+		set body ""
 	    }
+	    $jstate(jlib) send_message $roomjid -type groupchat \
+	      -body $body -xlist [list $xelem]
 	}
-
-	# Third Invite the second user
-	set opts [list -reason [mc mucChat2ConfInv] -continue true]
-	eval {$jstate(jlib) muc invite $roomjid $chatstate(fromjid)} $opts
-
-	# Third and Invite the third user
-	::MUC::Invite $roomjid 1
     }
 }
 
