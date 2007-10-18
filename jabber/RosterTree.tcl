@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.91 2007-10-17 13:18:24 matben Exp $
+# $Id: RosterTree.tcl,v 1.92 2007-10-18 08:02:33 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -499,6 +499,8 @@ proc ::RosterTree::DnDFileSource {win} {
 	puts $fd [format $dndSrc(content,$os) "xmpp:$jid?message"]
  	close $fd
     }
+
+    # @@@ Do I need a "file://" prefix?
     return $fileL
 }
 
