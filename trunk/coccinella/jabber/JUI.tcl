@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.220 2007-10-17 13:18:24 matben Exp $
+# $Id: JUI.tcl,v 1.221 2007-10-18 06:53:31 matben Exp $
 
 package provide JUI 1.0
 
@@ -1675,9 +1675,12 @@ proc ::JUI::DnDXmppExtractJID {data type} {
     if {$type eq "text/plain"} {
 	set data [encoding convertfrom $data]
     }
+    
+    # @@@ There is currently a problem with unescaped sequences like:
+    #     "d\27artagnan@jabber.se"
 
-    # Strip off any xmpp: and return a comma separated list.
-    return [lapply {string map {"xmpp:" ""}} $data]
+    # Strip off any "xmpp:".
+    return [string map {"xmpp:" ""} $data]
 }
 
 #-------------------------------------------------------------------------------

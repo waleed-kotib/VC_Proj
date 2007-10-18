@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.224 2007-10-17 13:18:24 matben Exp $
+# $Id: Chat.tcl,v 1.225 2007-10-18 06:53:30 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1605,11 +1605,11 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 proc ::Chat::DnDXmppDrop {chattoken win data type} {
         
     set ans [tk_messageBox -title [mc Warning] -type yesno \
-      -message "Do you actually want to invite these users to a new chat room?"]
+      -message "Do you actually want to invite this user to a new chat room?"]
     
     if {$ans eq "yes"} {
 	set jidL [::JUI::DnDXmppExtractJID $data $type]
-	set jidL [split $jidL ","]
+	set jidL [string map {"," ""} $jidL]
 	Invite $chattoken -jidlist $jidL
     }
 }
