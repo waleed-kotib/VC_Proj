@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.73 2007-10-15 12:06:12 matben Exp $
+# $Id: VCard.tcl,v 1.74 2007-10-18 08:02:34 matben Exp $
 
 package provide VCard 1.0
 
@@ -411,7 +411,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     grid rowconfigure $wp1 0 -weight 1
 
     set wp2 $wbot.2
-    ::Avatar::Widget $wp2
+    set wavatar [::Avatar::Widget $wp2]
     pack  $wp2 -side left
 
     set pbptop $wtop
@@ -429,6 +429,10 @@ proc ::VCard::Pages {nbframe etoken type} {
 	set im [::Utils::ImageFromData $elem(photo_binval) $mimetype]
 	if {$im ne ""} {
 	    ::Avatar::WidgetSetPhoto $wp2 $im
+	    
+	    if {([tk windowingsystem] ne "aqua") && ![catch {package require tkdnd}]} {
+		InitAvatarDnD $wavatar $etoken
+	    }
 	}
     }
     
@@ -513,6 +517,34 @@ proc ::VCard::Pages {nbframe etoken type} {
     if {$locals(haveTkDnD)} {
 	InitDnD $etoken
     }
+}
+
+proc ::VCard::InitAvatarDnD {win etoken} {
+ 
+    dnd bindsource $win text/uri-list \
+	[list ::VCard::AvatarDnDFileSource $etoken %W]
+    
+    # We trigger on Leave in order to not interfere with the drop target.
+    bind $win <Button1-Leave> { dnd drag %W }
+}
+
+proc ::VCard::AvatarDnDFileSource {etoken win} {
+    global  this
+    upvar $etoken elem
+    
+    if {[info exists elem(photo_type)] && [info exists elem(photo_binval)]} {
+
+	set tail [uriencode::quote $elem(jid)]
+	set suff [::Types::GetSuffixListForMime $elem(photo_type)]
+	set fileName [file join $this(tmpPath) $tail]$suff
+	set fd [open $fileName w]
+ 	fconfigure $fd -translation binary
+	puts -nonewline $fd [::base64::decode $elem(photo_binval)]
+	close $fd
+	
+	# @@@ Do I need a "file://" prefix?
+	return [list $fileName]
+   }
 }
 
 proc ::VCard::Fill {etoken} {

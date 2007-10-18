@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.37 2007-10-10 07:25:29 matben Exp $
+# $Id: Avatar.tcl,v 1.38 2007-10-18 08:02:33 matben Exp $
 
 # @@@ Issues:
 # 
@@ -1479,7 +1479,7 @@ proc ::Avatar::Widget {w} {
     grid columnconfigure $w 0 -minsize [expr {2*4 + 2*4 + 64}]
     grid rowconfigure    $w 0 -minsize [expr {2*4 + 2*4 + 64}]
     
-    return $w
+    return $w.l
 }
 
 proc ::Avatar::WidgetSetPhoto {w image {size 64}} {
@@ -1500,7 +1500,8 @@ proc ::Avatar::WidgetSetPhoto {w image {size 64}} {
 	$w.l configure -image ""
     }
     if {$image ne "" && $max > $size} {
-	bind $w <Enter> [list [namespace code WidgetBalloon] 1 $w $image]
+	#bind $w <Enter> [list [namespace code WidgetBalloon] 1 $w $image]
+	bind $w <ButtonRelease-1> [list [namespace code WidgetBalloon] 1 $w $image]
 	bind $w <Leave> [list [namespace code WidgetBalloon] 0 $w $image]
     } else {
 	bind $w <Enter> {}
