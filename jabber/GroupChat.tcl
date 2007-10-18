@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.217 2007-10-07 10:32:42 matben Exp $
+# $Id: GroupChat.tcl,v 1.218 2007-10-18 06:53:30 matben Exp $
 
 package require Create
 package require Enter
@@ -998,9 +998,27 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
       [list [namespace current]::CommandReturnKeyPress $chattoken]
     bind $wroom <Destroy> +[list ::GroupChat::OnDestroyChat $chattoken]
     
+    if {([tk windowingsystem] ne "aqua") && ![catch {package require tkdnd}]} {
+	::JUI::DnDXmppBindTarget $wtext \
+	  -command [namespace code [list DnDXmppDrop $chattoken]]
+	::JUI::DnDXmppBindTarget $wtextsend \
+	  -command [namespace code [list DnDXmppDrop $chattoken]]
+	::JUI::DnDXmppBindTarget $wusers \
+	  -command [namespace code [list DnDXmppDrop $chattoken]]
+    }
+    
     ::hooks::run buildGroupChatWidget $roomjid
 
     return $chattoken
+}
+
+proc ::GroupChat::DnDXmppDrop {chattoken win data type} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    set jidL [::JUI::DnDXmppExtractJID $data $type]
+    set jidL [string map {"," ""} $jidL]
+    ::MUC::Invite $chatstate(roomjid) -jidlist $jidL
 }
 
 proc ::GroupChat::GetWidget {roomjid value} {
