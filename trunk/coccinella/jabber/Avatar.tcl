@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.38 2007-10-18 08:02:33 matben Exp $
+# $Id: Avatar.tcl,v 1.39 2007-10-18 11:59:10 matben Exp $
 
 # @@@ Issues:
 # 
@@ -566,7 +566,7 @@ proc ::Avatar::GetRecentFiles {} {
     global  this
     variable aprefs
     
-    set recentL {}
+    set recentL [list]
     foreach f $aprefs(recent) {
 	set fname [file join $this(recentAvatarPath) $f]
 	if {[file exists $fname]} {
@@ -970,7 +970,6 @@ proc ::Avatar::PutPhotoCreateSizes {jid2} {
 	if {[info exists photo($mjid2,$size)]} {
 	    set name $photo($mjid2,$size)
 	    if {[image inuse $name]} {
-		#set tmp [CreateScaledPhoto $orig $size]
 		set tmp [::ui::image::scale $orig $size]
 		$name copy $tmp -compositingrule set -shrink
 		image delete $tmp
@@ -1049,7 +1048,6 @@ proc ::Avatar::GetPhotoOfSize {jid2 size} {
 
 	# Is not there, create!
 	set name $photo($mjid2,orig)
-	#set new [CreateScaledPhoto $name $size]
 	set new [::ui::image::scale $name $size]
 	set photo($mjid2,$size) $new
 	return $new
@@ -1059,7 +1057,6 @@ proc ::Avatar::GetPhotoOfSize {jid2 size} {
 	# If succesful; Note that only orig created.
 	if {[info exists photo($mjid2,orig)]} {
 	    set name $photo($mjid2,orig)
-	    #set new [CreateScaledPhoto $name $size]
 	    set new [::ui::image::scale $name $size]
 	    set photo($mjid2,$size) $new
 	    return $new
@@ -1137,7 +1134,7 @@ proc ::Avatar::FreePhotos {jid} {
     array unset photo "[jlib::ESC $mjid],*"
 }
 
-proc ::Avatar::FreeAllPhotos { } {
+proc ::Avatar::FreeAllPhotos {} {
     variable photo
 
     set images {}
@@ -1281,6 +1278,15 @@ proc ::Avatar::HaveCachedJID {jid2} {
     return 0
 }
 
+proc ::Avatar::GetCachedFileNameJID {jid2} {
+    set hash [GetHash $jid2]
+    if {$hash ne ""} {
+	return [GetCacheFileName $hash]
+    } else {
+	return ""
+    }
+}
+
 # Avatar::MakeCacheFileName --
 # 
 #       Gets the file name which may not exist.
@@ -1289,7 +1295,7 @@ proc ::Avatar::MakeCacheFileName {hash mime} {
     variable options
 
     set base [file join $options(-cachedir) [string trim $hash]]
-    return ${base}[GetSuffForMime $mime]
+    return $base[GetSuffForMime $mime]
 }
 
 # Avatar::GetCacheFileName --

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.225 2007-10-18 06:53:30 matben Exp $
+# $Id: Chat.tcl,v 1.226 2007-10-18 11:59:10 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1768,7 +1768,7 @@ proc ::Chat::OnDestroyThread {chattoken} {
     Debug 4 "::Chat::OnDestroyThread chattoken=$chattoken"
     # For some strange reason [info vars ..] seem to find nonexisting variables.
 
-    #Trigger Close chatstate
+    # Trigger Close chatstate
     if {$chatstate(havecs) eq "true"} {
         ChangeChatState $chattoken close
         SendChatState $chattoken $chatstate(chatstate)
@@ -1832,7 +1832,36 @@ proc ::Chat::SetAnyAvatar {chattoken} {
 	set min [expr {$mintray + $minava + 2*$padx}]
 	
 	wm minsize $dlgstate(w) [expr {$min < 220} ? 220 : $min] 320
+	
+	if {([tk windowingsystem] ne "aqua") && ![catch {package require tkdnd}]} {
+	    InitAvatarDnD $wavatar $chattoken
+	}
     }    
+}
+
+proc ::Chat::InitAvatarDnD {win chattoken} {
+ 
+    dnd bindsource $win text/uri-list \
+	[list ::Chat::AvatarDnDFileSource $chattoken %W]
+    bind $win <Button1-Leave> { dnd drag %W }
+}
+
+proc ::Chat::AvatarDnDFileSource {chattoken win} {
+    global  this
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set jid2 $chatstate(jid2)
+    set cachedFile [::Avatar::GetCachedFileNameJID $jid2]
+    if {[file exists $cachedFile]} {
+	set tail [uriencode::quote $jid2]
+	set suff [file extension $cachedFile]
+	set fileName [file join $this(tmpPath) $tail]$suff
+	file copy -force $cachedFile $fileName
+	
+	# @@@ Do I need a "file://" prefix?
+	return [list $fileName]
+   }
 }
 
 # Chat::AvatarNewPhotoHook --

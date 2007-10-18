@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.74 2007-10-18 08:02:34 matben Exp $
+# $Id: VCard.tcl,v 1.75 2007-10-18 11:59:11 matben Exp $
 
 package provide VCard 1.0
 
@@ -31,7 +31,7 @@ namespace eval ::VCard::  {
     variable uid 0
 }
 
-proc ::VCard::InitHook { } {    
+proc ::VCard::InitHook {} {    
     variable locals
     
     # Drag and Drop support...
@@ -43,7 +43,7 @@ proc ::VCard::InitHook { } {
     }
 }
 
-proc ::VCard::OnMenu { } {
+proc ::VCard::OnMenu {} {
     if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	Fetch own
