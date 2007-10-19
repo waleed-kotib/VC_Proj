@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.44 2007-09-14 13:41:26 matben Exp $
+# $Id: Subscribe.tcl,v 1.45 2007-10-19 13:23:35 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -77,7 +77,7 @@ proc ::Subscribe::NewDlg {jid} {
     ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
       -closecommand [list [namespace current]::CloseCmd $token] \
       -usemacmainmenu 1 -class JSubscribe
-    wm title $w [mc {Presence Subscription}]  
+    wm title $w [mc "Presence Subscription"]  
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsubsc)]]
     if {$nwin == 1} {
@@ -106,7 +106,7 @@ proc ::Subscribe::NewDlg {jid} {
 	set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
 
 	ttk::label $wall.head -style Headlabel \
-	  -text [mc {Presence Subscription}] -compound left \
+	  -text [mc "Presence Subscription"] -compound left \
 	  -image [list $im background $imd]
 	pack $wall.head -side top -fill both -expand 1
 	
@@ -272,6 +272,200 @@ proc ::Subscribe::ResProc {type queryE} {
 	::UI::MessageBox -type ok -message "We got an error from the\
 	  Subscribe::ResProc callback"
     }   
+}
+
+# Experiment!
+
+namespace eval ::SubscribeEx {
+    
+    variable uid 0
+}
+
+proc ::SubscribeEx::NewDlg {jid} {
+    global  this prefs wDlgs config
+
+    variable uid
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
+    
+    ::Debug 2 "::SubscribeEx::NewDlg jid=$jid"
+ 
+    set w $wDlgs(jsubsc)ex[incr uid]
+
+    # Initialize the state variable, an array.    
+    set token [namespace current]::$w
+    variable $w
+    upvar 0 $w state
+    
+    set state(w)        $w
+    set state(jid)      $jid
+    set state(finished) -1
+    set state(name)     ""
+    set state(group)    ""
+
+    ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
+      -closecommand [namespace current]::CloseCmd \
+      -usemacmainmenu 1 -class JSubscribe
+    wm title $w [mc "Presence Subscription"]  
+    
+    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsubsc)]]
+    if {$nwin == 1} {
+	::UI::SetWindowPosition $w $wDlgs(jsubsc)
+    }
+  
+    set jlib $jstate(jlib)
+    
+    
+
+    # Global frame.
+    set wall $w.fr
+    ttk::frame $wall
+    pack $wall -fill both -expand 1
+
+    if {$config(subscribe,show-head)} {
+	set im  [::Theme::GetImage [option get $w adduserImage {}]]
+	set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
+
+	ttk::label $wall.head -style Headlabel \
+	  -text [mc "Presence Subscription"] -compound left \
+	  -image [list $im background $imd]
+	pack $wall.head -side top -fill both -expand 1
+	
+	ttk::separator $wall.s -orient horizontal
+	pack $wall.s -side top -fill x
+    }
+    set wbox $wall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    set ujid [jlib::unescapejid $jid]
+    set str [mc jasubwant2 $ujid]
+    set str "A number of contacts want to see your presence. You can allow\
+ all of them or deselect any one of them. If you cancel you deny all of them."
+
+    ttk::label $wbox.msg -style Small.TLabel \
+      -padding {0 0 0 6} -wraplength 320 -justify left -text $str
+    pack $wbox.msg -side top -anchor w
+
+    set wframe $wbox.f
+    ttk::frame $wframe
+    pack $wframe -side top -anchor w -fill both -expand 1    
+    
+    ttk::label $wframe.more  -text [mc More]
+    ttk::label $wframe.allow -text [mc Allow]
+    ttk::label $wframe.jid   -text [mc "Contact ID"]
+    
+    grid  $wframe.more  $wframe.allow  $wframe.jid -padx 4 -pady 4
+    grid $wframe.jid -sticky w
+    grid columnconfigure $wframe 2 -minsize 160
+    
+    set state(wframe) $wframe
+    
+    AddJID $w "mats@home.se"
+    AddJID $w "mari@work.se"
+    AddJID $w "mari.lundberg@somelongname.se"
+    AddJID $w "donald.duck@disney.com"
+    
+    
+    # Button part.
+    set frbot $wbox.b
+    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $frbot.btok -text [mc Allow] -default active \
+      -command [list [namespace current]::Accept $w]
+    ttk::button $frbot.btcancel -text [mc Deny]  \
+      -command [list [namespace current]::Deny $w]
+    set padx [option get . buttonPadX {}]
+    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
+	pack $frbot.btok -side right
+	pack $frbot.btcancel -side right -padx $padx
+    } else {
+	pack $frbot.btcancel -side right
+	pack $frbot.btok -side right -padx $padx
+    }
+    pack $frbot -side top -fill x
+    wm resizable $w 0 0
+    bind $w <Return> [list $frbot.btok invoke]
+
+    return $w
+}
+
+proc ::SubscribeEx::AddJID {w jid} {
+    variable $w
+    upvar 0 $w state
+    set token [namespace current]::$w
+
+    set wframe $state(wframe)
+    
+    lassign [grid size $wframe] columns rows
+    puts "grid size=[grid size $wframe]"
+    
+    set row $rows
+    set state(more,$row)  0
+    set state(allow,$row) 1
+    set state(jid,$row) $jid
+    
+    ttk::checkbutton $wframe.m$row -style ArrowText.TCheckbutton \
+      -onvalue 0 -offvalue 1 -variable $token\(more,$row) \
+      -command [list [namespace current]::More $w $row]
+    ttk::checkbutton $wframe.c$row -variable $token\(allow,$row)
+    ttk::label $wframe.l$row -text $jid
+    ttk::frame $wframe.f$row
+    
+    grid  $wframe.m$row  $wframe.c$row  $wframe.l$row
+    grid  x              $wframe.f$row  -
+    grid $wframe.c$row -sticky e
+    grid $wframe.l$row $wframe.f$row -sticky w
+
+}
+
+proc ::SubscribeEx::More {w row} {
+    variable $w
+    upvar 0 $w state
+    set token [namespace current]::$w
+   
+    puts "::SubscribeEx::More row=$row"
+    
+    set wframe $state(wframe)
+    set wcont $wframe.f$row
+    set jid $state(jid,$row)
+
+    if {$state(more,$row)} {
+
+	# Find all our groups for any jid.
+	set allGroups [::Jabber::JlibCmd roster getgroups]
+		
+	ttk::label $wcont.lnick -text "[mc {Nickname}]:" -anchor e
+	ttk::entry $wcont.enick -width 18 -textvariable $token\(name,$row)
+	ttk::label $wcont.lgroup -text "[mc Group]:" -anchor e
+	ttk::combobox $wcont.egroup -values [concat None $allGroups] \
+	  -textvariable $token\(group,$row)
+	ttk::button $wcont.vcard -text "[mc {View Business Card}]..." \
+	  -command [list ::VCard::Fetch other $jid]
+
+
+	grid  $wframe.f$row  -row [expr {$row+1}] -columnspan 2 -column 1
+	grid $wframe.f$row -sticky w
+
+	grid  $wcont.lnick   $wcont.enick  -sticky e -pady 2
+	grid  $wcont.lgroup  $wcont.egroup -sticky e -pady 2
+	grid  x              $wcont.vcard  -pady 2
+	grid $wcont.enick   $wcont.egroup -sticky ew	
+    } else {
+	eval destroy [winfo children $wcont]
+	grid forget $wcont
+    }
+}
+
+proc ::SubscribeEx::Accept {w} {
+    
+}
+
+proc ::SubscribeEx::Deny {w} {
+    
+}
+
+proc ::SubscribeEx::CloseCmd {w} {
+    
 }
 
 # Prefs page ...................................................................
