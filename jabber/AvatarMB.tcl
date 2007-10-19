@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.22 2007-09-13 08:25:37 matben Exp $
+# $Id: AvatarMB.tcl,v 1.23 2007-10-19 06:29:07 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -225,9 +225,44 @@ proc ::AvatarMB::Button {mb args} {
     }
     bind $mb <Destroy> { AvatarMB::ButtonFree %W }
     
+    if {([tk windowingsystem] ne "aqua") && ![catch {package require tkdnd}]} {
+	InitDnD $mb
+    }
+    
     ::hooks::register avatarMyNewPhotoHook [list ::AvatarMB::MyNewPhotoHook $mb]
     
     return $mb
+}
+
+proc ::AvatarMB::InitDnD {win} {
+    
+    dnd bindtarget $win text/uri-list <Drop>      \
+       [list [namespace current]::DnDDrop %W %D %T]   
+     dnd bindtarget $win text/uri-list <DragEnter> \
+       [list [namespace current]::DnDEnter %W %A %D %T]   
+}
+
+proc ::AvatarMB::DnDDrop {w data type} {
+
+    # Take only first file.
+    set f [lindex $data 0]
+	
+    # Strip off any file:// prefix.
+    set f [string map {file:// ""} $f]
+    set f [uriencode::decodefile $f]
+    if {[VerifyPhotoFile $f]} {
+	SetFileToShare $f
+    }
+}
+
+proc ::AvatarMB::DnDEnter {w action data type} {
+
+    set act "none"
+    set f [lindex $data 0]
+    if {[VerifyPhotoFile $f]} {
+	set act $action
+    }
+    return $act
 }
 
 proc ::AvatarMB::ButtonFree {mb} {
@@ -467,8 +502,6 @@ proc ::AvatarMB::Menu {m args} {
 	grid rowconfigure $box $i -minsize $min
     }
     bind $m <ButtonPress-1>   [list ::AvatarMB::MenuUnpost $m]
-    #bind $m <ButtonRelease-1> [list ::AvatarMB::MenuUnpost $m]
-    #bind $m <ButtonRelease-1> [list ::AvatarMB::OnButtonRelease $m %x %y]
     
     bind $m <KeyPress> { }
     
@@ -639,7 +672,7 @@ proc ::AvatarMB::MenuNew {} {
       [::Types::GetSuffixListForMime image/jpeg]]
     set types [concat [list [list {Image Files} $suffL]] \
       [::Media::GetDlgFileTypesForMimeList {image/gif image/png image/jpeg}]]
-    set opts {}
+    set opts [list]
     if {[file isdirectory $prefs(dir,avatarPick)]} {
 	lappend opts -initialdir $prefs(dir,avatarPick)
     }
@@ -650,6 +683,16 @@ proc ::AvatarMB::MenuNew {} {
 	SetFileToShare $fileName
 
     }
+}
+
+proc ::AvatarMB::VerifyPhotoFile {f} {
+    
+    set ok 0
+    set suff [file extension $f]
+    if {[regexp {(.gif|.jpg|.jpeg|.png)} $suff]} {
+	set ok [::Media::HaveImporterForMime [::Types::GetMimeTypeForFileName $f]]
+    }
+    return $ok
 }
 
 proc ::AvatarMB::SetFileToShare {fileName} {
