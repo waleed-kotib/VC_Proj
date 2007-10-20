@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.46 2007-10-20 07:47:54 matben Exp $
+# $Id: Subscribe.tcl,v 1.47 2007-10-20 13:04:57 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -402,13 +402,14 @@ proc ::SubscribeEx::NewDlg {} {
     ttk::frame $wframe
     pack $wframe -side top -anchor w -fill both -expand 1    
     
-    ttk::label $wframe.more  -text [mc More]
+    #ttk::label $wframe.more  -text [mc More]
     ttk::label $wframe.allow -text [mc Allow]
     ttk::label $wframe.jid   -text [mc "Contact ID"]
     
-    grid  $wframe.more  $wframe.allow  $wframe.jid -padx 4 -pady 4
+    #grid  $wframe.more  $wframe.allow  $wframe.jid -padx 4 -pady 4
+    grid  $wframe.allow  x  $wframe.jid -padx 4 -pady 4
     grid $wframe.jid -sticky w
-    grid columnconfigure $wframe 2 -minsize 160
+    grid columnconfigure $wframe 2 -minsize 220
     
     set state(wframe) $wframe    
     
@@ -456,7 +457,8 @@ proc ::SubscribeEx::AddJID {w jid} {
     ttk::label $wframe.l$row -text $jid
     ttk::frame $wframe.f$row
     
-    grid  $wframe.m$row  $wframe.c$row  $wframe.l$row
+    #grid  $wframe.m$row  $wframe.c$row  $wframe.l$row
+    grid  $wframe.c$row  $wframe.m$row  $wframe.l$row
     grid  x              x              $wframe.f$row
     grid $wframe.c$row -sticky e
     grid $wframe.l$row $wframe.f$row -sticky w
