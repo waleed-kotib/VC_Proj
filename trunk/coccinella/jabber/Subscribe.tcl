@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.45 2007-10-19 13:23:35 matben Exp $
+# $Id: Subscribe.tcl,v 1.46 2007-10-20 07:47:54 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -40,7 +40,55 @@ namespace eval ::Subscribe:: {
     variable locals   
     variable uid 0
     
+    # Show head label in subcription dialog.
     set ::config(subscribe,show-head) 1
+    
+    variable queue [list]
+}
+
+if {0} {
+    ::Subscribe::Queue "mats@home.se"
+    ::Subscribe::Queue "mari@work.se"
+    ::Subscribe::Queue "mari.lundberg@somelongname.se"
+    ::Subscribe::Queue "donald.duck@disney.com"
+}
+
+# Mechanism for queuing subscription events. In situations (transports) when
+# we can get several of them at once we show an extended dialog.
+
+proc ::Subscribe::Queue {jid} {
+    variable queue
+    
+    # If we already have a 'JSubscribeEx' dialog, then add a line to that.
+    # else add event to queue.
+    # If the queu empty, then add a timer event (2 secs).
+    # When the timer fires display a 'JSubscribe' dialog if single JID,
+    # else a 'JSubscribeEx' dialog and add all JIDs.
+    
+    set wList [ui::findalltoplevelwithclass JSubscribeEx]
+    if {[llength $wList]} {
+	::SubscribeEx::AddJID [lindex $wList 0] $jid
+    } else {
+	if {![llength $queue]} {
+	    after 2000 [namespace code ExecQueue]
+	}
+	lappend queue $jid
+    }
+}
+
+proc ::Subscribe::ExecQueue {} {
+    variable queue
+
+    set len [llength $queue]
+    if {$len == 1} {
+	::Subscribe::NewDlg [lindex $queue 0]
+    } elseif {$len > 1} {
+	set w [::SubscribeEx::NewDlg]
+	foreach jid $queue {
+	    ::SubscribeEx::AddJID $w $jid
+	}
+    }
+    set queue [list]
 }
 
 # Subscribe::NewDlg --
@@ -251,12 +299,11 @@ proc ::Subscribe::CloseCmd {token w} {
     global  wDlgs
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
         
     # Deny presence to this user.
-    $jstate(jlib) send_presence -to $state(jid) -type "unsubscribed"
+    ::Jabber::JlibCmd send_presence -to $state(jid) -type "unsubscribed"
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
-    unset state
+    unset -nocomplain state
 }
 
 # Subscribe::ResProc --
@@ -274,21 +321,30 @@ proc ::Subscribe::ResProc {type queryE} {
     }   
 }
 
-# Experiment!
+#-------------------------------------------------------------------------------
+
+# SubscribeEx... --
+# 
+#       A dialog to handle multiple subscription requests.
+#       There should only be a single copy of this dialog (singleton).
 
 namespace eval ::SubscribeEx {
     
+    # Use option database for customization.
+    option add *JSubscribeEx.adduserImage           adduser         widgetDefault
+    option add *JSubscribeEx.adduserDisImage        adduserDis      widgetDefault
+
     variable uid 0
 }
 
-proc ::SubscribeEx::NewDlg {jid} {
+proc ::SubscribeEx::NewDlg {} {
     global  this prefs wDlgs config
 
     variable uid
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::SubscribeEx::NewDlg jid=$jid"
+    ::Debug 2 "::SubscribeEx::NewDlg"
  
     set w $wDlgs(jsubsc)ex[incr uid]
 
@@ -298,14 +354,13 @@ proc ::SubscribeEx::NewDlg {jid} {
     upvar 0 $w state
     
     set state(w)        $w
-    set state(jid)      $jid
     set state(finished) -1
     set state(name)     ""
     set state(group)    ""
 
     ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace current]::CloseCmd \
-      -usemacmainmenu 1 -class JSubscribe
+      -usemacmainmenu 1 -class JSubscribeEx
     wm title $w [mc "Presence Subscription"]  
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsubsc)]]
@@ -315,8 +370,6 @@ proc ::SubscribeEx::NewDlg {jid} {
   
     set jlib $jstate(jlib)
     
-    
-
     # Global frame.
     set wall $w.fr
     ttk::frame $wall
@@ -338,8 +391,6 @@ proc ::SubscribeEx::NewDlg {jid} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
-    set ujid [jlib::unescapejid $jid]
-    set str [mc jasubwant2 $ujid]
     set str "A number of contacts want to see your presence. You can allow\
  all of them or deselect any one of them. If you cancel you deny all of them."
 
@@ -359,13 +410,7 @@ proc ::SubscribeEx::NewDlg {jid} {
     grid $wframe.jid -sticky w
     grid columnconfigure $wframe 2 -minsize 160
     
-    set state(wframe) $wframe
-    
-    AddJID $w "mats@home.se"
-    AddJID $w "mari@work.se"
-    AddJID $w "mari.lundberg@somelongname.se"
-    AddJID $w "donald.duck@disney.com"
-    
+    set state(wframe) $wframe    
     
     # Button part.
     set frbot $wbox.b
@@ -400,22 +445,23 @@ proc ::SubscribeEx::AddJID {w jid} {
     puts "grid size=[grid size $wframe]"
     
     set row $rows
-    set state(more,$row)  0
-    set state(allow,$row) 1
-    set state(jid,$row) $jid
+    set state($row,more)  0
+    set state($row,allow) 1
+    set state($row,jid)   $jid
     
     ttk::checkbutton $wframe.m$row -style ArrowText.TCheckbutton \
-      -onvalue 0 -offvalue 1 -variable $token\(more,$row) \
+      -onvalue 0 -offvalue 1 -variable $token\($row,more) \
       -command [list [namespace current]::More $w $row]
-    ttk::checkbutton $wframe.c$row -variable $token\(allow,$row)
+    ttk::checkbutton $wframe.c$row -variable $token\($row,allow)
     ttk::label $wframe.l$row -text $jid
     ttk::frame $wframe.f$row
     
     grid  $wframe.m$row  $wframe.c$row  $wframe.l$row
-    grid  x              $wframe.f$row  -
+    grid  x              x              $wframe.f$row
     grid $wframe.c$row -sticky e
     grid $wframe.l$row $wframe.f$row -sticky w
 
+    return $row
 }
 
 proc ::SubscribeEx::More {w row} {
@@ -427,45 +473,107 @@ proc ::SubscribeEx::More {w row} {
     
     set wframe $state(wframe)
     set wcont $wframe.f$row
-    set jid $state(jid,$row)
+    set jid $state($row,jid)
 
-    if {$state(more,$row)} {
+    if {$state($row,more)} {
 
 	# Find all our groups for any jid.
 	set allGroups [::Jabber::JlibCmd roster getgroups]
+	set values [concat [list [mc None]] $allGroups]
 		
 	ttk::label $wcont.lnick -text "[mc {Nickname}]:" -anchor e
-	ttk::entry $wcont.enick -width 18 -textvariable $token\(name,$row)
+	ttk::entry $wcont.enick -textvariable $token\($row,name)
 	ttk::label $wcont.lgroup -text "[mc Group]:" -anchor e
-	ttk::combobox $wcont.egroup -values [concat None $allGroups] \
-	  -textvariable $token\(group,$row)
+	ttk::combobox $wcont.egroup -values $values \
+	  -textvariable $token\($row,group)
 	ttk::button $wcont.vcard -text "[mc {View Business Card}]..." \
 	  -command [list ::VCard::Fetch other $jid]
 
-
-	grid  $wframe.f$row  -row [expr {$row+1}] -columnspan 2 -column 1
+	grid  $wframe.f$row  -row [expr {$row+1}] -columnspan 1 -column 2
 	grid $wframe.f$row -sticky w
 
 	grid  $wcont.lnick   $wcont.enick  -sticky e -pady 2
 	grid  $wcont.lgroup  $wcont.egroup -sticky e -pady 2
 	grid  x              $wcont.vcard  -pady 2
-	grid $wcont.enick   $wcont.egroup -sticky ew	
+	grid $wcont.enick $wcont.egroup -sticky ew	
     } else {
 	eval destroy [winfo children $wcont]
 	grid forget $wcont
     }
 }
 
+proc ::SubscribeEx::GetContent {w} {
+    variable $w
+    upvar 0 $w state
+
+    set contentL [list]
+    foreach {key jid} [array get state jid,*] {
+	set row [string map {"jid," ""} $key]
+	set content [list $jid $state($row,allow)]
+	
+	if {[info exists state($row,name)]} {
+	    set value [string trim $state($row,name)]
+	    if {$value ne ""} {
+		lappend content -name $value
+	    }
+	}
+	if {[info exists state($row,group)]} {
+	    set value [string trim $state($row,group)]
+	    set value [string map [list [mc None] ""] $value]
+	    if {$value ne ""} {
+		lappend content -group $value
+	    }
+	}
+	lappend contentL $content
+    }
+    return $contentL
+}
+
 proc ::SubscribeEx::Accept {w} {
+    variable $w
+    upvar 0 $w state
+
+    foreach line [GetContent $w] {
+	set jid [lindex $line 0]
+	set allow [lindex $line 1]
+	set opts [lrange $ine 2 end]
+	
+	
+	
+    }
     
+    
+    Free $w
 }
 
 proc ::SubscribeEx::Deny {w} {
+    variable $w
+    upvar 0 $w state
+
+    foreach line [GetContent $w] {
+	set jid [lindex $line 0]
+
+    }
     
+    Free $w
 }
 
 proc ::SubscribeEx::CloseCmd {w} {
+    variable $w
     
+    puts "::SubscribeEx::CloseCmd w=$w"
+    
+    Free $w
+}
+
+proc ::SubscribeEx::Free {w} {
+    global  wDlgs
+    variable $w
+    upvar 0 $w state
+	
+    ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
+    destroy $state(w)
+    unset -nocomplain state
 }
 
 # Prefs page ...................................................................
