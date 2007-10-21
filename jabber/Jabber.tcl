@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.248 2007-10-17 13:18:24 matben Exp $
+# $Id: Jabber.tcl,v 1.249 2007-10-21 13:27:47 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -744,7 +744,7 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 		set msg [mc jamessautoreject2 $from]
 	    }
 	    ask {
-		::Subscribe::NewDlg $from
+		::Subscribe::Handle $from
 	    }
 	}
 	if {$msg ne ""} {
