@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.75 2007-10-18 11:59:11 matben Exp $
+# $Id: VCard.tcl,v 1.76 2007-10-21 13:27:47 matben Exp $
 
 package provide VCard 1.0
 
@@ -430,7 +430,7 @@ proc ::VCard::Pages {nbframe etoken type} {
 	if {$im ne ""} {
 	    ::Avatar::WidgetSetPhoto $wp2 $im
 	    
-	    if {([tk windowingsystem] ne "aqua") && ![catch {package require tkdnd}]} {
+	    if {$locals(haveTkDnD)} {
 		InitAvatarDnD $wavatar $etoken
 	    }
 	}

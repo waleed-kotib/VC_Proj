@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.48 2007-10-21 07:16:14 matben Exp $
+# $Id: Subscribe.tcl,v 1.49 2007-10-21 13:27:47 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -43,6 +43,12 @@ namespace eval ::Subscribe:: {
     # Show head label in subcription dialog.
     set ::config(subscribe,show-head) 1
     
+    # Millis to wait for a second subsciption request to show in multi dialog.
+    set ::config(subscribe,multi-wait-ms) 2000
+    
+    # Use the multi dialog for batches of subscription requests.
+    set ::config(subscribe,multi-dlg) 1
+    
     variable queue [list]
 }
 
@@ -54,10 +60,21 @@ if {0} {
     ::Subscribe::Queue "mimmi.duck@disney.com"
 }
 
+proc ::Subscribe::Handle {jid} {
+    global  config
+    
+    if {$config(subscribe,multi-dlg)} {
+	Queue $jid
+    } else {
+	NewDlg $jid
+    }
+}
+
 # Mechanism for queuing subscription events. In situations (transports) when
 # we can get several of them at once we show an extended dialog.
 
 proc ::Subscribe::Queue {jid} {
+    global  config
     variable queue
     
     # If we already have a 'JSubscribeEx' dialog, then add a line to that.
@@ -71,7 +88,7 @@ proc ::Subscribe::Queue {jid} {
 	::SubscribeEx::AddJID [lindex $wList 0] $jid
     } else {
 	if {![llength $queue]} {
-	    after 2000 [namespace code ExecQueue]
+	    after $config(subscribe,multi-wait-ms) [namespace code ExecQueue]
 	}
 	lappend queue $jid
     }
@@ -166,8 +183,7 @@ proc ::Subscribe::NewDlg {jid} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
-    set ujid [jlib::unescapejid $jid]
-    set str [mc jasubwant2 $ujid]
+    set str [mc jasubwant2 [GetDisplayName $jid]]
     if {!$havesubsc} {
 	append str " [mc jasubopts2]"
     }
@@ -185,7 +201,7 @@ proc ::Subscribe::NewDlg {jid} {
 	ttk::label $frmid.lnick -text "[mc {Nickname}]:" -anchor e
 	ttk::entry $frmid.enick -width 24 -textvariable $token\(name)
 	ttk::label $frmid.lgroup -text "[mc Group]:" -anchor e
-	ttk::combobox $frmid.egroup -values [concat None $allGroups] \
+	ttk::combobox $frmid.egroup -values [concat [list [mc None]] $allGroups] \
 	  -textvariable $token\(group)
 
 	grid  $frmid.lnick   $frmid.enick  -sticky e -pady 2
@@ -224,6 +240,21 @@ proc ::Subscribe::NewDlg {jid} {
     after idle $script
 
     return
+}
+
+proc ::Subscribe::GetDisplayName {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    set name ""
+    set nickE [$jstate(jlib) roster getextras $jid \
+      "http://jabber.org/protocol/nick"]
+    if {[llength $nickE]} {
+	set name [wrapper::getcdata $nickE]
+    }
+    if {$name eq ""} {
+	set name [jlib::unescapejid $jid]
+    }
+    return $name
 }
 
 # Subscribe::Deny --
@@ -360,8 +391,6 @@ proc ::SubscribeEx::NewDlg {} {
     
     set state(w)        $w
     set state(finished) -1
-    set state(name)     ""
-    set state(group)    ""
 
     ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace current]::CloseCmd \
@@ -450,7 +479,6 @@ proc ::SubscribeEx::AddJID {w jid} {
     set wframe $state(wframe)
     
     lassign [grid size $wframe] columns rows
-    puts "grid size=[grid size $wframe]"
     
     set name   [$jstate(jlib) roster getname $jid]
     set groups [$jstate(jlib) roster getgroups $jid]
@@ -463,8 +491,8 @@ proc ::SubscribeEx::AddJID {w jid} {
     set state($row,name)  $name
     set state($row,group) $group
     
-    set jstr $jid
-    set jlen [font measure CociDefaultFont $jid]
+    set jstr [::Subscribe::GetDisplayName $jid]
+    set jlen [font measure CociDefaultFont $jstr]
     if {$jlen > 220} {
 	set len [string length $jstr]
 	set n [expr {($len * 220)/$jlen - 2}]
@@ -493,8 +521,6 @@ proc ::SubscribeEx::More {w row} {
     upvar 0 $w state
     set token [namespace current]::$w
    
-    puts "::SubscribeEx::More row=$row"
-    
     set wframe $state(wframe)
     set wcont $wframe.f$row
     set jid $state($row,jid)
@@ -531,8 +557,8 @@ proc ::SubscribeEx::GetContent {w} {
     upvar 0 $w state
 
     set contentL [list]
-    foreach {key jid} [array get state jid,*] {
-	set row [string map {"jid," ""} $key]
+    foreach {key jid} [array get state *,jid] {
+	set row [string map {",jid" ""} $key]
 	set content [list $jid $state($row,allow)]
 	
 	if {[info exists state($row,name)]} {
@@ -588,7 +614,6 @@ proc ::SubscribeEx::Deny {w} {
 }
 
 proc ::SubscribeEx::CloseCmd {w} {    
-    puts "::SubscribeEx::CloseCmd w=$w"
     Deny $w
 }
 
