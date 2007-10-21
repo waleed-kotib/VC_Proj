@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.47 2007-10-20 13:04:57 matben Exp $
+# $Id: Subscribe.tcl,v 1.48 2007-10-21 07:16:14 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -49,8 +49,9 @@ namespace eval ::Subscribe:: {
 if {0} {
     ::Subscribe::Queue "mats@home.se"
     ::Subscribe::Queue "mari@work.se"
-    ::Subscribe::Queue "mari.lundberg@somelongname.se"
+    ::Subscribe::Queue "mari.lundberg@someextremelylongname.se"
     ::Subscribe::Queue "donald.duck@disney.com"
+    ::Subscribe::Queue "mimmi.duck@disney.com"
 }
 
 # Mechanism for queuing subscription events. In situations (transports) when
@@ -252,11 +253,20 @@ proc ::Subscribe::Accept {token} {
     global  wDlgs
     variable $token
     upvar 0 $token state
+    
+    Subscribe $jid $state(name) $state(group)
+
+    ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
+    set state(finished) 0
+    destroy $state(w)
+    unset state
+}
+
+proc ::Subscribe::Subscribe {jid name group} {
     upvar ::Jabber::jstate jstate
     
-    set jid $state(jid)
     set subscription [$jstate(jlib) roster getsubscription $jid]
-    
+  
     switch -- $subscription none - from {
 	set sendsubsc 1
 	set havesubsc 0
@@ -272,11 +282,11 @@ proc ::Subscribe::Accept {token} {
     # Add user to my roster. Send subscription request.	
     if {$sendsubsc} {
 	set opts [list]
-	if {[string length $state(name)]} {
-	    lappend opts -name $state(name)
+	if {[string length $name]} {
+	    lappend opts -name $name
 	}
-	if {($state(group) ne "") && ($state(group) ne "None")} {
-	    lappend opts -groups [list $state(group)]
+	if {($group ne "") && ($group ne "None") && ($group ne [mc None])} {
+	    lappend opts -groups [list $group]
 	}
 	eval {$jlib roster send_set $jid  \
 	  -command [namespace current]::ResProc} $opts
@@ -288,11 +298,6 @@ proc ::Subscribe::Accept {token} {
 	}
 	eval {$jlib send_presence -to $jid -type "subscribe"} $opts
     }  
-    
-    ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
-    set state(finished) 0
-    destroy $state(w)
-    unset state
 }
 
 proc ::Subscribe::CloseCmd {token w} {
@@ -407,9 +412,9 @@ proc ::SubscribeEx::NewDlg {} {
     ttk::label $wframe.jid   -text [mc "Contact ID"]
     
     #grid  $wframe.more  $wframe.allow  $wframe.jid -padx 4 -pady 4
-    grid  $wframe.allow  x  $wframe.jid -padx 4 -pady 4
+    grid  $wframe.allow  x  $wframe.jid -padx 0 -pady 4
     grid $wframe.jid -sticky w
-    grid columnconfigure $wframe 2 -minsize 220
+    grid columnconfigure $wframe 2 -minsize 220 -weight 1
     
     set state(wframe) $wframe    
     
@@ -438,6 +443,8 @@ proc ::SubscribeEx::NewDlg {} {
 proc ::SubscribeEx::AddJID {w jid} {
     variable $w
     upvar 0 $w state
+    upvar ::Jabber::jstate jstate
+
     set token [namespace current]::$w
 
     set wframe $state(wframe)
@@ -445,16 +452,31 @@ proc ::SubscribeEx::AddJID {w jid} {
     lassign [grid size $wframe] columns rows
     puts "grid size=[grid size $wframe]"
     
+    set name   [$jstate(jlib) roster getname $jid]
+    set groups [$jstate(jlib) roster getgroups $jid]
+    set group [lindex $groups 0]
+
     set row $rows
     set state($row,more)  0
     set state($row,allow) 1
     set state($row,jid)   $jid
+    set state($row,name)  $name
+    set state($row,group) $group
+    
+    set jstr $jid
+    set jlen [font measure CociDefaultFont $jid]
+    if {$jlen > 220} {
+	set len [string length $jstr]
+	set n [expr {($len * 220)/$jlen - 2}]
+	set jstr [string range $jstr 0 $n]
+	append jstr "..."
+    }
     
     ttk::checkbutton $wframe.m$row -style ArrowText.TCheckbutton \
       -onvalue 0 -offvalue 1 -variable $token\($row,more) \
       -command [list [namespace current]::More $w $row]
     ttk::checkbutton $wframe.c$row -variable $token\($row,allow)
-    ttk::label $wframe.l$row -text $jid
+    ttk::label $wframe.l$row -text $jstr
     ttk::frame $wframe.f$row
     
     #grid  $wframe.m$row  $wframe.c$row  $wframe.l$row
@@ -489,7 +511,7 @@ proc ::SubscribeEx::More {w row} {
 	ttk::combobox $wcont.egroup -values $values \
 	  -textvariable $token\($row,group)
 	ttk::button $wcont.vcard -text "[mc {View Business Card}]..." \
-	  -command [list ::VCard::Fetch other $jid]
+	  -command [list ::VCard::Fetch other $jid] -style Small.TButton
 
 	grid  $wframe.f$row  -row [expr {$row+1}] -columnspan 1 -column 2
 	grid $wframe.f$row -sticky w
@@ -534,38 +556,40 @@ proc ::SubscribeEx::GetContent {w} {
 proc ::SubscribeEx::Accept {w} {
     variable $w
     upvar 0 $w state
+    upvar ::Jabber::jstate jstate
 
+    set jlib $jstate(jlib)
+    
     foreach line [GetContent $w] {
 	set jid [lindex $line 0]
 	set allow [lindex $line 1]
-	set opts [lrange $ine 2 end]
+	array set opts [list -name "" -group ""]
+	array set opts [lrange $line 2 end]
 	
-	
-	
+	if {$allow} {
+	    ::Subscribe::Subscribe $jid $opts(-name) $opts(-group)
+	} else {
+	    $jlib send_presence -to $jid -type "unsubscribed"
+	}
     }
-    
-    
     Free $w
 }
 
 proc ::SubscribeEx::Deny {w} {
     variable $w
     upvar 0 $w state
+    upvar ::Jabber::jstate jstate
 
     foreach line [GetContent $w] {
 	set jid [lindex $line 0]
-
+	$jstate(jlib) send_presence -to $jid -type "unsubscribed"
     }
-    
     Free $w
 }
 
-proc ::SubscribeEx::CloseCmd {w} {
-    variable $w
-    
+proc ::SubscribeEx::CloseCmd {w} {    
     puts "::SubscribeEx::CloseCmd w=$w"
-    
-    Free $w
+    Deny $w
 }
 
 proc ::SubscribeEx::Free {w} {
