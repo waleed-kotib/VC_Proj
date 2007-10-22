@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.249 2007-10-21 13:27:47 matben Exp $
+# $Id: Jabber.tcl,v 1.250 2007-10-22 07:42:27 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -767,17 +767,10 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 }
 
 proc ::Jabber::SubscribedEvent {jlibname xmldata} {
-    variable jstate
-    
-    set jlib $jstate(jlib)
     
     set from [wrapper::getattribute $xmldata from]    
-
-    if {[::Roster::IsTransportHeuristics $from]} {
-	# silent.
-    } else {
-	::ui::dialog -title [mc {Presence Subscription}] -icon info -type ok \
-	  -message [mc jamessallowsub2 $from]
+    if {![::Roster::IsTransportHeuristics $from]} {
+	::Subscribed::Handle $from
     }
     return 1
 }
