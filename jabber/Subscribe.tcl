@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.49 2007-10-21 13:27:47 matben Exp $
+# $Id: Subscribe.tcl,v 1.50 2007-10-22 07:42:28 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -285,7 +285,7 @@ proc ::Subscribe::Accept {token} {
     variable $token
     upvar 0 $token state
     
-    Subscribe $jid $state(name) $state(group)
+    Subscribe $state(jid) $state(name) $state(group)
 
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
     set state(finished) 0
@@ -625,6 +625,93 @@ proc ::SubscribeEx::Free {w} {
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
     destroy $state(w)
     unset -nocomplain state
+}
+
+#--- Subscribed ----------------------------------------------------------------
+
+# Mechanism for queuing subscription confirmations. In situations (transports) 
+# when we can get several of them at once we show an single dialog.
+
+namespace eval ::Subscribed {
+    
+    # Millis to wait for a second subsciption request to show in multi dialog.
+    set ::config(subscribed,multi-wait-ms) 4000
+
+    # Use the multi dialog for batches of subscription requests.
+    set ::config(subscribed,multi-dlg) 1
+
+    variable queue [list]
+}
+
+if {0} {
+    ::Subscribed::Queue "mats@home.se"
+    ::Subscribed::Queue "mari@work.se"
+    ::Subscribed::Queue "mari.lundberg@someextremelylongname.se"
+    ::Subscribed::Queue "donald.duck@disney.com"
+    ::Subscribed::Queue "mimmi.duck@disney.com"
+}
+
+proc ::Subscribed::Handle {jid} {
+    global  config
+    
+    if {$config(subscribe,multi-dlg)} {
+	Queue $jid
+    } else {
+	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
+	  -message [mc jamessallowsub2 $jid]
+    }
+}
+
+proc ::Subscribed::Queue {jid} {
+    global  wDlgs config
+    variable queue
+    
+    set w $wDlgs(jsubsced)
+    if {[winfo exists $w]} {
+	AddJID $jid
+    } else {
+	if {![llength $queue]} {
+	    after $config(subscribed,multi-wait-ms) [namespace code ExecQueue]
+	}
+	lappend queue $jid
+    }
+}
+
+proc ::Subscribed::ExecQueue {} {
+    global  wDlgs
+    variable queue
+    
+    set len [llength $queue]
+    if {$len == 1} {
+	set jid [lindex $queue 0]
+	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
+	  -message [mc jamessallowsub2 $jid]
+    } elseif {$len > 1} {
+	set w $wDlgs(jsubsced)
+	set str "The following contacts have confirmed your presence subsctiptions: "
+	append str "\n"
+	::ui::dialog $w -title [mc "Presence Subscription"] -icon info -type ok \
+	  -message $str
+	AddJID [lindex $queue 0] 1
+	foreach jid [lrange $queue 1 end] {
+	    AddJID $jid
+	}
+    }
+    set queue [list]
+}
+
+proc ::Subscribed::AddJID {jid {first 0}} {
+    global  wDlgs
+    
+    set w $wDlgs(jsubsced)
+    if {[winfo exists $w]} {
+	set msg [$w cget -message]
+	if {!$first} {
+	    append msg ", "
+	}
+	append msg [::Subscribe::GetDisplayName $jid]
+	$w configure -message $msg
+    }    
 }
 
 # Prefs page ...................................................................
