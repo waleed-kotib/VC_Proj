@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.23 2007-10-19 06:29:07 matben Exp $
+# $Id: AvatarMB.tcl,v 1.24 2007-10-22 11:51:33 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -49,7 +49,8 @@ proc ::AvatarMB::InitPrefsHook { } {
 }
 
 proc ::AvatarMB::Init {} {
-       
+    global  this
+    
     # Static variables.
     variable widget
     variable initted
@@ -122,10 +123,15 @@ proc ::AvatarMB::Init {} {
 	    $activeim blank
 	    $activeim put [list [list $active $active] [list $active $active]]
 	    
-	    style element create FMenu.background image $blank  \
-	      -padding {0} -sticky news  \
-	      -map [list {active !disabled} $activeim]
-	    
+	    if {$this(tile08)} {
+		style element create FMenu.background image \
+		  [list $blank {active !disabled} $activeim] \
+		  -padding {0} -sticky news
+	    } else {
+		style element create FMenu.background image $blank  \
+		  -padding {0} -sticky news  \
+		  -map [list {active !disabled} $activeim]
+	    }
 	    if {0} {
 		# Tile BUG
 		style layout FMenu {

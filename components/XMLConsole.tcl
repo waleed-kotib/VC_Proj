@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: XMLConsole.tcl,v 1.3 2007-10-14 07:54:24 matben Exp $
+# $Id: XMLConsole.tcl,v 1.4 2007-10-22 11:51:33 matben Exp $
 
 namespace eval ::XMLConsole { 
 
@@ -91,8 +91,6 @@ proc ::XMLConsole::Build {} {
       -macclass {document {closeBox resizable}} \
       -closecommand [namespace code Close]
     wm title $w [mc "XML Console"]
-    
-    ::UI::SetWindowGeometry $w
 
     ttk::frame $w.frall
     pack  $w.frall  -fill both -expand 1
@@ -120,6 +118,8 @@ proc ::XMLConsole::Build {} {
     frame $wbox.m
     pack  $wbox.m  -side top -fill both -expand 1
 
+    set width 60
+
     # Pane geometry manager.
     set wpane $wbox.m.p
     ttk::paned $wpane -orient vertical
@@ -132,12 +132,12 @@ proc ::XMLConsole::Build {} {
     
     if {$config(ui,aqua-text)} {
 	frame $wlog
-	set wcont [::UI::Text $wtext -height 16 -width 1 -cursor {} -wrap word \
+	set wcont [::UI::Text $wtext -height 16 -width $width -cursor {} -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
 	  [list grid $wysc -column 1 -row 0 -sticky ns]]]
     } else {
 	frame $wlog -bd 1 -relief sunken
-	text $wtext -height 16 -width 1 -state disabled -cursor {} -wrap word \
+	text $wtext -height 16 -width $width -bd 0 -state disabled -cursor {} -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
 	  [list grid $wysc -column 1 -row 0 -sticky ns]]
 	set wcont $wtext
@@ -170,12 +170,12 @@ proc ::XMLConsole::Build {} {
     
     if {$config(ui,aqua-text)} {
 	frame $wsend
-	set wcont [::UI::Text  $wtext -height 1 -width 1 -wrap word \
+	set wcont [::UI::Text  $wtext -height 1 -width $width -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
 	  [list grid $wysc -column 1 -row 0 -sticky ns]]]
     } else {
 	frame $wsend -bd 1 -relief sunken
-	text  $wtext -height 1 -width 1 -wrap word \
+	text  $wtext -height 1 -width $width -bd 0 -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
 	  [list grid $wysc -column 1 -row 0 -sticky ns]]
 	set wcont $wtext
@@ -200,6 +200,8 @@ proc ::XMLConsole::Build {} {
     bind $wtext <Return> [namespace code [list DoSend $w]]
     bind $w <Destroy> \
       +[subst { if {"%W" eq "$w"} { [namespace code [list Free %W]] } }]
+
+    ::UI::SetWindowGeometry $w
     
     ::Jabber::JlibCmd tee_recv add [namespace code [list Recv $w]]
     ::Jabber::JlibCmd tee_send add [namespace code [list Send $w]]
