@@ -7,16 +7,20 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.2 2007-10-21 14:29:09 matben Exp $
+# $Id: spell.tcl,v 1.3 2007-10-22 07:44:30 matben Exp $
 
 package provide spell 0.1
 
 namespace eval spell {
     
     variable pipe
-    
+    variable spellers [list ispell aspell]
     variable static
     set static(w) -
+    
+    bind SpellText <KeyPress> {spell::Event %W %A %K}
+    bind SpellText <Destroy>  {spell::Free %W}
+    bind SpellText <Button-1> {spell::Move %W}
 }
 
 # spell::init --
@@ -26,20 +30,18 @@ namespace eval spell {
 
 proc spell::init {} {   
     variable pipe
+    variable spellers
     variable static
     
     if {[info exists pipe]} {
 	return
     }
-
-    set cmd [AutoExecOK ispell]
-    if {![llength $cmd]} {
-	set cmd [AutoExecOK aspell]
+    foreach s $spellers {
+	set cmd [AutoExecOK $s]
 	if {[llength $cmd]} {
-	    set static(speller) aspell
+	    set static(speller) $s
+	    break
 	}
-    } else {
-	set static(speller) ispell
     }
     if {[llength $cmd]} {
 	
@@ -48,6 +50,8 @@ proc spell::init {} {
 	fconfigure $pipe -buffering line -blocking 1
 	if {$static(speller) eq "ispell"} {
 	    #fconfigure $pipe -encoding latin1
+	} elseif {$static(speller) eq "aspell"} {
+	    fconfigure $pipe -encoding utf-8
 	}
 	set line [gets $pipe]
 	puts "line=$line"
@@ -84,8 +88,9 @@ proc spell::Readable {} {
     if {[fblocked $pipe]} {
 	return
     }
-    set line [gets $pipe]
-    puts "spell::readable line=$line"
+    set line [read $pipe]
+    set line [string trimright $line]
+    puts "spell::Readable line='$line'"
     
     if {![winfo exists $static(w)]} {
 	return
@@ -103,7 +108,7 @@ proc spell::Readable {} {
 	set word [lindex $line 1]
 	set suggest [lrange $line 4 end]
 	set suggest [lapply {string trimleft} [split $suggest ","]]
-	puts "suggest=$suggest"
+	#puts "suggest=$suggest"
 
 	set suggestions($word) $suggest
 	$w tag add spell-err $idx1 $idx2
@@ -144,9 +149,17 @@ proc spell::Bindings {w} {
 	set idx [lsearch [bindtags $w] Text]
 	bindtags $w [linsert [bindtags $w] [incr idx] SpellText]
     }
+}
+
+proc spell::Move {w} {
+    variable $w
+    upvar 0 $w state
     
-    bind SpellText <KeyPress> {spell::Event %W %A %K}
-    bind SpellText <Destroy>  {spell::Free %W}
+    puts "spell::Move"
+    if {[info exists state(lastIn)]} {
+	# Check both sides.
+	CheckWord $w $state(lastIn)
+    }
 }
 
 proc spell::Event {w A K} {
@@ -155,15 +168,18 @@ proc spell::Event {w A K} {
     variable static
     
     set ischar [string is wordchar -strict $A]
-    puts "spell::Event A=$A, K=$K, ischar=$ischar"
 
     set left  [$w get "insert -1c"]
     set right [$w get "insert"]
-    puts "\t left=$left, right=$right"
     set isleft  [string is wordchar -strict $left]
     set isright [string is wordchar -strict $right]
     
-    if {$isleft && $isright} {
+    set isedit $ischar
+    switch -- $K space - Return - Tab - BackSpace - Delete {set isedit 1}
+    puts "spell::Event A=$A, K=$K, ischar=$ischar, isedit=$isedit"
+    puts "\t left=$left, right=$right"
+    
+    if {$ischar && $isleft && $isright} {
 	set idx1 [$w index "insert wordstart"]
 	set idx2 [$w index "insert wordend"]
 	puts "+++word=[$w get $idx1 $idx2]"
@@ -174,24 +190,39 @@ proc spell::Event {w A K} {
     
     switch -- $K {
 	space - Return - Tab {
-	    
-	    set idx2 [$w index "insert"]
-	    set idx1 [$w index "$idx2 -2c wordstart"]
-	    set word [$w get $idx1 $idx2]
-	    puts "idx1=$idx1, idx2=$idx2, word=$word"
-	    set static(w) $w
-	    set static(idx1) $idx1
-	    set static(idx2) $idx2
-	    Word $w $word
+	    CheckWord $w "insert -2c"
 	}
 	Left - Right - Up - Down {
-
-
+	    Move $w
 	}
     }
     
     set state(lastA) $A
     set state(lastK) $K
+    set state(lastIn) [$w index insert]
+    set state(lastIsChar) $ischar
+}
+
+proc spell::GetWord {w ind} {
+    set idx1 [$w index "$ind wordstart"]
+    set idx2 [$w index "$ind wordend"]
+    return [$w get $idx1 $idx2]
+}
+
+proc spell::CheckWord {w ind} {
+    variable static
+    
+    set idx1 [$w index "$ind wordstart"]
+    set idx2 [$w index "$ind wordend"]
+    set word [$w get $idx1 $idx2]
+    set isword [string is wordchar -strict $word]
+    puts "spell::CheckWord idx1=$idx1, idx2=$idx2, word=$word"
+    if {$isword} {
+	set static(w) $w
+	set static(idx1) $idx1
+	set static(idx2) $idx2
+	Word $w $word
+    }
 }
 
 proc spell::Word {w word} {
