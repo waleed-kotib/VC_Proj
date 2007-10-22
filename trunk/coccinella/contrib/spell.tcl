@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.3 2007-10-22 07:44:30 matben Exp $
+# $Id: spell.tcl,v 1.4 2007-10-22 15:20:23 matben Exp $
 
 package provide spell 0.1
 
@@ -21,6 +21,7 @@ namespace eval spell {
     bind SpellText <KeyPress> {spell::Event %W %A %K}
     bind SpellText <Destroy>  {spell::Free %W}
     bind SpellText <Button-1> {spell::Move %W}
+    bind SpellText <FocusOut> {spell::CheckWord %W insert}
 }
 
 # spell::init --
@@ -33,7 +34,7 @@ proc spell::init {} {
     variable spellers
     variable static
     
-    if {[info exists pipe]} {
+    if {[info exists pipe] && ([lsearch [file channels] $pipe] >= 0)} {
 	return
     }
     foreach s $spellers {
@@ -78,6 +79,10 @@ proc spell::AutoExecOK {name} {
     return $cmd
 }
 
+# spell::Readable --
+# 
+#       Read and process result from speller.
+
 proc spell::Readable {} {
     variable pipe
     variable static
@@ -114,8 +119,7 @@ proc spell::Readable {} {
 	$w tag add spell-err $idx1 $idx2
 	
     } elseif {$c eq "?"} {
-	
-	
+		
     } elseif {($c eq "*") || ($c eq "+") || ($c eq "-")} {
 	$w tag remove spell-err $idx1 $idx2
     }
@@ -133,13 +137,9 @@ proc spell::new {w} {
     }
     if {![info exists pipe]} {
 	init
-    }
-    variable $w
-    upvar 0 $w state
-    
+    }    
     $w tag configure spell-err -foreground red
-    Bindings $w
-    
+    Bindings $w    
 }
 
 proc spell::Bindings {w} {
@@ -157,8 +157,19 @@ proc spell::Move {w} {
     
     puts "spell::Move"
     if {[info exists state(lastIn)]} {
+	
 	# Check both sides.
-	CheckWord $w $state(lastIn)
+	set ind $state(lastIn)
+	set left  [$w get "$ind -1c"]
+	set right [$w get "$ind"]
+	set isleft  [string is wordchar -strict $left]
+	set isright [string is wordchar -strict $right]
+	if {$isleft} {
+	    CheckWord $w "$ind -1c"
+	}
+	if {$isright} {
+	    CheckWord $w "$ind"
+	}
     }
 }
 
@@ -167,6 +178,9 @@ proc spell::Event {w A K} {
     upvar 0 $w state
     variable static
     
+    # Check a word when we think we 
+    # 1) have finished typing it
+    # 2) editing it
     set ischar [string is wordchar -strict $A]
 
     set left  [$w get "insert -1c"]
@@ -174,29 +188,35 @@ proc spell::Event {w A K} {
     set isleft  [string is wordchar -strict $left]
     set isright [string is wordchar -strict $right]
     
+    set ismove 0
+    set isspace 0
+    set isdel 0
     set isedit $ischar
+    switch -- $K space - Return - Tab {set isspace 1}
     switch -- $K space - Return - Tab - BackSpace - Delete {set isedit 1}
-    puts "spell::Event A=$A, K=$K, ischar=$ischar, isedit=$isedit"
-    puts "\t left=$left, right=$right"
+    switch -- $K BackSpace - Delete {set isdel 1}
+    switch -- $K Left - Right - Up - Down {set ismove 1}
     
-    if {$ischar && $isleft && $isright} {
-	set idx1 [$w index "insert wordstart"]
-	set idx2 [$w index "insert wordend"]
-	puts "+++word=[$w get $idx1 $idx2]"
+    puts "spell::Event A=$A, K=$K, ischar=$ischar, isedit=$isedit, ismove=$ismove\
+\t left=$left, right=$right, isleft=$isleft, isright=$isright"
+    
+    if {$isedit && $isleft && $isright} {
 	
-    } else {
+	# Edit single word.
+	puts "---> edit & left & right"
+	CheckWord $w insert
+    } elseif {$isspace} {
 	
-    }
-    
-    switch -- $K {
-	space - Return - Tab {
-	    CheckWord $w "insert -2c"
-	}
-	Left - Right - Up - Down {
-	    Move $w
-	}
-    }
-    
+	# Check left word.
+	puts "---> space"
+	CheckWord $w "insert -2c"
+    } elseif {$isdel && $isleft} {
+	puts "---> del & left"
+	Move $w
+    } elseif {$ismove && (($isleft && !$isright) || (!$isleft && $isright))} {
+	puts "---> move"
+	Move $w
+    }    
     set state(lastA) $A
     set state(lastK) $K
     set state(lastIn) [$w index insert]
@@ -216,20 +236,19 @@ proc spell::CheckWord {w ind} {
     set idx2 [$w index "$ind wordend"]
     set word [$w get $idx1 $idx2]
     set isword [string is wordchar -strict $word]
+    
     puts "spell::CheckWord idx1=$idx1, idx2=$idx2, word=$word"
+    
     if {$isword} {
 	set static(w) $w
 	set static(idx1) $idx1
 	set static(idx2) $idx2
-	Word $w $word
+	Word $word
     }
 }
 
-proc spell::Word {w word} {
-    variable $w
-    upvar 0 $w state
+proc spell::Word {word} {
     variable pipe
-    variable static
     
     # Must stop user from doing special processing in spell checker
     # by removing any special instruction characters.
@@ -237,7 +256,7 @@ proc spell::Word {w word} {
     if {[catch {
 	puts $pipe $word
     }]} {
-	
+	# error
     }
 }
 
@@ -259,7 +278,7 @@ proc spell::Free {w} {
 
 if {0} {
     toplevel .tt
-    pack [text .tt.t]
+    pack [text .tt.t -width 60 -font {{Lucida Grande} 16}]
     spell::new .tt.t
     set w .tt.t
     
