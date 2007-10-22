@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.174 2007-10-13 12:58:21 matben Exp $
+# $Id: UI.tcl,v 1.175 2007-10-22 11:51:33 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -295,6 +295,7 @@ proc ::UI::InitDlgs {} {
 	jrostadduser    .jrostadduser
 	jrostedituser   .jrostedituser
 	jsubsc          .jsubsc
+	jsubsced        .jsubsced
 	jsendmsg        .jsendmsg
 	jgotmsg         .jgotmsg
 	jstartchat      .jstartchat

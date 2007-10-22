@@ -9,7 +9,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: muc.tcl,v 1.39 2007-07-19 06:28:17 matben Exp $
+# $Id: muc.tcl,v 1.40 2007-10-22 11:51:33 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -148,9 +148,9 @@ proc jlib::muc::enter {jlibname roomjid nick args} {
     upvar ${jlibname}::muc::cache cache
     upvar ${jlibname}::muc::rooms rooms
     
-    set xsub {}
-    set extras {}
-    set cmd {}
+    set xsub [list]
+    set extras [list]
+    set cmd ""
     foreach {name value} $args {
 	
 	switch -- $name {
@@ -225,7 +225,7 @@ proc jlib::muc::exit {jlibname roomjid} {
 proc jlib::muc::setnick {jlibname roomjid nick args} {
     upvar ${jlibname}::muc::cache cache
     
-    set opts {}
+    set opts [list]
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
@@ -248,8 +248,8 @@ proc jlib::muc::setnick {jlibname roomjid nick args} {
 proc jlib::muc::invite {jlibname roomjid jid args} {
     variable xmlns
 
-    set opts {}
-    set children {}
+    set opts [list]
+    set children [list]
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
@@ -287,8 +287,8 @@ proc jlib::muc::setrole {jlibname roomjid nick role args} {
     if {![regexp $muc(roleExp) $role]} {
 	return -code error "Unrecognized role \"$role\""
     }
-    set opts {}
-    set subitem {}
+    set opts [list]
+    set subitem [list]
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
@@ -324,8 +324,8 @@ proc jlib::muc::setaffiliation {jlibname roomjid nick affiliation args} {
     if {![regexp $muc(affiliationExp) $affiliation]} {
 	return -code error "Unrecognized affiliation \"$affiliation\""
     }
-    set opts {}
-    set subitem {}
+    set opts [list]
+    set subitem [list]
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
@@ -427,7 +427,7 @@ proc jlib::muc::create {jlibname roomjid nick command args} {
     upvar ${jlibname}::muc::cache cache
     upvar ${jlibname}::muc::rooms rooms
 
-    set extras {}
+    set extras [list]
     foreach {name value} $args {
 	
 	switch -- $name {
@@ -487,8 +487,8 @@ proc jlib::muc::parse_create {cmd jlibname xmldata} {
 proc jlib::muc::setroom {jlibname roomjid type args} {
     variable xmlns
 
-    set opts {}
-    set subelements {}
+    set opts [list]
+    set subelements [list]
     foreach {name value} $args {
 	switch -- $name {
 	    -command {
@@ -527,8 +527,8 @@ proc jlib::muc::setroom {jlibname roomjid type args} {
 proc jlib::muc::destroy {jlibname roomjid args} {
     variable xmlns
 
-    set opts {}
-    set subelements {}
+    set opts [list]
+    set subelements [list]
     foreach {name value} $args {
 	
 	switch -- $name {
@@ -591,7 +591,7 @@ proc jlib::muc::mynick {jlibname roomjid} {
 proc jlib::muc::allroomsin {jlibname} {
     upvar ${jlibname}::muc::cache cache
     
-    set roomList {}
+    set roomList [list]
     foreach key [array names cache "*,inside"] {
 	regexp {(.+),inside} $key match room
 	lappend roomList $room
@@ -616,7 +616,7 @@ proc jlib::muc::isroom {jlibname jid} {
 proc jlib::muc::participants {jlibname roomjid} {
     upvar ${jlibname}::muc::cache cache
     
-    set everyone {}
+    set everyone [list]
 
     # The rosters presence elements should give us all info we need.
     foreach userAttr [$jlibname roster getpresence $roomjid -type available] {

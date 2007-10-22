@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.72 2007-10-12 06:56:29 matben Exp $
+# $Id: tileutils.tcl,v 1.73 2007-10-22 11:51:33 matben Exp $
 #
 
 package require treeutil
@@ -513,6 +513,7 @@ proc tileutils::WaveLabelThemeChanged {win} {
 # These should be collected in a separate theme specific file.
 
 proc tileutils::configstyles {name} {
+    global  this
     variable tiles
     variable fonts
     
@@ -677,13 +678,21 @@ proc tileutils::configstyles {name} {
 	unset -nocomplain foreground
 	array set foreground [style map . -foreground]
 	
-	style element create Safari.background image $tiles(blank)  \
-	  -border {6 6 6 6} -padding {0} -sticky news  \
-	  -map [list  \
-	  {background}                 $tiles(blank)  \
-	  {active !disabled !pressed}  $tiles(oval)   \
-	  {pressed !disabled}          $tiles(ovalDark)]
-	
+	if {$this(tile08)} {
+	    style element create Safari.background image \
+	      [list $tiles(blank)                         \
+	      {background}                 $tiles(blank)  \
+	      {active !disabled !pressed}  $tiles(oval)   \
+	      {pressed !disabled}          $tiles(ovalDark)] \
+	      -border {6 6 6 6} -padding {0} -sticky news
+	} else {
+	    style element create Safari.background image $tiles(blank)  \
+	      -border {6 6 6 6} -padding {0} -sticky news  \
+	      -map [list  \
+	      {background}                 $tiles(blank)  \
+	      {active !disabled !pressed}  $tiles(oval)   \
+	      {pressed !disabled}          $tiles(ovalDark)]
+	}
 	style layout Safari {
 	    Safari.background -children {
 		Safari.padding -children {
@@ -714,14 +723,25 @@ proc tileutils::configstyles {name} {
 	style map LSafari -foreground {background "#dedede"}
 	
 	# Aqua type plain arrow checkbutton.
-	style element create arrowCheckIcon image $tiles(open) \
-	  -sticky w -border {0} \
-	  -map [list \
-	 {!active !background  selected} $tiles(close)     \
-	 { active !background !selected} $tiles(openDark)  \
-	 { active !background  selected} $tiles(closeDark) \
-	 {!active  background !selected} $tiles(openLight) \
-	 {!active  background  selected} $tiles(closeLight)]
+	if {$this(tile08)} {
+	    style element create arrowCheckIcon image \
+	      [list $tiles(open) \
+	      {!active !background  selected} $tiles(close)     \
+	      { active !background !selected} $tiles(openDark)  \
+	      { active !background  selected} $tiles(closeDark) \
+	      {!active  background !selected} $tiles(openLight) \
+	      {!active  background  selected} $tiles(closeLight)] \
+	      -sticky w -border {0}
+	} else {
+	    style element create arrowCheckIcon image $tiles(open) \
+	      -sticky w -border {0} \
+	      -map [list \
+	      {!active !background  selected} $tiles(close)     \
+	      { active !background !selected} $tiles(openDark)  \
+	      { active !background  selected} $tiles(closeDark) \
+	      {!active  background !selected} $tiles(openLight) \
+	      {!active  background  selected} $tiles(closeLight)]
+	}
 	style layout Arrow.TCheckbutton {
 	    Arrow.border -sticky news -border 0 -children {
 		Arrow.padding -sticky news -border 0 -children {
@@ -1081,9 +1101,15 @@ if {0} {
 	set imfocus [$S copy [image create photo]]
 	$S destroy
 	
-	style element create RRAqua.background image $imborder \
-	  -border {12 12 12 12} -padding {0} -sticky news \
-	  -map [list {focus} $imfocus]
+	if {$this(tile08)} {
+	    style element create RRAqua.background image \
+	      [list $imborder {focus} $imfocus] \
+	      -border {12 12 12 12} -padding {0} -sticky news
+	} else {
+	    style element create RRAqua.background image $imborder \
+	      -border {12 12 12 12} -padding {0} -sticky news \
+	      -map [list {focus} $imfocus]
+	}
 	style layout RRAqua.TEntry {
 	    RRAqua.background -sticky news -children {
 		Entry.padding -sticky news -children {

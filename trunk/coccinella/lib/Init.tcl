@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.80 2007-10-15 06:36:29 matben Exp $
+# $Id: Init.tcl,v 1.81 2007-10-22 11:51:33 matben Exp $
 
 namespace eval ::Init {
     
@@ -693,10 +693,15 @@ proc ::Init::LoadPackages {} {
     
     # Take precautions and load only our own tile, treectrl.
     # Side effects??? It fools statically linked tile in tclkits
-        
+
+    set this(tile08) 0
+
     # tile may be statically linked (Windows).
     if {[lsearch -exact [info loaded] {{} tile}] >= 0} {
-	package require tile 0.7
+	set vers [package require tile 0.7]
+	if {[package vcompare $vers 0.8] >= 0} {
+	    set this(tile08) 1
+	}
     } elseif {[llength [info commands ::ttk::style]]} {
 	# 8.5b1+
 	namespace eval ::tile {} 
@@ -704,6 +709,7 @@ proc ::Init::LoadPackages {} {
 	interp alias {} ::tile::availableThemes {} ::ttk::themes
 	interp alias {} ::tile::setTheme {} ::ttk::setTheme
 	interp alias {} ::tile::CopyBindings {} ::ttk::copyBindings
+	set this(tile08) 1
     } else {
     
 	# We must be sure script libraries for tile come from us (tcl_findLibrary).
@@ -721,6 +727,9 @@ proc ::Init::LoadPackages {} {
 	    tk_messageBox -icon error -title [mc Error] \
 	      -message "This application requires the tile package to work! $::errorInfo"
 	    exit
+	}
+	if {[package vcompare $msg 0.8] >= 0} {
+	    set this(tile08) 1
 	}
     }
     
