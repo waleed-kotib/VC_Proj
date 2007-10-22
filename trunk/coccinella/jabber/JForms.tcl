@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: JForms.tcl,v 1.33 2007-09-13 08:25:39 matben Exp $
+# $Id: JForms.tcl,v 1.34 2007-10-22 13:46:02 matben Exp $
 # 
 #      Updated to version 2.5 of XEP-0004
 #  
@@ -1039,12 +1039,14 @@ proc ::JForms::GetXDataForm {token} {
     foreach {key val} [array get state var,*] {
 	set var [string map {var, ""} $key]
 	set type $state(type,$var)
-	set subtags {}
+	set subtags [list]
 	
 	switch -- $type {
 	    text-single - text-private - boolean {
-		set subtags [list [wrapper::createtag value \
-		  -chdata $state(var,$var)]]
+		set str [string trim $state(var,$var)]
+		if {$str ne ""} {
+		    set subtags [list [wrapper::createtag value -chdata $str]]
+		}
 	    }
 	    text-multi {
 		set subtags [GetXDataTextMultiForm $token $var]
