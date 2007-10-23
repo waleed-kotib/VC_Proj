@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.95 2007-10-15 14:02:53 matben Exp $
+# $Id: NewMsg.tcl,v 1.96 2007-10-23 13:48:59 matben Exp $
 
 package require ui::entryex
 
@@ -403,6 +403,8 @@ proc ::NewMsg::Build {args} {
 	grid  $wysc   -column 1 -row 0 -sticky ns
 	grid columnconfigure $wtxt 0 -weight 1
 	grid rowconfigure $wtxt 0 -weight 1
+	
+	hooks::run textSpellableNewHook $wtext
     }
     
     set locals($w,w)        $w
