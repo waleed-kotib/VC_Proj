@@ -1,13 +1,13 @@
 #  spell.tcl --
 #  
-#       Package to provide an interface to 'ispell' or 'aspell' and sets
-#       ip bindings to a text widget for interactive spell checking.
+#       Package to provide an interface to 'ispell' and 'aspell' and sets
+#       up bindings to a text widget for interactive spell checking.
 #      
 #  Copyright (c) 2007  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.4 2007-10-22 15:20:23 matben Exp $
+# $Id: spell.tcl,v 1.5 2007-10-23 08:01:53 matben Exp $
 
 package provide spell 0.1
 
@@ -16,12 +16,17 @@ namespace eval spell {
     variable pipe
     variable spellers [list ispell aspell]
     variable static
+    variable trigger
+    
     set static(w) -
+    set static(dict) ""
     
     bind SpellText <KeyPress> {spell::Event %W %A %K}
     bind SpellText <Destroy>  {spell::Free %W}
     bind SpellText <Button-1> {spell::Move %W}
-    bind SpellText <FocusOut> {spell::CheckWord %W insert}
+    bind SpellText <FocusOut> {spell::CheckWord %W "insert -1c"}
+    
+    option add *spellTagForeground      red     widgetDefault
 }
 
 # spell::init --
@@ -45,6 +50,9 @@ proc spell::init {} {
 	}
     }
     if {[llength $cmd]} {
+	if {$static(dict) ne ""} {
+	    -d $static(dict)
+	}
 	
 	# aspell also understands -a which means it runs as ispell
 	set pipe [open |[list $cmd -a] r+]
@@ -79,6 +87,25 @@ proc spell::AutoExecOK {name} {
     return $cmd
 }
 
+proc spell:alldicts {} {
+    variable static
+
+    set L [list]
+    if {$static(speller) eq "aspell"} {
+	set cmd [AutoExecOK aspell]
+	set names [exec $cmd dicts]
+	set L [lsort -unique [lapply {regsub {(-.+)}} $names [list ""]]]
+    }
+    return $L
+}
+
+proc spell::setdict {name} {
+    variable static
+    
+    # NB: aspell and ispell work differently here.
+    set static(dict) $name
+}
+
 # spell::Readable --
 # 
 #       Read and process result from speller.
@@ -86,6 +113,7 @@ proc spell::AutoExecOK {name} {
 proc spell::Readable {} {
     variable pipe
     variable static
+    variable trigger
 
     if {[catch {eof $pipe} iseof] || $iseof} {
 	return
@@ -106,23 +134,27 @@ proc spell::Readable {} {
     
     set c [string index $line 0]
     if {$c eq "#"} {
+
 	# Misspelled, no suggestions.
 	$w tag add spell-err $idx1 $idx2
     } elseif {$c eq "&"} {
+
 	# Misspelled, with suggestions.
+	$w tag add spell-err $idx1 $idx2
 	set word [lindex $line 1]
 	set suggest [lrange $line 4 end]
 	set suggest [lapply {string trimleft} [split $suggest ","]]
 	#puts "suggest=$suggest"
 
 	set suggestions($word) $suggest
-	$w tag add spell-err $idx1 $idx2
 	
     } elseif {$c eq "?"} {
 		
     } elseif {($c eq "*") || ($c eq "+") || ($c eq "-")} {
 	$w tag remove spell-err $idx1 $idx2
     }
+    
+    set trigger -
 }
 
 # spell::new --
@@ -130,6 +162,8 @@ proc spell::Readable {} {
 #       Constructor for interactive spell checking text widget.
 
 proc spell::new {w} {
+    variable $w
+    upvar 0 $w state
     variable pipe
     
     if {[winfo class $w] ne "Text"} {
@@ -138,8 +172,15 @@ proc spell::new {w} {
     if {![info exists pipe]} {
 	init
     }    
-    $w tag configure spell-err -foreground red
+    set state(lastIsChar) 0
+    set fg [option get . spellTagForeground {}]
+    $w tag configure spell-err -foreground $fg
     Bindings $w    
+}
+
+proc spell::clear {w} {
+    $w tag delete spell-err
+    Free $w
 }
 
 proc spell::Bindings {w} {
@@ -151,15 +192,99 @@ proc spell::Bindings {w} {
     }
 }
 
+proc spell::Event {w A K} {
+    variable $w
+    upvar 0 $w state
+    variable static
+    
+    # 1) Single character step
+    #    a) insert character
+    #    b) space
+    #    c) delete
+    #    d) Left, Right
+    # 2) Move, shortcut
+    
+    # Check a word when we think we 
+    # 1) have finished typing it
+    # 2) editing it
+    set ischar [string is wordchar -strict $A]
+
+    set left  [$w get "insert -1c"]
+    set right [$w get "insert"]
+    set isleft  [string is wordchar -strict $left]
+    set isright [string is wordchar -strict $right]
+    set ind [$w index "insert"]
+    
+    set isspace 0
+    set isdel 0
+    set isleftright 0
+    set isedit $ischar
+    switch -- $K space - Return - Tab {set isspace 1}
+    switch -- $K space - Return - Tab - BackSpace - Delete {set isedit 1}
+    switch -- $K BackSpace - Delete {set isdel 1}
+    switch -- $K Left - Right {set isleftright 1}
+        
+    # Detect any move larger than single character.
+    set isbigmove 0
+    if {[info exists state(lastInd)]} {
+	lassign [split $state(lastInd) "."] lrow lpos
+	lassign [split $ind "."] row pos
+	if {$lrow != $row} {
+	    set isbigmove 1
+	} elseif {[expr {abs($lpos - $pos) > 1}]} {
+	    set isbigmove 1
+	}
+    }
+        
+    puts "spell::Event A=$A, K=$K, ischar=$ischar, isedit=$isedit, isbigmove=$isbigmove\
+\t left=$left, right=$right, isleft=$isleft, isright=$isright"
+    
+    if {$isedit && $isleft && $isright} {
+	
+	# Edit single word.
+	puts "---> edit & left & right"
+	CheckWord $w insert
+    } elseif {$isspace} {
+	
+	# Check left word.
+	set is1space [string is wordchar -strict [$w get "insert -2c"]]
+	if {$is1space} {
+	    puts "---> space (left)"
+	    CheckWord $w "insert -2c"
+	    
+	    # Just split a word, check both sides.
+	    if {$isright} {
+		puts "---> space (right)"
+		CheckWord $w "insert"
+	    }
+	}
+    } elseif {$isdel && $isleft} {
+	puts "---> del & left"
+	CheckWord $w "insert -1c"
+    } elseif {$isleftright && $state(lastIsChar)} {
+	puts "---> move (left right)"
+	Move $w
+    } elseif {$isbigmove && $state(lastIsChar)} {
+
+	# If we moved, check last word if last character was a wordchar!
+	puts "---> move"
+	Move $w
+    }    
+    set state(lastA) $A
+    set state(lastK) $K
+    set state(lastInd) $ind
+    set state(lastIsChar) $ischar
+}
+
 proc spell::Move {w} {
     variable $w
     upvar 0 $w state
     
     puts "spell::Move"
-    if {[info exists state(lastIn)]} {
+    if {[info exists state(lastInd)]} {
 	
 	# Check both sides.
-	set ind $state(lastIn)
+	set ind $state(lastInd)
 	set left  [$w get "$ind -1c"]
 	set right [$w get "$ind"]
 	set isleft  [string is wordchar -strict $left]
@@ -173,56 +298,6 @@ proc spell::Move {w} {
     }
 }
 
-proc spell::Event {w A K} {
-    variable $w
-    upvar 0 $w state
-    variable static
-    
-    # Check a word when we think we 
-    # 1) have finished typing it
-    # 2) editing it
-    set ischar [string is wordchar -strict $A]
-
-    set left  [$w get "insert -1c"]
-    set right [$w get "insert"]
-    set isleft  [string is wordchar -strict $left]
-    set isright [string is wordchar -strict $right]
-    
-    set ismove 0
-    set isspace 0
-    set isdel 0
-    set isedit $ischar
-    switch -- $K space - Return - Tab {set isspace 1}
-    switch -- $K space - Return - Tab - BackSpace - Delete {set isedit 1}
-    switch -- $K BackSpace - Delete {set isdel 1}
-    switch -- $K Left - Right - Up - Down {set ismove 1}
-    
-    puts "spell::Event A=$A, K=$K, ischar=$ischar, isedit=$isedit, ismove=$ismove\
-\t left=$left, right=$right, isleft=$isleft, isright=$isright"
-    
-    if {$isedit && $isleft && $isright} {
-	
-	# Edit single word.
-	puts "---> edit & left & right"
-	CheckWord $w insert
-    } elseif {$isspace} {
-	
-	# Check left word.
-	puts "---> space"
-	CheckWord $w "insert -2c"
-    } elseif {$isdel && $isleft} {
-	puts "---> del & left"
-	Move $w
-    } elseif {$ismove && (($isleft && !$isright) || (!$isleft && $isright))} {
-	puts "---> move"
-	Move $w
-    }    
-    set state(lastA) $A
-    set state(lastK) $K
-    set state(lastIn) [$w index insert]
-    set state(lastIsChar) $ischar
-}
-
 proc spell::GetWord {w ind} {
     set idx1 [$w index "$ind wordstart"]
     set idx2 [$w index "$ind wordend"]
@@ -231,19 +306,22 @@ proc spell::GetWord {w ind} {
 
 proc spell::CheckWord {w ind} {
     variable static
+    variable trigger
     
     set idx1 [$w index "$ind wordstart"]
     set idx2 [$w index "$ind wordend"]
     set word [$w get $idx1 $idx2]
     set isword [string is wordchar -strict $word]
     
-    puts "spell::CheckWord idx1=$idx1, idx2=$idx2, word=$word"
-    
     if {$isword} {
 	set static(w) $w
 	set static(idx1) $idx1
 	set static(idx2) $idx2
+	
+	puts "spell::CheckWord idx1=$idx1, idx2=$idx2, word='$word' --------"
+
 	Word $word
+	vwait [namespace current]::trigger
     }
 }
 
@@ -257,22 +335,27 @@ proc spell::Word {word} {
 	puts $pipe $word
     }]} {
 	# error
+	catch {close $pipe}
+	unset -nocomplain pipe
     }
 }
 
-proc spell::lapply {cmd alist} {
+# A few duplicates to make this independent.
+
+proc spell::lapply {cmd alist {post ""}} {
     set applied [list]
     foreach e $alist {
-	lappend applied [uplevel $cmd [list $e]]
+	lappend applied [uplevel $cmd [list $e] $post]
     }
     return $applied
 }
 
+if {![llength [info commands lassign]]} {
+    proc lassign {vals args} {uplevel 1 [list foreach $args $vals break] }
+}
 
 proc spell::Free {w} {
-    variable $w
-    upvar 0 $w state
-    
+    variable $w    
     unset -nocomplain $w
 }
 
