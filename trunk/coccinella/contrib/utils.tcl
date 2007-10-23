@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: utils.tcl,v 1.11 2007-09-29 10:25:05 matben Exp $
+# $Id: utils.tcl,v 1.12 2007-10-23 13:48:59 matben Exp $
 
 package provide utils 1.0
     
@@ -41,6 +41,7 @@ proc min {args} {
 # lapply --
 # 
 #       Applies a command to each list element.
+#       NB: See mstack for a more general!
 
 proc lapply {cmd alist} {
     set applied [list]
