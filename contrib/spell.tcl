@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.6 2007-10-23 13:48:59 matben Exp $
+# $Id: spell.tcl,v 1.7 2007-10-24 15:04:25 matben Exp $
 
 package provide spell 0.1
 
@@ -159,14 +159,67 @@ proc spell::Bindings {w} {
     }
 }
 
+# spell::wordserial --
+# 
+#       Checks a single word and return a list:
+#         {correct list-of-suggestions}
+#       We must have been init'ed first.
+
+proc spell::wordserial {word} {
+    variable serialTrig 1
+    variable pipe
+    
+    # Not the nicest code I have written...
+    fileevent $pipe readable [list set [namespace current]::serialTrig 2]
+    puts $pipe $word
+    vwait [namespace current]::serialTrig
+    set line [read $pipe]
+    set c [string index $line 0]
+    set correct 1
+    set suggest [list]
+    if {$c eq "&" || $c eq "?"} {
+	set correct 0
+	set suggest [lrange $line 4 end]
+	set suggest [lapply {string trimleft} [split $suggest ","]]
+    } elseif {$c eq "#"} {
+	set correct 0
+    }
+    fileevent $pipe readable [namespace code Readable]
+    return [list $correct $suggest]
+}
+
 # spell::check --
 # 
 #       Spellcheck complete text widget.
+#       We must have been init'ed first.
 
 proc spell::check {w} {
+    variable serialTrig 1
+    variable pipe
     
-    set text [$w get 1.0 end]
+    # Not the nicest code I have written...
+    fileevent $pipe readable [list set [namespace current]::serialTrig 2]
     
+    set nlines [lindex [split [$w index end] "."] 0]
+    for {set n 1} {$n <= $nlines} {incr n} {
+	set text [$w get "$n.0" "$n.0 lineend"]
+	if {$text ne ""} {
+	    puts $pipe $text
+	    vwait [namespace current]::serialTrig
+	    set lines [read $pipe]
+	    foreach line [split $lines "\n"] {
+		set c [string index $line 0]
+		if {$c eq "&" || $c eq "?" || $c eq "#"} {
+		    set word [lindex $line 1]
+		    set len [string length $word]
+		    set id1 [string trimright [lindex $line 3] ":"]
+		    set id2 [expr {$id1 + $len}]
+		    $w tag add spell-err $n.$id1 $n.$id2
+		}
+	    }
+	}
+    }    
+    fileevent $pipe readable [namespace code Readable]
 }
 
 # spell::clear --
@@ -174,7 +227,7 @@ proc spell::check {w} {
 #       Removes any spell checking from widget.
 
 proc spell::clear {w} {
-    $w tag delete spell-err
+    $w tag remove spell-err 1.0 end
     Free $w
     set idx [lsearch [bindtags $w] SpellText]
     if {$idx >= 0} {
@@ -378,7 +431,9 @@ proc spell::Paste {w} {
     variable $w
     upvar 0 $w state
     
-    # Absolutely no idea here!
+
+    # Try to check the text between the lastInd and insert.
+
 }
 
 proc spell::GetWord {w ind} {
@@ -442,7 +497,7 @@ proc spell::Free {w} {
     unset -nocomplain $w
 }
 
-if {0} {
+if {1} {
     toplevel .tt
     pack [text .tt.t -width 60 -font {{Lucida Grande} 18}]
     spell::new .tt.t
