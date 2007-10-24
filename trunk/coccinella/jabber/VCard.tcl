@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.76 2007-10-21 13:27:47 matben Exp $
+# $Id: VCard.tcl,v 1.77 2007-10-24 13:08:52 matben Exp $
 
 package provide VCard 1.0
 
@@ -511,6 +511,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     }
 
     set elem(w,frphoto) $wfrphoto
+    set elem(w,avatar)  $wavatar
     set elem(w,emails)  $wemails
     set elem(w,desctxt) $wdesctxt
     
@@ -565,7 +566,7 @@ proc ::VCard::InitDnD {etoken} {
     
     upvar $etoken elem
 
-    set win $elem(w,frphoto)
+    set win $elem(w,avatar)
     
     dnd bindtarget $win text/uri-list <Drop>      \
       [list [namespace current]::DnDDrop $etoken %W %D %T]   
