@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.50 2007-10-22 07:42:28 matben Exp $
+# $Id: Subscribe.tcl,v 1.51 2007-10-24 13:51:56 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -425,11 +425,8 @@ proc ::SubscribeEx::NewDlg {} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
-    set str "A number of contacts want to see your presence. You can allow\
- all of them or deselect any one of them. If you cancel you deny all of them."
-
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 320 -justify left -text $str
+      -padding {0 0 0 6} -wraplength 320 -justify left -text [mc jasubmulti]
     pack $wbox.msg -side top -anchor w
 
     set wframe $wbox.f
@@ -688,10 +685,8 @@ proc ::Subscribed::ExecQueue {} {
 	  -message [mc jamessallowsub2 $jid]
     } elseif {$len > 1} {
 	set w $wDlgs(jsubsced)
-	set str "The following contacts have confirmed your presence subsctiptions: "
-	append str "\n"
 	::ui::dialog $w -title [mc "Presence Subscription"] -icon info -type ok \
-	  -message $str
+	  -message "[mc jasubmultians]:\n"
 	AddJID [lindex $queue 0] 1
 	foreach jid [lrange $queue 1 end] {
 	    AddJID $jid
