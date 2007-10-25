@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Spell.tcl,v 1.3 2007-10-25 12:37:38 matben Exp $
+# $Id: Spell.tcl,v 1.4 2007-10-25 14:50:11 matben Exp $
 
 package require spell
 
@@ -28,7 +28,11 @@ proc ::Spell::Init {} {
     global  tcl_platform this
     
     if {$tcl_platform(platform) eq "windows"} {
-	spell::addautopath [file join $this(prefsPath) exe]
+	set programs {C:\Program}
+	if {[info exists ::env(ProgramFiles)]} {
+	    set programs $::env(ProgramFiles)
+	}
+	spell::addautopath [file join $programs Aspell bin]
     }
     if {![spell::have]} {
 	return
