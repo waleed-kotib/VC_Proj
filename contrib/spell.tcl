@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.10 2007-10-25 12:37:38 matben Exp $
+# $Id: spell.tcl,v 1.11 2007-10-25 14:50:10 matben Exp $
 
 # TODO: try to simplify the async (fileevent) part of this similar
 #       to spell::wordserial perhaps.
@@ -106,6 +106,10 @@ proc spell::init {} {
 proc spell::AutoExecOK {name} {
     global  tcl_platform
     variable static
+    
+    if {$tcl_platform(platform) eq "windows"} {
+	append name .exe
+    }
     
     # ispell and aspell install in /usr/local/bin on my Mac.
     set cmd [auto_execok $name]
