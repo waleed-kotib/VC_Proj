@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.8 2007-10-25 08:19:21 matben Exp $
+# $Id: spell.tcl,v 1.9 2007-10-25 10:02:50 matben Exp $
 
 # TODO: try to simplify the async (fileevent) part of this similar
 #       to spell::wordserial perhaps.
@@ -196,18 +196,28 @@ proc spell::wordserial {word} {
 #       Spellcheck complete text widget.
 #       We must have been init'ed first.
 
-proc spell::check {w} {
+proc spell::check {w} {    
+    set nlines [lindex [split [$w index end] "."] 0]
+    checklines $w 1 $nlines
+}
+
+proc spell::checklines {w n1 n2} {
     variable serialTrig 1
     variable pipe
     
     # Not the nicest code I have written...
     fileevent $pipe readable [list set [namespace current]::serialTrig 2]
     
-    set nlines [lindex [split [$w index end] "."] 0]
-    for {set n 1} {$n <= $nlines} {incr n} {
+    for {set n $n1} {$n <= $n2} {incr n} {
 	set text [$w get "$n.0" "$n.0 lineend"]
 	if {$text ne ""} {
-	    puts $pipe $text
+	    if {[catch {
+		puts $pipe $text
+	    }]} {
+		catch {close $pipe}
+		unset -nocomplain pipe
+		return
+	    }
 	    vwait [namespace current]::serialTrig
 	    set lines [read $pipe]
 	    foreach line [split $lines "\n"] {
@@ -438,9 +448,13 @@ proc spell::Paste {w} {
     variable $w
     upvar 0 $w state
     
-
     # Try to check the text between the lastInd and insert.
-
+    # Take the complete lines to be safe.
+    set from [$w index "$state(lastInd) linestart"]
+    set to [$w index "insert lineend"]
+    set n1 [lindex [split $from "."] 0]
+    set n2 [lindex [split $to "."] 0]
+    checklines $w $n1 $n2
 }
 
 proc spell::GetWord {w ind} {
