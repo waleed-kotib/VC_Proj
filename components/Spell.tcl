@@ -18,14 +18,18 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Spell.tcl,v 1.2 2007-10-25 08:19:21 matben Exp $
+# $Id: Spell.tcl,v 1.3 2007-10-25 12:37:38 matben Exp $
 
 package require spell
 
 namespace eval ::Spell {}
 
 proc ::Spell::Init {} {
+    global  tcl_platform this
     
+    if {$tcl_platform(platform) eq "windows"} {
+	spell::addautopath [file join $this(prefsPath) exe]
+    }
     if {![spell::have]} {
 	return
     }
@@ -47,7 +51,7 @@ proc ::Spell::InitPrefsHook {} {
     variable state
 
     set state(on) 0    
-    ::PrefUtils::Add [list [list state(on) spell_state_on $state(on)] ]
+    ::PrefUtils::Add [list [list ::Spell::state(on) spell_state_on $state(on)] ]
 }
 
 proc ::Spell::OnMenu {} {
@@ -129,6 +133,7 @@ proc ::Spell::TextHook {w} {
 
     if {$state(on)} {
 	spell::new $w
+	bind $w <<ButtonPopup>> [namespace code [list Popup %W %x %y]]
     }
     bind $w <Destroy> {+Spell::OnDestroy %W}
     lappend wall $w
