@@ -7,7 +7,10 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.7 2007-10-24 15:04:25 matben Exp $
+# $Id: spell.tcl,v 1.8 2007-10-25 08:19:21 matben Exp $
+
+# TODO: try to simplify the async (fileevent) part of this similar
+#       to spell::wordserial perhaps.
 
 package provide spell 0.1
 
@@ -81,7 +84,7 @@ proc spell::init {} {
 	    fconfigure $pipe -encoding utf-8
 	}
 	set line [gets $pipe]
-	puts "line=$line"
+	# puts "line=$line"
 	if {[string range $line 0 3] ne "@(#)"} {
 	    return -code error "Wrong identification line: \"$line\""
 	}
@@ -212,7 +215,11 @@ proc spell::check {w} {
 		if {$c eq "&" || $c eq "?" || $c eq "#"} {
 		    set word [lindex $line 1]
 		    set len [string length $word]
-		    set id1 [string trimright [lindex $line 3] ":"]
+		    if {$c eq "#"} {
+			set id1 [lindex $line 2]
+		    } else {
+			set id1 [string trimright [lindex $line 3] ":"]
+		    }
 		    set id2 [expr {$id1 + $len}]
 		    $w tag add spell-err $n.$id1 $n.$id2
 		}
@@ -252,7 +259,7 @@ proc spell::Readable {} {
     }
     set line [read $pipe]
     set line [string trimright $line]
-    puts "spell::Readable line='$line'"
+    # puts "spell::Readable line='$line'"
     
     if {![winfo exists $static(w)]} {
 	return
@@ -344,56 +351,56 @@ proc spell::Event {w A K} {
 	    set isfix 1
 	    if {$right ne $state(lastRight)} {
 		set isdelright 1
-		puts "*** isdelright"
+		# puts "*** isdelright"
 	    }
 	}
     }
         
-    puts "spell::Event ischar=$ischar, isedit=$isedit, isbigmove=$isbigmove\
+    # puts "spell::Event ischar=$ischar, isedit=$isedit, isbigmove=$isbigmove\
  A=$A, K=$K, left=$left, right=$right, isleft=$isleft, isright=$isright"
-    puts "\t ind=$ind, state(lastInd)=$state(lastInd)"
+    # puts "\t ind=$ind, state(lastInd)=$state(lastInd)"
 
     if {$isedit && $isleft && $isright} {
 	
 	# Edit single word.
-	puts "---> edit & left & right"
+	# puts "---> edit & left & right"
 	CheckWord $w insert
     } elseif {$isspace || $ispunct} {
 	
 	# Check left word.
 	set is1space [string is wordchar -strict [$w get "insert -2c"]]
 	if {$is1space} {
-	    puts "---> space (left)"
+	    # puts "---> space (left)"
 	    CheckWord $w "insert -2c"
 	    
 	    # Just split a word, check both sides.
 	    if {$isright} {
-		puts "---> space (right)"
+		# puts "---> space (right)"
 		CheckWord $w "insert"
 	    }
 	}
     } elseif {$isdel && $isleft} {
-	puts "---> del & left"
+	# puts "---> del & left"
 	
 	# Delete to left.
 	CheckWord $w "insert -1c"
     } elseif {$isdel && $isright} {
-	puts "---> del & right"
+	# puts "---> del & right"
 	
 	# Delete to left but word to right.
 	CheckWord $w "insert"
     } elseif {$isdelright} {
-	puts "---> delright"
+	# puts "---> delright"
 	
 	# Delete to right.
 	CheckWord $w "insert"
     } elseif {$isleftright && $state(lastIsChar)} {
-	puts "---> move (left right)"
+	# puts "---> move (left right)"
 	Move $w
     } elseif {$isbigmove} {
 
 	# If we moved, check last word if last character was a wordchar!
-	puts "---> move"
+	# puts "---> move"
 	Move $w
     }    
     set state(lastA)      $A
@@ -411,7 +418,7 @@ proc spell::Move {w} {
     variable $w
     upvar 0 $w state
     
-    puts "spell::Move"
+    # puts "spell::Move"
 	
     # Check both sides.
     set ind $state(lastInd)
@@ -456,7 +463,7 @@ proc spell::CheckWord {w ind} {
 	set static(idx1) $idx1
 	set static(idx2) $idx2
 	
-	puts "spell::CheckWord idx1=$idx1, idx2=$idx2, word='$word' -----------"
+	# puts "spell::CheckWord idx1=$idx1, idx2=$idx2, word='$word' -----------"
 
 	Word $word
 	vwait [namespace current]::trigger
@@ -497,7 +504,7 @@ proc spell::Free {w} {
     unset -nocomplain $w
 }
 
-if {1} {
+if {0} {
     toplevel .tt
     pack [text .tt.t -width 60 -font {{Lucida Grande} 18}]
     spell::new .tt.t
