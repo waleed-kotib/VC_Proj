@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.9 2007-10-25 10:02:50 matben Exp $
+# $Id: spell.tcl,v 1.10 2007-10-25 12:37:38 matben Exp $
 
 # TODO: try to simplify the async (fileevent) part of this similar
 #       to spell::wordserial perhaps.
@@ -23,6 +23,7 @@ namespace eval spell {
     
     set static(w) -
     set static(dict) ""
+    set static(paths) [list]
     
     bind SpellText <KeyPress> {spell::Event %W %A %K}
     bind SpellText <Destroy>  {spell::Free %W}
@@ -33,18 +34,25 @@ namespace eval spell {
     option add *spellTagForeground      red     widgetDefault
 }
 
+# spell::addautopath --
+# 
+#       We may have a special installation directory for spell checkers.
+
+proc spell::addautopath {path} {
+    variable static
+    lappend static(paths) $path
+}
+
 proc spell::have {} {
     variable spellers
 
     # No clue on Windows.
     set have 0
-    if {[tk windowingsystem] ne "win32"} {
-	foreach s $spellers {
-	    set cmd [AutoExecOK $s]
-	    if {[llength $cmd]} {
-		set have 1
-		break
-	    }
+    foreach s $spellers {
+	set cmd [AutoExecOK $s]
+	if {[llength $cmd]} {
+	    set have 1
+	    break
 	}
     }
     return $have
@@ -96,13 +104,22 @@ proc spell::init {} {
 }
 
 proc spell::AutoExecOK {name} {
+    global  tcl_platform
+    variable static
     
     # ispell and aspell install in /usr/local/bin on my Mac.
     set cmd [auto_execok $name]
     if {![llength $cmd]} {
-	set file [file join /usr/local/bin $name]
-	if {[file executable $file] && ![file isdirectory $file]} {
-	    set cmd [list $file]
+	set search $static(paths) 
+	if {$tcl_platform(platform) ne "windows"} {
+	    lappend search /usr/local/bin
+	}
+	foreach dir $search {
+	    set file [file join $dir $name]
+	    if {[file executable $file] && ![file isdirectory $file]} {
+		set cmd [list $file]
+		break
+	    }
 	}
     }
     return $cmd
