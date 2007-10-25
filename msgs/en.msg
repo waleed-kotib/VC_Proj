@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.208 2007-10-24 13:51:56 matben Exp $
+#   $Id: en.msg,v 1.209 2007-10-25 08:19:21 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -413,6 +413,7 @@
 ::msgcat::mcset en mSlideShow            {Slide Show}
 ::msgcat::mcset en mSmaller              {Smaller}
 ::msgcat::mcset en mSort                 {Sort}
+::msgcat::mcset en mCheckSpell           {Check Spelling}
 ::msgcat::mcset en mStatus               {Status}
 ::msgcat::mcset en mStopTrans            {Stop &Transactions}
 ::msgcat::mcset en mStraighten           {Straighten}
