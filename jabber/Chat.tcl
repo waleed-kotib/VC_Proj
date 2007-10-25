@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.226 2007-10-18 11:59:10 matben Exp $
+# $Id: Chat.tcl,v 1.227 2007-10-25 11:51:53 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1550,6 +1550,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     if {$chatstate(active)} {
 	ActiveCmd $chattoken
     }
+    
+    ::hooks::run textSpellableNewHook $wtextsnd
     
     focus $wtextsnd
    

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.218 2007-10-18 06:53:30 matben Exp $
+# $Id: GroupChat.tcl,v 1.219 2007-10-25 11:51:54 matben Exp $
 
 package require Create
 package require Enter
@@ -1008,6 +1008,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     }
     
     ::hooks::run buildGroupChatWidget $roomjid
+    ::hooks::run textSpellableNewHook $wtextsend
 
     return $chattoken
 }
