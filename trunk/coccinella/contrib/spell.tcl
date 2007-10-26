@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.12 2007-10-26 12:33:34 matben Exp $
+# $Id: spell.tcl,v 1.13 2007-10-26 12:45:42 matben Exp $
 
 # TODO: try to simplify the async (fileevent) part of this similar
 #       to spell::wordserial perhaps.
@@ -350,19 +350,10 @@ proc spell::Readable {} {
 
 	# Misspelled, with suggestions.
 	$w tag add spell-err $idx1 $idx2
-	set word [lindex $line 1]
-	set suggest [lrange $line 4 end]
-	set suggest [lapply {string trimleft} [split $suggest ","]]
-	#puts "suggest=$suggest"
-	set suggestions($word) $suggest
     } elseif {$c eq "?"} {
 		
 	# Guess with guesses.
 	$w tag add spell-err $idx1 $idx2
-	set word [lindex $line 1]
-	set guess [lrange $line 4 end]
-	set guess [lapply {string trimleft} [split $guess ","]]
-	
     } elseif {($c eq "*") || ($c eq "+") || ($c eq "-")} {
 	$w tag remove spell-err $idx1 $idx2
     }
