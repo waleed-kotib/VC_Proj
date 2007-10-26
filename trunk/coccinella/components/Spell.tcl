@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Spell.tcl,v 1.4 2007-10-25 14:50:11 matben Exp $
+# $Id: Spell.tcl,v 1.5 2007-10-26 12:33:34 matben Exp $
 
 package require spell
 
@@ -37,16 +37,23 @@ proc ::Spell::Init {} {
     if {![spell::have]} {
 	return
     }
+    set speller [spell::speller]
+    
     component::register Spell \
       "Provides an interface to the aspell and ispell spellers."
 
     set menuDef {checkbutton mCheckSpell      {::Spell::OnMenu}  {} \
       {-variable ::Spell::state(on)}}
     ::JUI::RegisterMenuEntry info $menuDef
+    if {$speller eq "aspell"} {
+	set menuDef {cascade mDictionaries      {}  {} }
+	::JUI::RegisterMenuEntry info $menuDef
+    }
 
     # Add event hooks.
     ::hooks::register prefsInitHook         [namespace code InitPrefsHook]
     ::hooks::register textSpellableNewHook  [namespace code TextHook]
+    ::hooks::register menuPostCommand       [namespace code MenuPost]
     
     variable wall [list]
 }
@@ -77,11 +84,46 @@ proc ::Spell::OnMenu {} {
 	    bind $w <<ButtonPopup>> [namespace code [list Popup %W %x %y]]
 	}
     } else {
-	foreach w $wall {
-	    spell::clear $w
-	    bind $w <<ButtonPopup>> {}
-	}
+	Clear
     }
+}
+
+proc ::Spell::MenuPost {which wmenu} {
+    variable dictname
+    
+    if {$which eq "main-info"} {
+	
+	# Have no idea of how to get this.
+	set dictname en
+	
+	set m [::UI::MenuMethod $wmenu entrycget mDictionaries -menu]
+	$m delete 0 end
+	set dicts [spell::alldicts]
+	foreach dict $dicts {
+	    $m add radiobutton -label $dict -value $dict \
+	      -variable [namespace current]::dictname \
+	      -command [namespace code [list SetDict $dict]]
+	}
+	update idletasks
+    }
+}
+
+proc ::Spell::Clear {} {
+    variable wall
+    
+    foreach w $wall {
+	spell::clear $w
+	bind $w <<ButtonPopup>> {}
+    }
+}
+
+proc ::Spell::SetDict {name} {
+    
+    spell::reset
+    Clear
+    spell::setdict $name
+    spell::init
+    OnMenu
 }
 
 proc ::Spell::Popup {w x y} {
@@ -104,6 +146,9 @@ proc ::Spell::Popup {w x y} {
 		$menu add command -label $s \
 		  -command [namespace code [list Cmd $w $s]]
 	    }
+	    $menu add separator
+	    $menu add command -label [mc mAddToDictionary] \
+	      -command [namespace code [list AddWord $w]]
 	    set X [expr [winfo rootx $w] + $x]
 	    set Y [expr [winfo rooty $w] + $y]
 	    tk_popup $menu [expr int($X) - 10] [expr int($Y) - 10]   
@@ -129,6 +174,11 @@ proc ::Spell::Cmd {w new} {
     $w delete $pop(idx1) $pop(idx2)
     $w insert $pop(idx1) $str
     unset -nocomplain pop
+}
+
+proc ::Spell::AddWord {w} {
+    variable pop
+    spell::addword $pop(word)
 }
 
 proc ::Spell::TextHook {w} {
