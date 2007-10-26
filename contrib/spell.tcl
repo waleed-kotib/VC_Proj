@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.11 2007-10-25 14:50:10 matben Exp $
+# $Id: spell.tcl,v 1.12 2007-10-26 12:33:34 matben Exp $
 
 # TODO: try to simplify the async (fileevent) part of this similar
 #       to spell::wordserial perhaps.
@@ -17,6 +17,7 @@ package provide spell 0.1
 namespace eval spell {
     
     variable spellers [list ispell aspell]
+    variable spellers [list aspell ispell]
     variable pipe
     variable trigger
     variable static
@@ -24,6 +25,7 @@ namespace eval spell {
     set static(w) -
     set static(dict) ""
     set static(paths) [list]
+    set static(speller) ""
     
     bind SpellText <KeyPress> {spell::Event %W %A %K}
     bind SpellText <Destroy>  {spell::Free %W}
@@ -43,15 +45,20 @@ proc spell::addautopath {path} {
     lappend static(paths) $path
 }
 
+# spell::have --
+# 
+#       Checks for an executable.
+
 proc spell::have {} {
     variable spellers
+    variable static
 
-    # No clue on Windows.
     set have 0
     foreach s $spellers {
 	set cmd [AutoExecOK $s]
 	if {[llength $cmd]} {
 	    set have 1
+	    set static(speller) $s
 	    break
 	}
     }
@@ -103,12 +110,32 @@ proc spell::init {} {
     }
 }
 
+proc spell::speller {} {
+    variable static
+    if {[info exists static(speller)]} {
+	return $static(speller)
+    } else {
+	return
+    }
+}
+
+proc spell::reset {} {
+    variable pipe
+    variable static
+
+    catch {close $pipe}
+    unset -nocomplain pipe
+    unset -nocomplain static(dicts)
+}
+
 proc spell::AutoExecOK {name} {
     global  tcl_platform
     variable static
     
     if {$tcl_platform(platform) eq "windows"} {
-	append name .exe
+	set exe $name.exe
+    } else {
+	set exe $name
     }
     
     # ispell and aspell install in /usr/local/bin on my Mac.
@@ -119,7 +146,7 @@ proc spell::AutoExecOK {name} {
 	    lappend search /usr/local/bin
 	}
 	foreach dir $search {
-	    set file [file join $dir $name]
+	    set file [file join $dir $exe]
 	    if {[file executable $file] && ![file isdirectory $file]} {
 		set cmd [list $file]
 		break
@@ -129,23 +156,38 @@ proc spell::AutoExecOK {name} {
     return $cmd
 }
 
-proc spell:alldicts {} {
+proc spell::alldicts {} {
     variable static
 
-    set L [list]
-    if {$static(speller) eq "aspell"} {
+    if {[info exists static(dicts)]} {
+	return $static(dicts)
+    } else {
+	set L [list]
 	set cmd [AutoExecOK aspell]
-	set names [exec $cmd dicts]
-	set L [lsort -unique [lapply {regsub {(-.+)}} $names [list ""]]]
+	if {[llength $cmd]} {
+	    set names [exec $cmd dicts]
+	    set L [lsort -unique [lapply {regsub {(-.+)}} $names [list ""]]]
+	    set static(dicts) $L
+	}
+	return $L
     }
-    return $L
 }
 
 proc spell::setdict {name} {
     variable static
     
     # NB: aspell and ispell work differently here.
-    set static(dict) $name
+    if {$static(speller) eq "aspell"} {
+	set static(dict) $name
+    }
+}
+
+proc spell::addword {word} {
+    variable pipe
+    
+    catch {
+	puts $pipe "&$word"
+    }
 }
 
 # spell::new --
