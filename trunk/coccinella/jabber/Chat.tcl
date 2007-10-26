@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.227 2007-10-25 11:51:53 matben Exp $
+# $Id: Chat.tcl,v 1.228 2007-10-26 14:12:43 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2171,7 +2171,16 @@ proc ::Chat::SetState {chattoken state} {
     foreach name {send sendfile} {
 	$wtray buttonconfigure $name -state $state 
     }
-    if {[$wtray exists whiteboard] && ![::Roster::IsCoccinella $chatstate(jid)]} {
+    
+    # Must use full JID.
+    set jid $chatstate(jid)
+    if {[jlib::isbarejid $jid]} {
+	set res [::Jabber::JlibCmd roster gethighestresource $jid]
+	set jid3 $jid/$res
+    } else {
+	set jid3 $jid
+    }
+    if {[$wtray exists whiteboard] && ![::Roster::IsCoccinella $jid3]} {
 	$wtray buttonconfigure whiteboard -state disabled
     }	
     $chatstate(wtextsnd) configure -state $state
@@ -2832,9 +2841,13 @@ proc ::Chat::Whiteboard {dlgtoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
+    # We must be sure to have a full JID here since we must be sure of its
+    # capabilities.
     set jid $chatstate(jid)
-    if {![::JWB::HaveWhiteboard $jid]} {
-	::JWB::NewWhiteboardTo $jid -type chat
+    set res [::Jabber::JlibCmd roster gethighestresource $jid]
+    set jid3 $jid/$res
+    if {![::JWB::HaveWhiteboard $jid3]} {
+	::JWB::NewWhiteboardTo $jid3 -type chat
     }
 }
 

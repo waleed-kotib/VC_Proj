@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.13 2007-10-26 12:45:42 matben Exp $
+# $Id: spell.tcl,v 1.14 2007-10-26 14:12:43 matben Exp $
 
 # TODO: try to simplify the async (fileevent) part of this similar
 #       to spell::wordserial perhaps.
@@ -101,6 +101,8 @@ proc spell::init {} {
 	set line [gets $pipe]
 	# puts "line=$line"
 	if {[string range $line 0 3] ne "@(#)"} {
+	    catch {close $pipe}
+	    unset -nocomplain pipe
 	    return -code error "Wrong identification line: \"$line\""
 	}
 	fconfigure $pipe -blocking 0
@@ -203,7 +205,9 @@ proc spell::new {w} {
 	return -code error "Usage: spell::new textWidget"
     }
     if {![info exists pipe]} {
-	init
+	if {[catch {init}]} {
+	    return
+	}
     }    
     set state(lastIsChar) 0
     set state(lastInd)    1.0
