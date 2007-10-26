@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JingleIax.tcl,v 1.37 2007-08-24 13:33:13 matben Exp $
+# $Id: JingleIax.tcl,v 1.38 2007-10-26 14:12:43 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -598,7 +598,15 @@ proc ::JingleIAX::SetChatButtonState {chattoken} {
     set dlgtoken [::Chat::GetChatTokenValue $chattoken dlgtoken]
     set wtray [::Chat::GetDlgTokenValue $dlgtoken wtray]
     set jid [::Chat::GetChatTokenValue $chattoken jid]
-    set xelem [::Jabber::RosterCmd getx $jid "jingle/media/audio"]
+
+    # Must use full JID.
+    if {[jlib::isbarejid $jid]} {
+	set res [::Jabber::JlibCmd roster gethighestresource $jid]
+	set jid3 $jid/$res
+    } else {
+	set jid3 $jid
+    }
+    set xelem [::Jabber::RosterCmd getx $jid3 "jingle/media/audio"]
     if {$xelem ne {}} {
 	set state normal
     } else {
