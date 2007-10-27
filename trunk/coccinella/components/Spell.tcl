@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Spell.tcl,v 1.5 2007-10-26 12:33:34 matben Exp $
+# $Id: Spell.tcl,v 1.6 2007-10-27 14:15:26 matben Exp $
 
 package require spell
 
@@ -97,6 +97,11 @@ proc ::Spell::MenuPost {which wmenu} {
 	set dictname en
 	
 	set m [::UI::MenuMethod $wmenu entrycget mDictionaries -menu]
+	
+	# ispell doesn't put the dict menu there.
+	if {$m eq ""} {
+	    return
+	}
 	$m delete 0 end
 	set dicts [spell::alldicts]
 	foreach dict $dicts {
