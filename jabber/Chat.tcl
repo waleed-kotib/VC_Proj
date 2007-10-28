@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.228 2007-10-26 14:12:43 matben Exp $
+# $Id: Chat.tcl,v 1.229 2007-10-28 15:34:15 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -196,6 +196,15 @@ namespace eval ::Chat:: {
     set ::config(chat,notify-send) 1
     set ::config(chat,notify-recv) 1
     set ::config(chat,notify-show) 1
+
+    # Allow themed chats.
+    set ::config(chat,themed) 0
+    
+    # Postpone this to init.
+    variable haveTheme 0
+    if {$config(chat,themed) && ![catch {package require ChatTheme}]} {
+	set haveTheme 1
+    }
 }
 
 # Chat::OnToolButton --
@@ -620,14 +629,14 @@ proc ::Chat::GotMsg {body args} {
 	set chatstate(subject) $argsA(-subject)
 	set chatstate(lastsubject) $chatstate(subject)
 	eval {
-	    InsertMessage $chattoken sys "[mc Subject]: $chatstate(subject)"
+	    InsertMessageText $chattoken sys "[mc Subject]: $chatstate(subject)"
 	} $opts
     }
     
     if {$body ne ""} {
 	
 	# Put in chat window.
-	eval {InsertMessage $chattoken you $body} $opts
+	eval {InsertMessageText $chattoken you $body} $opts
 
 	# Put in history file.
        ::History::XPutItem recv $jid2 $xmldata
@@ -681,9 +690,14 @@ proc ::Chat::GotNormalMsg {body args} {
     }
 }
 
+proc ::Chat::Insert {chattoken xmldata time} {
+    
+    
+}
+
 # NB: @@@ Change this to take complete xml stanzas instead!
 
-# Chat::InsertMessage --
+# Chat::InsertMessageText --
 # 
 #       Puts message in text chat window.
 #       
@@ -693,7 +707,7 @@ proc ::Chat::GotNormalMsg {body args} {
 #       args:   -secs seconds
 #               -jidfrom jid
 
-proc ::Chat::InsertMessage {chattoken spec body args} {
+proc ::Chat::InsertMessageText {chattoken spec body args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jprefs jprefs
@@ -793,7 +807,6 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
     if {$history} {
 	set htag -history
     }
-    $wtext configure -state normal
     
     switch -- $whom {
 	me {
@@ -811,6 +824,7 @@ proc ::Chat::InsertMessage {chattoken spec body args} {
     }
     
     # Actually insert.
+    $wtext configure -state normal
     $wtext insert insert $prefix $pretags
     $wtext insert insert "   "   $txttags
     ::Text::ParseMsg chat $from $wtext $body $txttags
@@ -993,7 +1007,7 @@ proc ::Chat::InsertHistoryOld {chattoken args} {
     set result [GetHistory $chattoken -last $opts(-last) -maxage $opts(-maxage)]
     foreach elem $result {
         array set arrResult $elem
-        InsertMessage $chattoken $arrResult(-spec) $arrResult(-body) -secs $arrResult(-secs) \
+        InsertMessageText $chattoken $arrResult(-spec) $arrResult(-body) -secs $arrResult(-secs) \
           -jidfrom $arrResult(-name)
     }
     $wtext mark set insert end
@@ -1068,7 +1082,7 @@ proc ::Chat::InsertHistoryXML {chattoken} {
 	    }
 	}	
 	set tagspec [list $tag history]
-	InsertMessage $chattoken $tagspec $body -secs $secs -jidfrom $from
+	InsertMessageText $chattoken $tagspec $body -secs $secs -jidfrom $from
     }
     $wtext mark set insert end
 }
@@ -1490,7 +1504,13 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     pack $wpane -side top -fill both -expand 1    
 
     # Text chat dialog.
-    if {$config(ui,aqua-text)} {
+    if {$jprefs(chat,themed)} {
+	frame $wtxt -bd 1 -relief sunken
+	::ChatTheme::Widget $chattoken $wtext -height 12 -width 10 \
+	  -yscrollcommand [list ::UI::ScrollSet $wysc \
+	  [list grid $wysc -column 1 -row 0 -sticky ns]]
+	set wcont $wtext
+    } elseif {$config(ui,aqua-text)} {
 	frame $wtxt
 	set wcont [::UI::Text $wtext -height 12 -width 1 -state disabled -cursor {} -wrap word  \
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
@@ -1503,7 +1523,10 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 	set wcont $wtext
     }
     ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
-    bindtags $wtext [linsert [bindtags $wtext] 0 ReadOnlyText]
+    
+    if {[winfo class $wtext] eq "Text"} {
+	bindtags $wtext [linsert [bindtags $wtext] 0 ReadOnlyText]
+    }
     
     grid  $wcont  -column 0 -row 0 -sticky news
     grid  $wysc   -column 1 -row 0 -sticky ns
@@ -1511,8 +1534,9 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     grid rowconfigure    $wtxt 0 -weight 1
     
     # The tags.
-    ConfigureTextTags $w $wtext
-    
+    if {!$jprefs(chat,themed)} {
+	ConfigureTextTags $w $wtext
+    }    
     bind $wtext <<Copy>> {
 	::JUI::CopyEvent %W
 	break
@@ -1661,7 +1685,7 @@ proc ::Chat::OnReturnSubject {chattoken} {
     set myjid   [$jstate(jlib) myjid]
     set subject $chatstate(subject)
     $chatstate(wtext) mark set insert end
-    InsertMessage $chattoken sys "[mc Subject]: $subject" -jidfrom $myjid
+    InsertMessageText $chattoken sys "[mc Subject]: $subject" -jidfrom $myjid
     set xmldata [jlib::send_message_xmllist $jid  \
        -thread $threadID -type chat -from $myjid -subject $subject]
     ::History::XPutItem send $jid2 $xmldata
@@ -2307,7 +2331,7 @@ proc ::Chat::SmileyCmd {chattoken im key} {
 # 
 #       Various hooks.
 
-proc ::Chat::LoginHook { } {
+proc ::Chat::LoginHook {} {
     variable cprefs
     upvar ::Jabber::jstate jstate
 
@@ -2318,7 +2342,7 @@ proc ::Chat::LoginHook { } {
     return
 }
 
-proc ::Chat::LogoutHook { } {
+proc ::Chat::LogoutHook {} {
     
     foreach dlgtoken [GetTokenList dlg] {
 	variable $dlgtoken
@@ -2462,7 +2486,7 @@ proc ::Chat::InviteSendHistory {chattoken roomjid} {
     }
 }
 
-proc ::Chat::QuitHook { } {
+proc ::Chat::QuitHook {} {
     global  wDlgs
     
     ::UI::SaveWinGeom $wDlgs(jstartchat)
@@ -2477,7 +2501,7 @@ proc ::Chat::QuitHook { } {
     return
 }
 
-proc ::Chat::BuildSavedDialogs { } {
+proc ::Chat::BuildSavedDialogs {} {
     variable cprefs
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
@@ -2506,7 +2530,7 @@ proc ::Chat::BuildSavedDialogs { } {
     }
 }
 
-proc ::Chat::SaveDialogs { } {
+proc ::Chat::SaveDialogs {} {
     variable cprefs
     upvar ::Jabber::jprefs jprefs
     
@@ -2733,7 +2757,7 @@ proc ::Chat::Send {dlgtoken} {
     if {0} {
 	if {![string equal $chatstate(subject) $chatstate(lastsubject)]} {
 	    lappend opts -subject $chatstate(subject)
-	    InsertMessage $chattoken sys "[mc Subject]: $chatstate(subject)"
+	    InsertMessageText $chattoken sys "[mc Subject]: $chatstate(subject)"
 	}
     }
     set chatstate(lastsubject) $chatstate(subject)
@@ -2792,7 +2816,7 @@ proc ::Chat::Send {dlgtoken} {
     set dlgstate(lastsentsecs) [clock seconds]
     
     # Add to chat window.        
-    InsertMessage $chattoken me $text
+    InsertMessageText $chattoken me $text
 
     set chatstate(havesent) 1
     
@@ -2945,7 +2969,7 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
     if {$status ne ""} {
 	append showStr ", " $status
     }
-    InsertMessage $chattoken sys $showStr
+    InsertMessageText $chattoken sys $showStr
     ::History::XPutItem recv $chatstate(minjid) $xmldata
     
     if {[string equal $type "available"]} {
@@ -3058,7 +3082,7 @@ proc ::Chat::GetAllTokensFrom {type key pattern} {
     return $alltokens
 }
 
-proc ::Chat::GetFirstDlgToken { } {
+proc ::Chat::GetFirstDlgToken {} {
  
     set token ""
     set dlgtokens [GetTokenList dlg]
@@ -3194,7 +3218,7 @@ proc ::Chat::Free {dlgtoken} {
     unset dlgstate
 }
 
-proc ::Chat::GetFirstSashPos { } {
+proc ::Chat::GetFirstSashPos {} {
     global  wDlgs
     
     set win [::UI::GetFirstPrefixedToplevel $wDlgs(jchat)]
@@ -3459,7 +3483,8 @@ proc ::Chat::SendChatState {chattoken state} {
 
 # Preference page --------------------------------------------------------------
 
-proc ::Chat::InitPrefsHook { } {
+proc ::Chat::InitPrefsHook {} {
+    variable haveTheme
     upvar ::Jabber::jprefs jprefs
     	
     set jprefs(chatActiveRet) 1
@@ -3469,6 +3494,8 @@ proc ::Chat::InitPrefsHook { } {
     set jprefs(chat,histLen)      10
     set jprefs(chat,histAge)      0
     set jprefs(chat,mynick)       ""
+    set jprefs(chat,themed)       0
+    set jprefs(chat,theme)        "Bubblegum"
     
     ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(showMsgNewWin) jprefs_showMsgNewWin $jprefs(showMsgNewWin)]  \
@@ -3477,8 +3504,16 @@ proc ::Chat::InitPrefsHook { } {
       [list ::Jabber::jprefs(chat,histLen)  jprefs_chathistLen   $jprefs(chat,histLen)]  \
       [list ::Jabber::jprefs(chat,histAge)  jprefs_chathistAge   $jprefs(chat,histAge)]  \
       [list ::Jabber::jprefs(chat,mynick)   jprefs_chatmynick    $jprefs(chat,mynick)]  \
+      [list ::Jabber::jprefs(chat,themed)   jprefs_chatthemed    $jprefs(chat,themed)]  \
+      [list ::Jabber::jprefs(chat,theme)    jprefs_chattheme     $jprefs(chat,theme)]  \
       [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)] \
       ]    
+    if {!$haveTheme} {
+	set jprefs(chat,themed) 0
+    }
+    if {$jprefs(chat,themed)} {
+	::ChatTheme::Set $jprefs(chat,theme)
+    }
 }
 
 proc ::Chat::BuildPrefsHook {wtree nbframe} {
@@ -3492,10 +3527,11 @@ proc ::Chat::BuildPrefsHook {wtree nbframe} {
 proc ::Chat::BuildPrefsPage {wpage} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
+    variable haveTheme
     
     foreach key {
 	chatActiveRet showMsgNewWin inbox2click chat,normalAsChat
-	chat,histLen chat,histAge chat,mynick
+	chat,histLen chat,histAge chat,mynick chat,themed chat,theme
     } {
 	set tmpJPrefs($key) $jprefs($key)
     }
@@ -3553,10 +3589,26 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ttk::entry $wni.eni -textvariable [namespace current]::tmpJPrefs(chat,mynick)
 
     grid  $wni.lni  $wni.eni  -sticky w
-    grid columnconfigure $wni 1 -weight 1
 
     ::balloonhelp::balloonforwindow $wni.eni [mc tooltip-localnick]
 
+    ttk::separator $wc.sep4 -orient horizontal
+
+    set menuDef [lapply list [::ChatTheme::AllThemes]]
+    set wtm $wc.tm
+    ttk::frame $wc.tm
+    ttk::checkbutton $wtm.themed -text "Have themed chats:"  \
+      -variable [namespace current]::tmpJPrefs(chat,themed)
+    ui::optionmenu $wtm.theme -menulist $menuDef -direction flush \
+      -variable [namespace current]::tmpJPrefs(chat,theme)
+    
+    grid  $wtm.themed  $wtm.theme  -sticky w
+    
+    if {!$haveTheme} {
+	$wc.themed state {disabled}
+	$wc.theme state {disabled}
+    }
+    
     grid  $wc.active  -sticky w
     grid  $wc.newwin  -sticky w
     grid  $wc.normal  -sticky w
@@ -3567,17 +3619,24 @@ proc ::Chat::BuildPrefsPage {wpage} {
     grid  $wc.sep2    -sticky ew -pady 6
     grid  $wc.hi      -sticky w
     grid  $wc.sep3    -sticky ew -pady 6
-    grid  $wc.ni      -sticky ew
+    grid  $wc.ni      -sticky w
+    grid  $wc.sep4    -sticky ew -pady 6
+    grid  $wc.tm      -sticky w
 }
 
-proc ::Chat::SavePrefsHook { } {
+proc ::Chat::SavePrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
+    if {$tmpJPrefs(chat,themed)} {
+	if {$tmpJPrefs(chat,theme) ne $jprefs(chat,theme)} {
+	    ::ChatTheme::Set $tmpJPrefs(chat,theme)
+	}
+    }
     array set jprefs [array get tmpJPrefs]
 }
 
-proc ::Chat::CancelPrefsHook { } {
+proc ::Chat::CancelPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
         
@@ -3589,7 +3648,7 @@ proc ::Chat::CancelPrefsHook { } {
     }
 }
 
-proc ::Chat::UserDefaultsHook { } {
+proc ::Chat::UserDefaultsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     
@@ -3598,7 +3657,7 @@ proc ::Chat::UserDefaultsHook { } {
     }
 }
 
-proc ::Chat::DestroyPrefsHook { } {
+proc ::Chat::DestroyPrefsHook {} {
     variable tmpJPrefs
     
     unset -nocomplain tmpJPrefs
