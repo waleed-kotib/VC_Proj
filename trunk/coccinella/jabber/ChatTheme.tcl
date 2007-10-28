@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.1 2007-10-28 08:49:47 matben Exp $
+# $Id: ChatTheme.tcl,v 1.2 2007-10-28 15:34:15 matben Exp $
 
 package require Tkhtml 3.0
 
@@ -33,18 +33,24 @@ namespace eval ::ChatTheme {
     
     variable theme
     set theme(current) ""
+    set theme(resources) ""
     
     variable html
     set html(header) {<html><head></head><body>}
     set html(footer) {</body></html>}
     
     variable content
+    variable inited 0
 }
 
-proc ::ChatTheme::AllThemes {} {
+proc ::ChatTheme::Init {} {
+    variable inited
     variable path
     variable theme
     
+    if {$inited} {
+	return
+    }
     foreach which {default prefs} {
 	set theme($which) [list]
 	set dirs [glob -nocomplain -directory $path($which) -types d *]
@@ -57,6 +63,12 @@ proc ::ChatTheme::AllThemes {} {
 	    }
 	}
     }
+    set inited 1
+}
+
+proc ::ChatTheme::AllThemes {} {
+    variable theme
+    Init
     return [concat $theme(default) $theme(prefs)]
 }
 
@@ -76,6 +88,9 @@ proc ::ChatTheme::Set {name} {
     variable theme
     variable content
     
+    puts "::ChatTheme::Set $name"
+
+    Init
     set res [GetResourceDir $name]
     if {$res eq ""} {
 	return -code error "unknown theme \"$name\""
@@ -91,6 +106,7 @@ proc ::ChatTheme::Set {name} {
     set content(statusNext) [Readfile [file join $res NextStatus.html]]
     
     set theme(current) $name
+    set theme(resources) $res
 }
 
 proc ::ChatTheme::GetResourceDir {name} {
@@ -105,44 +121,71 @@ proc ::ChatTheme::GetResourceDir {name} {
     return
 }
 
-proc ::ChatTheme::Widget {w} {
+proc ::ChatTheme::Widget {token w args} {
     variable content
+    variable html
     
-    html $w -mode {almost standards}]
+    eval {html $w -mode {almost standards}} $args
 
-    $w configure -imagecmd [namespace code [list ImageCmd $w]]
+    $w configure -imagecmd [namespace code [list ImageCmd $token]]
     $w style $content(mainCss)
     $w parse $html(header)
     
     return $w
 }
 
-proc ::ChatTheme::ImageCmd {w url} {
+proc ::ChatTheme::ImageCmd {token url} {
     variable theme
     
-    $theme(current)
-    
-    
+    puts "::ChatTheme::ImageCmd url=$url"
+       
+    if {$url eq "myAvatar"} {
+	
+	# Scale to size...
+	set avatar [::Avatar::GetMyPhoto]
+	return $avatar
+    } elseif {$url eq "otherAvatar"} {
+	set jid2 [::Chat::GetChatTokenValue $token jid2]
+	set avatar [::Avatar::GetPhotoOfSize $jid2 32]
+	if {$avatar eq ""} {
+	    # Get default avatar from RosterAvatar
+	    set avatar ""
+	}
+	return $avatar
+    } else {
+	set f [file join $theme(resources) $url]
+	if {[file exists $f]} {
+	    return [image create photo -file $f]
+	} else {
+	    return 
+	}
+    }
 }
 
-proc ::ChatTheme::Incoming {w msg jid} {
+proc ::ChatTheme::Incoming {token xmldata time} {
     variable content
     
-    set nextstr "At some time last year I wrote:"
-    set avatar ???
+    set w [::Chat::GetChatTokenValue $token wtext]
+    set jid [::Chat::GetChatTokenValue $token jid]
     
+    set nextstr "At some time last year I wrote: $time"
     $w parse [string map [list %message% $nextstr] $content(inNext)]
     $w parse [string map \
-      [list %message% $msg %sender% $jid %userIconPath% ???] $content(in)]
-
+      [list %message% $msg %sender% $jid %userIconPath% otherAvatar] $content(in)]
 }
 
-proc ::ChatTheme::Outgoing {w msg jid} {
+proc ::ChatTheme::Outgoing {token xmldata time} {
     
-    
+    set w [::Chat::GetChatTokenValue $token wtext]
+    set jid [::Chat::GetChatTokenValue $token jid]
+
+    set nextstr "At some time last year I wrote: $time"
+    $w parse [string map [list %message% $nextstr] $content(outNext)]
+    $w parse [string map \
+      [list %message% $msg %sender% $jid %userIconPath% myAvatar] $content(out)]
 }
 
-proc ::ChatTheme::Status {w jid} {
+proc ::ChatTheme::Status {token } {
     
     
 }
