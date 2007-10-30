@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.230 2007-10-30 07:54:36 matben Exp $
+# $Id: Chat.tcl,v 1.231 2007-10-30 13:21:15 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -198,7 +198,7 @@ namespace eval ::Chat {
     set ::config(chat,notify-show) 1
 
     # Allow themed chats.
-    set ::config(chat,try-themed) 0
+    set ::config(chat,try-themed) 1
     
     # Postpone this to init.
     variable haveTheme 0
@@ -563,8 +563,14 @@ proc ::Chat::GotMsg {body args} {
     # We may have reset its jid to a 2-tier jid if it has been offline.
     set chatstate(jid)         $mjid
     set chatstate(fromjid)     $jid
-    set chatstate(displayname) [::Roster::GetDisplayName $jid2]
-        
+    
+    # Is this really needed here?
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	set chatstate(displayname) [jlib::resourcejid $jid]
+    } else {
+	set chatstate(displayname) [::Roster::GetDisplayName $jid2]
+    }
+    
     set w $dlgstate(w)
 
     # Check for ChatState (XEP-0085) support
@@ -592,18 +598,9 @@ proc ::Chat::GotMsg {body args} {
 
     if {$chatstate(havecs) eq "true" && $config(chat,notify-show)} {
         if { $msgChatState ne "" } {
-	    set jid2 [jlib::barejid $chatstate(jid)]
-            set name [::Jabber::RosterCmd getname $jid2]
-            if {$name eq ""} {
-                if {[::Jabber::JlibCmd service isroom $jid2]} {
-                    set name [::Jabber::JlibCmd service nick $chatstate(jid)]
-                } else {
-                    set name $chatstate(displayname)
-                }
-            }
             $chatstate(wnotifier) configure -image $dlgstate(iconNotifier)
             set notifyString "chatcomp$msgChatState"
-            set chatstate(notifier) " [mc $notifyString $name]"
+            set chatstate(notifier) " [mc $notifyString $chatstate(displayname)]"
         }
     } 
 
@@ -832,14 +829,7 @@ proc ::Chat::MessageGetYouName {chattoken jid} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    set jid2 [jlib::barejid $jid]
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
-	set name [jlib::resourcejid $jid]
-    } else {
-	# ::Roster::GetDisplayName
-	set name $chatstate(displayname)
-    }
-    return $name
+    return $chatstate(displayname)
 }
 
 proc ::Chat::MessageGetTime {chattoken secs} {
@@ -1376,7 +1366,6 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(fromjid)          $jid
     set chatstate(jid)              $mjid
     set chatstate(jid2)             $jid2
-    set chatstate(displayname)      [::Roster::GetDisplayName $jid2]
     set chatstate(dlgtoken)         $dlgtoken
     set chatstate(threadid)         $threadID
     set chatstate(nameorjid)        [::Roster::GetNameOrJID $jid2]
@@ -1395,6 +1384,11 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(havesent)         0
     set chatstate(themed)           $jprefs(chat,themed)
 
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	set chatstate(displayname) [jlib::resourcejid $jid]
+    } else {
+	set chatstate(displayname) [::Roster::GetDisplayName $jid2]
+    }
     
     set chatstate(havecs)           first
     set chatstate(chatstate)        active
@@ -1647,7 +1641,9 @@ proc ::Chat::NicknameEventHook {xmldata jid nickname} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
-	set chatstate(displayname) [::Roster::GetDisplayName $jid2]
+	if {![::Jabber::JlibCmd service isroom $jid2]} {
+	    set chatstate(displayname) [::Roster::GetDisplayName $jid2]
+	}
 	set chatstate(nameorjid)   [::Roster::GetNameOrJID $jid2]
 	SetTitle $chattoken
     }        
@@ -3291,21 +3287,12 @@ proc ::Chat::XEventRecv {chattoken xeventE args} {
     } elseif {[llength $composeE] && [llength $idE]} {
 	
 	# 2) Notification of message composing
-	jlib::splitjid $chatstate(jid) jid2 res
-	set name [::Jabber::RosterCmd getname $jid2]
-	if {$name eq ""} {
-	    if {[::Jabber::JlibCmd service isroom $jid2]} {
-		set name [::Jabber::JlibCmd service nick $chatstate(jid)]
-	    } else {
-		set name $chatstate(displayname)
-	    }
-	}
 	set dlgtoken $chatstate(dlgtoken)
 	variable $dlgtoken
 	upvar 0 $dlgtoken dlgstate
 
 	$chatstate(wnotifier) configure -image $dlgstate(iconNotifier)
-	set chatstate(notifier) " [mc chatcompreply $name]"
+	set chatstate(notifier) " [mc chatcompreply $chatstate(displayname)]"
     } elseif {($composeE == {}) && ($idE != {})} {
 	
 	# 3) Cancellations of message composing
