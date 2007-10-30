@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.3 2007-10-30 07:54:36 matben Exp $
+# $Id: ChatTheme.tcl,v 1.4 2007-10-30 13:49:34 matben Exp $
 
 package require Tkhtml 3.0
 
@@ -65,6 +65,7 @@ proc ::ChatTheme::Init {} {
 	    }
 	}
     }
+    puts "        inited"
     set inited 1
 }
 
@@ -188,15 +189,15 @@ proc ::ChatTheme::Incoming {token xmldata secs} {
     set name [::Chat::MessageGetYouName $token $jid]
     set time [::Chat::MessageGetTime $token $secs]
     
-    set msg ""
     set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
     if {[llength $bodyE]} {
 	set msg [wrapper::getcdata $bodyE]
-    }    
-    set nextstr "$name wrote at $time:"
-    $w parse [string map [list %message% $nextstr] $content(inNext)]
-    $w parse [string map \
-      [list %message% $msg %sender% $name %userIconPath% otherAvatar] $content(in)]
+	set nextstr "$name wrote at $time:"
+	$w parse [string map [list %message% $nextstr] $content(inNext)]
+	$w parse [string map \
+	  [list %message% $msg %sender% $name %userIconPath% otherAvatar] $content(in)]
+	after idle [list $w yview moveto 1.0]
+    }
 }
 
 proc ::ChatTheme::Outgoing {token xmldata secs} {
@@ -207,16 +208,15 @@ proc ::ChatTheme::Outgoing {token xmldata secs} {
     set name [::Chat::MessageGetMyName $token $jid]
     set time [::Chat::MessageGetTime $token $secs]
 
-    set msg ""
     set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
     if {[llength $bodyE]} {
 	set msg [wrapper::getcdata $bodyE]
-    }    
-
-    set nextstr "$name wrote at $time:"
-    $w parse [string map [list %message% $nextstr] $content(outNext)]
-    $w parse [string map \
-      [list %message% $msg %sender% $name %userIconPath% myAvatar] $content(out)]
+	set nextstr "$name wrote at $time:"
+	$w parse [string map [list %message% $nextstr] $content(outNext)]
+	$w parse [string map \
+	  [list %message% $msg %sender% $name %userIconPath% myAvatar] $content(out)]
+	after idle [list $w yview moveto 1.0]
+    }
 }
 
 proc ::ChatTheme::Status {token xmldata secs} {
@@ -230,6 +230,7 @@ proc ::ChatTheme::Status {token xmldata secs} {
     set str [::Chat::PresenceGetString $token $xmldata]
     $w parse [string map [list %message% $name %color% $color] $content(statusNext)]
     $w parse [string map [list %message% $str %color% $color] $content(status)]
+    after idle [list $w yview moveto 1.0]
 }
 
 
