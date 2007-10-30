@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.229 2007-10-28 15:34:15 matben Exp $
+# $Id: Chat.tcl,v 1.230 2007-10-30 07:54:36 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -29,10 +29,10 @@ package require UI::WSearch
 
 package provide Chat 1.0
 
-# TODO:   o Register presence per jid instead, see code below
+# TODO:   o Register presence per jid instead, see code below. Done?
 
 
-namespace eval ::Chat:: {
+namespace eval ::Chat {
     global  wDlgs
     
     # Add all event hooks.
@@ -198,11 +198,11 @@ namespace eval ::Chat:: {
     set ::config(chat,notify-show) 1
 
     # Allow themed chats.
-    set ::config(chat,themed) 0
+    set ::config(chat,try-themed) 0
     
     # Postpone this to init.
     variable haveTheme 0
-    if {$config(chat,themed) && ![catch {package require ChatTheme}]} {
+    if {$config(chat,try-themed) && ![catch {package require ChatTheme}]} {
 	set haveTheme 1
     }
 }
@@ -612,6 +612,8 @@ proc ::Chat::GotMsg {body args} {
     if {$tm ne ""} {
 	set secs [clock scan $tm -gmt 1]
 	lappend opts -secs $secs
+    } else {
+	set secs [clock seconds]
     }
 
     # If doesn't come a ChatState event (XEP-0085).
@@ -623,20 +625,14 @@ proc ::Chat::GotMsg {body args} {
     }
 
     # This is important since clicks may have reset the insert mark.
-    $chatstate(wtext) mark set insert end
-
-    if {[info exists argsA(-subject)]} {
-	set chatstate(subject) $argsA(-subject)
-	set chatstate(lastsubject) $chatstate(subject)
-	eval {
-	    InsertMessageText $chattoken sys "[mc Subject]: $chatstate(subject)"
-	} $opts
+    # @@@ Move to Text specific code?
+    if {[winfo class $chatstate(wtext)] eq "Text"} {
+	$chatstate(wtext) mark set insert end
     }
     
+    Insert $chattoken $xmldata $secs 1
+        
     if {$body ne ""} {
-	
-	# Put in chat window.
-	eval {InsertMessageText $chattoken you $body} $opts
 
 	# Put in history file.
        ::History::XPutItem recv $jid2 $xmldata
@@ -690,148 +686,203 @@ proc ::Chat::GotNormalMsg {body args} {
     }
 }
 
-proc ::Chat::Insert {chattoken xmldata time} {
+# Chat::Insert --
+# 
+#       Generic method to insert a message into dialog.
+#       
+# Arguments:
+#       chattoken
+#       xmldata
+#       secs
+#       inB       is this an incoming message? Boolean.
+
+proc ::Chat::Insert {chattoken xmldata secs inB} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
     
-    
+    if {$chatstate(themed)} {
+	InsertMessageTheme $chattoken $xmldata $secs $inB
+    } else {
+	InsertMessageText $chattoken $xmldata $secs $inB
+    }
 }
 
-# NB: @@@ Change this to take complete xml stanzas instead!
+proc ::Chat::InsertMessageTheme {chattoken xmldata secs inB} {
+
+    puts "::Chat::InsertMessageTheme inB=$inB"
+    set tag [wrapper::gettag $xmldata]
+    if {$tag eq "message"} {
+	if {$inB} {
+	    ::ChatTheme::Incoming $chattoken $xmldata $secs
+	} else {
+	    ::ChatTheme::Outgoing $chattoken $xmldata $secs	    
+	}
+    } else {
+	# @@@ Not sure how own presence changes are handled.
+	::ChatTheme::Status $chattoken $xmldata $secs		
+    }
+}
 
 # Chat::InsertMessageText --
 # 
-#       Puts message in text chat window.
-#       
-# Arguments:
-#       spec    {me|you|sys ?history?}
-#       body    text
-#       args:   -secs seconds
-#               -jidfrom jid
+#       Takes care of inserting both message and presence stanzas using
+#       the text widget.
 
-proc ::Chat::InsertMessageText {chattoken spec body args} {
+proc ::Chat::InsertMessageText {chattoken xmldata secs inB} {
     variable $chattoken
     upvar 0 $chattoken chatstate
+
+    set wtext $chatstate(wtext)
+    $wtext configure -state normal
+
+    set prefix ""
+    set time [MessageGetTime $chattoken $secs]
+    if {$time ne ""} {
+	append prefix "\[$time\] "
+    }
+
+    set tag  [wrapper::gettag $xmldata]
+    set from [wrapper::getattribute $xmldata from]
+    if {$inB} {
+	set name [MessageGetYouName $chattoken $from]
+    } else {
+	set name [MessageGetMyName $chattoken $from]
+    }
+    append prefix "<$name>"
+    
+    set haveSys 0
+    if {$tag eq "presence"} {
+	set sysstr [PresenceGetString $chattoken $xmldata]
+	set haveSys 1
+    } else {
+	set subjectE [wrapper::getfirstchildwithtag $xmldata "subject"]
+	if {[llength $subjectE]} {
+	    set subject [wrapper::getcdata $subjectE]
+	    set sysstr "[mc Subject]: $subject"
+	    set haveSys 1
+	}
+    }    
+    
+    # Is this a historic stanza?
+    set htag ""
+    if {[clock seconds] > [expr {$secs + 2}]} {
+	set htag "-history"
+    }
+    
+    # Both subject and presence coded as 'sys'. Good/bad?
+    if {$haveSys} {
+	set spec sys
+
+	set syspretags [concat syspre$htag $spec]
+	set systxttags [concat systext$htag $spec]
+
+	$wtext insert insert $prefix $syspretags
+	$wtext insert insert "   "   $systxttags
+	::Text::ParseMsg chat $from $wtext $sysstr $systxttags
+	$wtext insert insert "\n"    $spec
+    }
+    
+    if {$tag eq "message"} {
+	set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
+	if {[llength $bodyE]} {
+	    
+	    # The text tags.
+	    if {$inB} {
+		set spec me
+		set pretags [concat mepre$htag $spec]
+		set txttags [concat metext$htag $spec]
+	    } else {
+		set spec you
+		set pretags [concat youpre$htag $spec]
+		set txttags [concat youtext$htag $spec]
+	    }
+	    set body [wrapper::getcdata $bodyE]
+	    
+	    $wtext insert insert $prefix $pretags
+	    $wtext insert insert "   "   $txttags
+	    ::Text::ParseMsg chat $from $wtext $body $txttags
+	    $wtext insert insert "\n"    $spec
+	}
+    }
+    $wtext configure -state disabled
+    $wtext see end
+}
+
+proc ::Chat::MessageGetMyName {chattoken jid} {
     upvar ::Jabber::jprefs jprefs
     
-    array set argsA $args
-    
-    set w       $chatstate(w)
-    set wtext   $chatstate(wtext)
-    set jid     $chatstate(jid)
-    set whom    [lindex $spec 0]
-    set history [expr {[lsearch $spec "history"] >= 0 ? 1 : 0}]
-        
-    switch -- $whom {
-	me {
-	    if {[info exists argsA(-jidfrom)]} {
-		set myjid $argsA(-jidfrom)
-	    } else {
-		set myjid [::Jabber::GetMyJid]
-	    }
-	    jlib::splitjidex $myjid node host res	    
-	    if {$node eq ""} {
-		set name $host
-		set from $host
-	    } else {
-		set name [jlib::unescapestr $node]
-		set from $node@$host
-	    }
-	    if {$jprefs(chat,mynick) ne ""} {
-		set name $jprefs(chat,mynick)
-	    }
-	}
-	you {
-	    if {[info exists argsA(-jidfrom)]} {
-		set youjid $argsA(-jidfrom)
-	    } else {
-		set youjid $jid
-	    }
-	    set jid2 [jlib::barejid $youjid]
-	    if {[::Jabber::JlibCmd service isroom $jid2]} {
-		set name [::Jabber::JlibCmd service nick $jid]
-		set from $jid2/$name
-	    } else {
-		set name $chatstate(displayname)
-		set from $jid2
-	    }
-	}
-	sys {
-	    set from ""
-	    if {[info exists argsA(-jidfrom)]} {
-		set from $argsA(-jidfrom)
-	    }
-	    set jid2 [jlib::barejid $from]
-	    
-	    # Figure out where this comes from.
-	    if {[::Jabber::JlibCmd service isroom $jid2]} {
-		set name [::Jabber::JlibCmd service nick $jid]
-		set from $jid2/$name
-	    } elseif {[jlib::jidequal $chatstate(jid2) $jid2]} {
-		set name $chatstate(displayname)
-		set from $jid2
-	    } elseif {$jid2 ne ""} {
-		set name [::Roster::GetDisplayName $jid2]
-		set from $jid2
-	    } else {
-		set name $chatstate(displayname)
-		set from $jid2
-	    }
-	}
-    }
-    if {[info exists argsA(-secs)]} {
-	set secs $argsA(-secs)
+    set jid2 [jlib::barejid $jid]
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	set name [jlib::resourcejid $jid]
     } else {
-	set secs [clock seconds]
+	jlib::splitjidex $jid node host res	    
+	if {$node eq ""} {
+	    set name $host
+	} else {
+	    set name [jlib::unescapestr $node]
+	}
+	if {$jprefs(chat,mynick) ne ""} {
+	    set name $jprefs(chat,mynick)
+	}
     }
+    return $name
+}
+
+proc ::Chat::MessageGetYouName {chattoken jid} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set jid2 [jlib::barejid $jid]
+    if {[::Jabber::JlibCmd service isroom $jid2]} {
+	set name [jlib::resourcejid $jid]
+    } else {
+	# ::Roster::GetDisplayName
+	set name $chatstate(displayname)
+    }
+    return $name
+}
+
+proc ::Chat::MessageGetTime {chattoken secs} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    set w $chatstate(w)
     if {[::Utils::IsToday $secs]} {
 	set clockFormat [option get $w clockFormat {}]
     } else {
 	set clockFormat [option get $w clockFormatNotToday {}]
     }
+    
+    # We may have set the resources to not display time.
     if {$clockFormat ne ""} {
-	set theTime [clock format $secs -format $clockFormat]
-	set prefix "\[$theTime\] "
+	set time [clock format $secs -format $clockFormat]
     } else {
-	set prefix ""
+	set time ""
     }
-    set body [string trimright $body]
-    
-    switch -- $whom {
-	me - you {
-	    append prefix "<$name>"
-	}
-	sys {
-	    append prefix "<$name>"
-	}
+    return $time
+}
+
+proc ::Chat::PresenceGetString {chattoken xmldata} {
+	
+    set type [wrapper::getattribute $xmldata type]
+    if {$type eq ""} {
+	set type available
     }
-    set htag ""
-    if {$history} {
-	set htag -history
+    set show $type
+    set showE [wrapper::getfirstchildwithtag $xmldata show]
+    if {[llength $showE]} {
+	set show [string tolower [wrapper::getcdata $showE]]
     }
-    
-    switch -- $whom {
-	me {
-	    set pretags [concat mepre$htag $spec]
-	    set txttags [concat metext$htag $spec]
-	}
-	you {
-	    set pretags [concat youpre$htag $spec]
-	    set txttags [concat youtext$htag $spec]
-	}
-	sys {
-	    set pretags [concat syspre$htag $spec]
-	    set txttags [concat systext$htag $spec]
-	}
+    set status ""
+    set statusE [wrapper::getfirstchildwithtag $xmldata status]
+    if {[llength $statusE]} {
+	set status [wrapper::getcdata $statusE]
     }
-    
-    # Actually insert.
-    $wtext configure -state normal
-    $wtext insert insert $prefix $pretags
-    $wtext insert insert "   "   $txttags
-    ::Text::ParseMsg chat $from $wtext $body $txttags
-    $wtext insert insert "\n"    $spec
-    
-    $wtext configure -state disabled
-    $wtext see end
+    set str [::Roster::MapShowToText $show]
+    if {$status ne ""} {
+	append str ", " $status
+    }
+    return $str
 }
 
 # Handle new xml based history format which has different api ------------------
@@ -983,34 +1034,9 @@ proc ::Chat::GetHistory {chattoken args} {
 #       Find any matching history record and insert into dialog.
 
 proc ::Chat::InsertHistoryOld {chattoken args} {
-    global  prefs this
-    variable $chattoken
-    upvar 0 $chattoken chatstate
     
-    ::Debug 2 "::Chat::InsertHistoryOld $args"
-    if {![info exists chatstate(historyfile)]} {
-	return
-    }    
-    array set opts {
-	-last      -1
-	-maxage     0
-	-thread     0
-    }
-    array set opts $args
- 
-    if {$opts(-last) == 0} {
-	return
-    }
-    set wtext    $chatstate(wtext)
-    $wtext mark set insert 1.0
+    # Support is skipped: 0.96.3.
 
-    set result [GetHistory $chattoken -last $opts(-last) -maxage $opts(-maxage)]
-    foreach elem $result {
-        array set arrResult $elem
-        InsertMessageText $chattoken $arrResult(-spec) $arrResult(-body) -secs $arrResult(-secs) \
-          -jidfrom $arrResult(-name)
-    }
-    $wtext mark set insert end
 }
 
 # Using the new xml based preprocessed format.
@@ -1019,6 +1045,9 @@ proc ::Chat::InsertHistoryXML {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
+    if {[winfo class $chatstate(wtext)] ne "Text"} {
+	return
+    }
     if {![info exists chatstate(historyfile)]} {
 	return
     }    
@@ -1027,9 +1056,11 @@ proc ::Chat::InsertHistoryXML {chattoken} {
     set itemL [read $fd]
     close $fd
 
-    set wtext $chatstate(wtext)
-    $wtext mark set insert 1.0
-
+    if {[winfo class $chatstate(wtext)] eq "Text"} {
+	set wtext $chatstate(wtext)
+	$wtext mark set insert 1.0
+    }
+    
     foreach itemE $itemL {
 	set itemTag [tinydom::tagname $itemE]	
 	if {($itemTag ne "send") && ($itemTag ne "recv")} {
@@ -1037,54 +1068,18 @@ proc ::Chat::InsertHistoryXML {chattoken} {
 	}
 	set time [tinydom::getattribute $itemE time]
 	set secs [clock scan $time]
-	set body ""
 
 	if {$itemTag eq "send"} {
-	    set tag me
+	    set inB 0
 	} elseif {$itemTag eq "recv"} {
-	    set tag you
+	    set inB 1
 	}
 	set xmppE [lindex [tinydom::children $itemE] 0]
-	set from [tinydom::getattribute $xmppE from]
-
-	switch -- [tinydom::tagname $xmppE] {
-	    message {
-		set bodyE [tinydom::getfirstchildwithtag $xmppE body]
-		if {$bodyE ne {}} {
-		    set body [tinydom::chdata $bodyE]
-		}
-		set subjectE [tinydom::getfirstchildwithtag $xmppE subject]
-		if {$subjectE ne {}} {
-		    if {$body ne ""} {
-			append body ", "
-		    }
-		    append body "[mc Subject]: "
-		    append body [tinydom::chdata $subjectE]
-		    set tag sys
-		}
-	    }
-	    presence {
-		set show [tinydom::getattribute $xmppE type]
-		if {$show eq ""} {
-		    set show available
-		}
-		set showE [tinydom::getfirstchildwithtag $xmppE show]
-		if {$showE ne {}} {
-		    set show [tinydom::chdata $showE]
-		}
-		set showStr [::Roster::MapShowToText $show]
-		set body $showStr
-		set statusE [tinydom::getfirstchildwithtag $xmppE status]
-		if {$statusE ne {}} {
-		    append body ", " [tinydom::chdata $statusE]
-		}
-		set tag sys
-	    }
-	}	
-	set tagspec [list $tag history]
-	InsertMessageText $chattoken $tagspec $body -secs $secs -jidfrom $from
+	Insert $chattoken $xmppE $secs $inB
     }
-    $wtext mark set insert end
+    if {[winfo class $chatstate(wtext)] eq "Text"} {
+	$wtext mark set insert end
+    }
 }
 
 proc ::Chat::InsertHistory {chattoken} {
@@ -1111,11 +1106,13 @@ proc ::Chat::HistoryCmd {chattoken} {
 	InsertHistory $chattoken
     } else {
 	set wtext $chatstate(wtext)
-	set ranges [$wtext tag ranges history]
-	if {[llength $ranges]} {
-	    $wtext configure -state normal
-	    $wtext delete [lindex $ranges 0] [lindex $ranges end]
-	    $wtext configure -state disabled
+	if {[winfo class $wtext] eq "Text"} {
+	    set ranges [$wtext tag ranges history]
+	    if {[llength $ranges]} {
+		$wtext configure -state normal
+		$wtext delete [lindex $ranges 0] [lindex $ranges end]
+		$wtext configure -state disabled
+	    }
 	}
     }
 }
@@ -1170,7 +1167,7 @@ proc ::Chat::Build {threadID args} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
-    set w $wDlgs(jchat)${uiddlg}
+    set w $wDlgs(jchat)$uiddlg
     array set argsA $args
 
     set dlgstate(exists)      1
@@ -1396,6 +1393,8 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set chatstate(nhiddenmsgs)      0
     set chatstate(havehistory)      0
     set chatstate(havesent)         0
+    set chatstate(themed)           $jprefs(chat,themed)
+
     
     set chatstate(havecs)           first
     set chatstate(chatstate)        active
@@ -1684,10 +1683,16 @@ proc ::Chat::OnReturnSubject {chattoken} {
     set jid2    [jlib::barejid $jid]
     set myjid   [$jstate(jlib) myjid]
     set subject $chatstate(subject)
-    $chatstate(wtext) mark set insert end
-    InsertMessageText $chattoken sys "[mc Subject]: $subject" -jidfrom $myjid
+    
+    if {[winfo class $chatstate(wtext)] eq "Text"} {
+	$chatstate(wtext) mark set insert end
+    }
     set xmldata [jlib::send_message_xmllist $jid  \
-       -thread $threadID -type chat -from $myjid -subject $subject]
+      -thread $threadID -type chat -from $myjid -subject $subject]
+     
+    set secs [clock seconds]
+    Insert $chattoken $xmldata $secs 0
+     
     ::History::XPutItem send $jid2 $xmldata
     $jstate(jlib) send_message $jid -type chat -subject $subject \
       -thread $threadID
@@ -2746,20 +2751,11 @@ proc ::Chat::Send {dlgtoken} {
     if {[hooks::run sendTextChatHook $chattoken $jid $text] eq "stop"} {	    
 	return
     }
-
-    # This is important since clicks may have reset the insert mark.
-    $chatstate(wtext) mark set insert end
-
+    
     # Need to detect if subject changed. If subject was changed it was already
     # sent alone but some clients (Psi) doesn't recognize this why it is
     # duplicated here. Good/bad? Skip!
     set opts {}
-    if {0} {
-	if {![string equal $chatstate(subject) $chatstate(lastsubject)]} {
-	    lappend opts -subject $chatstate(subject)
-	    InsertMessageText $chattoken sys "[mc Subject]: $chatstate(subject)"
-	}
-    }
     set chatstate(lastsubject) $chatstate(subject)
     
     # Cancellations of any message composing jabber:x:event
@@ -2814,9 +2810,15 @@ proc ::Chat::Send {dlgtoken} {
     eval {$jlib send_message $jid -thread $threadID -type chat -body $text} $opts
 
     set dlgstate(lastsentsecs) [clock seconds]
+
+    # This is important since clicks may have reset the insert mark.
+    if {[winfo class $chatstate(wtext)] eq "Text"} {
+	$chatstate(wtext) mark set insert end
+    }
     
     # Add to chat window.        
-    InsertMessageText $chattoken me $text
+    set secs [clock seconds]
+    Insert $chattoken $xmldata $secs 0
 
     set chatstate(havesent) 1
     
@@ -2956,20 +2958,15 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
     if {[string equal $chatstate(presence) $show]} {
 	return
     }
-    set status ""
-    set statusE [wrapper::getfirstchildwithtag $xmldata status]
-    if {[llength $statusE]} {
-	set status [string tolower [wrapper::getcdata $statusE]]
-    }
+    set chatstate(presence) $show
 
     # This is important since clicks may have reset the insert mark.
-    $chatstate(wtext) mark set insert end
-
-    set showStr [::Roster::MapShowToText $show]
-    if {$status ne ""} {
-	append showStr ", " $status
+    if {[winfo class $chatstate(wtext)] eq "Text"} {
+	$chatstate(wtext) mark set insert end
     }
-    InsertMessageText $chattoken sys $showStr
+    set secs [clock seconds]
+    Insert $chattoken $xmldata $secs 1
+    
     ::History::XPutItem recv $chatstate(minjid) $xmldata
     
     if {[string equal $type "available"]} {
@@ -2983,7 +2980,6 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
     if {$icon ne ""} {
 	$chatstate(wpresimage) configure -image $icon
     }    
-    set chatstate(presence) $show
     XEventCancel $chattoken
 }
 
@@ -3495,7 +3491,7 @@ proc ::Chat::InitPrefsHook {} {
     set jprefs(chat,histAge)      0
     set jprefs(chat,mynick)       ""
     set jprefs(chat,themed)       0
-    set jprefs(chat,theme)        "Bubblegum"
+    set jprefs(chat,theme)        "Bubblegum" ;# Should be a fallback theme
     
     ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(showMsgNewWin) jprefs_showMsgNewWin $jprefs(showMsgNewWin)]  \
@@ -3512,6 +3508,11 @@ proc ::Chat::InitPrefsHook {} {
 	set jprefs(chat,themed) 0
     }
     if {$jprefs(chat,themed)} {
+	
+	# Verify that theme exists.
+	if {[lsearch [::ChatTheme::AllThemes] $jprefs(chat,theme)] < 0} {
+	    set $jprefs(chat,theme) "Bubblegum"
+	}
 	::ChatTheme::Set $jprefs(chat,theme)
     }
 }
@@ -3592,23 +3593,6 @@ proc ::Chat::BuildPrefsPage {wpage} {
 
     ::balloonhelp::balloonforwindow $wni.eni [mc tooltip-localnick]
 
-    ttk::separator $wc.sep4 -orient horizontal
-
-    set menuDef [lapply list [::ChatTheme::AllThemes]]
-    set wtm $wc.tm
-    ttk::frame $wc.tm
-    ttk::checkbutton $wtm.themed -text "Have themed chats:"  \
-      -variable [namespace current]::tmpJPrefs(chat,themed)
-    ui::optionmenu $wtm.theme -menulist $menuDef -direction flush \
-      -variable [namespace current]::tmpJPrefs(chat,theme)
-    
-    grid  $wtm.themed  $wtm.theme  -sticky w
-    
-    if {!$haveTheme} {
-	$wc.themed state {disabled}
-	$wc.theme state {disabled}
-    }
-    
     grid  $wc.active  -sticky w
     grid  $wc.newwin  -sticky w
     grid  $wc.normal  -sticky w
@@ -3620,8 +3604,38 @@ proc ::Chat::BuildPrefsPage {wpage} {
     grid  $wc.hi      -sticky w
     grid  $wc.sep3    -sticky ew -pady 6
     grid  $wc.ni      -sticky w
-    grid  $wc.sep4    -sticky ew -pady 6
-    grid  $wc.tm      -sticky w
+
+    if {$haveTheme} {
+	ttk::separator $wc.sep4 -orient horizontal
+	
+	set menuDef [lapply list [::ChatTheme::AllThemes]]
+	set wtm $wc.tm
+	ttk::frame $wc.tm
+	ttk::checkbutton $wtm.themed -text "Have themed chats:"  \
+	  -variable [namespace current]::tmpJPrefs(chat,themed) \
+	  -command [namespace code [list PrefsThemedCmd $wtm.theme]]
+	ui::optionmenu $wtm.theme -menulist $menuDef -direction flush \
+	  -variable [namespace current]::tmpJPrefs(chat,theme)
+	
+	if {$jprefs(chat,themed)} {
+	    
+	}
+	grid  $wtm.themed  $wtm.theme  -sticky w
+
+	grid  $wc.sep4    -sticky ew -pady 6
+	grid  $wc.tm      -sticky w
+	
+	PrefsThemedCmd $wtm.theme
+    }
+}
+
+proc ::Chat::PrefsThemedCmd {mb} {
+    variable tmpJPrefs
+    if {$tmpJPrefs(chat,themed)} {
+	$mb state {!disabled}
+    } else {
+	$mb state {disabled}
+    }
 }
 
 proc ::Chat::SavePrefsHook {} {
