@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.250 2007-10-22 07:42:27 matben Exp $
+# $Id: Jabber.tcl,v 1.251 2007-10-30 07:54:36 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -603,6 +603,7 @@ proc ::Jabber::MessageHandler {jlibname xmldata} {
 
     # The hooks are expecting a -key value list of preprocessed xml.
     # @@@ In the future we shall deliver the full xmldata instead.
+    #     See newExChatMessageHook below.
     set opts [list -xmldata $xmldata]
     
     foreach {name value} [wrapper::getattrlist $xmldata] {
@@ -651,6 +652,7 @@ proc ::Jabber::MessageHandler {jlibname xmldata} {
 	    eval {::hooks::run newErrorMessageHook} $opts
 	}
 	chat {
+	    ::hooks::run newExChatMessageHook $xmldata
 	    eval {::hooks::run newChatMessageHook $body} $opts
 	}
 	groupchat {

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.2 2007-10-28 15:34:15 matben Exp $
+# $Id: ChatTheme.tcl,v 1.3 2007-10-30 07:54:36 matben Exp $
 
 package require Tkhtml 3.0
 
@@ -41,6 +41,7 @@ namespace eval ::ChatTheme {
     
     variable content
     variable inited 0
+    variable wall [list]
 }
 
 proc ::ChatTheme::Init {} {
@@ -51,6 +52,7 @@ proc ::ChatTheme::Init {} {
     if {$inited} {
 	return
     }
+    puts "-----------::ChatTheme::Init"
     foreach which {default prefs} {
 	set theme($which) [list]
 	set dirs [glob -nocomplain -directory $path($which) -types d *]
@@ -87,8 +89,9 @@ proc ::ChatTheme::Readfile {fileName} {
 proc ::ChatTheme::Set {name} {
     variable theme
     variable content
+    variable wall
     
-    puts "::ChatTheme::Set $name"
+    puts "---------------::ChatTheme::Set $name"
 
     Init
     set res [GetResourceDir $name]
@@ -107,6 +110,11 @@ proc ::ChatTheme::Set {name} {
     
     set theme(current) $name
     set theme(resources) $res
+    
+    # Should we change theme for all existing widget? How?
+    foreach w $wall {
+	
+    }
 }
 
 proc ::ChatTheme::GetResourceDir {name} {
@@ -124,6 +132,7 @@ proc ::ChatTheme::GetResourceDir {name} {
 proc ::ChatTheme::Widget {token w args} {
     variable content
     variable html
+    variable wall
     
     eval {html $w -mode {almost standards}} $args
 
@@ -131,7 +140,16 @@ proc ::ChatTheme::Widget {token w args} {
     $w style $content(mainCss)
     $w parse $html(header)
     
+    lappend wall $w
+    
+    bind $w <Destroy> +[namespace code { Free %W }]
+    
     return $w
+}
+
+proc ::ChatTheme::Free {w} {
+    variable wall
+    lprune wall $w
 }
 
 proc ::ChatTheme::ImageCmd {token url} {
@@ -162,32 +180,56 @@ proc ::ChatTheme::ImageCmd {token url} {
     }
 }
 
-proc ::ChatTheme::Incoming {token xmldata time} {
+proc ::ChatTheme::Incoming {token xmldata secs} {
     variable content
     
     set w [::Chat::GetChatTokenValue $token wtext]
     set jid [::Chat::GetChatTokenValue $token jid]
+    set name [::Chat::MessageGetYouName $token $jid]
+    set time [::Chat::MessageGetTime $token $secs]
     
-    set nextstr "At some time last year I wrote: $time"
+    set msg ""
+    set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
+    if {[llength $bodyE]} {
+	set msg [wrapper::getcdata $bodyE]
+    }    
+    set nextstr "$name wrote at $time:"
     $w parse [string map [list %message% $nextstr] $content(inNext)]
     $w parse [string map \
-      [list %message% $msg %sender% $jid %userIconPath% otherAvatar] $content(in)]
+      [list %message% $msg %sender% $name %userIconPath% otherAvatar] $content(in)]
 }
 
-proc ::ChatTheme::Outgoing {token xmldata time} {
+proc ::ChatTheme::Outgoing {token xmldata secs} {
+    variable content
+    
+    set w [::Chat::GetChatTokenValue $token wtext]
+    set jid [wrapper::getattribute $xmldata from]
+    set name [::Chat::MessageGetMyName $token $jid]
+    set time [::Chat::MessageGetTime $token $secs]
+
+    set msg ""
+    set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
+    if {[llength $bodyE]} {
+	set msg [wrapper::getcdata $bodyE]
+    }    
+
+    set nextstr "$name wrote at $time:"
+    $w parse [string map [list %message% $nextstr] $content(outNext)]
+    $w parse [string map \
+      [list %message% $msg %sender% $name %userIconPath% myAvatar] $content(out)]
+}
+
+proc ::ChatTheme::Status {token xmldata secs} {
+    variable content
     
     set w [::Chat::GetChatTokenValue $token wtext]
     set jid [::Chat::GetChatTokenValue $token jid]
+    set name [::Chat::MessageGetYouName $token $jid]
 
-    set nextstr "At some time last year I wrote: $time"
-    $w parse [string map [list %message% $nextstr] $content(outNext)]
-    $w parse [string map \
-      [list %message% $msg %sender% $jid %userIconPath% myAvatar] $content(out)]
-}
-
-proc ::ChatTheme::Status {token } {
-    
-    
+    set color red
+    set str [::Chat::PresenceGetString $token $xmldata]
+    $w parse [string map [list %message% $name %color% $color] $content(statusNext)]
+    $w parse [string map [list %message% $str %color% $color] $content(status)]
 }
 
 
