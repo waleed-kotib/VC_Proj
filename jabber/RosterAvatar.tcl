@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.43 2007-10-11 12:19:53 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.44 2007-10-31 15:46:47 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -92,9 +92,11 @@ namespace eval ::RosterAvatar {
 
     # We should have a set of sizes to choose from: 32, 48 and 64
     variable avatarSize 32
+    variable avatarSizes {32 48 64}
     
     variable avatarDefault defaultBoy
     variable initedDB 0
+    variable initedDefaultAvatars 0
     
     variable statusOrder
     array set statusOrder {
@@ -262,6 +264,33 @@ proc ::RosterAvatar::MakeDefaultAvatar {} {
     set avimage [image create photo -file $f]
     set avatar(default) $avimage
     return $avimage
+}
+
+proc ::RosterAvatar::InitDefaultAvatars {} {
+    global  this
+    variable avatar
+    variable avatarSizes
+    variable avatarDefault 
+    variable initedDefaultAvatars
+    
+    if {$initedDefaultAvatars} {
+	return
+    }
+    foreach size $avatarSizes {
+	set f [file join $this(avatarPath) $size $avatarDefault.png]
+	set avatar(default,$size) [image create photo -file $f]
+    }
+}
+
+proc ::RosterAvatar::GetDefaultAvatarOfSize {size} {
+    variable avatarSizes
+    variable avatar
+
+    if {[lsearch $avatarSizes $size] < 0} {
+	return -code error "Unsupported size \"$size\""
+    }
+    InitDefaultAvatars
+    return $avatar(default,$size)
 }
 
 # RosterAvatar::Configure --

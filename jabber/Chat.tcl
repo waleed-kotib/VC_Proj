@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.231 2007-10-30 13:21:15 matben Exp $
+# $Id: Chat.tcl,v 1.232 2007-10-31 15:46:47 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -198,7 +198,7 @@ namespace eval ::Chat {
     set ::config(chat,notify-show) 1
 
     # Allow themed chats.
-    set ::config(chat,try-themed) 1
+    set ::config(chat,try-themed) 0
     
     # Postpone this to init.
     variable haveTheme 0

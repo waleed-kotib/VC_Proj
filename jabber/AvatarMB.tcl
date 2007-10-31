@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.24 2007-10-22 11:51:33 matben Exp $
+# $Id: AvatarMB.tcl,v 1.25 2007-10-31 15:46:47 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -702,6 +702,8 @@ proc ::AvatarMB::VerifyPhotoFile {f} {
 }
 
 proc ::AvatarMB::SetFileToShare {fileName} {
+    
+    Debug 4 "::Avatar::IsMyPhotoSharedFromFile=[::Avatar::IsMyPhotoSharedFromFile $fileName]"
     
     # Share only if not identical to existing one.
     if {[::Avatar::IsMyPhotoSharedFromFile $fileName]} {
