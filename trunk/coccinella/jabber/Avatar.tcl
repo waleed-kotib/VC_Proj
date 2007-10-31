@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.39 2007-10-18 11:59:10 matben Exp $
+# $Id: Avatar.tcl,v 1.40 2007-10-31 15:46:47 matben Exp $
 
 # @@@ Issues:
 # 
@@ -225,7 +225,8 @@ proc ::Avatar::QuitHook { } {
 
 proc ::Avatar::SetAndShareMyAvatarFromFile {fileName} {
     
-    Debug "::Avatar::SetAndShareMyAvatarFromFile"
+    ::Debug 4 "::Avatar::SetAndShareMyAvatarFromFile"
+    ::Debug 4 "CreateAndVerifyPhoto=[CreateAndVerifyPhoto $fileName name]"
 
     set ok 0
     if {[CreateAndVerifyPhoto $fileName name]} {

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.61 2007-10-11 13:00:38 matben Exp $
+# $Id: Emoticons.tcl,v 1.62 2007-10-31 15:46:47 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -130,6 +130,11 @@ proc ::Emoticons::InitWin {} {
 proc ::Emoticons::Exists {word} {
     variable smiley
     return [info exists smiley($word)]
+}
+
+proc ::Emoticons::Get {word} {
+    variable smiley
+    return $smiley($word)
 }
 
 proc ::Emoticons::Make {w word} {

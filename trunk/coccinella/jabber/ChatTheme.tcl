@@ -18,7 +18,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.4 2007-10-30 13:49:34 matben Exp $
+# $Id: ChatTheme.tcl,v 1.5 2007-10-31 15:46:47 matben Exp $
+
+# @@@ Open issues:
+#   o switching theme while open dialogs
+#   o toggle history (<div id='history'/> ; DIV#history { display: none }
+#   o switching font sizes through menu, custom style:
+#     $w style -id user { td { font-size: 120% } }
+#   o images (avatars) are cached, when new avatar set all changes,
+#     also old messages
+
 
 package require Tkhtml 3.0
 
@@ -153,24 +162,97 @@ proc ::ChatTheme::Free {w} {
     lprune wall $w
 }
 
+# ChatTheme::Parse --
+# 
+#       Parse inline emoticons and uri's into relevant html code.
+
+proc ::ChatTheme::Parse {jid str} {
+    
+    # Split string into words and whitespaces.
+    set wsp {[ \t\r\n]+}
+    set len [string length $str]
+    if {$len == 0} {
+	return
+    }
+
+    # Have hook for complete text.
+    if {[hooks::run htmlPreParseHook chat $jid $str] eq "stop"} {	    
+	return
+    }
+
+    set html ""
+    set start 0
+    while {[regexp -start $start -indices -- $wsp $str match]} {
+	lassign $match matchStart matchEnd
+	
+	# The "space" part.
+	set space [string range $str $matchStart $matchEnd]
+	incr matchStart -1
+	incr matchEnd
+	
+	# The word preceeding the space.
+	set word [string range $str $start $matchStart]
+	set start $matchEnd
+	
+	# Process the actual word:
+	# Run first the hook to see if anyone else wants to parse it.
+	if {[hooks::run htmlParseWordHook chat $jid $word] ne "stop"} {	    
+	    append html [ParseWord $word]
+	}
+    
+	# Insert the whitespace after word.
+	append html $space
+    }
+    
+    # And the final word.
+    set word [string range $str $start end]
+    if {[hooks::run htmlParseWordHook chat $jid $word] ne "stop"} {	    
+	append html [ParseWord $word]
+    }
+
+    return $html
+}
+
+proc ::ChatTheme::ParseWord {word} {
+    
+    if {[::Emoticons::Exists $word]} {
+	return "<img src=\"[uriencode::quote $word]\"/>"
+    } elseif {![ParseURI $word]} {
+	return $word
+    } else {
+	return $word
+    }
+}
+
+proc ::ChatTheme::ParseURI {word} {
+    
+    
+    return 0
+}
+
 proc ::ChatTheme::ImageCmd {token url} {
     variable theme
     
-    puts "::ChatTheme::ImageCmd url=$url"
+    #puts "::ChatTheme::ImageCmd url=$url"
        
+    set durl [uriencode::decodeurl $url]
     if {$url eq "myAvatar"} {
 	
 	# Scale to size...
 	set avatar [::Avatar::GetMyPhoto]
+	if {$avatar eq ""} {
+	    set avatar [::RosterAvatar::GetDefaultAvatarOfSize 32]
+	}
 	return $avatar
     } elseif {$url eq "otherAvatar"} {
 	set jid2 [::Chat::GetChatTokenValue $token jid2]
 	set avatar [::Avatar::GetPhotoOfSize $jid2 32]
 	if {$avatar eq ""} {
-	    # Get default avatar from RosterAvatar
-	    set avatar ""
+	    set avatar [::RosterAvatar::GetDefaultAvatarOfSize 32]
 	}
 	return $avatar
+    } elseif {[::Emoticons::Exists $durl]} {
+	return [::Emoticons::Get $durl]
     } else {
 	set f [file join $theme(resources) $url]
 	if {[file exists $f]} {
@@ -192,6 +274,7 @@ proc ::ChatTheme::Incoming {token xmldata secs} {
     set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
     if {[llength $bodyE]} {
 	set msg [wrapper::getcdata $bodyE]
+	set msg [Parse $jid $msg]
 	set nextstr "$name wrote at $time:"
 	$w parse [string map [list %message% $nextstr] $content(inNext)]
 	$w parse [string map \
@@ -211,6 +294,7 @@ proc ::ChatTheme::Outgoing {token xmldata secs} {
     set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
     if {[llength $bodyE]} {
 	set msg [wrapper::getcdata $bodyE]
+	set msg [Parse $jid $msg]
 	set nextstr "$name wrote at $time:"
 	$w parse [string map [list %message% $nextstr] $content(outNext)]
 	$w parse [string map \
@@ -232,10 +316,4 @@ proc ::ChatTheme::Status {token xmldata secs} {
     $w parse [string map [list %message% $str %color% $color] $content(status)]
     after idle [list $w yview moveto 1.0]
 }
-
-
-
-
-
-
 
