@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.232 2007-10-31 15:46:47 matben Exp $
+# $Id: Chat.tcl,v 1.233 2007-11-01 15:59:00 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -147,11 +147,15 @@ namespace eval ::Chat {
     }
     option add *ChatThread*Text.borderWidth     0               50
     option add *ChatThread*Text.relief          flat            50
-    option add *ChatThread.padding              {12  0 12  0}   50
+    #option add *ChatThread.padding              {12  0 12  0}   50
+    option add *ChatThread.padding              {0   0  0  0}   50
     option add *ChatThread*active.padding       {1}             50
     option add *ChatThread*TMenubutton.padding  {1}             50
     option add *ChatThread*top.padding          {12  8 12  8}   50
     option add *ChatThread*bot.padding          {0   6  0  6}   50
+
+    option add *ChatThread*frtxt.borderWidth    0               50
+    option add *ChatThread*frtxt.relief         sunken          50
 
     
     # Local preferences.
@@ -202,7 +206,7 @@ namespace eval ::Chat {
     
     # Postpone this to init.
     variable haveTheme 0
-    if {$config(chat,try-themed) && ![catch {package require ChatTheme}]} {
+    if {$::config(chat,try-themed) && ![catch {package require ChatTheme}]} {
 	set haveTheme 1
     }
 }
@@ -706,7 +710,6 @@ proc ::Chat::Insert {chattoken xmldata secs inB} {
 
 proc ::Chat::InsertMessageTheme {chattoken xmldata secs inB} {
 
-    puts "::Chat::InsertMessageTheme inB=$inB"
     set tag [wrapper::gettag $xmldata]
     if {$tag eq "message"} {
 	if {$inB} {
@@ -1035,9 +1038,6 @@ proc ::Chat::InsertHistoryXML {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    if {[winfo class $chatstate(wtext)] ne "Text"} {
-	return
-    }
     if {![info exists chatstate(historyfile)]} {
 	return
     }    
@@ -1076,7 +1076,7 @@ proc ::Chat::InsertHistory {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jprefs jprefs
-
+    
     if {$chatstate(historytype) eq "old"} {
 	InsertHistoryOld $chattoken -last $jprefs(chat,histLen)  \
 	  -maxage $jprefs(chat,histAge)
@@ -1103,6 +1103,9 @@ proc ::Chat::HistoryCmd {chattoken} {
 		$wtext delete [lindex $ranges 0] [lindex $ranges end]
 		$wtext configure -state disabled
 	    }
+	} else {
+	    
+	    puts "::Chat::HistoryCmd for Tkhtml ???"
 	}
     }
 }
@@ -1488,7 +1491,6 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     set wfind       $wthread.m.pane.frtxt.find
 
     # Frame to serve as container for the pane geometry manager.
-    # D =
     frame $wmid
     pack  $wmid -side top -fill both -expand 1
 
@@ -1498,7 +1500,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 
     # Text chat dialog.
     if {$jprefs(chat,themed)} {
-	frame $wtxt -bd 1 -relief sunken
+	frame $wtxt
 	::ChatTheme::Widget $chattoken $wtext -height 12 -width 10 \
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
 	  [list grid $wysc -column 1 -row 0 -sticky ns]]
@@ -1509,7 +1511,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
 	  [list grid $wysc -column 1 -row 0 -sticky ns]]]
     } else {
-	frame $wtxt -bd 1 -relief sunken
+	frame $wtxt
 	text $wtext -height 12 -width 1 -state disabled -cursor {} -wrap word  \
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
 	  [list grid $wysc -column 1 -row 0 -sticky ns]]
@@ -3595,6 +3597,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
     if {$haveTheme} {
 	ttk::separator $wc.sep4 -orient horizontal
 	
+	::ChatTheme::Reload
 	set menuDef [lapply list [::ChatTheme::AllThemes]]
 	set wtm $wc.tm
 	ttk::frame $wc.tm
@@ -3604,9 +3607,6 @@ proc ::Chat::BuildPrefsPage {wpage} {
 	ui::optionmenu $wtm.theme -menulist $menuDef -direction flush \
 	  -variable [namespace current]::tmpJPrefs(chat,theme)
 	
-	if {$jprefs(chat,themed)} {
-	    
-	}
 	grid  $wtm.themed  $wtm.theme  -sticky w
 
 	grid  $wc.sep4    -sticky ew -pady 6
@@ -3631,6 +3631,8 @@ proc ::Chat::SavePrefsHook {} {
     
     if {$tmpJPrefs(chat,themed)} {
 	if {$tmpJPrefs(chat,theme) ne $jprefs(chat,theme)} {
+	    ::ChatTheme::Set $tmpJPrefs(chat,theme)
+	} elseif {!$jprefs(chat,themed)} {
 	    ::ChatTheme::Set $tmpJPrefs(chat,theme)
 	}
     }

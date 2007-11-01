@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.5 2007-10-31 15:46:47 matben Exp $
+# $Id: ChatTheme.tcl,v 1.6 2007-11-01 15:59:00 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -27,14 +27,16 @@
 #     $w style -id user { td { font-size: 120% } }
 #   o images (avatars) are cached, when new avatar set all changes,
 #     also old messages
+#   o handle links (<a href...>, see the hv3 code for this; messy!
 
 
 package require Tkhtml 3.0
+package require pipes
 
 package provide ChatTheme 1.0
 
 namespace eval ::ChatTheme {
-
+    
     # The paths to search for chat themes.
     variable path
     set path(default) [file join $::this(resourcePath) themes chat]
@@ -45,8 +47,43 @@ namespace eval ::ChatTheme {
     set theme(resources) ""
     
     variable html
-    set html(header) {<html><head></head><body>}
-    set html(footer) {</body></html>}
+    set html(Header) {
+	<html><head></head><body>
+    }
+    set html(Footer) {
+	</body></html>
+    }
+    set html(Status) {
+	<div class="status">%message%</div><div id="insert"></div>
+    }
+    set html(HistoryDiv) {<div id="history"></div>}
+
+    # Defaults as fallbacks.
+    variable hdefault
+    set hdefault(Header) {}
+    set hdefault(Footer) {}
+    set hdefault(Status) {
+	<div class="status">%message%</div><div id="insert"></div>
+    }
+    set hdefault(in) {
+	<div class="incoming">
+	<div class="incomingsender">%sender%</div> 
+	<div class="incomingmessage">%message%</div> 
+	</div>
+	<div id="insert"></div> 
+    }
+    set hdefault(inNext) $hdefault(in)
+    set hdefault(out) {
+	<div class="outgoing">
+	<div class="outgoingsender">%sender%</div> 
+	<div class="outgoingmessage">%message%</div> 
+	</div>
+	<div id="insert"></div> 
+    }
+    set hdefault(outNext) $hdefault(out)
+    
+    variable style
+    set style(HistoryDiv) { DIV#history { display: none; } }
     
     variable content
     variable inited 0
@@ -78,6 +115,12 @@ proc ::ChatTheme::Init {} {
     set inited 1
 }
 
+proc ::ChatTheme::Reload {} {
+    variable inited
+    set inited 0
+    Init
+}
+
 proc ::ChatTheme::AllThemes {} {
     variable theme
     Init
@@ -100,6 +143,8 @@ proc ::ChatTheme::Set {name} {
     variable theme
     variable content
     variable wall
+    variable html
+    variable hdefault
     
     puts "---------------::ChatTheme::Set $name"
 
@@ -110,12 +155,21 @@ proc ::ChatTheme::Set {name} {
     }
     unset -nocomplain content
     
+    # Keep defaults as a fallback.
+    foreach name {Header Footer Status} {
+	set f [file join $res $name.html]
+	if {[file exists $f]} {
+	    set content($name) [Readfile $f]
+	} else {
+	    set content($name) $hdefault($name)
+	}
+    }
+    
     set content(mainCss)    [Readfile [file join $res main.css]]
     set content(in)         [Readfile [file join $res Incoming Content.html]]
     set content(inNext)     [Readfile [file join $res Incoming NextContent.html]]
     set content(out)        [Readfile [file join $res Outgoing Content.html]]
     set content(outNext)    [Readfile [file join $res Outgoing NextContent.html]]
-    set content(status)     [Readfile [file join $res Status.html]]
     set content(statusNext) [Readfile [file join $res NextStatus.html]]
     
     set theme(current) $name
@@ -142,13 +196,38 @@ proc ::ChatTheme::GetResourceDir {name} {
 proc ::ChatTheme::Widget {token w args} {
     variable content
     variable html
+    variable style
     variable wall
     
+    # Keep an instance specific state array.
+    variable $w
+    upvar 0 $w state
+    
+    # Keep track of last type: in | out |status
+    set state(lastType) ""
+
+    set jid [::Chat::GetChatTokenValue $token jid]
+    set name [::Chat::MessageGetYouName $token $jid]
+    set myname [::Chat::MessageGetMyName $token $jid]
+    set time [::Chat::MessageGetTime $token [clock seconds]]
+
     eval {html $w -mode {almost standards}} $args
 
     $w configure -imagecmd [namespace code [list ImageCmd $token]]
     $w style $content(mainCss)
-    $w parse $html(header)
+    $w style $style(HistoryDiv)
+    $w parse $html(Header)
+    
+    set map [list %chatName% $name %sourceName% $myname %destinationName% $name \
+      %incomingIconPath% otherAvatar %outgoingIconPath% myAvatar \
+      %timeOpened% $time]
+    
+    $w parse [string map $map $content(Header)]
+    $w parse $html(HistoryDiv)
+    
+    if {[tk windowingsystem] eq "aqua"} {
+	#$w style -id user-001 { font: "Lucida Grande"; }
+    }
     
     lappend wall $w
     
@@ -158,8 +237,11 @@ proc ::ChatTheme::Widget {token w args} {
 }
 
 proc ::ChatTheme::Free {w} {
+    variable $w
     variable wall
+    
     lprune wall $w
+    unset -nocomplain $w
 }
 
 # ChatTheme::Parse --
@@ -195,10 +277,9 @@ proc ::ChatTheme::Parse {jid str} {
 	set start $matchEnd
 	
 	# Process the actual word:
-	# Run first the hook to see if anyone else wants to parse it.
-	if {[hooks::run htmlParseWordHook chat $jid $word] ne "stop"} {	    
-	    append html [ParseWord $word]
-	}
+	set word [pipes::run htmlParseWordPipe chat jid $word]
+
+	append html [ParseWord $word]
     
 	# Insert the whitespace after word.
 	append html $space
@@ -206,9 +287,8 @@ proc ::ChatTheme::Parse {jid str} {
     
     # And the final word.
     set word [string range $str $start end]
-    if {[hooks::run htmlParseWordHook chat $jid $word] ne "stop"} {	    
-	append html [ParseWord $word]
-    }
+    set word [pipes::run htmlParseWordPipe chat jid $word]
+    append html [ParseWord $word]
 
     return $html
 }
@@ -217,8 +297,8 @@ proc ::ChatTheme::ParseWord {word} {
     
     if {[::Emoticons::Exists $word]} {
 	return "<img src=\"[uriencode::quote $word]\"/>"
-    } elseif {![ParseURI $word]} {
-	return $word
+    } elseif {[ParseURI $word]} {
+	return "<a href=\"$word\">$word</a>"
     } else {
 	return $word
     }
@@ -226,14 +306,18 @@ proc ::ChatTheme::ParseWord {word} {
 
 proc ::ChatTheme::ParseURI {word} {
     
-    
+    foreach {re cmd} [::Text::GetREUriList] {
+	if {[regexp $re $word]} {
+	    return 1
+	}
+    }
     return 0
 }
 
 proc ::ChatTheme::ImageCmd {token url} {
     variable theme
     
-    #puts "::ChatTheme::ImageCmd url=$url"
+    puts "::ChatTheme::ImageCmd url=$url"
        
     set durl [uriencode::decodeurl $url]
     if {$url eq "myAvatar"} {
@@ -263,22 +347,36 @@ proc ::ChatTheme::ImageCmd {token url} {
     }
 }
 
+#       The NextContent template is a message fragment for consecutive messages.
+#       It will be inserted into the main message block. The HTML template 
+#       should contain the bare minimum to display a message. 
+
 proc ::ChatTheme::Incoming {token xmldata secs} {
     variable content
-    
-    set w [::Chat::GetChatTokenValue $token wtext]
-    set jid [::Chat::GetChatTokenValue $token jid]
-    set name [::Chat::MessageGetYouName $token $jid]
-    set time [::Chat::MessageGetTime $token $secs]
-    
+
     set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
     if {[llength $bodyE]} {
+	
+	set w [::Chat::GetChatTokenValue $token wtext]
+	set jid [::Chat::GetChatTokenValue $token jid]
+	set name [::Chat::MessageGetYouName $token $jid]
+	set time [::Chat::MessageGetTime $token $secs]
+
+	variable $w
+	upvar 0 $w state
+
 	set msg [wrapper::getcdata $bodyE]
+	set msg [wrapper::xmlcrypt $msg]
 	set msg [Parse $jid $msg]
-	set nextstr "$name wrote at $time:"
-	$w parse [string map [list %message% $nextstr] $content(inNext)]
-	$w parse [string map \
-	  [list %message% $msg %sender% $name %userIconPath% otherAvatar] $content(in)]
+	set map [list %message% $msg %sender% $name %userIconPath% otherAvatar \
+	  %time% $time %service% Jabber %senderScreenName% $name]
+	
+	if {0 && $state(lastType) eq "in"} {
+	    $w parse [string map $map $content(inNext)]
+	} else {
+	    $w parse [string map $map $content(in)]
+	}
+	set state(lastType) "in"
 	after idle [list $w yview moveto 1.0]
     }
 }
@@ -286,19 +384,34 @@ proc ::ChatTheme::Incoming {token xmldata secs} {
 proc ::ChatTheme::Outgoing {token xmldata secs} {
     variable content
     
-    set w [::Chat::GetChatTokenValue $token wtext]
-    set jid [wrapper::getattribute $xmldata from]
-    set name [::Chat::MessageGetMyName $token $jid]
-    set time [::Chat::MessageGetTime $token $secs]
-
     set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
     if {[llength $bodyE]} {
+	
+	set w [::Chat::GetChatTokenValue $token wtext]
+	set jid [wrapper::getattribute $xmldata from]
+	set name [::Chat::MessageGetMyName $token $jid]
+	set time [::Chat::MessageGetTime $token $secs]
+
+	variable $w
+	upvar 0 $w state
+
 	set msg [wrapper::getcdata $bodyE]
+	set msg [wrapper::xmlcrypt $msg]
 	set msg [Parse $jid $msg]
-	set nextstr "$name wrote at $time:"
-	$w parse [string map [list %message% $nextstr] $content(outNext)]
-	$w parse [string map \
-	  [list %message% $msg %sender% $name %userIconPath% myAvatar] $content(out)]
+	set map [list %message% $msg %sender% $name %userIconPath% myAvatar \
+	  %time% $time %service% Jabber %senderScreenName% $name]
+
+	#puts "------------------msg=$msg"
+	set node [$w search {div#insert}]
+	
+	puts "================node=$node"
+	
+	if {0 && $state(lastType) eq "out"} {
+	    $w parse [string map $map $content(outNext)]
+	} else {
+	    $w parse [string map $map $content(out)]
+	}
+	set state(lastType) "out"
 	after idle [list $w yview moveto 1.0]
     }
 }
@@ -310,10 +423,24 @@ proc ::ChatTheme::Status {token xmldata secs} {
     set jid [::Chat::GetChatTokenValue $token jid]
     set name [::Chat::MessageGetYouName $token $jid]
 
+    variable $w
+    upvar 0 $w state
+
+    set time [::Chat::MessageGetTime $token $secs]
+
+    # Maybe there should be a mapping show -> color
+
     set color red
-    set str [::Chat::PresenceGetString $token $xmldata]
-    $w parse [string map [list %message% $name %color% $color] $content(statusNext)]
-    $w parse [string map [list %message% $str %color% $color] $content(status)]
+    set msg [::Chat::PresenceGetString $token $xmldata]
+    set msg [wrapper::xmlcrypt $msg]
+    set map [list %message% $str %color% $color %time% $time]
+
+    if {0 && $state(lastType) eq "status"} {
+	$w parse [string map $map $content(statusNext)]
+    } else {
+	$w parse [string map $map $content(status)]
+    }
+    set state(lastType) "status"
     after idle [list $w yview moveto 1.0]
 }
 

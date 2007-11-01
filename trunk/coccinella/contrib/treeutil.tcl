@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under BSD-style license.
 #  
-#  $Id: treeutil.tcl,v 1.16 2007-10-30 07:54:36 matben Exp $
+#  $Id: treeutil.tcl,v 1.17 2007-11-01 15:59:00 matben Exp $
 
 # USAGE:
 # 
@@ -289,25 +289,28 @@ proc treeutil::configureelementtype {w type args} {
 #       '(', ')', '&', '|', '^' and '!' should be avoided. 
 #       Tags must therefore be protected if they contain any of these specials.
 
+# BUG: this wont work for "!"
+
 proc treeutil::protect {tags} {
-    set tags [string map {_ __ ! _} $tags]
-    regsub -all {([()&|^])} $tags {\\\1} tags
+    regsub -all {([()&|^!])} $tags {\\\1} tags
     return $tags
 }
 proc treeutil::protect {tags} {
-    regsub -all {([()&|^!])} $tags {\\\1} tags
+    # Not foolproof!!!
+    set tags [string map {_ ___ ! _} $tags]
+    regsub -all {([()&|^])} $tags {\\\1} tags
     return $tags
 }
 
 proc treeutil::deprotect {tags} {
     # Inverse of protect. 
-    regsub -all {\\([()&|^])} $tags {\1} tags
-    set tags [string map {_ ! __ _} $tags]
+    regsub -all {\\([()&|^!])} $tags {\1} tags
     return $tags
 }
 proc treeutil::deprotect {tags} {
     # Inverse of protect. 
-    regsub -all {\\([()&|^!])} $tags {\1} tags
+    regsub -all {\\([()&|^])} $tags {\1} tags
+    set tags [string map {! _ ___ _} $tags]
     return $tags
 }
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.175 2007-10-22 11:51:33 matben Exp $
+# $Id: UI.tcl,v 1.176 2007-11-01 15:59:00 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -203,6 +203,20 @@ proc ::UI::InitCommonBinds {} {
 		}
 	    }
 	}
+	bind Html <4> {
+	    if {!$::tk_strictMotif} {
+		if {![string equal [%W yview] "0 1"]} {
+		    %W yview scroll -5 units
+		}
+	    }
+	}
+	bind Html <5> {
+	    if {!$::tk_strictMotif} {
+		if {![string equal [%W yview] "0 1"]} {
+		    %W yview scroll 5 units
+		}
+	    }
+	}
     } elseif {[string equal [tk windowingsystem] "aqua"]} {
 	bind Canvas <MouseWheel> {
 	    if {![string equal [%W yview] "0 1"]} {
@@ -214,6 +228,16 @@ proc ::UI::InitCommonBinds {} {
 		%W xview scroll [expr {- (%D)}] units
 	    }
 	}
+	bind Html <MouseWheel> {
+	    if {![string equal [%W yview] "0 1"]} {
+		%W yview scroll [expr {- (%D)}] units
+	    }
+	}
+	bind Html <Shift-MouseWheel> {
+	    if {![string equal [%W xview] "0 1"]} {
+		%W xview scroll [expr {- (%D)}] units
+	    }
+	}
     } else {
 	bind Canvas <MouseWheel> {
 	    if {![string equal [%W yview] "0 1"]} {
@@ -221,6 +245,16 @@ proc ::UI::InitCommonBinds {} {
 	    }
 	}
 	bind Canvas <Shift-MouseWheel> {
+	    if {![string equal [%W xview] "0 1"]} {
+		%W xview scroll [expr {- (%D / 120) * 4}] units
+	    }
+	}
+	bind Html <MouseWheel> {
+	    if {![string equal [%W yview] "0 1"]} {
+		%W yview scroll [expr {- (%D / 120) * 4}] units
+	    }
+	}
+	bind Html <Shift-MouseWheel> {
 	    if {![string equal [%W xview] "0 1"]} {
 		%W xview scroll [expr {- (%D / 120) * 4}] units
 	    }

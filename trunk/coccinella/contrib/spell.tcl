@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.14 2007-10-26 14:12:43 matben Exp $
+# $Id: spell.tcl,v 1.15 2007-11-01 15:59:00 matben Exp $
 
 # TODO: try to simplify the async (fileevent) part of this similar
 #       to spell::wordserial perhaps.
@@ -16,7 +16,6 @@ package provide spell 0.1
 
 namespace eval spell {
     
-    variable spellers [list ispell aspell]
     variable spellers [list aspell ispell]
     variable pipe
     variable trigger
@@ -141,9 +140,13 @@ proc spell::AutoExecOK {name} {
     }
     
     # ispell and aspell install in /usr/local/bin on my Mac.
+    # Use 'which' on unix to find it in /sw/...
     set cmd [auto_execok $name]
     if {![llength $cmd]} {
 	set search $static(paths) 
+	if {$tcl_platform(platform) eq "unix"} {
+	    catch {lappend search [file dirname [exec which $name]]}
+	}
 	if {$tcl_platform(platform) ne "windows"} {
 	    lappend search /usr/local/bin
 	}
