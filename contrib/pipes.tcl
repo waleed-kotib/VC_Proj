@@ -8,26 +8,32 @@
 #  
 #  This file is distributed under BSD style license.
 #       
-# $Id: pipes.tcl,v 1.3 2007-07-19 06:28:11 matben Exp $
+# $Id: pipes.tcl,v 1.4 2007-11-01 15:59:00 matben Exp $
 
 package provide pipes 1.0
 
-namespace eval pipes { }
+namespace eval pipes {}
 
-proc pipes::add {pipe func {seq 50}} {
+proc pipes::register {pipe func {seq 50}} {
     variable $pipe
 
     lappend $pipe [list $func $seq]
     set $pipe [lsort -integer -index 1 [lsort [set $pipe]]]
 }
 
-# The last argument is the one that gets piped from one invokation to the other.
+# Very experimental!
+
+# pipes::run --
+# 
+#       Pipe the last argument. 
+#       Since the order of the registered pipes may vary it is unclear how
+#       stable this can be.
 
 proc pipes::run {pipe args} {
     variable $pipe
 
     if {![info exists $pipe]} {
-	return
+	return [lindex $args end]
     }
 
     foreach spec [set $pipe] {
@@ -50,9 +56,9 @@ proc pipes::run {pipe args} {
 
 if {0} {    
     proc MyFunc {str} {return "$str$str"}
-    ::pipes::add testPipe MyFunc
-    ::pipes::add testPipe MyFunc
-    ::pipes::add testPipe MyFunc
+    pipes::register testPipe MyFunc
+    pipes::register testPipe MyFunc
+    pipes::register testPipe MyFunc
     puts "[::pipes::run testPipe abc]"
 }
 

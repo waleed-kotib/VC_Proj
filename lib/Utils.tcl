@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.73 2007-10-13 15:12:20 matben Exp $
+# $Id: Utils.tcl,v 1.74 2007-11-01 15:59:00 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -628,6 +628,11 @@ proc ::Text::RegisterURI {re cmd} {
     variable reguri
     
     lappend reguri $re $cmd
+}
+
+proc ::Text::GetREUriList {} {
+    variable reguri
+    return $reguri
 }
 
 # Text::ParseMsg --

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ParseStyledText.tcl,v 1.6 2007-10-12 06:56:29 matben Exp $
+# $Id: ParseStyledText.tcl,v 1.7 2007-11-01 15:59:00 matben Exp $
 
 namespace eval ::ParseStyledText {}
 
@@ -28,7 +28,8 @@ proc ::ParseStyledText::Init {} {
       "Simplified text font style parsing: *bold*, /italic/, and _underline_."
 
     # Add event hooks.
-    ::hooks::register textParseWordHook [namespace current]::ParseWordHook
+    ::hooks::register textParseWordHook [namespace code ParseWordHook]
+    ::pipes::register htmlParseWordPipe [namespace code ParseWordPipe]
     
     variable parse
     set parse {
@@ -36,6 +37,24 @@ proc ::ParseStyledText::Init {} {
 	{^/(.+)/$}    -slant      italic    titalic
 	{^_(.+)_$}    -underline  1         tunderline
     }
+
+    variable phtml
+    set phtml {
+	{^\*(.+)\*$}  {<b>\1</b>}
+	{^/(.+)/$}    {<i>\1</i>}
+	{^_(.+)_$}    {<u>\1</u>}
+    }
+}
+
+proc ::ParseStyledText::ParseWordPipe {type jid word} {
+    variable phtml
+    
+    foreach {re sub} $phtml {
+	if {[regsub -- $re $word $sub word]} {
+	    return $word
+	}
+    }
+    return $word
 }
 
 proc ::ParseStyledText::ParseWordHook {type jid w word tagList} {
