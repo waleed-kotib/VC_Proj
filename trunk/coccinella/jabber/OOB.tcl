@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: OOB.tcl,v 1.59 2007-10-08 12:09:17 matben Exp $
+# $Id: OOB.tcl,v 1.60 2007-11-02 12:09:18 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -377,7 +377,8 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
 	append str "\n" "[mc Description]: $desc"
     }
     set msg [mc jamessoobask2 $from $str]
-    set ans [::UI::MessageBox -title [mc {Receive File}] -icon info  \
+    set ans [::UI::MessageBox -title [mc {Receive File}] -icon info \
+      -type yesno -default yes -message $msg]
     if {$ans eq "no"} {	
 	ReturnError $from $id $subiq 406
 	return $ishandled
