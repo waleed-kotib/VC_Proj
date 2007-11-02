@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.6 2007-11-01 15:59:00 matben Exp $
+# $Id: ChatTheme.tcl,v 1.7 2007-11-02 16:03:23 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -26,8 +26,11 @@
 #   o switching font sizes through menu, custom style:
 #     $w style -id user { td { font-size: 120% } }
 #   o images (avatars) are cached, when new avatar set all changes,
-#     also old messages
+#     also old messages; default avatar wont change to user;
+#     could perhaps use a new uri: "otherAvatar-[incr uid]" to trigger this
 #   o handle links (<a href...>, see the hv3 code for this; messy!
+#   o Missing: The central element is a div element named Chat
+#   o find some simple default templates that can be used as a fallback
 
 
 package require Tkhtml 3.0
@@ -37,6 +40,9 @@ package provide ChatTheme 1.0
 
 namespace eval ::ChatTheme {
     
+    ::hooks::register avatarMyNewPhotoHook [namespace code MyAvatarHook]
+    ::hooks::register avatarNewPhotoHook   [namespace code OtherAvatarHook]
+    
     # The paths to search for chat themes.
     variable path
     set path(default) [file join $::this(resourcePath) themes chat]
@@ -44,6 +50,7 @@ namespace eval ::ChatTheme {
     
     variable theme
     set theme(current) ""
+    set theme(variant) ""
     set theme(resources) ""
     
     variable html
@@ -59,6 +66,7 @@ namespace eval ::ChatTheme {
     set html(HistoryDiv) {<div id="history"></div>}
 
     # Defaults as fallbacks.
+    # @@@ Need to figure out a very simple one.
     variable hdefault
     set hdefault(Header) {}
     set hdefault(Footer) {}
@@ -111,9 +119,12 @@ proc ::ChatTheme::Init {} {
 	    }
 	}
     }
-    puts "        inited"
     set inited 1
 }
+
+# ChatTheme::Reload --
+# 
+#       Force a new initialization.
 
 proc ::ChatTheme::Reload {} {
     variable inited
@@ -125,6 +136,41 @@ proc ::ChatTheme::AllThemes {} {
     variable theme
     Init
     return [concat $theme(default) $theme(prefs)]
+}
+
+proc ::ChatTheme::Variants {name} {
+    variable theme
+    variable path
+    
+    set res [GetResourceDir $name]
+    if {$res eq ""} {
+	return -code error "unknown theme \"$name\""
+    }
+    set varDir [file join $dir Variants]
+    set all [glob -nocomplain -directory $varDir -types f -tails *.css]
+    return [lapply {file rootname} $all]
+}
+
+proc ::ChatTheme::SetVariant {variant} {
+    variable theme
+    variable wall
+    
+    set res [GetResourceDir $theme(current)]
+    set dir [file join $res Variants]
+    set content(varCss) [Readfile [file join $dir $variant.css]]
+    
+    foreach w $wall {
+	$w style -importcmd [namespace code [list ImportCmd $w $dir]] \
+	  $content(varCss)
+    }
+}
+
+proc ::ChatTheme::ImportCmd {w dir url} {
+     
+    # Resolve url.
+    set data [Readfile [file normalize [file join $dir $url]]]
+    $w style -importcmd [namespace code [list ImportCmd $w]] $data
+    return
 }
 
 proc ::ChatTheme::Current {} {
@@ -166,13 +212,17 @@ proc ::ChatTheme::Set {name} {
     }
     
     set content(mainCss)    [Readfile [file join $res main.css]]
+    set content(varCss)     ""
     set content(in)         [Readfile [file join $res Incoming Content.html]]
     set content(inNext)     [Readfile [file join $res Incoming NextContent.html]]
     set content(out)        [Readfile [file join $res Outgoing Content.html]]
     set content(outNext)    [Readfile [file join $res Outgoing NextContent.html]]
-    set content(statusNext) [Readfile [file join $res NextStatus.html]]
+    # Seems optional...
+    #set content(statusNext) [Readfile [file join $res NextStatus.html]]
+
     
     set theme(current) $name
+    set theme(variant) ""
     set theme(resources) $res
     
     # Should we change theme for all existing widget? How?
@@ -193,6 +243,22 @@ proc ::ChatTheme::GetResourceDir {name} {
     return
 }
 
+# @@@ TODO
+# When we have updated our avatar we could have a hook that updates 
+# a counter and use a new uri: "otherAvatar-[incr uid]" to trigger this
+
+proc ::ChatTheme::MyAvatarHook {} {
+    
+    puts "::ChatTheme::MyAvatarHook"
+    
+}
+
+proc ::ChatTheme::OtherAvatarHook {jid2} {
+    
+    puts "::ChatTheme::OtherAvatarHook jid2=$jid2"
+    
+}
+
 proc ::ChatTheme::Widget {token w args} {
     variable content
     variable html
@@ -211,8 +277,10 @@ proc ::ChatTheme::Widget {token w args} {
     set myname [::Chat::MessageGetMyName $token $jid]
     set time [::Chat::MessageGetTime $token [clock seconds]]
 
-    eval {html $w -mode {almost standards}} $args
+    #eval {html $w -mode {almost standards}} $args
+    eval {html $w -mode quirks} $args
 
+    $w handler node "div" [namespace code [list NodeHandler $token]]
     $w configure -imagecmd [namespace code [list ImageCmd $token]]
     $w style $content(mainCss)
     $w style $style(HistoryDiv)
@@ -234,6 +302,13 @@ proc ::ChatTheme::Widget {token w args} {
     bind $w <Destroy> +[namespace code { Free %W }]
     
     return $w
+}
+
+proc ::ChatTheme::NodeHandler {token node} {
+    
+    set attr [$node attribute]
+    puts "::ChatTheme::NodeHandler node=$node, attr=$attr"
+    
 }
 
 proc ::ChatTheme::Free {w} {
@@ -314,37 +389,60 @@ proc ::ChatTheme::ParseURI {word} {
     return 0
 }
 
+proc ::ChatTheme::CopyPhoto {name} {
+    set new [image create photo]
+    $new copy $name -compositingrule set -shrink
+    return $new
+}
+
 proc ::ChatTheme::ImageCmd {token url} {
     variable theme
     
     puts "::ChatTheme::ImageCmd url=$url"
-       
+    
+    # NB1: When tkhtml gets an image it is cached inside and destroyed
+    #      together with the widget. We therefore MUST create images for
+    #      explicit use by tkhtml and NEVER return a reference to an
+    #      existing image since this will generate problems.
+           
+    # When we have updated our avatar we could have a hook that updates 
+    # a counter and use a new uri: "otherAvatar-[incr uid]" to trigger this
+    
+    set name ""
     set durl [uriencode::decodeurl $url]
     if {$url eq "myAvatar"} {
 	
 	# Scale to size...
-	set avatar [::Avatar::GetMyPhoto]
-	if {$avatar eq ""} {
-	    set avatar [::RosterAvatar::GetDefaultAvatarOfSize 32]
+	set name [::Avatar::GetMyPhoto]
+	if {$name eq ""} {
+	    set f [file join $theme(resources) Outgoing buddy_icon.png]
+	    if {[file exists $f]} {
+		set name [image create photo -file $f]
+	    } else {
+		set name [CopyPhoto [::RosterAvatar::GetDefaultAvatarOfSize 32]]
+	    }
 	}
-	return $avatar
     } elseif {$url eq "otherAvatar"} {
 	set jid2 [::Chat::GetChatTokenValue $token jid2]
-	set avatar [::Avatar::GetPhotoOfSize $jid2 32]
-	if {$avatar eq ""} {
-	    set avatar [::RosterAvatar::GetDefaultAvatarOfSize 32]
+	set name [::Avatar::GetPhotoOfSize $jid2 32]
+	if {$name eq ""} {
+	    set f [file join $theme(resources) Incoming buddy_icon.png]
+	    if {[file exists $f]} {
+		set name [image create photo -file $f]
+	    } else {
+		set name [CopyPhoto [::RosterAvatar::GetDefaultAvatarOfSize 32]]
+	    }
 	}
-	return $avatar
     } elseif {[::Emoticons::Exists $durl]} {
-	return [::Emoticons::Get $durl]
+	set name [CopyPhoto [::Emoticons::Get $durl]]
     } else {
 	set f [file join $theme(resources) $url]
 	if {[file exists $f]} {
-	    return [image create photo -file $f]
-	} else {
-	    return 
+	    set name [image create photo -file $f]
 	}
     }
+    puts "     name=$name"
+    return $name
 }
 
 #       The NextContent template is a message fragment for consecutive messages.
@@ -366,7 +464,7 @@ proc ::ChatTheme::Incoming {token xmldata secs} {
 	upvar 0 $w state
 
 	set msg [wrapper::getcdata $bodyE]
-	set msg [wrapper::xmlcrypt $msg]
+	#set msg [wrapper::xmlcrypt $msg]
 	set msg [Parse $jid $msg]
 	set map [list %message% $msg %sender% $name %userIconPath% otherAvatar \
 	  %time% $time %service% Jabber %senderScreenName% $name]
@@ -396,7 +494,7 @@ proc ::ChatTheme::Outgoing {token xmldata secs} {
 	upvar 0 $w state
 
 	set msg [wrapper::getcdata $bodyE]
-	set msg [wrapper::xmlcrypt $msg]
+	#set msg [wrapper::xmlcrypt $msg]
 	set msg [Parse $jid $msg]
 	set map [list %message% $msg %sender% $name %userIconPath% myAvatar \
 	  %time% $time %service% Jabber %senderScreenName% $name]
@@ -404,7 +502,7 @@ proc ::ChatTheme::Outgoing {token xmldata secs} {
 	#puts "------------------msg=$msg"
 	set node [$w search {div#insert}]
 	
-	puts "================node=$node"
+	#puts "================node=$node"
 	
 	if {0 && $state(lastType) eq "out"} {
 	    $w parse [string map $map $content(outNext)]
@@ -432,7 +530,7 @@ proc ::ChatTheme::Status {token xmldata secs} {
 
     set color red
     set msg [::Chat::PresenceGetString $token $xmldata]
-    set msg [wrapper::xmlcrypt $msg]
+    #set msg [wrapper::xmlcrypt $msg]
     set map [list %message% $str %color% $color %time% $time]
 
     if {0 && $state(lastType) eq "status"} {

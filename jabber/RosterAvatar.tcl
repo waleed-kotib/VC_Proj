@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.44 2007-10-31 15:46:47 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.45 2007-11-02 16:03:23 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -280,6 +280,7 @@ proc ::RosterAvatar::InitDefaultAvatars {} {
 	set f [file join $this(avatarPath) $size $avatarDefault.png]
 	set avatar(default,$size) [image create photo -file $f]
     }
+    set initedDefaultAvatars 1
 }
 
 proc ::RosterAvatar::GetDefaultAvatarOfSize {size} {
