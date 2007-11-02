@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.165 2007-10-16 12:10:16 matben Exp $	
+# $Id: Coccinella.tcl,v 1.166 2007-11-02 07:46:40 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -204,6 +204,7 @@ set state(launchStatus) packages
 set packages(generic) {
     component
     hooks
+    pipes
     tileutils
     undo
     utils
