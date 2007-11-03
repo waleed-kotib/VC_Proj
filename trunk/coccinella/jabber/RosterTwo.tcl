@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTwo.tcl,v 1.24 2007-10-08 12:09:17 matben Exp $
+# $Id: RosterTwo.tcl,v 1.25 2007-11-03 11:38:55 matben Exp $
 
 package require RosterTree
 
@@ -71,7 +71,7 @@ proc ::RosterTwo::Configure {_T} {
     #   0) the tree 
     #   1) hidden for tags
     $T column create -tags cTree -itembackground $itemBackground -resize 0 \
-      -expand 1
+      -expand 1 -squeeze 1
     $T column create -tags cTag -visible 0
     $T configure -treecolumn cTree -showheader 0
 
@@ -91,8 +91,8 @@ proc ::RosterTwo::Configure {_T} {
     set S [$T style create styStd]
     $T style elements $S {eBorder eBox1 eBox2 eImage eText eText2}
     $T style layout $S eImage -padx [list $px 0] -pady [list $py 0] -expand ns
-    $T style layout $S eText  -padx [list $dX 0] -pady [list $py $dY] -detach 1
-    $T style layout $S eText2 -padx [list $dX 0] -pady [list $dY $py] -detach 1
+    $T style layout $S eText  -padx [list $dX 0] -pady [list $py $dY] -detach 1 -squeeze x
+    $T style layout $S eText2 -padx [list $dX 0] -pady [list $dY $py] -detach 1 -squeeze x
     $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     $T style layout $S eBox1 -union {eText}
