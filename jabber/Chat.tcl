@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.233 2007-11-01 15:59:00 matben Exp $
+# $Id: Chat.tcl,v 1.234 2007-11-03 06:57:25 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2695,18 +2695,11 @@ proc ::Chat::CommandReturnKeyPress {chattoken} {
 }
 
 proc ::Chat::Send {dlgtoken} {
-    global  prefs
-    
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
-    variable cprefs
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::xmppxmlns xmppxmlns
     
     ::Debug 2 "::Chat::Send "
     
-    set jlib $jstate(jlib)
-
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
 	::UI::MessageBox -type ok -icon error -title [mc Error] \
@@ -2717,24 +2710,7 @@ proc ::Chat::Send {dlgtoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    set w        $chatstate(w)
-    set wtextsnd $chatstate(wtextsnd)
-    set threadID $chatstate(threadid)
-    
-    # According to XMPP we should send to 3-tier jid if still online,
-    # else to 2-tier.
-    set chatstate(fromjid) [$jstate(jlib) getrecipientjid $chatstate(fromjid)]
-    set jid [jlib::jidmap $chatstate(fromjid)]
-    set jid2 [jlib::barejid $jid]
-    set chatstate(jid) $jid
-    
-    if {![jlib::jidvalidate $jid]} {
-	set ans [::UI::MessageBox -message [mc jamessbadjid2 $jid] \
-	  -icon error -title [mc Error] -type yesno]
-	if {[string equal $ans "no"]} {
-	    return
-	}
-    }
+    set wtextsnd $chatstate(wtextsnd)        
 
     # Get text to send. Strip off any ending newlines.
     # There might by smiley icons in the text widget. Parse them to text.
@@ -2744,7 +2720,36 @@ proc ::Chat::Send {dlgtoken} {
     if {$text eq ""} {
 	return
     }
-   
+    
+    SendText $chattoken $text
+}
+
+proc ::Chat::SendText {chattoken text} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    variable cprefs
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::xmppxmlns xmppxmlns
+    
+    set jlib $jstate(jlib)
+    set threadID $chatstate(threadid)
+
+    # According to XMPP we should send to 3-tier jid if still online,
+    # else to 2-tier.
+    set chatstate(fromjid) [$jstate(jlib) getrecipientjid $chatstate(fromjid)]
+    set jid [jlib::jidmap $chatstate(fromjid)]
+    set jid2 [jlib::barejid $jid]
+    set chatstate(jid) $jid
+
+    if {![jlib::jidvalidate $jid]} {
+	set ans [::UI::MessageBox -message [mc jamessbadjid2 $jid] \
+	  -icon error -title [mc Error] -type yesno]
+	if {[string equal $ans "no"]} {
+	    return
+	}
+    }
+
     # Have hook for complete text.
     if {[hooks::run sendTextChatHook $chattoken $jid $text] eq "stop"} {	    
 	return
@@ -2753,7 +2758,7 @@ proc ::Chat::Send {dlgtoken} {
     # Need to detect if subject changed. If subject was changed it was already
     # sent alone but some clients (Psi) doesn't recognize this why it is
     # duplicated here. Good/bad? Skip!
-    set opts {}
+    set opts [list]
     set chatstate(lastsubject) $chatstate(subject)
     
     # Cancellations of any message composing jabber:x:event
@@ -2776,15 +2781,15 @@ proc ::Chat::Send {dlgtoken} {
     #-- this check is done with chatstate(havecs) but we need to send for first anyway
     set cselems [list]
     if { ($chatstate(havecs) eq "first") || ($chatstate(havecs) eq "true") } {
-        #-- The cselems is sended for first and then wait for a right reply 
-        if {$chatstate(havecs) eq "first"} {
-            set chatstate(havecs) false
-        }
-        ChangeChatState $chattoken send
+	#-- The cselems is sended for first and then wait for a right reply 
+	if {$chatstate(havecs) eq "first"} {
+	    set chatstate(havecs) false
+	}
+	ChangeChatState $chattoken send
 	set csE [wrapper::createtag $chatstate(chatstate) \
 	  -attrlist [list xmlns $xmppxmlns(chatstates)]]
-        lappend cselems $csE
-        lappend xlist $csE
+	lappend cselems $csE
+	lappend xlist $csE
     }
     
     # Handle any nickname. Only first message.

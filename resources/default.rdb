@@ -104,7 +104,7 @@
 
 ! specific megawidgets
 !
-*Chat*Scrollbar.width:               12
+!*Chat*Scrollbar.width:               12
 *Disco*Scrollbar.width:              12
 *Disco*Tree.highlightThickness:      0
 *GroupChat*Scrollbar.width:          12
