@@ -18,12 +18,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.220 2007-10-31 07:25:20 matben Exp $
+# $Id: GroupChat.tcl,v 1.221 2007-11-03 08:34:51 matben Exp $
 
 package require Create
 package require Enter
 package require History
 package require Bookmarks
+package require JUI
 package require UI::WSearch
 package require colorutils
 package require mstack
@@ -51,6 +52,8 @@ namespace eval ::GroupChat:: {
     ::hooks::register prefsCancelHook         ::GroupChat::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook   ::GroupChat::UserDefaultsHook
 
+    option add *GroupChat*TreeCtrl.background "#e6edf7"         50
+    
     # Icons
     option add *GroupChat*sendImage            send             widgetDefault
     option add *GroupChat*sendDisImage         sendDis          widgetDefault
@@ -141,10 +144,14 @@ namespace eval ::GroupChat:: {
     option add *GroupChatRoom*Text.borderWidth     0               50
     option add *GroupChatRoom*Text.relief          flat            50
     option add *GroupChatRoom.padding              {12  0 12  0}   50
+    # option add *GroupChatRoom.padding              { 0  0  0  0}   50
     option add *GroupChatRoom*active.padding       {1}             50
     option add *GroupChatRoom*TMenubutton.padding  {1}             50
     option add *GroupChatRoom*top.padding          {12  8 12  8}   50
     option add *GroupChatRoom*bot.padding          { 0  6  0  6}   50
+    
+    option add *GroupChatRoom*mid.pv.r.borderWidth 1               widgetDefault
+    option add *GroupChatRoom*mid.pv.r.relief      sunken          widgetDefault
     
     # Local stuff
     variable enteruid 0
@@ -951,7 +958,8 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     }
     
     # Users list.
-    frame $wfrusers -bd 1 -relief sunken
+    #frame $wfrusers -bd 1 -relief sunken
+    frame $wfrusers
     ttk::scrollbar $wyscusers -orient vertical -command [list $wusers yview]
     Tree $chattoken $w $wusers $wyscusers
 
@@ -1700,8 +1708,8 @@ proc ::GroupChat::TreeInitDB {} {
 
     option add *GroupChat.utree:styRole:eRoleText-padx       2             widgetDefault
     option add *GroupChat.utree:styRole:eRoleText-pady       2             widgetDefault
-    option add *GroupChat.utree:styRole:eRoleImage-padx      2             widgetDefault
-    option add *GroupChat.utree:styRole:eRoleImage-pady      2             widgetDefault
+    option add *GroupChat.utree:styRole:eImage-padx          4             widgetDefault
+    option add *GroupChat.utree:styRole:eImage-pady          2             widgetDefault
 
     set initedTreeDB 1
 }
@@ -1732,7 +1740,6 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     # The elements.
     $T element create eImage     image
     $T element create eText      text
-    $T element create eRoleImage image
     $T element create eRoleText  text
     $T element create eBorder    rect  -open new -showfocus 1
     $T element create eWindow    window
@@ -1742,19 +1749,19 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
     $T style elements $S {eBorder eImage eText}
     $T style layout $S eImage  -expand ns
     $T style layout $S eText   -squeeze x -expand ns
-    $T style layout $S eBorder -detach 1 -iexpand xy
+    $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styEntry]
     $T style elements $S {eBorder eImage eWindow}
     $T style layout $S eImage  -expand ns
     $T style layout $S eWindow -iexpand xy
-    $T style layout $S eBorder -detach 1 -iexpand xy
+    $T style layout $S eBorder -detach 1 -iexpand xy -indent 0
     
     set S [$T style create styRole]
-    $T style elements $S {eBorder eRoleImage eRoleText}
-    $T style layout $S eRoleImage -expand ns
+    $T style elements $S {eBorder eImage eRoleText}
+    $T style layout $S eImage -expand ns
     $T style layout $S eRoleText  -squeeze x -expand ns
-    $T style layout $S eBorder    -detach 1 -iexpand xy
+    $T style layout $S eBorder    -detach 1 -iexpand xy -indent 0
 
     set S [$T style create styTag]
     $T style elements $S {eText}
@@ -1901,8 +1908,10 @@ proc ::GroupChat::TreeCreateUserItem {chattoken jid3} {
 	if {$pitem eq ""} {
 	    set pitem [TreeCreateWithTag $T $ptag root]
 	    set text $userRoleToStr($role)
+	    set image [::Rosticons::Get application/group-available]
 	    $T item style set $pitem cTree styRole
-	    $T item element configure $pitem cTree eRoleText -text $text
+	    $T item element configure $pitem cTree \
+	      eRoleText -text $text + eImage -image $image
 	    $T item sort root -command [list ::GroupChat::TreeSortRoleCmd $T]
 	}
     }
