@@ -13,6 +13,7 @@ component::attempt ImageMagic       [file join $dir ImageMagic.tcl]     ::ImageM
 component::attempt JivePhone        [file join $dir JivePhone.tcl]      ::JivePhone::Init
 component::attempt MailtoURI        [file join $dir MailtoURI.tcl]      ::MailtoURI::Init
 component::attempt LiveRosterImage  [file join $dir LiveRosterImage.tcl]  ::LiveRosterImage::Init
+component::attempt MeBeam           [file join $dir MeBeam.tcl]         ::MeBeam::Init
 component::attempt Mood             [file join $dir Mood.tcl]           ::Mood::Init
 component::attempt Notifier         [file join $dir Notifier.tcl]       ::Notifier::Init
 component::attempt NotifyOnline     [file join $dir NotifyOnline.tcl]   ::NotifyOnline::Init
