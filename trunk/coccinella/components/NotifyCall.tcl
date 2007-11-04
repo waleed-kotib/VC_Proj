@@ -133,7 +133,7 @@ proc ::NotifyCall::HungUp {w } {
     destroy $w
 }
 
-proc ::NotifyCall::JivePhoneEventHook {type cid args} {
+proc ::NotifyCall::JivePhoneEventHook {type ext cid args} {
     variable cociFile
     variable state
 

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.29 2007-09-12 13:37:55 matben Exp $
+# $Id: JivePhone.tcl,v 1.30 2007-11-04 13:54:50 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -318,17 +318,15 @@ proc ::JivePhone::PresenceHook {jid type args} {
 #       Events are sent to the user when their phone is ringing, ...
 #       ... message packets are used to send events for the time being. 
 
-proc ::JivePhone::MessageHook {body args} {    
+proc ::JivePhone::MessageHook {xmldata uuid} {    
     variable xmlns
     variable popMenuDef
     variable popMenuType
     variable state
     variable callID
     
-    Debug "::JivePhone::MessageHook $args"
+    Debug "::JivePhone::MessageHook"
     
-    array set argsArr $args
-    set xmldata $argsArr(-xmldata)
     set elem [wrapper::getfirstchildwithtag $xmldata "phone-event"]
     if {[llength $elem]} {
 	set status [wrapper::getattribute $elem "status"]
@@ -339,7 +337,7 @@ proc ::JivePhone::MessageHook {body args} {
 	if {$cidElem != {}} {
 	    set cid [wrapper::getcdata $cidElem]
 	} else {
-	    set cid [mc {Unknown}]
+	    set cid [mc "Unknown"]
 	}
 	set image [::Rosticons::Get [string tolower phone/$status]]
 	
@@ -353,14 +351,14 @@ proc ::JivePhone::MessageHook {body args} {
 	    ::Roster::RegisterPopupEntry $popMenuDef(forward) $popMenuType(forward)
 	    bind $win <Button-1> [list ::JivePhone::DoDial "FORWARD"]
 	    ::balloonhelp::balloonforwindow $win [mc phoneMakeForward]
-	    eval {::hooks::run jivePhoneEvent $type $cid $callID} $args
+	    ::hooks::run jivePhoneEvent $type $cid $callID $xmldata
 	}
 	if {$type eq "HANG_UP"} {
 	    ::Roster::DeRegisterPopupEntry mJiveForward
 	    
 	    bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
 	    ::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
-	    eval {::hooks::run jivePhoneEvent $type $cid ""} $args
+	    ::hooks::run jivePhoneEvent $type $cid "" $xmldata
 	}
 	
 	# Provide a default notifier?
@@ -546,7 +544,7 @@ proc ::JivePhone::OnDial {w type {jid ""}} {
     ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
       -to $state(service) -command [list ::JivePhone::DialCB $dnid]
 
-    eval {::hooks::run jivePhoneEvent $command $dnid $callID}
+    ::hooks::run jivePhoneEvent $command $dnid $callID
 
     destroy $w
 }
@@ -574,7 +572,7 @@ proc ::JivePhone::DialJID {jid type {callID ""}} {
     ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
       -to $state(service) -command [list ::JivePhone::DialCB $jid]
 
-    eval {::hooks::run jivePhoneEvent $command $jid $callID}    
+    ::hooks::run jivePhoneEvent $command $jid $callID
 }
 
 proc ::JivePhone::DialExtension {extension type {callID ""}} {
@@ -601,7 +599,7 @@ proc ::JivePhone::DialExtension {extension type {callID ""}} {
     ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
       -to $state(service) -command [list ::JivePhone::DialCB $extension]
 
-    eval {::hooks::run jivePhoneEvent $command $extension $callID}
+    ::hooks::run jivePhoneEvent $command $extension $callID
 }
 
 proc ::JivePhone::DialCB {dnid type subiq args} {

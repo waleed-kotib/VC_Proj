@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: SpotLight.tcl,v 1.7 2007-07-18 09:40:10 matben Exp $
+# $Id: SpotLight.tcl,v 1.8 2007-11-04 13:54:50 matben Exp $
 
 namespace eval ::SpotLight:: { }
 
@@ -72,14 +72,13 @@ proc ::SpotLight::Init { } {
     component::register SpotLight {Launch SpotLight with incoming messages.}
 }
 
-proc ::SpotLight::ChatMessageHook {body args} {
+proc ::SpotLight::ChatMessageHook {xmldata} {
     global this
 
+    set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     if {$body eq ""} {
         return
     }
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
 
     # -from is a 3-tier jid /resource included.
     set jid [wrapper::getattribute $xmldata from]
@@ -91,8 +90,9 @@ proc ::SpotLight::ChatMessageHook {body args} {
 
     set search_string "$jid2"
 
-    if {[info exists argsA(-subject)]} {
-        append search_string " $argsA(-subject)"
+    set subject [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata subject]]
+    if {$subject ne ""} {
+        append search_string " $subject"
     }
 
     if {[string equal $this(platform) "macosx"]} {

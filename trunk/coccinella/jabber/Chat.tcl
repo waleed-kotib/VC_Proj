@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.234 2007-11-03 06:57:25 matben Exp $
+# $Id: Chat.tcl,v 1.235 2007-11-04 13:54:50 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -152,7 +152,7 @@ namespace eval ::Chat {
     option add *ChatThread*active.padding       {1}             50
     option add *ChatThread*TMenubutton.padding  {1}             50
     option add *ChatThread*top.padding          {12  8 12  8}   50
-    option add *ChatThread*bot.padding          {0   6  0  6}   50
+    option add *ChatThread*bot.padding          {6   6  6  6}   50
 
     option add *ChatThread*frtxt.borderWidth    0               50
     option add *ChatThread*frtxt.relief         sunken          50
@@ -397,6 +397,9 @@ proc ::Chat::DoStart {w} {
 # Arguments:
 #       jid
 #       args        -message, -thread
+#       
+# Results:
+#       chattoken
 
 proc ::Chat::StartThread {jid args} {
     global  config
@@ -463,23 +466,29 @@ proc ::Chat::StartThread {jid args} {
 # 
 #       Takes a threadID and handles building of dialog and chat thread stuff.
 #       @@@ Add more code here...
-#       
+#    
+# Arguments:
+# 
+#       args        ?-subject subject -message text?
+#          
 # Results:
 #       chattoken
 
 proc ::Chat::NewChat {threadID jid args} {
     upvar ::Jabber::jprefs jprefs
+
+    array set argsA $args    
     
     if {$jprefs(chat,tabbedui)} {
 	set dlgtoken [GetFirstDlgToken]
 	if {$dlgtoken eq ""} {
-	    set dlgtoken [eval {Build $threadID -from $jid} $args]
+	    set dlgtoken [eval {Build $threadID $jid} $args]
 	    set chattoken [GetTokenFrom chat threadid $threadID]
 	} else {
-	    set chattoken [NewPage $dlgtoken $threadID -from $jid]
+	    set chattoken [NewPage $dlgtoken $threadID $jid]
 	}
     } else {
-	set dlgtoken [eval {Build $threadID -from $jid} $args]		
+	set dlgtoken [eval {Build $threadID $jid} $args]		
 	set chattoken [GetActiveChatToken $dlgtoken]
     }
     MakeAndInsertHistory $chattoken
@@ -494,22 +503,18 @@ proc ::Chat::NewChat {threadID jid args} {
 #       If no dialog, make a freash one.
 #       
 # Arguments:
-#       body        the text message.
-#       args        ?-key value? pairs
+#       xmldata
 #       
 # Results:
 #       updates UI.
 
-proc ::Chat::GotMsg {body args} {
+proc ::Chat::GotMsg {xmldata} {
     global  prefs config
 
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::Chat::GotMsg args='$args'"
-
-    array set argsA $args    
-    set xmldata $argsA(-xmldata)
+    ::Debug 2 "::Chat::GotMsg"
     
     # -from is a 3-tier jid /resource included.
     set jid [wrapper::getattribute $xmldata from]
@@ -517,11 +522,13 @@ proc ::Chat::GotMsg {body args} {
     set mjid  [jlib::jidmap $jid]
     set mjid2 [jlib::barejid $mjid]
     
+    set body   [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
+    set thread [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata thread]]
+
     # We must follow the thread...
     # There are several cases to deal with: Have thread page, have dialog?
-    if {[info exists argsA(-thread)] && $config(chat,allow-multi-thread-per-jid)} {
-	set threadID $argsA(-thread)
-	set chattoken [GetTokenFrom chat threadid $threadID]
+    if {($thread ne "") && $config(chat,allow-multi-thread-per-jid)} {
+	set chattoken [GetTokenFrom chat threadid $thread]
     } else {
 	
 	# Try to find a reasonable fallback for clients that fail here (Psi).
@@ -530,16 +537,16 @@ proc ::Chat::GotMsg {body args} {
 	if {$chattoken eq ""} {
 	    
 	    # Need to create a new thread ID.
-	    set threadID [jlib::generateuuid]
+	    set thread [jlib::generateuuid]
 	} else {
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
 
-	    set threadID $chatstate(threadid)
+	    set thread $chatstate(threadid)
 	}
     }
     
-    # At this stage we have a threadID.
+    # At this stage we have a thread.
     # We may not yet have a dialog and/or page for this thread. Make them.
     set newdlg 0
     if {$chattoken eq ""} {
@@ -547,14 +554,14 @@ proc ::Chat::GotMsg {body args} {
 	    # Junk
 	    return
 	} else {
-	    set chattoken [eval {NewChat $threadID $jid} $args]
+	    set chattoken [NewChat $thread $jid]
 	    variable $chattoken
 	    upvar 0 $chattoken chatstate
 
             # First ChatState is active
             set chatstate(chatstate) active
 	    
-	    eval {::hooks::run newChatThreadHook $body} $args
+	    ::hooks::run newChatThreadHook $xmldata
 	}
     } else {
 	variable $chattoken
@@ -565,8 +572,8 @@ proc ::Chat::GotMsg {body args} {
     upvar 0 $dlgtoken dlgstate
 
     # We may have reset its jid to a 2-tier jid if it has been offline.
-    set chatstate(jid)         $mjid
-    set chatstate(fromjid)     $jid
+    set chatstate(jid)     $mjid
+    set chatstate(fromjid) $jid
     
     # Is this really needed here?
     if {[::Jabber::JlibCmd service isroom $jid2]} {
@@ -579,19 +586,19 @@ proc ::Chat::GotMsg {body args} {
 
     # Check for ChatState (XEP-0085) support
     set msgChatState ""
-    if {[info exists argsA(-active)]} {
+    if {[wrapper::havechildtag $xmldata active]} {
         set chatstate(havecs) true
         set msgChatState active
-    } elseif {[info exists argsA(-composing)]} {
+    } elseif {[wrapper::havechildtag $xmldata composing]} {
         set chatstate(havecs) true
         set msgChatState composing
-    } elseif {[info exists argsA(-paused)]} {
+    } elseif {[wrapper::havechildtag $xmldata paused]} {
         set chatstate(havecs) true
         set msgChatState paused
-    } elseif {[info exists argsA(-inactive)]} {
+    } elseif {[wrapper::havechildtag $xmldata inactive]} {
         set chatstate(havecs) true
         set msgChatState inactive
-    } elseif {[info exists argsA(-gone)]} {
+    } elseif {[wrapper::havechildtag $xmldata gone]} {
         set chatstate(havecs) true
         set msgChatState gone
     } else {
@@ -621,8 +628,8 @@ proc ::Chat::GotMsg {body args} {
     # See if we've got a jabber:x:event (XEP-0022).
     # 
     # @@@ Should we handle this with hooks?
-    if {[info exists argsA(-x)] && $chatstate(havecs) eq "true"} {
-	eval {XEventHandleAnyXElem $chattoken} $args
+    if {$chatstate(havecs) eq "true"} {
+	XEventHandleAnyXElem $chattoken $xmldata
     }
 
     # This is important since clicks may have reset the insert mark.
@@ -638,7 +645,7 @@ proc ::Chat::GotMsg {body args} {
 	# Put in history file.
        ::History::XPutItem recv $jid2 $xmldata
        
-	eval {TabAlert $chattoken} $args
+	TabAlert $chattoken
 	XEventCancel $chattoken
 	    
 	# Put an extra (*) in the windows title if not in focus.
@@ -657,14 +664,14 @@ proc ::Chat::GotMsg {body args} {
     }
     
     # Run this hook (speech).
-    eval {::hooks::run displayChatMessageHook $body} $args
+    ::hooks::run displayChatMessageHook $xmldata
 }
 
 # Chat::GotNormalMsg --
 # 
 #       Treats a 'normal' message as a chat message.
 
-proc ::Chat::GotNormalMsg {body args} {
+proc ::Chat::GotNormalMsg {xmldata uuid} {
     global  prefs
     upvar ::Jabber::jprefs jprefs
         
@@ -672,18 +679,16 @@ proc ::Chat::GotNormalMsg {body args} {
     if {$jprefs(chat,normalAsChat) && ($body ne "")} {
 	
 	::Debug 2 "::Chat::GotNormalMsg args='$args'"
-	eval {GotMsg $body} $args
+	GotMsg $xmldata
     }
     
     # Try identify if composing event sent as normal message.
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
     set jid2 [jlib::barejid [wrapper::getattribute $xmldata from]]
     set mjid2 [jlib::jidmap $jid2]
     set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
     
     if {($chattoken ne "") && [info exists argsA(-x)]} {
-	eval {XEventHandleAnyXElem $chattoken} $args
+	XEventHandleAnyXElem $chattoken $xmldata
     }
 }
 
@@ -1130,16 +1135,17 @@ proc ::Chat::BuildInit {} {
 
 # Chat::Build --
 #
-#       Builds the chat dialog.
+#       Builds the chat dialog and the first thread widget.
 #
 # Arguments:
 #       threadID    unique thread id.
-#       args        ?-subject subject -from fromJid -message text?
+#       jid         JID
+#       args        ?-subject subject -message text?
 #       
 # Results:
 #       dlgtoken; shows window.
 
-proc ::Chat::Build {threadID args} {
+proc ::Chat::Build {threadID jid args} {
     global  this prefs wDlgs
     
     variable uiddlg
@@ -1161,7 +1167,6 @@ proc ::Chat::Build {threadID args} {
     upvar 0 $dlgtoken dlgstate
     
     set w $wDlgs(jchat)$uiddlg
-    array set argsA $args
 
     set dlgstate(exists)      1
     set dlgstate(w)           $w
@@ -1270,7 +1275,7 @@ proc ::Chat::Build {threadID args} {
     
     # Use an extra frame that contains everything thread specific.
     set chattoken [eval {
-	BuildThreadWidget $dlgtoken $wthread $threadID
+	BuildThread $dlgtoken $wthread $threadID $jid
     } $args]
     pack $wthread -in $wcont -fill both -expand 1
     variable $chattoken
@@ -1308,7 +1313,7 @@ proc ::Chat::Build {threadID args} {
     return $dlgtoken
 }
 
-# Chat::BuildThreadWidget --
+# Chat::BuildThread --
 # 
 #       Builds page with all thread specific ui parts.
 #       
@@ -1316,11 +1321,13 @@ proc ::Chat::Build {threadID args} {
 #       dlgtoken    topwindow token
 #       wthread     mega widget path
 #       threadID
+#       from        JID
+#       args        ?-subject subject -message text?
 #       
 # Results:
 #       chattoken
 
-proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
+proc ::Chat::BuildThread {dlgtoken wthread threadID from args} {
     global  prefs this wDlgs config
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
@@ -1331,7 +1338,7 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Chat::BuildThreadWidget args=$args"
+    ::Debug 2 "::Chat::BuildThread args=$args"
     array set argsA $args
 
     # Initialize the state variable, an array, that keeps is the storage.
@@ -1345,16 +1352,12 @@ proc ::Chat::BuildThreadWidget {dlgtoken wthread threadID args} {
     
     set jlib $jstate(jlib)
 
-    # -from is sometimes a 3-tier jid /resource included.
+    # from is sometimes a 3-tier jid /resource included.
     # Try to keep any /resource part unless not possible.
     
-    if {[info exists argsA(-from)]} {
-	set jid [$jstate(jlib) getrecipientjid $argsA(-from)]
-    } else {
-	return
-    }
+    set mfrom [jlib::jidmap $from]
+    set jid [$jstate(jlib) getrecipientjid $from]
     set mjid [jlib::jidmap $jid]
-    set mfrom [jlib::jidmap $argsA(-from)]
     jlib::splitjidex $jid node domain res
     set jid2 [jlib::barejid $mjid]
 
@@ -1909,7 +1912,7 @@ proc ::Chat::AvatarNewPhotoHook {jid2} {
 #       Several procs to handle the tabbed interface; creates and deletes
 #       notebook and pages.
 
-proc ::Chat::NewPage {dlgtoken threadID args} {
+proc ::Chat::NewPage {dlgtoken threadID jid args} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     upvar ::Jabber::jprefs jprefs
@@ -1927,7 +1930,7 @@ proc ::Chat::NewPage {dlgtoken threadID args} {
     } 
 
     # Make fresh page with chat widget.
-    set chattoken [eval {MakeNewPage $dlgtoken $threadID} $args]
+    set chattoken [eval {MakeNewPage $dlgtoken $threadID $jid} $args]
     return $chattoken
 }
 
@@ -1982,7 +1985,7 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
     set dlgstate(wpage2token,$wpage) $chattoken
 }
 
-proc ::Chat::MakeNewPage {dlgtoken threadID args} {
+proc ::Chat::MakeNewPage {dlgtoken threadID jid args} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
@@ -1990,7 +1993,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID args} {
     array set argsA $args
         
     # Make fresh page with chat widget.
-    set dispname [::Roster::GetDisplayName $argsA(-from)]
+    set dispname [::Roster::GetDisplayName $jid]
     set wnb $dlgstate(wnb)
     set wpage $wnb.p[incr dlgstate(uid)]
     ttk::frame $wpage
@@ -2000,7 +2003,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID args} {
     # able to reparent it when notebook gons.
     set wthread $dlgstate(wthread)[incr uidpage]
     set chattoken [eval {
-	BuildThreadWidget $dlgtoken $wthread $threadID
+	BuildThread $dlgtoken $wthread $threadID $jid
     } $args]
     pack $wthread -in $wpage -fill both -expand true
 
@@ -2291,7 +2294,7 @@ proc ::Chat::GetActiveChatToken {dlgtoken} {
     return $chattoken
 }
 
-proc ::Chat::TabAlert {chattoken args} {
+proc ::Chat::TabAlert {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -2826,7 +2829,7 @@ proc ::Chat::SendText {chattoken text} {
     set chatstate(havesent) 1
     
     set opts [list -from $jid2]
-    eval {::hooks::run displayChatMessageHook $text} $opts
+    ::hooks::run displayChatMessageHook $xmldata
 }
 
 proc ::Chat::TraceJid {dlgtoken name junk1 junk2} {
@@ -3237,7 +3240,7 @@ proc ::Chat::GetFirstSashPos {} {
 
 # Handle incoming jabber:x:event (XEP-0022).
 
-proc ::Chat::XEventHandleAnyXElem {chattoken args} {
+proc ::Chat::XEventHandleAnyXElem {chattoken xmldata} {
     global  config
     
     if {!$config(chat,notify-recv)} {
@@ -3245,48 +3248,43 @@ proc ::Chat::XEventHandleAnyXElem {chattoken args} {
     }
 
     # See if we've got a jabber:x:event (XEP-0022).
-    # 
-    #  Should we handle this with hooks????
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
     set xeventE [wrapper::getfirstchild $xmldata x "jabber:x:event"]
     if {[llength $xeventE]} {
 
-	# If we get xevents as normal messages, send them as normal as well.
-	if {[info exists argsA(-type)]} {
-	    variable $chattoken
-	    upvar 0 $chattoken chatstate
+	variable $chattoken
+	upvar 0 $chattoken chatstate
 
-	    if {$argsA(-type) eq "chat"} {
-		set chatstate(xevent,type) chat
-	    } else {
-		set chatstate(xevent,type) normal
-	    }
+	# If we get xevents as normal messages, send them as normal as well.
+	set type [wrapper::getattribute $xmldata type]
+	
+	if {$type eq "chat"} {
+	    set chatstate(xevent,type) chat
+	} else {
+	    set chatstate(xevent,type) normal
 	}
-	eval {XEventRecv $chattoken $xeventE} $args
+	XEventRecv $chattoken $xmldata
     }
 }
 
-proc ::Chat::XEventRecv {chattoken xeventE args} {
+proc ::Chat::XEventRecv {chattoken xmldata} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 	
-    array set argsA $args
+    set xeventE [wrapper::getfirstchild $xmldata x "jabber:x:event"]
 
     # This can be one of three things:
     # 1) Request for event notification
     # 2) Notification of message composing
     # 3) Cancellations of message composing
     
-    set msgid ""
-    if {[info exists argsA(-id)]} {
-	set msgid $argsA(-id)
+    set msgid [wrapper::getattribute $xmldata id]
+    if {$msgid ne ""} {
 	lappend chatstate(xevent,msgidlist) $msgid
     }
     set composeE [wrapper::getfirstchildwithtag $xeventE "composing"]
     set idE      [wrapper::getfirstchildwithtag $xeventE "id"]
         
-    if {($msgid ne "") && [llength $composeE] && ($idE == {})} {
+    if {($msgid ne "") && [llength $composeE] && ![llength $idE]} {
 	
 	# 1) Request for event notification
 	set chatstate(xevent,msgid) $msgid
@@ -3300,7 +3298,7 @@ proc ::Chat::XEventRecv {chattoken xeventE args} {
 
 	$chatstate(wnotifier) configure -image $dlgstate(iconNotifier)
 	set chatstate(notifier) " [mc chatcompreply $chatstate(displayname)]"
-    } elseif {($composeE == {}) && ($idE != {})} {
+    } elseif {![llength $composeE] && [llength $idE]} {
 	
 	# 3) Cancellations of message composing
 	$chatstate(wnotifier) configure -image ""

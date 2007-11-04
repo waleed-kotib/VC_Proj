@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.25 2007-09-16 14:55:26 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.26 2007-11-04 13:54:50 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -507,11 +507,12 @@ proc ::BuddyPounce::Event {from eventkey args} {
     variable alertTitle
     
     ::Debug 4 "::BuddyPounce::Event from = $from, eventkey=$eventkey"
-    array set argsArr $args
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
     
     # We must check 'jid', 'group' and 'any' in that order.
     # A list of actions to perform if any.
-    set actions {}
+    set actions [list]
     
     # First this specific JID.
     set jid [jlib::jidmap $from]
@@ -581,8 +582,9 @@ proc ::BuddyPounce::Event {from eventkey args} {
 		    set body [subst -nocommands -novariables $body]
 		}
 		set opts [list]
-		if {[info exists argsArr(-body)]} {
-		    lappend opts -quotemessage $argsArr(-body)
+		set msgbody [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
+		if {$msgbody ne ""} {
+		    lappend opts -quotemessage $msgbody
 		}
 		eval {::NewMsg::Build -to $from  \
 		  -subject $subject -message $body} $opts
@@ -618,7 +620,7 @@ proc ::BuddyPounce::PlaySound {tail} {
     }
 }
 
-proc ::BuddyPounce::QuitHook { } {
+proc ::BuddyPounce::QuitHook {} {
     variable wdlg
     
     ::UI::SaveWinPrefixGeom $wdlg
@@ -631,22 +633,18 @@ proc ::BuddyPounce::CloseHook {wclose} {
     return ""
 }
 
-proc ::BuddyPounce::NewChatMsgHook {body args} {
+proc ::BuddyPounce::NewChatMsgHook {xmldata} {
 
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
     set from [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $from]
-    eval {Event $jid2 chat} $args
+    Event $jid2 chat -xmldata $xmldata
 }
 
-proc ::BuddyPounce::NewMsgHook {body args} {
+proc ::BuddyPounce::NewMsgHook {xmldata uuid} {
     
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
     set from [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $from]
-    eval {Event $jid2 msg} $args
+    Event $jid2 msg -xmldata $xmldata
 }
 
 proc ::BuddyPounce::PresenceHook {jid type args} {
@@ -658,12 +656,12 @@ proc ::BuddyPounce::PresenceHook {jid type args} {
     switch -- $type {
 	available {
 	    if {![::Jabber::RosterCmd wasavailable $jid]} {
-		Event $jid $type
+		eval {Event $jid $type} $args
 	    }
 	}
 	unavailable {
 	    if {[::Jabber::RosterCmd wasavailable $jid]} {
-		Event $jid $type
+		eval {Event $jid $type} $args
 	    }
 	}
     }

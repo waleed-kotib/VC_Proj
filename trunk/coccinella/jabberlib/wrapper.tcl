@@ -10,7 +10,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: wrapper.tcl,v 1.36 2007-09-06 13:20:47 matben Exp $
+# $Id: wrapper.tcl,v 1.37 2007-11-04 13:54:51 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -732,6 +732,10 @@ proc wrapper::getfirstchildwithtag {xmllist tag} {
 	}
     }
     return $c
+}
+
+proc wrapper::havechildtag {xmllist tag} {
+    return [llength [getfirstchildwithtag $xmllist $tag]]
 }
 
 proc wrapper::getfirstchildwithxmlns {xmllist ns} {

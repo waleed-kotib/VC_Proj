@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.39 2007-09-15 14:27:23 matben Exp $
+# $Id: Sounds.tcl,v 1.40 2007-11-04 13:54:50 matben Exp $
 
 namespace eval ::Sounds:: {
 	
@@ -307,16 +307,16 @@ proc ::Sounds::PlayMIDI {fileName} {
     }
 }
 
-proc ::Sounds::Msg {type snd body args} {
-        
+proc ::Sounds::Msg {type snd xmldata {uuid ""}} {
+
+    set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
+
     # We sometimes get non text stuff messages, like jabber:x:event etc.
     if {![string length $body]} {
 	return
     }
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
     set from [wrapper::getattribute $xmldata from]
-    
+
     # We shouldn't make noise for our own messages.
     switch -- $type {
 	normal {
@@ -337,12 +337,11 @@ proc ::Sounds::Msg {type snd body args} {
 	    }
 	}
     }
-
     PlayWhenIdle $snd
+    return
 }
 
-proc ::Sounds::Event {snd args} {
-    
+proc ::Sounds::Event {snd args} {    
     PlayWhenIdle $snd
 }
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GotMsg.tcl,v 1.55 2007-10-09 13:05:17 matben Exp $
+# $Id: GotMsg.tcl,v 1.56 2007-11-04 13:54:50 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -47,12 +47,12 @@ proc ::GotMsg::QuitAppHook {} {
 }
 
 # @@@ Enable this when solved the uidmsg vs. uuid mixup.
-proc ::GotMsg::MessageHook {bodytxt args} {
+proc ::GotMsg::MessageHook {xmldata uuid} {
     upvar ::Jabber::jprefs jprefs
 
-    if {$jprefs(showMsgNewWin) && ($bodytxt ne "")} {
-	array set argsA $args
-	GotMsg $argsA(-uuid)
+    set body   [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
+    if {$jprefs(showMsgNewWin) && ($body ne "")} {
+	GotMsg $uuid
     }
 }
 

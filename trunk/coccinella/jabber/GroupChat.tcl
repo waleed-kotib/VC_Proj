@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.221 2007-11-03 08:34:51 matben Exp $
+# $Id: GroupChat.tcl,v 1.222 2007-11-04 13:54:50 matben Exp $
 
 package require Create
 package require Enter
@@ -432,12 +432,9 @@ proc ::GroupChat::SetProtocol {roomjid _protocol} {
 # 
 #       MUC (and others) send invitations using normal messages. Catch!
 
-proc ::GroupChat::NormalMsgHook {body args} {
+proc ::GroupChat::NormalMsgHook {xmldata uuid} {
     upvar ::Jabber::xmppxmlns xmppxmlns
-    
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
-    
+        
     set roomjid [wrapper::getattribute $xmldata from]
     set xuserE [wrapper::getfirstchild $xmldata x $xmppxmlns(muc,user)]
     
@@ -466,7 +463,7 @@ proc ::GroupChat::NormalMsgHook {body args} {
     }
     if {$isinvite} {
 
-	::Debug 2 "::GroupChat::NormalMsgHook args='$args'"
+	::Debug 2 "::GroupChat::NormalMsgHook"
 
 	set str [mc jamessgcinvite2 $invitejid $roomjid]
 	append str " " $str2
@@ -514,29 +511,29 @@ proc ::GroupChat::NewChat {roomjid} {
 #       If no dialog, make a freash one.
 #       
 # Arguments:
-#       body        the text message.
-#       args        ?-key value? pairs
+#       xmldata
 #       
 # Results:
 #       updates UI.
 
-proc ::GroupChat::GotMsg {body args} {
+proc ::GroupChat::GotMsg {xmldata} {
     global  prefs
     
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    ::Debug 2 "::GroupChat::GotMsg args='$args'"
+    ::Debug 2 "::GroupChat::GotMsg"
     
-    array set argsA $args
-    set xmldata $argsA(-xmldata)    
     set from [wrapper::getattribute $xmldata from]
     if {$from eq ""} {
 	return
     }
     set from [jlib::jidmap $from]
     jlib::splitjid $from roomjid res
-        
+
+    set body    [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
+    set subject [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata subject]]
+
     # If we haven't a window for this roomjid, make one!
     set chattoken [GetTokenFrom chat roomjid [jlib::ESC $roomjid]]
     if {$chattoken eq ""} {
@@ -553,16 +550,14 @@ proc ::GroupChat::GotMsg {body args} {
     if {[info exists chatstate(ignore,$from)] && $chatstate(ignore,$from)} {
 	return
     }
-    if {[info exists argsA(-subject)]} {
-	set chatstate(subject) $argsA(-subject)
-	set str "[mc Subject]: $chatstate(subject)"
-	eval {InsertMessage $chattoken $from $str} $args
+    
+    InsertMessage $chattoken $xmldata
+    
+    if {$subject ne ""} {
+	set chatstate(subject) $subject
     }
     if {$body ne ""} {
-
-	# And put message in window.
-	eval {InsertMessage $chattoken $from $body} $args
-	eval {TabAlert $chattoken} $args
+	TabAlert $chattoken $xmldata
 	    
 	# Put an extra (*) in the windows title if not in focus.
 	if {([set wfocus [focus]] eq "") ||  \
@@ -572,7 +567,7 @@ proc ::GroupChat::GotMsg {body args} {
 	}
 	
 	# Run display hooks (speech).
-	eval {::hooks::run displayGroupChatMessageHook $body} $args
+	::hooks::run displayGroupChatMessageHook $xmldata
     }
 }
 
@@ -1480,7 +1475,7 @@ proc ::GroupChat::SetTitle {chattoken} {
     wm title $chatstate(w) $str
 }
 
-proc ::GroupChat::TabAlert {chattoken args} {
+proc ::GroupChat::TabAlert {chattoken xmldata} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -2060,7 +2055,7 @@ proc ::GroupChat::TreeDeleteItem {T tag} {
     variable tag2item
   
     if {[info exists tag2item($T,$tag)]} {
-	$T item delete $item
+	$T item delete $tag2item($T,$tag)
     }
 }
 
@@ -2177,42 +2172,46 @@ proc ::GroupChat::StatusSyncHook {show args} {
 # 
 #       Puts message in text groupchat window.
 
-proc ::GroupChat::InsertMessage {chattoken from body args} {
+#proc ::GroupChat::InsertMessage {chattoken from body args}
+
+proc ::GroupChat::InsertMessage {chattoken xmldata} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    array set argsA $args
-    
-    set xmldata $argsA(-xmldata)
+    set tag  [wrapper::gettag $xmldata]
+    set from [wrapper::getattribute $xmldata from]
 
     set w       $chatstate(w)
     set wtext   $chatstate(wtext)
     set roomjid $chatstate(roomjid)
             
+    set haveSys 0
+    if {$tag eq "presence"} {
+	set sysstr [PresenceGetString $chattoken $xmldata]
+	set haveSys 1
+    }
+    
     # This can be room name or nick name.
     set mynick [::Jabber::JlibCmd service mynick $roomjid]
     set myroomjid $roomjid/$mynick
     if {[jlib::jidequal $myroomjid $from]} {
 	set whom me
 	set historyTag send
-    } elseif {[string equal $roomjid $from]} {
-	set whom sys
-	set historyTag recv
     } else {
 	set whom they
 	set historyTag recv
     }    
-    set nick ""
-    
-    switch -- $whom {
-	me - they {
-	    set nick [::Jabber::JlibCmd service nick $from]
-	    set nick [jlib::unescapestr $nick]
-	}
-    }
+    set nick [jlib::unescapestr [jlib::resourcejid $from]]
+
     set history 0
-    set secs ""
-    
+    set msecs [clock clicks -milliseconds]
+    if {$tag eq "presence"} {
+	set chatstate(last,sys) $msecs
+    } else {
+	set chatstate(last,$whom) $msecs
+    }
+
+    set secs ""    
     set stamp [::Jabber::GetDelayStamp $xmldata]
     if {$stamp ne ""} {
 	set secs [clock scan $stamp -gmt 1]
@@ -2221,7 +2220,6 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     if {$secs eq ""} {
 	set secs [clock seconds]
     }
-    set chatstate(last,$whom) [clock clicks -milliseconds]
     if {[::Utils::IsToday $secs]} {
 	set clockFormat [option get $w clockFormat {}]
     } else {
@@ -2250,11 +2248,44 @@ proc ::GroupChat::InsertMessage {chattoken from body args} {
     }
     $wtext mark set insert end
     $wtext configure -state normal
-    $wtext insert end $prefix $pretags
     
-    ::Text::ParseMsg groupchat $from $wtext "  $body" ${whom}text${htag}
-    $wtext insert end \n
-    
+    if {$haveSys} {
+	set spec sys
+	
+	set syspretags [concat syspre$htag $spec]
+	set systxttags [concat systext$htag $spec]
+
+	$wtext insert end $prefix $syspretags
+	$wtext insert insert "   "   $systxttags
+	::Text::ParseMsg groupchat $from $wtext $sysstr $systxttags
+	$wtext insert end "\n"
+    }
+
+    set subjectE [wrapper::getfirstchildwithtag $xmldata "subject"]
+    if {[llength $subjectE]} {
+	set subject [wrapper::getcdata $subjectE]
+	set str "[mc Subject]: $subject"
+	set txttags ${whom}text${htag}
+
+	$wtext insert end $prefix $pretags
+	$wtext insert insert "   "   $txttags
+	::Text::ParseMsg groupchat $from $wtext $str $txttags
+	$wtext insert end "\n"
+    }
+
+    if {$tag eq "message"} {
+	set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
+	if {[llength $bodyE]} {
+	    set txttags ${whom}text${htag}
+
+	    set body [wrapper::getcdata $bodyE]
+
+	    $wtext insert end $prefix $pretags
+	    $wtext insert insert "   "   $txttags
+	    ::Text::ParseMsg groupchat $from $wtext $body $txttags
+	    $wtext insert end "\n"
+	}
+    }
     $wtext configure -state disabled
     $wtext see end
     
@@ -2559,7 +2590,7 @@ proc ::GroupChat::SetNick {chattoken nick} {
     #  -command [list ::GroupChat::SetNickCB $chattoken]
 }
 
-proc ::GroupChat::SetNickCB {chattoken xmldata} {
+proc ::GroupChat::SetNickCB {chattoken jlib xmldata} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -2722,33 +2753,40 @@ proc ::GroupChat::InsertPresenceChange {chattoken xmldata} {
 	if {[expr {$ms - $chatstate(last,sys) < 400}]} {
 	    #return
 	}
-	set jid3 [wrapper::getattribute $xmldata from]
-	jlib::splitjid $jid3 jid2 res
-	if {$res eq ""} {
-	    jlib::splitjidex $jid3 node domain res
-	    set name $node
-	} else {
-	    set name $res
-	}
-	if {$res eq ""} {
-	    array set presA [lindex [$jstate(jlib) roster getpresence $jid2] 0]
-	} else {
-	    array set presA [$jstate(jlib) roster getpresence $jid2 -resource $res]
-	}
-	set show $presA(-type)
-	if {[info exists presA(-show)]} {
-	    set show $presA(-show)
-	}
-	
-	# The Gtalk server is playing games by sending out multiple identical
-	# presence to us. It acts very weird! No workaround.
-	set str [string tolower [::Roster::MapShowToText $show]]
-	if {[info exists presA(-status)]} {
-	    append str " " $presA(-status)
-	}
-	InsertMessage $chattoken $chatstate(roomjid) "$name: $str"  \
-	  -xmldata $xmldata
+	InsertMessage $chattoken $xmldata
     }
+}
+
+proc ::GroupChat::PresenceGetString {chattoken xmldata} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    upvar ::Jabber::jstate jstate
+    
+    set from [wrapper::getattribute $xmldata from]
+    jlib::splitjid $from jid2 res
+    if {$res eq ""} {
+	jlib::splitjidex $from node domain res
+	set name $node
+    } else {
+	set name $res
+    }
+    if {$res eq ""} {
+	array set presA [lindex [$jstate(jlib) roster getpresence $jid2] 0]
+    } else {
+	array set presA [$jstate(jlib) roster getpresence $jid2 -resource $res]
+    }
+    set show $presA(-type)
+    if {[info exists presA(-show)]} {
+	set show $presA(-show)
+    }
+    
+    # The Gtalk server is playing games by sending out multiple identical
+    # presence to us. It acts very weird! No workaround.
+    set str [string tolower [::Roster::MapShowToText $show]]
+    if {[info exists presA(-status)]} {
+	append str " " $presA(-status)
+    }
+    return $str
 }
 
 proc ::GroupChat::AddUsers {chattoken} {
