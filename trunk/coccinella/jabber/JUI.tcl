@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.222 2007-10-18 08:02:33 matben Exp $
+# $Id: JUI.tcl,v 1.223 2007-11-04 15:32:45 matben Exp $
 
 package provide JUI 1.0
 
@@ -61,6 +61,7 @@ namespace eval ::JUI:: {
 
     # Other icons.
     option add *JMain.resizeHandleImage           resizehandle    widgetDefault
+    option add *JMain.secureImage                 locked          widgetDefault
 
     option add *JMain.cociEs32                    coci-es-32      widgetDefault
     option add *JMain.cociEsActive32              coci-es-shadow-32 widgetDefault
@@ -368,12 +369,20 @@ proc ::JUI::Build {w} {
 	ttk::frame $wbot
 	pack $wbot -side bottom -fill x
 	
+	ttk::frame $wbot.r
+	pack  $wbot.r  -side right -fill y
+	
 	if {[tk windowingsystem] ne "aqua"} {
-	    ttk::label $wbot.size -compound image -image $iconResize
+	    ttk::label $wbot.r.size -compound image -image $iconResize
 	} else {
-	    ttk::frame $wbot.size -width 8
+	    ttk::frame $wbot.r.size
 	}
-	pack  $wbot.size -side right -anchor s
+	ttk::button $wbot.r.secure -style Plain -compound image -padding {0 2 2 0}
+	
+	grid  $wbot.r.secure  -sticky n
+	grid  $wbot.r.size    -sticky se
+	grid columnconfigure $wbot.r 0 -minsize 20 ;# 16 + 2*2
+	grid rowconfigure    $wbot.r 0 -weight 1
 	
 	set wfstat $wbot.f
 	ttk::frame $wfstat
@@ -392,13 +401,14 @@ proc ::JUI::Build {w} {
 	set infoLabel $config(ui,main,infoLabel)
 	ttk::frame $wfstat.cont
 	ttk::label $wfstat.me -textvariable ::Jabber::jstate($infoLabel) -anchor w
-	pack  $wfstat.ava  -side right -padx 3 -pady 1
+	pack  $wfstat.ava  -side right -pady 1
 	pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
-	pack  $wfstat.me  -padx 3 -pady 4 -fill x -expand 1
+	pack  $wfstat.me  -padx 6 -pady 4 -fill x -expand 1
 
 	set jwapp(mystatus)  $wfstat.bst
 	set jwapp(myjid)     $wfstat.me
 	set jwapp(statcont)  $wstatcont
+	set jwapp(secure)    $wbot.r.secure
     }
     
     # Experimental.
@@ -1134,16 +1144,26 @@ proc ::JUI::RosterSelectionHook {} {
 proc ::JUI::LoginHook {} {
     variable jwapp
     
-    # The Login/Logout button strings may have different widths.
     set w $jwapp(w)
+    if {[info exists jwapp(secure)] && [winfo exists $jwapp(secure)]} {
+	set name [::Theme::GetImage [option get $w secureImage {}]]
+	$jwapp(secure) configure -image $name
+    }
+
+    # The Login/Logout button strings may have different widths.
     set minwidth [$jwapp(wtbar) minwidth]
     set minW [expr $minwidth > 200 ? $minwidth : 200]
     wm minsize $w $minW 300    
 }
 
 proc ::JUI::LogoutHook {} {
+    variable jwapp
     
-    SetStatusMessage [mc {Logged out}]
+    if {[info exists jwapp(secure)] && [winfo exists $jwapp(secure)]} {
+	$jwapp(secure) configure -image ""
+    }
+    
+    SetStatusMessage [mc "Logged out"]
     FixUIWhen "disconnect"
     SetConnectState "disconnect"
 }
