@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Speech.tcl,v 1.15 2007-09-27 14:19:26 matben Exp $
+# $Id: Speech.tcl,v 1.16 2007-11-04 13:54:50 matben Exp $
 
 namespace eval ::Speech:: {}
 
@@ -68,8 +68,8 @@ proc ::Speech::Init {} {
 
     # Hooks to run when message displayed to user.
     ::hooks::register displayMessageHook          [list ::Speech::SpeakMessage normal]
-    ::hooks::register displayChatMessageHook      [list ::Speech::SpeakMessage chat]
-    ::hooks::register displayGroupChatMessageHook [list ::Speech::SpeakMessage groupchat]
+    ::hooks::register displayChatMessageHook      ::Speech::SpeakMessage2
+    ::hooks::register displayGroupChatMessageHook ::Speech::SpeakMessage2
     ::hooks::register whiteboardTextInsertHook    ::Speech::SpeakWBText
 
     # Define all hooks for preference settings.
@@ -101,6 +101,45 @@ proc ::Speech::Verify {} {
       ($sprefs(voiceOther-$plat) eq "")} {
 	set sprefs(voiceOther-$plat) [lindex $voices 1]
     }
+}
+
+proc ::Speech::SpeakMessage2 {xmldata} {
+    variable sprefs
+
+    set from [wrapper::getattribute $xmldata from]
+    set type [wrapper::getattribute $xmldata type]
+    set subject [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata subject]]
+    set body    [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
+
+    switch -- $type {
+	chat {
+	    if {$sprefs(speakChat)} {
+		set myjid [::Jabber::GetMyJid]
+		set jid2 [jlib::barejid $myjid]
+		if {[string match ${jid2}* $from]} {
+		    set voice $sprefs(voiceUs)
+		    set txt "I say, "
+		} else {
+		    set voice $sprefs(voiceOther)
+		    set txt " , "
+		}
+		append txt $body
+		Speak $txt $voice
+	    }
+	}
+	groupchat {
+	    if {$sprefs(speakChat)} {
+		jlib::splitjid $from roomjid res
+		set myjid [::Jabber::GetMyJid $roomjid]
+		if {[string equal $myjid $from]} {
+		    Speak $body $sprefs(voiceUs)
+		} else {
+		    Speak $body $sprefs(voiceOther)
+		}
+	    }
+	}
+    }
+    return
 }
 
 proc ::Speech::SpeakMessage {type body args} {

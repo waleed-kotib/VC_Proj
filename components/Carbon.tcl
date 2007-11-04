@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.13 2007-10-16 12:10:16 matben Exp $
+# $Id: Carbon.tcl,v 1.14 2007-11-04 13:54:50 matben Exp $
 # 
 # @@@ Move the sleep stuff to something more generic.
 
@@ -65,9 +65,10 @@ proc ::Carbon::LoginHook {} {
     set wasSleepLoggedOut 0
 }
 
-proc ::Carbon::NewMsgHook {body args} {
+proc ::Carbon::NewMsgHook {xmldata args} {
     variable nHiddenMsgs
     
+    set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     if {($body ne {}) && ![::UI::IsAppInFront]} {
 	incr nHiddenMsgs
 	::carbon::dock overlay -text $nHiddenMsgs

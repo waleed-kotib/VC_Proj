@@ -19,13 +19,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Notifier.tcl,v 1.6 2007-07-18 09:40:09 matben Exp $
+# $Id: Notifier.tcl,v 1.7 2007-11-04 13:54:50 matben Exp $
 
 namespace eval ::Notifier:: {
     
 }
 
-proc ::Notifier::Init { } {
+proc ::Notifier::Init {} {
     global  this
     
     # Use this on windows only.
@@ -46,7 +46,7 @@ proc ::Notifier::Init { } {
     ::hooks::register oobSetRequestHook     [namespace current]::OOBSetHook
 }
 
-proc ::Notifier::InitPrefsHook { } {
+proc ::Notifier::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
 
     set jprefs(notifier,state) 0
@@ -55,37 +55,34 @@ proc ::Notifier::InitPrefsHook { } {
       [list ::Jabber::jprefs(notifier,state)  jprefs_notifier_state  $jprefs(notifier,state)]]   
 }
 
-proc ::Notifier::MessageHook {body args} {
+proc ::Notifier::MessageHook {xmldata} {
     
+    set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     if {![string length $body]} {
 	return
     }
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
     set from [wrapper::getattribute $xmldata from]
     set str "You just received a new message from $from"
     after 200 [list ::Notifier::DisplayMsg $str]
 }
 
-proc ::Notifier::ChatHook {body args} {
+proc ::Notifier::ChatHook {xmldata} {
     
+    set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     if {![string length $body]} {
 	return
     }
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
     set from [wrapper::getattribute $xmldata from]
     set str "You just received a new chat message from $from"
     after 200 [list ::Notifier::DisplayMsg $str]
 }
 
-proc ::Notifier::ThreadHook {body args} {
+proc ::Notifier::ThreadHook {xmldata} {
     
+    set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     if {![string length $body]} {
 	return
     }
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
     set from [wrapper::getattribute $xmldata from]
     set str "The user $from just started a new chat thread"
     after 200 [list ::Notifier::DisplayMsg $str]

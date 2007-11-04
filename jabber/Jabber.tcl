@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.251 2007-10-30 07:54:36 matben Exp $
+# $Id: Jabber.tcl,v 1.252 2007-11-04 13:54:51 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -599,39 +599,8 @@ proc ::Jabber::MessageHandler {jlibname xmldata} {
         
     set from [wrapper::getattribute $xmldata from]
     set type [wrapper::getattribute $xmldata type]
-    set body ""
-
-    # The hooks are expecting a -key value list of preprocessed xml.
-    # @@@ In the future we shall deliver the full xmldata instead.
-    #     See newExChatMessageHook below.
-    set opts [list -xmldata $xmldata]
-    
-    foreach {name value} [wrapper::getattrlist $xmldata] {
-	lappend opts -$name $value
-    }
-    set xElist [list]
-    foreach E [wrapper::getchildren $xmldata] {
-	set tag    [wrapper::gettag $E]
-	set chdata [wrapper::getcdata $E]
-
-	switch -- $tag {
-	    body {
-		set body $chdata
-		lappend opts -$tag $chdata
-	    }
-	    subject - thread {
-		lappend opts -$tag $chdata
-	    }
-	    x {
-		lappend xElist $E
-	    }
-	    default {
-		lappend opts -$tag $E
-	    }
-	}	
-    }    
-    if {[llength $xElist]} {
-	lappend opts -x $xElist
+    if {$from eq ""} {
+	# ??? return  check XMPP RFC
     }
     
     switch -- $type {
@@ -647,29 +616,61 @@ proc ::Jabber::MessageHandler {jlibname xmldata} {
 		append str "\n" "[mc {Error code}]: $errcode\n"
 		append str "[mc Message]: $errmsg"	
 		ui::dialog -title [mc Error] -message $str -icon error -type ok
-
+		::Jabber::AddErrorLog $from $str
 	    }
-	    eval {::hooks::run newErrorMessageHook} $opts
 	}
 	chat {
-	    ::hooks::run newExChatMessageHook $xmldata
-	    eval {::hooks::run newChatMessageHook $body} $opts
+	    ::hooks::run newChatMessageHook $xmldata
 	}
 	groupchat {
-	    eval {::hooks::run newGroupChatMessageHook $body} $opts
+	    ::hooks::run newGroupChatMessageHook $xmldata
 	}
 	headline {
-	    eval {::hooks::run newHeadlineMessageHook $body} $opts
+	    ::hooks::run newHeadlineMessageHook $xmldata
 	}
 	default {
 	    	    
 	    # Add a unique identifier for each message which is handy for the mailbox.
-	    lappend opts -uuid [uuid::uuid generate]
+	    set uuid [uuid::uuid generate]
 	    
 	    # Normal message. Handles whiteboard stuff as well.
-	    eval {::hooks::run newMessageHook $body} $opts
+	    ::hooks::run newMessageHook $xmldata $uuid
 	}
     }
+}
+
+# Jabber::ExtractOptsFromXmldata --
+# 
+#       As an emergency to rescue the old style proc calls.
+
+proc ::Jabber::ExtractOptsFromXmldata {xmldata} {
+    
+    set opts [list -xmldata $xmldata]
+    
+    foreach {name value} [wrapper::getattrlist $xmldata] {
+	lappend opts -$name $value
+    }
+    set xElist [list]
+    foreach E [wrapper::getchildren $xmldata] {
+	set tag    [wrapper::gettag $E]
+	set chdata [wrapper::getcdata $E]
+
+	switch -- $tag {
+	    subject - thread - body {
+		lappend opts -$tag $chdata
+	    }
+	    x {
+		lappend xElist $E
+	    }
+	    default {
+		lappend opts -$tag $E
+	    }
+	}	
+    }    
+    if {[llength $xElist]} {
+	lappend opts -x $xElist
+    }
+    return $opts
 }
 
 # Jabber::(Un)Subscribe(d)Event --
@@ -1002,7 +1003,7 @@ proc ::Jabber::AddErrorLog {jid msg} {
 
 # Jabber::ErrorLogDlg
 
-proc ::Jabber::ErrorLogDlg { } {
+proc ::Jabber::ErrorLogDlg {} {
     global  this wDlgs
     
     variable jerror

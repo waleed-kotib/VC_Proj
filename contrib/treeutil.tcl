@@ -6,7 +6,7 @@
 #  
 #  This source file is distributed under BSD-style license.
 #  
-#  $Id: treeutil.tcl,v 1.17 2007-11-01 15:59:00 matben Exp $
+#  $Id: treeutil.tcl,v 1.18 2007-11-04 13:54:50 matben Exp $
 
 # USAGE:
 # 
@@ -278,6 +278,40 @@ proc treeutil::configureelementtype {w type args} {
     foreach E [$w element names] {
 	if {[$w element type $E] eq $type} {
 	    eval {$w element configure $E} $args
+	}
+    }
+}
+
+proc treeutil::copycolumns {src dst} {
+    
+    foreach C [$src column list] {
+	set opts [list]
+	foreach spec [$src column configure $C] {
+	    lappend opts [lindex $spec 4]
+	}
+	eval {$dst column create} $opts
+    }
+}
+
+proc treeutil::copyelements {src dst} {
+	
+    foreach E [$src element names] {
+	set opts [list]
+	foreach spec [$src element configure $E] {
+	    lappend opts [lindex $spec 4]
+	}
+	set type [$src element type $E]
+	eval {$dst element create $E $type} $opts
+    }
+}
+
+proc treeutil::copystyles {src dst} {
+	
+    foreach S [$src style names] {
+	foreach E [$src style elements $S] {
+	    set opts [$src style layout $S $E]
+	    $dst style create $S
+	    eval {$dst style layout $S $W} $opts
 	}
     }
 }

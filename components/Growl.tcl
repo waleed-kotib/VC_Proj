@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.25 2007-09-29 10:25:05 matben Exp $
+# $Id: Growl.tcl,v 1.26 2007-11-04 13:54:50 matben Exp $
 
 namespace eval ::Growl { 
 
@@ -26,7 +26,7 @@ namespace eval ::Growl {
     #option add *growlImage            send     widgetDefault
 }
 
-proc ::Growl::Init { } {
+proc ::Growl::Init {} {
     global  this    
     variable cociFile
     
@@ -56,34 +56,28 @@ proc ::Growl::Init { } {
 
 }
 
-proc ::Growl::MessageHook {body args} { 
+proc ::Growl::MessageHook {xmldata uuid} { 
     variable cociFile
     
+    set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     if {$body eq ""} {
 	return
     }
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
     set jid [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $jid]
     set ujid [jlib::unescapejid $jid2]
     set title "[mc Message]: $ujid"
-    if {[info exists argsA(-subject)]} {
-	set subject $argsA(-subject)
-    } else {
-	set subject ""
-    }
+    set subject [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata subject]]
     growl post [mc Message] $title $subject $cociFile
 }
 
-proc ::Growl::ChatMessageHook {body args} {    
+proc ::Growl::ChatMessageHook {xmldata} {    
     variable cociFile
     
+    set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     if {$body eq ""} {
 	return
     }
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
 
     # -from is a 3-tier jid /resource included.
     set jid [wrapper::getattribute $xmldata from]
@@ -101,8 +95,9 @@ proc ::Growl::ChatMessageHook {body args} {
     # 	set chattoken [::Chat::GetTokenFrom chat threadid $threadID]
     # 	parray chattoken
 
-    if {[info exists argsA(-subject)]} {
-	append title "\n$argsA(-subject)"
+    set subject [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata subject]]
+    if {$subject ne ""} {
+	append title "\n$subject"
     }
     growl post [mc Message] $title $body $cociFile
 }
@@ -162,7 +157,7 @@ proc ::Growl::FileTransferRecvHook {jid name size} {
     }
 }
 
-proc ::Growl::JivePhoneEventHook {type cid callID args} {
+proc ::Growl::JivePhoneEventHook {type cid callID {xmldata {}}} {
     variable cociFile
     
     if {$type eq "RING"} {

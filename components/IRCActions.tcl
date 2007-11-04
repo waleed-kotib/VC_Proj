@@ -23,7 +23,7 @@
 #            2) Configurable nick alert
 #            3) Implement -command for error notice
 #  
-# $Id: IRCActions.tcl,v 1.6 2007-09-12 13:37:55 matben Exp $
+# $Id: IRCActions.tcl,v 1.7 2007-11-04 13:54:50 matben Exp $
 
 namespace eval ::IRCActions:: {
     
@@ -271,14 +271,13 @@ proc ::IRCActions::ParseWordHook {type jid w word tagList} {
 # 
 #       Make some alert when my nick is displayed.
 
-proc ::IRCActions::DisplayHook {text args} {
+proc ::IRCActions::DisplayHook {xmldata} {
     
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
     set from [wrapper::getattribute $xmldata from]
     set roomjid [jlib::barejid $from]
     set nick [::Jabber::JlibCmd muc mynick $roomjid]
-    if {[string match -nocase *$nick* $text]} {    
+    set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
+    if {[string match -nocase *$nick* $body]} {    
 	::Sounds::PlayWhenIdle newmsg
     }
 }

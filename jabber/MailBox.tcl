@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.131 2007-10-10 07:25:29 matben Exp $
+# $Id: MailBox.tcl,v 1.132 2007-11-04 13:54:51 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -162,13 +162,13 @@ proc ::MailBox::InitHandler {jlibName} {
 #       Should never be called for whiteboard messages.
 #
 # Arguments:
-#       bodytxt     the body chdata
-#       args        the xml attributes and elements as a '-key value' list
+#       xmldata
+#       uuid
 #       
 # Results:
 #       updates UI.
 
-proc ::MailBox::MessageHook {bodytxt args} {
+proc ::MailBox::MessageHook {xmldata uuid} {
     global  prefs
 
     variable locals
@@ -176,21 +176,17 @@ proc ::MailBox::MessageHook {bodytxt args} {
     variable uidmsg
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 4 "::MailBox::MessageHook bodytxt='$bodytxt', args='$args'"
+    ::Debug 4 "::MailBox::MessageHook"
 
-    array set argsA $args
-    set xmldata $argsA(-xmldata)
-    set uuid $argsA(-uuid)
-    
+    set body    [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
+    set subject [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata subject]]
+
     set xdataE [wrapper::getfirstchild $xmldata x "jabber:x:data"]
-    set haveSubject 0
-    if {[info exists argsA(-subject)] && [string length $argsA(-subject)]} {
-	set haveSubject 1
-    }    
+    set haveSubject [string length $subject]
 	
     # Ignore messages with empty body, subject or no xdata form. 
     # They are probably not for display.
-    if {($bodytxt eq "") && !$haveSubject && ![llength $xdataE]} {
+    if {($body eq "") && !$haveSubject && ![llength $xdataE]} {
 	return
     }
     
@@ -222,8 +218,13 @@ proc ::MailBox::MessageHook {bodytxt args} {
 	}
 	set idxuuid $uuid
     } else {
-	set bodytxt [string trimright $bodytxt "\n"]
-	set messageList [eval {MakeMessageList $bodytxt} $args]    
+	set body [string trimright $body "\n"]
+	
+	# @@@ At some time we need to fix this!
+	#     One alternative is to keep an array with entries like
+	#     the history xml format and store as list.
+	set opts [::Jabber::ExtractOptsFromXmldata $xmldata]
+	set messageList [eval {MakeMessageList $bodytxt} $opts]    
 	
 	# All messages cached in 'mailbox' array.
 	set mailbox($uidmsg) $messageList
@@ -241,7 +242,7 @@ proc ::MailBox::MessageHook {bodytxt args} {
     ::JUI::MailBoxState nonempty
 
     # @@@ as hook instead when solved the uuid vs. uidmsg mixup!
-    if {$jprefs(showMsgNewWin) && ($bodytxt ne "")} {
+    if {$jprefs(showMsgNewWin) && ($body ne "")} {
 	::GotMsg::GotMsg $idxuuid
     }
 }
