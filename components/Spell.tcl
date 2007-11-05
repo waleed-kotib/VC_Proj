@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Spell.tcl,v 1.6 2007-10-27 14:15:26 matben Exp $
+# $Id: Spell.tcl,v 1.7 2007-11-05 15:08:50 matben Exp $
 
 package require spell
 
@@ -61,8 +61,13 @@ proc ::Spell::Init {} {
 proc ::Spell::InitPrefsHook {} {
     variable state
 
-    set state(on) 0    
-    ::PrefUtils::Add [list [list ::Spell::state(on) spell_state_on $state(on)] ]
+    set state(on)   0    
+    set state(lang) en
+    
+    ::PrefUtils::Add [list  \
+      [list ::Spell::state(on)   spell_state_on   $state(on)] \
+      [list ::Spell::state(lang) spell_state_lang $state(lang)] \
+      ]
 }
 
 proc ::Spell::OnMenu {} {
@@ -89,13 +94,8 @@ proc ::Spell::OnMenu {} {
 }
 
 proc ::Spell::MenuPost {which wmenu} {
-    variable dictname
     
     if {$which eq "main-info"} {
-	
-	# Have no idea of how to get this.
-	set dictname en
-	
 	set m [::UI::MenuMethod $wmenu entrycget mDictionaries -menu]
 	
 	# ispell doesn't put the dict menu there.
@@ -106,7 +106,7 @@ proc ::Spell::MenuPost {which wmenu} {
 	set dicts [spell::alldicts]
 	foreach dict $dicts {
 	    $m add radiobutton -label $dict -value $dict \
-	      -variable [namespace current]::dictname \
+	      -variable [namespace current]::state(lang) \
 	      -command [namespace code [list SetDict $dict]]
 	}
 	update idletasks
@@ -134,13 +134,12 @@ proc ::Spell::SetDict {name} {
 proc ::Spell::Popup {w x y} {
     variable pop
     
-    set idx1 [$w index "current wordstart"]
-    set idx2 [$w index "current wordend"]
-    set word [$w get $idx1 $idx2]
+    set word [spell::GetWord $w current]
     set isword [string is wordchar -strict $word]
     if {$isword} {
 	lassign [spell::wordserial $word] correct suggest
 	if {!$correct && [llength $suggest]} {
+	    lassign [spell::GetWordIndices $w current] idx1 idx2
 	    set pop(idx1) $idx1
 	    set pop(idx2) $idx2
 	    set pop(word) $word
