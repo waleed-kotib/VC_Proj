@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.223 2007-11-04 15:32:45 matben Exp $
+# $Id: JUI.tcl,v 1.224 2007-11-05 08:53:14 matben Exp $
 
 package provide JUI 1.0
 
@@ -70,7 +70,7 @@ namespace eval ::JUI:: {
     switch -- [tk windowingsystem] {
 	aqua {
 	    option add *JMain*TNotebook.padding   {8 8 8 4}       50
-	    option add *JMain*bot.f.padding       {8 6 8 4}       50
+	    option add *JMain*bot.f.padding       {8 6 4 4}       50
 	}
 	x11 {
 	    option add *JMain*TNotebook.padding   {2 4 2 2}       50
@@ -78,7 +78,7 @@ namespace eval ::JUI:: {
 	}
 	default {
 	    option add *JMain*TNotebook.padding   {4 4 4 2}       50
-	    option add *JMain*bot.f.padding       {8 4 8 0}       50
+	    option add *JMain*bot.f.padding       {8 6 4 4}       50
 	}
     }
     option add *JMain*TMenubutton.padding         {1}             50
@@ -373,13 +373,16 @@ proc ::JUI::Build {w} {
 	pack  $wbot.r  -side right -fill y
 	
 	if {[tk windowingsystem] ne "aqua"} {
-	    ttk::label $wbot.r.size -compound image -image $iconResize
+	    ttk::label $wbot.r.size -style Plainer \
+	      -compound image -image $iconResize
 	} else {
-	    ttk::frame $wbot.r.size
+	    ttk::frame $wbot.r.size -width [image width $iconResize] \
+	      -height [image height $iconResize]
 	}
-	ttk::button $wbot.r.secure -style Plain -compound image -padding {0 2 2 0}
+	ttk::button $wbot.r.secure -style Plainer \
+	  -compound image -padding {0 2 2 0}
 	
-	grid  $wbot.r.secure  -sticky n
+	grid  $wbot.r.secure
 	grid  $wbot.r.size    -sticky se
 	grid columnconfigure $wbot.r 0 -minsize 20 ;# 16 + 2*2
 	grid rowconfigure    $wbot.r 0 -weight 1
@@ -1146,8 +1149,11 @@ proc ::JUI::LoginHook {} {
     
     set w $jwapp(w)
     if {[info exists jwapp(secure)] && [winfo exists $jwapp(secure)]} {
-	set name [::Theme::GetImage [option get $w secureImage {}]]
-	$jwapp(secure) configure -image $name
+	set sasl [::Jabber::JlibCmd connect feature sasl]
+	if {$sasl} {
+	    set name [::Theme::GetImage [option get $w secureImage {}]]
+	    $jwapp(secure) configure -image $name
+	}
     }
 
     # The Login/Logout button strings may have different widths.

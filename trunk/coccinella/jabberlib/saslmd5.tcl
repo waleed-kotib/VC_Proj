@@ -12,7 +12,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: saslmd5.tcl,v 1.11 2007-07-19 06:28:17 matben Exp $
+# $Id: saslmd5.tcl,v 1.12 2007-11-05 08:53:14 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -442,7 +442,7 @@ proc saslmd5::parse_challenge {str} {
     
     # this takes a bit of low level processing...
     # 'split' does not work here since = may be used inside quotes.
-    set challenge {}
+    set challenge [list]
     set idx 0
     while {1} {
 	set n [string first = $str $idx]
