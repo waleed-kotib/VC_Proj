@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.192 2007-10-14 09:34:25 matben Exp $
+# $Id: jabberlib.tcl,v 1.193 2007-11-05 08:53:14 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -179,29 +179,29 @@ namespace eval jlib {
     # Some common xmpp xml namespaces.
     variable xmppxmlns
     array set xmppxmlns {
-	stream      http://etherx.jabber.org/streams
-	streams     urn:ietf:params:xml:ns:xmpp-streams
-	tls         urn:ietf:params:xml:ns:xmpp-tls
-	sasl        urn:ietf:params:xml:ns:xmpp-sasl
-	bind        urn:ietf:params:xml:ns:xmpp-bind
-	stanzas     urn:ietf:params:xml:ns:xmpp-stanzas
-	session     urn:ietf:params:xml:ns:xmpp-session
+	stream      "http://etherx.jabber.org/streams"
+	streams     "urn:ietf:params:xml:ns:xmpp-streams"
+	tls         "urn:ietf:params:xml:ns:xmpp-tls"
+	sasl        "urn:ietf:params:xml:ns:xmpp-sasl"
+	bind        "urn:ietf:params:xml:ns:xmpp-bind"
+	stanzas     "urn:ietf:params:xml:ns:xmpp-stanzas"
+	session     "urn:ietf:params:xml:ns:xmpp-session"
     }
     
     variable jxmlns
     array set jxmlns {
-	amp             http://jabber.org/protocol/amp
-	caps            http://jabber.org/protocol/caps
-	compress        http://jabber.org/features/compress 
-	disco           http://jabber.org/protocol/disco 
-	disco,items     http://jabber.org/protocol/disco#items 
-	disco,info      http://jabber.org/protocol/disco#info
-	ibb             http://jabber.org/protocol/ibb
-	muc             http://jabber.org/protocol/muc
-	muc,user        http://jabber.org/protocol/muc#user
-	muc,admin       http://jabber.org/protocol/muc#admin
-	muc,owner       http://jabber.org/protocol/muc#owner
-	pubsub          http://jabber.org/protocol/pubsub
+	amp             "http://jabber.org/protocol/amp"
+	caps            "http://jabber.org/protocol/caps"
+	compress        "http://jabber.org/features/compress"
+	disco           "http://jabber.org/protocol/disco"
+	disco,items     "http://jabber.org/protocol/disco#items"
+	disco,info      "http://jabber.org/protocol/disco#info"
+	ibb             "http://jabber.org/protocol/ibb"
+	muc             "http://jabber.org/protocol/muc"
+	muc,user        "http://jabber.org/protocol/muc#user"
+	muc,admin       "http://jabber.org/protocol/muc#admin"
+	muc,owner       "http://jabber.org/protocol/muc#owner"
+	pubsub          "http://jabber.org/protocol/pubsub"
     }
     
     # This is likely to change when XEP accepted.

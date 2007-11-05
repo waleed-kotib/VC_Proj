@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.73 2007-10-22 11:51:33 matben Exp $
+# $Id: tileutils.tcl,v 1.74 2007-11-05 08:53:14 matben Exp $
 #
 
 package require treeutil
@@ -813,6 +813,11 @@ proc tileutils::configstyles {name} {
 	  -padding {0} -borderwidth 0 -relief flat
 
 	style configure Small.Plain -font CociSmallFont
+	
+	# As Plain but Plainer
+	style layout Plainer {
+	    Plain.label
+	}
 
 	
 	# Test------------------

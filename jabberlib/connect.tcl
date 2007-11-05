@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.29 2007-08-16 07:11:15 matben Exp $
+# $Id: connect.tcl,v 1.30 2007-11-05 08:53:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -18,6 +18,7 @@
 #   jlibname connect register jid password
 #   jlibname connect auth
 #   jlibname connect free                               (destructor)
+#   jlibname connect feature name
 #
 #### EXECUTION PATHS ###########################################################
 # 
@@ -262,11 +263,18 @@ proc jlib::connect::connect {jlibname jid password args} {
     debug "jlib::connect::connect jid=$jid, args=$args"
         
     # Instance specific namespace.
+    #   'state' only lives until connection finalized
+    #   'feature' lives until stream is closed
+
     namespace eval ${jlibname}::connect {
 	variable state
+	variable feature
     }
     upvar ${jlibname}::connect::state state
+    upvar ${jlibname}::connect::feature feature
       
+    $jlibname register_reset [namespace code stream_reset]
+    
     jlib::splitjidex $jid username server resource
     
     # Notes:
@@ -283,11 +291,11 @@ proc jlib::connect::connect {jlibname jid password args} {
     set state(args)     $args
     set state(error)    ""
     set state(state)    ""
-    
-    set state(usessl)   0
-    set state(usetls)   0
-    set state(usesasl)  0
-    set state(usecompress) 0
+
+    foreach name {ssl tls sasl compress} {
+	set state(use$name) 0
+	set feature($name) 0
+    }
     
     # Default options.
     array set state [array get options]
@@ -858,6 +866,7 @@ proc jlib::connect::timeout {jlibname} {
 
 proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {    
     upvar ${jlibname}::connect::state state
+    upvar ${jlibname}::connect::feature feature
     
     debug "jlib::connect::finish errcode=$errcode, errmsg=$errmsg"
 
@@ -885,6 +894,12 @@ proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
 	$jlibname kill
     } else {
 	set status ok
+	
+	# Copy the state(use*) to feature(*)
+	foreach name {ssl tls sasl compress} {
+	    set feature($name) $state(use$name)
+	}
+
     }
     
     # Here status must be either 'ok' or 'error'.
@@ -897,11 +912,27 @@ proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
     }
 }
 
+proc jlib::connect::feature {jlibname name} {
+    upvar ${jlibname}::connect::feature feature
+
+    if {[info exists feature($name)]} {
+	return $feature($name)
+    } else {
+	return 0
+    }
+}
+
 proc jlib::connect::free {jlibname} {
     upvar ${jlibname}::connect::state state
 
     debug  "jlib::connect::free"
     unset -nocomplain state
+}
+
+proc jlib::connect::stream_reset {jlibname} {
+    upvar ${jlibname}::connect::feature feature
+    debug "jlib::connect::stream_reset"
+    unset -nocomplain feature
 }
 
 proc jlib::connect::debug {str} {
