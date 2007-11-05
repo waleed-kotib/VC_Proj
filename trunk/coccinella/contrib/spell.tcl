@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.15 2007-11-01 15:59:00 matben Exp $
+# $Id: spell.tcl,v 1.16 2007-11-05 15:08:50 matben Exp $
 
 # TODO: try to simplify the async (fileevent) part of this similar
 #       to spell::wordserial perhaps.
@@ -95,10 +95,12 @@ proc spell::init {} {
 	if {$static(speller) eq "ispell"} {
 	    #fconfigure $pipe -encoding latin1
 	} elseif {$static(speller) eq "aspell"} {
-	    fconfigure $pipe -encoding utf-8
+	    
+	    # Both we and aspell use utf-8, thus, no translation!
+	    fconfigure $pipe -translation binary
 	}
 	set line [gets $pipe]
-	# puts "line=$line"
+	puts "line=$line"
 	if {[string range $line 0 3] ne "@(#)"} {
 	    catch {close $pipe}
 	    unset -nocomplain pipe
@@ -187,11 +189,24 @@ proc spell::setdict {name} {
     }
 }
 
+proc spell::getlang {} {
+    variable static
+    
+    # NB: aspell and ispell work differently here.
+    if {$static(speller) eq "aspell"} {
+	set cmd [AutoExecOK aspell]
+	set lang [exec $cmd dump config lang]
+	
+	return $lang
+    }
+}
+
 proc spell::addword {word} {
     variable pipe
     
     catch {
 	puts $pipe "&$word"
+	flush $pipe
     }
 }
 
@@ -242,9 +257,12 @@ proc spell::wordserial {word} {
     variable serialTrig 1
     variable pipe
     
+    puts "spell::wordserial word='$word'"
+    
     # Not the nicest code I have written...
     fileevent $pipe readable [list set [namespace current]::serialTrig 2]
     puts $pipe $word
+    flush $pipe
     vwait [namespace current]::serialTrig
     set line [read $pipe]
     set c [string index $line 0]
@@ -283,6 +301,7 @@ proc spell::checklines {w n1 n2} {
 	if {$text ne ""} {
 	    if {[catch {
 		puts $pipe $text
+		flush $pipe
 	    }]} {
 		catch {close $pipe}
 		unset -nocomplain pipe
@@ -339,7 +358,7 @@ proc spell::Readable {} {
     }
     set line [read $pipe]
     set line [string trimright $line]
-    # puts "spell::Readable line='$line'"
+    puts "spell::Readable line='$line'"
     
     if {![winfo exists $static(w)]} {
 	return
@@ -519,26 +538,43 @@ proc spell::Paste {w} {
 }
 
 proc spell::GetWord {w ind} {
-    set idx1 [$w index "$ind wordstart"]
-    set idx2 [$w index "$ind wordend"]
-    return [$w get $idx1 $idx2]
+    
+    # Buggy for utf-8 characters!
+    #set idx1 [$w index "$ind wordstart"]
+    #set idx2 [$w index "$ind wordend"]
+    #return [$w get $idx1 $idx2]
+    set ind [$w index $ind]
+    set line [$w get "$ind linestart" "$ind lineend"]
+    set i [lindex [split $ind .] 1]
+    set idx1 [string wordstart $line $i]
+    set idx2 [expr {[string wordend $line $i] - 1}]
+    return [string range $line $idx1 $idx2]
 }
+
+proc spell::GetWordIndices {w ind} {
+    
+    set ind [$w index $ind]
+    set line [$w get "$ind linestart" "$ind lineend"]
+    lassign [split $ind .] n i
+    set idx1 [string wordstart $line $i]
+    set idx2 [string wordend $line $i]
+    return [list $n.$idx1 $n.$idx2]
+}       
 
 proc spell::CheckWord {w ind} {
     variable static
     variable trigger
     
-    set idx1 [$w index "$ind wordstart"]
-    set idx2 [$w index "$ind wordend"]
-    set word [$w get $idx1 $idx2]
+    set word [GetWord $w $ind]
     set isword [string is wordchar -strict $word]
     
     if {$isword} {
 	set static(w) $w
+	lassign [GetWordIndices $w $ind] idx1 idx2
 	set static(idx1) $idx1
 	set static(idx2) $idx2
 	
-	# puts "spell::CheckWord idx1=$idx1, idx2=$idx2, word='$word' -----------"
+	puts "spell::CheckWord idx1=$idx1, idx2=$idx2, word='$word' -----------"
 
 	Word $word
 	vwait [namespace current]::trigger
@@ -553,6 +589,7 @@ proc spell::Word {word} {
     set word [string trimleft $word "*&@+-~#!%`^"]
     if {[catch {
 	puts $pipe $word
+	flush $pipe
     }]} {
 	# error
 	catch {close $pipe}
