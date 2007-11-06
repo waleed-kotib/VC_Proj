@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Spell.tcl,v 1.7 2007-11-05 15:08:50 matben Exp $
+# $Id: Spell.tcl,v 1.8 2007-11-06 15:01:23 matben Exp $
 
 package require spell
 
@@ -62,12 +62,13 @@ proc ::Spell::InitPrefsHook {} {
     variable state
 
     set state(on)   0    
-    set state(lang) en
+    set state(dict) en
     
     ::PrefUtils::Add [list  \
       [list ::Spell::state(on)   spell_state_on   $state(on)] \
-      [list ::Spell::state(lang) spell_state_lang $state(lang)] \
+      [list ::Spell::state(dict) spell_state_dict $state(dict)] \
       ]
+    spell::setdict $state(dict)
 }
 
 proc ::Spell::OnMenu {} {
@@ -77,7 +78,6 @@ proc ::Spell::OnMenu {} {
     if {$state(on)} {
 	foreach w $wall {
 	    spell::new $w
-	    spell::check $w
 	    
 	    # @@@ We must have a kind of plugin architecture here so it is
 	    # possible to add multiple popup menu entries.
@@ -106,7 +106,7 @@ proc ::Spell::MenuPost {which wmenu} {
 	set dicts [spell::alldicts]
 	foreach dict $dicts {
 	    $m add radiobutton -label $dict -value $dict \
-	      -variable [namespace current]::state(lang) \
+	      -variable [namespace current]::state(dict) \
 	      -command [namespace code [list SetDict $dict]]
 	}
 	update idletasks
