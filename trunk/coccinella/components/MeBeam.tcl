@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: MeBeam.tcl,v 1.1 2007-11-03 06:57:25 matben Exp $
+# $Id: MeBeam.tcl,v 1.2 2007-11-06 08:22:44 matben Exp $
 
 namespace eval ::MeBeam {}
 
@@ -35,10 +35,24 @@ proc ::MeBeam::Init {} {
 }
 
 proc ::MeBeam::MainMenuPostHook {type m} {
+    
     if {$type eq "main-action"} {
 	::UI::MenuMethod $m entryconfigure "Invite MeBeam" -state disabled
+	
+	# If selected single online roster item.
+	if {[::JUI::GetConnectState] eq "connectfin"} {
+	    set jidL [::RosterTree::GetSelectedJID]
+	    if {[llength $jidL] == 1} {
+		set jid [lindex $jidL 0]
+		if {[::Jabber::RosterCmd isavailable $jid]} {
+		    ::UI::MenuMethod $m entryconfigure "Invite MeBeam" -state normal
+		}
+	    }
+	}
     }
 }
+
+# Active chat dialog. This works only for Mac OS X.
 
 proc ::MeBeam::ChatMenuPostHook {m} {
     if {[::JUI::GetConnectState] eq "connectfin"} {
@@ -47,23 +61,48 @@ proc ::MeBeam::ChatMenuPostHook {m} {
 }
 
 proc ::MeBeam::Cmd {} {
-    variable url
+
+    if {[::JUI::GetConnectState] ne "connectfin"} {
+	return
+    }
     
+    # Active chat dialog. This works only for Mac OS X.
     if {[winfo exists [focus]]} {
 	set top [winfo toplevel [focus]]
 	set wclass [winfo class $top]
 	if {$wclass eq "Chat"} {
 	    set dlgtoken [::Chat::GetTokenFrom dlg w $top]
 	    set token [::Chat::GetActiveChatToken $dlgtoken]
-	    
-	    set str [mc "Please join me for video chat on"]
-	    append str " "
-	    append str $url
-	    append str [uuid::uuid generate]
-	    
-	    ::Chat::SendText $token $str
+	    ::Chat::SendText $token [InviteStr]
+	    return
 	}
     }
+    
+    # Selected roster item.
+    set jidL [::RosterTree::GetSelectedJID]
+    if {[llength $jidL] == 1} {
+	set jid [lindex $jidL 0]
+	if {[::Jabber::RosterCmd isavailable $jid]} {
+	    set jid2 [jlib::barejid $jid]
+	    set mjid2 [jlib::jidmap $jid2]
+	    set token [::Chat::GetTokenFrom chat jid [jlib::ESC $mjid2]*]
+	    if {$token ne ""} {
+		::Chat::SendText $token [InviteStr]
+	    } else {
+		::Chat::StartThread $jid2 -message [InviteStr]
+	    }
+	}
+    }
+}
+
+proc ::MeBeam::InviteStr {} {
+    variable url
+    
+    set str [mc "Please join me for video chat on"]
+    append str " "
+    append str $url
+    append str [uuid::uuid generate]
+    return $str
 }
 
 
