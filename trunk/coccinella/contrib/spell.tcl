@@ -7,10 +7,17 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.16 2007-11-05 15:08:50 matben Exp $
+# $Id: spell.tcl,v 1.17 2007-11-06 15:01:23 matben Exp $
 
 # TODO: try to simplify the async (fileevent) part of this similar
 #       to spell::wordserial perhaps.
+#       
+# @@@ Despite many attempts I haven't been able to find a robust way to
+#     spell test more than a single word in an interactive mode.
+#     There is no way to relate what comes out with what was put in
+#     when it works async like this.
+#     I can only see the C api as a viable solution.
+#     Note that in such a case most of this code can still be used.
 
 package provide spell 0.1
 
@@ -67,6 +74,7 @@ proc spell::have {} {
 # spell::init --
 # 
 #       This serves to init any spell checker tools.
+#       Constructor for a 'spell' object.
 
 proc spell::init {} {   
     variable pipe
@@ -100,7 +108,7 @@ proc spell::init {} {
 	    fconfigure $pipe -translation binary
 	}
 	set line [gets $pipe]
-	puts "line=$line"
+	# puts "line=$line"
 	if {[string range $line 0 3] ne "@(#)"} {
 	    catch {close $pipe}
 	    unset -nocomplain pipe
@@ -111,6 +119,27 @@ proc spell::init {} {
     } else {
 	return -code error "Failed to find \"ispell\" or \"aspell\""
     }
+    
+    # If doing this OO make a state array.
+    variable $pipe
+    upvar 0 $pipe state
+    
+    set state(pipe) $pipe
+    set state(dict) $static(dict)
+    
+    return $pipe
+}
+
+# spell::free --
+# 
+#       Destructor of the 'spell' object.
+
+proc spell::free {pipe} {
+    variable $pipe
+    upvar 0 $pipe state
+    
+    catch {close $pipe}
+    unset -nocomplain state
 }
 
 proc spell::speller {} {
@@ -189,21 +218,20 @@ proc spell::setdict {name} {
     }
 }
 
-proc spell::getlang {} {
+proc spell::getdict {} {
     variable static
     
     # NB: aspell and ispell work differently here.
     if {$static(speller) eq "aspell"} {
 	set cmd [AutoExecOK aspell]
 	set lang [exec $cmd dump config lang]
-	
 	return $lang
     }
+    return
 }
 
 proc spell::addword {word} {
-    variable pipe
-    
+    variable pipe    
     catch {
 	puts $pipe "&$word"
 	flush $pipe
@@ -254,13 +282,13 @@ proc spell::Bindings {w} {
 #       We must have been init'ed first.
 
 proc spell::wordserial {word} {
-    variable serialTrig 1
+    variable serialTrig 0
     variable pipe
     
-    puts "spell::wordserial word='$word'"
+    # puts "spell::wordserial word='$word'"
     
     # Not the nicest code I have written...
-    fileevent $pipe readable [list set [namespace current]::serialTrig 2]
+    fileevent $pipe readable [list set [namespace current]::serialTrig 1]
     puts $pipe $word
     flush $pipe
     vwait [namespace current]::serialTrig
@@ -277,55 +305,6 @@ proc spell::wordserial {word} {
     }
     fileevent $pipe readable [namespace code Readable]
     return [list $correct $suggest]
-}
-
-# spell::check --
-# 
-#       Spellcheck complete text widget.
-#       We must have been init'ed first.
-
-proc spell::check {w} {    
-    set nlines [lindex [split [$w index end] "."] 0]
-    checklines $w 1 $nlines
-}
-
-proc spell::checklines {w n1 n2} {
-    variable serialTrig 1
-    variable pipe
-    
-    # Not the nicest code I have written...
-    fileevent $pipe readable [list set [namespace current]::serialTrig 2]
-    
-    for {set n $n1} {$n <= $n2} {incr n} {
-	set text [$w get "$n.0" "$n.0 lineend"]
-	if {$text ne ""} {
-	    if {[catch {
-		puts $pipe $text
-		flush $pipe
-	    }]} {
-		catch {close $pipe}
-		unset -nocomplain pipe
-		return
-	    }
-	    vwait [namespace current]::serialTrig
-	    set lines [read $pipe]
-	    foreach line [split $lines "\n"] {
-		set c [string index $line 0]
-		if {$c eq "&" || $c eq "?" || $c eq "#"} {
-		    set word [lindex $line 1]
-		    set len [string length $word]
-		    if {$c eq "#"} {
-			set id1 [lindex $line 2]
-		    } else {
-			set id1 [string trimright [lindex $line 3] ":"]
-		    }
-		    set id2 [expr {$id1 + $len}]
-		    $w tag add spell-err $n.$id1 $n.$id2
-		}
-	    }
-	}
-    }    
-    fileevent $pipe readable [namespace code Readable]
 }
 
 # spell::clear --
@@ -358,7 +337,7 @@ proc spell::Readable {} {
     }
     set line [read $pipe]
     set line [string trimright $line]
-    puts "spell::Readable line='$line'"
+    # puts "spell::Readable line='$line'"
     
     if {![winfo exists $static(w)]} {
 	return
@@ -525,16 +504,7 @@ proc spell::Move {w} {
 }
 
 proc spell::Paste {w} {
-    variable $w
-    upvar 0 $w state
-    
-    # Try to check the text between the lastInd and insert.
-    # Take the complete lines to be safe.
-    set from [$w index "$state(lastInd) linestart"]
-    set to [$w index "insert lineend"]
-    set n1 [lindex [split $from "."] 0]
-    set n2 [lindex [split $to "."] 0]
-    checklines $w $n1 $n2
+
 }
 
 proc spell::GetWord {w ind} {
@@ -574,8 +544,6 @@ proc spell::CheckWord {w ind} {
 	set static(idx1) $idx1
 	set static(idx2) $idx2
 	
-	puts "spell::CheckWord idx1=$idx1, idx2=$idx2, word='$word' -----------"
-
 	Word $word
 	vwait [namespace current]::trigger
     }
