@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: MeBeam.tcl,v 1.2 2007-11-06 08:22:44 matben Exp $
+# $Id: MeBeam.tcl,v 1.3 2007-11-07 13:36:32 matben Exp $
 
 namespace eval ::MeBeam {}
 
@@ -73,7 +73,7 @@ proc ::MeBeam::Cmd {} {
 	if {$wclass eq "Chat"} {
 	    set dlgtoken [::Chat::GetTokenFrom dlg w $top]
 	    set token [::Chat::GetActiveChatToken $dlgtoken]
-	    ::Chat::SendText $token [InviteStr]
+	    ::Chat::SendText $token [Invite]
 	    return
 	}
     }
@@ -87,21 +87,23 @@ proc ::MeBeam::Cmd {} {
 	    set mjid2 [jlib::jidmap $jid2]
 	    set token [::Chat::GetTokenFrom chat jid [jlib::ESC $mjid2]*]
 	    if {$token ne ""} {
-		::Chat::SendText $token [InviteStr]
+		::Chat::SendText $token [Invite]
 	    } else {
-		::Chat::StartThread $jid2 -message [InviteStr]
+		::Chat::StartThread $jid2 -message [Invite]
 	    }
 	}
     }
 }
 
-proc ::MeBeam::InviteStr {} {
+proc ::MeBeam::Invite {} {
     variable url
     
     set str [mc "Please join me for video chat on"]
     append str " "
     append str $url
     append str [uuid::uuid generate]
+    ::Utils::OpenURLInBrowser $url
+    
     return $str
 }
 
