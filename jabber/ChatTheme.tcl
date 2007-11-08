@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.7 2007-11-02 16:03:23 matben Exp $
+# $Id: ChatTheme.tcl,v 1.8 2007-11-08 14:27:55 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -54,25 +54,28 @@ namespace eval ::ChatTheme {
     set theme(resources) ""
     
     variable html
-    set html(Header) {
+    set html(header) {
 	<html><head></head><body>
     }
-    set html(Footer) {
+    set html(footer) {
 	</body></html>
     }
-    set html(Status) {
+    set html(status) {
 	<div class="status">%message%</div><div id="insert"></div>
     }
     set html(HistoryDiv) {<div id="history"></div>}
 
     # Defaults as fallbacks.
     # @@@ Need to figure out a very simple one.
+
     variable hdefault
-    set hdefault(Header) {}
-    set hdefault(Footer) {}
-    set hdefault(Status) {
+    set hdefault(header) {}
+    set hdefault(footer) {}
+    set hdefault(status) {
 	<div class="status">%message%</div><div id="insert"></div>
     }
+    set hdefault(statusNext) $hdefault(status)
+    
     set hdefault(in) {
 	<div class="incoming">
 	<div class="incomingsender">%sender%</div> 
@@ -81,6 +84,7 @@ namespace eval ::ChatTheme {
 	<div id="insert"></div> 
     }
     set hdefault(inNext) $hdefault(in)
+    
     set hdefault(out) {
 	<div class="outgoing">
 	<div class="outgoingsender">%sender%</div> 
@@ -91,7 +95,7 @@ namespace eval ::ChatTheme {
     set hdefault(outNext) $hdefault(out)
     
     variable style
-    set style(HistoryDiv) { DIV#history { display: none; } }
+    set style(HistoryDiv) { div#history { display: none; } }
     
     variable content
     variable inited 0
@@ -204,10 +208,11 @@ proc ::ChatTheme::Set {name} {
     # Keep defaults as a fallback.
     foreach name {Header Footer Status} {
 	set f [file join $res $name.html]
+	set aname "[string tolower [string index $name 0]][string range $name 1 end]"
 	if {[file exists $f]} {
-	    set content($name) [Readfile $f]
+	    set content($aname) [Readfile $f]
 	} else {
-	    set content($name) $hdefault($name)
+	    set content($aname) $hdefault($aname)
 	}
     }
     
@@ -218,8 +223,12 @@ proc ::ChatTheme::Set {name} {
     set content(out)        [Readfile [file join $res Outgoing Content.html]]
     set content(outNext)    [Readfile [file join $res Outgoing NextContent.html]]
     # Seems optional...
-    #set content(statusNext) [Readfile [file join $res NextStatus.html]]
-
+    set f [file join $res NextStatus.html]
+    if {[file exists $f]} {
+	set content(statusNext) [Readfile $f]
+    } else {
+	set content(statusNext) $content(status)
+    }
     
     set theme(current) $name
     set theme(variant) ""
@@ -270,7 +279,9 @@ proc ::ChatTheme::Widget {token w args} {
     upvar 0 $w state
     
     # Keep track of last type: in | out |status
-    set state(lastType) ""
+    set state(lastType)    ""
+    set state(myAvaUID)    0
+    set state(otherAvaUID) 0
 
     set jid [::Chat::GetChatTokenValue $token jid]
     set name [::Chat::MessageGetYouName $token $jid]
@@ -280,17 +291,17 @@ proc ::ChatTheme::Widget {token w args} {
     #eval {html $w -mode {almost standards}} $args
     eval {html $w -mode quirks} $args
 
-    $w handler node "div" [namespace code [list NodeHandler $token]]
     $w configure -imagecmd [namespace code [list ImageCmd $token]]
     $w style $content(mainCss)
     $w style $style(HistoryDiv)
-    $w parse $html(Header)
+    $w parse $html(header)
+    $w parse {<div id="Chat">}
     
     set map [list %chatName% $name %sourceName% $myname %destinationName% $name \
       %incomingIconPath% otherAvatar %outgoingIconPath% myAvatar \
       %timeOpened% $time]
     
-    $w parse [string map $map $content(Header)]
+    $w parse [string map $map $content(header)]
     $w parse $html(HistoryDiv)
     
     if {[tk windowingsystem] eq "aqua"} {
@@ -302,13 +313,6 @@ proc ::ChatTheme::Widget {token w args} {
     bind $w <Destroy> +[namespace code { Free %W }]
     
     return $w
-}
-
-proc ::ChatTheme::NodeHandler {token node} {
-    
-    set attr [$node attribute]
-    puts "::ChatTheme::NodeHandler node=$node, attr=$attr"
-    
 }
 
 proc ::ChatTheme::Free {w} {
@@ -410,7 +414,7 @@ proc ::ChatTheme::ImageCmd {token url} {
     
     set name ""
     set durl [uriencode::decodeurl $url]
-    if {$url eq "myAvatar"} {
+    if {[string match "myAvatar*" $url]} {
 	
 	# Scale to size...
 	set name [::Avatar::GetMyPhoto]
@@ -422,7 +426,7 @@ proc ::ChatTheme::ImageCmd {token url} {
 		set name [CopyPhoto [::RosterAvatar::GetDefaultAvatarOfSize 32]]
 	    }
 	}
-    } elseif {$url eq "otherAvatar"} {
+    } elseif {[string match "otherAvatar*" $url]} {
 	set jid2 [::Chat::GetChatTokenValue $token jid2]
 	set name [::Avatar::GetPhotoOfSize $jid2 32]
 	if {$name eq ""} {
@@ -460,22 +464,13 @@ proc ::ChatTheme::Incoming {token xmldata secs} {
 	set name [::Chat::MessageGetYouName $token $jid]
 	set time [::Chat::MessageGetTime $token $secs]
 
-	variable $w
-	upvar 0 $w state
-
 	set msg [wrapper::getcdata $bodyE]
 	#set msg [wrapper::xmlcrypt $msg]
 	set msg [Parse $jid $msg]
 	set map [list %message% $msg %sender% $name %userIconPath% otherAvatar \
 	  %time% $time %service% Jabber %senderScreenName% $name]
-	
-	if {0 && $state(lastType) eq "in"} {
-	    $w parse [string map $map $content(inNext)]
-	} else {
-	    $w parse [string map $map $content(in)]
-	}
-	set state(lastType) "in"
-	after idle [list $w yview moveto 1.0]
+
+	InsertType $w in $map
     }
 }
 
@@ -490,27 +485,13 @@ proc ::ChatTheme::Outgoing {token xmldata secs} {
 	set name [::Chat::MessageGetMyName $token $jid]
 	set time [::Chat::MessageGetTime $token $secs]
 
-	variable $w
-	upvar 0 $w state
-
 	set msg [wrapper::getcdata $bodyE]
 	#set msg [wrapper::xmlcrypt $msg]
 	set msg [Parse $jid $msg]
 	set map [list %message% $msg %sender% $name %userIconPath% myAvatar \
 	  %time% $time %service% Jabber %senderScreenName% $name]
-
-	#puts "------------------msg=$msg"
-	set node [$w search {div#insert}]
 	
-	#puts "================node=$node"
-	
-	if {0 && $state(lastType) eq "out"} {
-	    $w parse [string map $map $content(outNext)]
-	} else {
-	    $w parse [string map $map $content(out)]
-	}
-	set state(lastType) "out"
-	after idle [list $w yview moveto 1.0]
+	InsertType $w out $map
     }
 }
 
@@ -531,14 +512,58 @@ proc ::ChatTheme::Status {token xmldata secs} {
     set color red
     set msg [::Chat::PresenceGetString $token $xmldata]
     #set msg [wrapper::xmlcrypt $msg]
-    set map [list %message% $str %color% $color %time% $time]
+    set map [list %message% $msg %color% $color %time% $time]
 
-    if {0 && $state(lastType) eq "status"} {
-	$w parse [string map $map $content(statusNext)]
-    } else {
-	$w parse [string map $map $content(status)]
-    }
-    set state(lastType) "status"
-    after idle [list $w yview moveto 1.0]
+    InsertType $w status $map
 }
+
+# ChatTheme::InsertType --
+# 
+#       Generic way of inserting a message into html widget.
+#       
+# Arguments:
+#       w
+#       type      in | out | status
+#       map
+
+proc ::ChatTheme::InsertType {w type map} {
+    variable $w
+    upvar 0 $w state
+    variable content
+    
+    # Find all <div id="insert"></div>
+    set nodes [$w search {div#insert}]
+    if {[llength $nodes]} {
+	set div [lindex $nodes end]
+	set parent [$div parent]
+    }
+    
+    if {$state(lastType) eq $type} {
+	if {[llength $nodes]} {
+	    set childs [$w fragment [string map $map $content(${type}Next)]]
+	    $parent insert -before $div $childs
+	} else {
+	    # Missing <div id="insert"></div> 
+	    $w parse [string map $map $content($type)]
+	}
+    } else {
+	$w parse [string map $map $content($type)]
+    }
+    
+    # Be sure to remove all <div id="insert"></div> we had before adding html.
+    if {[llength $nodes]} {
+	$parent remove $nodes
+    }
+    set state(lastType) $type
+    after idle [list ::ChatTheme::SeeEnd $w]
+    return
+}
+
+proc ::ChatTheme::SeeEnd {w} {
+    if {[winfo exists $w]} {
+	$w yview moveto 1.0
+    }
+}
+
+
 
