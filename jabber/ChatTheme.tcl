@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.8 2007-11-08 14:27:55 matben Exp $
+# $Id: ChatTheme.tcl,v 1.9 2007-11-08 15:40:25 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -29,7 +29,6 @@
 #     also old messages; default avatar wont change to user;
 #     could perhaps use a new uri: "otherAvatar-[incr uid]" to trigger this
 #   o handle links (<a href...>, see the hv3 code for this; messy!
-#   o Missing: The central element is a div element named Chat
 #   o find some simple default templates that can be used as a fallback
 
 
@@ -63,7 +62,7 @@ namespace eval ::ChatTheme {
     set html(status) {
 	<div class="status">%message%</div><div id="insert"></div>
     }
-    set html(HistoryDiv) {<div id="history"></div>}
+    set html(historyDiv) {<div id="history"></div>}
 
     # Defaults as fallbacks.
     # @@@ Need to figure out a very simple one.
@@ -95,7 +94,7 @@ namespace eval ::ChatTheme {
     set hdefault(outNext) $hdefault(out)
     
     variable style
-    set style(HistoryDiv) { div#history { display: none; } }
+    set style(historyDiv) { div#history { display: none; } }
     
     variable content
     variable inited 0
@@ -257,15 +256,24 @@ proc ::ChatTheme::GetResourceDir {name} {
 # a counter and use a new uri: "otherAvatar-[incr uid]" to trigger this
 
 proc ::ChatTheme::MyAvatarHook {} {
+    variable wall
     
-    puts "::ChatTheme::MyAvatarHook"
-    
+    foreach w $wall {
+	variable $w
+	upvar 0 $w state
+	incr state(myAvatarUID)
+    }
 }
 
 proc ::ChatTheme::OtherAvatarHook {jid2} {
+    variable wall
     
     puts "::ChatTheme::OtherAvatarHook jid2=$jid2"
-    
+    foreach w $wall {
+	variable $w
+	upvar 0 $w state
+	incr state(otherAvatarUID)
+    }
 }
 
 proc ::ChatTheme::Widget {token w args} {
@@ -278,10 +286,14 @@ proc ::ChatTheme::Widget {token w args} {
     variable $w
     upvar 0 $w state
     
+    set state(token) $token
+    
     # Keep track of last type: in | out |status
-    set state(lastType)    ""
-    set state(myAvaUID)    0
-    set state(otherAvaUID) 0
+    set state(lastType) ""
+
+    # Keep counters so we can change the avatar when it gets updated.
+    set state(myAvatarUID)    0
+    set state(otherAvatarUID) 0
 
     set jid [::Chat::GetChatTokenValue $token jid]
     set name [::Chat::MessageGetYouName $token $jid]
@@ -293,7 +305,7 @@ proc ::ChatTheme::Widget {token w args} {
 
     $w configure -imagecmd [namespace code [list ImageCmd $token]]
     $w style $content(mainCss)
-    $w style $style(HistoryDiv)
+    $w style $style(historyDiv)
     $w parse $html(header)
     $w parse {<div id="Chat">}
     
@@ -302,7 +314,7 @@ proc ::ChatTheme::Widget {token w args} {
       %timeOpened% $time]
     
     $w parse [string map $map $content(header)]
-    $w parse $html(HistoryDiv)
+    $w parse $html(historyDiv)
     
     if {[tk windowingsystem] eq "aqua"} {
 	#$w style -id user-001 { font: "Lucida Grande"; }
@@ -425,6 +437,8 @@ proc ::ChatTheme::ImageCmd {token url} {
 	    } else {
 		set name [CopyPhoto [::RosterAvatar::GetDefaultAvatarOfSize 32]]
 	    }
+	} else {
+	    set name [CopyPhoto $name]
 	}
     } elseif {[string match "otherAvatar*" $url]} {
 	set jid2 [::Chat::GetChatTokenValue $token jid2]
@@ -436,6 +450,8 @@ proc ::ChatTheme::ImageCmd {token url} {
 	    } else {
 		set name [CopyPhoto [::RosterAvatar::GetDefaultAvatarOfSize 32]]
 	    }
+	} else {
+	    set name [CopyPhoto $name]
 	}
     } elseif {[::Emoticons::Exists $durl]} {
 	set name [CopyPhoto [::Emoticons::Get $durl]]
@@ -464,10 +480,14 @@ proc ::ChatTheme::Incoming {token xmldata secs} {
 	set name [::Chat::MessageGetYouName $token $jid]
 	set time [::Chat::MessageGetTime $token $secs]
 
+	variable $w
+	upvar 0 $w state
+
 	set msg [wrapper::getcdata $bodyE]
 	#set msg [wrapper::xmlcrypt $msg]
 	set msg [Parse $jid $msg]
-	set map [list %message% $msg %sender% $name %userIconPath% otherAvatar \
+	set avatar otherAvatar$state(otherAvatarUID)
+	set map [list %message% $msg %sender% $name %userIconPath% $avatar \
 	  %time% $time %service% Jabber %senderScreenName% $name]
 
 	InsertType $w in $map
@@ -485,10 +505,14 @@ proc ::ChatTheme::Outgoing {token xmldata secs} {
 	set name [::Chat::MessageGetMyName $token $jid]
 	set time [::Chat::MessageGetTime $token $secs]
 
+	variable $w
+	upvar 0 $w state
+
 	set msg [wrapper::getcdata $bodyE]
 	#set msg [wrapper::xmlcrypt $msg]
 	set msg [Parse $jid $msg]
-	set map [list %message% $msg %sender% $name %userIconPath% myAvatar \
+	set avatar myAvatar$state(myAvatarUID)
+	set map [list %message% $msg %sender% $name %userIconPath% $avatar \
 	  %time% $time %service% Jabber %senderScreenName% $name]
 	
 	InsertType $w out $map
