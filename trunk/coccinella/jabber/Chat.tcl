@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.235 2007-11-04 13:54:50 matben Exp $
+# $Id: Chat.tcl,v 1.236 2007-11-09 08:50:36 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -160,7 +160,6 @@ namespace eval ::Chat {
     
     # Local preferences.
     variable cprefs
-    set cprefs(usexevents)    1
     set cprefs(xeventsmillis) 10000
     set cprefs(xeventid)      0
     set cprefs(lastActiveRet) 0
@@ -196,10 +195,18 @@ namespace eval ::Chat {
     # Show the head label.
     set ::config(chat,show-head) 1
     
+    # Control how the ancient XEP-0022 (jabber:x:event) is handled.
+    set ::config(chat,use-xevents) 1
+#     set ::config(chat,use-xevents) 0
+    
     # Control how chat state notification is handled.
     set ::config(chat,notify-send) 1
     set ::config(chat,notify-recv) 1
     set ::config(chat,notify-show) 1
+
+#     set ::config(chat,notify-send) 0
+#     set ::config(chat,notify-recv) 0
+#     set ::config(chat,notify-show) 0
 
     # Allow themed chats.
     set ::config(chat,try-themed) 0
@@ -491,7 +498,7 @@ proc ::Chat::NewChat {threadID jid args} {
 	set dlgtoken [eval {Build $threadID $jid} $args]		
 	set chattoken [GetActiveChatToken $dlgtoken]
     }
-    MakeAndInsertHistory $chattoken
+    #MakeAndInsertHistory $chattoken
     RegisterPresence $chattoken        
     
     return $chattoken
@@ -677,8 +684,6 @@ proc ::Chat::GotNormalMsg {xmldata uuid} {
         
     # Whiteboard messages are handled elsewhere. A guard:
     if {$jprefs(chat,normalAsChat) && ($body ne "")} {
-	
-	::Debug 2 "::Chat::GotNormalMsg args='$args'"
 	GotMsg $xmldata
     }
     
@@ -687,7 +692,7 @@ proc ::Chat::GotNormalMsg {xmldata uuid} {
     set mjid2 [jlib::jidmap $jid2]
     set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
     
-    if {($chattoken ne "") && [info exists argsA(-x)]} {
+    if {$chattoken ne ""} {
 	XEventHandleAnyXElem $chattoken $xmldata
     }
 }
@@ -1577,20 +1582,19 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from args} {
     
     focus $wtextsnd
    
-    # jabber:x:event
-    if {$cprefs(usexevents)} {
-	bind $wtextsnd <KeyPress>  \
-	  +[list [namespace current]::KeyPressEvent $chattoken %A]
-	bind $wtextsnd <Alt-KeyPress>     {# nothing}
-	bind $wtextsnd <Meta-KeyPress>    {# nothing}
-	bind $wtextsnd <Control-KeyPress> {# nothing}
-	bind $wtextsnd <Escape>           {# nothing}
-	bind $wtextsnd <KP_Enter>         {# nothing}
-	bind $wtextsnd <Tab>              {# nothing}
-	if {[string equal [tk windowingsystem] "aqua"]} {
-	    bind $wtextsnd <Command-KeyPress> {# nothing}
-	}
+    # This is to handle chat state events.
+    bind $wtextsnd <KeyPress>  \
+      +[list [namespace current]::KeyPressEvent $chattoken %A]
+    bind $wtextsnd <Alt-KeyPress>     {# nothing}
+    bind $wtextsnd <Meta-KeyPress>    {# nothing}
+    bind $wtextsnd <Control-KeyPress> {# nothing}
+    bind $wtextsnd <Escape>           {# nothing}
+    bind $wtextsnd <KP_Enter>         {# nothing}
+    bind $wtextsnd <Tab>              {# nothing}
+    if {[string equal [tk windowingsystem] "aqua"]} {
+	bind $wtextsnd <Command-KeyPress> {# nothing}
     }
+
     bind $wtextsnd <Return>  \
       [list [namespace current]::ReturnKeyPress $chattoken]    
     bind $wtextsnd <$this(modkey)-Return> \
@@ -2728,6 +2732,7 @@ proc ::Chat::Send {dlgtoken} {
 }
 
 proc ::Chat::SendText {chattoken text} {
+    global  config
     variable $chattoken
     upvar 0 $chattoken chatstate
 
@@ -2762,22 +2767,20 @@ proc ::Chat::SendText {chattoken text} {
     # sent alone but some clients (Psi) doesn't recognize this why it is
     # duplicated here. Good/bad? Skip!
     set opts [list]
+    set xlist [list]
     set chatstate(lastsubject) $chatstate(subject)
     
     # Cancellations of any message composing jabber:x:event
-    if {$cprefs(usexevents) &&  \
-      [string equal $chatstate(xevent,status) "composing"]} {
-	XEventSendCancelCompose $chattoken
-    }
-    set xlist [list]
-    
-    # Requesting composing notification.
-    if {$cprefs(usexevents)} {
+    if {$config(chat,use-xevents)} {
+	if {$chatstate(xevent,status) eq "composing"} {
+	    XEventSendCancelCompose $chattoken
+	}
+
+	# Requesting composing notification.
 	lappend opts -id [incr cprefs(xeventid)]
 	lappend xlist [wrapper::createtag "x" -attrlist {xmlns jabber:x:event} \
 	  -subtags [list [wrapper::createtag "composing"]]]
     }
-
 
     #-- The <active ...> tag is only sended in the first message, 
     #-- for next messages we have to check if the contact has reply to us with the same active tag
@@ -2828,7 +2831,6 @@ proc ::Chat::SendText {chattoken text} {
 
     set chatstate(havesent) 1
     
-    set opts [list -from $jid2]
     ::hooks::run displayChatMessageHook $xmldata
 }
 
@@ -3186,7 +3188,6 @@ proc ::Chat::Close {dlgtoken} {
 	if {$closetoplevel} {
 	    ::UI::SaveWinGeom $wDlgs(jchat) $dlgstate(w)
 	    foreach chattoken $chattokens {
-                #Send CancelCompose jabber:x:event
 		XEventSendCancelCompose $chattoken
 	    }
 	    destroy $dlgstate(w)
@@ -3243,7 +3244,7 @@ proc ::Chat::GetFirstSashPos {} {
 proc ::Chat::XEventHandleAnyXElem {chattoken xmldata} {
     global  config
     
-    if {!$config(chat,notify-recv)} {
+    if {!$config(chat,use-xevents)} {
 	return
     }
 
@@ -3342,9 +3343,8 @@ proc ::Chat::KeyPressEvent {chattoken char} {
 	  [list [namespace current]::XEventSendCancelCompose $chattoken]]
     }
 
-    #Sending keypress for ChatState
+    # Sending keypress for ChatState
     if { ($chatstate(havecs) eq "true") && ($chatstate(chatstate) ne "composing")} {
-        #Trigger Close chatstate
         ChangeChatState $chattoken typing
         SendChatState $chattoken $chatstate(chatstate)
     }
@@ -3364,9 +3364,9 @@ proc ::Chat::XEventSendCompose {chattoken} {
     set id [lindex $chatstate(xevent,msgidlist) end]
     set chatstate(xevent,msgidlist) [lindex $chatstate(xevent,msgidlist) end]
     set chatstate(xevent,composeid) $id
-    set opts {}
+    set opts [list]
     if {$chatstate(xevent,type) eq "chat"} {
-	set opts [list -thread $chatstate(threadid) -type chat]
+	lappend opts -thread $chatstate(threadid) -type chat
     }
     if {$config(chat,notify-send)} {
 	set xelems [list \
