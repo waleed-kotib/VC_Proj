@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.25 2007-10-31 15:46:47 matben Exp $
+# $Id: AvatarMB.tcl,v 1.26 2007-11-10 15:44:59 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -33,7 +33,7 @@ namespace eval ::AvatarMB {
     variable initted 0
 }
 
-proc ::AvatarMB::InitPrefsHook { } {
+proc ::AvatarMB::InitPrefsHook {} {
     global  prefs
     
     set prefs(dir,avatarPick) ""
@@ -687,7 +687,6 @@ proc ::AvatarMB::MenuNew {} {
     if {[file exists $fileName]} {
 	set prefs(dir,avatarPick) [file dirname $fileName]
 	SetFileToShare $fileName
-
     }
 }
 
@@ -703,7 +702,8 @@ proc ::AvatarMB::VerifyPhotoFile {f} {
 
 proc ::AvatarMB::SetFileToShare {fileName} {
     
-    Debug 4 "::Avatar::IsMyPhotoSharedFromFile=[::Avatar::IsMyPhotoSharedFromFile $fileName]"
+    Debug 4 "::AvatarMB::SetFileToShare"
+    Debug 4 "\t ::Avatar::IsMyPhotoSharedFromFile=[::Avatar::IsMyPhotoSharedFromFile $fileName]"
     
     # Share only if not identical to existing one.
     if {[::Avatar::IsMyPhotoSharedFromFile $fileName]} {

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.236 2007-11-09 08:50:36 matben Exp $
+# $Id: Chat.tcl,v 1.237 2007-11-10 15:44:59 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -197,20 +197,23 @@ namespace eval ::Chat {
     
     # Control how the ancient XEP-0022 (jabber:x:event) is handled.
     set ::config(chat,use-xevents) 1
-#     set ::config(chat,use-xevents) 0
     
     # Control how chat state notification is handled.
     set ::config(chat,notify-send) 1
     set ::config(chat,notify-recv) 1
     set ::config(chat,notify-show) 1
 
-#     set ::config(chat,notify-send) 0
-#     set ::config(chat,notify-recv) 0
-#     set ::config(chat,notify-show) 0
-
-    # Allow themed chats.
-    set ::config(chat,try-themed) 0
+    # For easier debug.
+    if {0} {
+	set ::config(chat,use-xevents) 0
+	set ::config(chat,notify-send) 0
+	set ::config(chat,notify-recv) 0
+	set ::config(chat,notify-show) 0	
+    }
     
+    # Allow themed chats.
+    set ::config(chat,try-themed) 1
+        
     # Postpone this to init.
     variable haveTheme 0
     if {$::config(chat,try-themed) && ![catch {package require ChatTheme}]} {
@@ -498,7 +501,7 @@ proc ::Chat::NewChat {threadID jid args} {
 	set dlgtoken [eval {Build $threadID $jid} $args]		
 	set chattoken [GetActiveChatToken $dlgtoken]
     }
-    #MakeAndInsertHistory $chattoken
+    MakeAndInsertHistory $chattoken
     RegisterPresence $chattoken        
     
     return $chattoken
@@ -2785,17 +2788,21 @@ proc ::Chat::SendText {chattoken text} {
     #-- The <active ...> tag is only sended in the first message, 
     #-- for next messages we have to check if the contact has reply to us with the same active tag
     #-- this check is done with chatstate(havecs) but we need to send for first anyway
-    set cselems [list]
-    if { ($chatstate(havecs) eq "first") || ($chatstate(havecs) eq "true") } {
-	#-- The cselems is sended for first and then wait for a right reply 
-	if {$chatstate(havecs) eq "first"} {
-	    set chatstate(havecs) false
+
+    if {$config(chat,notify-send)} {
+	set cselems [list]
+	if { ($chatstate(havecs) eq "first") || ($chatstate(havecs) eq "true") } {
+	    
+	    #-- The cselems is sended for first and then wait for a right reply 
+	    if {$chatstate(havecs) eq "first"} {
+		set chatstate(havecs) false
+	    }
+	    ChangeChatState $chattoken send
+	    set csE [wrapper::createtag $chatstate(chatstate) \
+	      -attrlist [list xmlns $xmppxmlns(chatstates)]]
+	    lappend cselems $csE
+	    lappend xlist $csE
 	}
-	ChangeChatState $chattoken send
-	set csE [wrapper::createtag $chatstate(chatstate) \
-	  -attrlist [list xmlns $xmppxmlns(chatstates)]]
-	lappend cselems $csE
-	lappend xlist $csE
     }
     
     # Handle any nickname. Only first message.

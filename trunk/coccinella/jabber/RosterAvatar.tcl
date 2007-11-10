@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.45 2007-11-02 16:03:23 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.46 2007-11-10 15:44:59 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -89,6 +89,8 @@ namespace eval ::RosterAvatar {
     ::hooks::register  discoInfoHook        ::RosterAvatar::DiscoInfoHook
     ::hooks::register  rosterTreeConfigure  ::RosterAvatar::TreeConfigureHook
     ::hooks::register  prefsInitHook        ::RosterAvatar::InitPrefsHook
+    
+    ::hooks::register  avatarNewPhotoHook   [namespace code NewPhotoHook]
 
     # We should have a set of sizes to choose from: 32, 48 and 64
     variable avatarSize 32
@@ -500,7 +502,8 @@ proc ::RosterAvatar::Configure {_T} {
     ::RosterTree::EditSetBinds [namespace code EditCmd]
 
     if {$styleClass eq "avatar"} {
-	::Avatar::Configure -autoget 1 -command ::RosterAvatar::OnAvatarPhoto
+	::Avatar::Configure -autoget 1
+	::Avatar::RegisterHash [namespace code OnAvatarHash]
 	
 	# We shall get avatars for all users.
 	::Avatar::GetAll
@@ -600,7 +603,6 @@ proc ::RosterAvatar::HeaderCmd {T C} {
     
     set sortColumn $jprefs(rost,avatar-sortColumn)
     set ctag [$T column cget $C -tags]
-    #puts "::RosterAvatar::HeaderCmd C=$C, sortColumn=$sortColumn, ctag=$ctag"    
     
     if {[$T column compare $C == $sortColumn]} {
 	if {[$T column cget $sortColumn -arrow] eq "down"} {
@@ -769,19 +771,39 @@ proc ::RosterAvatar::Init { } {
     ::RosterTree::FreeTags
 }
 
+proc ::RosterAvatar::OnAvatarHash {jid2} {
+    
+    # If removed (empty hash) we do this right away, else the -autoget and
+    # hooks fixes it.
+    set hash [::Jabber::JlibCmd avatar get_hash $jid2]
+    if {$hash eq ""} {
+	OnAvatarPhoto $jid2
+    }
+}
+
+proc ::RosterAvatar::NewPhotoHook {jid2} {
+    OnAvatarPhoto $jid2
+}
+
 # RosterAvatar::OnAvatarPhoto --
 # 
 #       Callback from Avatar when there is a new image or the image has been
 #       removed.
 
-proc ::RosterAvatar::OnAvatarPhoto {type jid2} {
+proc ::RosterAvatar::OnAvatarPhoto {jid2} {
     
-    ::Debug 4 "::RosterAvatar::OnAvatarPhoto type=$type, jid2=$jid2"
+    ::Debug 4 "::RosterAvatar::OnAvatarPhoto jid2=$jid2"
     
     # We get this callback async. Beware!
     set styleName [::RosterTree::GetStyle]
     if {($styleName ne "avatar") && ($styleName ne "avatarlarge")} {
 	return
+    }
+    set hash [::Jabber::JlibCmd avatar get_hash $jid2]
+    if {$hash eq ""} {
+	set type remove
+    } else {
+	set type put
     }
 
     # Avatars are defined per BARE JID, jid2.
@@ -838,9 +860,10 @@ proc ::RosterAvatar::SetAvatarImage {type jid} {
     }
 }
 
-proc ::RosterAvatar::Delete { } {
+proc ::RosterAvatar::Delete {} {
     
-    ::Avatar::Configure -autoget 0 -command ""
+    ::Avatar::Configure -autoget 0 ;# -command ""
+    ::Avatar::DeregisterHash [namespace code OnAvatarHash]
     FreeAltCache
 }
 
@@ -865,8 +888,6 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     variable rosterBaseStyle
     upvar ::Jabber::jstate  jstate
     upvar ::Jabber::jprefs jprefs
-    
-    ::Debug 6 "::RosterAvatar::CreateItem jid=$jid, presence=$presence"
 
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return

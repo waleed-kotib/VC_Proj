@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.9 2007-11-08 15:40:25 matben Exp $
+# $Id: ChatTheme.tcl,v 1.10 2007-11-10 15:44:59 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -251,31 +251,6 @@ proc ::ChatTheme::GetResourceDir {name} {
     return
 }
 
-# @@@ TODO
-# When we have updated our avatar we could have a hook that updates 
-# a counter and use a new uri: "otherAvatar-[incr uid]" to trigger this
-
-proc ::ChatTheme::MyAvatarHook {} {
-    variable wall
-    
-    foreach w $wall {
-	variable $w
-	upvar 0 $w state
-	incr state(myAvatarUID)
-    }
-}
-
-proc ::ChatTheme::OtherAvatarHook {jid2} {
-    variable wall
-    
-    puts "::ChatTheme::OtherAvatarHook jid2=$jid2"
-    foreach w $wall {
-	variable $w
-	upvar 0 $w state
-	incr state(otherAvatarUID)
-    }
-}
-
 proc ::ChatTheme::Widget {token w args} {
     variable content
     variable html
@@ -319,7 +294,9 @@ proc ::ChatTheme::Widget {token w args} {
     if {[tk windowingsystem] eq "aqua"} {
 	#$w style -id user-001 { font: "Lucida Grande"; }
     }
-    
+    if {![llength $wall]} {
+	::Avatar::RegisterHash [namespace code OnAvatarHash]
+    }
     lappend wall $w
     
     bind $w <Destroy> +[namespace code { Free %W }]
@@ -332,7 +309,70 @@ proc ::ChatTheme::Free {w} {
     variable wall
     
     lprune wall $w
+    if {![llength $wall]} {
+	::Avatar::DeregisterHash [namespace code OnAvatarHash]
+    }
     unset -nocomplain $w
+}
+
+# ChatTheme::MyAvatarHook, OtherAvatarHook --
+# 
+#       Thi is how we are informed when an actual photo have been created.
+
+proc ::ChatTheme::MyAvatarHook {} {
+    variable wall
+    
+    foreach w $wall {
+	variable $w
+	upvar 0 $w state
+	incr state(myAvatarUID)
+    }
+}
+
+proc ::ChatTheme::OtherAvatarHook {jid2} {
+    IncrOtherAvatarUID
+}
+
+# ChatTheme::IncrOtherAvatarUID --
+# 
+#       This updates the counter which results in an empty avatar later.
+
+proc ::ChatTheme::IncrOtherAvatarUID {} {
+    variable wall
+    
+    puts "++++++++++++++++::ChatTheme::IncrOtherAvatarUID"
+    foreach w $wall {
+	variable $w
+	upvar 0 $w state
+	incr state(otherAvatarUID)
+    }
+}
+
+proc ::ChatTheme::OnAvatarHash {jid} {
+    variable wall
+    
+    puts "<<<<<<<<<<<<<<<::ChatTheme::OnAvatarHash jid=$jid"
+    set jid2 [jlib::barejid $jid]
+    
+    # Bother only if we have an open chat with JID.
+    set have 0
+    foreach w $wall {
+	variable $w
+	upvar 0 $w state
+    	
+	set cjid [::Chat::GetChatTokenValue $state(token) jid]
+	if {[jlib::jidequal $jid2 [jlib::barejid $cjid]]} {
+	    set have 1
+	    break
+	}
+    }
+    if {$have} {
+	set hash [::Jabber::JlibCmd avatar get_hash $jid]
+	if {$hash ne ""} {
+	    ::Avatar::GetAsyncIfExists $jid
+	}
+	IncrOtherAvatarUID
+    }
 }
 
 # ChatTheme::Parse --
