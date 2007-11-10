@@ -10,7 +10,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: wrapper.tcl,v 1.37 2007-11-04 13:54:51 matben Exp $
+# $Id: wrapper.tcl,v 1.38 2007-11-10 11:54:35 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -483,7 +483,7 @@ proc wrapper::xmlerror {id args} {
 proc wrapper::createxml {xmllist} {
         
     # Extract the XML data items.
-    foreach {tag attrlist isempty chdata childlist} $xmllist {break}
+    foreach {tag attrlist isempty chdata childlist} $xmllist { break }
     set attrlist [xmlcrypt $attrlist]
     set rawxml "<$tag"
     foreach {attr value} $attrlist {
@@ -533,7 +533,7 @@ proc wrapper::formattag {xmllist} {
     variable nl
     variable prefix
     
-    foreach {tag attrlist isempty chdata childlist} $xmllist {break}
+    foreach {tag attrlist isempty chdata childlist} $xmllist { break }
     set attrlist [xmlcrypt $attrlist]
     set rawxml "$nl$prefix$tabs<$tag"
     foreach {attr value} $attrlist {
@@ -885,6 +885,7 @@ proc wrapper::setchildlist {xmllist childlist} {
 # wrapper::setchildwithtag --
 # 
 #       Replaces any element with same tag. 
+#       If not there it will be added.
 #       xmllist must be nonempty.
 
 proc wrapper::setchildwithtag {xmllist elem} {
@@ -896,6 +897,8 @@ proc wrapper::setchildwithtag {xmllist elem} {
 	}
     }
     lappend clist $elem
+    # IMPORTANT:
+    lset xmllist 2 0
     return [lreplace $xmllist 4 4 $clist]
 }
 
