@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.193 2007-11-05 08:53:14 matben Exp $
+# $Id: jabberlib.tcl,v 1.194 2007-11-10 15:44:59 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -2692,7 +2692,7 @@ proc jlib::send_iq {jlibname type xmldata args} {
 	lappend attrlist $name $value
     }
     set xmllist [wrapper::createtag "iq" -attrlist $attrlist -subtags $xmldata]
-    
+
     send $jlibname $xmllist
     return
 }

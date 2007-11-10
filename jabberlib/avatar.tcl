@@ -11,7 +11,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: avatar.tcl,v 1.26 2007-07-19 06:28:17 matben Exp $
+# $Id: avatar.tcl,v 1.27 2007-11-10 15:44:59 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -24,7 +24,7 @@
 #   OPTIONS
 #      -announce   0|1
 #      -share      0|1
-#      -command    tclProc
+#      -command    tclProc      invoked when hash changed
 #      -cache      0|1
 #	
 #   INSTANCE COMMANDS
@@ -55,6 +55,8 @@
 #   getting hashes and not else.
 #      
 ################################################################################
+# TODO:
+#       1) Update to XEP-0084: User Avatar 1.0, 2007-11-07, using PEP
 
 package require base64     ; # tcllib
 package require sha1       ; # tcllib                           
@@ -448,6 +450,7 @@ proc jlib::avatar::uptodate {jlibname jid2} {
 #       We must handle both 'avatar' and 'vcard' from one place
 #       since we don't want separate callbacks if both are supplied.
 #       It is assumed that hash from any are identical.
+#       Invokes any -command if hash changed.
 
 proc jlib::avatar::presence_handler {jlibname xmldata} {
     upvar ${jlibname}::avatar::options options

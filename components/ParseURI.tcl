@@ -70,7 +70,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ParseURI.tcl,v 1.42 2007-10-05 07:00:14 matben Exp $
+# $Id: ParseURI.tcl,v 1.43 2007-11-10 15:44:56 matben Exp $
 
 package require uriencode
 
@@ -132,7 +132,7 @@ proc ::ParseURI::Parse {args} {
 	    set authxmpp ""
 	    set pathxmpp $hierxmpp
 	}
-	set querylist {}
+	set querylist [list]
 	foreach sub [split $querypairs ";"] {
 	    foreach {key value} [split $sub =] {break}
 	    lappend querylist $key $value
@@ -146,7 +146,7 @@ proc ::ParseURI::Parse {args} {
 	set iquerytype message
 	set fragment ""
 	set querypairs $headers
-	set querylist {}
+	set querylist [list]
 	foreach sub [split $querypairs "&"] {
 	    foreach {key value} [split $sub =] {break}
 	    lappend querylist $key $value
@@ -309,7 +309,7 @@ proc ::ParseURI::DoDisco {token} {
     set node ""
     set request info
     set type get
-    set opts {}
+    set opts [list]
     foreach {key value} [array get state query,*] {
 	
 	switch -- $key {
@@ -407,7 +407,7 @@ proc ::ParseURI::HandleJoinGroupchat {token} {
     }
     
     # We brutaly assumes muc room here.
-    set opts {}
+    set opts [list]
     if {[info exists state(query,password)]} {
 	lappend opts -password $state(query,password)
     }
@@ -445,7 +445,7 @@ proc ::ParseURI::DoMessage {token} {
     variable $token
     upvar 0 $token state
     
-    set opts {}
+    set opts [list]
     set type normal
     foreach {key value} [array get state query,*] {
 	
@@ -494,7 +494,7 @@ proc ::ParseURI::DoPubsub {token} {
     variable $token
     upvar 0 $token state
 
-    set opts {}
+    set opts [list]
     set action subscribe
     foreach {key value} [array get state query,*] {
 	
@@ -537,7 +537,7 @@ proc ::ParseURI::DoRoster {token} {
     variable $token
     upvar 0 $token state
 
-    set opts {}
+    set opts [list]
     foreach {key value} [array get state query,*] {
 	
 	switch -- $key {

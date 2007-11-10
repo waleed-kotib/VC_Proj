@@ -20,12 +20,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.40 2007-10-31 15:46:47 matben Exp $
+# $Id: Avatar.tcl,v 1.41 2007-11-10 15:44:57 matben Exp $
 
 # @@@ Issues:
 # 
 # Features:
 #       1) We don't request avatar for offline users, only if already cached.
+# TODO:
+#       1) Update to XEP-0084: User Avatar 1.0, 2007-11-07, using PEP
 
 package require sha1       ; # tcllib                           
 package require jlib::avatar
@@ -66,6 +68,9 @@ namespace eval ::Avatar:: {
 
     # Use a priority order if we have hash from both.
     variable protocolPrio {vcard avatar}
+    variable protocolPrio {vcard}
+    
+    variable callbackCmdL [list]
 
     # There are two sets of prefs:
     #   1) our own avatar which must be controllable directly from UI
@@ -116,13 +121,13 @@ proc ::Avatar::Configure {args} {
     } elseif {[llength $args] == 1} {
 	return $options($args)
     } else {
-	set aopts {}
+	set aopts [list]
 	foreach {key value} $args {
 	    switch -- $key {
 		-cache {
 		    lappend aopts -cache $value
 		}
-		-command {
+		-command-XXXXXXXX {
 		    if {$value ne ""} {
 			lappend aopts -command ::Avatar::OnNewHash
 		    } else {
@@ -136,9 +141,32 @@ proc ::Avatar::Configure {args} {
     }
 }
 
+# Avatar::RegisterHash, DeregisterHash --
+# 
+#       Register callbacks when an avatar hash has been changed.
+#       @@@ hooks instead?
+
+proc ::Avatar::RegisterHash {procName} {
+    variable callbackCmdL
+    lappend callbackCmdL $procName
+    set callbackCmdL [lsort -unique $callbackCmdL]
+}
+
+proc ::Avatar::DeregisterHash {procName} {
+    variable callbackCmdL
+    lprune callbackCmdL $procName
+}
+
+proc ::Avatar::RegisterHashInvoke {jid} {
+    variable callbackCmdL
+    foreach cmd $callbackCmdL {
+	uplevel #0 $cmd [list $jid]
+    }
+}
+
 # These hooks deal with sharing (announcing) our own avatar.
 
-proc ::Avatar::InitHook { } {
+proc ::Avatar::InitHook {} {
     variable myphoto
     variable aprefs
     
@@ -154,7 +182,7 @@ proc ::Avatar::InitHook { } {
     }
 }
 
-proc ::Avatar::InitPrefsHook { } {
+proc ::Avatar::InitPrefsHook {} {
     variable aprefs
     
     ::PrefUtils::Add [list  \
@@ -171,9 +199,11 @@ proc ::Avatar::JabberInitHook {jlibname} {
 	ShareImage $aprefs(fileName)
     }
     ReadHashmap $aprefs(hashmapFile)
+    
+    ::Jabber::JlibCmd avatar configure -command ::Avatar::OnNewHash
 }
 
-proc ::Avatar::LoginHook { } {
+proc ::Avatar::LoginHook {} {
     variable aprefs
     upvar ::Jabber::jstate jstate
     
@@ -194,7 +224,7 @@ proc ::Avatar::LoginHook { } {
     }
 }
 
-proc ::Avatar::LogoutHook { } {
+proc ::Avatar::LogoutHook {} {
     variable options
     
     if {!$options(-cache)} {
@@ -202,11 +232,21 @@ proc ::Avatar::LogoutHook { } {
     }
 }
 
-proc ::Avatar::QuitHook { } {
+proc ::Avatar::QuitHook {} {
     variable aprefs
     upvar ::Jabber::jstate jstate
     
     WriteHashmap $aprefs(hashmapFile)
+}
+
+proc ::Avatar::ClearCache {} {
+    variable options
+    
+    set files [glob -nocomplain -dir $options(-cachedir) *]
+    if {[llength $files]} {
+	eval {file delete} $files
+    }
+    ClearCacheHashmap
 }
 
 #--- First section deals with our own avatar -----------------------------------
@@ -225,9 +265,6 @@ proc ::Avatar::QuitHook { } {
 
 proc ::Avatar::SetAndShareMyAvatarFromFile {fileName} {
     
-    ::Debug 4 "::Avatar::SetAndShareMyAvatarFromFile"
-    ::Debug 4 "CreateAndVerifyPhoto=[CreateAndVerifyPhoto $fileName name]"
-
     set ok 0
     if {[CreateAndVerifyPhoto $fileName name]} {
 	SetMyPhoto $name
@@ -242,7 +279,7 @@ proc ::Avatar::SetAndShareMyAvatarFromFile {fileName} {
     return $ok
 }
 
-proc ::Avatar::UnsetAndUnshareMyAvatar { } {
+proc ::Avatar::UnsetAndUnshareMyAvatar {} {
 
     ::Avatar::UnsetMyPhotoAndFile
     ::Avatar::UnshareImage
@@ -367,7 +404,7 @@ proc ::Avatar::SetMyPhoto {name} {
     $myphoto(image) copy $name -shrink
 }
 
-proc ::Avatar::GetMyPhoto { } {
+proc ::Avatar::GetMyPhoto {} {
     variable myphoto
     
     if {[info exists myphoto(image)]} {
@@ -387,14 +424,14 @@ proc ::Avatar::IsMyPhotoSharedFromFile {fileName} {
     return [expr {$aprefs(share) && [IsMyPhotoFromFile $fileName]}]
 }
 
-proc ::Avatar::GetMyPhotoHash { } {
+proc ::Avatar::GetMyPhotoHash {} {
     variable myphoto
 
     # Note that 'jlib avatar get_my_data hash' only works if online.
     return $myphoto(hash)
 }
 
-proc ::Avatar::UnsetMyPhotoAndFile { } {
+proc ::Avatar::UnsetMyPhotoAndFile {} {
     global  this
     variable myphoto
     variable aprefs
@@ -423,7 +460,7 @@ proc ::Avatar::SetShareOption {bool} {
     set aprefs(share) $bool
 }
 
-proc ::Avatar::GetShareOption { } {
+proc ::Avatar::GetShareOption {} {
     variable aprefs
     return $aprefs(share)
 }
@@ -458,7 +495,7 @@ proc ::Avatar::SaveMyImageFile {fileName} {
     return $aprefs(fileName)
 }
 
-proc ::Avatar::GetMyAvatarFile { } {
+proc ::Avatar::GetMyAvatarFile {} {
     global  this
     
     Debug "::Avatar::GetMyAvatarFile"
@@ -483,7 +520,7 @@ proc ::Avatar::GetMyAvatarFile { } {
 proc ::Avatar::ShareImage {fileName} {
     upvar ::Jabber::jstate jstate
     
-    Debug "::Avatar::ShareImage --->"
+    Debug 4 "::Avatar::ShareImage --->"
     
     # @@@ We could try to be economical by not storing the same image twice.
 
@@ -497,7 +534,7 @@ proc ::Avatar::ShareImage {fileName} {
     set jlib $jstate(jlib)
     $jlib avatar set_data $data $mime
     set base64 [$jlib avatar get_my_data base64]
-    
+        
     # If we configure while online need to update our presence info and
     # store the data with the server.
     # Saves Avatar into vCard.
@@ -522,7 +559,7 @@ proc ::Avatar::ShareImage {fileName} {
 #       Remove our avatar for public usage.
 #       It sends new presence with empty hashes.
 
-proc ::Avatar::UnshareImage { } {
+proc ::Avatar::UnshareImage {} {
     upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::UnshareImage --->"
@@ -646,9 +683,6 @@ proc ::Avatar::OnNewHash {jid} {
     }
     set hash [$jlib avatar get_hash $jid2]
     if {$hash eq ""} {
-	if {$options(-command) ne ""} {
-	    $options(-command) remove $jid2
-	}
 	FreePhotos $jid
 	FreeHashCache $jid2
     } else {
@@ -659,15 +693,10 @@ proc ::Avatar::OnNewHash {jid} {
 	} elseif {$options(-autoget)} {
 	    GetPrioAvatar $jid
 	}
-	
-	# Try first to get the Avatar from Cache.
-	#set data [ReadCacheAvatar $hash]
-	#if {$data ne ""} {
-	#    SetPhotoFromData $jid2 $data
-	#} elseif {$options(-autoget)} {
-	#    GetPrioAvatar $jid
-	#}
     }
+    
+    # If no -autoget interested parties my call 'GetAsyncIfExists' here.
+    RegisterHashInvoke $jid2
 }
 
 # Avatar::GetPrioAvatar --
@@ -687,6 +716,7 @@ proc ::Avatar::GetPrioAvatar {jid} {
     # We need to know if 'avatar' or 'vcard' style to get.
     # Use a priority order if we have hash from both.    
     # Note that all vCards are defined per jid2, bare JID.
+
     foreach prot $protocolPrio {
 	if {[$jlib avatar have_hash_protocol $jid2 $prot]} {    
 	    switch -- $prot {
@@ -803,7 +833,6 @@ proc ::Avatar::GetAsyncIfExists {jid} {
 	# First try to load the avatar from Cache directory.
 	if {[HaveCachedHash $hash]} {
 	    SetPhotoFromCache $jid2
-	    #SetPhotoFromData $jid2 $data
 	} else {
 	    GetPrioAvatar $jid
 	}
@@ -814,7 +843,7 @@ proc ::Avatar::GetAsyncIfExists {jid} {
 # 
 #       Requests all avatars in our roster.
 
-proc ::Avatar::GetAll { } {
+proc ::Avatar::GetAll {} {
     upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::GetAll"
@@ -823,16 +852,6 @@ proc ::Avatar::GetAll { } {
 
     # @@@ Not sure here...
     foreach jid2 [$jlib roster getusers] {
-	set jid [$jlib avatar get_full_jid $jid2]
-	GetAsyncIfExists $jid
-    }
-    return
-   
-    # BU
-    set jlib $jstate(jlib)
-    foreach jid2 [$jlib avatar get_all_avatar_jids] {
-	
-	# This can be a jid2 if vcard.
 	set jid [$jlib avatar get_full_jid $jid2]
 	GetAsyncIfExists $jid
     }
@@ -866,9 +885,9 @@ proc ::Avatar::SetPhotoFromData {jid2 data} {
     if {![catch {
 	PutPhotoFromData $jid2 $data
     } err]} {
-	if {$options(-command) ne ""} {
-	    $options(-command) $type $jid2
-	}
+# 	if {$options(-command) ne ""} {
+# 	    $options(-command) $type $jid2
+# 	}
     } else {
 	Debug $err
     }
@@ -894,9 +913,9 @@ proc ::Avatar::SetPhotoFromCache {jid2} {
     if {![catch {
 	PutPhotoFromCache $jid2
     } err]} {
-	if {$options(-command) ne ""} {
-	    $options(-command) $type $jid2
-	}
+# 	if {$options(-command) ne ""} {
+# 	    $options(-command) $type $jid2
+# 	}
     } else {
 	Debug $err
     }
@@ -1224,7 +1243,7 @@ proc ::Avatar::GetScaleMN {from to} {
     return [list $N $M]
 }
 
-proc ::Avatar::MakeScaleTable { } {
+proc ::Avatar::MakeScaleTable {} {
     variable scaleTable
     
     # {{numerator denominator} ...}
@@ -1463,6 +1482,11 @@ proc ::Avatar::ReadHashmap {fileName} {
 	    }
 	}
     }
+}
+
+proc ::Avatar::ClearCacheHashmap {} {
+    variable hashmap
+    unset -nocomplain hashmap
 }
 
 #-------------------------------------------------------------------------------

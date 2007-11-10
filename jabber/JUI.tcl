@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.224 2007-11-05 08:53:14 matben Exp $
+# $Id: JUI.tcl,v 1.225 2007-11-10 15:44:59 matben Exp $
 
 package provide JUI 1.0
 
@@ -94,9 +94,9 @@ namespace eval ::JUI:: {
     
     # Configurations:
     set ::config(url,home) "http://thecoccinella.org"
-    set ::config(url,bugs)  \
-      "http://sourceforge.net/tracker/?group_id=68334&atid=520863"    
-    #set ::config(url,bugs) "https://bugs.launchpad.net/coccinella"
+#     set ::config(url,bugs)  \
+#       "http://sourceforge.net/tracker/?group_id=68334&atid=520863"    
+    set ::config(url,bugs) "https://bugs.launchpad.net/coccinella"
         
     set ::config(ui,status,menu)        dynamic   ;# plain|dynamic
     set ::config(ui,main,infoLabel)     server    ;# mejid|mejidres|status|server
