@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.237 2007-11-10 15:44:59 matben Exp $
+# $Id: Chat.tcl,v 1.238 2007-11-11 15:56:34 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2968,6 +2968,7 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
     if {[llength $showE]} {
 	set show [string tolower [wrapper::getcdata $showE]]
     }
+    puts "----------------chatstate(presence)=$chatstate(presence)"
         
     # Skip if duplicate presence. Bug?
     if {[string equal $chatstate(presence) $show]} {

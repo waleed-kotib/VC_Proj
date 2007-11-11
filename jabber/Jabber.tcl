@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.252 2007-11-04 13:54:51 matben Exp $
+# $Id: Jabber.tcl,v 1.253 2007-11-11 15:56:34 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -276,9 +276,20 @@ namespace eval ::Jabber:: {
   
     variable killerId 
     
+    # Dialogs with head label.
     set ::config(version,show-head) 1
     set ::config(logout,show-head)  1
-    set ::config(sub,subscribe-msgbox) 0
+    set ::config(subscribe,trpt-msgbox) 0
+    
+    # Set a timer dialog instead of just stright auto rejecting.
+    set ::config(subscribe,auto-reject-timer) 0
+    
+    # Set a timer dialog instead of just stright auto accepting.
+    set ::config(subscribe,auto-accept-timer) 0
+    
+    # Shall we send a message to user when one of the auto dispatchers done.
+    set ::config(subscribe,auto-reject-send-msg) 0
+    set ::config(subscribe,auto-accept-send-msg) 0
     
     # This is a method to show fake caps responses.
     set ::config(caps,fake) 0
@@ -709,7 +720,7 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	if {$subscription eq "none" || $subscription eq "from"} {
 	    $jlib send_presence -to $from -type "subscribe"
 	}
-	if {$config(sub,subscribe-msgbox)} {
+	if {$config(subscribe,trpt-msgbox)} {
 	    set subtype [lindex [split $jidtype /] 1]
 	    set typename [::Roster::GetNameFromTrpt $subtype]
 	    ::ui::dialog -title [mc Info] -icon info -type ok \
@@ -738,13 +749,29 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	
 	switch -- $jprefs(subsc,$key) {
 	    accept {
-		$jlib send_presence -to $from -type "subscribed"
-		set autoaccepted 1
-		set msg [mc jamessautoaccepted2 $from]
+		if {$config(subscribe,auto-accept-timer)} {
+		
+		} else {
+		    $jlib send_presence -to $from -type "subscribed"
+		    set autoaccepted 1
+		    set msg [mc jamessautoaccepted2 $from]
+		    
+		    if {$config(subscribe,auto-accept-send-msg)} {
+			::Subscribe::SendAutoAcceptMsg $from
+		    }
+		}
 	    }
 	    reject {
-		$jlib send_presence -to $from -type "unsubscribed"
-		set msg [mc jamessautoreject2 $from]
+		if {$config(subscribe,auto-reject-timer)} {
+		    ::Subscribe::RejectAfter $from
+		} else {
+		    $jlib send_presence -to $from -type "unsubscribed"
+		    set msg [mc jamessautoreject2 $from]
+		    
+		    if {$config(subscribe,auto-reject-send-msg)} {
+			::Subscribe::SendAutoRejectMsg $from
+		    }
+		}
 	    }
 	    ask {
 		::Subscribe::Handle $from
