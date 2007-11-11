@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.41 2007-11-10 15:44:57 matben Exp $
+# $Id: Avatar.tcl,v 1.42 2007-11-11 08:35:22 matben Exp $
 
 # @@@ Issues:
 # 
@@ -520,7 +520,7 @@ proc ::Avatar::GetMyAvatarFile {} {
 proc ::Avatar::ShareImage {fileName} {
     upvar ::Jabber::jstate jstate
     
-    Debug 4 "::Avatar::ShareImage --->"
+    Debug "::Avatar::ShareImage --->"
     
     # @@@ We could try to be economical by not storing the same image twice.
 
@@ -882,13 +882,9 @@ proc ::Avatar::SetPhotoFromData {jid2 data} {
     }
     
     # Be silent!
-    if {![catch {
+    if {[catch {
 	PutPhotoFromData $jid2 $data
     } err]} {
-# 	if {$options(-command) ne ""} {
-# 	    $options(-command) $type $jid2
-# 	}
-    } else {
 	Debug $err
     }
     
@@ -910,13 +906,9 @@ proc ::Avatar::SetPhotoFromCache {jid2} {
     }
 
     # Be silent!
-    if {![catch {
+    if {[catch {
 	PutPhotoFromCache $jid2
     } err]} {
-# 	if {$options(-command) ne ""} {
-# 	    $options(-command) $type $jid2
-# 	}
-    } else {
 	Debug $err
     }
     
