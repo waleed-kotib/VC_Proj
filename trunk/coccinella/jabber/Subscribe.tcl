@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.51 2007-10-24 13:51:56 matben Exp $
+# $Id: Subscribe.tcl,v 1.52 2007-11-11 15:56:35 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -355,6 +355,82 @@ proc ::Subscribe::ResProc {type queryE} {
 	::UI::MessageBox -type ok -message "We got an error from the\
 	  Subscribe::ResProc callback"
     }   
+}
+
+#-------------------------------------------------------------------------------
+
+namespace eval ::Subscribe {
+    
+    
+    set ::config(subscribe,reject-after) 10000
+    
+    ui::dialog button accept -text [mc Accept]
+    ui::dialog button reject -text [mc Reject]
+    
+    ::msgcat::mcset en jamesssubscautorej {Subscription request of %s will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
+    ::msgcat::mcset sv jamesssubscautorej {Subscription request of %s will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
+
+}
+
+proc ::Subscribe::RejectAfter {jid} {
+    global  config
+    
+    set name [GetDisplayName $jid]
+    set secs [expr {$config(subscribe,reject-after)/1000}]
+    set msg [mc jamesssubscautorej $name $secs]
+    set w [ui::dialog -message $msg -buttons {reject accept} -default reject \
+      -command [namespace code [list RejectCmd $jid]]]
+    
+    after 1000 [namespace code [list RejectTimer $w $jid $secs]]
+}
+
+proc ::Subscribe::RejectTimer {w jid secs} {
+
+    if {[winfo exists $w]} {
+	incr secs -1
+	set name [GetDisplayName $jid]
+	if {$secs <= 0} {
+	    ::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
+	    destroy $w
+	    set msg [mc jamessautoreject2 $name]
+	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	} else {
+	    set msg [mc jamesssubscautorej $name $secs]
+	    $w configure -message $msg
+	    after 1000 [namespace code [list RejectTimer $w $jid $secs]]
+	}
+    }
+}
+
+proc ::Subscribe::RejectCmd {jid w button} {
+    global  config
+    
+    if {$button eq "reject"} {
+	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
+	if {$config(subscribe,auto-reject-send-msg)} {
+	    SendAutoRejectMsg $from
+	}
+    } else {
+	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
+    }
+}
+
+#-------------------------------------------------------------------------------
+
+proc ::Subscribe::SendAutoRejectMsg {jid} {
+    
+    set autoRejectMsg "Your request has been automatically refused by the peers IM client software. It wasn't an action taken by your party"
+    
+    ::Jabber::JlibCmd send_message $jid -subject "Auto rejection" \
+      -message $autoRejectMsg
+}
+
+proc ::Subscribe::SendAutoAcceptMsg {jid} {
+    
+    set autoAcceptMsg "Your request has been automatically accepted by the peers IM client software. It wasn't an action taken by your party"
+    
+    ::Jabber::JlibCmd send_message $jid -subject "Auto acception" \
+      -message $autoAcceptMsg
 }
 
 #-------------------------------------------------------------------------------

@@ -17,21 +17,40 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: MeBeam.tcl,v 1.3 2007-11-07 13:36:32 matben Exp $
+# $Id: MeBeam.tcl,v 1.4 2007-11-11 15:56:33 matben Exp $
 
-namespace eval ::MeBeam {}
+namespace eval ::MeBeam {
+    
+    # Where shall the MeBeam menu be?
+    set ::config(mebeam,menu-action) 0
+    set ::config(mebeam,menu-roster) 1
+}
 
 proc ::MeBeam::Init {} {
+    global  config
 
-    set menuDef [list command "Invite MeBeam" {::MeBeam::Cmd} {} {}]
-    ::JUI::RegisterMenuEntry action $menuDef
-
-    ::hooks::register menuPostCommand         ::MeBeam::MainMenuPostHook
-    ::hooks::register menuChatActionPostHook  ::MeBeam::ChatMenuPostHook
+    if {$config(mebeam,menu-action)} {
+	set menuDef [list command "Invite MeBeam" {::MeBeam::Cmd} {} {}]
+	::JUI::RegisterMenuEntry action $menuDef
+	
+	::hooks::register menuPostCommand         ::MeBeam::MainMenuPostHook
+	::hooks::register menuChatActionPostHook  ::MeBeam::ChatMenuPostHook
+    }
+    if {$config(mebeam,menu-roster)} {
+	set mDef [list command "Invite MeBeam" {::MeBeam::RosterCmd $jid3}]
+	set mType {"Invite MeBeam" {user available}}
+	::Roster::RegisterPopupEntry $mDef $mType    
+    }    
     
     variable url "http://www.mebeam.com/coccinella.php?ccn_"
     
     component::register MeBeam "MeBeam web based video conferencing"
+}
+
+proc ::MeBeam::RosterCmd {jid} {
+    puts "::MeBeam::RosterCmd jid=$jid"
+    
+    Start $jid
 }
 
 proc ::MeBeam::MainMenuPostHook {type m} {
@@ -83,26 +102,31 @@ proc ::MeBeam::Cmd {} {
     if {[llength $jidL] == 1} {
 	set jid [lindex $jidL 0]
 	if {[::Jabber::RosterCmd isavailable $jid]} {
-	    set jid2 [jlib::barejid $jid]
-	    set mjid2 [jlib::jidmap $jid2]
-	    set token [::Chat::GetTokenFrom chat jid [jlib::ESC $mjid2]*]
-	    if {$token ne ""} {
-		::Chat::SendText $token [Invite]
-	    } else {
-		::Chat::StartThread $jid2 -message [Invite]
-	    }
+	    Start $jid
 	}
+    }
+}
+
+proc ::MeBeam::Start {jid} {
+    
+    set jid2 [jlib::barejid $jid]
+    set mjid2 [jlib::jidmap $jid2]
+    set token [::Chat::GetTokenFrom chat jid [jlib::ESC $mjid2]*]
+    if {$token ne ""} {
+	::Chat::SendText $token [Invite]
+    } else {
+	::Chat::StartThread $jid2 -message [Invite]
     }
 }
 
 proc ::MeBeam::Invite {} {
     variable url
     
+    set newurl $url[uuid::uuid generate]
     set str [mc "Please join me for video chat on"]
     append str " "
-    append str $url
-    append str [uuid::uuid generate]
-    ::Utils::OpenURLInBrowser $url
+    append str $newurl
+    ::Utils::OpenURLInBrowser $newurl
     
     return $str
 }
