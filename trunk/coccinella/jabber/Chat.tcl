@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.238 2007-11-11 15:56:34 matben Exp $
+# $Id: Chat.tcl,v 1.239 2007-11-12 14:04:49 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -212,7 +212,7 @@ namespace eval ::Chat {
     }
     
     # Allow themed chats.
-    set ::config(chat,try-themed) 1
+    set ::config(chat,try-themed) 0
         
     # Postpone this to init.
     variable haveTheme 0
@@ -492,19 +492,48 @@ proc ::Chat::NewChat {threadID jid args} {
     if {$jprefs(chat,tabbedui)} {
 	set dlgtoken [GetFirstDlgToken]
 	if {$dlgtoken eq ""} {
-	    set dlgtoken [eval {Build $threadID $jid} $args]
+	    set dlgtoken [Build $threadID $jid]
 	    set chattoken [GetTokenFrom chat threadid $threadID]
 	} else {
 	    set chattoken [NewPage $dlgtoken $threadID $jid]
 	}
     } else {
-	set dlgtoken [eval {Build $threadID $jid} $args]		
+	set dlgtoken [Build $threadID $jid]		
 	set chattoken [GetActiveChatToken $dlgtoken]
     }
     MakeAndInsertHistory $chattoken
-    RegisterPresence $chattoken        
+    RegisterPresence $chattoken      
+    eval {ProcessMessageArgs $chattoken} $args
     
     return $chattoken
+}
+
+# Chat::ProcessMessageArgs --
+# 
+#       Handle any message to be sent.
+#       NB: Must be made after widget has been created to avoid duplicate
+#           from history.
+# 
+# Arguments:
+#       args:
+#           -message
+#           -subject
+
+proc ::Chat::ProcessMessageArgs {chattoken args} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    array set argsA {
+	-message ""
+    }
+    array set argsA $args
+    if {[string length $argsA(-message)] || [info exists argsA(-subject)]} {
+	set opts [list]
+	if {[info exists argsA(-subject)]} {
+	    lappend opts -subject $argsA(-subject)
+	}
+	eval {SendText $chattoken $argsA(-message)} $opts
+    }
 }
 
 # Chat::GotMsg --
@@ -1148,12 +1177,11 @@ proc ::Chat::BuildInit {} {
 # Arguments:
 #       threadID    unique thread id.
 #       jid         JID
-#       args        ?-subject subject -message text?
 #       
 # Results:
 #       dlgtoken; shows window.
 
-proc ::Chat::Build {threadID jid args} {
+proc ::Chat::Build {threadID jid} {
     global  this prefs wDlgs
     
     variable uiddlg
@@ -1162,7 +1190,7 @@ proc ::Chat::Build {threadID jid args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Chat::Build threadID=$threadID, args='$args'"
+    ::Debug 2 "::Chat::Build threadID=$threadID"
     
     if {!$buildInited} {
 	BuildInit
@@ -1282,9 +1310,7 @@ proc ::Chat::Build {threadID jid args} {
     pack $wcont -side top -fill both -expand 1
     
     # Use an extra frame that contains everything thread specific.
-    set chattoken [eval {
-	BuildThread $dlgtoken $wthread $threadID $jid
-    } $args]
+    set chattoken [BuildThread $dlgtoken $wthread $threadID $jid]
     pack $wthread -in $wcont -fill both -expand 1
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -1330,12 +1356,11 @@ proc ::Chat::Build {threadID jid args} {
 #       wthread     mega widget path
 #       threadID
 #       from        JID
-#       args        ?-subject subject -message text?
 #       
 # Results:
 #       chattoken
 
-proc ::Chat::BuildThread {dlgtoken wthread threadID from args} {
+proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     global  prefs this wDlgs config
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
@@ -1346,8 +1371,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from args} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Chat::BuildThread args=$args"
-    array set argsA $args
+    ::Debug 2 "::Chat::BuildThread"
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -1406,10 +1430,6 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from args} {
     
     set chatstate(havecs)           first
     set chatstate(chatstate)        active
-
-    if {[info exists argsA(-subject)]} {
-	set chatstate(subject) $argsA(-subject)
-    }
     
     if {$jprefs(chatActiveRet)} {
 	set chatstate(active) 1
@@ -1574,9 +1594,6 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from args} {
     if {$jprefs(chatFont) ne ""} {
 	$wtextsnd configure -font $jprefs(chatFont)
     }
-    if {[info exists argsA(-message)]} {
-	$wtextsnd insert end $argsA(-message)	
-    }
     if {$chatstate(active)} {
 	ActiveCmd $chattoken
     }
@@ -1626,7 +1643,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from args} {
 
     ::Avatar::GetAsyncIfExists $jid2
     SetAnyAvatar $chattoken
-    
+
     # ?
     after idle [list raise [winfo toplevel $wthread]]
     
@@ -1919,7 +1936,7 @@ proc ::Chat::AvatarNewPhotoHook {jid2} {
 #       Several procs to handle the tabbed interface; creates and deletes
 #       notebook and pages.
 
-proc ::Chat::NewPage {dlgtoken threadID jid args} {
+proc ::Chat::NewPage {dlgtoken threadID jid} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     upvar ::Jabber::jprefs jprefs
@@ -1937,7 +1954,7 @@ proc ::Chat::NewPage {dlgtoken threadID jid args} {
     } 
 
     # Make fresh page with chat widget.
-    set chattoken [eval {MakeNewPage $dlgtoken $threadID $jid} $args]
+    set chattoken [MakeNewPage $dlgtoken $threadID $jid]
     return $chattoken
 }
 
@@ -1992,12 +2009,11 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
     set dlgstate(wpage2token,$wpage) $chattoken
 }
 
-proc ::Chat::MakeNewPage {dlgtoken threadID jid args} {
+proc ::Chat::MakeNewPage {dlgtoken threadID jid} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
     variable uidpage
-    array set argsA $args
         
     # Make fresh page with chat widget.
     set dispname [::Roster::GetDisplayName $jid]
@@ -2009,9 +2025,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID jid args} {
     # We must make the new page a sibling of the notebook in order to be
     # able to reparent it when notebook gons.
     set wthread $dlgstate(wthread)[incr uidpage]
-    set chattoken [eval {
-	BuildThread $dlgtoken $wthread $threadID $jid
-    } $args]
+    set chattoken [BuildThread $dlgtoken $wthread $threadID $jid]
     pack $wthread -in $wpage -fill both -expand true
 
     variable $chattoken
@@ -2734,7 +2748,7 @@ proc ::Chat::Send {dlgtoken} {
     SendText $chattoken $text
 }
 
-proc ::Chat::SendText {chattoken text} {
+proc ::Chat::SendText {chattoken text args} {
     global  config
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -2742,6 +2756,8 @@ proc ::Chat::SendText {chattoken text} {
     variable cprefs
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
+    
+    array set argsA $args
     
     set jlib $jstate(jlib)
     set threadID $chatstate(threadid)
@@ -2814,6 +2830,10 @@ proc ::Chat::SendText {chattoken text} {
     }     
     if {[llength $xlist]} {
 	lappend opts -xlist $xlist
+    }
+    if {[info exists argsA(-subject)]} {
+	set chatstate(subject) $argsA(-subject)
+	lappend opts -subject $argsA(-subject)
     }
     
     # Put in history file.
