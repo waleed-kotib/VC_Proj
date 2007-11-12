@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.253 2007-11-11 15:56:34 matben Exp $
+# $Id: Jabber.tcl,v 1.254 2007-11-12 15:36:03 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -281,10 +281,10 @@ namespace eval ::Jabber:: {
     set ::config(logout,show-head)  1
     set ::config(subscribe,trpt-msgbox) 0
     
-    # Set a timer dialog instead of just stright auto rejecting.
+    # Set a timer dialog instead of just straight auto rejecting.
     set ::config(subscribe,auto-reject-timer) 0
     
-    # Set a timer dialog instead of just stright auto accepting.
+    # Set a timer dialog instead of just straight auto accepting.
     set ::config(subscribe,auto-accept-timer) 0
     
     # Shall we send a message to user when one of the auto dispatchers done.
@@ -750,7 +750,7 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	switch -- $jprefs(subsc,$key) {
 	    accept {
 		if {$config(subscribe,auto-accept-timer)} {
-		
+		    ::Subscribe::AcceptAfter $from
 		} else {
 		    $jlib send_presence -to $from -type "subscribed"
 		    set autoaccepted 1
