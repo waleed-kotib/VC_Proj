@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.52 2007-11-11 15:56:35 matben Exp $
+# $Id: Subscribe.tcl,v 1.53 2007-11-12 15:36:03 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -358,18 +358,70 @@ proc ::Subscribe::ResProc {type queryE} {
 }
 
 #-------------------------------------------------------------------------------
+#
+# Experimental code which count downs on auto accept & reject.
 
 namespace eval ::Subscribe {
-    
-    
+       
+    # Sets the number of millisecs the dialog starts its countdown.
+    set ::config(subscribe,accept-after) 10000
     set ::config(subscribe,reject-after) 10000
     
     ui::dialog button accept -text [mc Accept]
     ui::dialog button reject -text [mc Reject]
-    
-    ::msgcat::mcset en jamesssubscautorej {Subscription request of %s will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
-    ::msgcat::mcset sv jamesssubscautorej {Subscription request of %s will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
 
+}
+
+::msgcat::mcset en jamesssubscautoacc {Subscription request of %s will be accepted in: %s secs. If you don't do anything this dialog will be closed and the request will be accepted.}
+::msgcat::mcset sv jamesssubscautoacc {Subscription request of %s will be accepted in: %s secs. If you don't do anything this dialog will be closed and the request will be accepted.}
+::msgcat::mcset pl jamesssubscautoacc {Subscription request of %s will be accepted in: %s secs. If you don't do anything this dialog will be closed and the request will be accepted.}
+::msgcat::mcset nl jamesssubscautoacc {Subscription request of %s will be accepted in: %s secs. If you don't do anything this dialog will be closed and the request will be accepted.}
+
+::msgcat::mcset en jamesssubscautorej {Subscription request of %s will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
+::msgcat::mcset sv jamesssubscautorej {Subscription request of %s will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
+::msgcat::mcset pl jamesssubscautorej {Subscription request of %s will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
+::msgcat::mcset nl jamesssubscautorej {Subscription request of %s will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
+
+proc ::Subscribe::AcceptAfter {jid} {
+    global  config
+    
+    set name [GetDisplayName $jid]
+    set secs [expr {$config(subscribe,accept-after)/1000}]
+    set msg [mc jamesssubscautoacc $name $secs]
+    set w [ui::dialog -message $msg -buttons {accept reject} -default accept \
+      -command [namespace code [list AcceptCmd $jid]]]    
+    after 1000 [namespace code [list AcceptTimer $w $jid $secs]]
+}
+
+proc ::Subscribe::AcceptTimer {w jid secs} {
+    
+    if {[winfo exists $w]} {
+	incr secs -1
+	set name [GetDisplayName $jid]
+	if {$secs <= 0} {
+	    ::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
+	    destroy $w
+	    set msg [mc jamessautoaccepted2 $name]
+	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	} else {
+	    set msg [mc jamesssubscautoacc $name $secs]
+	    $w configure -message $msg
+	    after 1000 [namespace code [list AcceptTimer $w $jid $secs]]
+	}
+    }
+}
+
+proc ::Subscribe::AcceptCmd {jid w button} {
+    global  config
+    
+    if {$button eq "accept" || $button eq ""} {
+	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
+	if {$config(subscribe,auto-accept-send-msg)} {
+	    SendAutoAcceptMsg $from
+	}
+    } else {
+	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
+    }
 }
 
 proc ::Subscribe::RejectAfter {jid} {
@@ -379,8 +431,7 @@ proc ::Subscribe::RejectAfter {jid} {
     set secs [expr {$config(subscribe,reject-after)/1000}]
     set msg [mc jamesssubscautorej $name $secs]
     set w [ui::dialog -message $msg -buttons {reject accept} -default reject \
-      -command [namespace code [list RejectCmd $jid]]]
-    
+      -command [namespace code [list RejectCmd $jid]]]    
     after 1000 [namespace code [list RejectTimer $w $jid $secs]]
 }
 
@@ -405,7 +456,7 @@ proc ::Subscribe::RejectTimer {w jid secs} {
 proc ::Subscribe::RejectCmd {jid w button} {
     global  config
     
-    if {$button eq "reject"} {
+    if {$button eq "reject" || $button eq ""} {
 	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
 	if {$config(subscribe,auto-reject-send-msg)} {
 	    SendAutoRejectMsg $from
