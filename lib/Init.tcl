@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.81 2007-10-22 11:51:33 matben Exp $
+# $Id: Init.tcl,v 1.82 2007-11-13 07:23:52 matben Exp $
 
 namespace eval ::Init {
     
@@ -788,12 +788,18 @@ proc ::Init::LoadPackages {} {
 #       The config array shall be used for hardcoded configuration settings
 #       that can be overriden only at build time by adding a config.tcl file
 #       in resources/. 
-#       array set config {-junk "The Junk" ...}
+#       array set config {junk "The Junk" ...}
 
 proc ::Init::Config {} {
     global  this config
     
     set f [file join $this(resourcePath) config.tcl]
+    if {[file exists $f]} {
+	source $f
+    }
+    
+    # Let any user defined config file override hard coded and build configs.
+    set f [file join $this(prefsPath) resources config.tcl]
     if {[file exists $f]} {
 	source $f
     }
