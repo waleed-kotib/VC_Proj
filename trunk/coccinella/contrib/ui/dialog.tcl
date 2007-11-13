@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.32 2007-08-10 08:07:51 matben Exp $
+# $Id: dialog.tcl,v 1.33 2007-11-13 14:05:26 matben Exp $
 
 # Public commands:
 # 
@@ -230,6 +230,7 @@ snit::widget ui::dialog::widget {
       -default info                   \
       -validatemethod ValidateIcon
     option -badge       1
+    option -expandclient 0
     option -modal       0
     option -parent      .
     option -timeout     {}
@@ -358,7 +359,7 @@ snit::widget ui::dialog::widget {
 	grid $top.message -column 1 -row 0 -sticky nw
 	grid columnconfigure $top 0 -minsize $minsize
 	grid columnconfigure $top 1 -minsize $wraplength
-
+	
 	# This stops -detail from being configurable :-(
 	if {[$top.detail cget -text] ne ""} {
 	    grid  $top.detail  -column 1 -row 1 -sticky nw
@@ -370,7 +371,7 @@ snit::widget ui::dialog::widget {
 	# Reversed order for Mac.
 	set buttons $options(-buttons)
 	if {[option get $win buttonOrder {}] eq "cancelok"} {
-	    set buttons {}
+	    set buttons [list]
 	    foreach b $options(-buttons) {
 		set buttons [linsert $buttons 0 $b]
 	    }
@@ -596,7 +597,14 @@ snit::widget ui::dialog::widget {
     method clientframe {} { 
 	if {![winfo exists $client]} {
 	    ttk::frame $client
-	    grid $client -column 1 -row 2 -sticky news
+	    
+	    # If -expandclient be sure that -message "" etc.
+	    if {$options(-expandclient)} {
+		grid $client -column 1 -row 0 -rowspan 3 -sticky news
+		
+	    } else {
+		grid $client -column 1 -row 2 -sticky news
+	    }
 	    # so it's first in keyboard traversal order
 	    lower $client
 	}
