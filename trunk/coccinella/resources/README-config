@@ -14,5 +14,9 @@ is no such file, but it can be put there at build time. This allows for
 custom builds that change "lower-level" details of how the application
 works and looks.
 
+It is also possible for a user to put such a file in the preference folder as:
+    Coccinella/resources/config.tcl
+which will override any hardcoded or build configs.
+
 The resources/configExample.tcl is an example config file that shows
 some of the possible customization.

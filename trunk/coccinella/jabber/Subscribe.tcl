@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.53 2007-11-12 15:36:03 matben Exp $
+# $Id: Subscribe.tcl,v 1.54 2007-11-13 07:23:52 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -417,7 +417,7 @@ proc ::Subscribe::AcceptCmd {jid w button} {
     if {$button eq "accept" || $button eq ""} {
 	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
 	if {$config(subscribe,auto-accept-send-msg)} {
-	    SendAutoAcceptMsg $from
+	    SendAutoAcceptMsg $jid
 	}
     } else {
 	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
@@ -459,7 +459,7 @@ proc ::Subscribe::RejectCmd {jid w button} {
     if {$button eq "reject" || $button eq ""} {
 	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
 	if {$config(subscribe,auto-reject-send-msg)} {
-	    SendAutoRejectMsg $from
+	    SendAutoRejectMsg $jid
 	}
     } else {
 	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
