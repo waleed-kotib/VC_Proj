@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.166 2007-11-02 07:46:40 matben Exp $	
+# $Id: Coccinella.tcl,v 1.167 2007-11-13 15:39:33 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -293,7 +293,7 @@ set state(launchStatus) preferences
 ::Debug 2 "--> prefsInitHook"
 ::hooks::run prefsInitHook
 
-# Parse any command line options. Can set protocol!
+# Parse any command line options.
 # @@@ There is a conflict here if some prefs settings depend on, say protocol.
 ::PrefUtils::ParseCommandLineOptions $argv
 

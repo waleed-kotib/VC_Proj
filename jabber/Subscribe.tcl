@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.55 2007-11-13 14:05:30 matben Exp $
+# $Id: Subscribe.tcl,v 1.56 2007-11-13 15:39:33 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -52,7 +52,7 @@ namespace eval ::Subscribe:: {
     variable queue [list]
 }
 
-proc ::Subscribe::Handle {jid} {
+proc ::Subscribe::HandleAsk {jid} {
     global  config
     
     if {$config(subscribe,multi-dlg)} {
@@ -109,9 +109,9 @@ proc ::Subscribe::ExecQueue {} {
 #       jid    the jid we receive a 'subscribe' presence element from.
 #       
 # Results:
-#       none
+#       widgetPath
 
-proc ::Subscribe::NewDlg {jid} {
+proc ::Subscribe::NewDlg {jid args} {
     global  this prefs wDlgs config
 
     variable uid
@@ -119,6 +119,12 @@ proc ::Subscribe::NewDlg {jid} {
     upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Subscribe::NewDlg jid=$jid"
+    
+    # -auto ""|accept|reject
+    array set argsA {
+	-auto ""
+    }
+    array set argsA $args
     
     # Initialize the state variable, an array.    
     set token [namespace current]::dlg[incr uid]
@@ -175,13 +181,17 @@ proc ::Subscribe::NewDlg {jid} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
-    set str [mc jasubwant2 [GetDisplayName $jid]]
+    set name [GetDisplayName $jid]
+    
+    set str [mc jasubwant2 $name]
     if {!$havesubsc} {
 	append str " [mc jasubopts2]"
     }
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 200 -justify left -text $str
     pack $wbox.msg -side top -anchor w
+    
+    set wrapL $wbox.msg
 
     # If we already have a subscription we've already got the opportunity
     # to select nickname and group. Do not repeat that.
@@ -200,6 +210,25 @@ proc ::Subscribe::NewDlg {jid} {
 	grid  $frmid.lgroup  $frmid.egroup -sticky e -pady 2
 	grid  $frmid.enick   $frmid.egroup -sticky ew	
     }
+    if {$argsA(-auto) eq "accept"} {
+	set secs [expr {$config(subscribe,accept-after)/1000}]
+	set msg [mc jamesssubscautoacc $name $secs]
+	ttk::label $wbox.accept -style Small.TLabel \
+	  -text $msg -wraplength 200 -justify left
+	ttk::button $wbox.pause -style Url -text [mc Pause] \
+	  -command [namespace code [list Pause $token]]
+	
+	pack $wbox.accept -side top -anchor w	
+	pack $wbox.pause -side top -anchor e -padx 12	
+	lappend wrapL $wbox.accept
+	set state(waccept) $wbox.accept
+	
+	set secs [expr {$config(subscribe,accept-after)/1000}]
+	set state(timer-id) [after 1000 [namespace code [list AcceptTimer2 $token $secs]]]
+    } elseif {$argsA(-auto) eq "reject"} {
+	
+    }
+    
     
     # Button part.
     set frbot $wbox.b
@@ -223,15 +252,51 @@ proc ::Subscribe::NewDlg {jid} {
     pack $frbot -side top -fill x
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
+    
+    set state(btaccept) $frbot.btok
+    set state(btdeny)   $frbot.btcancel
 
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 30]
-    } $wbox.msg $w]    
+	set length [expr {[winfo reqwidth %s] - 30}]
+	foreach win [list %s] {
+	    $win configure -wraplength $length
+	}
+    } $w $wrapL]    
     after idle $script
 
-    return
+    return $w
+}
+
+proc ::Subscribe::AcceptTimer2 {token secs} {
+    variable $token
+    upvar 0 $token state
+            
+    if {[info exists state(w)]} {
+	set w $state(w)
+	incr secs -1
+	set name [GetDisplayName $state(jid)]
+	if {$secs <= 0} {
+	    set msg [mc jamessautoaccepted2 $name]
+	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	    $state(btaccept) invoke
+	} else {
+	    set msg [mc jamesssubscautoacc $name $secs]
+	    $state(waccept) configure -text $msg
+	    set state(timer-id) [after 1000 [namespace code [list AcceptTimer2 $token $secs]]]
+	}
+    }    
+}
+
+proc ::Subscribe::Pause {token} {
+    variable $token
+    upvar 0 $token state
+
+    if {[info exists state(timer-id)]} {
+	after cancel $state(timer-id)
+	unset state(timer-id)
+    }
 }
 
 proc ::Subscribe::GetDisplayName {jid} {
@@ -765,7 +830,7 @@ namespace eval ::Subscribed {
     set ::config(subscribed,multi-dlg) 1
     
     # Use a fancy dialog for queued 'subscribed' events.
-    set ::config(subscribed,fancy-dlg) 0
+    set ::config(subscribed,fancy-dlg) 1
 
     variable queue [list]
 }
