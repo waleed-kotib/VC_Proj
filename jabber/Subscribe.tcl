@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.54 2007-11-13 07:23:52 matben Exp $
+# $Id: Subscribe.tcl,v 1.55 2007-11-13 14:05:30 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -50,14 +50,6 @@ namespace eval ::Subscribe:: {
     set ::config(subscribe,multi-dlg) 1
     
     variable queue [list]
-}
-
-if {0} {
-    ::Subscribe::Queue "mats@home.se"
-    ::Subscribe::Queue "mari@work.se"
-    ::Subscribe::Queue "mari.lundberg@someextremelylongname.se"
-    ::Subscribe::Queue "donald.duck@disney.com"
-    ::Subscribe::Queue "mimmi.duck@disney.com"
 }
 
 proc ::Subscribe::Handle {jid} {
@@ -486,6 +478,14 @@ proc ::Subscribe::SendAutoAcceptMsg {jid} {
 
 #-------------------------------------------------------------------------------
 
+if {0} {
+    ::Subscribe::Queue "mats@home.se"
+    ::Subscribe::Queue "mari@work.se"
+    ::Subscribe::Queue "mari.lundberg@someextremelylongname.se"
+    ::Subscribe::Queue "donald.duck@disney.com"
+    ::Subscribe::Queue "mimmi.duck@disney.com"
+}
+
 # SubscribeEx... --
 # 
 #       A dialog to handle multiple subscription requests.
@@ -518,6 +518,8 @@ proc ::SubscribeEx::NewDlg {} {
     
     set state(w)        $w
     set state(finished) -1
+    set state(nusers)   0
+    set state(all)      1
 
     ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace current]::CloseCmd \
@@ -553,44 +555,52 @@ proc ::SubscribeEx::NewDlg {} {
     pack $wbox -fill both -expand 1
 
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 320 -justify left -text [mc jasubmulti]
+      -padding {0 0 0 6} -wraplength 320 -justify left \
+      -text [mc jasubmulti $state(nusers)]
     pack $wbox.msg -side top -anchor w
 
     set wframe $wbox.f
     ttk::frame $wframe
     pack $wframe -side top -anchor w -fill both -expand 1    
     
-    #ttk::label $wframe.more  -text [mc More]
     ttk::label $wframe.allow -text [mc Allow]
     ttk::label $wframe.jid   -text [mc "Contact ID"]
+    ttk::checkbutton $wframe.all \
+      -command [namespace code [list All $w]] \
+      -variable $token\(all)
+    ttk::label $wframe.lall -text [mc All]
     
-    #grid  $wframe.more  $wframe.allow  $wframe.jid -padx 4 -pady 4
     grid  $wframe.allow  x  $wframe.jid -padx 0 -pady 4
+    grid  $wframe.all    x  $wframe.lall
     grid $wframe.jid -sticky w
+    grid $wframe.all -sticky e
+    grid $wframe.lall -sticky w
     grid columnconfigure $wframe 2 -minsize 220 -weight 1
     
-    set state(wframe) $wframe    
+    set state(frame) $wframe
+    set state(label) $wbox.msg
     
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Allow] -default active \
+    ttk::button $frbot.btok -text [mc OK] -default active \
       -command [list [namespace current]::Accept $w]
-    ttk::button $frbot.btcancel -text [mc Deny]  \
-      -command [list [namespace current]::Deny $w]
-    set padx [option get . buttonPadX {}]
-    if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-	pack $frbot.btok -side right
-	pack $frbot.btcancel -side right -padx $padx
-    } else {
-	pack $frbot.btcancel -side right
-	pack $frbot.btok -side right -padx $padx
-    }
+    pack $frbot.btok -side right
+
     pack $frbot -side top -fill x
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
 
     return $w
+}
+
+proc ::SubscribeEx::All {w} {
+    variable $w
+    upvar 0 $w state
+    
+    foreach {key value} [array get state *,allow] {
+	set state($key) $state(all)
+    }
 }
 
 proc ::SubscribeEx::AddJID {w jid} {
@@ -600,17 +610,20 @@ proc ::SubscribeEx::AddJID {w jid} {
 
     set token [namespace current]::$w
 
-    set wframe $state(wframe)
-    
-    lassign [grid size $wframe] columns rows
+    set wframe $state(frame)
+        
+    incr state(nusers)
+    $state(label) configure -text [mc jasubmulti $state(nusers)]
     
     set name   [$jstate(jlib) roster getname $jid]
     set groups [$jstate(jlib) roster getgroups $jid]
     set group [lindex $groups 0]
 
+    lassign [grid size $wframe] columns rows
+
     set row $rows
     set state($row,more)  0
-    set state($row,allow) 1
+    set state($row,allow) $state(all)
     set state($row,jid)   $jid
     set state($row,name)  $name
     set state($row,group) $group
@@ -631,7 +644,6 @@ proc ::SubscribeEx::AddJID {w jid} {
     ttk::label $wframe.l$row -text $jstr
     ttk::frame $wframe.f$row
     
-    #grid  $wframe.m$row  $wframe.c$row  $wframe.l$row
     grid  $wframe.c$row  $wframe.m$row  $wframe.l$row
     grid  x              x              $wframe.f$row
     grid $wframe.c$row -sticky e
@@ -645,7 +657,7 @@ proc ::SubscribeEx::More {w row} {
     upvar 0 $w state
     set token [namespace current]::$w
    
-    set wframe $state(wframe)
+    set wframe $state(frame)
     set wcont $wframe.f$row
     set jid $state($row,jid)
 
@@ -725,20 +737,8 @@ proc ::SubscribeEx::Accept {w} {
     Free $w
 }
 
-proc ::SubscribeEx::Deny {w} {
-    variable $w
-    upvar 0 $w state
-    upvar ::Jabber::jstate jstate
-
-    foreach line [GetContent $w] {
-	set jid [lindex $line 0]
-	$jstate(jlib) send_presence -to $jid -type "unsubscribed"
-    }
-    Free $w
-}
-
 proc ::SubscribeEx::CloseCmd {w} {    
-    Deny $w
+    Accept $w
 }
 
 proc ::SubscribeEx::Free {w} {
@@ -763,6 +763,9 @@ namespace eval ::Subscribed {
 
     # Use the multi dialog for batches of subscription requests.
     set ::config(subscribed,multi-dlg) 1
+    
+    # Use a fancy dialog for queued 'subscribed' events.
+    set ::config(subscribed,fancy-dlg) 0
 
     variable queue [list]
 }
@@ -802,7 +805,7 @@ proc ::Subscribed::Queue {jid} {
 }
 
 proc ::Subscribed::ExecQueue {} {
-    global  wDlgs
+    global  wDlgs config
     variable queue
     
     set len [llength $queue]
@@ -812,8 +815,12 @@ proc ::Subscribed::ExecQueue {} {
 	  -message [mc jamessallowsub2 $jid]
     } elseif {$len > 1} {
 	set w $wDlgs(jsubsced)
-	::ui::dialog $w -title [mc "Presence Subscription"] -icon info -type ok \
-	  -message "[mc jasubmultians]:\n"
+	if {$config(subscribed,fancy-dlg)} {
+	    FancyDlg
+	} else {
+	    ::ui::dialog $w -title [mc "Presence Subscription"] -icon info \
+	      -type ok -message "[mc jasubmultians]:\n"
+	}
 	AddJID [lindex $queue 0] 1
 	foreach jid [lrange $queue 1 end] {
 	    AddJID $jid
@@ -823,17 +830,107 @@ proc ::Subscribed::ExecQueue {} {
 }
 
 proc ::Subscribed::AddJID {jid {first 0}} {
-    global  wDlgs
+    global  wDlgs config
     
     set w $wDlgs(jsubsced)
     if {[winfo exists $w]} {
-	set msg [$w cget -message]
-	if {!$first} {
-	    append msg ", "
+	if {$config(subscribed,fancy-dlg)} {
+	    AddJIDFancy $w $jid $first
+	} else {
+	    AddJIDPlain $w $jid $first
 	}
-	append msg [::Subscribe::GetDisplayName $jid]
-	$w configure -message $msg
     }    
+}
+
+proc ::Subscribed::AddJIDPlain {w jid {first 0}} {
+    
+    set msg [$w cget -message]
+    if {!$first} {
+	append msg ", "
+    }
+    append msg [::Subscribe::GetDisplayName $jid]
+    $w configure -message $msg
+}
+
+::msgcat::mcset en jamesssubscedfancy {%s additional contacts can see your presence.}
+::msgcat::mcset sv jamesssubscedfancy {%s additional contacts can see your presence.}
+
+proc ::Subscribed::FancyDlg {} {
+    global  wDlgs
+    
+    set w $wDlgs(jsubsced)
+
+    variable $w
+    upvar 0 $w state
+    set token [namespace current]::$w
+
+    set msg [mc jamesssubscedfancy 0]
+    ::ui::dialog $w -title [mc "Presence Subscription"] -icon info -type ok \
+      -expandclient 1
+    set fr [$w clientframe]
+    
+    set state(check) 1
+    
+    ttk::checkbutton $fr.c -style Arrow.TCheckbutton \
+      -command [namespace code [list ExpandFancy $w]] -variable $token\(check)
+    ttk::label $fr.l -text $msg
+    ttk::frame $fr.f
+    
+    grid  $fr.c  $fr.l  -sticky nw -padx 2
+    grid $fr.c -pady 2
+    grid columnconfigure $fr 1 -weight 1
+    
+    set state(frame) $fr.f
+    set state(label) $fr.l
+    
+    bind $w <Destroy> [subst { if {"%W" eq "$w"} { unset -nocomplain $token } }]
+    
+    return $w
+}
+
+proc ::Subscribed::ExpandFancy {w} {
+    variable $w
+    upvar 0 $w state
+
+    set fr $state(frame)
+    if {$state(check)} {
+	grid forget $fr
+    } else {
+	grid  $fr  -column 1 -row 1 -sticky news -pady 4
+    }
+}
+
+proc ::Subscribed::AddJIDFancy {w jid {first 0}} {
+    variable $w
+    upvar 0 $w state
+
+    set fr $state(frame)
+    lassign [grid size $fr] ncol nrow
+    
+    set nusers [expr {$nrow + 1}]
+    $state(label) configure -text [mc jamesssubscedfancy $nusers]
+    
+    set box $fr.f$nrow
+    ttk::frame $box
+    grid  $box  -sticky ew
+    
+    ttk::label $box.l -style Small.TLabel \
+      -text [::Subscribe::GetDisplayName $jid]
+    ttk::button $box.b -style Small.TButton \
+      -text "[mc {View Business Card}]..." \
+      -command [list ::VCard::Fetch other $jid]
+
+    pack $box.l -side left -padx 2 -pady 2
+    pack $box.b -side right -padx 2 -pady 2
+}
+
+if {0} {
+    ::Subscribed::FancyDlg
+    ::Subscribed::AddJID "mats@home.se"
+    ::Subscribed::AddJID "mari@work.se"
+    ::Subscribed::AddJID "mari.lundberg@someextremelylongname.se"
+    ::Subscribed::AddJID "donald.duck@disney.com"
+    ::Subscribed::AddJID "mimmi.duck@disney.com"
 }
 
 # Prefs page ...................................................................

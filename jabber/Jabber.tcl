@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.254 2007-11-12 15:36:03 matben Exp $
+# $Id: Jabber.tcl,v 1.255 2007-11-13 14:05:30 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -823,13 +823,13 @@ proc ::Jabber::UnsubscribeEvent {jlibname xmldata} {
     } else {
 	
 	$jlib send_presence -to $from -type "unsubscribed"
-	::ui::dialog -title [mc {Presence Subscription}] -icon info -type ok  \
+	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
 	  -message [mc jamessunsubpres2 $from]	
 
 	# If there is any subscription to this jid's presence.
 	if {$subscription eq "both" || $subscription eq "to"} {
 	    
-	    set ans [::UI::MessageBox -title [mc {Presence Subscription}] \
+	    set ans [::UI::MessageBox -title [mc "Presence Subscription"] \
 	      -icon question -type yesno -default yes \
 	      -message [mc jamessunsubask2 $from $from]]
 	    if {$ans eq "yes"} {
@@ -869,7 +869,7 @@ proc ::Jabber::UnsubscribedEvent {jlibname xmldata} {
 	    if {$status ne ""} {
 		append msg " " $status
 	    }
-	    ::ui::dialog -title [mc {Subscription Failed}]  \
+	    ::ui::dialog -title [mc "Subscription Failed"] \
 	      -icon info -type ok -message $msg
 	}
 	if {$jprefs(rost,rmIfUnsub)} {
@@ -878,7 +878,7 @@ proc ::Jabber::UnsubscribedEvent {jlibname xmldata} {
 	    $jlib roster send_remove $from
 	}
     } else {		
-	::ui::dialog -title [mc {Presence Subscription}] -icon info -type ok \
+	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
 	  -message [mc jamessunsubscribed2 $from]
     }
     return 1
