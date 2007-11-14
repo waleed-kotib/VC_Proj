@@ -18,11 +18,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.56 2007-11-13 15:39:33 matben Exp $
+# $Id: Subscribe.tcl,v 1.57 2007-11-14 08:39:54 matben Exp $
 
 package provide Subscribe 1.0
 
-namespace eval ::Subscribe:: {
+namespace eval ::Subscribe {
 
     # Use option database for customization.
     option add *JSubscribe.adduserImage           adduser         widgetDefault
@@ -52,7 +52,7 @@ namespace eval ::Subscribe:: {
     variable queue [list]
 }
 
-proc ::Subscribe::HandleAsk {jid} {
+proc ::Subscribe::HandleAsk {jid args} {
     global  config
     
     if {$config(subscribe,multi-dlg)} {
@@ -107,6 +107,8 @@ proc ::Subscribe::ExecQueue {} {
 #
 # Arguments:
 #       jid    the jid we receive a 'subscribe' presence element from.
+#       args:
+#           -auto accept|reject
 #       
 # Results:
 #       widgetPath
@@ -125,13 +127,14 @@ proc ::Subscribe::NewDlg {jid args} {
 	-auto ""
     }
     array set argsA $args
-    
+
+    set w $wDlgs(jsubsc)[incr uid]
+
     # Initialize the state variable, an array.    
-    set token [namespace current]::dlg[incr uid]
-    variable $token
-    upvar 0 $token state
+    set token [namespace current]::$w
+    variable $w
+    upvar 0 $w state
     
-    set w $wDlgs(jsubsc)$uid
     set state(w)        $w
     set state(jid)      $jid
     set state(finished) -1
@@ -139,7 +142,7 @@ proc ::Subscribe::NewDlg {jid args} {
     set state(group)    ""
 
     ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
-      -closecommand [list [namespace current]::CloseCmd $token] \
+      -closecommand [list [namespace current]::CloseCmd $w] \
       -usemacmainmenu 1 -class JSubscribe
     wm title $w [mc "Presence Subscription"]  
     
@@ -193,6 +196,10 @@ proc ::Subscribe::NewDlg {jid args} {
     
     set wrapL $wbox.msg
 
+    # In order to do the "auto" states we keep a list of widgets that shall
+    # not be disabled.
+    set wkeepL [list]
+
     # If we already have a subscription we've already got the opportunity
     # to select nickname and group. Do not repeat that.
     if {!$havesubsc} {
@@ -216,27 +223,41 @@ proc ::Subscribe::NewDlg {jid args} {
 	ttk::label $wbox.accept -style Small.TLabel \
 	  -text $msg -wraplength 200 -justify left
 	ttk::button $wbox.pause -style Url -text [mc Pause] \
-	  -command [namespace code [list Pause $token]]
+	  -command [namespace code [list Pause $w]]
 	
 	pack $wbox.accept -side top -anchor w	
 	pack $wbox.pause -side top -anchor e -padx 12	
 	lappend wrapL $wbox.accept
 	set state(waccept) $wbox.accept
+	lappend wkeepL $wbox.accept $wbox.pause
 	
 	set secs [expr {$config(subscribe,accept-after)/1000}]
-	set state(timer-id) [after 1000 [namespace code [list AcceptTimer2 $token $secs]]]
+	set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
     } elseif {$argsA(-auto) eq "reject"} {
+	set secs [expr {$config(subscribe,reject-after)/1000}]
+	set msg [mc jamesssubscautorej $name $secs]
+	ttk::label $wbox.reject -style Small.TLabel \
+	  -text $msg -wraplength 200 -justify left
+	ttk::button $wbox.pause -style Url -text [mc Pause] \
+	  -command [namespace code [list Pause $w]]
 	
+	pack $wbox.reject -side top -anchor w	
+	pack $wbox.pause -side top -anchor e -padx 12	
+	lappend wrapL $wbox.reject
+	set state(wreject) $wbox.reject
+	lappend wkeepL $wbox.reject $wbox.pause
+	
+	set secs [expr {$config(subscribe,reject-after)/1000}]
+	set state(timer-id) [after 1000 [namespace code [list RejectTimer $w $secs]]]
     }
-    
-    
+        
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btok -text [mc Yes] -default active \
-      -command [list [namespace current]::Accept $token]
+      -command [list [namespace current]::Accept $w]
     ttk::button $frbot.btcancel -text [mc No]  \
-      -command [list [namespace current]::Deny $token]
+      -command [list [namespace current]::Deny $w]
     ttk::button $frbot.bvcard -text "[mc {View Business Card}]..." \
       -command [list ::VCard::Fetch other $jid]
     set padx [option get . buttonPadX {}]
@@ -253,9 +274,18 @@ proc ::Subscribe::NewDlg {jid args} {
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
     
+    lappend wkeepL $frbot.btok $frbot.btcancel
+
     set state(btaccept) $frbot.btok
     set state(btdeny)   $frbot.btcancel
-
+    set state(wkeepL)   $wkeepL
+    
+    if {$argsA(-auto) eq "accept"} {
+	SetAutoState $w on
+    } elseif {$argsA(-auto) eq "reject"} {
+	SetAutoState $w on
+    }
+    
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
@@ -269,9 +299,39 @@ proc ::Subscribe::NewDlg {jid args} {
     return $w
 }
 
-proc ::Subscribe::AcceptTimer2 {token secs} {
-    variable $token
-    upvar 0 $token state
+proc ::Subscribe::SetAutoState {w which} {
+    variable $w
+    upvar 0 $w state
+
+    if {$which eq "on"} {
+	SetAllWidgetStates $w {disabled background}
+	foreach win $state(wkeepL) {
+	    $win state {!background !disabled}
+	}
+    } else {
+	SetAllWidgetStates $w {!background !disabled}
+    }
+}
+
+proc ::Subscribe::SetAllWidgetStates {w thestate} {
+    
+    set Q $w
+    while {[llength $Q]} {
+	set QN [list]
+	foreach win $Q {	 
+ 	    switch [winfo class $win] \
+	      TEntry - TLabel - TButton - TCombobox {$win state $thestate}
+	    foreach child [winfo children $win] {
+		lappend QN $child
+	    }
+	}
+	set Q $QN
+    }    
+}
+
+proc ::Subscribe::AcceptTimer {w secs} {
+    variable $w
+    upvar 0 $w state
             
     if {[info exists state(w)]} {
 	set w $state(w)
@@ -284,15 +344,36 @@ proc ::Subscribe::AcceptTimer2 {token secs} {
 	} else {
 	    set msg [mc jamesssubscautoacc $name $secs]
 	    $state(waccept) configure -text $msg
-	    set state(timer-id) [after 1000 [namespace code [list AcceptTimer2 $token $secs]]]
+	    set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
 	}
     }    
 }
 
-proc ::Subscribe::Pause {token} {
-    variable $token
-    upvar 0 $token state
+proc ::Subscribe::RejectTimer {w secs} {
+    variable $w
+    upvar 0 $w state
+	    
+    if {[info exists state(w)]} {
+	set w $state(w)
+	incr secs -1
+	set name [GetDisplayName $state(jid)]
+	if {$secs <= 0} {
+	    set msg [mc jamessautoreject2 $name]
+	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	    $state(btdeny) invoke
+	} else {
+	    set msg [mc jamesssubscautorej $name $secs]
+	    $state(wreject) configure -text $msg
+	    set state(timer-id) [after 1000 [namespace code [list RejectTimer $w $secs]]]
+	}
+    }    
+}
 
+proc ::Subscribe::Pause {w} {
+    variable $w
+    upvar 0 $w state
+
+    SetAutoState $w off
     if {[info exists state(timer-id)]} {
 	after cancel $state(timer-id)
 	unset state(timer-id)
@@ -303,8 +384,7 @@ proc ::Subscribe::GetDisplayName {jid} {
     upvar ::Jabber::jstate jstate
     
     set name ""
-    set nickE [$jstate(jlib) roster getextras $jid \
-      "http://jabber.org/protocol/nick"]
+    set nickE [$jstate(jlib) roster getextras $jid "http://jabber.org/protocol/nick"]
     if {[llength $nickE]} {
 	set name [wrapper::getcdata $nickE]
     }
@@ -318,10 +398,10 @@ proc ::Subscribe::GetDisplayName {jid} {
 # 
 #       Deny the subscription request.
 
-proc ::Subscribe::Deny {token} {
+proc ::Subscribe::Deny {w} {
     global  wDlgs
-    variable $token
-    upvar 0 $token state
+    variable $w
+    upvar 0 $w state
     upvar ::Jabber::jstate jstate
 
     # Deny presence to this user.
@@ -337,10 +417,10 @@ proc ::Subscribe::Deny {token} {
 # 
 #       Accept the subscription request.
 
-proc ::Subscribe::Accept {token} {
+proc ::Subscribe::Accept {w} {
     global  wDlgs
-    variable $token
-    upvar 0 $token state
+    variable $w
+    upvar 0 $w state
     
     Subscribe $state(jid) $state(name) $state(group)
 
@@ -388,10 +468,10 @@ proc ::Subscribe::Subscribe {jid name group} {
     }  
 }
 
-proc ::Subscribe::CloseCmd {token w} {
+proc ::Subscribe::CloseCmd {w w} {
     global  wDlgs
-    variable $token
-    upvar 0 $token state
+    variable $w
+    upvar 0 $w state
         
     # Deny presence to this user.
     ::Jabber::JlibCmd send_presence -to $state(jid) -type "unsubscribed"
@@ -418,7 +498,7 @@ proc ::Subscribe::ResProc {type queryE} {
 #
 # Experimental code which count downs on auto accept & reject.
 
-namespace eval ::Subscribe {
+namespace eval ::SubscribeAuto {
        
     # Sets the number of millisecs the dialog starts its countdown.
     set ::config(subscribe,accept-after) 10000
@@ -439,7 +519,7 @@ namespace eval ::Subscribe {
 ::msgcat::mcset pl jamesssubscautorej {Subscription request of %s will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
 ::msgcat::mcset nl jamesssubscautorej {Subscription request of %s will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
 
-proc ::Subscribe::AcceptAfter {jid} {
+proc ::SubscribeAuto::AcceptAfter {jid} {
     global  config
     
     set name [GetDisplayName $jid]
@@ -450,7 +530,7 @@ proc ::Subscribe::AcceptAfter {jid} {
     after 1000 [namespace code [list AcceptTimer $w $jid $secs]]
 }
 
-proc ::Subscribe::AcceptTimer {w jid secs} {
+proc ::SubscribeAuto::AcceptTimer {w jid secs} {
     
     if {[winfo exists $w]} {
 	incr secs -1
@@ -468,20 +548,47 @@ proc ::Subscribe::AcceptTimer {w jid secs} {
     }
 }
 
-proc ::Subscribe::AcceptCmd {jid w button} {
+proc ::SubscribeAuto::AcceptCmd {jid w button} {
     global  config
+    upvar ::Jabber::jprefs jprefs
     
     if {$button eq "accept" || $button eq ""} {
 	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
+	SendSubscribe $jid
+
 	if {$config(subscribe,auto-accept-send-msg)} {
-	    SendAutoAcceptMsg $jid
+	    SendAcceptMsg $jid
 	}
     } else {
 	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
     }
 }
 
-proc ::Subscribe::RejectAfter {jid} {
+# SubscribeAuto::SendSubscribe --
+# 
+#       Must automatically subscribed to users we have accepted and to whon
+#       we have no previous subscription to.
+
+proc ::SubscribeAuto::SendSubscribe {jid} {
+    upvar ::Jabber::jstate jstate
+    upvar ::Jabber::jprefs jprefs
+    
+    set jlib $jstate(jlib)
+    set subscription [$jlib roster getsubscription $jid]
+
+    switch -- $subscription none - from {
+	
+	# Explicitly set the users group.
+	if {$jprefs(subsc,auto) && [string length $jprefs(subsc,group)]} {
+	    $jlib roster send_set $jid -groups [list $jprefs(subsc,group)]
+	}
+	$jlib send_presence -to $jid -type "subscribe"
+	set msg [mc jamessautosubs2 $jid]
+	::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+    }    
+}
+
+proc ::SubscribeAuto::RejectAfter {jid} {
     global  config
     
     set name [GetDisplayName $jid]
@@ -492,7 +599,7 @@ proc ::Subscribe::RejectAfter {jid} {
     after 1000 [namespace code [list RejectTimer $w $jid $secs]]
 }
 
-proc ::Subscribe::RejectTimer {w jid secs} {
+proc ::SubscribeAuto::RejectTimer {w jid secs} {
 
     if {[winfo exists $w]} {
 	incr secs -1
@@ -510,22 +617,20 @@ proc ::Subscribe::RejectTimer {w jid secs} {
     }
 }
 
-proc ::Subscribe::RejectCmd {jid w button} {
+proc ::SubscribeAuto::RejectCmd {jid w button} {
     global  config
     
     if {$button eq "reject" || $button eq ""} {
 	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
 	if {$config(subscribe,auto-reject-send-msg)} {
-	    SendAutoRejectMsg $jid
+	    SendRejectMsg $jid
 	}
     } else {
 	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
     }
 }
 
-#-------------------------------------------------------------------------------
-
-proc ::Subscribe::SendAutoRejectMsg {jid} {
+proc ::SubscribeAuto::SendRejectMsg {jid} {
     
     set autoRejectMsg "Your request has been automatically refused by the peers IM client software. It wasn't an action taken by your party"
     
@@ -533,7 +638,7 @@ proc ::Subscribe::SendAutoRejectMsg {jid} {
       -message $autoRejectMsg
 }
 
-proc ::Subscribe::SendAutoAcceptMsg {jid} {
+proc ::SubscribeAuto::SendAcceptMsg {jid} {
     
     set autoAcceptMsg "Your request has been automatically accepted by the peers IM client software. It wasn't an action taken by your party"
     
@@ -638,8 +743,9 @@ proc ::SubscribeEx::NewDlg {} {
     grid  $wframe.allow  x  $wframe.jid -padx 0 -pady 4
     grid  $wframe.all    x  $wframe.lall
     grid $wframe.jid -sticky w
-    grid $wframe.all -sticky e
+    grid $wframe.all -sticky w
     grid $wframe.lall -sticky w
+    grid columnconfigure $wframe 0 -minsize 36
     grid columnconfigure $wframe 2 -minsize 220 -weight 1
     
     set state(frame) $wframe
@@ -675,7 +781,7 @@ proc ::SubscribeEx::AddJID {w jid} {
 
     set token [namespace current]::$w
 
-    set wframe $state(frame)
+    set f $state(frame)
         
     incr state(nusers)
     $state(label) configure -text [mc jasubmulti $state(nusers)]
@@ -684,7 +790,7 @@ proc ::SubscribeEx::AddJID {w jid} {
     set groups [$jstate(jlib) roster getgroups $jid]
     set group [lindex $groups 0]
 
-    lassign [grid size $wframe] columns rows
+    lassign [grid size $f] columns rows
 
     set row $rows
     set state($row,more)  0
@@ -702,17 +808,17 @@ proc ::SubscribeEx::AddJID {w jid} {
 	append jstr "..."
     }
     
-    ttk::checkbutton $wframe.m$row -style ArrowText.TCheckbutton \
+    ttk::checkbutton $f.m$row -style ArrowText.TCheckbutton \
       -onvalue 0 -offvalue 1 -variable $token\($row,more) \
       -command [list [namespace current]::More $w $row]
-    ttk::checkbutton $wframe.c$row -variable $token\($row,allow)
-    ttk::label $wframe.l$row -text $jstr
-    ttk::frame $wframe.f$row
+    ttk::checkbutton $f.c$row -variable $token\($row,allow)
+    ttk::label $f.l$row -text $jstr
+    ttk::frame $f.f$row
     
-    grid  $wframe.c$row  $wframe.m$row  $wframe.l$row
-    grid  x              x              $wframe.f$row
-    grid $wframe.c$row -sticky e
-    grid $wframe.l$row $wframe.f$row -sticky w
+    grid  $f.c$row  $f.m$row  $f.l$row
+    grid  x         x         $f.f$row
+    grid $f.c$row -sticky e
+    grid $f.l$row $f.f$row -sticky w
 
     return $row
 }
@@ -722,8 +828,8 @@ proc ::SubscribeEx::More {w row} {
     upvar 0 $w state
     set token [namespace current]::$w
    
-    set wframe $state(frame)
-    set wcont $wframe.f$row
+    set f $state(frame)
+    set wcont $f.f$row
     set jid $state($row,jid)
 
     if {$state($row,more)} {
@@ -740,8 +846,8 @@ proc ::SubscribeEx::More {w row} {
 	ttk::button $wcont.vcard -text "[mc {View Business Card}]..." \
 	  -command [list ::VCard::Fetch other $jid] -style Small.TButton
 
-	grid  $wframe.f$row  -row [expr {$row+1}] -columnspan 1 -column 2
-	grid $wframe.f$row -sticky w
+	grid  $f.f$row  -row [expr {$row+1}] -columnspan 1 -column 2
+	grid $f.f$row -sticky w
 
 	grid  $wcont.lnick   $wcont.enick  -sticky e -pady 2
 	grid  $wcont.lgroup  $wcont.egroup -sticky e -pady 2
