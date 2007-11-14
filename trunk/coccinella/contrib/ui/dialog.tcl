@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.33 2007-11-13 14:05:26 matben Exp $
+# $Id: dialog.tcl,v 1.34 2007-11-14 16:15:31 matben Exp $
 
 # Public commands:
 # 
@@ -597,11 +597,10 @@ snit::widget ui::dialog::widget {
     method clientframe {} { 
 	if {![winfo exists $client]} {
 	    ttk::frame $client
+	    #frame $client -bg red
 	    
-	    # If -expandclient be sure that -message "" etc.
 	    if {$options(-expandclient)} {
-		grid $client -column 1 -row 0 -rowspan 3 -sticky news
-		
+		grid $client -column 1 -row 0 -rowspan 3 -sticky news		
 	    } else {
 		grid $client -column 1 -row 2 -sticky news
 	    }

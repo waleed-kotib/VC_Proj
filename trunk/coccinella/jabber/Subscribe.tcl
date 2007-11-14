@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.57 2007-11-14 08:39:54 matben Exp $
+# $Id: Subscribe.tcl,v 1.58 2007-11-14 16:15:31 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -27,7 +27,8 @@ namespace eval ::Subscribe {
     # Use option database for customization.
     option add *JSubscribe.adduserImage           adduser         widgetDefault
     option add *JSubscribe.adduserDisImage        adduserDis      widgetDefault
-
+    
+    option add *JSubscribe.vcardImage             vcard           widgetDefault
     
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Subscribe::InitPrefsHook
@@ -252,24 +253,27 @@ proc ::Subscribe::NewDlg {jid args} {
     }
         
     # Button part.
+    set imvcard [::Theme::GetImage [option get $w vcardImage {}]]
+
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btok -text [mc Yes] -default active \
       -command [list [namespace current]::Accept $w]
     ttk::button $frbot.btcancel -text [mc No]  \
       -command [list [namespace current]::Deny $w]
-    ttk::button $frbot.bvcard -text "[mc {View Business Card}]..." \
+    ttk::button $frbot.bvcard -style Plain \
+      -compound image -image $imvcard \
       -command [list ::VCard::Fetch other $jid]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btok -side right
 	pack $frbot.btcancel -side right -padx $padx
-	pack $frbot.bvcard -side left -padx 4
     } else {
 	pack $frbot.btcancel -side right
 	pack $frbot.btok -side right -padx $padx
-	pack $frbot.bvcard -side left -padx 4
     }
+    pack $frbot.bvcard -side left -padx 4
+
     pack $frbot -side top -fill x
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
@@ -279,6 +283,8 @@ proc ::Subscribe::NewDlg {jid args} {
     set state(btaccept) $frbot.btok
     set state(btdeny)   $frbot.btcancel
     set state(wkeepL)   $wkeepL
+    
+    ::balloonhelp::balloonforwindow $frbot.bvcard [mc "View business card"]
     
     if {$argsA(-auto) eq "accept"} {
 	SetAutoState $w on
@@ -666,6 +672,7 @@ namespace eval ::SubscribeEx {
     # Use option database for customization.
     option add *JSubscribeEx.adduserImage           adduser         widgetDefault
     option add *JSubscribeEx.adduserDisImage        adduserDis      widgetDefault
+    option add *JSubscribeEx.vcardImage             vcard           widgetDefault
 
     variable uid 0
 }
@@ -833,26 +840,30 @@ proc ::SubscribeEx::More {w row} {
     set jid $state($row,jid)
 
     if {$state($row,more)} {
+	set imvcard [::Theme::GetImage [option get $w vcardImage {}]]
 
 	# Find all our groups for any jid.
 	set allGroups [::Jabber::JlibCmd roster getgroups]
 	set values [concat [list [mc None]] $allGroups]
 		
 	ttk::label $wcont.lnick -text "[mc {Nickname}]:" -anchor e
-	ttk::entry $wcont.enick -textvariable $token\($row,name)
+	ttk::entry $wcont.enick -width 1 -textvariable $token\($row,name)
 	ttk::label $wcont.lgroup -text "[mc Group]:" -anchor e
-	ttk::combobox $wcont.egroup -values $values \
+	ttk::combobox $wcont.egroup -width 1 -values $values \
 	  -textvariable $token\($row,group)
-	ttk::button $wcont.vcard -text "[mc {View Business Card}]..." \
-	  -command [list ::VCard::Fetch other $jid] -style Small.TButton
+	ttk::button $wcont.vcard -style Plainer \
+	  -compound image -image $imvcard \
+	  -command [list ::VCard::Fetch other $jid]
 
 	grid  $f.f$row  -row [expr {$row+1}] -columnspan 1 -column 2
-	grid $f.f$row -sticky w
+	grid $f.f$row -sticky ew
 
-	grid  $wcont.lnick   $wcont.enick  -sticky e -pady 2
-	grid  $wcont.lgroup  $wcont.egroup -sticky e -pady 2
-	grid  x              $wcont.vcard  -pady 2
-	grid $wcont.enick $wcont.egroup -sticky ew	
+	grid  $wcont.lnick   $wcont.enick  $wcont.vcard  -sticky e -pady 0
+	grid  $wcont.lgroup  $wcont.egroup -  -sticky e -pady 0
+	grid $wcont.enick $wcont.egroup -sticky ew
+	grid columnconfigure $wcont 1 -weight 1
+
+	::balloonhelp::balloonforwindow $wcont.vcard [mc "View business card"]
     } else {
 	eval destroy [winfo children $wcont]
 	grid forget $wcont
@@ -939,6 +950,8 @@ namespace eval ::Subscribed {
     set ::config(subscribed,fancy-dlg) 1
 
     variable queue [list]
+    
+    option add *vcard22Image      vcard     widgetDefault
 }
 
 if {0} {
@@ -952,7 +965,7 @@ if {0} {
 proc ::Subscribed::Handle {jid} {
     global  config
     
-    if {$config(subscribe,multi-dlg)} {
+    if {$config(subscribed,multi-dlg)} {
 	Queue $jid
     } else {
 	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
@@ -1050,7 +1063,10 @@ proc ::Subscribed::FancyDlg {} {
     grid  $fr.c  $fr.l  -sticky nw -padx 2
     grid $fr.c -pady 2
     grid columnconfigure $fr 1 -weight 1
+    grid rowconfigure    $fr 0 -weight 1
     
+    raise $fr.c
+
     set state(frame) $fr.f
     set state(label) $fr.l
     
@@ -1080,26 +1096,39 @@ proc ::Subscribed::AddJIDFancy {w jid {first 0}} {
     
     set nusers [expr {$nrow + 1}]
     $state(label) configure -text [mc jamesssubscedfancy $nusers]
+  
+    set jstr [::Subscribe::GetDisplayName $jid]
+    set jlen [font measure CociSmallFont $jstr]
+    if {$jlen > 220} {
+	set len [string length $jstr]
+	set n [expr {($len * 220)/$jlen - 2}]
+	set jstr [string range $jstr 0 $n]
+	append jstr "..."
+    }
     
+    set subPath [file join images 22]
+    set imvcard [::Theme::GetImage [option get . vcard22Image {}] $subPath]
+
     set box $fr.f$nrow
     ttk::frame $box
     grid  $box  -sticky ew
     
-    ttk::label $box.l -style Small.TLabel \
-      -text [::Subscribe::GetDisplayName $jid]
-    ttk::button $box.b -style Small.TButton \
-      -text "[mc {View Business Card}]..." \
+    ttk::label $box.l -style Small.TLabel -text $jstr
+    ttk::button $box.b -style Plainer \
+      -compound image -image $imvcard \
       -command [list ::VCard::Fetch other $jid]
 
-    pack $box.l -side left -padx 2 -pady 2
-    pack $box.b -side right -padx 2 -pady 2
+    pack $box.l -side left -padx 2 -pady 0
+    pack $box.b -side right -padx 2 -pady 0
+    
+    ::balloonhelp::balloonforwindow $box.b [mc "View business card"]
 }
 
 if {0} {
     ::Subscribed::FancyDlg
     ::Subscribed::AddJID "mats@home.se"
     ::Subscribed::AddJID "mari@work.se"
-    ::Subscribed::AddJID "mari.lundberg@someextremelylongname.se"
+    ::Subscribed::AddJID "mari.lundberg@someextremelylongnamexxxxxxxxxxx.se"
     ::Subscribed::AddJID "donald.duck@disney.com"
     ::Subscribed::AddJID "mimmi.duck@disney.com"
 }

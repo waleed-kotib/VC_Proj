@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.257 2007-11-14 08:39:53 matben Exp $
+# $Id: Jabber.tcl,v 1.258 2007-11-14 16:15:31 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -290,7 +290,7 @@ namespace eval ::Jabber:: {
     # Set a timer dialog instead of just straight auto rejecting.
     set ::config(subscribe,auto-reject-timer) 0
     
-    # Sets a timer in the standard "ask" dialogs to auto accept.
+    # Sets a timer in the standard "ask" dialogs to auto reject.
     set ::config(subscribe,auto-reject-std-dlg) 0
     
     # Shall we send a message to user when one of the auto dispatchers done.
