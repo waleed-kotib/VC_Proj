@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.211 2007-11-13 14:05:26 matben Exp $
+#   $Id: en.msg,v 1.212 2007-11-14 16:15:31 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -626,6 +626,7 @@
 ::msgcat::mcset en {Contact presence change}
 ::msgcat::mcset en {Username & Password}
 ::msgcat::mcset en {View Business Card}
+::msgcat::mcset en {View business card}
 
 ::msgcat::mcset en {Windows opacity}
 ::msgcat::mcset en {Writing file}
