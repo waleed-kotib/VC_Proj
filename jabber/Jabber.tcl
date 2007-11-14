@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.256 2007-11-13 15:39:33 matben Exp $
+# $Id: Jabber.tcl,v 1.257 2007-11-14 08:39:53 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -281,15 +281,21 @@ namespace eval ::Jabber:: {
     set ::config(logout,show-head)  1
     set ::config(subscribe,trpt-msgbox) 0
     
-    # Set a timer dialog instead of just straight auto rejecting.
-    set ::config(subscribe,auto-reject-timer) 0
-    
     # Set a timer dialog instead of just straight auto accepting.
     set ::config(subscribe,auto-accept-timer) 0
     
+    # Sets a timer in the standard "ask" dialogs to auto accept.
+    set ::config(subscribe,auto-accept-std-dlg) 0
+    
+    # Set a timer dialog instead of just straight auto rejecting.
+    set ::config(subscribe,auto-reject-timer) 0
+    
+    # Sets a timer in the standard "ask" dialogs to auto accept.
+    set ::config(subscribe,auto-reject-std-dlg) 0
+    
     # Shall we send a message to user when one of the auto dispatchers done.
-    set ::config(subscribe,auto-reject-send-msg) 0
     set ::config(subscribe,auto-accept-send-msg) 0
+    set ::config(subscribe,auto-reject-send-msg) 0
     
     # This is a method to show fake caps responses.
     set ::config(caps,fake) 0
@@ -335,7 +341,7 @@ proc ::Jabber::HaveWhiteboard {} {
 #       Makes reasonable default settings for a number of variables and
 #       preferences.
 
-proc ::Jabber::FactoryDefaults { } {
+proc ::Jabber::FactoryDefaults {} {
     global  this env prefs wDlgs sysFont
     
     variable jstate
@@ -405,7 +411,7 @@ proc ::Jabber::FactoryDefaults { } {
 #       following way:  {theVarName itsResourceName itsHardCodedDefaultValue
 #                 {thePriority 20}}.
 
-proc ::Jabber::InitPrefsHook { } {
+proc ::Jabber::InitPrefsHook {} {
     
     variable jstate
     variable jprefs
@@ -426,13 +432,13 @@ proc ::Jabber::InitPrefsHook { } {
 # 
 #       Accesor functions for various preference arrays.
 
-proc ::Jabber::GetjprefsArray { } {
+proc ::Jabber::GetjprefsArray {} {
     variable jprefs
     
     return [array get jprefs]
 }
 
-proc ::Jabber::GetjserverArray { } {
+proc ::Jabber::GetjserverArray {} {
     variable jserver
     
     return [array get jserver]
@@ -444,19 +450,19 @@ proc ::Jabber::SetjprefsArray {jprefsArrList} {
     array set jprefs $jprefsArrList
 }
 
-proc ::Jabber::GetIQRegisterElements { } {
+proc ::Jabber::GetIQRegisterElements {} {
     variable jprefs
 
     return $jprefs(iqRegisterElem)
 }
 
-proc ::Jabber::GetServerJid { } {
+proc ::Jabber::GetServerJid {} {
     variable jstate
 
     return $jstate(server)
 }
 
-proc ::Jabber::GetServerIpNum { } {
+proc ::Jabber::GetServerIpNum {} {
     variable jstate
     
     return $jstate(ipNum)
@@ -477,7 +483,7 @@ proc ::Jabber::GetMyJid {{roomjid {}}} {
     return $jid
 }
 
-proc ::Jabber::GetMyStatus { } {
+proc ::Jabber::GetMyStatus {} {
     variable jstate
     
     return $jstate(show)
@@ -485,7 +491,7 @@ proc ::Jabber::GetMyStatus { } {
     # Alternative: [$jstate(jlib) mypresence]
 }
 
-proc ::Jabber::IsConnected { } {
+proc ::Jabber::IsConnected {} {
     variable jstate
 
     # @@@ Bad solution to fix p2p bugs.
@@ -526,7 +532,7 @@ proc ::Jabber::DiscoCmd {args}  {
 # Results:
 #       none.
 
-proc ::Jabber::Init { } {
+proc ::Jabber::Init {} {
     global  wDlgs prefs
     
     variable jstate
@@ -745,31 +751,36 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	
 	# Accept, deny, or ask depending on preferences we've set.
 	set msg ""
-	set autoaccepted 0
 	
 	switch -- $jprefs(subsc,$key) {
 	    accept {
 		if {$config(subscribe,auto-accept-timer)} {
-		    ::Subscribe::AcceptAfter $from
+		    ::SubscribeAuto::AcceptAfter $from
+		} elseif {$config(subscribe,auto-accept-std-dlg)} {
+		    ::Subscribe::NewDlg $from -auto accept
 		} else {
 		    $jlib send_presence -to $from -type "subscribed"
-		    set autoaccepted 1
+
+		    # Auto subscribe to subscribers to me.
+		    ::SubscribeAuto::SendSubscribe $from
 		    set msg [mc jamessautoaccepted2 $from]
 		    
 		    if {$config(subscribe,auto-accept-send-msg)} {
-			::Subscribe::SendAutoAcceptMsg $from
+			::SubscribeAuto::SendAcceptMsg $from
 		    }
 		}
 	    }
 	    reject {
 		if {$config(subscribe,auto-reject-timer)} {
-		    ::Subscribe::RejectAfter $from
+		    ::SubscribeAuto::RejectAfter $from
+		} elseif {$config(subscribe,auto-reject-std-dlg)} {
+		    ::Subscribe::NewDlg $from -auto reject
 		} else {
 		    $jlib send_presence -to $from -type "unsubscribed"
 		    set msg [mc jamessautoreject2 $from]
 		    
 		    if {$config(subscribe,auto-reject-send-msg)} {
-			::Subscribe::SendAutoRejectMsg $from
+			::SubscribeAuto::SendRejectMsg $from
 		    }
 		}
 	    }
@@ -778,18 +789,6 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	    }
 	}
 	if {$msg ne ""} {
-	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
-	}
-	
-	# Auto subscribe to subscribers to me.
-	if {$autoaccepted && $jprefs(subsc,auto)} {
-	    
-	    # Explicitly set the users group.
-	    if {[string length $jprefs(subsc,group)]} {
-		$jlib roster send_set $from -groups [list $jprefs(subsc,group)]
-	    }
-	    $jlib send_presence -to $from -type "subscribe"
-	    set msg [mc jamessautosubs2 $from]
 	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	}
     }
@@ -1003,7 +1002,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 #
 #       Hides or shows console on mac and windows, sets debug for XML I/O.
 
-proc ::Jabber::DebugCmd { } {
+proc ::Jabber::DebugCmd {} {
     global  this
     
     variable jstate
@@ -1356,7 +1355,7 @@ proc ::Jabber::SetStatus {type args} {
 #       This is useful if we happen to change a custom presence x element,
 #       for instance, our phone status.
 
-proc ::Jabber::SyncStatus { } {
+proc ::Jabber::SyncStatus {} {
     variable jstate
     
     # We need to add -status to preserve it.
@@ -1909,7 +1908,7 @@ namespace eval ::Jabber::Passwd:: {
     variable password
 }
 
-proc ::Jabber::Passwd::OnMenu { } {
+proc ::Jabber::Passwd::OnMenu {} {
     if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	Build
@@ -1925,7 +1924,7 @@ proc ::Jabber::Passwd::OnMenu { } {
 # Results:
 #       none
 
-proc ::Jabber::Passwd::Build { } {
+proc ::Jabber::Passwd::Build {} {
     global  this wDlgs
     
     variable finished -1
@@ -2100,7 +2099,7 @@ namespace eval ::Jabber::Logout:: {
     option add *JLogout.connectDisImage          connectDis      widgetDefault
 }
 
-proc ::Jabber::Logout::OnMenuStatus { } {
+proc ::Jabber::Logout::OnMenuStatus {} {
     if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	WithStatus
