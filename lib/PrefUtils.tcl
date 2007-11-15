@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: PrefUtils.tcl,v 1.14 2007-10-04 14:01:07 matben Exp $
+# $Id: PrefUtils.tcl,v 1.15 2007-11-15 08:56:14 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -323,23 +323,21 @@ proc ::PrefUtils::ResetToUserDefaults {} {
 
 # PrefUtils::ParseCommandLineOptions --
 #
-#       Process command line options. Some systems (Mac OS X) add their own
-#       things in the beginning. Skip these.
+#       Process command line options for preferences.
 
 proc ::PrefUtils::ParseCommandLineOptions {cargv} {
     global  prefs argvArr
     
-    if {$cargv == {}} {
+    if {![llength $cargv]} {
 	return
     }
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
-    # Skip anything that does not start with "-". Skip also -psn_...
-    if {![regexp {(-[a-z].+$)} $cargv match optList]} {
+    # Skip anything that does not start with "-".
+    if {![regexp {(-[a-z].+$)} $cargv - optList]} {
 	return
     }
-    set optList [lsearch -all -not -inline -regexp $optList {-psn_\d*}]
     
     foreach {key value} $optList {
 	
@@ -347,12 +345,6 @@ proc ::PrefUtils::ParseCommandLineOptions {cargv} {
 	    -debugLevel {
 		set name [string trimleft $key -]
 		uplevel #0 set $name $value
-	    }
-	    -port {
-		
-	    }
-	    -connect {
-		
 	    }
 	    -prefs_* {
 		if {[regexp {^-prefs_(.+)$} $key match index]} {

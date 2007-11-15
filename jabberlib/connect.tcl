@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.30 2007-11-05 08:53:14 matben Exp $
+# $Id: connect.tcl,v 1.31 2007-11-15 08:56:14 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -147,6 +147,24 @@ proc jlib::connect::init_static {} {
     # todo:
     # -anonymous
     set inited 1
+}
+
+# jlib::connect::filteroptions --
+# 
+#       Filter an arbitrary -key value list to receive options that can
+#       typically be used by a client.
+
+proc jlib::connect::filteroptions {args} {
+    variable options
+
+    set opts [list]
+    foreach {key value} $args {
+	if {$key eq "-command"} { continue }
+	if {[info exists options($key)]} {
+	    lappend opts $key $value
+	}
+    }
+    return $opts
 }
 
 # jlib::connect::configure --

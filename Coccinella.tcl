@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.167 2007-11-13 15:39:33 matben Exp $	
+# $Id: Coccinella.tcl,v 1.168 2007-11-15 08:56:14 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -36,7 +36,6 @@ set state(launchSecs) [clock seconds]
 # MacOSX adds a -psn_* switch.
 set argv [lsearch -all -not -inline -regexp $argv {-psn_\d*}]
 set argc [llength $argv]
-array set argvArr $argv
 
 # We use a variable 'this(platform)' that is more convenient for MacOSX.
 switch -- $::tcl_platform(platform) {
@@ -293,7 +292,7 @@ set state(launchStatus) preferences
 ::Debug 2 "--> prefsInitHook"
 ::hooks::run prefsInitHook
 
-# Parse any command line options.
+# Parse some command line options.
 # @@@ There is a conflict here if some prefs settings depend on, say protocol.
 ::PrefUtils::ParseCommandLineOptions $argv
 
