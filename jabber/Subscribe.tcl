@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.58 2007-11-14 16:15:31 matben Exp $
+# $Id: Subscribe.tcl,v 1.59 2007-11-15 10:32:52 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -49,6 +49,9 @@ namespace eval ::Subscribe {
     
     # Use the multi dialog for batches of subscription requests.
     set ::config(subscribe,multi-dlg) 1
+    
+    # In the normal subscription dialog, where shall the vcard button be?
+    set ::config(subscribe,ui-vcard-pos) "name"  ;# name | button
     
     variable queue [list]
 }
@@ -196,6 +199,8 @@ proc ::Subscribe::NewDlg {jid args} {
     pack $wbox.msg -side top -anchor w
     
     set wrapL $wbox.msg
+    
+    set imvcard [::Theme::GetImage [option get $w vcardImage {}]]
 
     # In order to do the "auto" states we keep a list of widgets that shall
     # not be disabled.
@@ -209,14 +214,27 @@ proc ::Subscribe::NewDlg {jid args} {
 	pack $frmid -side top -fill both -expand 1
 	
 	ttk::label $frmid.lnick -text "[mc {Nickname}]:" -anchor e
-	ttk::entry $frmid.enick -width 24 -textvariable $token\(name)
+	ttk::entry $frmid.enick -width 18 -textvariable $token\(name)
 	ttk::label $frmid.lgroup -text "[mc Group]:" -anchor e
 	ttk::combobox $frmid.egroup -values [concat [list [mc None]] $allGroups] \
 	  -textvariable $token\(group)
-
-	grid  $frmid.lnick   $frmid.enick  -sticky e -pady 2
-	grid  $frmid.lgroup  $frmid.egroup -sticky e -pady 2
-	grid  $frmid.enick   $frmid.egroup -sticky ew	
+	
+	if {$config(subscribe,ui-vcard-pos) eq "name"} {
+	    ttk::button $frmid.bvcard -style Plain \
+	      -compound image -image $imvcard \
+	      -command [list ::VCard::Fetch other $jid]
+	    ::balloonhelp::balloonforwindow $frmid.bvcard [mc "View business card"]
+	}
+	
+	if {$config(subscribe,ui-vcard-pos) eq "name"} {
+	    grid  $frmid.lnick   $frmid.enick   $frmid.bvcard  -sticky e -pady 2
+	    grid  $frmid.lgroup  $frmid.egroup  -  -sticky e -pady 2
+	} else {
+	    grid  $frmid.lnick   $frmid.enick   -sticky e -pady 2
+	    grid  $frmid.lgroup  $frmid.egroup  -sticky e -pady 2
+	}
+	grid $frmid.enick $frmid.egroup -sticky ew	
+	
     }
     if {$argsA(-auto) eq "accept"} {
 	set secs [expr {$config(subscribe,accept-after)/1000}]
@@ -253,17 +271,12 @@ proc ::Subscribe::NewDlg {jid args} {
     }
         
     # Button part.
-    set imvcard [::Theme::GetImage [option get $w vcardImage {}]]
-
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btok -text [mc Yes] -default active \
       -command [list [namespace current]::Accept $w]
     ttk::button $frbot.btcancel -text [mc No]  \
       -command [list [namespace current]::Deny $w]
-    ttk::button $frbot.bvcard -style Plain \
-      -compound image -image $imvcard \
-      -command [list ::VCard::Fetch other $jid]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btok -side right
@@ -272,7 +285,13 @@ proc ::Subscribe::NewDlg {jid args} {
 	pack $frbot.btcancel -side right
 	pack $frbot.btok -side right -padx $padx
     }
-    pack $frbot.bvcard -side left -padx 4
+    if {$config(subscribe,ui-vcard-pos) eq "button"} {
+	ttk::button $frbot.bvcard -style Plain \
+	  -compound image -image $imvcard \
+	  -command [list ::VCard::Fetch other $jid]
+	pack $frbot.bvcard -side left -padx 4
+	::balloonhelp::balloonforwindow $frbot.bvcard [mc "View business card"]
+    }
 
     pack $frbot -side top -fill x
     wm resizable $w 0 0
@@ -283,9 +302,7 @@ proc ::Subscribe::NewDlg {jid args} {
     set state(btaccept) $frbot.btok
     set state(btdeny)   $frbot.btcancel
     set state(wkeepL)   $wkeepL
-    
-    ::balloonhelp::balloonforwindow $frbot.bvcard [mc "View business card"]
-    
+        
     if {$argsA(-auto) eq "accept"} {
 	SetAutoState $w on
     } elseif {$argsA(-auto) eq "reject"} {
