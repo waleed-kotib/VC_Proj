@@ -1,0 +1,46 @@
+
+README-command-line
+-------------------
+
+You may specify a command line when starting Coccinella. This is typically used
+to automatically login, and then you use one of two alternatives:
+
+  -jid myname@somewhere.se/home
+  -profile nameOfProfile
+
+where nameOfProfile must exist. Normally you would also add a:
+
+  -password secret
+
+otherwise you will be prompted about this. Then there are a bunch of switches
+to control some details of your connection:
+
+  -compress         0
+  -defaulthttpurl   http://%h:5280/http-poll/
+  -defaultport      5222
+  -defaultresource  "default"
+  -defaultsslport   5223
+  -digest           1
+  -dnsprotocol      udp
+  -dnssrv           1
+  -dnstxthttp       1
+  -dnstimeout       3000
+  -http             0
+  -httpurl          ""
+  -ip               ""
+  -method           ssl | tlssasl | sasl
+  -minpollsecs      4
+  -noauth           0
+  -port             ""
+  -saslthencomp     1
+  -secure           0
+  -timeout          30000
+  -transport        tcp | http  
+
+but note that these may change.
+
+For debugging you use:
+  -debugLevel 4
+
+
+

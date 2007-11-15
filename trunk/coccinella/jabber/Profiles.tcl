@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.98 2007-09-16 07:39:12 matben Exp $
+# $Id: Profiles.tcl,v 1.99 2007-11-15 08:56:14 matben Exp $
 
 package require ui::megaentry
 
@@ -101,7 +101,7 @@ namespace eval ::Profiles:: {
     variable debug 0
 }
 
-proc ::Profiles::InitHook { } {
+proc ::Profiles::InitHook {} {
     global config
     variable profiles
     variable selected
@@ -150,7 +150,7 @@ proc ::Profiles::InitHook { } {
 #           name2 {server2 username2 password2 ?-key value ...?} ... }
 
 
-proc ::Profiles::SanityCheck { } {
+proc ::Profiles::SanityCheck {} {
     global  config
     variable profiles
     variable selected
@@ -208,7 +208,7 @@ proc ::Profiles::SanityCheck { } {
 #       |   1      1  |    1    tlssasl |
 #       ---------------------------------
 
-proc ::Profiles::TranslateAnySSLSASLOptions { } {
+proc ::Profiles::TranslateAnySSLSASLOptions {} {
     variable profiles
     
     array set mapMethod {
@@ -464,7 +464,7 @@ proc ::Profiles::FindProfileNameFromJID {jid} {
 # 
 #       Do we use the (partly) hardcoded profiles?
 
-proc ::Profiles::DoConfig { } {
+proc ::Profiles::DoConfig {} {
     global  config
     
     return $config(profiles,do)
@@ -481,7 +481,7 @@ proc ::Profiles::GetConfigProfile {name} {
     }
 }
 
-proc ::Profiles::GetList { } {
+proc ::Profiles::GetList {} {
     global  config
     variable profiles
     variable cprofiles
@@ -561,6 +561,17 @@ proc ::Profiles::Get {name key} {
     }
 }
 
+proc ::Profiles::Exists {name} {
+    global  config
+    
+    if {$config(profiles,do)} {
+	set prof $cprofiles
+    } else {
+	set prof $profiles
+    }
+    return [expr {[lsearch -exact $prof $name] < 0 ? 0 : 1}]
+}
+
 proc ::Profiles::GetSelected {key} {
     return [Get [GetSelectedName] $key]
 }
@@ -584,7 +595,7 @@ proc ::Profiles::GetProfile {name} {
     }
 }
 
-proc ::Profiles::GetSelectedName { } {
+proc ::Profiles::GetSelectedName {} {
     global  config
     variable selected
     variable cselected
@@ -622,7 +633,7 @@ proc ::Profiles::SetSelectedName {name} {
 # 
 #       Utlity function to get a list of the names of all profiles. Sorted!
 
-proc ::Profiles::GetAllNames { } {
+proc ::Profiles::GetAllNames {} {
     global  config
     variable profiles
     variable cprofiles
@@ -644,7 +655,7 @@ proc ::Profiles::GetAllNames { } {
 # 
 #       Just sorts the profiles list using names only.
 
-proc ::Profiles::SortProfileList { } {
+proc ::Profiles::SortProfileList {} {
     global  config
     variable profiles
     variable cprofiles
@@ -680,7 +691,7 @@ proc ::Profiles::SortOptsList {opts} {
     return $tmp
 }
 
-proc ::Profiles::ImportIfNecessary { } {
+proc ::Profiles::ImportIfNecessary {} {
     variable profiles
     variable selected
     upvar ::Jabber::jserver jserver
@@ -695,7 +706,7 @@ proc ::Profiles::ImportIfNecessary { } {
     }
 }
 
-proc ::Profiles::ImportFromJserver { } {
+proc ::Profiles::ImportFromJserver {} {
     variable profiles
     variable selected
     upvar ::Jabber::jserver jserver
@@ -820,7 +831,7 @@ proc ::Profiles::BuildPage {page} {
 # 
 #       Invoked from the Save button.
 
-proc ::Profiles::SaveHook { } {
+proc ::Profiles::SaveHook {} {
     global  config
     variable wprefspage
 
@@ -833,7 +844,7 @@ proc ::Profiles::SaveHook { } {
     }
 }
 
-proc ::Profiles::CancelHook { } {
+proc ::Profiles::CancelHook {} {
     global  config
     variable wprefspage
 
@@ -868,7 +879,7 @@ namespace eval ::Profiles {
 # 
 #       Standalone dialog profile settings dialog.
 
-proc ::Profiles::BuildDialog { } {
+proc ::Profiles::BuildDialog {} {
     global  wDlgs config
     variable wdlgpage
     

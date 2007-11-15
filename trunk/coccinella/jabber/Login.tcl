@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.133 2007-10-16 08:14:08 matben Exp $
+# $Id: Login.tcl,v 1.134 2007-11-15 08:56:14 matben Exp $
 
 package provide Login 1.0
 
@@ -58,7 +58,7 @@ namespace eval ::Login:: {
 # Results:
 #       none
 
-proc ::Login::Dlg { } {
+proc ::Login::Dlg {} {
     global  this prefs config wDlgs
     
     variable wtoplevel
@@ -275,7 +275,7 @@ proc ::Login::Dlg { } {
     after 100 [list [namespace current]::GetNormalSize $w]
 }
 
-proc ::Login::LoadProfiles { } {
+proc ::Login::LoadProfiles {} {
     global  wDlgs
     variable tmpProfArr
     variable menuVar
@@ -368,8 +368,6 @@ proc ::Login::MoreOpts {w} {
     variable morevar
 
     pack $wfrmore -side top -fill x -padx 2
-    #$wtri configure -command [list [namespace current]::LessOpts $w] \
-    #  -image [::UI::GetIcon openAqua] -text "[mc Less]..."   
     $wtri configure -command [list [namespace current]::LessOpts $w] \
       -text "  [mc Less]..."   
 }
@@ -383,8 +381,6 @@ proc ::Login::LessOpts {w} {
     update idletasks
     
     pack forget $wfrmore
-    #$wtri configure -command [list [namespace current]::MoreOpts $w] \
-    #  -image [::UI::GetIcon closeAqua] -text "[mc More]..."   
     $wtri configure -command [list [namespace current]::MoreOpts $w] \
       -text "  [mc More]..."   
     after 100 [list wm geometry $w {}]
@@ -397,7 +393,7 @@ proc ::Login::DoCancel {w} {
     Close $w
 }
 
-proc ::Login::Profiles { } {
+proc ::Login::Profiles {} {
     
     ::Profiles::BuildDialog
 }
@@ -420,7 +416,7 @@ proc ::Login::Close {w} {
 #       This resets the complete login process.
 #       Must take care of everything.
 
-proc ::Login::Reset { } {
+proc ::Login::Reset {} {
     variable pending
     upvar ::Jabber::jstate jstate
 
@@ -526,14 +522,16 @@ proc ::Login::LoginCallback {token {errcode ""} {errmsg ""}} {
 # Login::LaunchHook --
 # 
 #       Method to automatically login after launch.
+#       Command line options have higher priority than user settings.
 
-proc ::Login::LaunchHook { } {
+proc ::Login::LaunchHook {} {
     upvar ::Jabber::jprefs jprefs
     
-    if {!$jprefs(autoLogin)} {
-	return
+    if {![ParseCommandLine]} {
+	if {$jprefs(autoLogin)} {
+	    LoginCmd
+	}
     }
-    LoginCmd
 }
 
 # Login::LoginCmd --
@@ -543,7 +541,11 @@ proc ::Login::LaunchHook { } {
 proc ::Login::LoginCmd {} {
     
     # Use our selected profile.
-    set profname [::Profiles::GetSelectedName]
+    LoginWithProfile [::Profiles::GetSelectedName]
+}
+
+proc ::Login::LoginWithProfile {profname} {
+    
     set domain   [::Profiles::Get $profname domain]
     set node     [::Profiles::Get $profname node]
     set password [::Profiles::Get $profname password]
@@ -559,10 +561,10 @@ proc ::Login::LoginCmd {} {
 	}
 	set password [ui::megaentrytext $ans]
     }
-    set opts   [::Profiles::Get $profname options]
-    array set optsArr $opts
-    if {[info exists optsArr(-resource)] && ($optsArr(-resource) ne "")} {
-	set res $optsArr(-resource)
+    set opts [::Profiles::Get $profname options]
+    array set optsA $opts
+    if {[info exists optsA(-resource)] && ($optsA(-resource) ne "")} {
+	set res $optsA(-resource)
     } else {
 	set res [::Profiles::MachineResource]
     }
@@ -570,7 +572,58 @@ proc ::Login::LoginCmd {} {
       [namespace current]::AutoLoginCB} $opts
 }
 
-proc ::Login::QuitAppHook { } {
+# Login::ParseCommandLine --
+# 
+#       Processes the command line options to see if we shall login and with
+#       which parameters.
+
+proc ::Login::ParseCommandLine {} {
+    global  argv
+    
+    Debug 4 "::Login::ParseCommandLine argv='$argv'"
+    
+    if {[expr {[llength $argv] % 2 == 1}]} {
+	return
+    }
+    array set argvA $argv
+    
+    set login 0
+    if {[info exists argvA(-jid)]} {
+	set jid $argvA(-jid)
+	jlib::splitjidex $jid node domain res
+	if {$res eq ""} {
+	    set res [::Profiles::MachineResource]
+	}
+	if {[info exists argvA(-password)]} {
+	    set password $argvA(-password)
+	    set login 1
+	} else {
+	    set ujid [jlib::unescapejid $jid]
+	    set ans [ui::megaentry -label "[mc Password]:" -icon question \
+	      -geovariable prefs(winGeom,jautologin) -show {*} \
+	      -title [mc Password] -message [mc enterpassword $ujid]]
+	    if {$ans ne ""} {
+		set password [ui::megaentrytext $ans]
+		set login 1
+	    }
+	}
+	if {$login} {
+	    set opts [eval {jlib::connect::filteroptions} $argv]
+	    eval {::Login::HighLogin $domain $node $res $password \
+	      [namespace current]::AutoLoginCB} $opts
+	}
+    } elseif {[info exists argvA(-profile)]} {
+	if {[::Profiles::Exists $argvA(-profile)]} {
+	    LoginWithProfile $argvA(-profile)
+	    set login 1
+	} else {
+	    puts stderr "profile \"$argvA(-profile)\" does not exist"
+	}
+    }
+    return $login
+}
+
+proc ::Login::QuitAppHook {} {
     global  wDlgs
     
     ::UI::SaveWinGeom $wDlgs(jlogin)    
