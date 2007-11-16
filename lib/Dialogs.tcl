@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Dialogs.tcl,v 1.72 2007-09-14 08:11:45 matben Exp $
+# $Id: Dialogs.tcl,v 1.73 2007-11-16 14:52:14 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -26,70 +26,6 @@ namespace eval ::Dialogs:: {
     
     # Add all event hooks.
     ::hooks::register quitAppHook ::Dialogs::Free 10
-}
-
-proc ::Dialogs::InfoComponents { } {
-    global  prefs this wDlgs
-    
-    # Check first of there are *any* components.
-    set compList [component::getall]
-    if {[llength $compList] == 0} {
-	::UI::MessageBox -icon info -type ok -message [mc messnoplugs]
-	return  
-    }
-    set w $wDlgs(comp)
-    if {[winfo exists $w]} {
-	raise $w
-	return
-    }
-    ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [mc mPlugins]
-     
-    ttk::frame $w.frall
-    pack $w.frall -fill both -expand 1
-
-    set wbox $w.frall.f
-    ttk::frame $wbox -padding [option get . dialogPadding {}]
-    pack $wbox -fill both -expand 1
-
-    # Button part.
-    set frbot $wbox.b
-    ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w]
-    pack $frbot.btok -side right
-    pack $frbot -side bottom -fill x
-
-    set tbox $wbox.t
-    frame $tbox -bd 1 -relief sunken
-    pack  $tbox -fill both -expand 1
-
-    set wtxt $tbox.txt
-    set wysc $tbox.ysc
-    ttk::scrollbar $wysc -orient vertical -command [list $wtxt yview]
-    text $wtxt -highlightthickness 0 -bd 0 \
-      -bg white -wrap word -width 50 -height 16 -exportselection 1 \
-      -yscrollcommand [list ::UI::ScrollSet $wysc \
-      [list grid $wysc -column 1 -row 0 -sticky ns]]
-
-    grid  $wtxt  -column 0 -row 0 -sticky news
-    grid  $wysc  -column 1 -row 0 -sticky ns
-    grid columnconfigure $tbox 0 -weight 1
-    grid rowconfigure $tbox 0 -weight 1
-
-    $wtxt tag configure ttitle -foreground black -background "#dedeff"  \
-      -spacing1 2 -spacing3 2 -lmargin1 20 -font CociSmallBoldFont
-    $wtxt tag configure ttxt -font CociSmallFont -wrap word -lmargin1 10 -lmargin2 10 \
-      -spacing1 6 -spacing3 6
-    $wtxt tag configure tline -font {Helvetica -1} -background black
-    
-    foreach comp $compList {
-	set name [lindex $comp 0]
-	set text [lindex $comp 1]
-	$wtxt insert end "$name\n" ttitle
-	$wtxt insert end "$text\n" ttxt
-    }
-    $wtxt configure -state disabled
-    bind $w <Return> [list $frbot.btok invoke]
 }
 
 # Printing the canvas on Unix/Linux.

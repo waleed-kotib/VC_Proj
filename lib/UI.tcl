@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.176 2007-11-01 15:59:00 matben Exp $
+# $Id: UI.tcl,v 1.177 2007-11-16 14:52:14 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -183,34 +183,30 @@ proc ::UI::InitCommonBinds {} {
 	focus [tk_focusPrev %W]
 	break
     }
-        
+    SetMoseWheelFor Canvas
+    SetMoseWheelFor Html
+
+    # Linux has a strange binding by default. Handled by <<Paste>>.
+    if {[string equal $this(platform) "unix"]} {
+	bind Text <Control-Key-v> {}
+    }
+}
+
+proc ::UI::SetMoseWheelFor {bindTarget} {
+    
     if {[string equal "x11" [tk windowingsystem]]} {
 	# Support for mousewheels on Linux/Unix commonly comes through mapping
 	# the wheel to the extended buttons.  If you have a mousewheel, find
 	# Linux configuration info at:
 	#	http://www.inria.fr/koala/colas/mouse-wheel-scroll/
-	bind Canvas <4> {
+	bind $bindTarget <4> {
 	    if {!$::tk_strictMotif} {
 		if {![string equal [%W yview] "0 1"]} {
 		    %W yview scroll -5 units
 		}
 	    }
 	}
-	bind Canvas <5> {
-	    if {!$::tk_strictMotif} {
-		if {![string equal [%W yview] "0 1"]} {
-		    %W yview scroll 5 units
-		}
-	    }
-	}
-	bind Html <4> {
-	    if {!$::tk_strictMotif} {
-		if {![string equal [%W yview] "0 1"]} {
-		    %W yview scroll -5 units
-		}
-	    }
-	}
-	bind Html <5> {
+	bind $bindTarget <5> {
 	    if {!$::tk_strictMotif} {
 		if {![string equal [%W yview] "0 1"]} {
 		    %W yview scroll 5 units
@@ -218,52 +214,27 @@ proc ::UI::InitCommonBinds {} {
 	    }
 	}
     } elseif {[string equal [tk windowingsystem] "aqua"]} {
-	bind Canvas <MouseWheel> {
+	bind $bindTarget <MouseWheel> {
 	    if {![string equal [%W yview] "0 1"]} {
 		%W yview scroll [expr {- (%D)}] units
 	    }
 	}
-	bind Canvas <Shift-MouseWheel> {
-	    if {![string equal [%W xview] "0 1"]} {
-		%W xview scroll [expr {- (%D)}] units
-	    }
-	}
-	bind Html <MouseWheel> {
-	    if {![string equal [%W yview] "0 1"]} {
-		%W yview scroll [expr {- (%D)}] units
-	    }
-	}
-	bind Html <Shift-MouseWheel> {
+	bind $bindTarget <Shift-MouseWheel> {
 	    if {![string equal [%W xview] "0 1"]} {
 		%W xview scroll [expr {- (%D)}] units
 	    }
 	}
     } else {
-	bind Canvas <MouseWheel> {
+	bind $bindTarget <MouseWheel> {
 	    if {![string equal [%W yview] "0 1"]} {
 		%W yview scroll [expr {- (%D / 120) * 4}] units
 	    }
 	}
-	bind Canvas <Shift-MouseWheel> {
+	bind $bindTarget <Shift-MouseWheel> {
 	    if {![string equal [%W xview] "0 1"]} {
 		%W xview scroll [expr {- (%D / 120) * 4}] units
 	    }
 	}
-	bind Html <MouseWheel> {
-	    if {![string equal [%W yview] "0 1"]} {
-		%W yview scroll [expr {- (%D / 120) * 4}] units
-	    }
-	}
-	bind Html <Shift-MouseWheel> {
-	    if {![string equal [%W xview] "0 1"]} {
-		%W xview scroll [expr {- (%D / 120) * 4}] units
-	    }
-	}
-    }
-
-    # Linux has a strange binding by default. Handled by <<Paste>>.
-    if {[string equal $this(platform) "unix"]} {
-	bind Text <Control-Key-v> {}
     }
 }
 
@@ -875,7 +846,11 @@ proc ::UI::ScrollFrame {w args} {
     }
     array set opts $args
     
-    frame $w -class Scrollframe -bd $opts(-bd) -relief $opts(-relief)
+    if {0} {
+	frame $w -class Scrollframe -bd $opts(-bd) -relief $opts(-relief)	
+    } else {
+	ttk::frame $w -class Scrollframe
+    }
     ttk::scrollbar $w.ysc -command [list $w.can yview]
     if {$opts(-width)} {
 	set cwidth [expr {$opts(-width) - $opts(-bd) - [winfo reqwidth $w.ysc]}]
@@ -887,15 +862,16 @@ proc ::UI::ScrollFrame {w args} {
     pack $w.ysc -side right -fill y
     pack $w.can -side left -fill both -expand 1
     
-    if {!$opts(-propagate)} {
+    if {1 || !$opts(-propagate)} {
 	ttk::frame $w.can.bg
 	$w.can create window 0 0 -anchor nw -window $w.can.bg -tags twin
     }
     ttk::frame $w.can.f -padding $opts(-padding)
     $w.can create window 0 0 -anchor nw -window $w.can.f -tags twin
-    
+
     if {$opts(-propagate)} {
 	bind $w.can.f <Configure> [list ::UI::ScrollFrameResize $w]
+	bind $w.can   <Configure> [list ::UI::ScrollFrameResizeBg $w]
     } else {
 	bind $w.can.f <Configure> [list ::UI::ScrollFrameResizeScroll $w]
 	bind $w.can   <Configure> [list ::UI::ScrollFrameResizeBg $w]
@@ -904,6 +880,7 @@ proc ::UI::ScrollFrame {w args} {
 }
 
 proc ::UI::ScrollFrameResize {w} {
+    update idletasks
     set bbox [$w.can bbox twin]
     set width [winfo width $w.can.f]
     $w.can configure -width $width -scrollregion $bbox
@@ -914,7 +891,8 @@ proc ::UI::ScrollFrameResizeScroll {w} {
     $w.can configure -scrollregion $bbox
 }
 
-proc ::UI::ScrollFrameResizeBg {w} {    
+proc ::UI::ScrollFrameResizeBg {w} {   
+    update idletasks
     set bbox [$w.can bbox all]
     set width  [winfo width $w.can]
     set height [winfo height $w.can]
@@ -923,6 +901,20 @@ proc ::UI::ScrollFrameResizeBg {w} {
 
 proc ::UI::ScrollFrameInterior {w} { 
     return $w.can.f
+}
+
+# UI::QuirkSize --
+# 
+#       This is a trick to trigger an extra Expose event which sometimes (Aqua)
+#       is missing.
+
+proc ::UI::QuirkSize {w} {    
+    set geo [wm geometry $w]
+    regexp {([0-9]+)x([0-9]+)} $geo - width height
+    incr width
+    wm geometry $w ${width}x${height}
+    incr width -1
+    wm geometry $w ${width}x${height}
 }
 
 # UI::ScrollSet --
