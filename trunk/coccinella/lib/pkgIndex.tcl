@@ -10,6 +10,7 @@
 
 package ifneeded AMenu           1.0 [list source [file join $dir AMenu.tcl]]
 package ifneeded Bookmarks       1.0 [list source [file join $dir Bookmarks.tcl]]
+package ifneeded Component       1.0 [list source [file join $dir Component.tcl]]
 package ifneeded Dialogs         1.0 [list source [file join $dir Dialogs.tcl]]
 package ifneeded EditDialogs     1.0 [list source [file join $dir EditDialogs.tcl]]
 package ifneeded FactoryDefaults 1.0 [list source [file join $dir SetFactoryDefaults.tcl]]
