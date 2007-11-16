@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.258 2007-11-14 16:15:31 matben Exp $
+# $Id: Jabber.tcl,v 1.259 2007-11-16 08:27:39 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -279,23 +279,8 @@ namespace eval ::Jabber:: {
     # Dialogs with head label.
     set ::config(version,show-head) 1
     set ::config(logout,show-head)  1
+
     set ::config(subscribe,trpt-msgbox) 0
-    
-    # Set a timer dialog instead of just straight auto accepting.
-    set ::config(subscribe,auto-accept-timer) 0
-    
-    # Sets a timer in the standard "ask" dialogs to auto accept.
-    set ::config(subscribe,auto-accept-std-dlg) 0
-    
-    # Set a timer dialog instead of just straight auto rejecting.
-    set ::config(subscribe,auto-reject-timer) 0
-    
-    # Sets a timer in the standard "ask" dialogs to auto reject.
-    set ::config(subscribe,auto-reject-std-dlg) 0
-    
-    # Shall we send a message to user when one of the auto dispatchers done.
-    set ::config(subscribe,auto-accept-send-msg) 0
-    set ::config(subscribe,auto-reject-send-msg) 0
     
     # This is a method to show fake caps responses.
     set ::config(caps,fake) 0
@@ -742,54 +727,18 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	    set key notinrost
 	}		
 	
-	# No resource here!
-	if {$subscription eq "from" || $subscription eq "both"} {
-	    set isSubscriberToMe 1
-	} else {
-	    set isSubscriberToMe 0
-	}
-	
 	# Accept, deny, or ask depending on preferences we've set.
-	set msg ""
 	
 	switch -- $jprefs(subsc,$key) {
 	    accept {
-		if {$config(subscribe,auto-accept-timer)} {
-		    ::SubscribeAuto::AcceptAfter $from
-		} elseif {$config(subscribe,auto-accept-std-dlg)} {
-		    ::Subscribe::NewDlg $from -auto accept
-		} else {
-		    $jlib send_presence -to $from -type "subscribed"
-
-		    # Auto subscribe to subscribers to me.
-		    ::SubscribeAuto::SendSubscribe $from
-		    set msg [mc jamessautoaccepted2 $from]
-		    
-		    if {$config(subscribe,auto-accept-send-msg)} {
-			::SubscribeAuto::SendAcceptMsg $from
-		    }
-		}
+		::SubscribeAuto::HandleAccept $from
 	    }
 	    reject {
-		if {$config(subscribe,auto-reject-timer)} {
-		    ::SubscribeAuto::RejectAfter $from
-		} elseif {$config(subscribe,auto-reject-std-dlg)} {
-		    ::Subscribe::NewDlg $from -auto reject
-		} else {
-		    $jlib send_presence -to $from -type "unsubscribed"
-		    set msg [mc jamessautoreject2 $from]
-		    
-		    if {$config(subscribe,auto-reject-send-msg)} {
-			::SubscribeAuto::SendRejectMsg $from
-		    }
-		}
+		::SubscribeAuto::HandleReject $from
 	    }
 	    ask {
 		::Subscribe::HandleAsk $from
 	    }
-	}
-	if {$msg ne ""} {
-	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	}
     }
     return 1

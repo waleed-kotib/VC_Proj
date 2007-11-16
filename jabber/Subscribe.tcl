@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.60 2007-11-15 15:39:49 matben Exp $
+# $Id: Subscribe.tcl,v 1.61 2007-11-16 08:27:39 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -44,16 +44,56 @@ namespace eval ::Subscribe {
     # Show head label in subcription dialog.
     set ::config(subscribe,show-head) 1
     
+    # In the normal subscription dialog, where shall the vcard button be?
+    set ::config(subscribe,ui-vcard-pos) "name"  ;# name | button
+    
     # Millis to wait for a second subsciption request to show in multi dialog.
     set ::config(subscribe,multi-wait-ms) 2000
     
     # Use the multi dialog for batches of subscription requests.
     set ::config(subscribe,multi-dlg) 1
     
-    # In the normal subscription dialog, where shall the vcard button be?
-    set ::config(subscribe,ui-vcard-pos) "name"  ;# name | button
+    # Set a timer dialog instead of just straight auto accepting.
+    set ::config(subscribe,auto-accept-timer) 0
+    
+    # Sets a timer in the standard "ask" dialogs to auto accept.
+    set ::config(subscribe,auto-accept-std-dlg) 1
+    
+    # Set a timer dialog instead of just straight auto rejecting.
+    set ::config(subscribe,auto-reject-timer) 0
+    
+    # Sets a timer in the standard "ask" dialogs to auto reject.
+    set ::config(subscribe,auto-reject-std-dlg) 1
+    
+    # Shall we send a message to user when one of the auto dispatchers done.
+    set ::config(subscribe,auto-accept-send-msg) 0
+    set ::config(subscribe,auto-reject-send-msg) 0
     
     variable queue [list]
+}
+
+if {0} {
+    # Test code:
+    # Ask:
+    ::Subscribe::HandleAsk "mats@home.se"
+    ::Subscribe::HandleAsk "mari@work.se"
+    ::Subscribe::HandleAsk "mari.lundberg@someextremelylongname.se"
+    ::Subscribe::HandleAsk "donald.duck@disney.com"
+    ::Subscribe::HandleAsk "mimmi.duck@disney.com"  
+    
+    # Auto accept:
+    ::SubscribeAuto::HandleAccept "mats@home.se"
+    ::SubscribeAuto::HandleAccept "mari@work.se"
+    ::SubscribeAuto::HandleAccept "mari.lundberg@someextremelylongname.se"
+    ::SubscribeAuto::HandleAccept "donald.duck@disney.com"
+    ::SubscribeAuto::HandleAccept "mimmi.duck@disney.com"  
+    
+    # Auto reject:
+    ::SubscribeAuto::HandleReject "mats@home.se"
+    ::SubscribeAuto::HandleReject "mari@work.se"
+    ::SubscribeAuto::HandleReject "mari.lundberg@someextremelylongname.se"
+    ::SubscribeAuto::HandleReject "donald.duck@disney.com"
+    ::SubscribeAuto::HandleReject "mimmi.duck@disney.com"  
 }
 
 proc ::Subscribe::HandleAsk {jid args} {
@@ -209,6 +249,7 @@ proc ::Subscribe::NewDlg {jid args} {
     set imvcard [::Theme::GetImage [option get $w vcardImage {}]]
 
     if {$argsA(-auto) eq "accept"} {
+	
 	set secs [expr {$config(subscribe,accept-after)/1000}]
 	set msg [mc jamesssubscautoacc $secs]
 	ttk::label $wbox.accept -style Small.TLabel \
@@ -220,11 +261,15 @@ proc ::Subscribe::NewDlg {jid args} {
 	pack $wbox.pause -side top -anchor e -padx 12	
 	lappend wrapL $wbox.accept
 	set state(waccept) $wbox.accept
+	set state(wpause)  $wbox.pause
+	
 	lappend wkeepL $wbox.accept $wbox.pause
 	
 	set secs [expr {$config(subscribe,accept-after)/1000}]
 	set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
+
     } elseif {$argsA(-auto) eq "reject"} {
+
 	set secs [expr {$config(subscribe,reject-after)/1000}]
 	set msg [mc jamesssubscautorej $secs]
 	ttk::label $wbox.reject -style Small.TLabel \
@@ -236,6 +281,8 @@ proc ::Subscribe::NewDlg {jid args} {
 	pack $wbox.pause -side top -anchor e -padx 12	
 	lappend wrapL $wbox.reject
 	set state(wreject) $wbox.reject
+	set state(wpause)  $wbox.pause
+
 	lappend wkeepL $wbox.reject $wbox.pause
 	
 	set secs [expr {$config(subscribe,reject-after)/1000}]
@@ -352,7 +399,8 @@ proc ::Subscribe::SetAllWidgetStates {w thestate} {
 	set QN [list]
 	foreach win $Q {	 
  	    switch [winfo class $win] \
-	      TEntry - TLabel - TButton - TCombobox {$win state $thestate}
+	      TEntry - TLabel - TButton - TCombobox - TCheckbutton - TRadiobutton \
+	      {$win state $thestate}
 	    foreach child [winfo children $win] {
 		lappend QN $child
 	    }
@@ -406,6 +454,7 @@ proc ::Subscribe::Pause {w} {
     upvar 0 $w state
 
     SetAutoState $w off
+    $state(wpause) state {disabled}
     if {[info exists state(timer-id)]} {
 	after cancel $state(timer-id)
 	unset state(timer-id)
@@ -545,23 +594,15 @@ namespace eval ::SubscribeAuto {
     set queue(reject) [list]
 }
 
-::msgcat::mcset en jamesssubscautoacc {Subscription request will be accepted in: %s secs. If you don't do anything this dialog will be closed and the request will be accepted.}
-::msgcat::mcset sv jamesssubscautoacc {Subscription request will be accepted in: %s secs. If you don't do anything this dialog will be closed and the request will be accepted.}
-::msgcat::mcset pl jamesssubscautoacc {Subscription request will be accepted in: %s secs. If you don't do anything this dialog will be closed and the request will be accepted.}
-::msgcat::mcset nl jamesssubscautoacc {Subscription request will be accepted in: %s secs. If you don't do anything this dialog will be closed and the request will be accepted.}
+::msgcat::mcset en jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
+::msgcat::mcset sv jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
+::msgcat::mcset pl jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
+::msgcat::mcset nl jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
 
-::msgcat::mcset en jamesssubscautorej {Subscription request will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
-::msgcat::mcset sv jamesssubscautorej {Subscription request will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
-::msgcat::mcset pl jamesssubscautorej {Subscription request will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
-::msgcat::mcset nl jamesssubscautorej {Subscription request will be rejected in: %s secs. If you don't do anything this dialog will be closed and the request will be rejected.}
-
-if {0} {
-    ::SubscribeAuto::Queue accept "mats@home.se"
-    ::SubscribeAuto::Queue accept "mari@work.se"
-    ::SubscribeAuto::Queue accept "mari.lundberg@someextremelylongname.se"
-    ::SubscribeAuto::Queue accept "donald.duck@disney.com"
-    ::SubscribeAuto::Queue accept "mimmi.duck@disney.com"
-}
+::msgcat::mcset en jamesssubscautorej {Subscription request will be rejected in: %s secs.}
+::msgcat::mcset sv jamesssubscautorej {Subscription request will be rejected in: %s secs.}
+::msgcat::mcset pl jamesssubscautorej {Subscription request will be rejected in: %s secs.}
+::msgcat::mcset nl jamesssubscautorej {Subscription request will be rejected in: %s secs.}
 
 proc ::SubscribeAuto::HandleAccept {jid} {
     global  config
@@ -575,7 +616,7 @@ proc ::SubscribeAuto::HandleAccept {jid} {
 	    ::Subscribe::NewDlg $jid -auto accept
 	}
     } else {
-	$jlib send_presence -to $from -type "subscribed"
+	::Jabber::JlibCmd send_presence -to $from -type "subscribed"
 
 	# Auto subscribe to subscribers to me.
 	::SubscribeAuto::SendSubscribe $jid
@@ -584,6 +625,28 @@ proc ::SubscribeAuto::HandleAccept {jid} {
 	
 	if {$config(subscribe,auto-accept-send-msg)} {
 	    ::SubscribeAuto::SendAcceptMsg $jid
+	}
+    }
+}
+
+proc ::SubscribeAuto::HandleReject {jid} {
+    global  config
+
+    if {$config(subscribe,auto-reject-timer)} {
+	::SubscribeAuto::RejectAfter $jid
+    } elseif {$config(subscribe,auto-reject-std-dlg)} {
+	if {$config(subscribe,multi-dlg)} {
+	    Queue reject $jid
+	} else {
+	    ::Subscribe::NewDlg $jid -auto reject
+	}
+    } else {
+	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
+	set msg [mc jamessautoreject2 $jid]
+	::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	
+	if {$config(subscribe,auto-reject-send-msg)} {
+	    ::SubscribeAuto::SendRejectMsg $jid
 	}
     }
 }
@@ -604,7 +667,8 @@ proc ::SubscribeAuto::Queue {type jid} {
 	::SubscribeMulti::AddJID [lindex $wList 0] $jid
     } else {
 	if {![llength $queue($type)]} {
-	    after $config(subscribe,multi-wait-ms) [namespace code ExecQueue]
+	    set ms $config(subscribe,multi-wait-ms)
+	    after $ms [namespace code [list ExecQueue $type]]
 	}
 	lappend queue($type) $jid
     }
@@ -617,7 +681,8 @@ proc ::SubscribeAuto::ExecQueue {type} {
     if {$len == 1} {
 	::Subscribe::NewDlg [lindex $queue($type) 0] -auto $type
     } elseif {$len > 1} {
-	set w [::SubscribeMulti::NewDlg -auto $type]
+	set Type [string totitle $type]
+	set w [::SubscribeMulti::NewDlg -auto $type -class JSubscribeMultiA$Type]
 	foreach jid $queue($type) {
 	    ::SubscribeMulti::AddJID $w $jid
 	}
@@ -754,19 +819,6 @@ proc ::SubscribeAuto::SendAcceptMsg {jid} {
 
 #-------------------------------------------------------------------------------
 
-if {0} {
-    ::Subscribe::Queue "mats@home.se"
-    ::Subscribe::Queue "mari@work.se"
-    ::Subscribe::Queue "mari.lundberg@someextremelylongname.se"
-    ::Subscribe::Queue "donald.duck@disney.com"
-    ::Subscribe::Queue "mimmi.duck@disney.com"
-    ::Subscribe::Queue "mats@home.se"
-    ::Subscribe::Queue "mari@work.se"
-    ::Subscribe::Queue "mari.lundberg@someextremelylongname.se"
-    ::Subscribe::Queue "donald.duck@disney.com"
-    ::Subscribe::Queue "mimmi.duck@disney.com"
-}
-
 # SubscribeMulti... --
 # 
 #       A dialog to handle multiple subscription requests.
@@ -779,6 +831,14 @@ namespace eval ::SubscribeMulti {
     option add *JSubscribeMulti.adduserDisImage        adduserDis      widgetDefault
     option add *JSubscribeMulti.vcardImage             vcard           widgetDefault
 
+    option add *JSubscribeMultiAAccept.adduserImage           adduser         widgetDefault
+    option add *JSubscribeMultiAAccept.adduserDisImage        adduserDis      widgetDefault
+    option add *JSubscribeMultiAAccept.vcardImage             vcard           widgetDefault
+
+    option add *JSubscribeMultiAReject.adduserImage           adduser         widgetDefault
+    option add *JSubscribeMultiAReject.adduserDisImage        adduserDis      widgetDefault
+    option add *JSubscribeMultiAReject.vcardImage             vcard           widgetDefault
+
     variable uid 0
 }
 
@@ -789,6 +849,7 @@ namespace eval ::SubscribeMulti {
 # Arguments:
 #       args:
 #           -auto accept|reject
+#           -class windowClassName
 #       
 # Results:
 #       widgetPath
@@ -803,7 +864,8 @@ proc ::SubscribeMulti::NewDlg {args} {
     ::Debug 2 "::SubscribeMulti::NewDlg"
  
     array set argsA {
-	-auto ""
+	-auto  ""
+	-class JSubscribeMulti
     }
     array set argsA $args
     set w $wDlgs(jsubsc)ex[incr uid]
@@ -817,14 +879,19 @@ proc ::SubscribeMulti::NewDlg {args} {
     set state(finished) -1
     set state(nusers)   0
     set state(all)      1
+    set state(auto)     $argsA(-auto)
 
     ::UI::Toplevel $w -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace current]::CloseCmd \
-      -usemacmainmenu 1 -class JSubscribeMulti
+      -usemacmainmenu 1 -class $argsA(-class)
     wm title $w [mc "Presence Subscription"]  
     wm withdraw $w
   
     set jlib $jstate(jlib)
+    
+    # In order to do the "auto" states we keep a list of widgets that shall
+    # not be disabled.
+    set wkeepL [list]
     
     # Global frame.
     set wall $w.fr
@@ -842,6 +909,8 @@ proc ::SubscribeMulti::NewDlg {args} {
 	
 	ttk::separator $wall.s -orient horizontal
 	pack $wall.s -side top -fill x
+	
+	lappend wkeepL $wall.head
     }
     set wbox $wall.f
     ttk::frame $wbox -padding [option get . dialogPadding {}]
@@ -852,11 +921,11 @@ proc ::SubscribeMulti::NewDlg {args} {
       -text [mc jasubmulti $state(nusers)]
     pack $wbox.msg -side top -anchor w
 
-    if {$argsA(-auto) eq "accept"} {
+    if {$state(auto) eq "accept"} {
 	set secs [expr {$config(subscribe,accept-after)/1000}]
 	set msg [mc jamesssubscautoacc $secs]
 	ttk::label $wbox.accept -style Small.TLabel \
-	  -text $msg -wraplength 200 -justify left
+	  -text $msg -wraplength 320 -justify left
 	ttk::button $wbox.pause -style Url -text [mc Pause] \
 	  -command [namespace code [list Pause $w]]
 	
@@ -864,15 +933,17 @@ proc ::SubscribeMulti::NewDlg {args} {
 	pack $wbox.pause -side top -anchor e -padx 12	
 	lappend wrapL $wbox.accept
 	set state(waccept) $wbox.accept
+	set state(wpause)  $wbox.pause
+
 	lappend wkeepL $wbox.accept $wbox.pause
 	
 	set secs [expr {$config(subscribe,accept-after)/1000}]
-	#set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
-    } elseif {$argsA(-auto) eq "reject"} {
+	set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
+    } elseif {$state(auto) eq "reject"} {
 	set secs [expr {$config(subscribe,reject-after)/1000}]
 	set msg [mc jamesssubscautorej $secs]
 	ttk::label $wbox.reject -style Small.TLabel \
-	  -text $msg -wraplength 200 -justify left
+	  -text $msg -wraplength 320 -justify left
 	ttk::button $wbox.pause -style Url -text [mc Pause] \
 	  -command [namespace code [list Pause $w]]
 	
@@ -880,10 +951,14 @@ proc ::SubscribeMulti::NewDlg {args} {
 	pack $wbox.pause -side top -anchor e -padx 12	
 	lappend wrapL $wbox.reject
 	set state(wreject) $wbox.reject
+	set state(wpause)  $wbox.pause
+
 	lappend wkeepL $wbox.reject $wbox.pause
 	
+	set state(all) 0
+
 	set secs [expr {$config(subscribe,reject-after)/1000}]
-	#set state(timer-id) [after 1000 [namespace code [list RejectTimer $w $secs]]]
+	set state(timer-id) [after 1000 [namespace code [list RejectTimer $w $secs]]]
     }
 
     set useScrolls 0
@@ -926,17 +1001,93 @@ proc ::SubscribeMulti::NewDlg {args} {
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
     
-    #update idletasks
+    set state(btok) $frbot.btok
+    
+    lappend wkeepL $frbot.btok
+    set state(wkeepL) $wkeepL
+    
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsubsc)]]
     if {$nwin == 1} {
 	::UI::SetWindowPosition $w $wDlgs(jsubsc)
     }
     wm deiconify $w
-    
+
+    if {$state(auto) eq "accept"} {
+	SetAutoState $w on
+    } elseif {$state(auto) eq "reject"} {
+	SetAutoState $w on
+    }
+
     if {$useScrolls} {
 	::UI::QuirkSize $w
     }
     return $w
+}
+
+proc ::SubscribeMulti::AcceptTimer {w secs} {
+    variable $w
+    upvar 0 $w state
+	    
+    if {[info exists state(w)]} {
+	set w $state(w)
+	incr secs -1
+	if {$secs <= 0} {
+	    $state(btok) invoke
+	} else {
+	    set msg [mc jamesssubscautoacc $secs]
+	    $state(waccept) configure -text $msg
+	    set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
+	}
+    }    
+}
+
+proc ::SubscribeMulti::RejectTimer {w secs} {
+    variable $w
+    upvar 0 $w state
+	    
+    if {[info exists state(w)]} {
+	set w $state(w)
+	incr secs -1
+	if {$secs <= 0} {
+	    $state(btok) invoke
+	} else {
+	    set msg [mc jamesssubscautorej $secs]
+	    $state(wreject) configure -text $msg
+	    set state(timer-id) [after 1000 [namespace code [list RejectTimer $w $secs]]]
+	}
+    }    
+}
+
+proc ::SubscribeMulti::Pause {w} {
+    variable $w
+    upvar 0 $w state
+
+    SetAutoState $w off
+    $state(wpause) state {disabled}
+    if {[info exists state(timer-id)]} {
+	after cancel $state(timer-id)
+	unset state(timer-id)
+    }
+}
+
+proc ::SubscribeMulti::SetAutoState {w which} {
+    variable $w
+    upvar 0 $w state
+
+    if {$which eq "on"} {
+	::Subscribe::SetAllWidgetStates $w {disabled background}
+	foreach win $state(wkeepL) {
+	    $win state {!background !disabled}
+	}
+    } else {
+	::Subscribe::SetAllWidgetStates $w {!background !disabled}
+	if {[info exists state(waccept)]} {
+	    $state(waccept) state {disabled background}
+	}
+	if {[info exists state(wreject)]} {
+	    $state(wreject) state {disabled background}
+	}
+    }
 }
 
 proc ::SubscribeMulti::All {w} {
@@ -975,9 +1126,9 @@ proc ::SubscribeMulti::AddJID {w jid} {
     
     set jstr [::Subscribe::GetDisplayName $jid]
     set jlen [font measure CociDefaultFont $jstr]
-    if {$jlen > 220} {
+    if {$jlen > 240} {
 	set len [string length $jstr]
-	set n [expr {($len * 220)/$jlen - 2}]
+	set n [expr {($len * 240)/$jlen - 2}]
 	set jstr [string range $jstr 0 $n]
 	append jstr "..."
     }
@@ -993,7 +1144,12 @@ proc ::SubscribeMulti::AddJID {w jid} {
     grid  x         x         $f.f$row
     grid $f.c$row -sticky e
     grid $f.l$row $f.f$row -sticky w
-
+    
+    if {[info exists state(timer-id)]} {
+	$f.m$row state {disabled}
+	$f.c$row state {disabled}
+	$f.l$row state {disabled}
+    }
     return $row
 }
 
@@ -1122,6 +1278,7 @@ namespace eval ::Subscribed {
 }
 
 if {0} {
+    # Test code:
     ::Subscribed::Queue "mats@home.se"
     ::Subscribed::Queue "mari@work.se"
     ::Subscribed::Queue "mari.lundberg@someextremelylongname.se"
