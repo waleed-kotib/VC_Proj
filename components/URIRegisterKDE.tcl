@@ -18,14 +18,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: URIRegisterKDE.tcl,v 1.4 2007-09-12 13:37:55 matben Exp $
+# $Id: URIRegisterKDE.tcl,v 1.5 2007-11-17 07:40:52 matben Exp $
 
-namespace eval URIRegisterKDE { }
-
-proc URIRegisterKDE::Init { } {
-    global  this
+namespace eval URIRegisterKDE { 
     
-    if {![string equal $this(platform) "unix"]} {
+    if {![string equal $::this(platform) "unix"]} {
 	return
     }
     
@@ -34,9 +31,15 @@ proc URIRegisterKDE::Init { } {
     if {![file isdirectory $dir]} {
 	return
     }
+
+    component::define URIRegisterKDE "Adds XMPP uri parsing support in KDE"
+}
+
+proc URIRegisterKDE::Init {} {
+
     Register
     
-    component::register URIRegisterKDE "Adds XMPP uri parsing support in KDE"
+    component::register URIRegisterKDE
 }
 
 # ParseURI::RegisterKDE --

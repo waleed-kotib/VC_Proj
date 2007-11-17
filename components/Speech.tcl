@@ -17,24 +17,15 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Speech.tcl,v 1.16 2007-11-04 13:54:50 matben Exp $
+# $Id: Speech.tcl,v 1.17 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::Speech:: {}
-
-# Speech::Load --
-# 
-#       Tries to load the speech component.
-
-proc ::Speech::Load {} {
-    global  this
+namespace eval ::Speech {
     variable sprefs
-    
-    ::Debug 2 "::Speech::Load"
-    
+
     set sprefs(package) ""
     set sprefs(haveSpeech) 0
     
-    switch -- $this(platform) {
+    switch -- $::this(platform) {
 	macosx {
 	    if {[catch {package require TclSpeech}]} {
 		return
@@ -53,13 +44,24 @@ proc ::Speech::Load {} {
 	    return
 	}
     }
+
+    component::define Speech \
+      "Text-to-speech on Macs using TclSpeech and on Windows using MSSpeech"
+}
+
+# Speech::Load --
+# 
+#       Tries to load the speech component.
+
+proc ::Speech::Load {} {
+    
+    ::Debug 2 "::Speech::Load"    
     
     # Set up all hooks.
     Init
     
     # We should register ourselves.
-    component::register Speech \
-      "Text-to-speech on Macs using TclSpeech and on Windows using MSSpeech"
+    component::register Speech
 }
 
 proc ::Speech::Init {} {

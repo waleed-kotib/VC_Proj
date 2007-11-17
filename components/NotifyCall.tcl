@@ -18,14 +18,18 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
 
-namespace eval ::NotifyCall:: { }
+namespace eval ::NotifyCall { 
 
-proc ::NotifyCall::Init { } {
+    return
+    component::define NotifyCall  \
+      "Provides support for Incoming Calls Dialog"
+}
+
+proc ::NotifyCall::Init {} {
     
     return
     
-    component::register NotifyCall  \
-      "Provides support for Incoming Calls Dialog"
+    component::register NotifyCall
 
     ::hooks::register jivePhoneEvent		::NotifyCall::JivePhoneEventHook
     ::hooks::register IAXPhoneEvent		::NotifyCall::IAXPhoneEventHook

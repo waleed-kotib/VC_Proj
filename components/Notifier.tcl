@@ -19,24 +19,25 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Notifier.tcl,v 1.7 2007-11-04 13:54:50 matben Exp $
+# $Id: Notifier.tcl,v 1.8 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::Notifier:: {
-    
-}
-
-proc ::Notifier::Init {} {
-    global  this
+namespace eval ::Notifier {
     
     # Use this on windows only.
-    if {![string equal $this(platform) "windows"]} {
+    if {![string equal $::this(platform) "windows"]} {
 	return
     }
     if {[catch {package require notebox}]} {
 	return
     }
-    component::register Notifier  \
+    component::define Notifier  \
       "Provides a small event notifier window."
+}
+
+proc ::Notifier::Init {} {
+    global  this
+    
+    component::register Notifier
 
     # Add event hooks.
     ::hooks::register prefsInitHook         [namespace current]::InitPrefsHook

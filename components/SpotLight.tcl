@@ -17,59 +17,70 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: SpotLight.tcl,v 1.8 2007-11-04 13:54:50 matben Exp $
+# $Id: SpotLight.tcl,v 1.9 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::SpotLight:: { }
-
-proc ::SpotLight::Init { } {
-    global this
-    global tcl_platform
+namespace eval ::SpotLight:: { 
 
     # I switch off this since buggy!
     return
     
-    #---- Check support of Indexer into our Operating System -------
-    if {![string equal $this(platform) "macosx"]} {
-        if {![string equal $this(platform) "windows"]} {
-            #@@@ Support for Beagle in Linux coming...
-            return
-        } else {
-	    # Get Google Desktop Registry Entry
-	    if {[catch {package require registry}]} {
-		return
-            } else {
-                variable gDesktopURL
-                
-		# If Google Desktop is Not installed return
-		if {[catch {
-		    set gDesktopURL [registry get "HKEY_CURRENT_USER\\Software\\Google\\Google Desktop\\API" "search_url"]
-		}]} {
-		    return
-		}		
-                if {$gDesktopURL eq ""} {
-                    return
-                }
-            }
-        }
-    } else {
-	
-	# Check that we are running over a Tiger or greater version of OSX
-        set darwinVersion [string index $tcl_platform(osVersion) 0] 
-        if { $darwinVersion < 8 } {
-		return
-        } else {
-	    
-            # Load AppleScript support needed for launching SpotLight
-            if {[catch {package require Tclapplescript}]} {
-                return
-            }
-        }
+    if {[::SpotLight::Have]} {
+	component::define SpotLight "Launch SpotLight with incoming messages."
     }
+}
+
+proc ::SpotLight::Init {} {
+    global this
+    global tcl_platform
 
     # Add event hooks.
     ::hooks::register newChatMessageHook ::SpotLight::ChatMessageHook 1
 
-    component::register SpotLight {Launch SpotLight with incoming messages.}
+    component::register SpotLight
+}
+
+proc ::SpotLight::Have {} {
+    global this
+    global tcl_platform
+  
+    #---- Check support of Indexer into our Operating System -------
+    if {![string equal $this(platform) "macosx"]} {
+	if {![string equal $this(platform) "windows"]} {
+	    #@@@ Support for Beagle in Linux coming...
+	    return 0
+	} else {
+	    # Get Google Desktop Registry Entry
+	    if {[catch {package require registry}]} {
+		return 0
+	    } else {
+		variable gDesktopURL
+		
+		# If Google Desktop is Not installed return
+		if {[catch {
+		    set gDesktopURL [registry get "HKEY_CURRENT_USER\\Software\\Google\\Google Desktop\\API" "search_url"]
+		}]} {
+		    return 0
+		}		
+		if {$gDesktopURL eq ""} {
+		    return 0
+		}
+	    }
+	}
+    } else {
+	
+	# Check that we are running over a Tiger or greater version of OSX
+	set darwinVersion [string index $tcl_platform(osVersion) 0] 
+	if { $darwinVersion < 8 } {
+		return 0
+	} else {
+	    
+	    # Load AppleScript support needed for launching SpotLight
+	    if {[catch {package require Tclapplescript}]} {
+		return 0
+	    }
+	}
+    }
+    return 1
 }
 
 proc ::SpotLight::ChatMessageHook {xmldata} {

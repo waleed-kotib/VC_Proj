@@ -21,14 +21,22 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ImageMagic.tcl,v 1.13 2007-09-12 13:37:55 matben Exp $
+# $Id: ImageMagic.tcl,v 1.14 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::ImageMagic:: {
+namespace eval ::ImageMagic {
     
+    if {[string equal $::tcl_platform(platform) "unix"]} {
+	set importcmd [lindex [auto_execok import] 0]
+	if {[llength $importcmd]} {
+	    component::define ImageMagic  \
+	      "ImageMagic import command bindings for taking screenshots on X11"
+	}	
+    }
+
     variable imageType gif
 }
 
-proc ::ImageMagic::Init { } {
+proc ::ImageMagic::Init {} {
     global  tcl_platform
     variable imageType
     variable haveImageMagic
@@ -44,8 +52,7 @@ proc ::ImageMagic::Init { } {
     
     # Register a menu entry for this component.
     if {$haveImageMagic} {
-	component::register ImageMagic  \
-	  "ImageMagic import command bindings for taking screenshots on X11"
+	component::register ImageMagic
 	
 	# 'type' 'label' 'command' 'opts' {subspec}
 	# where subspec defines a cascade menu recursively

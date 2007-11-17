@@ -18,9 +18,18 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.26 2007-11-04 13:54:50 matben Exp $
+# $Id: Growl.tcl,v 1.27 2007-11-17 07:40:52 matben Exp $
 
 namespace eval ::Growl { 
+
+    if {[tk windowingsystem] ne "aqua"} {
+	return
+    }
+    if {[catch {package require growl}]} {
+	return
+    }
+    component::define Growl  \
+      "Provides support for Growl notifier on Mac OS X."
 
     # TODO
     #option add *growlImage            send     widgetDefault
@@ -30,14 +39,7 @@ proc ::Growl::Init {} {
     global  this    
     variable cociFile
     
-    if {[tk windowingsystem] ne "aqua"} {
-	return
-    }
-    if {[catch {package require growl}]} {
-	return
-    }
-    component::register Growl  \
-      "Provides support for Growl notifier on Mac OS X."
+    component::register Growl
     
     # There are some nice 64x64 error & info icons as well.
     set cociFile [file join $this(imagePath) Coccinella.png]

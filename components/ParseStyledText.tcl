@@ -18,14 +18,17 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ParseStyledText.tcl,v 1.7 2007-11-01 15:59:00 matben Exp $
+# $Id: ParseStyledText.tcl,v 1.8 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::ParseStyledText {}
+namespace eval ::ParseStyledText {
+
+    component::define ParseStyledText \
+      "Simplified text font style parsing: *bold*, /italic/, and _underline_."
+}
 
 proc ::ParseStyledText::Init {} {
     
-    component::register ParseStyledText \
-      "Simplified text font style parsing: *bold*, /italic/, and _underline_."
+    component::register ParseStyledText
 
     # Add event hooks.
     ::hooks::register textParseWordHook [namespace code ParseWordHook]

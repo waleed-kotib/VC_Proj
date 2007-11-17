@@ -17,10 +17,20 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: GMeeting.tcl,v 1.16 2007-08-24 13:33:13 matben Exp $
+# $Id: GMeeting.tcl,v 1.17 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::GMeeting:: {
+namespace eval ::GMeeting {
     
+    if {![string equal $::this(platform) "unix"]} {
+	 return
+     }
+     set cmd [lindex [auto_execok gnomemeeting] 0]
+     if {$cmd == {}} {
+	 return
+     }	
+
+     component::define GnomeMeeting  \
+      "Provides a method to launch Gnome Meeting"
 }
 
 proc ::GMeeting::Init { } {
@@ -42,8 +52,7 @@ proc ::GMeeting::Init { } {
 
     ::hooks::register jabberInitHook  ::GMeeting::JabberInitHook
     
-    component::register GnomeMeeting  \
-      "Provides a method to launch Gnome Meeting"
+    component::register GnomeMeeting
 }
 
 proc ::GMeeting::JabberInitHook {jlibname} {

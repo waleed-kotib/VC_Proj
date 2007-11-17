@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.168 2007-11-15 08:56:14 matben Exp $	
+# $Id: Coccinella.tcl,v 1.169 2007-11-17 07:40:52 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -217,6 +217,7 @@ set packages(uibase) {
 }
 set packages(application) {
     AMenu
+    Component
     Dialogs
     EditDialogs
     FactoryDefaults
@@ -276,8 +277,7 @@ FactoryDefaults
 
 # Components.
 ::Debug 2 "++> component::load"
-component::lappend_auto_path $this(componentPath)
-component::load
+::Component::Load
 
 # Set the user preferences from the preferences file.
 ::Splash::SetMsg "[mc splashprefs]..."

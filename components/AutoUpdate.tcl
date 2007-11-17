@@ -18,13 +18,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoUpdate.tcl,v 1.26 2007-10-08 12:09:17 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.27 2007-11-17 07:40:52 matben Exp $
 
 package require tinydom
 package require http 2.3
 
-namespace eval ::AutoUpdate:: {
+namespace eval ::AutoUpdate {
     
+    component::define AutoUpdate \
+      "Automatically checks for new version of this application."
+
     # Allow the update url to be set via the option database.
     set urlEN     "http://coccinella.sourceforge.net/updates/update_en.xml"
     set urlFormat "http://coccinella.sourceforge.net/updates/update_%s.xml"
@@ -49,8 +52,7 @@ proc ::AutoUpdate::Init {} {
     set menuDef {command  mUpdateCheck  {::AutoUpdate::Get -silent 0}  {}}
     ::JUI::RegisterMenuEntry info $menuDef
 
-    component::register AutoUpdate \
-      "Automatically checks for new version of this application."
+    component::register AutoUpdate
 }
 
 proc ::AutoUpdate::InitPrefsHook {} {

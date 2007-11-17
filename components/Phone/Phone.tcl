@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Phone.tcl,v 1.24 2007-09-12 13:37:55 matben Exp $
+# $Id: Phone.tcl,v 1.25 2007-11-17 07:40:52 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -51,6 +51,14 @@
 namespace eval ::Phone {
     variable phone
 
+    if {[catch {package require TPhone}]} {
+	return
+    }
+    if {[catch {package require NotifyCall}]} {
+	return
+    }
+    component::define Phone "Protocol abstraction for softphones"
+
     set phone(selected) ""
     set phone(previous) ""
 
@@ -60,14 +68,7 @@ namespace eval ::Phone {
 proc ::Phone::Init { } {
     variable scriptPath
 
-    if {[catch {package require TPhone}]} {
-	return
-    }
-    if {[catch {package require NotifyCall}]} {
-	return
-    }
-
-    component::register Phone "Protocol abstraction for softphones"
+    component::register Phone
     
     # This seems necessary since the 'package require' only searches two
     # directory levels?

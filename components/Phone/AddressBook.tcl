@@ -18,13 +18,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: AddressBook.tcl,v 1.11 2007-09-12 13:37:55 matben Exp $
+# $Id: AddressBook.tcl,v 1.12 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::AddressBook:: { }
+namespace eval ::AddressBook { 
 
-proc ::AddressBook::Init { } {
+    component::define AddressBook "Address book for softphones"
+}
+
+proc ::AddressBook::Init {} {
     
-    component::register AddressBook "Address book for softphones"
+    component::register AddressBook
         
     # Add event hooks.
     

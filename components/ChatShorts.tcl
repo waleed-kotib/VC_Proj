@@ -18,17 +18,23 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatShorts.tcl,v 1.1 2007-10-10 12:50:00 matben Exp $
+# $Id: ChatShorts.tcl,v 1.2 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::ChatShorts {}
+namespace eval ::ChatShorts {
+
+    # Crashes, see below.
+    return
+
+    component::define ChatShorts \
+      "Implements /clean, /retain commands for chats."
+}
 
 proc ::ChatShorts::Init {} {
     
     # Crashes, see below.
     return
     
-    component::register ChatShorts \
-      "Implements /clean, /retain commands for chats."
+    component::register ChatShorts
 
     # Add event hooks.
     ::hooks::register sendTextChatHook      [namespace code ChatTextHook]

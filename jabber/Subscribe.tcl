@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.61 2007-11-16 08:27:39 matben Exp $
+# $Id: Subscribe.tcl,v 1.62 2007-11-17 07:40:52 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -68,6 +68,9 @@ namespace eval ::Subscribe {
     # Shall we send a message to user when one of the auto dispatchers done.
     set ::config(subscribe,auto-accept-send-msg) 0
     set ::config(subscribe,auto-reject-send-msg) 0
+    
+    # Experimental:
+    set ::config(subscribe,exp-scrollframe) 0
     
     variable queue [list]
 }
@@ -885,7 +888,7 @@ proc ::SubscribeMulti::NewDlg {args} {
       -closecommand [namespace current]::CloseCmd \
       -usemacmainmenu 1 -class $argsA(-class)
     wm title $w [mc "Presence Subscription"]  
-    wm withdraw $w
+    #wm withdraw $w
   
     set jlib $jstate(jlib)
     
@@ -922,6 +925,7 @@ proc ::SubscribeMulti::NewDlg {args} {
     pack $wbox.msg -side top -anchor w
 
     if {$state(auto) eq "accept"} {
+	
 	set secs [expr {$config(subscribe,accept-after)/1000}]
 	set msg [mc jamesssubscautoacc $secs]
 	ttk::label $wbox.accept -style Small.TLabel \
@@ -939,7 +943,9 @@ proc ::SubscribeMulti::NewDlg {args} {
 	
 	set secs [expr {$config(subscribe,accept-after)/1000}]
 	set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
+
     } elseif {$state(auto) eq "reject"} {
+
 	set secs [expr {$config(subscribe,reject-after)/1000}]
 	set msg [mc jamesssubscautorej $secs]
 	ttk::label $wbox.reject -style Small.TLabel \
@@ -961,15 +967,14 @@ proc ::SubscribeMulti::NewDlg {args} {
 	set state(timer-id) [after 1000 [namespace code [list RejectTimer $w $secs]]]
     }
 
-    set useScrolls 0
-    if {!$useScrolls} {
+    if {!$config(subscribe,exp-scrollframe)} {
 	set wframe $wbox.f
 	ttk::frame $wframe
 	pack $wframe -side top -anchor w -fill both -expand 1    
     } else {
-	::UI::ScrollFrame $wbox.f
-	pack $wbox.f -side top -anchor w -fill both -expand 1
-	set wframe [::UI::ScrollFrameInterior $wbox.f]
+ 	::UI::ScrollFrame $wbox.f -padding {0 0 6 0}
+ 	pack $wbox.f -side top -anchor w -fill both -expand 1
+ 	set wframe [::UI::ScrollFrameInterior $wbox.f]
     }
     
     ttk::label $wframe.allow -text [mc Allow]
@@ -1006,20 +1011,17 @@ proc ::SubscribeMulti::NewDlg {args} {
     lappend wkeepL $frbot.btok
     set state(wkeepL) $wkeepL
     
-    set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsubsc)]]
-    if {$nwin == 1} {
-	::UI::SetWindowPosition $w $wDlgs(jsubsc)
+    #wm deiconify $w
+    if {!$config(subscribe,exp-scrollframe)} {
+	set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsubsc)]]
+	if {$nwin == 1} {
+	    ::UI::SetWindowPosition $w $wDlgs(jsubsc)
+	}
     }
-    wm deiconify $w
-
     if {$state(auto) eq "accept"} {
 	SetAutoState $w on
     } elseif {$state(auto) eq "reject"} {
 	SetAutoState $w on
-    }
-
-    if {$useScrolls} {
-	::UI::QuirkSize $w
     }
     return $w
 }

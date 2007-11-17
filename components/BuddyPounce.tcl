@@ -19,15 +19,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.26 2007-11-04 13:54:50 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.27 2007-11-17 07:40:52 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
 #     target:   is either a jid, a roster group, or 'any'  
 #     action:   how to respond, popup, sound, reply etc.
 
-namespace eval ::BuddyPounce:: {
+namespace eval ::BuddyPounce {
     
+    component::define BuddyPounce "Set actions for contact events"
 }
 
 proc ::BuddyPounce::Init {} {
@@ -54,7 +55,7 @@ proc ::BuddyPounce::Init {} {
     }
     ::Roster::RegisterPopupEntry $menuDef $menuType
     
-    component::register BuddyPounce "Set actions for contact events"
+    component::register BuddyPounce
         
     # Audio formats.
     variable audioSuffixes [list]

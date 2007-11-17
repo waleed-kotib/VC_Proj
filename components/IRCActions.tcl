@@ -23,18 +23,20 @@
 #            2) Configurable nick alert
 #            3) Implement -command for error notice
 #  
-# $Id: IRCActions.tcl,v 1.7 2007-11-04 13:54:50 matben Exp $
+# $Id: IRCActions.tcl,v 1.8 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::IRCActions:: {
+namespace eval ::IRCActions {
     
+    component::define IRCActions \
+      "IRC style actions for chatrooms: /join. /topic, /invite, /nick, /me, amongst others"
+
     option add *parseMeCDataOpts      {-foreground blue}     widgetDefault
     option add *parseNickCDataOpts    {-foreground blue}     widgetDefault
 }
 
-proc ::IRCActions::Init { } {
+proc ::IRCActions::Init {} {
     
-    component::register IRCActions \
-      "IRC style actions for chatrooms: /join. /topic, /invite, /nick, /me, amongst others"
+    component::register IRCActions
 
     # Add event hooks.
     ::hooks::register sendTextGroupChatHook [namespace current]::TextGroupChatHook

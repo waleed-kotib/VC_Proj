@@ -17,10 +17,12 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: MeBeam.tcl,v 1.4 2007-11-11 15:56:33 matben Exp $
+# $Id: MeBeam.tcl,v 1.5 2007-11-17 07:40:52 matben Exp $
 
 namespace eval ::MeBeam {
     
+    component::define MeBeam "MeBeam web based video conferencing"
+
     # Where shall the MeBeam menu be?
     set ::config(mebeam,menu-action) 0
     set ::config(mebeam,menu-roster) 1
@@ -44,7 +46,7 @@ proc ::MeBeam::Init {} {
     
     variable url "http://www.mebeam.com/coccinella.php?ccn_"
     
-    component::register MeBeam "MeBeam web based video conferencing"
+    component::register MeBeam
 }
 
 proc ::MeBeam::RosterCmd {jid} {

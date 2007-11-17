@@ -18,16 +18,19 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: Geolocation.tcl,v 1.12 2007-09-12 13:37:55 matben Exp $
+#  $Id: Geolocation.tcl,v 1.13 2007-11-17 07:40:52 matben Exp $
 
 package require jlib::pep
 
-namespace eval ::Geolocation:: { }
+namespace eval ::Geolocation {
 
-proc ::Geolocation::Init { } {
-
-    component::register Geolocation \
+    component::define Geolocation \
       "Communicate information about the current geographical location"
+}
+
+proc ::Geolocation::Init {} {
+
+    component::register Geolocation
 
     # Add event hooks.
     ::hooks::register jabberInitHook        ::Geolocation::JabberInitHook

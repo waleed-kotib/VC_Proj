@@ -19,19 +19,25 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# $Id: URIRegistry.tcl,v 1.9 2007-10-05 07:00:14 matben Exp $
+# $Id: URIRegistry.tcl,v 1.10 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::URIRegistry {}
+namespace eval ::URIRegistry {
 
-proc ::URIRegistry::Init {} {
-    global  tcl_platform this
-
-    if {![string equal $tcl_platform(platform) "windows"]} {
+    if {![string equal $::tcl_platform(platform) "windows"]} {
 	return
     }
     if {[catch {package require registry}]} {
 	return
     }
+
+    component::define URIRegistry  \
+      {Automatically adds an registry entry so that this program is\
+      launched when clicking an uri <a href='xmpp:jid[?query]'/>.}
+}
+
+proc ::URIRegistry::Init {} {
+    global  tcl_platform this
+
     ::Debug 2 "::URIRegistry::Init"
     
     # Find the exe we are running. Starkits?
@@ -48,9 +54,7 @@ proc ::URIRegistry::Init {} {
 	    return
 	}
     }
-    component::register URIRegistry  \
-      {Automatically adds an registry entry so that this program is\
-      launched when clicking an uri <a href='xmpp:jid[?query]'/>.}
+    component::register URIRegistry
 }
 
 proc ::URIRegistry::SetProtocol {name cmd} {

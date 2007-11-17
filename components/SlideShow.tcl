@@ -17,12 +17,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#       $Id: SlideShow.tcl,v 1.26 2007-09-12 13:37:55 matben Exp $
+#       $Id: SlideShow.tcl,v 1.27 2007-11-17 07:40:52 matben Exp $
 
 package require undo
 
-namespace eval ::SlideShow:: {
+namespace eval ::SlideShow {
     
+    if {![::Jabber::HaveWhiteboard]} {
+	return
+    }
+    component::define SlideShow "Whiteboard based slide show"
 }
 
 proc ::SlideShow::Load { } {
@@ -59,7 +63,7 @@ proc ::SlideShow::Load { } {
     
     ::WB::RegisterMenuEntry file $menuspec
     
-    component::register SlideShow "Whiteboard based slide show"
+    component::register SlideShow
         
     # PNG
     set priv(imnext) [image create photo -data {

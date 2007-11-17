@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.30 2007-11-04 13:54:50 matben Exp $
+# $Id: JivePhone.tcl,v 1.31 2007-11-17 07:40:52 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -33,12 +33,15 @@
 #    I could imagine a dialer as a tab page, but then we need nice buttons.
 #
 
-namespace eval ::JivePhone:: { }
+namespace eval ::JivePhone { 
 
-proc ::JivePhone::Init { } {
-    
-    component::register JivePhone  \
+    component::define JivePhone  \
       "VoIP notifications from the Openfire plugin Asterisk-IM"
+}
+
+proc ::JivePhone::Init {} {
+    
+    component::register JivePhone
         
     # Add event hooks.
     ::hooks::register presenceHook          ::JivePhone::PresenceHook
