@@ -18,17 +18,20 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.10 2007-09-26 13:46:41 matben Exp $
+#  $Id: UserActivity.tcl,v 1.11 2007-11-17 07:40:52 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
 
-namespace eval ::UserActivity {}
+namespace eval ::UserActivity {
+
+    component::define UserActivity \
+      "Communicate information about user activities"
+}
 
 proc ::UserActivity::Init {} {
 
-    component::register UserActivity \
-      "Communicate information about user activities"
+    component::register UserActivity
 
     ::Debug 2 "::UserActivity::Init"
 

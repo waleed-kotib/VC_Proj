@@ -17,16 +17,19 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.34 2007-09-12 13:37:55 matben Exp $
+#  $Id: Mood.tcl,v 1.35 2007-11-17 07:40:52 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
 
-namespace eval ::Mood:: { }
+namespace eval ::Mood {
 
-proc ::Mood::Init { } {
+    component::define Mood "Communicate information about user moods"
+}
 
-    component::register Mood "Communicate information about user moods"
+proc ::Mood::Init {} {
+
+    component::register Mood
 
     ::Debug 2 "::Mood::Init"
 

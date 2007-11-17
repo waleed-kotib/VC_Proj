@@ -3,8 +3,10 @@
 #       Demo of some of the functionality for components.
 #       This is just a first sketch.
 
-namespace eval ::ComponentExample:: {
+namespace eval ::ComponentExample {
     
+    component::define ComponentExample  \
+      "This is justa dummy example of the component mechanism."
 }
 
 proc ::ComponentExample::Init { } {
@@ -25,8 +27,7 @@ proc ::ComponentExample::Init { } {
     
     ::hooks::register jabberInitHook  ::ComponentExample::JabberInitHook
 
-    component::register ComponentExample  \
-      "This is justa dummy example of the component mechanism."
+    component::register ComponentExample
 }
 
 proc ::ComponentExample::JabberInitHook {jlibname} {

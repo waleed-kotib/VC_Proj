@@ -17,12 +17,10 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: WhiteboardMK.tcl,v 1.4 2007-07-18 09:40:10 matben Exp $
+# $Id: WhiteboardMK.tcl,v 1.5 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::WhiteboardMK {}
+namespace eval ::WhiteboardMK {
 
-proc ::WhiteboardMK::Init { } {
-    
     if {![::Jabber::HaveWhiteboard]} {
 	return
     }
@@ -32,8 +30,14 @@ proc ::WhiteboardMK::Init { } {
     }]} {
 	return
     }
-    component::register WhiteboardMK  \
+
+    component::define WhiteboardMK  \
       "Provides a metakit database to save complete whiteboards in a single file."
+}
+
+proc ::WhiteboardMK::Init { } {
+    
+    component::register WhiteboardMK
     
     ::CanvasFile::RegisterSaveFormat WhiteboardMK Metakit .cmk  \
       ::WhiteboardMK::Save

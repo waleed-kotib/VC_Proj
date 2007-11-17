@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Component.tcl,v 1.1 2007-11-16 14:52:14 matben Exp $
+# $Id: Component.tcl,v 1.2 2007-11-17 07:40:52 matben Exp $
    
 package require component
 
@@ -37,7 +37,6 @@ proc ::Component::Load {} {
     # Since we are so early in the launch process we do it this way.
     set offL [::PrefUtils::GetValue ::Jabber::jprefs(comp,off)  jprefs_comp_off {}]
     set jprefs(comp,off) $offL
-    #puts "+++++++++++++++::Component::Load offL=$offL"
     
     component::exclude $offL
     component::lappend_auto_path $this(componentPath)
@@ -113,7 +112,6 @@ proc ::Component::Dlg {} {
     checkbutton $wtxt._tmp
     set cbwidth [winfo reqwidth $wtxt._tmp]
     destroy $wtxt._tmp
-    puts "cbwidth=$cbwidth"
     set lm [expr {$cbwidth + 10}]
 
     $wtxt tag configure ttitle -foreground black \
@@ -125,10 +123,7 @@ proc ::Component::Dlg {} {
     foreach comp $compList {
 	set name [lindex $comp 0]
 	set text [lindex $comp 1]
-	set state($name) 1
-	if {[lsearch $jprefs(comp,off) $name] >= 0} {
-	    set state($name) 0
-	}
+	set state($name) [component::exists $name]
 	
 	checkbutton $wtxt.$n -variable [namespace current]::state($name) \
 	  -background white

@@ -4,36 +4,75 @@
 #  
 #  This file is distributed under BSD style license.
 #       
-# $Id: component.tcl,v 1.8 2007-07-19 06:28:11 matben Exp $
+# $Id: component.tcl,v 1.9 2007-11-17 07:40:52 matben Exp $
 
 package provide component 1.0
-
 
 namespace eval component { 
 
     # Search path for components, similar to ::auto_path.
-    variable auto_path {}
+    variable auto_path [list]
+
+    variable priv
+    set priv(offL) [list]
 }
 
 proc component::lappend_auto_path {path} {
-    
     variable auto_path
     
     lappend auto_path $path
 }
 
-proc component::attempt {name fileName initProc} {
+# component::exclude --
+# 
+#       Set list of component names we shall not attempt to load.
+
+proc component::exclude {offL} {
     variable priv
     
-    uplevel #0 [list source $fileName]
-    uplevel #0 $initProc
+    set priv(offL) $offL    
 }
 
-proc component::register {name str} {
+# component::attempt --
+# 
+#       Used in cmpntIndex files.
+
+proc component::attempt {name fileName initProc} {
+    variable priv
+
+    # This normally calls 'component::define'.
+    uplevel #0 [list source $fileName]
+
+    if {[info exists priv($name,name)]} {
+	if {[lsearch $priv(offL) $name] < 0} {
+	
+	    # While 'component::register' may get called here.
+	    uplevel #0 $initProc
+	}
+    }
+}
+
+# component::define --
+# 
+#       Each component defines itself with name and string.
+#       It doesn't load anything.
+
+proc component::define {name str} {
     variable priv
     
     set priv($name,name) $name
     set priv($name,str)  $str
+}
+
+# component::register --
+# 
+#       Each component register with this function which means it is
+#       being loaded.
+
+proc component::register {name} {
+    variable priv
+    
+    set priv($name,reg) 1
 }
 
 proc component::unregister {name} {
@@ -43,10 +82,10 @@ proc component::unregister {name} {
     array unset priv $name,*
 }
 
-proc component::getall { } {
+proc component::getall {} {
     variable priv
 
-    set ans {}
+    set ans [list]
     foreach {key value} [array get priv *,name] {
 	set name $priv($key)
 	lappend ans [list $name $priv($name,str)]
@@ -61,8 +100,7 @@ proc component::getall { } {
 #       
 #       component::attempt MyCool [file join $dir mycool.tcl] MyCoolInitProc
 
-proc component::load { } {
-    
+proc component::load {} {
     variable auto_path
     
     foreach dir $auto_path {
@@ -89,7 +127,7 @@ proc component::loaddir {dir} {
 proc component::exists {name} {
     variable priv
     
-    return [info exists priv($name,name)]
+    return [info exists priv($name,reg)]
 }
 
 #-------------------------------------------------------------------------------

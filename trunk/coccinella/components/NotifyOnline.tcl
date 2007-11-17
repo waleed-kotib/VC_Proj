@@ -18,12 +18,17 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyOnline.tcl,v 1.3 2007-07-18 09:40:09 matben Exp $
+# $Id: NotifyOnline.tcl,v 1.4 2007-11-17 07:40:52 matben Exp $
 
 package require http
 
-namespace eval ::NotifyOnline:: {
+namespace eval ::NotifyOnline {
     
+    return
+    
+    component::define NotifyOnline  \
+      "Does http actions as a response to login/logout."
+
     # So far only logout (and quit).
     set url "http://www.evaal.com/index.php"
 
@@ -31,9 +36,11 @@ namespace eval ::NotifyOnline:: {
     set ::config(notifyonline,url) $url
 }
 
-proc ::NotifyOnline::Init { } {
+proc ::NotifyOnline::Init {} {
 
     ::Debug 2 "::NotifyOnline::Init"
+    
+    component::register NotifyOnline
 	
     # Let any custom config override component registration.
     ::hooks::register initHook ::NotifyOnline::InitHook
@@ -43,8 +50,7 @@ proc ::NotifyOnline::InitHook { } {
     global  config
     
     if {$config(notifyonline,do)} {
-	component::register NotifyOnline  \
-	  "Does http actions as a response to login/logout."
+	component::register NotifyOnline
 	
 	::hooks::register loginHook        ::NotifyOnline::LoginHook
 	::hooks::register logoutHook       ::NotifyOnline::LogoutHook

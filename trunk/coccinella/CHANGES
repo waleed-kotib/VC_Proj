@@ -16,6 +16,7 @@ Coccinella-0.96.4 (2007????)
  o spell checking
  o secure (sasl) indicator
  o major rework of subscription dialogs
+ o improved component/plugin control
 
 
 Coccinella-0.96.2 (20070919)

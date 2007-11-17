@@ -18,10 +18,20 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.40 2007-11-04 13:54:50 matben Exp $
+# $Id: Sounds.tcl,v 1.41 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::Sounds:: {
+namespace eval ::Sounds {
 	
+    set QuickTimeTcl [::Media::HavePackage QuickTimeTcl]
+    set snack        [::Media::HavePackage snack]
+
+    if {!$QuickTimeTcl && !$snack} {
+	return
+    }
+    
+    component::define Sounds "Provides alert sounds through QuickTime\
+      or the Snack audio package."
+
     variable nameToText 
     array set nameToText {
 	online          "Contact is online"
@@ -74,8 +84,7 @@ proc ::Sounds::Load {} {
     set priv(canPlay) 1
    
     # We should register ourselves.
-    component::register Sounds "Provides alert sounds through QuickTime\
-      or the Snack audio package."
+    component::register Sounds
 
     # Make sure we get called when certain events happen.
     InitEventHooks

@@ -18,9 +18,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: XMLConsole.tcl,v 1.4 2007-10-22 11:51:33 matben Exp $
+# $Id: XMLConsole.tcl,v 1.5 2007-11-17 07:40:52 matben Exp $
 
 namespace eval ::XMLConsole { 
+
+    component::define XMLConsole "Simple XML console <$this(modkey)-Shift-D>"
 
     # TODO
     option add *XMLConsole*Text.tabsX                    4        widgetDefault
@@ -33,7 +35,7 @@ namespace eval ::XMLConsole {
 proc ::XMLConsole::Init {} {
     global  this
     
-    component::register XMLConsole "Simple XML console <$this(modkey)-Shift-D>"
+    component::register XMLConsole 
     
     ::hooks::register prefsInitHook  [namespace code InitPrefsHook]
     ::hooks::register loginHook      [namespace code LoginHook]

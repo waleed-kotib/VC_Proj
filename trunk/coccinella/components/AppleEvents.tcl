@@ -18,21 +18,22 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# $Id: AppleEvents.tcl,v 1.8 2007-07-18 09:40:08 matben Exp $
+# $Id: AppleEvents.tcl,v 1.9 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::AppleEvents:: { }
-
-proc ::AppleEvents::Init { } {
-    global  this
-
-    if {![string equal $this(platform) "macosx"]} {
+namespace eval ::AppleEvents {
+    
+    if {![string equal $::this(platform) "macosx"]} {
 	return
     }
     if {[catch {package require tclAE}]} {
 	return
     }
-    ::Debug 2 "::AppleEvents::Init"
-    
+    component::define AppleEvents "Apple event handlers for Launch Services."
+}
+
+proc ::AppleEvents::Init {} {
+
+    ::Debug 2 "::AppleEvents::Init"    
  
     #tclAE::installEventHandler aevt GURL ::AppleEvents::HandleGURL
 
@@ -47,8 +48,7 @@ proc ::AppleEvents::Init { } {
     # test...
     tclAE::installEventHandler WWW! OURL ::AppleEvents::HandleOURL
     
-    component::register AppleEvents  \
-      {Apple event handlers for Launch Services.}
+    component::register AppleEvents
 }
 
 proc ::AppleEvents::HandleOURL {theAppleEvent theReplyAE} {

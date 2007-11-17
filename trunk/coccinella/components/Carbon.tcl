@@ -17,11 +17,20 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.14 2007-11-04 13:54:50 matben Exp $
+# $Id: Carbon.tcl,v 1.15 2007-11-17 07:40:52 matben Exp $
 # 
 # @@@ Move the sleep stuff to something more generic.
 
 namespace eval ::Carbon { 
+
+    if {[tk windowingsystem] ne "aqua"} {
+	return
+    }
+    if {[catch {package require carbon}]} {
+	return
+    }
+    component::define Carbon  \
+      "Provides Mac OS X specific support such as various dock features."
 
     # Keep track of number of messages we receive while in the background.
     variable nHiddenMsgs 0
@@ -29,14 +38,7 @@ namespace eval ::Carbon {
 
 proc ::Carbon::Init {} {
     
-    if {[tk windowingsystem] ne "aqua"} {
-	return
-    }
-    if {[catch {package require carbon}]} {
-	return
-    }
-    component::register Carbon  \
-      "Provides Mac OS X specific support such as various dock features."
+    component::register Carbon
     
     ::carbon::sleep add ::Carbon::Sleep
 

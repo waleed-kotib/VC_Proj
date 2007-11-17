@@ -18,16 +18,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Spell.tcl,v 1.8 2007-11-06 15:01:23 matben Exp $
+# $Id: Spell.tcl,v 1.9 2007-11-17 07:40:52 matben Exp $
 
 package require spell
 
-namespace eval ::Spell {}
+namespace eval ::Spell {
 
-proc ::Spell::Init {} {
-    global  tcl_platform this
-    
-    if {$tcl_platform(platform) eq "windows"} {
+    if {$::tcl_platform(platform) eq "windows"} {
 	set programs {C:\Program}
 	if {[info exists ::env(ProgramFiles)]} {
 	    set programs $::env(ProgramFiles)
@@ -37,10 +34,19 @@ proc ::Spell::Init {} {
     if {![spell::have]} {
 	return
     }
+
+    component::define Spell \
+      "Provides an interface to the aspell and ispell spellers."
+}
+
+proc ::Spell::Init {} {
+    
+    if {![spell::have]} {
+	return
+    }
     set speller [spell::speller]
     
-    component::register Spell \
-      "Provides an interface to the aspell and ispell spellers."
+    component::register Spell
 
     set menuDef {checkbutton mCheckSpell      {::Spell::OnMenu}  {} \
       {-variable ::Spell::state(on)}}

@@ -17,12 +17,15 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: MailtoURI.tcl,v 1.8 2007-10-13 12:58:20 matben Exp $
+# $Id: MailtoURI.tcl,v 1.9 2007-11-17 07:40:52 matben Exp $
 
 package require uri
 package require uriencode
 
-namespace eval ::MailtoURI {}
+namespace eval ::MailtoURI {
+
+    component::define MailtoURI "Parses in-text mailto: URIs"
+}
 
 proc ::MailtoURI::Init {} {
 
@@ -30,7 +33,7 @@ proc ::MailtoURI::Init {} {
     variable mailtoRE $::uri::mailto::url
     
     ::Text::RegisterURI $mailtoRE ::MailtoURI::TextCmd
-    component::register MaitoURI "Parses in-text mailto: URIs"
+    component::register MailtoURI
 }
 
 proc ::MailtoURI::TextCmd {uri} {

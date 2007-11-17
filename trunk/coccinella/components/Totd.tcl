@@ -4,16 +4,17 @@
 
 namespace eval ::Totd {
     
+    if {$::this(vers,full) eq "0.96.4"} {
+	return
+    }
+    component::define Totd "Useful tips"
+
     option add *Totd.icon       coci-es-shadow-128      widgetDefault
     option add *Totd*Text.font  CociDefaultFont         50
 }
 
 proc ::Totd::Init {} {
-    
-    if {$::this(vers,full) eq "0.96.4"} {
-	return
-    }
-    
+        
     set mDef {
 	command  mTotd...  ::Totd::Build  {} {}
     }
@@ -34,7 +35,7 @@ proc ::Totd::Init {} {
 	uplevel #0 [list ::msgcat::mcload $msgdir]
     }
 
-    component::register Totd "Useful tips"
+    component::register Totd
 }
 
 proc ::Totd::InitPrefsHook {} {

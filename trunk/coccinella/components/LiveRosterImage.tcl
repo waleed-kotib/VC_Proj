@@ -17,19 +17,22 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: LiveRosterImage.tcl,v 1.2 2007-09-05 07:44:41 matben Exp $
+#  $Id: LiveRosterImage.tcl,v 1.3 2007-11-17 07:40:52 matben Exp $
 
-namespace eval ::LiveRosterImage {}
+namespace eval ::LiveRosterImage {
 
-proc ::LiveRosterImage::Init {} {
-    
-    if {[catch {package require tkpath 0.2.6}]} {
-	return
-    }
     if {[tk windowingsystem] ne "aqua"} {
 	return
     }
-    component::register LiveRosterImage "Draw an overlay to the roster background image"
+    if {[catch {package require tkpath 0.2.6}]} {
+	return
+    }
+    component::define LiveRosterImage "Draw an overlay to the roster background image"
+}
+
+proc ::LiveRosterImage::Init {} {
+    
+    component::register LiveRosterImage
 
     # Add event hooks.
     ::hooks::register setPresenceHook       [namespace code PresenceHook]

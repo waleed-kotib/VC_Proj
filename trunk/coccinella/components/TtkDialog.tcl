@@ -17,14 +17,9 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: TtkDialog.tcl,v 1.6 2007-09-12 13:37:55 matben Exp $
+#  $Id: TtkDialog.tcl,v 1.7 2007-11-17 07:40:52 matben Exp $
 
 namespace eval ::TtkDialog {
-    variable scriptDir [file dirname [info script]]
-}
-
-proc ::TtkDialog::Init { } {
-    variable scriptDir
     
     # X11 only!
     if {[tk windowingsystem] ne "x11"} {
@@ -33,12 +28,21 @@ proc ::TtkDialog::Init { } {
     if {[catch {package require ui::dialog}]} {
 	return
     }
+
+    variable scriptDir [file dirname [info script]]
     set fsdialog [file join $scriptDir fsdialog.tcl]
     if {![file exists $fsdialog]} {
 	return
     }
+    component::define TtkDialog "Userfriendly file selection dialogs"
+
+}
+
+proc ::TtkDialog::Init { } {
+    variable scriptDir
+    
     uplevel #0 [list source $fsdialog]
-    component::register TtkDialog "Userfriendly file selection dialogs"
+    component::register TtkDialog
 
     interp alias {} tk_getOpenFile     {} ttk::getOpenFile
     interp alias {} tk_getSaveFile     {} ttk::getSaveFile

@@ -24,15 +24,10 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Iax.tcl,v 1.22 2007-07-18 09:40:10 matben Exp $
+# $Id: Iax.tcl,v 1.23 2007-11-17 07:40:52 matben Exp $
 
 namespace eval ::Iax {
 
-    variable scriptPath [file dirname [info script]]
-}
-
-proc ::Iax::Init { } {
-    
     if {![component::exists Phone]} {
 	return
     }
@@ -45,7 +40,14 @@ proc ::Iax::Init { } {
     if {[catch {package require JingleIax}]} {
 	return
     }
-    component::register IAX "Provides the iax client softphone."
+    component::define IAX "Provides the iax client softphone."
+
+    variable scriptPath [file dirname [info script]]
+}
+
+proc ::Iax::Init { } {
+    
+    component::register IAX
 
     ::Phone::RegisterPhone iax "IAX Phone"  \
       ::Iax::InitProc ::Iax::CmdProc ::Iax::DeleteProc

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.225 2007-11-10 15:44:59 matben Exp $
+# $Id: JUI.tcl,v 1.226 2007-11-17 07:40:52 matben Exp $
 
 package provide JUI 1.0
 
@@ -185,7 +185,7 @@ proc ::JUI::Init {} {
     }
     
     set mDefsInfo {    
-	{command     mPlugins       {::Dialogs::InfoComponents}     {}}
+	{command     mPlugins       {::Component::Dlg}              {}}
 	{checkbutton mInbox...      {::MailBox::OnMenu}               I \
 	  {-variable ::JUI::state(mailbox,visible)}}
 	{cascade     mFontSize      {}                              {} {} {
