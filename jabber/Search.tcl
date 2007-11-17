@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.39 2007-10-12 12:02:16 matben Exp $
+# $Id: Search.tcl,v 1.40 2007-11-17 14:15:05 matben Exp $
 
 package provide Search 1.0
 
@@ -176,8 +176,10 @@ proc ::Search::Build {args} {
     }
     
     set wscrollframe $wleft.frsc
-    ::UI::ScrollFrame $wscrollframe -padding {8 12} -bd 1 -relief sunken \
-      -propagate 0 -width $wraplength
+     ::UI::ScrollFrame $wscrollframe -padding {8 12} -bd 1 -relief sunken \
+       -propagate 0 -width $wraplength
+#     ::UI::ScrollFrame $wscrollframe -padding {8 12} -bd 1 -relief sunken
+
     pack $wscrollframe -fill both -expand 1 -pady 4
 
     
@@ -240,6 +242,8 @@ proc ::Search::Build {args} {
     }
     bind $w <Destroy> \
       +[subst { if {"%W" eq "$w"} { [namespace code [list Free %W]] } }]
+    
+    return $w
 }
 
 proc ::Search::TableCmd {w x y} {

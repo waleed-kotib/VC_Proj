@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.10 2007-11-10 15:44:59 matben Exp $
+# $Id: ChatTheme.tcl,v 1.11 2007-11-17 14:15:05 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -509,7 +509,7 @@ proc ::ChatTheme::ImageCmd {token url} {
 #       It will be inserted into the main message block. The HTML template 
 #       should contain the bare minimum to display a message. 
 
-proc ::ChatTheme::Incoming {token xmldata secs} {
+proc ::ChatTheme::Incoming {token xmldata secs historyB} {
     variable content
 
     set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
@@ -534,7 +534,7 @@ proc ::ChatTheme::Incoming {token xmldata secs} {
     }
 }
 
-proc ::ChatTheme::Outgoing {token xmldata secs} {
+proc ::ChatTheme::Outgoing {token xmldata secs historyB} {
     variable content
     
     set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.239 2007-11-12 14:04:49 matben Exp $
+# $Id: Chat.tcl,v 1.240 2007-11-17 14:15:05 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -677,7 +677,7 @@ proc ::Chat::GotMsg {xmldata} {
 	$chatstate(wtext) mark set insert end
     }
     
-    Insert $chattoken $xmldata $secs 1
+    Insert $chattoken $xmldata $secs 1 0
         
     if {$body ne ""} {
 
@@ -737,31 +737,32 @@ proc ::Chat::GotNormalMsg {xmldata uuid} {
 #       chattoken
 #       xmldata
 #       secs
-#       inB       is this an incoming message? Boolean.
+#       inB       (boolean) is this an incoming message?
+#       historyB  (boolean) is this a history message?
 
-proc ::Chat::Insert {chattoken xmldata secs inB} {
+proc ::Chat::Insert {chattoken xmldata secs inB historyB} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
     if {$chatstate(themed)} {
-	InsertMessageTheme $chattoken $xmldata $secs $inB
+	InsertMessageTheme $chattoken $xmldata $secs $inB $historyB
     } else {
-	InsertMessageText $chattoken $xmldata $secs $inB
+	InsertMessageText $chattoken $xmldata $secs $inB $historyB
     }
 }
 
-proc ::Chat::InsertMessageTheme {chattoken xmldata secs inB} {
+proc ::Chat::InsertMessageTheme {chattoken xmldata secs inB historyB} {
 
     set tag [wrapper::gettag $xmldata]
     if {$tag eq "message"} {
 	if {$inB} {
-	    ::ChatTheme::Incoming $chattoken $xmldata $secs
+	    ::ChatTheme::Incoming $chattoken $xmldata $secs $historyB
 	} else {
-	    ::ChatTheme::Outgoing $chattoken $xmldata $secs	    
+	    ::ChatTheme::Outgoing $chattoken $xmldata $secs $historyB    
 	}
     } else {
 	# @@@ Not sure how own presence changes are handled.
-	::ChatTheme::Status $chattoken $xmldata $secs		
+	::ChatTheme::Status $chattoken $xmldata $secs	
     }
 }
 
@@ -770,7 +771,7 @@ proc ::Chat::InsertMessageTheme {chattoken xmldata secs inB} {
 #       Takes care of inserting both message and presence stanzas using
 #       the text widget.
 
-proc ::Chat::InsertMessageText {chattoken xmldata secs inB} {
+proc ::Chat::InsertMessageText {chattoken xmldata secs inB historyB} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
@@ -804,17 +805,20 @@ proc ::Chat::InsertMessageText {chattoken xmldata secs inB} {
 	    set haveSys 1
 	}
     }    
-    
-    # Is this a historic stanza?
-    set htag ""
-    if {[clock seconds] > [expr {$secs + 2}]} {
+    if {$historyB} {
 	set htag "-history"
+	set ranges [$wtext tag ranges history]
+	
+    } else {
+	set htag ""
     }
     
     # Both subject and presence coded as 'sys'. Good/bad?
     if {$haveSys} {
 	set spec sys
-
+	if {$historyB} {
+	    lappend spec history
+	}
 	set syspretags [concat syspre$htag $spec]
 	set systxttags [concat systext$htag $spec]
 
@@ -829,12 +833,17 @@ proc ::Chat::InsertMessageText {chattoken xmldata secs inB} {
 	if {[llength $bodyE]} {
 	    
 	    # The text tags.
+	    if {$historyB} {
+		set spec history
+	    } else {
+		set spec ""
+	    }
 	    if {$inB} {
-		set spec me
+		lappend spec me
 		set pretags [concat mepre$htag $spec]
 		set txttags [concat metext$htag $spec]
 	    } else {
-		set spec you
+		lappend spec you
 		set pretags [concat youpre$htag $spec]
 		set txttags [concat youtext$htag $spec]
 	    }
@@ -1095,19 +1104,18 @@ proc ::Chat::InsertHistoryXML {chattoken} {
     
     foreach itemE $itemL {
 	set itemTag [tinydom::tagname $itemE]	
-	if {($itemTag ne "send") && ($itemTag ne "recv")} {
+	if {$itemTag eq "send"} {
+	    set inB 0
+	} elseif {$itemTag eq "recv"} {
+	    set inB 1
+	} else {
 	    continue
 	}
 	set time [tinydom::getattribute $itemE time]
 	set secs [clock scan $time]
 
-	if {$itemTag eq "send"} {
-	    set inB 0
-	} elseif {$itemTag eq "recv"} {
-	    set inB 1
-	}
 	set xmppE [lindex [tinydom::children $itemE] 0]
-	Insert $chattoken $xmppE $secs $inB
+	Insert $chattoken $xmppE $secs $inB 1
     }
     if {[winfo class $chatstate(wtext)] eq "Text"} {
 	$wtext mark set insert end
@@ -1567,6 +1575,9 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
 	::JUI::CopyEvent %W
 	break
     }
+    
+    # Keep a mark so that we know where to insert historic messages.
+    $wtext mark set mhistory 1.0
 
     # Text send.
     if {$config(ui,aqua-text)} {
@@ -1716,7 +1727,7 @@ proc ::Chat::OnReturnSubject {chattoken} {
       -thread $threadID -type chat -from $myjid -subject $subject]
      
     set secs [clock seconds]
-    Insert $chattoken $xmldata $secs 0
+    Insert $chattoken $xmldata $secs 0 0
      
     ::History::XPutItem send $jid2 $xmldata
     $jstate(jlib) send_message $jid -type chat -subject $subject \
@@ -2854,7 +2865,7 @@ proc ::Chat::SendText {chattoken text args} {
     
     # Add to chat window.        
     set secs [clock seconds]
-    Insert $chattoken $xmldata $secs 0
+    Insert $chattoken $xmldata $secs 0 0
 
     set chatstate(havesent) 1
     
@@ -3001,7 +3012,7 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
 	$chatstate(wtext) mark set insert end
     }
     set secs [clock seconds]
-    Insert $chattoken $xmldata $secs 1
+    Insert $chattoken $xmldata $secs 1 0
     
     ::History::XPutItem recv $chatstate(minjid) $xmldata
     
