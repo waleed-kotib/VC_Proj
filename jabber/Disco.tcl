@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.136 2007-10-12 06:56:29 matben Exp $
+# $Id: Disco.tcl,v 1.137 2007-11-17 10:12:52 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -77,6 +77,7 @@ namespace eval ::Disco:: {
 	pubsub                1
 	server                1
 	services              1
+	service               1
 	store                 1
     }
 
