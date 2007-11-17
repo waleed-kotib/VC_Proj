@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.240 2007-11-17 14:15:05 matben Exp $
+# $Id: Chat.tcl,v 1.241 2007-11-17 16:19:27 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -670,12 +670,6 @@ proc ::Chat::GotMsg {xmldata} {
     if {$chatstate(havecs) eq "true"} {
 	XEventHandleAnyXElem $chattoken $xmldata
     }
-
-    # This is important since clicks may have reset the insert mark.
-    # @@@ Move to Text specific code?
-    if {[winfo class $chatstate(wtext)] eq "Text"} {
-	$chatstate(wtext) mark set insert end
-    }
     
     Insert $chattoken $xmldata $secs 1 0
         
@@ -809,9 +803,20 @@ proc ::Chat::InsertMessageText {chattoken xmldata secs inB historyB} {
 	set htag "-history"
 	set ranges [$wtext tag ranges history]
 	
+	# First 'history' always inserted at 1.0.
+	if {[llength $ranges] == 0} {
+	    set ind 1.0
+	} else {
+	
+	    # Keep a mark so that we know where to insert historic messages.
+	    $wtext mark set mhistory 1.0
+	    set ind [lindex $ranges end]
+	}
     } else {
 	set htag ""
+	set ind end
     }
+    $wtext mark set insert $ind
     
     # Both subject and presence coded as 'sys'. Good/bad?
     if {$haveSys} {
@@ -1096,11 +1101,6 @@ proc ::Chat::InsertHistoryXML {chattoken} {
     fconfigure $fd -encoding utf-8
     set itemL [read $fd]
     close $fd
-
-    if {[winfo class $chatstate(wtext)] eq "Text"} {
-	set wtext $chatstate(wtext)
-	$wtext mark set insert 1.0
-    }
     
     foreach itemE $itemL {
 	set itemTag [tinydom::tagname $itemE]	
@@ -1116,9 +1116,6 @@ proc ::Chat::InsertHistoryXML {chattoken} {
 
 	set xmppE [lindex [tinydom::children $itemE] 0]
 	Insert $chattoken $xmppE $secs $inB 1
-    }
-    if {[winfo class $chatstate(wtext)] eq "Text"} {
-	$wtext mark set insert end
     }
 }
 
@@ -1575,9 +1572,6 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
 	::JUI::CopyEvent %W
 	break
     }
-    
-    # Keep a mark so that we know where to insert historic messages.
-    $wtext mark set mhistory 1.0
 
     # Text send.
     if {$config(ui,aqua-text)} {
@@ -1720,9 +1714,6 @@ proc ::Chat::OnReturnSubject {chattoken} {
     set myjid   [$jstate(jlib) myjid]
     set subject $chatstate(subject)
     
-    if {[winfo class $chatstate(wtext)] eq "Text"} {
-	$chatstate(wtext) mark set insert end
-    }
     set xmldata [jlib::send_message_xmllist $jid  \
       -thread $threadID -type chat -from $myjid -subject $subject]
      
@@ -2857,11 +2848,6 @@ proc ::Chat::SendText {chattoken text args} {
     eval {$jlib send_message $jid -thread $threadID -type chat -body $text} $opts
 
     set dlgstate(lastsentsecs) [clock seconds]
-
-    # This is important since clicks may have reset the insert mark.
-    if {[winfo class $chatstate(wtext)] eq "Text"} {
-	$chatstate(wtext) mark set insert end
-    }
     
     # Add to chat window.        
     set secs [clock seconds]
@@ -3007,10 +2993,6 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
     }
     set chatstate(presence) $show
 
-    # This is important since clicks may have reset the insert mark.
-    if {[winfo class $chatstate(wtext)] eq "Text"} {
-	$chatstate(wtext) mark set insert end
-    }
     set secs [clock seconds]
     Insert $chattoken $xmldata $secs 1 0
     
