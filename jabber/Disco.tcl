@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.137 2007-11-17 10:12:52 matben Exp $
+# $Id: Disco.tcl,v 1.138 2007-11-18 11:08:56 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -102,6 +102,8 @@ namespace eval ::Disco:: {
     
     # Shall we return private ip info in disco info?
     set ::config(disco,info-ip) 1
+    
+    set ::config(disco,get-info-onselect) 1
 }
 
 proc ::Disco::InitPrefsHook {} {
@@ -1124,7 +1126,16 @@ proc ::Disco::PostMenuCmd {m mType clicked jid node} {
 }
 
 proc ::Disco::Selection {T v} {
-    # empty
+    global  config
+    upvar ::Jabber::jstate jstate
+
+    if {$config(disco,get-info-onselect)} {
+	set jid  [lindex $v end 0]
+	set node [lindex $v end 1]
+	if {![$jstate(jlib) disco isdiscoed info $jid $node]} {
+	    GetInfo $jid -node $node
+	}
+    }
 }
 
 # Disco::OpenTreeCmd --
