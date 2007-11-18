@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.62 2007-11-17 07:40:52 matben Exp $
+# $Id: Subscribe.tcl,v 1.63 2007-11-18 15:08:36 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -1238,6 +1238,7 @@ proc ::SubscribeMulti::Accept {w} {
 	if {$allow} {
 	    ::Subscribe::Subscribe $jid $opts(-name) $opts(-group)
 	} else {
+	    # @@@ Do we need to remove roster item as well?
 	    $jlib send_presence -to $jid -type "unsubscribed"
 	}
     }

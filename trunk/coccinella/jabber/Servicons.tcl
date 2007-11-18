@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.9 2007-07-19 06:28:17 matben Exp $
+# $Id: Servicons.tcl,v 1.10 2007-11-18 15:08:36 matben Exp $
 
 package require Icondef
 
@@ -34,7 +34,7 @@ namespace eval ::Servicons:: {
 
     variable priv
     set priv(defaultSet) "default"
-    set priv(alltypes)   {}
+    set priv(alltypes)   [list]
     
     variable alias
     array set alias {
@@ -192,7 +192,7 @@ proc ::Servicons::GetAllSets { } {
     variable priv
     variable state
     
-    set setList {}
+    set setList [list]
     foreach path [list $this(serviconsPath) $this(altServiconsPath)] {
 	foreach f [glob -nocomplain -directory $path *] {
 	    set name [file tail $f]

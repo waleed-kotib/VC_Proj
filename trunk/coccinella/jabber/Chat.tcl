@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.241 2007-11-17 16:19:27 matben Exp $
+# $Id: Chat.tcl,v 1.242 2007-11-18 15:08:36 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -756,7 +756,7 @@ proc ::Chat::InsertMessageTheme {chattoken xmldata secs inB historyB} {
 	}
     } else {
 	# @@@ Not sure how own presence changes are handled.
-	::ChatTheme::Status $chattoken $xmldata $secs	
+	::ChatTheme::Status $chattoken $xmldata $secs $historyB
     }
 }
 
@@ -1151,8 +1151,7 @@ proc ::Chat::HistoryCmd {chattoken} {
 		$wtext configure -state disabled
 	    }
 	} else {
-	    
-	    puts "::Chat::HistoryCmd for Tkhtml ???"
+	    ::ChatTheme::DeleteHistory $wtext
 	}
     }
 }
