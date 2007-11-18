@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.11 2007-11-17 14:15:05 matben Exp $
+# $Id: ChatTheme.tcl,v 1.12 2007-11-18 15:08:36 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -62,7 +62,8 @@ namespace eval ::ChatTheme {
     set html(status) {
 	<div class="status">%message%</div><div id="insert"></div>
     }
-    set html(historyDiv) {<div id="history"></div>}
+    set html(historyDiv) {<div id="History"><div id="insertHistory"></div></div>}
+    set html(insertHistory) {<div id="insertHistory"></div>}
 
     # Defaults as fallbacks.
     # @@@ Need to figure out a very simple one.
@@ -315,6 +316,20 @@ proc ::ChatTheme::Free {w} {
     unset -nocomplain $w
 }
 
+proc ::ChatTheme::DeleteHistory {w} {
+    variable html
+    
+    set historyN [$w search "div#History"]
+    set childN [$historyN children]
+    puts "::ChatTheme::DeleteHistory historyN=$historyN, childN=$childN"
+    
+    foreach node $childN {
+	$node destroy
+    }
+    set insertN [$w fragment $html(insertHistory)]
+    $historyN insert $insertN
+}
+
 # ChatTheme::MyAvatarHook, OtherAvatarHook --
 # 
 #       Thi is how we are informed when an actual photo have been created.
@@ -530,7 +545,7 @@ proc ::ChatTheme::Incoming {token xmldata secs historyB} {
 	set map [list %message% $msg %sender% $name %userIconPath% $avatar \
 	  %time% $time %service% Jabber %senderScreenName% $name]
 
-	InsertType $w in $map
+	InsertType $w in $map $historyB
     }
 }
 
@@ -555,11 +570,11 @@ proc ::ChatTheme::Outgoing {token xmldata secs historyB} {
 	set map [list %message% $msg %sender% $name %userIconPath% $avatar \
 	  %time% $time %service% Jabber %senderScreenName% $name]
 	
-	InsertType $w out $map
+	InsertType $w out $map $historyB
     }
 }
 
-proc ::ChatTheme::Status {token xmldata secs} {
+proc ::ChatTheme::Status {token xmldata secs historyB} {
     variable content
     
     set w [::Chat::GetChatTokenValue $token wtext]
@@ -578,7 +593,7 @@ proc ::ChatTheme::Status {token xmldata secs} {
     #set msg [wrapper::xmlcrypt $msg]
     set map [list %message% $msg %color% $color %time% $time]
 
-    InsertType $w status $map
+    InsertType $w status $map $historyB
 }
 
 # ChatTheme::InsertType --
@@ -590,22 +605,37 @@ proc ::ChatTheme::Status {token xmldata secs} {
 #       type      in | out | status
 #       map
 
-proc ::ChatTheme::InsertType {w type map} {
+proc ::ChatTheme::InsertType {w type map historyB} {
     variable $w
     upvar 0 $w state
     variable content
     
-    # Find all <div id="insert"></div>
-    set nodes [$w search {div#insert}]
+    puts "::ChatTheme::InsertType type=$type, historyB=$historyB"
+    
+    # There can actually be two '<div id="insert"></div>':
+    # one in the History part and one ordinary.
+    
+    if {$historyB} {
+	set insertN [$w search "div#insertHistory"]
+	puts "\t insertN=$insertN"
+	
+	
+    } else {
+	
+    }
+    
+    # Find all <div id="insert"></div> 
+    # There should be zero or one of them.
+    set nodes [$w search "div#insert"]
     if {[llength $nodes]} {
-	set div [lindex $nodes end]
-	set parent [$div parent]
+	set insertN [lindex $nodes end]
+	set parent [$insertN parent]
     }
     
     if {$state(lastType) eq $type} {
 	if {[llength $nodes]} {
 	    set childs [$w fragment [string map $map $content(${type}Next)]]
-	    $parent insert -before $div $childs
+	    $parent insert -before $insertN $childs
 	} else {
 	    # Missing <div id="insert"></div> 
 	    $w parse [string map $map $content($type)]

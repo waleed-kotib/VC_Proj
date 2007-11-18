@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.138 2007-11-18 11:08:56 matben Exp $
+# $Id: Disco.tcl,v 1.139 2007-11-18 15:08:36 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -49,9 +49,6 @@ namespace eval ::Disco:: {
     # Specials.
     option add *Disco*TreeCtrl.backgroundImage    cociexec        widgetDefault
     option add *Disco.fontStyleMixed              0               widgetDefault    
-    
-    # If number children smaller than this do disco#info.
-    variable discoInfoLimit 12
     
     # Common xml namespaces.
     variable xmlns
@@ -103,7 +100,11 @@ namespace eval ::Disco:: {
     # Shall we return private ip info in disco info?
     set ::config(disco,info-ip) 1
     
+    # Shall we disco-info an item when selected if not done before?
     set ::config(disco,get-info-onselect) 1
+    
+    # If number children smaller than this do disco#info.
+    set ::config(disco,info-limit) 12
 }
 
 proc ::Disco::InitPrefsHook {} {
@@ -387,10 +388,10 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 }
 
 proc ::Disco::ItemsCB {cmd jlibname type from queryE args} {
+    global  config
     variable tstate
     variable wtree
     variable wtab
-    variable discoInfoLimit
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
@@ -439,9 +440,9 @@ proc ::Disco::ItemsCB {cmd jlibname type from queryE args} {
 	    set cnode [lindex $cent 1]
 	    if {[llength $vstruct] == 1} {
 		GetInfo $cjid -node $cnode
-	    } elseif {$clen < $discoInfoLimit} {
+	    } elseif {$clen < $config(disco,info-limit)} {
 		GetInfo $cjid -node $cnode
-	    } elseif {($cnode ne "") && ($clen < $discoInfoLimit)} {
+	    } elseif {($cnode ne "") && ($clen < $config(disco,info-limit))} {
 		GetInfo $cjid -node $cnode
 	    }
 	}
