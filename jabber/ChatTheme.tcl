@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.12 2007-11-18 15:08:36 matben Exp $
+# $Id: ChatTheme.tcl,v 1.13 2007-11-19 12:57:29 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -609,45 +609,95 @@ proc ::ChatTheme::InsertType {w type map historyB} {
     variable $w
     upvar 0 $w state
     variable content
-    
-    puts "::ChatTheme::InsertType type=$type, historyB=$historyB"
-    
-    # There can actually be two '<div id="insert"></div>':
+        
+    # There can actually be two <div id="insert"></div>:
     # one in the History part and one ordinary.
-    
-    if {$historyB} {
-	set insertN [$w search "div#insertHistory"]
-	puts "\t insertN=$insertN"
-	
-	
-    } else {
-	
-    }
+
+    # html tree:
+    #   <div id='Chat'>
+    #       <div id='History'>
+    #           ...
+    #               <div id='insert'/>
+    #           ...
+    #           <div id='insertHistory'>
+    #       </div>
+    #       ...
+    #           <div id='insert'/>
+    #       ...    
     
     # Find all <div id="insert"></div> 
-    # There should be zero or one of them.
-    set nodes [$w search "div#insert"]
-    if {[llength $nodes]} {
-	set insertN [lindex $nodes end]
-	set parent [$insertN parent]
-    }
+    # There can be zero, one, or two of them.
+    set insertNL [$w search "div#insert"]
     
-    if {$state(lastType) eq $type} {
-	if {[llength $nodes]} {
-	    set childs [$w fragment [string map $map $content(${type}Next)]]
-	    $parent insert -before $insertN $childs
+    # Find where each 'insert' belong. Keep two separate lists of insert nodes.
+    set stdInsertNL [list]
+    set hstInsertNL [list]
+    foreach node $insertNL {
+	set pl [string length [FindParentid $w $node div History]]
+	set isHistInsert($node) $pl
+	if {$pl} {
+	    lappend hstInsertNL $node
 	} else {
-	    # Missing <div id="insert"></div> 
-	    $w parse [string map $map $content($type)]
+	    lappend stdInsertNL $node
 	}
-    } else {
-	$w parse [string map $map $content($type)]
     }
     
-    # Be sure to remove all <div id="insert"></div> we had before adding html.
-    if {[llength $nodes]} {
-	$parent remove $nodes
-    }
+    set sameTypeB [expr {$state(lastType) eq $type}]
+
+    # There are two parameters determining where the html shall be placed:
+    # 
+    #   sameTypeB  historyB      where
+    #       0         0        normal insert
+    #       1         0        insert
+    #       0         1        before insertHistory
+    #       1         1        insert child of History
+    
+    if {$historyB} {
+	set historyN [$w search "div#History"]
+	set insertHistN [$w search "div#insertHistory"]
+	
+	if {$sameTypeB} {
+	    if {[llength $hstInsertNL]} {
+		set insertN [lindex $hstInsertNL end]
+		set parentN [$insertN parent]
+		set childs [$w fragment [string map $map $content(${type}Next)]]
+		$parentN insert -before $insertN $childs
+	    } else {
+		# Missing <div id="insert"></div> 
+		set childs [$w fragment [string map $map $content($type)]]
+		$historyN insert -before $insertHistN $childs
+	    }
+	} else {
+	    set childs [$w fragment [string map $map $content($type)]]
+	    $historyN insert -before $insertHistN $childs
+	}
+	
+	# Cleanup all old 'insert' situated in 'History'.
+	foreach N $hstInsertNL { $N destroy }
+	
+    } else {
+	
+	set chatN [$w search "div#Chat"]
+	if {$sameTypeB} {
+	    if {[llength $stdInsertNL]} {
+		set insertN [lindex $insertNL end]
+		set parentN [$insertN parent]
+		set childs [$w fragment [string map $map $content(${type}Next)]]
+		$parentN insert -before $insertN $childs
+	    } else {
+		# Missing <div id="insert"></div> 
+		set childs [$w fragment [string map $map $content($type)]]
+		$chatN insert $childs
+	    }
+	} else {
+	    set childs [$w fragment [string map $map $content($type)]]
+	    $chatN insert $childs
+	}
+	
+	# Cleanup all old 'insert' *not* situated in 'History'.
+	foreach N $stdInsertNL { $N destroy }
+    }    
+    
     set state(lastType) $type
     after idle [list ::ChatTheme::SeeEnd $w]
     return
@@ -659,5 +709,27 @@ proc ::ChatTheme::SeeEnd {w} {
     }
 }
 
+# ChatTheme::FindParentid --
+# 
+#       Starts from 'node' and searches for the first matching parent element
+#       with 'tag' and 'id'. Empty if not found.
 
+proc ::ChatTheme::FindParentid {w node tag id} {
+    
+    set rootN [$w node]
+    set parentN [$node parent]
+    set resN ""
+    while {$parentN ne $rootN} {
+	if {[$parentN tag] eq $tag} {
+	    array unset attr
+	    array set attr [$parentN attribute]
+	    if {[info exists attr(id)] && ($attr(id) eq $id)} {
+		set resN $parentN
+		break
+	    }
+	}
+	set parentN [$parentN parent]
+    }
+    return $resN
+}
 
