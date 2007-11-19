@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.63 2007-11-18 15:08:36 matben Exp $
+# $Id: Subscribe.tcl,v 1.64 2007-11-19 13:59:11 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -491,6 +491,13 @@ proc ::Subscribe::Deny {w} {
     # Deny presence to this user.
     $jstate(jlib) send_presence -to $state(jid) -type "unsubscribed"
     
+    # This doesn't work with ejabberd!
+    # http://www.xmpp.org/rfcs/rfc3921.html#int-sub-alt :
+    # Note: If the contact's server previously added the user to the contact's
+    # roster for tracking purposes, it MUST remove the relevant item at this time.
+
+    $jstate(jlib) roster send_remove $state(jid)
+    
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
     set state(finished) 0
     destroy $state(w)
@@ -559,6 +566,8 @@ proc ::Subscribe::CloseCmd {w w} {
         
     # Deny presence to this user.
     ::Jabber::JlibCmd send_presence -to $state(jid) -type "unsubscribed"
+    ::Jabber::JlibCmd roster send_remove $state(jid)
+
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
     unset -nocomplain state
 }
@@ -645,6 +654,7 @@ proc ::SubscribeAuto::HandleReject {jid} {
 	}
     } else {
 	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
+	::Jabber::JlibCmd roster send_remove $jid
 	set msg [mc jamessautoreject2 $jid]
 	::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	
@@ -736,6 +746,7 @@ proc ::SubscribeAuto::AcceptCmd {jid w button} {
 	}
     } else {
 	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
+	::Jabber::JlibCmd roster send_remove $jid
     }
 }
 
@@ -780,6 +791,7 @@ proc ::SubscribeAuto::RejectTimer {w jid secs} {
 	set name [GetDisplayName $jid]
 	if {$secs <= 0} {
 	    ::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
+	    ::Jabber::JlibCmd roster send_remove $jid
 	    destroy $w
 	    set msg [mc jamessautoreject2 $name]
 	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
@@ -796,6 +808,7 @@ proc ::SubscribeAuto::RejectCmd {jid w button} {
     
     if {$button eq "reject" || $button eq ""} {
 	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
+	::Jabber::JlibCmd roster send_remove $jid
 	if {$config(subscribe,auto-reject-send-msg)} {
 	    SendRejectMsg $jid
 	}
@@ -1238,8 +1251,9 @@ proc ::SubscribeMulti::Accept {w} {
 	if {$allow} {
 	    ::Subscribe::Subscribe $jid $opts(-name) $opts(-group)
 	} else {
-	    # @@@ Do we need to remove roster item as well?
+	    # @@@ Do we need to remove roster item as well? See above.
 	    $jlib send_presence -to $jid -type "unsubscribed"
+	    $jlib roster send_remove $jid
 	}
     }
     Free $w
