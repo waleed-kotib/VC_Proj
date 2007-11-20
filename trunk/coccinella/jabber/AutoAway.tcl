@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.10 2007-09-16 07:39:11 matben Exp $
+# $Id: AutoAway.tcl,v 1.11 2007-11-20 15:27:44 matben Exp $
 
 package require idletime
 
@@ -85,7 +85,7 @@ proc ::AutoAway::InitPrefsHook {} {
     set jprefs(logoutmsg)    ""
     set jprefs(aalogin)      0
 
-    ::PrefUtils::Add [list  \
+    ::PrefUtils::Add [list \
       [list ::Jabber::jprefs(autoaway)    jprefs_autoaway     $jprefs(autoaway)]  \
       [list ::Jabber::jprefs(xautoaway)   jprefs_xautoaway    $jprefs(xautoaway)]  \
       [list ::Jabber::jprefs(awaymin)     jprefs_awaymin      $jprefs(awaymin)]  \
@@ -97,13 +97,20 @@ proc ::AutoAway::InitPrefsHook {} {
       [list ::Jabber::jprefs(logoutmsg)   jprefs_logoutmsg    $jprefs(logoutmsg)]  \
       [list ::Jabber::jprefs(aalogin)     jprefs_aalogin      $jprefs(aalogin)]  \
       ]
- 
+
+    # Set some kind of auto-away on hidden tabs.
+    set jprefs(aa,on-hidden-tabs) 0
+
+    ::PrefUtils::Add [list \
+      [list ::Jabber::jprefs(aa,on-hidden-tabs)  jprefs_aa_on-hidden-tabs  $jprefs(aa,on-hidden-tabs)]  \
+      ]
+    
     variable allKeys
     set allKeys {
 	autoaway   awaymin   awaymsg
 	xautoaway  xawaymin  xawaymsg
 	autologout logoutmin logoutmsg
-	aalogin
+	aalogin    aa,on-hidden-tabs
     }
 }
 
@@ -224,11 +231,11 @@ proc ::AutoAway::BuildPrefsHook {wtree nbframe} {
 
 proc ::AutoAway::BuildPage {page} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
     variable allKeys
     
     foreach key $allKeys {
-	set tmpJPrefs($key) $jprefs($key)
+	set tmpp($key) $jprefs($key)
     }
     
     set wc $page.c
@@ -246,17 +253,18 @@ proc ::AutoAway::BuildPage {page} {
     
     set waa $wc.aa
     ttk::frame $waa
+    pack  $waa  -side top -fill x
     
     set str "[mc prefminaw2] ([mc Minutes]):"
-    set varName [namespace current]::tmpJPrefs(autoaway)
+    set varName [namespace current]::tmpp(autoaway)
     ttk::checkbutton $waa.lminaw -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.eminaw $waa.eawmsg] $varName]]
     ttk::entry $waa.eminaw -font CociSmallFont -width 3 \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
-      -textvariable [namespace current]::tmpJPrefs(awaymin)
+      -textvariable [namespace current]::tmpp(awaymin)
     ttk::label $waa.law -text [mc Message]:
     ttk::entry $waa.eawmsg -font CociSmallFont -width 32  \
-      -textvariable [namespace current]::tmpJPrefs(awaymsg)
+      -textvariable [namespace current]::tmpp(awaymsg)
     ttk::frame $waa.paw -height 6
 
     SetEntryState [list $waa.eminaw $waa.eawmsg] $varName
@@ -268,15 +276,15 @@ proc ::AutoAway::BuildPage {page} {
     grid $waa.eawmsg -sticky ew
 
     set str "[mc prefminea2] ([mc Minutes]):"
-    set varName [namespace current]::tmpJPrefs(xautoaway)
+    set varName [namespace current]::tmpp(xautoaway)
     ttk::checkbutton $waa.lminxa -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.eminxa $waa.examsg] $varName]]
     ttk::entry $waa.eminxa -font CociSmallFont -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
-      -textvariable [namespace current]::tmpJPrefs(xawaymin)
+      -textvariable [namespace current]::tmpp(xawaymin)
     ttk::label $waa.lxa -text [mc Message]:
     ttk::entry $waa.examsg -font CociSmallFont -width 32  \
-      -textvariable [namespace current]::tmpJPrefs(xawaymsg)
+      -textvariable [namespace current]::tmpp(xawaymsg)
     ttk::frame $waa.pxa -height 6
 
     SetEntryState [list $waa.eminxa $waa.examsg] $varName
@@ -288,17 +296,17 @@ proc ::AutoAway::BuildPage {page} {
     grid $waa.eawmsg -sticky ew    
         
     set str "[mc prefminlogout] ([mc Minutes]):"
-    set varName [namespace current]::tmpJPrefs(autologout)
+    set varName [namespace current]::tmpp(autologout)
     ttk::checkbutton $waa.clo -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.elomin $waa.elomsg $waa.cli] $varName]]
     ttk::entry $waa.elomin -font CociSmallFont -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
-      -textvariable [namespace current]::tmpJPrefs(logoutmin)
+      -textvariable [namespace current]::tmpp(logoutmin)
     ttk::label $waa.llo -text [mc Message]:
     ttk::entry $waa.elomsg -font CociSmallFont -width 32  \
-      -textvariable [namespace current]::tmpJPrefs(logoutmsg)
+      -textvariable [namespace current]::tmpp(logoutmsg)
     ttk::checkbutton $waa.cli -text [mc "Relogin on activity"] \
-      -variable [namespace current]::tmpJPrefs(aalogin)
+      -variable [namespace current]::tmpp(aalogin)
 
     SetEntryState [list $waa.elomin $waa.elomsg $waa.cli] $varName
     
@@ -312,7 +320,15 @@ proc ::AutoAway::BuildPage {page} {
     grid columnconfigure $waa 0 -minsize 32
     grid columnconfigure $waa 2 -weight 1
 
-    pack  $waa  -side top -fill x
+    
+    set varName [namespace current]::tmpp(aa,on-hidden-tabs)
+    ttk::checkbutton $waa.htabs -text [mc "Apply auto-away on hidden chat tabs"] \
+      -variable $varName
+    
+    grid  $waa.htabs  -  -  -  -sticky w
+    
+    ::balloonhelp::balloonforwindow $waa.htabs \
+      "If activated then directed auto-away presence will be sent to users on hidden chat tabs"
 }
 
 proc ::AutoAway::SetEntryState {winL varName} {
@@ -330,9 +346,9 @@ proc ::AutoAway::SetEntryState {winL varName} {
 
 proc ::AutoAway::SavePrefsHook {} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
         
-    array set jprefs [array get tmpJPrefs]
+    array set jprefs [array get tmpp]
     
     # If changed present auto away settings, may need to reconfigure.
     Setup  
@@ -341,10 +357,10 @@ proc ::AutoAway::SavePrefsHook {} {
 proc ::AutoAway::CancelPrefsHook {} {
     global  prefs
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
 	
-    foreach key [array names tmpJPrefs] {
-	if {![string equal $jprefs($key) $tmpJPrefs($key)]} {
+    foreach key [array names tmpp] {
+	if {![string equal $jprefs($key) $tmpp($key)]} {
 	    ::Preferences::HasChanged
 	    return
 	}
@@ -353,17 +369,17 @@ proc ::AutoAway::CancelPrefsHook {} {
 
 proc ::AutoAway::UserDefaultsHook {} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
 	
-    foreach key [array names tmpJPrefs] {
-	set tmpJPrefs($key) $jprefs($key)
+    foreach key [array names tmpp] {
+	set tmpp($key) $jprefs($key)
     }
 }
 
 proc ::AutoAway::DestroyPrefsHook {} {
-    variable tmpJPrefs
+    variable tmpp
     
-    unset -nocomplain tmpJPrefs
+    unset -nocomplain tmpp
 }
 
 #-------------------------------------------------------------------------------

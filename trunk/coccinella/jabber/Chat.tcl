@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.242 2007-11-18 15:08:36 matben Exp $
+# $Id: Chat.tcl,v 1.243 2007-11-20 15:27:44 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2130,6 +2130,7 @@ proc ::Chat::SelectPage {chattoken} {
 proc ::Chat::TabChanged {dlgtoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
+    upvar ::Jabber::jprefs jprefs
     
     Debug 2 "::Chat::TabChanged"
 
@@ -2148,12 +2149,25 @@ proc ::Chat::TabChanged {dlgtoken} {
         foreach ichattoken $chattokens {
             if { $ichattoken eq $chattoken } {
                 ChangeChatState $ichattoken focus
+		AACancel $ichattoken
             } else {
                 ChangeChatState $ichattoken lostfocus
+		AAStart $ichattoken
             }
             upvar 0 $ichattoken ichatstate
             SendChatState $ichattoken $ichatstate(chatstate)
         }
+    }
+
+    if {$jprefs(aa,on-hidden-tabs)} {
+	set chattokens $dlgstate(chattokens)
+	foreach ichattoken $chattokens {
+	    if { $ichattoken eq $chattoken } {
+		AACancel $ichattoken
+	    } else {
+		AAStart $ichattoken
+	    }
+	}
     }
 
     SetThreadState $dlgtoken $chattoken
@@ -2917,20 +2931,37 @@ proc ::Chat::Save {dlgtoken} {
 
     set wtext $chatstate(wtext)
     
+    set fTypes [list [list "Text" {.txt}] [list "XML" {.xml}]]
     set ans [tk_getSaveFile -title [mc Save] \
-      -initialfile "Chat $chatstate(fromjid).txt"]
+      -initialfile "Chat $chatstate(fromjid).txt" -filetypes $fTypes]
     
     if {[string length $ans]} {
-	set allText [::Text::TransformToPureText $wtext]
-	set fd [open $ans w]
-	fconfigure $fd -encoding utf-8
-	puts $fd "Chat with:\t$chatstate(fromjid)"
-	puts $fd "Subject:\t$chatstate(subject)"
-	puts $fd "\n"
-	puts $fd $allText	
-	close $fd
-	if {[string equal $this(platform) "macintosh"]} {
-	    file attributes $ans -type TEXT -creator ttxt
+	set fileName $ans
+	set ext [file extension $fileName]
+	if {$ext eq ".txt"} {
+	    set allText [::Text::TransformToPureText $wtext]
+	    set fd [open $fileName w]
+	    fconfigure $fd -encoding utf-8
+	    puts $fd "Chat with:\t$chatstate(fromjid)"
+	    puts $fd "Subject:\t$chatstate(subject)"
+	    puts $fd "\n"
+	    puts $fd $allText	
+	    close $fd
+	} elseif {$ext eq ".xml"} {
+	    set jid $chatstate(jid)
+	    set fd [open $fileName w]
+	    fconfigure $fd -encoding utf-8
+	    puts $fd [::History::GetPrefix $jid]
+	    if {$chatstate(history) && $chatstate(havehistory)} {
+		set hfd [open $chatstate(historyfile) r]
+		fconfigure $hfd -encoding utf-8
+		puts $fd [read $hfd]
+		close $hfd
+	    }
+	    
+	    
+	    puts $fd [::History::GetPostfix]
+	    close $fd
 	}
     }
 }
@@ -3489,6 +3520,31 @@ proc ::Chat::SendChatState {chattoken state} {
     }
 }
 
+# Chat::AAStart, AACancel --
+#
+#       Some functions to handle auto-away on hidden tabs, if activated.
+
+proc ::Chat::AAStart {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    puts "::Chat::AAStart chattoken=$chattoken"
+    
+
+    
+    
+}
+
+proc ::Chat::AACancel {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    puts "::Chat::AACancel chattoken=$chattoken"
+    
+
+    
+}
+
 # Preference page --------------------------------------------------------------
 
 proc ::Chat::InitPrefsHook {} {
@@ -3505,7 +3561,7 @@ proc ::Chat::InitPrefsHook {} {
     set jprefs(chat,themed)       0
     set jprefs(chat,theme)        "Bubblegum" ;# Should be a fallback theme
     
-    ::PrefUtils::Add [list  \
+    ::PrefUtils::Add [list \
       [list ::Jabber::jprefs(showMsgNewWin) jprefs_showMsgNewWin $jprefs(showMsgNewWin)]  \
       [list ::Jabber::jprefs(inbox2click)   jprefs_inbox2click   $jprefs(inbox2click)]  \
       [list ::Jabber::jprefs(chat,normalAsChat)   jprefs_chatnormalAsChat   $jprefs(chat,normalAsChat)]  \
@@ -3539,14 +3595,14 @@ proc ::Chat::BuildPrefsHook {wtree nbframe} {
 
 proc ::Chat::BuildPrefsPage {wpage} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
     variable haveTheme
     
     foreach key {
 	chatActiveRet showMsgNewWin inbox2click chat,normalAsChat
 	chat,histLen chat,histAge chat,mynick chat,themed chat,theme
     } {
-	set tmpJPrefs($key) $jprefs($key)
+	set tmpp($key) $jprefs($key)
     }
     
     set wc $wpage.c
@@ -3554,20 +3610,20 @@ proc ::Chat::BuildPrefsPage {wpage} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
  
     ttk::checkbutton $wc.active -text [mc prefchactret2]  \
-      -variable [namespace current]::tmpJPrefs(chatActiveRet)
+      -variable [namespace current]::tmpp(chatActiveRet)
     ttk::checkbutton $wc.newwin -text [mc prefcushow] \
-      -variable [namespace current]::tmpJPrefs(showMsgNewWin)
+      -variable [namespace current]::tmpp(showMsgNewWin)
     ttk::checkbutton $wc.normal -text [mc prefchnormal]  \
-      -variable [namespace current]::tmpJPrefs(chat,normalAsChat)
+      -variable [namespace current]::tmpp(chat,normalAsChat)
 
     ttk::separator $wc.sep -orient horizontal    
 
     ttk::label $wc.lmb2 -text "[mc prefcu2clk]:"
     ttk::radiobutton $wc.rb2new -text [mc prefcuopen] \
-      -value newwin -variable [namespace current]::tmpJPrefs(inbox2click)
+      -value newwin -variable [namespace current]::tmpp(inbox2click)
     ttk::radiobutton $wc.rb2re   \
       -text [mc prefcureply] -value reply \
-      -variable [namespace current]::tmpJPrefs(inbox2click)
+      -variable [namespace current]::tmpp(inbox2click)
 
     ttk::separator $wc.sep2 -orient horizontal
     
@@ -3575,7 +3631,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ttk::frame $wc.hi
     ttk::label $whi.lhist -text "[mc {History length}]:"
     spinbox $whi.shist -width 4 -from 0 -increment 5 -to 1000 -state readonly \
-      -textvariable [namespace current]::tmpJPrefs(chat,histLen)
+      -textvariable [namespace current]::tmpp(chat,histLen)
     ttk::label $whi.lage -text "[mc {More recent than}]:"
     set mb $whi.mbage
     set menuDef [list                       \
@@ -3586,7 +3642,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
 	[list [mc {No restriction}]  -value 0]     \
     ]
     ui::optionmenu $mb -menulist $menuDef -direction flush \
-      -variable [namespace current]::tmpJPrefs(chat,histAge)
+      -variable [namespace current]::tmpp(chat,histAge)
 
     grid  $whi.lhist   $whi.shist  $whi.lage  $whi.mbage  -sticky w
     grid columnconfigure $whi 1 -weight 1
@@ -3599,7 +3655,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
     set wni $wc.ni
     ttk::frame $wc.ni
     ttk::label $wni.lni -text "[mc {Local nickname}]:"
-    ttk::entry $wni.eni -textvariable [namespace current]::tmpJPrefs(chat,mynick)
+    ttk::entry $wni.eni -textvariable [namespace current]::tmpp(chat,mynick)
 
     grid  $wni.lni  $wni.eni  -sticky w
 
@@ -3625,10 +3681,10 @@ proc ::Chat::BuildPrefsPage {wpage} {
 	set wtm $wc.tm
 	ttk::frame $wc.tm
 	ttk::checkbutton $wtm.themed -text "Have themed chats:"  \
-	  -variable [namespace current]::tmpJPrefs(chat,themed) \
+	  -variable [namespace current]::tmpp(chat,themed) \
 	  -command [namespace code [list PrefsThemedCmd $wtm.theme]]
 	ui::optionmenu $wtm.theme -menulist $menuDef -direction flush \
-	  -variable [namespace current]::tmpJPrefs(chat,theme)
+	  -variable [namespace current]::tmpp(chat,theme)
 	
 	grid  $wtm.themed  $wtm.theme  -sticky w
 
@@ -3640,8 +3696,8 @@ proc ::Chat::BuildPrefsPage {wpage} {
 }
 
 proc ::Chat::PrefsThemedCmd {mb} {
-    variable tmpJPrefs
-    if {$tmpJPrefs(chat,themed)} {
+    variable tmpp
+    if {$tmpp(chat,themed)} {
 	$mb state {!disabled}
     } else {
 	$mb state {disabled}
@@ -3650,24 +3706,24 @@ proc ::Chat::PrefsThemedCmd {mb} {
 
 proc ::Chat::SavePrefsHook {} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
     
-    if {$tmpJPrefs(chat,themed)} {
-	if {$tmpJPrefs(chat,theme) ne $jprefs(chat,theme)} {
-	    ::ChatTheme::Set $tmpJPrefs(chat,theme)
+    if {$tmpp(chat,themed)} {
+	if {$tmpp(chat,theme) ne $jprefs(chat,theme)} {
+	    ::ChatTheme::Set $tmpp(chat,theme)
 	} elseif {!$jprefs(chat,themed)} {
-	    ::ChatTheme::Set $tmpJPrefs(chat,theme)
+	    ::ChatTheme::Set $tmpp(chat,theme)
 	}
     }
-    array set jprefs [array get tmpJPrefs]
+    array set jprefs [array get tmpp]
 }
 
 proc ::Chat::CancelPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
         
-    foreach key [array names tmpJPrefs] {
-	if {![string equal $jprefs($key) $tmpJPrefs($key)]} {
+    foreach key [array names tmpp] {
+	if {![string equal $jprefs($key) $tmpp($key)]} {
 	    ::Preferences::HasChanged
 	    break
 	}
@@ -3676,17 +3732,17 @@ proc ::Chat::CancelPrefsHook {} {
 
 proc ::Chat::UserDefaultsHook {} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
     
-    foreach key [array names tmpJPrefs] {
-	set tmpJPrefs($key) $jprefs($key)
+    foreach key [array names tmpp] {
+	set tmpp($key) $jprefs($key)
     }
 }
 
 proc ::Chat::DestroyPrefsHook {} {
-    variable tmpJPrefs
+    variable tmpp
     
-    unset -nocomplain tmpJPrefs
+    unset -nocomplain tmpp
 }
 
 #-------------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 #  
 #      This file is part of The Coccinella application. 
 #      It implements various methods to handle history info.
+#      NB: A better name would be 'XMLLog'.
 #      
 #  Copyright (c) 2004-2007  Mats Bengtsson
 #  
@@ -18,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: History.tcl,v 1.34 2007-10-07 10:32:42 matben Exp $
+# $Id: History.tcl,v 1.35 2007-11-20 15:27:45 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -72,6 +73,16 @@ if {0} {
     ::History::XFastSelection $f 10 $age  
     
     ::History::XFastParseFiles mari@localhost 2 0
+}
+
+proc ::History::GetPrefix {jid} {
+    variable xmlPrefix
+    return [format $xmlPrefix [wrapper::xmlcrypt $jid]]
+}
+
+proc ::History::GetPostfix {} {
+    variable xmlPostfix
+    return $xmlPostfix
 }
 
 # New xml based format ---------------------------------------------------------
