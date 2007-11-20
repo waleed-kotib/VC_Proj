@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.65 2007-11-20 13:40:57 matben Exp $
+# $Id: Subscribe.tcl,v 1.66 2007-11-20 15:27:45 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -1615,7 +1615,7 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     ttk::checkbutton $wtimer.c -text "If auto-accept/reject show dialog with timer:" \
       -variable [namespace current]::tmpp(subsc,timer) \
       -command [namespace code $autoCmd]
-    ttk::label $wtimer.l -text "The dialog is closed after (seconds):"
+    ttk::label $wtimer.l -text "The dialog is closed after (Seconds):"
     ttk::entry $wtimer.e -width 3 \
       -textvariable [namespace current]::tmpp(subsc,timer-secs) \
       -validate key -validatecommand [namespace code {ValidSecs %S}]
