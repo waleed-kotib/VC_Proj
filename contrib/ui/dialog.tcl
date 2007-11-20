@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.35 2007-11-15 07:31:05 matben Exp $
+# $Id: dialog.tcl,v 1.36 2007-11-20 13:40:57 matben Exp $
 
 # Public commands:
 # 
@@ -610,6 +610,10 @@ snit::widget ui::dialog::widget {
 
     method grab {} {
 	ui::Grab $win
+    }
+    
+    method invoke {button} {
+	$self Done $button
     }
 }
 

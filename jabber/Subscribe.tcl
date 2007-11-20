@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.64 2007-11-19 13:59:11 matben Exp $
+# $Id: Subscribe.tcl,v 1.65 2007-11-20 13:40:57 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -53,24 +53,36 @@ namespace eval ::Subscribe {
     # Use the multi dialog for batches of subscription requests.
     set ::config(subscribe,multi-dlg) 1
     
-    # Set a timer dialog instead of just straight auto accepting.
-    set ::config(subscribe,auto-accept-timer) 0
-    
     # Sets a timer in the standard "ask" dialogs to auto accept.
-    set ::config(subscribe,auto-accept-std-dlg) 1
+    # NB: some of these options now in jprefs.
+    #set ::config(subscribe,auto-accept-std-dlg) 1
     
-    # Set a timer dialog instead of just straight auto rejecting.
-    set ::config(subscribe,auto-reject-timer) 0
+    # Set a timer dialog instead of just straight auto accepting.
+    # This just shows a plain dialog for each request.
+    # NB: string catalogs must be updated if using this.
+    set ::config(subscribe,auto-accept-plain) 0
     
     # Sets a timer in the standard "ask" dialogs to auto reject.
-    set ::config(subscribe,auto-reject-std-dlg) 1
+    #set ::config(subscribe,auto-reject-std-dlg) 1
+    
+    # Set a timer dialog instead of just straight auto rejecting.
+    # This just shows a plain dialog for each request.
+    # NB: string catalogs must be updated if using this.
+    set ::config(subscribe,auto-reject-plain) 0
+       
+    # Sets the number of millisecs the dialog starts its countdown.
+    set ::config(subscribe,accept-after) 10000
+    set ::config(subscribe,reject-after) 10000
     
     # Shall we send a message to user when one of the auto dispatchers done.
     set ::config(subscribe,auto-accept-send-msg) 0
     set ::config(subscribe,auto-reject-send-msg) 0
+
+    set nonAqua [expr {[tk windowingsystem] ne "aqua"}]
     
     # Experimental:
-    set ::config(subscribe,exp-scrollframe) 0
+    # NB: buggy on Aqua 8.4.9
+    set ::config(subscribe,exp-scrollframe) $nonAqua
     
     variable queue [list]
 }
@@ -253,7 +265,8 @@ proc ::Subscribe::NewDlg {jid args} {
 
     if {$argsA(-auto) eq "accept"} {
 	
-	set secs [expr {$config(subscribe,accept-after)/1000}]
+	#set secs [expr {$config(subscribe,accept-after)/1000}]
+	set secs $jprefs(subsc,timer-secs)
 	set msg [mc jamesssubscautoacc $secs]
 	ttk::label $wbox.accept -style Small.TLabel \
 	  -text $msg -wraplength 200 -justify left
@@ -268,12 +281,12 @@ proc ::Subscribe::NewDlg {jid args} {
 	
 	lappend wkeepL $wbox.accept $wbox.pause
 	
-	set secs [expr {$config(subscribe,accept-after)/1000}]
 	set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
 
     } elseif {$argsA(-auto) eq "reject"} {
 
-	set secs [expr {$config(subscribe,reject-after)/1000}]
+	#set secs [expr {$config(subscribe,reject-after)/1000}]
+	set secs $jprefs(subsc,timer-secs)
 	set msg [mc jamesssubscautorej $secs]
 	ttk::label $wbox.reject -style Small.TLabel \
 	  -text $msg -wraplength 200 -justify left
@@ -288,7 +301,6 @@ proc ::Subscribe::NewDlg {jid args} {
 
 	lappend wkeepL $wbox.reject $wbox.pause
 	
-	set secs [expr {$config(subscribe,reject-after)/1000}]
 	set state(timer-id) [after 1000 [namespace code [list RejectTimer $w $secs]]]
     }
 
@@ -521,10 +533,15 @@ proc ::Subscribe::Accept {w} {
     unset state
 }
 
+# Subscribe::Subscribe --
+# 
+#       Generic way to handle a subscription acception.
+
 proc ::Subscribe::Subscribe {jid name group} {
     upvar ::Jabber::jstate jstate
     
-    set subscription [$jstate(jlib) roster getsubscription $jid]
+    set jlib $jstate(jlib)
+    set subscription [$jlib roster getsubscription $jid]
   
     switch -- $subscription none - from {
 	set sendsubsc 1
@@ -533,7 +550,6 @@ proc ::Subscribe::Subscribe {jid name group} {
 	set sendsubsc 0
 	set havesubsc 1
     }
-    set jlib $jstate(jlib)
 
     # Accept (allow) subscription.
     $jlib send_presence -to $jid -type "subscribed"
@@ -582,20 +598,16 @@ proc ::Subscribe::ResProc {type queryE} {
     ::Debug 2 "::Subscribe::ResProc: type=$type"
 
     if {[string equal $type "error"]} {
-	::UI::MessageBox -type ok -message "We got an error from the\
-	  Subscribe::ResProc callback"
+	::UI::MessageBox -type ok \
+	  -message "We got an error from the Subscribe::ResProc callback"
     }   
 }
 
 #-------------------------------------------------------------------------------
 #
-# Experimental code which count downs on auto accept & reject.
+# Handle the auto accept & reject situations.
 
 namespace eval ::SubscribeAuto {
-       
-    # Sets the number of millisecs the dialog starts its countdown.
-    set ::config(subscribe,accept-after) 10000
-    set ::config(subscribe,reject-after) 10000
     
     ui::dialog button accept -text [mc Accept]
     ui::dialog button reject -text [mc Reject]
@@ -606,29 +618,25 @@ namespace eval ::SubscribeAuto {
     set queue(reject) [list]
 }
 
-::msgcat::mcset en jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
-::msgcat::mcset sv jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
-::msgcat::mcset pl jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
-::msgcat::mcset nl jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
-
-::msgcat::mcset en jamesssubscautorej {Subscription request will be rejected in: %s secs.}
-::msgcat::mcset sv jamesssubscautorej {Subscription request will be rejected in: %s secs.}
-::msgcat::mcset pl jamesssubscautorej {Subscription request will be rejected in: %s secs.}
-::msgcat::mcset nl jamesssubscautorej {Subscription request will be rejected in: %s secs.}
+# SubscribeAuto::HandleAccept --
+# 
+#       Dispatches an auto-accept request to the configured dialog if any.
 
 proc ::SubscribeAuto::HandleAccept {jid} {
     global  config
+    upvar ::Jabber::jprefs jprefs
 
-    if {$config(subscribe,auto-accept-timer)} {
-	::SubscribeAuto::AcceptAfter $jid
-    } elseif {$config(subscribe,auto-accept-std-dlg)} {
+    # Was: config(subscribe,auto-accept-std-dlg)
+    if {$jprefs(subsc,timer)} {
 	if {$config(subscribe,multi-dlg)} {
 	    Queue accept $jid
 	} else {
 	    ::Subscribe::NewDlg $jid -auto accept
 	}
+    } elseif {$config(subscribe,auto-accept-plain)} {
+	::SubscribeAuto::AcceptAfter $jid
     } else {
-	::Jabber::JlibCmd send_presence -to $from -type "subscribed"
+	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
 
 	# Auto subscribe to subscribers to me.
 	::SubscribeAuto::SendSubscribe $jid
@@ -641,17 +649,23 @@ proc ::SubscribeAuto::HandleAccept {jid} {
     }
 }
 
+# SubscribeAuto::HandleReject --
+# 
+#       Dispatches an auto-reject request to the configured dialog if any.
+
 proc ::SubscribeAuto::HandleReject {jid} {
     global  config
+    upvar ::Jabber::jprefs jprefs
 
-    if {$config(subscribe,auto-reject-timer)} {
-	::SubscribeAuto::RejectAfter $jid
-    } elseif {$config(subscribe,auto-reject-std-dlg)} {
+    # Was: config(subscribe,auto-reject-std-dlg)
+    if {$jprefs(subsc,timer)} {
 	if {$config(subscribe,multi-dlg)} {
 	    Queue reject $jid
 	} else {
 	    ::Subscribe::NewDlg $jid -auto reject
 	}
+    } elseif {$config(subscribe,auto-reject-plain)} {
+	::SubscribeAuto::RejectAfter $jid
     } else {
 	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
 	::Jabber::JlibCmd roster send_remove $jid
@@ -683,6 +697,8 @@ proc ::SubscribeAuto::Queue {type jid} {
 	    set ms $config(subscribe,multi-wait-ms)
 	    after $ms [namespace code [list ExecQueue $type]]
 	}
+	
+	# Add to queue.
 	lappend queue($type) $jid
     }
 }
@@ -700,10 +716,20 @@ proc ::SubscribeAuto::ExecQueue {type} {
 	    ::SubscribeMulti::AddJID $w $jid
 	}
     }
+    
+    # Empty queue.
     set queue($type) [list]
 }
 
 # Some simple dialogs for auto accept/reject -----------------------------------
+
+# NB: string catalogs must be updated if using this.
+
+::msgcat::mcset en jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
+::msgcat::mcset sv jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
+
+::msgcat::mcset en jamesssubscautorej {Subscription request will be rejected in: %s secs.}
+::msgcat::mcset sv jamesssubscautorej {Subscription request will be rejected in: %s secs.}
 
 proc ::SubscribeAuto::AcceptAfter {jid} {
     global  config
@@ -719,10 +745,9 @@ proc ::SubscribeAuto::AcceptTimer {w jid secs} {
     
     if {[winfo exists $w]} {
 	incr secs -1
-	set name [GetDisplayName $jid]
 	if {$secs <= 0} {
-	    ::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
-	    destroy $w
+	    $w invoke accept
+	    set name [::Subscribe::GetDisplayName $jid]
 	    set msg [mc jamessautoaccepted2 $name]
 	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	} else {
@@ -752,7 +777,7 @@ proc ::SubscribeAuto::AcceptCmd {jid w button} {
 
 # SubscribeAuto::SendSubscribe --
 # 
-#       Must automatically subscribed to users we have accepted and to whon
+#       Must automatically subscribed to users we have accepted and to whom
 #       we have no previous subscription to.
 
 proc ::SubscribeAuto::SendSubscribe {jid} {
@@ -769,8 +794,8 @@ proc ::SubscribeAuto::SendSubscribe {jid} {
 	    $jlib roster send_set $jid -groups [list $jprefs(subsc,group)]
 	}
 	$jlib send_presence -to $jid -type "subscribe"
-	set msg [mc jamessautosubs2 $jid]
-	::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	#set msg [mc jamessautosubs2 $jid]
+	#::ui::dialog -title [mc Info] -icon info -type ok -message $msg
     }    
 }
 
@@ -788,11 +813,9 @@ proc ::SubscribeAuto::RejectTimer {w jid secs} {
 
     if {[winfo exists $w]} {
 	incr secs -1
-	set name [GetDisplayName $jid]
 	if {$secs <= 0} {
-	    ::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
-	    ::Jabber::JlibCmd roster send_remove $jid
-	    destroy $w
+	    $w invoke reject
+	    set name [::Subscribe::GetDisplayName $jid]
 	    set msg [mc jamessautoreject2 $name]
 	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	} else {
@@ -939,7 +962,8 @@ proc ::SubscribeMulti::NewDlg {args} {
 
     if {$state(auto) eq "accept"} {
 	
-	set secs [expr {$config(subscribe,accept-after)/1000}]
+	#set secs [expr {$config(subscribe,accept-after)/1000}]
+	set secs $jprefs(subsc,timer-secs)
 	set msg [mc jamesssubscautoacc $secs]
 	ttk::label $wbox.accept -style Small.TLabel \
 	  -text $msg -wraplength 320 -justify left
@@ -954,12 +978,12 @@ proc ::SubscribeMulti::NewDlg {args} {
 
 	lappend wkeepL $wbox.accept $wbox.pause
 	
-	set secs [expr {$config(subscribe,accept-after)/1000}]
 	set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
 
     } elseif {$state(auto) eq "reject"} {
 
-	set secs [expr {$config(subscribe,reject-after)/1000}]
+	#set secs [expr {$config(subscribe,reject-after)/1000}]
+	set secs $jprefs(subsc,timer-secs)
 	set msg [mc jamesssubscautorej $secs]
 	ttk::label $wbox.reject -style Small.TLabel \
 	  -text $msg -wraplength 320 -justify left
@@ -976,7 +1000,6 @@ proc ::SubscribeMulti::NewDlg {args} {
 	
 	set state(all) 0
 
-	set secs [expr {$config(subscribe,reject-after)/1000}]
 	set state(timer-id) [after 1000 [namespace code [list RejectTimer $w $secs]]]
     }
 
@@ -1484,12 +1507,16 @@ proc ::Subscribe::InitPrefsHook { } {
     set jprefs(subsc,notinrost)     ask
     set jprefs(subsc,auto)          0
     set jprefs(subsc,group)         {}
+    set jprefs(subsc,timer)         0
+    set jprefs(subsc,timer-secs)    10
 	
     ::PrefUtils::Add [list  \
       [list ::Jabber::jprefs(subsc,inrost)     jprefs_subsc_inrost      $jprefs(subsc,inrost)]  \
       [list ::Jabber::jprefs(subsc,notinrost)  jprefs_subsc_notinrost   $jprefs(subsc,notinrost)]  \
       [list ::Jabber::jprefs(subsc,auto)       jprefs_subsc_auto        $jprefs(subsc,auto)]  \
       [list ::Jabber::jprefs(subsc,group)      jprefs_subsc_group       $jprefs(subsc,group)]  \
+      [list ::Jabber::jprefs(subsc,timer)      jprefs_subsc_timer       $jprefs(subsc,timer)]  \
+      [list ::Jabber::jprefs(subsc,timer-secs) jprefs_subsc_timer-secs  $jprefs(subsc,timer-secs)]  \
       ]
     
 }
@@ -1505,10 +1532,10 @@ proc ::Subscribe::BuildPrefsHook {wtree nbframe} {
 
 proc ::Subscribe::BuildPageSubscriptions {page} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
     
-    foreach key {inrost notinrost auto group} {
-	set tmpJPrefs(subsc,$key) $jprefs(subsc,$key)
+    foreach key {inrost notinrost auto group timer timer-secs} {
+	set tmpp(subsc,$key) $jprefs(subsc,$key)
     }
 
     set wc $page.c
@@ -1524,63 +1551,145 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     grid columnconfigure $wc.head 1 -weight 1
     pack  $wc.head  -side top -fill x
 
+    # Subscription actions:
     set wsubs $wc.fr
-    ttk::frame $wsubs
+    ttk::frame $wsubs -padding {0 0 0 12}
+    pack  $wsubs  -side top -fill x
+    
+    array set strA {
+	ask     "Always ask"
+	accept  "Auto-accept"
+	reject  "Auto-reject"
+    }
 
-    ttk::label $wsubs.la1 -text "[mc prefsuif2]..."
-    ttk::label $wsubs.lin -text "...[mc prefsuis2]:"
+    ttk::label $wsubs.la1  -text "[mc prefsuif2]..."
     ttk::label $wsubs.lnot -text "...[mc prefsuisnot2]:"
+    ttk::label $wsubs.lin  -text "...[mc prefsuis2]:"
 
-    ttk::separator $wsubs.s -orient vertical
+    set mDef [list \
+      [list [mc $strA(ask)] -value ask] \
+      [list [mc $strA(accept)] -value accept] \
+      [list [mc $strA(reject)] -value reject] ]
     
-    grid  $wsubs.la1  -         -            -sticky w
-    grid  $wsubs.lin  -         $wsubs.lnot  -sticky w
-    grid  x           $wsubs.s  x            -sticky ns -padx 16
+    ui::optionmenu $wsubs.min -menulist $mDef \
+      -variable [namespace current]::tmpp(subsc,inrost)
+    ui::optionmenu $wsubs.mnot -menulist $mDef \
+      -variable [namespace current]::tmpp(subsc,notinrost)
+    set minsize [$wsubs.min maxwidth]
     
-    foreach  \
-      val { accept        reject        ask }   \
-      txt { "Auto-accept" "Auto-reject" "Always ask" } {
-	foreach val2 {inrost notinrost} {
-	    ttk::radiobutton $wsubs.$val2$val \
-	      -text [mc $txt] -value $val  \
-	      -variable [namespace current]::tmpJPrefs(subsc,$val2)	      
+    grid  $wsubs.la1   -  -         -sticky w
+    grid  x  $wsubs.lnot  $wsubs.mnot  -padx 2 -pady 2
+    grid  x  $wsubs.lin   $wsubs.min   -padx 2 -pady 2
+    grid $wsubs.lin $wsubs.lnot -sticky e
+    grid $wsubs.min $wsubs.mnot -sticky ew
+    grid columnconfigure $wsubs 0 -minsize 24
+    grid columnconfigure $wsubs 2 -weight 1 -minsize $minsize
+    
+    
+    if {0} {
+	# BU:
+	ttk::separator $wsubs.s -orient vertical
+	
+	grid  $wsubs.la1  -         -            -sticky w
+	grid  $wsubs.lin  -         $wsubs.lnot  -sticky w
+	grid  x           $wsubs.s  x            -sticky ns -padx 16
+	
+	foreach key {ask accept reject} {
+	    set str $strA($key)
+	    foreach val2 {inrost notinrost} {
+		ttk::radiobutton $wsubs.$val2$key \
+		  -text [mc $str] -value $key  \
+		  -variable [namespace current]::tmpp(subsc,$val2)	      
+	    }
+	    grid  $wsubs.inrost$key  ^  $wsubs.notinrost$key  -sticky w
 	}
-	grid  $wsubs.inrost$val  ^  $wsubs.notinrost$val  -sticky w
     }
     
+    # Auto dialogs:
+    set wtimer $wc.timer
+    ttk::frame $wtimer -padding {0 0 0 12}
+    pack  $wtimer -side top -fill x
+    
+    set autoCmd [list PrefsSetEntryState $wtimer.e tmpp(subsc,timer)]
+    
+    ttk::checkbutton $wtimer.c -text "If auto-accept/reject show dialog with timer:" \
+      -variable [namespace current]::tmpp(subsc,timer) \
+      -command [namespace code $autoCmd]
+    ttk::label $wtimer.l -text "The dialog is closed after (seconds):"
+    ttk::entry $wtimer.e -width 3 \
+      -textvariable [namespace current]::tmpp(subsc,timer-secs) \
+      -validate key -validatecommand [namespace code {ValidSecs %S}]
+    
+    grid  $wtimer.c  -          -  -sticky w
+    grid  x          $wtimer.l  $wtimer.e  -sticky w
+
+    grid columnconfigure $wtimer 0 -minsize 24
+    grid columnconfigure $wtimer 2 -weight 1    
+    
+    eval $autoCmd
+    
+    # Default group:
     set wauto $wc.auto
     ttk::frame $wauto
+    pack  $wauto  -side top -fill x
+
+    set groupCmd [list PrefsSetEntryState $wauto.ent tmpp(subsc,auto)]
+
     ttk::checkbutton $wauto.sub -text "[mc prefsuauto2]:" \
-      -variable [namespace current]::tmpJPrefs(subsc,auto)
-    ttk::label $wauto.la -text [mc {Default group}]:
+      -variable [namespace current]::tmpp(subsc,auto) \
+      -command [namespace code $groupCmd]
+    ttk::label $wauto.la -text [mc "Default group"]:
     ttk::entry $wauto.ent -font CociSmallFont \
-      -textvariable [namespace current]::tmpJPrefs(subsc,group)
+      -textvariable [namespace current]::tmpp(subsc,group)
     
     grid  $wauto.sub  -           -
     grid  x           $wauto.la   $wauto.ent
     grid $wauto.sub -sticky w
     grid $wauto.ent -sticky ew
-    grid columnconfigure $wauto 0 -minsize 32
+    grid columnconfigure $wauto 0 -minsize 24
     grid columnconfigure $wauto 2 -weight 1
     
-    pack  $wsubs  -side top -fill x
-    pack  $wauto  -side top -fill x -pady 12
+    eval $groupCmd
+    
+    return $page
+}
+
+proc ::Subscribe::PrefsSetEntryState {winL varName} {
+    upvar $varName var
+    if {$var} {
+	foreach w $winL {
+	    $w state {!disabled}
+	}
+    } else {
+	foreach w $winL {
+	    $w state {disabled}
+	}
+    }   
+}
+
+proc ::Subscribe::ValidSecs {s} {
+    if {[regexp {^[0-9]*$} $s]} {
+	return 1
+    } else {
+	bell
+	return 0
+    }
 }
 
 proc ::Subscribe::SavePrefsHook {} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
     
-    array set jprefs [array get tmpJPrefs]
-    unset tmpJPrefs
+    array set jprefs [array get tmpp]
+    unset tmpp
 }
 
 proc ::Subscribe::CancelPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
 	
-    foreach key [array names tmpJPrefs] {
-	if {![string equal $jprefs($key) $tmpJPrefs($key)]} {
+    foreach key [array names tmpp] {
+	if {![string equal $jprefs($key) $tmpp($key)]} {
 	    ::Preferences::HasChanged
 	    break
 	}
@@ -1589,10 +1698,10 @@ proc ::Subscribe::CancelPrefsHook {} {
 
 proc ::Subscribe::UserDefaultsHook {} {
     upvar ::Jabber::jprefs jprefs
-    variable tmpJPrefs
+    variable tmpp
 	
-    foreach key [array names tmpJPrefs] {
-	set tmpJPrefs($key) $jprefs($key)
+    foreach key [array names tmpp] {
+	set tmpp($key) $jprefs($key)
     }
 }
 
