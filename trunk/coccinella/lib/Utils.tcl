@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.74 2007-11-01 15:59:00 matben Exp $
+# $Id: Utils.tcl,v 1.75 2007-11-20 13:40:57 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -402,7 +402,7 @@ proc ::Utils::OpenURLInBrowser {url} {
 
 
 proc ::Utils::ValidMinutes {str} {
-    if {[regexp {[0-9]*} $str match]} {
+    if {[regexp {^[0-9]*$} $str]} {
 	return 1
     } else {
 	bell
