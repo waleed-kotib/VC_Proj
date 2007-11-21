@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.243 2007-11-20 15:27:44 matben Exp $
+# $Id: Chat.tcl,v 1.244 2007-11-21 08:26:43 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -3520,29 +3520,73 @@ proc ::Chat::SendChatState {chattoken state} {
     }
 }
 
-# Chat::AAStart, AACancel --
+# Chat::AAStart, AACancel, AACmd --
 #
 #       Some functions to handle auto-away on hidden tabs, if activated.
 
 proc ::Chat::AAStart {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
+    upvar ::Jabber::jprefs jprefs
 
-    puts "::Chat::AAStart chattoken=$chattoken"
+    #puts "::Chat::AAStart chattoken=$chattoken"
     
-
-    
-    
+    if {$jprefs(autoaway) && [string is integer -strict $jprefs(awaymin)]} {
+	set ms [expr {60*1000*$jprefs(awaymin)}]
+	set id [after $ms [namespace code [list AACmd $chattoken away]]]
+	set chatstate(aa,id-away) $id
+    }
+    if {$jprefs(xautoaway) && [string is integer -strict $jprefs(xawaymin)]} {
+	set ms [expr {60*1000*$jprefs(xawaymin)}]
+	set id [after $ms [namespace code [list AACmd $chattoken xa]]]
+	set chatstate(aa,id-xa) $id
+    }
 }
 
 proc ::Chat::AACancel {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
+    upvar ::Jabber::jstate jstate
 
-    puts "::Chat::AACancel chattoken=$chattoken"
+    #puts "::Chat::AACancel chattoken=$chattoken"
     
+    if {[info exists chatstate(aa,id-away)]} {
+	after cancel $chatstate(aa,id-away)
+    }
+    if {[info exists chatstate(aa,id-xa)]} {
+	after cancel $chatstate(aa,id-xa)
+    }    
+    if {[info exists chatstate(aa,show)]} {
+	::Jabber::SetStatus $jstate(show) -status $jstate(status) \
+	  -to $chatstate(jid)
+	unset chatstate(aa,show)
+    }
+}
 
+proc ::Chat::AACmd {chattoken show} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+
+    #puts "::Chat::AACmd chattoken=$chattoken"
     
+    # Auto away and extended away are only set when the
+    # current status has a lower priority than away or xa respectively.
+    set currPrio [::AutoAway::GetPriorityForShow $jstate(show)]
+    set aaPrio   [::AutoAway::GetPriorityForShow $show]
+    if {$currPrio >= $aaPrio} {
+	return
+    }
+
+    # Keep track of directed presence so we can "revoke" it when active.
+    set chatstate(aa,show) $show
+    if {$show eq "xa"} {
+	set status $jprefs(xawaymsg)
+    } else {
+	set status $jprefs(${show}msg)
+    }
+    ::Jabber::SetStatus $show -status $status -to $chatstate(jid)
 }
 
 # Preference page --------------------------------------------------------------
