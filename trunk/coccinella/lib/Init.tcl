@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.82 2007-11-13 07:23:52 matben Exp $
+# $Id: Init.tcl,v 1.83 2007-11-21 13:08:44 matben Exp $
 
 namespace eval ::Init {
     
@@ -63,9 +63,18 @@ proc ::Init::SetThis {mainScript} {
     set this(themesPath)        [file join $path themes]
     set this(soundsPath)        [file join $path sounds]
     set this(httpdRootPath)     $path
+    set this(isAppWrapped)      0
     set this(appPath)           $path
+
+    # 'appPath' points to folder which contains:
+    #    Coccinella.tcl       if run from sources
+    #    Coccinella*.exe      on Windows
+    #    Coccinella*.bin      on Unix
+    #    Coccinella*.app      on Mac OS X
+    
     if {[info exists starkit::topdir]} {
 	set this(appPath) [file dirname [info nameofexecutable]]
+	set this(isAppWrapped) 1
     } elseif {$this(platform) eq "macosx"} {
 	
 	# If we have an application bundle we must get the .app folder.
@@ -79,6 +88,7 @@ proc ::Init::SetThis {mainScript} {
 		set idx [lsearch -glob $psplit *.app]
 		incr idx -1
 		set this(appPath) [eval file join [lrange $psplit 0 $idx]]
+		set this(isAppWrapped) 1
 	    }
 	}
     }
@@ -365,8 +375,13 @@ proc ::Init::GetAppDrivePrefsPath {} {
 
 proc ::Init::GetAppDirPrefsPath {} {
     global  this
-    set psplit [file split $this(appPath)]
-    return [eval file join [lrange $psplit 0 end-1] $this(prefsDriverDir)]
+    if {$this(isAppWrapped)} {
+	set path [file join $this(appPath) $this(prefsDriverDir)]
+    } else {
+	set psplit [file split $this(appPath)]
+	set path [eval file join [lrange $psplit 0 end-1] $this(prefsDriverDir)]
+    }
+    return path
 }
 
 # Init::SetPrefsPaths --
