@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.11 2007-11-20 15:27:44 matben Exp $
+# $Id: AutoAway.tcl,v 1.12 2007-11-21 08:26:43 matben Exp $
 
 package require idletime
 
@@ -51,6 +51,11 @@ namespace eval ::AutoAway {
     }
     variable savedShowStatus {available ""}
     variable wasAutoLoggedOut 0
+}
+
+proc ::AutoAway::GetPriorityForShow {show} {
+    variable statusPriority
+    return $statusPriority($show)
 }
 
 proc ::AutoAway::LoginHook {} {
@@ -269,8 +274,8 @@ proc ::AutoAway::BuildPage {page} {
 
     SetEntryState [list $waa.eminaw $waa.eawmsg] $varName
 
-    grid  $waa.lminaw  -         -            $waa.eminaw
-    grid  x            $waa.law  $waa.eawmsg  -
+    grid  $waa.lminaw  -         -            $waa.eminaw  -pady 1
+    grid  x            $waa.law  $waa.eawmsg  -            -pady 1
     grid  $waa.paw
     grid $waa.lminaw -sticky w
     grid $waa.eawmsg -sticky ew
@@ -289,8 +294,8 @@ proc ::AutoAway::BuildPage {page} {
 
     SetEntryState [list $waa.eminxa $waa.examsg] $varName
 
-    grid  $waa.lminxa  -         -            $waa.eminxa
-    grid  x            $waa.lxa  $waa.examsg  -
+    grid  $waa.lminxa  -         -            $waa.eminxa  -pady 1
+    grid  x            $waa.lxa  $waa.examsg  -            -pady 1
     grid  $waa.pxa
     grid $waa.lminxa -sticky w
     grid $waa.eawmsg -sticky ew    
@@ -310,8 +315,8 @@ proc ::AutoAway::BuildPage {page} {
 
     SetEntryState [list $waa.elomin $waa.elomsg $waa.cli] $varName
     
-    grid  $waa.clo  -         -            $waa.elomin
-    grid  x         $waa.llo  $waa.elomsg  -
+    grid  $waa.clo  -         -            $waa.elomin  -pady 1
+    grid  x         $waa.llo  $waa.elomsg  -            -pady 1
     grid  x         $waa.cli  -            -
     grid $waa.clo -sticky w
     grid $waa.cli -sticky w
