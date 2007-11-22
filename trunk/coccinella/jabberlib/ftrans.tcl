@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.22 2007-09-28 07:50:10 matben Exp $
+# $Id: ftrans.tcl,v 1.23 2007-11-22 15:21:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -27,8 +27,6 @@
 #      jlibName filetransfer ifree sid
 #      
 ############################# CHANGES ##########################################
-#
-#       0.1         first version
 
 package require jlib		
 package require jlib::si
@@ -58,9 +56,7 @@ namespace eval jlib::ftrans {
 #       when we receive a file-transfer query.
 
 proc jlib::ftrans::registerhandler {clientProc} {
-    
     variable handler
-    
     set handler $clientProc
 }
 
@@ -73,8 +69,6 @@ proc jlib::ftrans::init {jlibname args} {
     }
     
     # Register this feature with disco.
-    
-    
 }
 
 # jlib::ftrans::cmdproc --
@@ -90,15 +84,12 @@ proc jlib::ftrans::init {jlibname args} {
 #       none.
 
 proc jlib::ftrans::cmdproc {jlibname cmd args} {
-    
-    # Which command? Just dispatch the command to the right procedure.
     return [eval {$cmd $jlibname} $args]
 }
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
 # These are all functions used by the initiator (sender).
-
 
 # jlib::ftrans::send --
 # 
@@ -117,7 +108,7 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
     upvar ${jlibname}::ftrans::istate istate
     #puts "jlib::ftrans::send $args"
 
-    set sid [jlib::generateuuid]
+    set sid [jlib::util::from args -sid [jlib::generateuuid]]
     set fileE [eval {i_constructor $jlibname $sid $jid $cmd} $args]
 
     # The 'block-size' is crucial here; must tell the stream in question.
@@ -128,30 +119,13 @@ proc jlib::ftrans::send {jlibname jid cmd args} {
     return $sid
 }
 
-# jlib::ftrans::element --
-# 
-#       Makes an ftrans instance and returns the si element.
-#       It is like 'send' but made for embedding.
-
-proc jlib::ftrans::element {jlibname jid cmd args} {
-    variable xmlns
-    upvar ${jlibname}::ftrans::istate istate
-    
-    set sid [jlib::generateuuid]
-    set fileE [eval {i_constructor $jlibname $sid $jid $cmd} $args]
-    set cmd [namespace current]::open_cb
-
-    set siE [jlib::si::i_constructor $jlibname $sid $jid $istate($sid,-mime) \
-      $xmlns(ftrans) $fileE $cmd -block-size $istate($sid,-block-size)]
-    
-    return $siE
-}
-
 # jlib::ftrans::i_constructor --
 # 
 #       This is the initiator constructor of a file transfer object.
 #       Makes a new ftrans instance but doesn't do any networking.
-#       Returns the file element.
+#       
+# Results:
+#       The file element.
 
 proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
     variable xmlns
@@ -160,9 +134,6 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
     # 4096 is the recommended block-size
     array set opts {
 	-progress     ""
-	-description  ""
-	-date         ""
-	-hash         ""
 	-block-size   4096 
 	-mime         application/octet-stream
     }
@@ -192,6 +163,7 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
 	    if {![file readable $fileName]} {
 		return -code error "file \"$fileName\" is not readable"
 	    }
+	    
 	    # File open is not done until we get the 'open_cb'.
 	    set size [file size $fileName]
 	    set name [file tail $fileName]
@@ -216,21 +188,59 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
 	    set istate($sid,fileName) $fileName
 	}
     }
-    set subElems [list]
-    if {[string length $opts(-description)]} {
-	set descE [wrapper::createtag "desc" -chdata $opts(-description)]
-	set subElems [list $descE]
+    
+    return [eval {element $name $size} $args]
+}
+
+# jlib::ftrans::element --
+# 
+#       Just create the file element. Nothing cached. Stateless.
+#       
+#       <file xmlns='http://jabber.org/protocol/si/profile/file-transfer'
+#           name='NDA.pdf'
+#           size='138819'
+#           date='2004-01-28T10:07Z'>
+#         <desc>All Shakespearean characters must sign and return this NDA ASAP</desc>
+#       </file> 
+#       
+# Arguments:
+#       name
+#       size
+#       args: -description -date -hash
+#       
+# Result:
+#       The file element.
+
+proc jlib::ftrans::element {name size args} {
+    variable xmlns
+    
+    array set argsA $args
+    
+    set subEL [list]
+    if {[info exists argsA(-description)]} {
+	set descE [wrapper::createtag "desc" -chdata $argsA(-description)]
+	set subEL [list $descE]
     }
     set attrs [list xmlns $xmlns(ftrans) name $name size $size]
-    if {[string length $opts(-date)]} {
-	lappend attrs date $opts(-date)
+    if {[info exists argsA(-date)]} {
+	lappend attrs date $argsA(-date)
     }
-    if {[string length $opts(-hash)]} {
-	lappend attrs hash $opts(-hash)
+    if {[info exists argsA(-hash)]} {
+	lappend attrs hash $argsA(-hash)
     }    
-    set fileE [wrapper::createtag "file" -attrlist $attrs -subtags $subElems]
+    set fileE [wrapper::createtag "file" -attrlist $attrs -subtags $subEL]
     
     return $fileE
+}
+
+proc jlib::ftrans::sipub_element {jlibname name size fileName mime args} {
+    variable xmlns
+    
+    set fileE [jlib::ftrans::element $name $size]
+    set sipubE [jlib::sipub::element [$jlibname myjid] $xmlns(ftrans) \
+      $fileE $fileName $mime]
+
+    return $sipubE
 }
 
 # jlib::ftrans::open_cb --
@@ -238,12 +248,11 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
 #       This is a transports way of reporting result from it's 'open' method.
 
 proc jlib::ftrans::open_cb {jlibname type sid subiq} {
-    
-    #puts "jlib::ftrans::open_cb (i)"
-    
     variable xmlns
     upvar ${jlibname}::ftrans::istate istate
     
+    #puts "jlib::ftrans::open_cb (i)"
+        
     if {[string equal $type "error"]} {
 	set istate($sid,status) "error"
 	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid $subiq]
@@ -265,8 +274,7 @@ proc jlib::ftrans::open_cb {jlibname type sid subiq} {
 #       Invokes the si's 'send_data' method which in turn calls the right
 #       stream handler for this.
 
-proc jlib::ftrans::send_file_chunk {jlibname sid} {
-    
+proc jlib::ftrans::send_file_chunk {jlibname sid} {    
     upvar ${jlibname}::ftrans::istate istate
     #puts "jlib::ftrans::send_file_chunk (i) sid=$sid"
     
@@ -324,8 +332,7 @@ proc jlib::ftrans::send_file_chunk {jlibname sid} {
 # 
 #       Only errors should be reported.
 
-proc jlib::ftrans::send_chunk_error_cb {jlibname sid} {
-    
+proc jlib::ftrans::send_chunk_error_cb {jlibname sid} {    
     upvar ${jlibname}::ftrans::istate istate
     #puts "jlib::ftrans::send_chunk_error_cb (i)"
 
@@ -333,8 +340,7 @@ proc jlib::ftrans::send_chunk_error_cb {jlibname sid} {
     ifree $jlibname $sid
 }
 
-proc jlib::ftrans::close_cb {jlibname type sid subiq} {
-        
+proc jlib::ftrans::close_cb {jlibname type sid subiq} {        
     upvar ${jlibname}::ftrans::istate istate
     #puts "jlib::ftrans::close_cb (i)"
 
@@ -348,7 +354,6 @@ proc jlib::ftrans::close_cb {jlibname type sid subiq} {
 # @@@ NEVER TESTED
 #
 proc jlib::ftrans::ireset {jlibname sid} {
-
     upvar ${jlibname}::ftrans::istate istate
     
     if {[info exists istate($sid,aid)]} {
@@ -363,8 +368,7 @@ proc jlib::ftrans::ireset {jlibname sid} {
 # 
 #       Returns current open transfers we have initiated.
 
-proc jlib::ftrans::initiatorinfo {jlibname} {
-    
+proc jlib::ftrans::initiatorinfo {jlibname} {   
     upvar ${jlibname}::ftrans::istate istate
 
     set iList [list]
@@ -380,8 +384,7 @@ proc jlib::ftrans::initiatorinfo {jlibname} {
     return $iList
 }
 
-proc jlib::ftrans::getinitiatorstate {jlibname sid} {
-    
+proc jlib::ftrans::getinitiatorstate {jlibname sid} {    
     upvar ${jlibname}::ftrans::istate istate
     
     set opts [list]
@@ -393,7 +396,6 @@ proc jlib::ftrans::getinitiatorstate {jlibname sid} {
 }
 
 proc jlib::ftrans::ifree {jlibname sid} {
-
     upvar ${jlibname}::ftrans::istate istate
     #puts "jlib::ftrans::ifree (i) sid=$sid"
 
@@ -420,11 +422,11 @@ proc jlib::ftrans::ifree {jlibname sid} {
 #       Alternative 1 is the normal situation for manual file transfers,
 #       and 2 is used when we receive embedded si-elements.
 
-proc jlib::ftrans::open_handler {jlibname sid jid siE respCmd args} {
-    
+proc jlib::ftrans::open_handler {jlibname sid jid siE respCmd args} {    
     variable handler
     variable xmlns
     upvar ${jlibname}::ftrans::tstate tstate
+    upvar ${jlibname}::ftrans::sid_handler sid_handler
     #puts "jlib::ftrans::open_handler (t)"
     
     if {![info exists handler]} {
@@ -444,16 +446,23 @@ proc jlib::ftrans::open_handler {jlibname sid jid siE respCmd args} {
 	lappend opts -queryE $siE
 	
 	# Make a call up to application level to pick destination file.
-	# This is an idle call in order to not block.
-	set cmd [list [namespace current]::accept $jlibname $sid]
-	after idle [list eval $handler  \
-	  [list $jlibname $jid $tstate($sid,name) $tstate($sid,size) $cmd] $opts]
+	# This is an idle call in order not to block.
+	set cb [list [namespace current]::accept $jlibname $sid]
+	
+	# For sipub we have a registered handler for this sid.
+	if {[info exists sid_handler($sid)]} {
+	    set cmd $sid_handler($sid)
+	    unset sid_handler($sid)
+	} else {
+	    set cmd $handler
+	}
+	after idle [list eval $cmd \
+	  [list $jlibname $jid $tstate($sid,name) $tstate($sid,size) $cb] $opts]
     }
     return
 }
 
-proc jlib::ftrans::t_constructor {jlibname sid jid siE args} {
-    
+proc jlib::ftrans::t_constructor {jlibname sid jid siE args} {    
     variable handler
     variable xmlns
     upvar ${jlibname}::ftrans::tstate tstate
@@ -502,6 +511,16 @@ proc jlib::ftrans::t_constructor {jlibname sid jid siE args} {
     return
 }
 
+# jlib::ftrans::register_sid_handler --
+# 
+#       Used by sipub to take over from the client handler for this sid.
+
+proc jlib::ftrans::register_sid_handler {jlibname sid cmd} {
+    upvar ${jlibname}::ftrans::sid_handler sid_handler
+    puts "jlib::ftrans::register_sid_handler (t)"
+    set sid_handler($sid) $cmd
+}
+
 # jlib::ftrans::accept --
 # 
 #       Used by profile handler to accept/reject file transfer.
@@ -512,8 +531,7 @@ proc jlib::ftrans::t_constructor {jlibname sid jid siE args} {
 #                   -command
 #                   -progress
 
-proc jlib::ftrans::accept {jlibname sid accepted args} {
-    
+proc jlib::ftrans::accept {jlibname sid accepted args} {    
     upvar ${jlibname}::ftrans::tstate tstate
     
     array set opts {
@@ -545,8 +563,7 @@ proc jlib::ftrans::accept {jlibname sid accepted args} {
 # 
 #       Registered handler when receiving data. Called indirectly from stream.
 
-proc jlib::ftrans::recv {jlibname sid data} {
-    
+proc jlib::ftrans::recv {jlibname sid data} {    
     upvar ${jlibname}::ftrans::tstate tstate
     #puts "jlib::ftrans::recv (t)"
     
@@ -574,8 +591,7 @@ proc jlib::ftrans::recv {jlibname sid data} {
 #       This is called both for normal close and when an error occured
 #       in the stream to close prematurely.
 
-proc jlib::ftrans::close_handler {jlibname sid {errmsg ""}} {
-    
+proc jlib::ftrans::close_handler {jlibname sid {errmsg ""}} {    
     upvar ${jlibname}::ftrans::tstate tstate
     #puts "jlib::ftrans::close_handler (t)"
     
@@ -593,8 +609,7 @@ proc jlib::ftrans::close_handler {jlibname sid {errmsg ""}} {
     tfree $jlibname $sid
 }
 
-proc jlib::ftrans::data {jlibname sid} {
-    
+proc jlib::ftrans::data {jlibname sid} {    
     return $tstate($sid,data)
 }
 
@@ -603,7 +618,6 @@ proc jlib::ftrans::data {jlibname sid} {
 #       Resets are closes down target side file-transfer during transport.
 
 proc jlib::ftrans::treset {jlibname sid} {
-
     upvar ${jlibname}::ftrans::tstate tstate
     #puts "jlib::ftrans::treset (t)"
     
@@ -624,8 +638,7 @@ proc jlib::ftrans::treset {jlibname sid} {
 # 
 #       Returns current target transfers.
 
-proc jlib::ftrans::targetinfo {jlibname} {
-    
+proc jlib::ftrans::targetinfo {jlibname} {    
     upvar ${jlibname}::ftrans::tstate tstate
 
     set tList [list]
@@ -642,7 +655,6 @@ proc jlib::ftrans::targetinfo {jlibname} {
 }
 
 proc jlib::ftrans::gettargetstate {jlibname sid} {
-    
     upvar ${jlibname}::ftrans::tstate tstate
     
     set opts [list]
@@ -654,7 +666,6 @@ proc jlib::ftrans::gettargetstate {jlibname sid} {
 }
 
 proc jlib::ftrans::terror {jlibname sid {errormsg ""}} {
-    
     upvar ${jlibname}::ftrans::tstate tstate
     #puts "jlib::ftrans::terror (t) errormsg=$errormsg"
     
@@ -668,7 +679,6 @@ proc jlib::ftrans::terror {jlibname sid {errormsg ""}} {
 }
 
 proc jlib::ftrans::tfree {jlibname sid} {
-
     upvar ${jlibname}::ftrans::tstate tstate
     #puts "jlib::ftrans::tfree (t) sid=$sid"
 
