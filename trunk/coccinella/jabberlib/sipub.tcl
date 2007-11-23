@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: sipub.tcl,v 1.4 2007-11-23 09:04:35 matben Exp $
+# $Id: sipub.tcl,v 1.5 2007-11-23 15:25:22 matben Exp $
 # 
 # NB: There are three different id's floating around:
 #     1) iq-get/result related
@@ -166,43 +166,8 @@ proc jlib::sipub::get_element {xmldata} {
     return [wrapper::getchilddeep $xmldata [list [list sipub $xmlns(sipub)]]]
 }
 
-# jlib::sipub::get --
-#
-#       Request to get the file associated with a sipub element.
-#       It is like doing a client HTTP get url request.
-#       We shall typically provide -command, -progress, and -channel.
-#       
-# Arguments:
-#       xmldata     complete message element or whatever.
-#       args:       -channel
-#                   -command
-#                   -progress
-#                   
-# Result:
-#       si pub id.
-
-proc jlib::sipub::get {jlibname xmldata args} {
-    variable xmlns
-    variable state
-    
-    puts "jlib::sipub::get"
-    set sipubE [wrapper::getchilddeep $xmldata [list [list sipub $xmlns(sipub)]]]
-    
-    # Note that we use the sipub announced from attribute if exists!
-    set from [wrapper::getattribute $sipubE from]
-    if {$from eq ""} {
-	set from [wrapper::getattribute $xmldata from]
-    }
-    set spid [wrapper::getattribute $sipubE id]
-    
-    # Need a state array here to keep track of callbacks etc.
-    set state($spid,args) $args
-    
-    # Request to get file.
-    start $jlibname $from $spid [namespace code [list get_cb $jlibname $spid]]
-    
-    return $spid
-}
+# NB: We have a separate 'start' command in order to catch the response and
+#     obtain the 'sid' which is typically needed to control the file transfer.
 
 # jlib::sipub::start --
 # 
@@ -247,16 +212,43 @@ proc jlib::sipub::get_cb {jlibname spid type startingE} {
     }
 }
 
-proc jlib::sipub::si_handler {spid jlibname jid name size cmd args} {
+# jlib::sipub::set_accept_handler --
+# 
+#       This is normally called as a response to the 'start' command's
+#       callback when we get a sipub 'starting' element.
+#       We shall typically provide -command, -progress, and -channel.
+#       
+# Arguments:
+#       xmldata     complete message element or whatever.
+#       args:       -channel
+#                   -command
+#                   -progress
+#                   
+# Result:
+#       none
+
+proc jlib::sipub::set_accept_handler {jlibname sid args} {
+    variable state
+
+    # This is just kept until we get the si-callback.
+    set state($sid,args) $args
+
+    # We shall be prepared to get the si-set request.
+    $jlibname filetransfer register_sid_handler $sid \
+      [namespace code [list si_handler $sid]]
+    return
+}
+
+proc jlib::sipub::si_handler {sid jlibname jid name size cmd args} {
     variable state
     
-    #puts "jlib::sipub::si_handler $spid $jid $name $size $cmd $args"
+    puts "jlib::sipub::si_handler sid=$sid"
 
     # We requested this file using 'sipub::get' in the first place so
     # therefore accept the stream.
     # We also provide all the arguments -channel etc.
-    uplevel #0 $cmd 1 $state($spid,args)
-    unset state($spid,args)
+    uplevel #0 $cmd 1 $state($sid,args)
+    unset state($sid,args)
 }
 
 # We have to do it here since need the initProc before doing this.
@@ -298,7 +290,23 @@ if {0} {
     
     set fileName /Users/matben/Desktop/splash.svg
     set fd [open $fileName.tmp w]
-    $jlib sipub get $messageE -channel $fd -command command -progress progress
+    
+    proc start_cb {type startingE} {
+	puts "start_cb type=$type"
+	if {$type eq "result"} {
+	    set sid [wrapper::getattribute $startingE sid]
+	    $::jlib sipub set_accept_handler $sid \
+	      -channel $::fd -command command -progress progress
+	}
+    }
+    set sipubE [wrapper::getchilddeep $messageE \
+      [list [list sipub $jlib::sipub::xmlns(sipub)]]]
+    set from [wrapper::getattribute $sipubE from]
+    if {$from eq ""} {
+	set from [wrapper::getattribute $messageE from]
+    }
+    set spid [wrapper::getattribute $sipubE id]
+    $jlib sipub start $from $spid start_cb
     
 }
 

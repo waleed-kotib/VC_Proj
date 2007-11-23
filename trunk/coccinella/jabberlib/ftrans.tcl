@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.23 2007-11-22 15:21:54 matben Exp $
+# $Id: ftrans.tcl,v 1.24 2007-11-23 15:25:22 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -233,10 +233,26 @@ proc jlib::ftrans::element {name size args} {
     return $fileE
 }
 
+# jlib::ftrans::uri --
+# 
+#       Create a sipub uri that references a local file.
+
+proc jlib::ftrans::uri { fileName mime} {
+    variable cache
+   
+    
+    return $uri
+}
+
+# jlib::ftrans::sipub_element --
+# 
+#       This creates a new sipub instance. Typically only used for normal
+#       messages. For groupchats, pubsub etc. you must not use this one.
+
 proc jlib::ftrans::sipub_element {jlibname name size fileName mime args} {
     variable xmlns
     
-    set fileE [jlib::ftrans::element $name $size]
+    set fileE [element $name $size]
     set sipubE [jlib::sipub::element [$jlibname myjid] $xmlns(ftrans) \
       $fileE $fileName $mime]
 
@@ -517,7 +533,7 @@ proc jlib::ftrans::t_constructor {jlibname sid jid siE args} {
 
 proc jlib::ftrans::register_sid_handler {jlibname sid cmd} {
     upvar ${jlibname}::ftrans::sid_handler sid_handler
-    puts "jlib::ftrans::register_sid_handler (t)"
+    #puts "jlib::ftrans::register_sid_handler (t)"
     set sid_handler($sid) $cmd
 }
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.259 2007-11-16 08:27:39 matben Exp $
+# $Id: Jabber.tcl,v 1.260 2007-11-23 15:25:21 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -42,6 +42,7 @@ package require jlib::http
 package require jlib::ibb
 package require jlib::pubsub
 package require jlib::si
+package require jlib::sipub
 package require jlib::vcard
 
 # All jlib scripts we may ever want.
@@ -340,6 +341,7 @@ proc ::Jabber::FactoryDefaults {} {
     
     # Protocol parts
     set jprefs(useSVGT) 0
+    #set jprefs(useSVGT) 1
     
     # Other
     set jprefs(defSubscribe)        1

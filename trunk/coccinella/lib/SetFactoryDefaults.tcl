@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetFactoryDefaults.tcl,v 1.57 2007-09-29 14:12:11 matben Exp $
+# $Id: SetFactoryDefaults.tcl,v 1.58 2007-11-23 15:25:22 matben Exp $
 
 package provide FactoryDefaults 1.0
 
@@ -71,7 +71,7 @@ proc FactoryDefaults { } {
     # File transport method: putget, http, or si.
     # http and si identical from the whiteboards perspective.
     set prefs(trptMethod) putget
-    #set prefs(trptMethod) si
+    set prefs(trptMethod) sipub
         
     # so no server delay is needed
     set prefs(afterStartServer) 0   
