@@ -8,12 +8,15 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: sipub.tcl,v 1.3 2007-11-22 15:21:54 matben Exp $
+# $Id: sipub.tcl,v 1.4 2007-11-23 09:04:35 matben Exp $
 # 
 # NB: There are three different id's floating around:
 #     1) iq-get/result related
-#     2) sipub id
-#     3) si id (stream id)
+#     2) sipub id (spid)
+#     3) si id (stream id, sid) 
+#     
+# @@@ TODO: Move some code to the profile instead since we have hardcoded
+#           the 'filetransfer' profile.
 
 package require jlib		
 package require jlib::si
@@ -29,6 +32,8 @@ namespace eval jlib::sipub {
     jlib::disco::registerfeature $xmlns(sipub)
 
     # We use a static cache array that maps sipub id (spid) to file name and mime.
+    # This seems more practical since the jlib instances may vary between the
+    # sessions.
     variable cache
     
     # Note: jlib::ensamble_register is last in this file!
@@ -71,6 +76,7 @@ proc jlib::sipub::get_cache {} {
 #       any number of file transfers instances, each with its unique 'sid'.
 #       Once a sipub instance is created it can be made to live as long as
 #       the cache is kept.
+#       This shall be called from the profile or application layer.
 #       
 # Results:
 #       sipub element.
@@ -95,9 +101,11 @@ proc jlib::sipub::element {from profile profileE fileName mime} {
 
 # jlib::sipub::handle_get --
 # 
-#       Handles incoming iq-get/sipub stanzas. There must be a sipub object
-#       with matching id (spid).
+#       Handles incoming iq-get/start sipub stanzas. 
+#       There must be a sipub object with matching id (spid).
 #       This has the corresponding role of the HTTP server side GET request.
+#       
+#       NB: We have hardcoded the 'filetransfer' profile.
 
 proc jlib::sipub::handle_get {jlibname from startE args} {
     variable xmlns
@@ -145,14 +153,14 @@ proc jlib::sipub::send_cb {jlibname status sid {subiq ""}} {
 # 
 #       Searches an element recursively to see if there is a sipub element.
 
-proc jlib::sipub::have_sipub {jlibname xmldata} {
+proc jlib::sipub::have_sipub {xmldata} {
     variable xmlns
     
     return [llength [wrapper::getchilddeep $xmldata \
       [list [list sipub $xmlns(sipub)]]]]
 }
 
-proc jlib::sipub::get_element {jlibname xmldata} {
+proc jlib::sipub::get_element {xmldata} {
     variable xmlns
     
     return [wrapper::getchilddeep $xmldata [list [list sipub $xmlns(sipub)]]]
@@ -162,19 +170,22 @@ proc jlib::sipub::get_element {jlibname xmldata} {
 #
 #       Request to get the file associated with a sipub element.
 #       It is like doing a client HTTP get url request.
-#       We shall provide typically -command, -progress, and -channel.
+#       We shall typically provide -command, -progress, and -channel.
 #       
 # Arguments:
 #       xmldata     complete message element or whatever.
 #       args:       -channel
 #                   -command
 #                   -progress
+#                   
+# Result:
+#       si pub id.
 
 proc jlib::sipub::get {jlibname xmldata args} {
     variable xmlns
     variable state
     
-    puts "jlib::sipub::handle_sipub"
+    puts "jlib::sipub::get"
     set sipubE [wrapper::getchilddeep $xmldata [list [list sipub $xmlns(sipub)]]]
     
     # Note that we use the sipub announced from attribute if exists!
@@ -188,8 +199,9 @@ proc jlib::sipub::get {jlibname xmldata args} {
     set state($spid,args) $args
     
     # Request to get file.
-    start $jlibname $from $spid \
-      -command [namespace code [list get_cb $jlibname $spid]]
+    start $jlibname $from $spid [namespace code [list get_cb $jlibname $spid]]
+    
+    return $spid
 }
 
 # jlib::sipub::start --
@@ -197,14 +209,12 @@ proc jlib::sipub::get {jlibname xmldata args} {
 #       Sends a start element. A iq-result/error is expected.
 #       This 'id' must be a matching spid.
 
-proc jlib::sipub::start {jlibname jid id args} {
+proc jlib::sipub::start {jlibname jid id cmd} {
     variable xmlns
 
-    set argsA(-command) ""
-    array set argsA $args
     set startE [wrapper::createtag "start" \
       -attrlist [list xmlns $xmlns(sipub) id $id]]
-    $jlibname send_iq get [list $startE] -to $jid -command $argsA(-command)
+    $jlibname send_iq get [list $startE] -to $jid -command $cmd
 }
 
 # jlib::sipub::get_cb --
@@ -221,25 +231,32 @@ proc jlib::sipub::get_cb {jlibname spid type startingE} {
     if {[wrapper::gettag $startingE] ne "starting"} {
 	return
     }
-    set sid [wrapper::getattribute $startingE id]
+    set sid [wrapper::getattribute $startingE sid]
     
     if {$type eq "result"} {
 	
-	# We shall be prepared to get si-set request.
+	# We shall be prepared to get the si-set request.
 	$jlibname filetransfer register_sid_handler $sid \
 	  [namespace code [list si_handler $spid]]
     } else {
-	
+	array set argsA $state($spid,args)
+	if {[info exists argsA(-command)]} {
+	    uplevel #0 $argsA(-command) $jlibname $sid error
+	}
+	unset state($spid,args)
     }
 }
 
 proc jlib::sipub::si_handler {spid jlibname jid name size cmd args} {
     variable state
     
-    puts "jlib::sipub::si_handler $spid $jid $name $size $cmd $args"
-    
-    
-    
+    #puts "jlib::sipub::si_handler $spid $jid $name $size $cmd $args"
+
+    # We requested this file using 'sipub::get' in the first place so
+    # therefore accept the stream.
+    # We also provide all the arguments -channel etc.
+    uplevel #0 $cmd 1 $state($spid,args)
+    unset state($spid,args)
 }
 
 # We have to do it here since need the initProc before doing this.
