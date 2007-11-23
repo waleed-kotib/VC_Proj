@@ -18,11 +18,27 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.36 2007-10-05 12:49:10 matben Exp $
+# $Id: Taskbar.tcl,v 1.37 2007-11-23 11:18:02 matben Exp $
 
 package require balloonhelp
 
-namespace eval ::Taskbar:: {}
+namespace eval ::Taskbar {
+
+    switch -- [tk windowingsystem] {
+	win32 {
+	    if {[catch {package require Winico}]} {
+		return
+	    }
+	}
+	x11 {
+	    if {[catch {package require tktray}]} {
+		return
+	    }
+	}
+	default { return }
+    }
+    component::define Taskbar "Creates a system tray icon"
+}
 
 proc ::Taskbar::Load {} {
     global  tcl_platform this
@@ -47,7 +63,7 @@ proc ::Taskbar::Load {} {
 	}
     }
         
-    component::register Taskbar "Creates a system tray icon"
+    component::register Taskbar
     
     # Add all event hooks.
     ::hooks::register initHook              ::Taskbar::InitHook
