@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.89 2007-09-25 12:46:27 matben Exp $
+# $Id: JWB.tcl,v 1.90 2007-11-23 15:25:21 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -907,6 +907,7 @@ proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
 
 proc ::JWB::SVGImageImportElem {w cmd args} {
     variable jwbstate
+    upvar ::Jabber::xmppxmlns xmppxmlns
     
     set rest [lrange $cmd 2 end]
     set idx [lsearch $cmd -url]
@@ -922,17 +923,33 @@ proc ::JWB::SVGImageImportElem {w cmd args} {
 	return
     }    
     set jid $jwbstate($w,jid)
+    set tail [file tail $fileName]
+    set size [file size $fileName]
     set mime [::Types::GetMimeTypeForFileName $fileName]
-    set cmd [namespace code [list SVGImageSendCB $w]]
-    set siE [::Jabber::JlibCmd filetransfer element $jid $cmd -file $fileName \
-      -mime $mime]
-    return $siE
-}
 
-proc ::JWB::SVGImageSendCB {w jlib status sid {subiq ""}} {
+    # @@@ TODO: handle case where we chat with specific user in groupchat room!
     
-    #puts "::JWB::SVGImageSendCB w=$w"
-    
+    if {[string equal $jwbstate($w,type) "groupchat"]} {
+	set isRoom 1
+    } elseif {[::Jabber::JlibCmd service isroom $jid]} {
+	set isRoom 1
+    } else {
+	set isRoom 0
+    }
+    if {$isRoom} {
+	set nick [::Jabber::JlibCmd service mynick $jid]
+	set myjid $jid/$nick
+    } else {
+	set myjid [::Jabber::JlibCmd myjid]
+    }
+
+    # Create the sipub element to embed in <image/>
+    set fileE [jlib::ftrans::element $tail $size]
+
+    set sipubE [jlib::sipub::element $myjid $xmppxmlns(file-transfer) \
+      $fileE $fileName $mime]
+
+    return $sipubE
 }
 
 # JWB::DoSendCanvas --
@@ -1378,90 +1395,91 @@ proc ::JWB::GetSVGWBMessageList {w xlist} {
 # JWB::SVGImageHandlerEx --
 # 
 #       Gets called for each image element we find in the document.
-#       It takes care of any si element for getting the image.
+#       It takes care of any sipub element for getting the image.
 #       This is a target handler.
-#       
-#       NB: It wont work for groupchat since we need a sid for each target.
 
 proc ::JWB::SVGImageHandlerEx {w imageE opts} {
     variable jwbstate
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
+    
+    Debug 4 "::JWB::SVGImageHandlerEx imageE=$imageE, opts=$opts"
             
     set wcan [::WB::GetCanvasFromWtop $w]
-    array set attrA [wrapper::getattrlist $imageE]
+    
+    array set optsA [SVGImageAttrToOpts $imageE $opts]
+    set sipubE [jlib::sipub::get_element $imageE]
+    if {![llength $sipubE]} {
+	# error
+	eval {::Import::NewBrokenImage $wcan $optsA(-coords)} [array get optsA]
+	return
+    }
+    set url  [wrapper::getattribute $imageE xlink:href]  
+    set spid [wrapper::getattribute $sipubE id]
+    set mime [wrapper::getattribute $sipubE mime-type] 
+    set from [wrapper::getattribute $sipubE from]
+    
+    # Need to check file cache, MIME types etc.
+    set prep [SVGPrepare $wcan $url $mime [array get optsA]]
+    if {$prep ne ""} {
+	return
+    }
+    
+    ::Jabber::JlibCmd sipub start $from $spid \
+      [namespace code [list SVGImageStartCB $w $imageE]]
+}
+
+proc ::JWB::SVGImageAttrToOpts {imageE opts} {
     
     set aopts [list]
+    array set attrA [wrapper::getattrlist $imageE]
     lappend aopts -coords [list $attrA(x) $attrA(y)] \
       -width $attrA(width) -height $attrA(height) \
       -url $attrA(xlink:href) -tags $attrA(id)
     set aopts [concat $aopts $opts]
     array set aoptsA $aopts
     
-    set siE [wrapper::getfirstchild $imageE si $xmppxmlns(si)]
-    if {![llength $siE]} {
-	# error
-	eval {::Import::NewBrokenImage $wcan $aoptsA(-coords)} [array get aoptsA]
-	return
-    }
-    set url  [wrapper::getattribute $imageE xlink:href]  
-    set sid  [wrapper::getattribute $siE id]
-    set mime [wrapper::getattribute $siE mime-type] 
-    
-
-    # Need to check file cache, MIME types etc.
-    set prep [SVGPrepare $wcan $url $mime [array get aoptsA]]
-    if {$prep ne ""} {
-	return
-    }
-    
-    # @@@ bare JID vs. full JID ??? Must sort out. Always full JID since
-    #     capabilities may differ ???
-    
-    set jid $jwbstate($w,jid)
-
-    set tail [::uriencode::decodefile [file tail $url]]
-    set dstPath [::FileCache::MakeCacheFileName $tail]
-    set fd [open $dstPath w]
-    
-    # Relate this sid to our whiteboard token 'w'.
-    set jwbstate($w,sid,$sid) $sid
-    
-    # 'sid' is our token here.
-    ::Import::ObjectNew $sid $w $dstPath [array get aoptsA]
-            
-    # State array which is our object. 
-    # Keep only until we get an iq-response (::JWB::SVGStreamCB).
-    variable $sid
-    upvar 0 $sid state
-    
-    set state(w)     $w
-    set state(opts)  [array get aoptsA]
-
-    set cmd [namespace code [list SVGStreamCB $sid]]
-    set fopts [list -channel $fd \
-      -progress [namespace code [list SVGImageStreamProgress $w]] \
-      -command  [namespace code [list SVGImageStreamCmd $w]]]
-
-    set err [eval {$jstate(jlib) si t_handler $jid $siE $cmd} $fopts]
-    if {$err ne ""} {
-	close $fd
-	eval {::Import::NewBrokenImage $wcan $aoptsA(-coords)} [array get aoptsA]
-    }
+    return [array get aoptsA]
 }
 
-proc ::JWB::SVGStreamCB {sid type args} {
-    variable $sid
-    upvar 0 $sid state
-    upvar ::Jabber::jstate jstate
+# JWB::SVGImageStartCB --
+# 
+#       This is like our constructor for the file transfer.
+
+proc ::JWB::SVGImageStartCB {w imageE type startingE} {
+    variable jwbstate
     
-    if {$type eq "error"} {
-	$jstate(jlib) si stream_closed $sid
-	array set optsA $state(opts)
-	set wcan [::WB::GetCanvasFromWtop $state(w)]
-	eval {::Import::NewBrokenImage $wcan $optsA(-coords)} $state(opts)
+    Debug 4 "::JWB::SVGImageStartCB"
+    
+    # Some basic error checking.
+    if {[wrapper::gettag $startingE] ne "starting"} {
+	return
     }
-    unset -nocomplain state
+    
+    if {$type eq "result"} {
+	set sid [wrapper::getattribute $startingE sid]
+	set url [wrapper::getattribute $imageE xlink:href]  
+	    
+	set tail [::uriencode::decodefile [file tail $url]]
+	set dstPath [::FileCache::MakeCacheFileName $tail]
+	set fd [open $dstPath w]
+	
+	# Relate this sid to our whiteboard token 'w'.
+	set jwbstate($w,sid,$sid) $sid
+
+	# 'sid' is our token here.
+	::Import::ObjectNew $sid $w $dstPath [SVGImageAttrToOpts $imageE ""]
+
+	# We shall be prepared to get the si-set request.
+	::Jabber::JlibCmd sipub set_accept_handler $sid \
+	  -channel $fd \
+	  -progress [namespace code [list SVGImageStreamProgress $w]] \
+	  -command  [namespace code [list SVGImageStreamCmd $w]]
+    } else {
+	set wcan [::WB::GetCanvasFromWtop $w]
+	array set optsA [SVGImageAttrToOpts $imageE ""]
+	eval {::Import::NewBrokenImage $wcan $optsA(-coords)} [array get optsA]
+    }    
 }
 
 # JWB::SVGPrepare --

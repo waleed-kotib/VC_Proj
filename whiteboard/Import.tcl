@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Import.tcl,v 1.33 2007-09-25 12:46:27 matben Exp $
+# $Id: Import.tcl,v 1.34 2007-11-23 15:25:22 matben Exp $
 
 package require http
 package require httpex
@@ -332,7 +332,7 @@ proc ::Import::DoImport {wcan opts args} {
 		    }
 		    eval {::WB::PutFile $w $fileName $putOpts} $putArgs
 		}
-		http - si {
+		http - sipub {
 		    set id [$wcan find withtag $useTag]
 		    set line [::CanvasUtils::GetOneLinerForAny $wcan $id  \
 		      -uritype http]
