@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: si.tcl,v 1.24 2007-11-22 15:21:54 matben Exp $
+# $Id: si.tcl,v 1.25 2007-11-24 08:18:27 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -497,69 +497,6 @@ proc jlib::si::handle_set {jlibname from siE args} {
 	return 0
     }     
     return 1
-}
-
-# jlib::si::t_handler --
-# 
-#       This shall only be used when we get an embedded si-element which we
-#       respond by an iq-get/si call.
-#       
-# Arguments:
-#       jlibname:   the instance of this jlib.
-#       args:       -channel
-#                   -command
-#                   -progress
-#
-# Results:
-#       empty if OK else an error token.
-
-proc jlib::si::t_handler {jlibname from siE cmd args} {    
-    variable xmlns
-    variable trpt
-    variable prof
-    upvar ${jlibname}::si::tstate tstate
-    
-    #puts "jlib::si::t_handler (t)"
-    
-    # These are the attributes of the si element.
-    array set attr {
-	id          ""
-	mime-type   ""
-	profile     ""
-    }
-    array set attr [wrapper::getattrlist $siE]
-    set sid     $attr(id)
-    set profile $attr(profile)
-    
-    if {![info exists prof($profile,open)]} {
-	return "bad-profile"
-    }
-    set stream [pick_stream $siE]
-    if {![string length $stream]} {
-	return "no-valid-streams"
-    }
-    set profileE [wrapper::getfirstchildwithxmlns $siE $profile]
-    if {![llength $profileE]} {
-	return "bad-request"
-    }
-    set tstate($sid,profile)   $profile
-    set tstate($sid,stream)    $stream
-    set tstate($sid,mime-type) $attr(mime-type)
-    set tstate($sid,-from)     $from
-    foreach {key val} $args {
-	set tstate($sid,$key)  $val
-    }
-    set jid $from
-    
-    # We invoke the target handler without requesting any response.
-    eval $prof($profile,open) [list $jlibname $sid $jid $siE {}] $args
-
-    # Instead we must make an iq-get/si call which is otherwise identical to a
-    # iq-result/si.
-    set siE [t_element $jlibname $sid $profileE]
-    jlib::send_iq $jlibname get [list $siE] -to $jid -command $cmd
-    
-    return
 }
 
 # jlib::si::pick_stream --

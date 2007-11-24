@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.12 2007-11-21 08:26:43 matben Exp $
+# $Id: AutoAway.tcl,v 1.13 2007-11-24 08:18:26 matben Exp $
 
 package require idletime
 
@@ -51,6 +51,9 @@ namespace eval ::AutoAway {
     }
     variable savedShowStatus {available ""}
     variable wasAutoLoggedOut 0
+    
+    # Shall we allow the user to have autoaway on "hidden chat tabs".
+    set ::config(aa,on-hidden-tabs) 0
 }
 
 proc ::AutoAway::GetPriorityForShow {show} {
@@ -75,7 +78,7 @@ proc ::AutoAway::LogoutHook {} {
 }
 
 proc ::AutoAway::InitPrefsHook {} {
-    global  prefs
+    global  prefs config
     upvar ::Jabber::jprefs jprefs
     
     # Auto away page:
@@ -109,6 +112,9 @@ proc ::AutoAway::InitPrefsHook {} {
     ::PrefUtils::Add [list \
       [list ::Jabber::jprefs(aa,on-hidden-tabs)  jprefs_aa_on-hidden-tabs  $jprefs(aa,on-hidden-tabs)]  \
       ]
+    if {!$config(aa,on-hidden-tabs)} {
+	set jprefs(aa,on-hidden-tabs) 0
+    }
     
     variable allKeys
     set allKeys {
@@ -235,6 +241,7 @@ proc ::AutoAway::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::AutoAway::BuildPage {page} {
+    global  config
     upvar ::Jabber::jprefs jprefs
     variable tmpp
     variable allKeys
@@ -325,15 +332,16 @@ proc ::AutoAway::BuildPage {page} {
     grid columnconfigure $waa 0 -minsize 32
     grid columnconfigure $waa 2 -weight 1
 
-    
-    set varName [namespace current]::tmpp(aa,on-hidden-tabs)
-    ttk::checkbutton $waa.htabs -text [mc "Apply auto-away on hidden chat tabs"] \
-      -variable $varName
-    
-    grid  $waa.htabs  -  -  -  -sticky w
-    
-    ::balloonhelp::balloonforwindow $waa.htabs \
-      "If activated then directed auto-away presence will be sent to users on hidden chat tabs"
+    if {$config(aa,on-hidden-tabs)} {
+	set varName [namespace current]::tmpp(aa,on-hidden-tabs)
+	ttk::checkbutton $waa.htabs -text [mc "Apply auto-away on hidden chat tabs"] \
+	  -variable $varName
+	
+	grid  $waa.htabs  -  -  -  -sticky w
+	
+	::balloonhelp::balloonforwindow $waa.htabs \
+	  "If activated then directed auto-away presence will be sent to users on hidden chat tabs"
+    }
 }
 
 proc ::AutoAway::SetEntryState {winL varName} {

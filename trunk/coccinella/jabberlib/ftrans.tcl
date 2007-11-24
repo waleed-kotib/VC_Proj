@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.24 2007-11-23 15:25:22 matben Exp $
+# $Id: ftrans.tcl,v 1.25 2007-11-24 08:18:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -428,15 +428,9 @@ proc jlib::ftrans::ifree {jlibname sid} {
 #       It is called as an iq-set/si handler.
 #       
 #       There are two ways this can work:
-#       1) We provide an respCmd tclProc which is used by the application
-#          layer to either accept or deny the file. The application handler
-#          must be registered. It invokes a callback given any -channel,
-#          -command, and -progess.
-#       2) With an empty respCmd we shall receive the file and provide any
-#          -channel, -command, and -progess.
-#          
-#       Alternative 1 is the normal situation for manual file transfers,
-#       and 2 is used when we receive embedded si-elements.
+#       1) Using the global handler registered by 'registerhandler'
+#       2) Or the for a specific sid, 'register_sid_handler', which is typically
+#          used for sipub.
 
 proc jlib::ftrans::open_handler {jlibname sid jid siE respCmd args} {    
     variable handler
@@ -452,29 +446,28 @@ proc jlib::ftrans::open_handler {jlibname sid jid siE respCmd args} {
     
     set tstate($sid,cmd) $respCmd
     
-    if {$respCmd ne ""} {
-	set opts [list]
-	foreach key {mime desc hash date} {
-	    if {[string length $tstate($sid,$key)]} {
-		lappend opts -$key $tstate($sid,$key)
-	    }
+    set opts [list]
+    foreach key {mime desc hash date} {
+	if {[string length $tstate($sid,$key)]} {
+	    lappend opts -$key $tstate($sid,$key)
 	}
-	lappend opts -queryE $siE
-	
-	# Make a call up to application level to pick destination file.
-	# This is an idle call in order not to block.
-	set cb [list [namespace current]::accept $jlibname $sid]
-	
-	# For sipub we have a registered handler for this sid.
-	if {[info exists sid_handler($sid)]} {
-	    set cmd $sid_handler($sid)
-	    unset sid_handler($sid)
-	} else {
-	    set cmd $handler
-	}
-	after idle [list eval $cmd \
-	  [list $jlibname $jid $tstate($sid,name) $tstate($sid,size) $cb] $opts]
     }
+    lappend opts -queryE $siE
+    
+    # Make a call up to application level to pick destination file.
+    # This is an idle call in order not to block.
+    set cb [list [namespace current]::accept $jlibname $sid]
+    
+    # For sipub we have a registered handler for this sid.
+    if {[info exists sid_handler($sid)]} {
+	set cmd $sid_handler($sid)
+	unset sid_handler($sid)
+    } else {
+	set cmd $handler
+    }
+    after idle [list eval $cmd \
+      [list $jlibname $jid $tstate($sid,name) $tstate($sid,size) $cb] $opts]
+
     return
 }
 

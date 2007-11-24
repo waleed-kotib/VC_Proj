@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.90 2007-11-23 15:25:21 matben Exp $
+# $Id: JWB.tcl,v 1.91 2007-11-24 08:18:27 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -945,7 +945,6 @@ proc ::JWB::SVGImageImportElem {w cmd args} {
 
     # Create the sipub element to embed in <image/>
     set fileE [jlib::ftrans::element $tail $size]
-
     set sipubE [jlib::sipub::element $myjid $xmppxmlns(file-transfer) \
       $fileE $fileName $mime]
 
@@ -1397,6 +1396,8 @@ proc ::JWB::GetSVGWBMessageList {w xlist} {
 #       Gets called for each image element we find in the document.
 #       It takes care of any sipub element for getting the image.
 #       This is a target handler.
+#       
+#       opts:   -tags ... -anchor nw
 
 proc ::JWB::SVGImageHandlerEx {w imageE opts} {
     variable jwbstate
@@ -1425,8 +1426,9 @@ proc ::JWB::SVGImageHandlerEx {w imageE opts} {
 	return
     }
     
+    # We do a sipub request to get the file.
     ::Jabber::JlibCmd sipub start $from $spid \
-      [namespace code [list SVGImageStartCB $w $imageE]]
+      [namespace code [list SVGImageStartCB $w $imageE $opts]]
 }
 
 proc ::JWB::SVGImageAttrToOpts {imageE opts} {
@@ -1446,7 +1448,7 @@ proc ::JWB::SVGImageAttrToOpts {imageE opts} {
 # 
 #       This is like our constructor for the file transfer.
 
-proc ::JWB::SVGImageStartCB {w imageE type startingE} {
+proc ::JWB::SVGImageStartCB {w imageE opts type startingE} {
     variable jwbstate
     
     Debug 4 "::JWB::SVGImageStartCB"
@@ -1468,7 +1470,8 @@ proc ::JWB::SVGImageStartCB {w imageE type startingE} {
 	set jwbstate($w,sid,$sid) $sid
 
 	# 'sid' is our token here.
-	::Import::ObjectNew $sid $w $dstPath [SVGImageAttrToOpts $imageE ""]
+	set optsL [SVGImageAttrToOpts $imageE $opts]
+	::Import::ObjectNew $sid $w $dstPath $optsL
 
 	# We shall be prepared to get the si-set request.
 	::Jabber::JlibCmd sipub set_accept_handler $sid \
@@ -1477,7 +1480,7 @@ proc ::JWB::SVGImageStartCB {w imageE type startingE} {
 	  -command  [namespace code [list SVGImageStreamCmd $w]]
     } else {
 	set wcan [::WB::GetCanvasFromWtop $w]
-	array set optsA [SVGImageAttrToOpts $imageE ""]
+	array set optsA [SVGImageAttrToOpts $imageE $opts]
 	eval {::Import::NewBrokenImage $wcan $optsA(-coords)} [array get optsA]
     }    
 }
