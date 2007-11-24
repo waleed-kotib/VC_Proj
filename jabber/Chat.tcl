@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.244 2007-11-21 08:26:43 matben Exp $
+# $Id: Chat.tcl,v 1.245 2007-11-24 08:18:26 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -186,6 +186,15 @@ namespace eval ::Chat {
         composing,send       active
     }
     
+    # This maps number of open tabs to number of steps we shall decrease 
+    # presence priority.
+    variable busyTabMap
+    array set busyTabMap {
+	2  1
+	3  2
+	4  3
+    }
+    
     # Shall we allow multiple chat threads (and dialogs, tabs) per JID?
     set ::config(chat,allow-multi-thread-per-jid) 0
     
@@ -210,6 +219,9 @@ namespace eval ::Chat {
 	set ::config(chat,notify-recv) 0
 	set ::config(chat,notify-show) 0	
     }
+    
+    # Send global busy presence if we have many tabs open.
+    set ::config(chat,set-busy-presence) 1
     
     # Allow themed chats.
     set ::config(chat,try-themed) 0
@@ -2011,6 +2023,7 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
 }
 
 proc ::Chat::MakeNewPage {dlgtoken threadID jid} {
+    global  config
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
@@ -2034,6 +2047,10 @@ proc ::Chat::MakeNewPage {dlgtoken threadID jid} {
     set chatstate(wpage) $wpage
     set dlgstate(wpage2token,$wpage) $chattoken
     
+    if {$config(chat,set-busy-presence)} {
+	UpdateBusyPresence
+    }
+    
     return $chattoken
 }
 
@@ -2050,6 +2067,7 @@ proc ::Chat::CloseThreadPage {chattoken} {
 }
 
 proc ::Chat::DeletePage {chattoken} {
+    global  config
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -2073,6 +2091,10 @@ proc ::Chat::DeletePage {chattoken} {
 	upvar 0 $chattoken chatstate
 
 	MoveThreadFromPage $dlgtoken $chattoken
+    }
+    
+    if {$config(chat,set-busy-presence)} {
+	UpdateBusyPresence
     }
 }
 
@@ -3520,6 +3542,23 @@ proc ::Chat::SendChatState {chattoken state} {
     }
 }
 
+# Chat::UpdateBusyPresence --
+# 
+#       This gets called whenevr we add or delete a chat tab.
+
+proc ::Chat::UpdateBusyPresence {} {
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+    variable busyTabMap
+
+    # Check if activated.
+    
+    set prio [::AutoAway::GetPriorityForShow $jstate(show)]
+    
+    
+    
+}
+
 # Chat::AAStart, AACancel, AACmd --
 #
 #       Some functions to handle auto-away on hidden tabs, if activated.
@@ -3689,6 +3728,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
       -variable [namespace current]::tmpp(chat,histAge)
 
     grid  $whi.lhist   $whi.shist  $whi.lage  $whi.mbage  -sticky w
+    grid $whi.mbage -sticky ew
     grid columnconfigure $whi 1 -weight 1
     grid columnconfigure $whi 3 -minsize [$mb maxwidth]
 

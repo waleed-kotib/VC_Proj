@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: sipub.tcl,v 1.5 2007-11-23 15:25:22 matben Exp $
+# $Id: sipub.tcl,v 1.6 2007-11-24 08:18:27 matben Exp $
 # 
 # NB: There are three different id's floating around:
 #     1) iq-get/result related
@@ -169,6 +169,15 @@ proc jlib::sipub::get_element {xmldata} {
 # NB: We have a separate 'start' command in order to catch the response and
 #     obtain the 'sid' which is typically needed to control the file transfer.
 
+# Typical usage:
+# 
+#       jlib sipub start ... cb
+#       proc cb {type startingE} {
+#            set sid [wrapper::getattribute $startingE sid]
+#            jlib sipub set_accept_handler $sid \
+#                -channel ... -command ... -progress ...
+#       }
+
 # jlib::sipub::start --
 # 
 #       Sends a start element. A iq-result/error is expected.
@@ -180,36 +189,6 @@ proc jlib::sipub::start {jlibname jid id cmd} {
     set startE [wrapper::createtag "start" \
       -attrlist [list xmlns $xmlns(sipub) id $id]]
     $jlibname send_iq get [list $startE] -to $jid -command $cmd
-}
-
-# jlib::sipub::get_cb --
-# 
-#       We expect to get back an iq-result/starting element which tells us the
-#       'sid' to look out for.
-
-proc jlib::sipub::get_cb {jlibname spid type startingE} {
-    variable state
-    
-    puts "jlib::sipub::get_cb type=$type"
-    
-    # Some basic error checking.
-    if {[wrapper::gettag $startingE] ne "starting"} {
-	return
-    }
-    set sid [wrapper::getattribute $startingE sid]
-    
-    if {$type eq "result"} {
-	
-	# We shall be prepared to get the si-set request.
-	$jlibname filetransfer register_sid_handler $sid \
-	  [namespace code [list si_handler $spid]]
-    } else {
-	array set argsA $state($spid,args)
-	if {[info exists argsA(-command)]} {
-	    uplevel #0 $argsA(-command) $jlibname $sid error
-	}
-	unset state($spid,args)
-    }
 }
 
 # jlib::sipub::set_accept_handler --
@@ -242,7 +221,7 @@ proc jlib::sipub::set_accept_handler {jlibname sid args} {
 proc jlib::sipub::si_handler {sid jlibname jid name size cmd args} {
     variable state
     
-    puts "jlib::sipub::si_handler sid=$sid"
+    #puts "jlib::sipub::si_handler sid=$sid"
 
     # We requested this file using 'sipub::get' in the first place so
     # therefore accept the stream.

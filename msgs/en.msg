@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.212 2007-11-14 16:15:31 matben Exp $
+#   $Id: en.msg,v 1.213 2007-11-24 08:18:27 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -802,6 +802,9 @@
 ::msgcat::mcset en jamessskipsendq2      {Contact ID %s is invalid. Do you want to skip it and send to the rest?}
 ::msgcat::mcset en jamessstatuscust2     {Select a presence state and optionally enter a message.}
 ::msgcat::mcset en jamessstatuscustdtl2  {The most frequent combinations are easily reachable as menu entries.}
+::msgcat::mcset en jamesssubscautoacc    {Subscription request will be accepted in: %s secs.}
+::msgcat::mcset en jamesssubscautorej    {Subscription request will be rejected in: %s secs.}
+::msgcat::mcset en jamesssubscedfancy    {%s additional contacts can see your presence.}
 ::msgcat::mcset en jamesstimeconn2       {Time since %s was last connected}
 ::msgcat::mcset en jamesstimeoutserver2  {Server %s did not respond: timeout.}
 ::msgcat::mcset en jamesstimeservstart2  {Time since server %s was started}

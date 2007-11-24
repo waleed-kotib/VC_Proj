@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.66 2007-11-20 15:27:45 matben Exp $
+# $Id: Subscribe.tcl,v 1.67 2007-11-24 08:18:27 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -723,14 +723,6 @@ proc ::SubscribeAuto::ExecQueue {type} {
 
 # Some simple dialogs for auto accept/reject -----------------------------------
 
-# NB: string catalogs must be updated if using this.
-
-::msgcat::mcset en jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
-::msgcat::mcset sv jamesssubscautoacc {Subscription request will be accepted in: %s secs.}
-
-::msgcat::mcset en jamesssubscautorej {Subscription request will be rejected in: %s secs.}
-::msgcat::mcset sv jamesssubscautorej {Subscription request will be rejected in: %s secs.}
-
 proc ::SubscribeAuto::AcceptAfter {jid} {
     global  config
     
@@ -1399,9 +1391,6 @@ proc ::Subscribed::AddJIDPlain {w jid {first 0}} {
     append msg [::Subscribe::GetDisplayName $jid]
     $w configure -message $msg
 }
-
-::msgcat::mcset en jamesssubscedfancy {%s additional contacts can see your presence.}
-::msgcat::mcset sv jamesssubscedfancy {%s additional contacts can see your presence.}
 
 proc ::Subscribed::FancyDlg {} {
     global  wDlgs
