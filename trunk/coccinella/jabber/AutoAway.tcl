@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.13 2007-11-24 08:18:26 matben Exp $
+# $Id: AutoAway.tcl,v 1.14 2007-11-24 15:06:06 matben Exp $
 
 package require idletime
 
@@ -49,11 +49,14 @@ namespace eval ::AutoAway {
 	invisible       6
 	unavailable     7
     }
-    variable savedShowStatus {available ""}
+    variable savedShowStatus [list available ""]
     variable wasAutoLoggedOut 0
     
     # Shall we allow the user to have autoaway on "hidden chat tabs".
     set ::config(aa,on-hidden-tabs) 0
+    
+    # Send global busy presence if we have many tabs open.
+    set ::config(aa,busy-chats) 1
 }
 
 proc ::AutoAway::GetPriorityForShow {show} {
@@ -108,12 +111,23 @@ proc ::AutoAway::InitPrefsHook {} {
 
     # Set some kind of auto-away on hidden tabs.
     set jprefs(aa,on-hidden-tabs) 0
+    
+    # Set busy presence when several active chat tabs.
+    set jprefs(aa,busy-chats)     0
+    set jprefs(aa,busy-chats-n)   2
+    set jprefs(aa,busy-chats-msg) ""
 
     ::PrefUtils::Add [list \
       [list ::Jabber::jprefs(aa,on-hidden-tabs)  jprefs_aa_on-hidden-tabs  $jprefs(aa,on-hidden-tabs)]  \
+      [list ::Jabber::jprefs(aa,busy-chats)      jprefs_aa_busy-chats      $jprefs(aa,busy-chats)]  \
+      [list ::Jabber::jprefs(aa,busy-chats-n)    jprefs_aa_busy-chats-n    $jprefs(aa,busy-chats-n)]  \
+      [list ::Jabber::jprefs(aa,busy-chats-msg)  jprefs_aa_busy-chats-msg  $jprefs(aa,busy-chats-msg)]  \
       ]
     if {!$config(aa,on-hidden-tabs)} {
 	set jprefs(aa,on-hidden-tabs) 0
+    }
+    if {!$config(aa,busy-chats)} {
+	set jprefs(aa,busy-chats) 0
     }
     
     variable allKeys
@@ -121,7 +135,9 @@ proc ::AutoAway::InitPrefsHook {} {
 	autoaway   awaymin   awaymsg
 	xautoaway  xawaymin  xawaymsg
 	autologout logoutmin logoutmsg
-	aalogin    aa,on-hidden-tabs
+	aalogin    
+	aa,on-hidden-tabs
+	aa,busy-chats        aa,busy-chats-n      aa,busy-chats-msg
     }
 }
 
@@ -333,15 +349,38 @@ proc ::AutoAway::BuildPage {page} {
     grid columnconfigure $waa 2 -weight 1
 
     if {$config(aa,on-hidden-tabs)} {
-	set varName [namespace current]::tmpp(aa,on-hidden-tabs)
 	ttk::checkbutton $waa.htabs -text [mc "Apply auto-away on hidden chat tabs"] \
-	  -variable $varName
+	  -variable [namespace current]::tmpp(aa,on-hidden-tabs)
 	
 	grid  $waa.htabs  -  -  -  -sticky w
 	
 	::balloonhelp::balloonforwindow $waa.htabs \
 	  "If activated then directed auto-away presence will be sent to users on hidden chat tabs"
     }
+    
+    if {$config(aa,busy-chats)} {
+	set varName [namespace current]::tmpp(aa,busy-chats)
+	ttk::checkbutton $waa.cbusy -text [mc "Busy when (active chat sessions)"]: \
+	  -variable $varName \
+	  -command [namespace code [list SetEntryState [list $waa.ebusy $waa.mbusy] $varName]]
+	ttk::entry $waa.ebusy -font CociSmallFont -width 3  \
+	  -validate key -validatecommand {::Utils::ValidMinutes %S} \
+	  -textvariable [namespace current]::tmpp(aa,busy-chats-n)
+	ttk::label $waa.lbusy -text [mc Message]:
+	ttk::entry $waa.mbusy -font CociSmallFont -width 32  \
+	  -textvariable [namespace current]::tmpp(aa,busy-chats-msg)
+	
+	grid  $waa.cbusy  -           -           $waa.ebusy  -pady 1
+	grid  x           $waa.lbusy  $waa.mbusy  -           -pady 1 
+	grid $waa.cbusy -sticky w
+	grid $waa.mbusy -sticky ew    
+
+	SetEntryState [list $waa.ebusy $waa.mbusy] $varName
+
+	set bstr [mc "When you have <number> or more active chat sessions, presence state will be automatically changed to Busy."]
+	::balloonhelp::balloonforwindow $waa.cbusy $bstr
+    }
+    return $page
 }
 
 proc ::AutoAway::SetEntryState {winL varName} {

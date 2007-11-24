@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.245 2007-11-24 08:18:26 matben Exp $
+# $Id: Chat.tcl,v 1.246 2007-11-24 15:06:06 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -186,15 +186,6 @@ namespace eval ::Chat {
         composing,send       active
     }
     
-    # This maps number of open tabs to number of steps we shall decrease 
-    # presence priority.
-    variable busyTabMap
-    array set busyTabMap {
-	2  1
-	3  2
-	4  3
-    }
-    
     # Shall we allow multiple chat threads (and dialogs, tabs) per JID?
     set ::config(chat,allow-multi-thread-per-jid) 0
     
@@ -219,9 +210,6 @@ namespace eval ::Chat {
 	set ::config(chat,notify-recv) 0
 	set ::config(chat,notify-show) 0	
     }
-    
-    # Send global busy presence if we have many tabs open.
-    set ::config(chat,set-busy-presence) 1
     
     # Allow themed chats.
     set ::config(chat,try-themed) 0
@@ -2047,8 +2035,8 @@ proc ::Chat::MakeNewPage {dlgtoken threadID jid} {
     set chatstate(wpage) $wpage
     set dlgstate(wpage2token,$wpage) $chattoken
     
-    if {$config(chat,set-busy-presence)} {
-	UpdateBusyPresence
+    if {$config(aa,busy-chats)} {
+	AutoBusyPresenceUpdate
     }
     
     return $chattoken
@@ -2093,8 +2081,8 @@ proc ::Chat::DeletePage {chattoken} {
 	MoveThreadFromPage $dlgtoken $chattoken
     }
     
-    if {$config(chat,set-busy-presence)} {
-	UpdateBusyPresence
+    if {$config(aa,busy-chats)} {
+	AutoBusyPresenceUpdate
     }
 }
 
@@ -3542,19 +3530,87 @@ proc ::Chat::SendChatState {chattoken state} {
     }
 }
 
-# Chat::UpdateBusyPresence --
+namespace eval ::Chat {
+
+    variable autoBusy
+    array set autoBusy {
+	set       0
+	nPrev     0
+    }
+}
+
+# Chat::AutoBusyPresenceUpdate, AutoBusyTimer --
 # 
 #       This gets called whenevr we add or delete a chat tab.
 
-proc ::Chat::UpdateBusyPresence {} {
+proc ::Chat::AutoBusyPresenceUpdate {} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-    variable busyTabMap
+    variable autoBusy
 
     # Check if activated.
+    if {!$jprefs(aa,busy-chats)} {
+	return
+    }
+    set prioNow [::AutoAway::GetPriorityForShow $jstate(show)]
+    set prioDnD [::AutoAway::GetPriorityForShow dnd]
+    if {$prioNow >= $prioDnD} {
+	return
+    }
+    set tokenL [GetTokenList chat]
+    set nChats [llength $tokenL]
+    puts "\t tokenL=$tokenL"
+    if {$nChats < $jprefs(aa,busy-chats-n)} {
+	set isBusy 0
+    } else {
+	set isBusy 1
+    }
     
-    set prio [::AutoAway::GetPriorityForShow $jstate(show)]
+    if {$autoBusy(set) && !$isBusy} {
+	
+	# Was busy but not anymore.
+	AutoBusyTimer
+    } elseif {!$autoBusy(set) && $isBusy} {
+
+	# Wasn't busy but is now.
+	AutoBusySet
+    }
+    set autoBusy(nPrev) $nChats
+}
+
+proc ::Chat::AutoBusySet {} {
+    upvar ::Jabber::jprefs jprefs
+    upvar ::Jabber::jstate jstate
+    variable autoBusy
     
+    # We call this only once.
+    if {$autoBusy(set)} {
+	return
+    }
+    set autoBusy(showPrev)   $jstate(show)
+    set sutoBusy(statusPrev) $jstate(status)
+    
+    # Set global presence.
+    ::Jabber::SetStatus busy -status $jprefs(aa,busy-chats-msg)
+    
+    foreach chattoken [GetTokenList chat] {
+	
+	# And reset to WRONG!!!!!!!!!!!
+	set jid [GetChatTokenValue $chttoken jid]
+	::Jabber::SetStatus $show -status $status -to $jid
+    }    
+    set autoBusy(set) 1
+}
+
+proc ::Chat::AutoBusyCancel {} {
+    variable autoBusy
+    
+    # Set show/status to what it was before it was auto busy.
+    
+}
+
+proc ::Chat::AutoBusyTimer {} {
+    variable autoBusy
     
     
 }
