@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.25 2007-11-24 08:18:27 matben Exp $
+# $Id: ftrans.tcl,v 1.26 2007-11-25 15:48:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -192,6 +192,33 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
     return [eval {element $name $size} $args]
 }
 
+# jlib::ftrans::uri --
+# 
+#       Create a sipub uri that references a local file.
+#       XEP-0096 File Transfer, sect. 6.2.2 recvfile:
+#       xmpp:romeo@montague.net/orchard?recvfile;sid=pub234;mime-type=text%2Fplain&name=reply.txt&size=2048 
+
+proc jlib::ftrans::uri {jid fileName mime} {
+   
+    # @@@ JID must be encoded!
+    set spid [jlib::sipub::newcache $fileName $mime]
+    set tail [file tail $fileName]
+    set size [file size $fileName]
+    set uri "xmpp:$jid?recvfile"
+    set uri2 ""
+    append uri2 ";" "sid=$spid"
+    append uri2 ";" "mime-type=$mime"
+    append uri2 ";" "name=$tail"
+    append uri2 ";" "size=$size"
+    set uri2 [uriencode::quote $uri2]
+    
+    return $uri$uri2
+}
+
+if {0} {
+    set uri [jlib::ftrans::uri mats@home.se/z /Users/matben/Desktop/ObjC.pdf application/pdf]
+}
+
 # jlib::ftrans::element --
 # 
 #       Just create the file element. Nothing cached. Stateless.
@@ -231,17 +258,6 @@ proc jlib::ftrans::element {name size args} {
     set fileE [wrapper::createtag "file" -attrlist $attrs -subtags $subEL]
     
     return $fileE
-}
-
-# jlib::ftrans::uri --
-# 
-#       Create a sipub uri that references a local file.
-
-proc jlib::ftrans::uri { fileName mime} {
-    variable cache
-   
-    
-    return $uri
 }
 
 # jlib::ftrans::sipub_element --
