@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: sipub.tcl,v 1.6 2007-11-24 08:18:27 matben Exp $
+# $Id: sipub.tcl,v 1.7 2007-11-25 15:48:54 matben Exp $
 # 
 # NB: There are three different id's floating around:
 #     1) iq-get/result related
@@ -67,6 +67,21 @@ proc jlib::sipub::set_cache {cacheL} {
 proc jlib::sipub::get_cache {} {
     variable cache
     return [array get cache]
+}
+
+# jlib::sipub::newcache --
+# 
+#       This just adds a reference to our cache. Used to construct xmpp uri
+#       for 'recvfile'.
+
+proc jlib::sipub::newcache {fileName mime} {
+    variable cache
+
+    set spid [jlib::generateuuid]
+    set cache($spid,file) $fileName
+    set cache($spid,mime) $mime
+    
+    return $spid
 }
 
 # jlib::sipub::element --

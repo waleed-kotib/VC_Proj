@@ -70,7 +70,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ParseURI.tcl,v 1.44 2007-11-17 07:40:52 matben Exp $
+# $Id: ParseURI.tcl,v 1.45 2007-11-25 15:48:54 matben Exp $
 
 package require uriencode
 
@@ -288,6 +288,7 @@ proc ::ParseURI::ProcessURI {token} {
 	message     -
 	probe       -
 	pubsub      -
+	recvfile    -
 	register    -
 	remove      -
 	roster      -
@@ -297,9 +298,6 @@ proc ::ParseURI::ProcessURI {token} {
 	unsubscribe - 
 	vcard         {
 	    Do[string totitle $state(iquerytype)] $token
-	}
-	recvfile {
-	    # @@@ TODO
 	}
     }
 }
@@ -517,6 +515,44 @@ proc ::ParseURI::DoPubsub {token} {
     jlib:splitjid $myjid myjid2 -
     eval {::Jabber::JlibCmd pubsub $action $state(jid) $myjid2} $opts
     Free $token
+}
+
+proc ::ParseURI::DoRecvfile {token} {
+    variable $token
+    upvar 0 $token state
+
+    # xmpp:romeo@montague.net/orchard?recvfile;sid=pub234;mime-type=text%2Fplain&name=reply.txt&size=2048 
+
+    foreach {key value} [array get state query,*] {
+
+	
+    }
+
+    
+    # We do a sipub request to get the file.
+    ::Jabber::JlibCmd sipub start $from $spid [namespace code DoRecvfileCB]
+
+    Free $token
+}
+
+proc ::ParseURI::DoRecvfileCB {type startingE} {
+    
+    # Some basic error checking.
+    if {[wrapper::gettag $startingE] ne "starting"} {
+	return
+    }
+    
+    if {$type eq "result"} {
+	set sid [wrapper::getattribute $startingE sid]
+
+	# We shall be prepared to get the si-set request.
+	::Jabber::JlibCmd sipub set_accept_handler $sid \
+	  -channel $fd \
+	  -progress [namespace code [list SVGImageStreamProgress $w]] \
+	  -command  [namespace code [list SVGImageStreamCmd $w]]
+    } else {
+	ui::dialog -icon error -message ""
+    }
 }
 
 proc ::ParseURI::DoRegister {token} {
