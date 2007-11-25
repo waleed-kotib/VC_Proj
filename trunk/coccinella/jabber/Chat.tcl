@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.247 2007-11-25 08:01:18 matben Exp $
+# $Id: Chat.tcl,v 1.248 2007-11-25 12:20:20 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2480,7 +2480,6 @@ proc ::Chat::InviteCreateRoom {roomjidVar} {
     # @@@ Test: 10.1.4 Requesting a Unique Room Name
     
     set unique [$jstate(jlib) disco hasfeature $xmppxmlns(muc,unique) $server]
-    #puts "\t unique=$unique"
     
     if {$unique} {
 	set uniqueE [wrapper::createtag "unique" \
@@ -3559,7 +3558,7 @@ proc ::Chat::AutoBusyUpdate {} {
     if {!$jprefs(aa,busy-chats)} {
 	return
     }
-    set prioNow [::AutoAway::GetPriorityForShow $jstate(show)]
+    set prioNow [::AutoAway::GetPriorityForShow $autoBusy(show)]
     set prioDnD [::AutoAway::GetPriorityForShow dnd]
     if {$prioNow >= $prioDnD} {
 	return
@@ -3567,8 +3566,6 @@ proc ::Chat::AutoBusyUpdate {} {
     set tokenL [GetTokenList chat]
     set nChats [llength $tokenL]
     set autoBusy(nChats) $nChats
-    puts "::Chat::AutoBusyUpdate"
-    puts "\t tokenL=$tokenL"
     if {$nChats < $jprefs(aa,busy-chats-n)} {
 	set isBusy 0
     } else {
@@ -3590,8 +3587,6 @@ proc ::Chat::AutoBusySet {} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     variable autoBusy
-    
-    puts "::Chat::AutoBusySet"
     
     AutoBusyCancelPending
     
@@ -3659,11 +3654,10 @@ proc ::Chat::AutoBusyCancelPending {} {
 }
 
 proc ::Chat::AutoBusyTimerCB {} {
-
+    
     # Only the first one gets executed and the rest are just cancelled.
     AutoBusyCancelPending
-
-    AutoBusySet
+    AutoBusySetNormal
 }
 
 # Chat::AAStart, AACancel, AACmd --
