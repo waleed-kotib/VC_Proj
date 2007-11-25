@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.246 2007-11-24 15:06:06 matben Exp $
+# $Id: Chat.tcl,v 1.247 2007-11-25 08:01:18 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2036,7 +2036,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID jid} {
     set dlgstate(wpage2token,$wpage) $chattoken
     
     if {$config(aa,busy-chats)} {
-	AutoBusyPresenceUpdate
+	AutoBusyUpdate
     }
     
     return $chattoken
@@ -2082,7 +2082,7 @@ proc ::Chat::DeletePage {chattoken} {
     }
     
     if {$config(aa,busy-chats)} {
-	AutoBusyPresenceUpdate
+	AutoBusyUpdate
     }
 }
 
@@ -3531,19 +3531,26 @@ proc ::Chat::SendChatState {chattoken state} {
 }
 
 namespace eval ::Chat {
+    
+    ::hooks::register setPresenceHook [namespace code AutoBusyPresenceHook]
 
     variable autoBusy
     array set autoBusy {
-	set       0
+	nChats    0
 	nPrev     0
+	pending   {}
+	set       0
+	presSet   0
+	show      unavailable
+	status    ""
     }
 }
 
-# Chat::AutoBusyPresenceUpdate, AutoBusyTimer --
+# Chat::AutoBusyUpdate, AutoBusyTimer --
 # 
 #       This gets called whenevr we add or delete a chat tab.
 
-proc ::Chat::AutoBusyPresenceUpdate {} {
+proc ::Chat::AutoBusyUpdate {} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     variable autoBusy
@@ -3559,6 +3566,8 @@ proc ::Chat::AutoBusyPresenceUpdate {} {
     }
     set tokenL [GetTokenList chat]
     set nChats [llength $tokenL]
+    set autoBusy(nChats) $nChats
+    puts "::Chat::AutoBusyUpdate"
     puts "\t tokenL=$tokenL"
     if {$nChats < $jprefs(aa,busy-chats-n)} {
 	set isBusy 0
@@ -3566,13 +3575,12 @@ proc ::Chat::AutoBusyPresenceUpdate {} {
 	set isBusy 1
     }
     
+    # Was busy but not anymore.
     if {$autoBusy(set) && !$isBusy} {
-	
-	# Was busy but not anymore.
 	AutoBusyTimer
-    } elseif {!$autoBusy(set) && $isBusy} {
 
 	# Wasn't busy but is now.
+    } elseif {!$autoBusy(set) && $isBusy} {
 	AutoBusySet
     }
     set autoBusy(nPrev) $nChats
@@ -3583,36 +3591,79 @@ proc ::Chat::AutoBusySet {} {
     upvar ::Jabber::jstate jstate
     variable autoBusy
     
+    puts "::Chat::AutoBusySet"
+    
+    AutoBusyCancelPending
+    
     # We call this only once.
     if {$autoBusy(set)} {
 	return
     }
-    set autoBusy(showPrev)   $jstate(show)
-    set sutoBusy(statusPrev) $jstate(status)
     
-    # Set global presence.
-    ::Jabber::SetStatus busy -status $jprefs(aa,busy-chats-msg)
+    # Set global busy presence.
+    set autoBusy(presSet) 1
+    ::Jabber::SetStatus dnd -status $jprefs(aa,busy-chats-msg)
     
+    # Set directed presence as it was before to active chat contacts.
     foreach chattoken [GetTokenList chat] {
-	
-	# And reset to WRONG!!!!!!!!!!!
-	set jid [GetChatTokenValue $chttoken jid]
-	::Jabber::SetStatus $show -status $status -to $jid
+	set jid [GetChatTokenValue $chattoken jid]
+	::Jabber::SetStatus $autoBusy(show) -status $autoBusy(status) -to $jid
     }    
+    set autoBusy(presSet) 0
     set autoBusy(set) 1
 }
 
-proc ::Chat::AutoBusyCancel {} {
+proc ::Chat::AutoBusyPresenceHook {type args} {
+    variable autoBusy
+    upvar ::Jabber::jstate jstate
+    
+    # We must exclude presence set by auto busy.
+    if {!$autoBusy(presSet)} {
+	
+	# This is our global show/status state that is set using any other way
+	# than from auto busy.
+	set autoBusy(show) $jstate(show)
+	set autoBusy(status) $jstate(status)
+	set autoBusy(set) 0
+	AutoBusyCancelPending
+    }
+}
+
+proc ::Chat::AutoBusySetNormal {} {
     variable autoBusy
     
     # Set show/status to what it was before it was auto busy.
-    
+    if {$autoBusy(set)} {
+	::Jabber::SetStatus $autoBusy(show) -status $autoBusy(status)
+	set autoBusy(set) 0
+    }
 }
 
 proc ::Chat::AutoBusyTimer {} {
     variable autoBusy
+    upvar ::Jabber::jprefs jprefs
     
-    
+    set deltaN [expr {$jprefs(aa,busy-chats-n) - $autoBusy(nChats)}]
+    set ms [expr {60000/$deltaN}]
+    set id [after $ms [namespace code AutoBusyTimerCB]]
+    lappend autoBusy(pending) $id
+}
+
+proc ::Chat::AutoBusyCancelPending {} {
+    variable autoBusy
+
+    foreach id $autoBusy(pending) {
+	after cancel $id
+    }
+    set autoBusy(pending) [list]
+}
+
+proc ::Chat::AutoBusyTimerCB {} {
+
+    # Only the first one gets executed and the rest are just cancelled.
+    AutoBusyCancelPending
+
+    AutoBusySet
 }
 
 # Chat::AAStart, AACancel, AACmd --
