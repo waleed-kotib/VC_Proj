@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Plugins.tcl,v 1.30 2007-09-27 09:36:09 matben Exp $
+# $Id: Plugins.tcl,v 1.31 2007-11-25 15:55:32 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1301,7 +1301,7 @@ proc ::Plugins::BuildPrefsHook {wtree nbframe} {
     if {![::Preferences::HaveTableItem Whiteboard]} {
 	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
     }
-    ::Preferences::NewTableItem {Whiteboard Plugins2} [mc mPlugins]
+    ::Preferences::NewTableItem {Whiteboard Plugins2} [mc Plugins]
 
     set wpage [$nbframe page Plugins2]
     ::Plugins::BuildPrefsPage $wpage

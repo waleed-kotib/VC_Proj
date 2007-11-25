@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.213 2007-11-24 08:18:27 matben Exp $
+#   $Id: en.msg,v 1.214 2007-11-25 15:51:59 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -132,6 +132,7 @@
 ::msgcat::mcset en Personal
 ::msgcat::mcset en Phone
 ::msgcat::mcset en Play
+::msgcat::mcset en Plugins
 ::msgcat::mcset en Port
 ::msgcat::mcset en Ports
 ::msgcat::mcset en Preferences
