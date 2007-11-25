@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: WDialogs.tcl,v 1.3 2007-09-14 13:17:09 matben Exp $
+# $Id: WDialogs.tcl,v 1.4 2007-11-25 15:55:32 matben Exp $
    
 package provide WDialogs 1.0
 
@@ -44,7 +44,7 @@ proc ::WDialogs::InfoOnPlugins { } {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [mc mPlugins]
+    wm title $w [mc Plugins]
     
     # Global frame.
     ttk::frame $w.frall

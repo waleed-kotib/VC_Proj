@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Component.tcl,v 1.2 2007-11-17 07:40:52 matben Exp $
+# $Id: Component.tcl,v 1.3 2007-11-25 15:51:59 matben Exp $
    
 package require component
 
@@ -67,7 +67,7 @@ proc ::Component::Dlg {} {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [mc mPlugins]
+    wm title $w [mc Plugins]
      
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
