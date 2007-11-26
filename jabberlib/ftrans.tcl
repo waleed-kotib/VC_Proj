@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.26 2007-11-25 15:48:54 matben Exp $
+# $Id: ftrans.tcl,v 1.27 2007-11-26 09:14:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -200,10 +200,12 @@ proc jlib::ftrans::i_constructor {jlibname sid jid cmd args} {
 
 proc jlib::ftrans::uri {jid fileName mime} {
    
-    # @@@ JID must be encoded!
+    # NB: The JID must be uri encoded as a path to preserver the "/"
+    #     while the query part must be encoded as is.
     set spid [jlib::sipub::newcache $fileName $mime]
     set tail [file tail $fileName]
     set size [file size $fileName]
+    set jid [uriencode::quotepath $jid]
     set uri "xmpp:$jid?recvfile"
     set uri2 ""
     append uri2 ";" "sid=$spid"
@@ -215,9 +217,7 @@ proc jlib::ftrans::uri {jid fileName mime} {
     return $uri$uri2
 }
 
-if {0} {
-    set uri [jlib::ftrans::uri mats@home.se/z /Users/matben/Desktop/ObjC.pdf application/pdf]
-}
+# set uri [jlib::ftrans::uri "mats@home.se/z z" /Users/matben/Desktop/ObjC.pdf application/pdf]
 
 # jlib::ftrans::element --
 # 
