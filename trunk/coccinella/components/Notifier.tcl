@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Notifier.tcl,v 1.8 2007-11-17 07:40:52 matben Exp $
+# $Id: Notifier.tcl,v 1.9 2007-11-26 14:49:24 matben Exp $
 
 namespace eval ::Notifier {
     
@@ -56,7 +56,7 @@ proc ::Notifier::InitPrefsHook {} {
       [list ::Jabber::jprefs(notifier,state)  jprefs_notifier_state  $jprefs(notifier,state)]]   
 }
 
-proc ::Notifier::MessageHook {xmldata} {
+proc ::Notifier::MessageHook {xmldata uuid} {
     
     set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     if {![string length $body]} {
