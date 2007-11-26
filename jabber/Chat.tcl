@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.248 2007-11-25 12:20:20 matben Exp $
+# $Id: Chat.tcl,v 1.249 2007-11-26 08:35:30 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -695,6 +695,8 @@ proc ::Chat::GotMsg {xmldata} {
 	set icon [::Roster::GetPresenceIcon $jid invisible]
 	$chatstate(wpresimage) configure -image $icon
     }
+    
+    ::hooks::run recvChatMessageHook $chattoken $xmldata
     
     # Run this hook (speech).
     ::hooks::run displayChatMessageHook $xmldata
@@ -2011,7 +2013,6 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
 }
 
 proc ::Chat::MakeNewPage {dlgtoken threadID jid} {
-    global  config
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     
@@ -2034,11 +2035,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID jid} {
     upvar 0 $chattoken chatstate
     set chatstate(wpage) $wpage
     set dlgstate(wpage2token,$wpage) $chattoken
-    
-    if {$config(aa,busy-chats)} {
-	AutoBusyUpdate
-    }
-    
+        
     return $chattoken
 }
 
@@ -2055,7 +2052,6 @@ proc ::Chat::CloseThreadPage {chattoken} {
 }
 
 proc ::Chat::DeletePage {chattoken} {
-    global  config
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -2079,10 +2075,6 @@ proc ::Chat::DeletePage {chattoken} {
 	upvar 0 $chattoken chatstate
 
 	MoveThreadFromPage $dlgtoken $chattoken
-    }
-    
-    if {$config(aa,busy-chats)} {
-	AutoBusyUpdate
     }
 }
 
@@ -2320,6 +2312,13 @@ proc ::Chat::GetChatTokenValue {chattoken key} {
     upvar 0 $chattoken chatstate
     
     return $chatstate($key)
+}
+
+proc ::Chat::ExistsChatTokenKey {chattoken key} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    return [info exists chatstate($key)]
 }
 
 # Chat::GetActiveChatToken --
@@ -3529,12 +3528,17 @@ proc ::Chat::SendChatState {chattoken state} {
     }
 }
 
+#--- Auto Busy part ------------------------------------------------------------
+
 namespace eval ::Chat {
     
-    ::hooks::register setPresenceHook [namespace code AutoBusyPresenceHook]
-
+    ::hooks::register setPresenceHook     [namespace code AutoBusyPresenceHook]
+    ::hooks::register sendTextChatHook    [namespace code AutoBusySendHook]
+    ::hooks::register recvChatMessageHook [namespace code AutoBusyRecvHook]
+    
     variable autoBusy
     array set autoBusy {
+	nActive   0
 	nChats    0
 	nPrev     0
 	pending   {}
@@ -3545,9 +3549,59 @@ namespace eval ::Chat {
     }
 }
 
+proc ::Chat::AutoBusySendHook {chattoken jid text} {
+    AutoBusyActivity $chattoken
+}
+
+proc ::Chat::AutoBusyRecvHook {chattoken xmldata} {
+    AutoBusyActivity $chattoken
+}
+
+proc ::Chat::AutoBusyActivity {chattoken} {
+    upvar ::Jabber::jprefs jprefs
+    
+    if {!$jprefs(aa,busy-chats)} {
+	return
+    }
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    # Mark this instance as being active
+    set chatstate(ab,active) 1
+    AutoBusyUpdate
+    
+    if {[info exists chatstate(ab,id)]} {
+	after cancel $chatstate(ab,id)
+	unset chatstate(ab,id)
+    }
+    
+    # Set the "inactivity" time depending on prefs setting. 
+    set ms [expr {20000 * $jprefs(aa,busy-chats-n)}]
+    set id [after $ms [namespace code [list AutoBusyInactiveEvent $chattoken]]]
+    set chatstate(ab,id) $id
+}
+
+proc ::Chat::AutoBusyInactiveEvent {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    # If we end up here this instance is not active.
+    unset -nocomplain chatstate(ab,active)
+    AutoBusyUpdate
+}
+
+proc ::Chat::AutoBusyGetNumActive {} {
+    
+    set nActive 0
+    foreach chattoken [GetTokenList chat] {
+	incr nActive [ExistsChatTokenKey $chattoken ab,active]
+    }
+    return $nActive
+}
+
 # Chat::AutoBusyUpdate, AutoBusyTimer --
 # 
-#       This gets called whenevr we add or delete a chat tab.
+#       This gets called whenever we change the activity on an instance.
 
 proc ::Chat::AutoBusyUpdate {} {
     upvar ::Jabber::jprefs jprefs
@@ -3565,8 +3619,10 @@ proc ::Chat::AutoBusyUpdate {} {
     }
     set tokenL [GetTokenList chat]
     set nChats [llength $tokenL]
-    set autoBusy(nChats) $nChats
-    if {$nChats < $jprefs(aa,busy-chats-n)} {
+    set nActive [AutoBusyGetNumActive]
+    set autoBusy(nChats)  $nChats
+    set autoBusy(nActive) $nActive
+    if {$nActive < $jprefs(aa,busy-chats-n)} {
 	set isBusy 0
     } else {
 	set isBusy 1
@@ -3634,14 +3690,26 @@ proc ::Chat::AutoBusySetNormal {} {
     }
 }
 
+# Chat::AutoBusyTimer --
+# 
+#       Starts timer to set "normal" status.
+
 proc ::Chat::AutoBusyTimer {} {
     variable autoBusy
     upvar ::Jabber::jprefs jprefs
     
-    set deltaN [expr {$jprefs(aa,busy-chats-n) - $autoBusy(nChats)}]
+    set deltaN [expr {$jprefs(aa,busy-chats-n) - $autoBusy(nActive)}]
+    set deltaN [max $deltaN 1]
     set ms [expr {60000/$deltaN}]
     set id [after $ms [namespace code AutoBusyTimerCB]]
     lappend autoBusy(pending) $id
+}
+
+proc ::Chat::AutoBusyTimerCB {} {
+    
+    # Only the first one gets executed and the rest are just cancelled.
+    AutoBusyCancelPending
+    AutoBusySetNormal
 }
 
 proc ::Chat::AutoBusyCancelPending {} {
@@ -3653,12 +3721,7 @@ proc ::Chat::AutoBusyCancelPending {} {
     set autoBusy(pending) [list]
 }
 
-proc ::Chat::AutoBusyTimerCB {} {
-    
-    # Only the first one gets executed and the rest are just cancelled.
-    AutoBusyCancelPending
-    AutoBusySetNormal
-}
+#--- Auto Away part ------------------------------------------------------------
 
 # Chat::AAStart, AACancel, AACmd --
 #
