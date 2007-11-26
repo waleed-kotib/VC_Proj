@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.25 2007-10-08 12:09:17 matben Exp $
+# $Id: FTrans.tcl,v 1.26 2007-11-26 15:06:21 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -533,62 +533,53 @@ proc ::FTrans::SendCommandOOB {fileName jid jlibname type subiq} {
 
 #... Target (receiver) section..................................................
 
+# FTrans::SetHandler --
+# 
+#       Handler for incoming file-transfer requests (set).
+
 proc ::FTrans::SetHandler {jlibname jid name size cmd args} {
-    variable uid
     
     ::Debug 2 "---> ::FTrans::SetHandler (t): jid=$jid, name=$name, size=$size, cmd=$cmd, $args"
-
-    # Initialize the state variable, an array, that keeps is the storage.
-    set token [namespace current]::[incr uid]
-    variable $token
-    upvar 0 $token state
     
-    set state(jid)   $jid
-    set state(name)  $name
-    set state(size)  $size
-    set state(cmd)   $cmd
-    set state(w)     [ui::autoname]
-    foreach {key value} $args {
-	set state($key) $value
-    }
-    set str "\n[mc File]: $name\n[mc Size]: [::Utils::FormatBytes $size]\n"
-    if {[info exists state(-desc)]} {
-	append str "[mc Description]: $state(-desc)\n"
-    }
-    set msg [mc jamessoobask2 $jid $name $str]
+    array set argsA $args
+
+    # Keep this for the non modal dialog -command.
+    set spec [list $jlibname $jid $name $size $cmd $args]
     
     # Nonmodal message dialog.
-    ui::dialog $state(w) -title [mc "Receive File"] -icon question  \
+    set str "\n[mc File]: $name\n[mc Size]: [::Utils::FormatBytes $size]\n"
+    if {[info exists argsA(-desc)]} {
+	append str "[mc Description]: $argsA(-desc)\n"
+    }
+    set msg [mc jamessoobask2 $jid $name $str]
+    ui::dialog -title [mc "Receive File"] -icon question  \
       -type yesno -default yes -message $msg                    \
-      -command [list [namespace current]::SetHandlerAnswer $token]
+      -command [list [namespace current]::SetHandlerAnswer $spec]
     
     ::hooks::run fileTransferReceiveHook $jid $name $size
 }
 
-proc ::FTrans::SetHandlerAnswer {token wdlg answer} {
+proc ::FTrans::SetHandlerAnswer {spec wdlg answer} {
     global  prefs
-    variable $token
-    upvar 0 $token state
-    
+
     destroy $wdlg
     
-    set name $state(name)
-    set cmd  $state(cmd)
-
+    lassign $spec jlibname jid name size cmd args
+    
     if {$answer} {
 	
 	# Do this each time since we may have changed proxy settings.
 	BytestreamsConfigure
 	
 	set userDir [::Utils::GetDirIfExist $prefs(userPath)]
-	set fileName [tk_getSaveFile -title [mc {Save File}] \
+	set fileName [tk_getSaveFile -title [mc "Save File"] \
 	  -initialfile $name -initialdir $userDir]
 	if {$fileName ne ""} {
 	    set prefs(userPath) [file dirname $fileName]
-	    set fd [open $fileName w]
 	    
-	    set state(fileName) $fileName
-	    set state(fd)       $fd
+	    # Make progress object.
+	    set token [eval {ObjectReceive $jid $fileName $size} $args]
+	    set fd [open $fileName w]
 
 	    eval [linsert $cmd end yes      \
 	      -channel $fd                  \
@@ -602,6 +593,30 @@ proc ::FTrans::SetHandlerAnswer {token wdlg answer} {
 	eval $cmd $answer
 	unset -nocomplain state
     }
+}
+
+# FTrans::ObjectReceive --
+# 
+#       This is kind of constructor for our file transfer operation.
+
+proc ::FTrans::ObjectReceive {jid fileName size args} {
+    variable uid
+    
+    # Initialize the state variable, an array, that keeps is the storage.
+    set token [namespace current]::[incr uid]
+    variable $token
+    upvar 0 $token state
+    
+    set state(jid)      $jid
+    set state(fileName) $fileName
+    set state(name)     [file tail $fileName]
+    set state(size)     $size
+    set state(w)        [ui::autoname]
+    
+    foreach {key value} $args {
+	set state($key) $value
+    }    
+    return $token
 }
 
 proc ::FTrans::TProgress {token jlibname sid total bytes} {

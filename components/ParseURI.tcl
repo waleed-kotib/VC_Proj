@@ -70,7 +70,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ParseURI.tcl,v 1.45 2007-11-25 15:48:54 matben Exp $
+# $Id: ParseURI.tcl,v 1.46 2007-11-26 15:06:21 matben Exp $
 
 package require uriencode
 
@@ -512,47 +512,71 @@ proc ::ParseURI::DoPubsub {token} {
 	return
     }
     set myjid [::Jabber::JlibCmd myjid]
-    jlib:splitjid $myjid myjid2 -
+    set myjid2 [jlib::barejid $myjid]
     eval {::Jabber::JlibCmd pubsub $action $state(jid) $myjid2} $opts
     Free $token
 }
+
+# set uri [jlib::ftrans::uri mari@jabber.se/z /Users/matben/Desktop/ObjC.pdf application/pdf]
 
 proc ::ParseURI::DoRecvfile {token} {
     variable $token
     upvar 0 $token state
 
-    # xmpp:romeo@montague.net/orchard?recvfile;sid=pub234;mime-type=text%2Fplain&name=reply.txt&size=2048 
+    # xmpp:romeo@montague.net/orchard?recvfile;sid=pub234;mime-type=text%2Fplain;name=reply.txt;size=2048 
 
-    foreach {key value} [array get state query,*] {
-
-	
+    array set queryA [ExtractKeyValuePairs $token]
+    parray state
+    
+    # Without a 'sid' we can't continue.
+    if {![info exists queryA(sid)]} {
+	Free $token
+	return
     }
-
     
     # We do a sipub request to get the file.
-    ::Jabber::JlibCmd sipub start $from $spid [namespace code DoRecvfileCB]
-
-    Free $token
+    ::Jabber::JlibCmd sipub start $state(jid) $queryA(sid) \
+      [namespace code [list DoRecvfileCB $token]]
 }
 
-proc ::ParseURI::DoRecvfileCB {type startingE} {
+proc ::ParseURI::DoRecvfileCB {token type startingE} {
+    global  prefs
+    variable $token
+    upvar 0 $token state
     
     # Some basic error checking.
     if {[wrapper::gettag $startingE] ne "starting"} {
+	Free $token
 	return
     }
     
     if {$type eq "result"} {
+	
 	set sid [wrapper::getattribute $startingE sid]
 
-	# We shall be prepared to get the si-set request.
-	::Jabber::JlibCmd sipub set_accept_handler $sid \
-	  -channel $fd \
-	  -progress [namespace code [list SVGImageStreamProgress $w]] \
-	  -command  [namespace code [list SVGImageStreamCmd $w]]
+	set queryA(name) ""
+	array set queryA [ExtractKeyValuePairs $token]
+
+	set userDir [::Utils::GetDirIfExist $prefs(userPath)]
+	set fileName [tk_getSaveFile -title [mc "Save File"] \
+	  -initialfile $queryA(name) -initialdir $userDir]
+	if {$fileName ne ""} {
+	
+	    set prefs(userPath) [file dirname $fileName]
+	    set fd [open $fileName w]
+	
+	    set dlgtoken [::FTrans::ObjectReceive $state(jid) $fileName $queryA(size)]	    
+	    
+	    # We shall be prepared to get the si-set request.
+	    ::Jabber::JlibCmd sipub set_accept_handler $sid \
+	      -channel $fd \
+	      -progress [list ::FTrans::TProgress $dlgtoken] \
+	      -command  [list ::FTrans::TCommand $dlgtoken]]
+	}
     } else {
 	ui::dialog -icon error -message ""
     }
+    Free $token
 }
 
 proc ::ParseURI::DoRegister {token} {
@@ -630,6 +654,18 @@ proc ::ParseURI::DoVcard {token} {
 
     ::VCard::Fetch "other" $state(jid)
     Free $token
+}
+
+proc ::ParseURI::ExtractKeyValuePairs {token} {
+    variable $token
+    upvar 0 $token state
+
+    set keyValueL [list]
+    foreach {key value} [array get state query,*] {
+	set bkey [string map [list "query," ""] $key]
+	lappend keyValueL $bkey $value
+    }
+    return $keyValueL
 }
 
 proc ::ParseURI::Noop {args} { }

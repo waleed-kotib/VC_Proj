@@ -5,7 +5,7 @@
 # 	extend the uri package to deal with URN (RFC 2141)
 # 	see http://www.normos.org/ietf/rfc/rfc2141.txt
 # 	
-# $Id: uriencode.tcl,v 1.1.1.1 2002-12-08 10:56:46 matben Exp $
+# $Id: uriencode.tcl,v 1.2 2007-11-26 15:06:21 matben Exp $
 
 package provide uriencode 1.0
 
@@ -45,17 +45,7 @@ proc uriencode::quotepath {path} {
     
     set isrel [string equal [file pathtype $path] "relative"]
 
-    if {[string equal $::tcl_platform(platform) "macintosh"]} {
-	
-	# The volume specifier always leaves a ":"; {Macintosh HD:}
-	# Any updirs ../ become :: in file split and need to be translated.
-	set qpath {}
-	foreach str [file split $path] {
-	    regsub "::" $str ".." str
-	    set str [string trimright $str ":"]
-	    lappend qpath [uriencode::quote $str]
-	}	
-    } elseif {!$isrel} {
+    if {!$isrel} {
 	
 	# An absolute non mac path. 
 	# Be sure to get rid of unix style "/" and windows "C:/"
@@ -67,7 +57,7 @@ proc uriencode::quotepath {path} {
     } else {
 	
 	# A relative non mac path.
-	set qpath {}
+	set qpath [list]
 	foreach str [file split $path] {
 	    lappend qpath [uriencode::quote $str]
 	}
