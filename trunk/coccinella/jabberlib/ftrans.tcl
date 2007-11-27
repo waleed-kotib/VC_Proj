@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.28 2007-11-26 15:06:21 matben Exp $
+# $Id: ftrans.tcl,v 1.29 2007-11-27 07:42:09 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -216,8 +216,6 @@ proc jlib::ftrans::uri {jid fileName mime} {
     
     return $uri$uri2
 }
-
-# set uri [jlib::ftrans::uri matben@localhost/z /Users/matben/Desktop/ObjC.pdf application/pdf]
 
 # jlib::ftrans::element --
 # 

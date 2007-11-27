@@ -70,7 +70,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ParseURI.tcl,v 1.46 2007-11-26 15:06:21 matben Exp $
+# $Id: ParseURI.tcl,v 1.47 2007-11-27 07:42:08 matben Exp $
 
 package require uriencode
 
@@ -517,7 +517,7 @@ proc ::ParseURI::DoPubsub {token} {
     Free $token
 }
 
-# set uri [jlib::ftrans::uri mari@jabber.se/z /Users/matben/Desktop/ObjC.pdf application/pdf]
+# set uri [jlib::ftrans::uri mari@jabber.se/z /Users/matben/Desktop/splash.svg image/svg]
 
 proc ::ParseURI::DoRecvfile {token} {
     variable $token
@@ -526,7 +526,6 @@ proc ::ParseURI::DoRecvfile {token} {
     # xmpp:romeo@montague.net/orchard?recvfile;sid=pub234;mime-type=text%2Fplain;name=reply.txt;size=2048 
 
     array set queryA [ExtractKeyValuePairs $token]
-    parray state
     
     # Without a 'sid' we can't continue.
     if {![info exists queryA(sid)]} {
@@ -571,7 +570,7 @@ proc ::ParseURI::DoRecvfileCB {token type startingE} {
 	    ::Jabber::JlibCmd sipub set_accept_handler $sid \
 	      -channel $fd \
 	      -progress [list ::FTrans::TProgress $dlgtoken] \
-	      -command  [list ::FTrans::TCommand $dlgtoken]]
+	      -command  [list ::FTrans::TCommand $dlgtoken]
 	}
     } else {
 	ui::dialog -icon error -message ""

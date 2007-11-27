@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.26 2007-11-26 15:06:21 matben Exp $
+# $Id: FTrans.tcl,v 1.27 2007-11-27 07:42:08 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -35,7 +35,7 @@ namespace eval ::FTrans {
     ::hooks::register discoInfoProxyBytestreamsHook   ::FTrans::DiscoHook
     ::hooks::register logoutHook                      ::FTrans::LogoutHook
     
-    set title [mc {Send File}]
+    set title [mc "Send File"]
         
     option add *FTrans.title                 $title           widgetDefault
     option add *FTrans.sendFileImage         sendfile         widgetDefault
@@ -639,6 +639,8 @@ proc ::FTrans::TProgress {token jlibname sid total bytes} {
 	ui::progress::toplevel $w -text $str  \
 	  -cancelcommand [list [namespace current]::TCancel $jlibname $sid]
     }
+    
+    # WRONG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if {[string equal $::tcl_platform(platform) "windows"]} {
 	update
     } else {
