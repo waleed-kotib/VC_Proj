@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.249 2007-11-26 08:35:30 matben Exp $
+# $Id: Chat.tcl,v 1.250 2007-11-27 07:51:26 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1833,6 +1833,9 @@ proc ::Chat::OnDestroyThread {chattoken} {
         SendChatState $chattoken $chatstate(chatstate)
     }
     DeregisterPresence $chattoken
+    
+    # Call the hook just before deleting the state array so we can ask it.
+    ::hooks::run deleteChatThreadHook $chattoken
 
     unset $chattoken
     array unset $chattoken    
@@ -3532,9 +3535,10 @@ proc ::Chat::SendChatState {chattoken state} {
 
 namespace eval ::Chat {
     
-    ::hooks::register setPresenceHook     [namespace code AutoBusyPresenceHook]
-    ::hooks::register sendTextChatHook    [namespace code AutoBusySendHook]
-    ::hooks::register recvChatMessageHook [namespace code AutoBusyRecvHook]
+    ::hooks::register setPresenceHook       [namespace code AutoBusyPresenceHook]
+    ::hooks::register sendTextChatHook      [namespace code AutoBusySendHook]
+    ::hooks::register recvChatMessageHook   [namespace code AutoBusyRecvHook]
+    ::hooks::register deleteChatThreadHook  [namespace code AutoBusyDeleteHook]
     
     variable autoBusy
     array set autoBusy {
@@ -3555,6 +3559,12 @@ proc ::Chat::AutoBusySendHook {chattoken jid text} {
 
 proc ::Chat::AutoBusyRecvHook {chattoken xmldata} {
     AutoBusyActivity $chattoken
+}
+
+proc ::Chat::AutoBusyDeleteHook {chattoken} {
+    
+    # When a chat thread is deleted we mark it is inactive.
+    AutoBusyInactiveEvent $chattoken
 }
 
 proc ::Chat::AutoBusyActivity {chattoken} {
