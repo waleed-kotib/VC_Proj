@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: bytestreams.tcl,v 1.31 2007-07-19 06:28:17 matben Exp $
+# $Id: bytestreams.tcl,v 1.32 2007-11-28 13:20:40 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -1491,6 +1491,8 @@ proc  jlib::bytestreams::readable {jlibname sid sock} {
     upvar ${jlibname}::bytestreams::static static
     debug "jlib::bytestreams::readable (t)"
 
+    fileevent $sock readable {}
+
     # We may have been reset or something.
     if {![jlib::si::havesi $jlibname $sid]} {
 	tfinish $jlibname $sid
@@ -1500,6 +1502,8 @@ proc  jlib::bytestreams::readable {jlibname sid sock} {
     if {[catch {eof $sock} iseof] || $iseof} {
 	debug "\t eof"
 	# @@@ Perhaps we should check number of bytes reveived or something???
+	#     If the initiator closes socket before transfer is complete
+	#     we wont notice this otherwise.
 	jlib::si::stream_closed $jlibname $sid
 	tfinish $jlibname $sid
     } else {
@@ -1511,6 +1515,20 @@ proc  jlib::bytestreams::readable {jlibname sid sock} {
     
 	# Deliver to si for further processing.
 	jlib::si::stream_recv $jlibname $sid $data
+	
+	# This is a trick to put this event at the back of the queue to
+	# avoid using any 'update'.
+	after idle [list after 0 [list \
+	  [namespace current]::setreadable $jlibname $sid $sock]]
+    }
+}
+
+proc jlib::bytestreams::setreadable {jlibname sid sock} {
+    
+    # We could have been closed since this event comes async.
+    if {[lsearch [file channels] $sock] >= 0} {
+	fileevent $sock readable  \
+	  [list [namespace current]::readable $jlibname $sid $sock]
     }
 }
 
