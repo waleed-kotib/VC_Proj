@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.27 2007-11-27 07:42:08 matben Exp $
+# $Id: FTrans.tcl,v 1.28 2007-11-28 13:20:40 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -641,11 +641,11 @@ proc ::FTrans::TProgress {token jlibname sid total bytes} {
     }
     
     # WRONG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if {[string equal $::tcl_platform(platform) "windows"]} {
-	update
-    } else {
-	update idletasks
-    }
+#     if {[string equal $::tcl_platform(platform) "windows"]} {
+# 	update
+#     } else {
+# 	update idletasks
+#     }
 }
 
 proc ::FTrans::TCancel {jlibname sid} {
