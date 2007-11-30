@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.214 2007-11-25 15:51:59 matben Exp $
+#   $Id: en.msg,v 1.215 2007-11-30 12:58:20 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -513,6 +513,7 @@
 ::msgcat::mcset en {History length}
 ::msgcat::mcset en {Import Iconset}
 ::msgcat::mcset en {Incoming Message}
+::msgcat::mcset en {Insert emoticon}
 ::msgcat::mcset en {Invite Contact}
 ::msgcat::mcset en {Logged in}
 ::msgcat::mcset en {Iconset Archive}
