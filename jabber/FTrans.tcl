@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.28 2007-11-28 13:20:40 matben Exp $
+# $Id: FTrans.tcl,v 1.29 2007-11-30 15:30:13 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -499,8 +499,10 @@ proc ::FTrans::SendCommand {jlibname status sid {subiq ""}} {
 	    }
 	}
 	ui::dialog -icon error -type ok -title [mc Error] -message $msg
+    } elseif {$status eq "reset"} {
+	# empty    
     } else {
-	ui::dialog -icon info -type ok -title [mc {File Transfer}] \
+	ui::dialog -icon info -type ok -title [mc "File Transfer"] \
 	  -message [mc jamessoobok2 $state(name) $state(jid)]
     }
 }

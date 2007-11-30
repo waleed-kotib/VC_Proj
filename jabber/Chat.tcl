@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.252 2007-11-30 12:58:19 matben Exp $
+# $Id: Chat.tcl,v 1.253 2007-11-30 15:30:13 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1468,6 +1468,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     pack $wtop -side top -anchor w -fill x
     
     set icon [::Roster::GetPresenceIconFromJid $jid]
+    set pstr [::Roster::GetPresenceAndStatusText $jid]
     
     # D =
     ttk::label $wtop.l -style Small.TLabel -text "[mc Subject]:" -padding {4 0}
@@ -1485,7 +1486,8 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     bind $wsubject <Return>   [list ::Chat::OnReturnSubject $chattoken]   
     
     ::balloonhelp::balloonforwindow $wsubject "Enter the subject of the conversation"
-
+    ::balloonhelp::balloonforwindow $wpresimage $pstr
+    
     # Notifier label.
     set chatstate(wnotifier) $wnotifier
         
@@ -3050,9 +3052,12 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
 	#SetState $chattoken disabled
     }
     set icon [::Roster::GetPresenceIconFromJid $from]
+    set pstr [::Roster::GetPresenceAndStatusText $from]
     if {$icon ne ""} {
 	$chatstate(wpresimage) configure -image $icon
     }    
+    ::balloonhelp::balloonforwindow $chatstate(wpresimage) $pstr
+    
     XEventCancel $chattoken
 }
 
