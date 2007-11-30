@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.139 2007-11-18 15:08:36 matben Exp $
+# $Id: Disco.tcl,v 1.140 2007-11-30 08:42:05 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1737,6 +1737,8 @@ proc ::Disco::AddServerDo {w} {
     upvar ::Jabber::jprefs jprefs
     variable dlgaddjid
     variable dlgpermanent
+    
+    ::JUI::ShowNotebook
     
     ::UI::SaveWinGeom $w   
     if {$dlgaddjid ne ""} {

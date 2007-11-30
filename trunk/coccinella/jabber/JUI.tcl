@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.226 2007-11-17 07:40:52 matben Exp $
+# $Id: JUI.tcl,v 1.227 2007-11-30 08:42:05 matben Exp $
 
 package provide JUI 1.0
 
@@ -168,7 +168,7 @@ proc ::JUI::Init {} {
 	{command     mSearch...     {::Search::OnMenu}                {}}
 	{command     mAddContact... {::JUser::OnMenu}                 {}}
 	{cascade     mRegister...   {}                                {} {} {}}
-	{command     mDiscoverServer... {::Disco::OnMenuAddServer}    {}}
+	{command     mDiscoverServer... {::Disco::OnMenuAddServer}    D}
 	{separator}
 	{command     mEnterRoom...  {::GroupChat::OnMenuEnter}        R}
 	{command     mCreateRoom... {::GroupChat::OnMenuCreate}       {}}
@@ -1009,6 +1009,17 @@ proc ::JUI::OnMenuToggleNotebook {} {
 	RosterMoveToPage
     }
     ::hooks::run uiMainToggleNotebook $state(show,notebook)
+}
+
+proc ::JUI::ShowNotebook {} {
+    variable jwapp
+    variable state
+    
+    if {![winfo ismapped $jwapp(notebook)]} {
+	RosterMoveToPage
+	set state(show,notebook) 1
+	::hooks::run uiMainToggleNotebook $state(show,notebook)
+    }
 }
 
 proc ::JUI::GetMainWindow {} {
