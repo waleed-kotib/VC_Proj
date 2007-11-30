@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.251 2007-11-30 12:54:57 matben Exp $
+# $Id: Chat.tcl,v 1.252 2007-11-30 12:58:19 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1518,6 +1518,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     
     ::balloonhelp::balloonforwindow $wbot.hist [mc jachathist]
     ::balloonhelp::balloonforwindow $wbot.active [mc jaactiveret]
+    ::balloonhelp::balloonforwindow $wsmile [mc "Insert emoticon"]
 
     set wmid        $wthread.m
     set wpane       $wthread.m.pane
