@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.250 2007-11-27 07:51:26 matben Exp $
+# $Id: Chat.tcl,v 1.251 2007-11-30 12:54:57 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1482,7 +1482,9 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     # Special bindings for setting subject.
     bind $wsubject <FocusIn>  [list ::Chat::OnFocusInSubject $chattoken]
     bind $wsubject <FocusOut> [list ::Chat::OnFocusOutSubject $chattoken]
-    bind $wsubject <Return>   [list ::Chat::OnReturnSubject $chattoken]    
+    bind $wsubject <Return>   [list ::Chat::OnReturnSubject $chattoken]   
+    
+    ::balloonhelp::balloonforwindow $wsubject "Enter the subject of the conversation"
 
     # Notifier label.
     set chatstate(wnotifier) $wnotifier
