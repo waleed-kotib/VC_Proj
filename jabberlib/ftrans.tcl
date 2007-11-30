@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.29 2007-11-27 07:42:09 matben Exp $
+# $Id: ftrans.tcl,v 1.30 2007-11-30 14:38:34 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -44,6 +44,13 @@ namespace eval jlib::ftrans {
       [namespace current]::open_handler       \
       [namespace current]::recv               \
       [namespace current]::close_handler
+    	
+    # This is our reader commands when the transport sends off data
+    # on the network.
+    jlib::si::registerreader $xmlns(ftrans)  \
+      [namespace current]::open_data         \
+      [namespace current]::read_data         \
+      [namespace current]::close_data
     
     jlib::disco::registerfeature $xmlns(ftrans)
 
@@ -287,102 +294,95 @@ proc jlib::ftrans::open_cb {jlibname type sid subiq} {
 	set istate($sid,status) "error"
 	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid $subiq]
 	ifree $jlibname $sid
-    } else {
-    
-	# @@@ assuming -file type
-	# This must never fail since tested if 'readable' before.
-	set fd [open $istate($sid,fileName) {RDONLY}]
-	fconfigure $fd -translation binary
-	set istate($sid,fd) $fd
-
-	send_file_chunk $jlibname $sid
     }
 }
 
-# jlib::ftrans::send_file_chunk --
+# jlib::ftrans::open_data, read_data, close_data --
 # 
-#       Invokes the si's 'send_data' method which in turn calls the right
-#       stream handler for this.
+#       These are all used by the streams (transports) to handle the data
+#       stream it needs when transmitting.
 
-proc jlib::ftrans::send_file_chunk {jlibname sid} {    
+proc jlib::ftrans::open_data {jlibname sid} {
     upvar ${jlibname}::ftrans::istate istate
-    #puts "jlib::ftrans::send_file_chunk (i) sid=$sid"
+    #puts "jlib::ftrans::open_data (i) sid=$sid"
     
-    # We can have been reset since this is an idle call.
-    if {![info exists istate($sid,sid)]} {
-	return
-    }
-    
+    # @@@ assuming -file type
+    # This must never fail since tested if 'readable' before.
+    set fd [open $istate($sid,fileName) r]
+    fconfigure $fd -translation binary
+    set istate($sid,fd) $fd
+    return
+}
+
+proc jlib::ftrans::read_data {jlibname sid} {    
+    upvar ${jlibname}::ftrans::istate istate
+    #puts "jlib::ftrans::read_data (i) sid=$sid"
+
     # If we have reached eof we receive empty.
-    if {[catch {
-	set data [read $istate($sid,fd) $istate($sid,-block-size)]
-    } err]} {
-	#puts "\t err=$err"
-	set istate($sid,status) "error"
-	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {networkerror ""}]
-	ifree $jlibname $sid
-	return
-    }
+    set data [read $istate($sid,fd) $istate($sid,-block-size)]
     set len [string length $data]
     #puts "\t len=$len"
     incr istate($sid,bytes) $len
-    if {!$len} {
-	#puts "\t eof"
-	
-	# Empty -> eof.
-	catch {close $istate($sid,fd)}
-	set istate($sid,status) "ok"
-	
-	# Close stream. 
-	# Shall we wait for a result from this query before reporting?
-	set cmd [namespace current]::close_cb
-	jlib::si::send_close $jlibname $sid $cmd
-    } else {
 
-	# Invoke the si's method which calls the right stream handler to do the job.
-	set cmd [namespace current]::send_chunk_error_cb
-	jlib::si::send_data $jlibname $sid $data $cmd
-	
-	# There is a potential problem if we've been reset here...
-	if {![info exists istate($sid,sid)]} {
-	    return
-	}
-	if {[string length $istate($sid,-progress)]} {
-	    uplevel #0 $istate($sid,-progress)  \
-	      [list $jlibname $sid $istate($sid,size) $istate($sid,bytes)]
-	}
-
-	# Do like this to avoid blocking.
-	set istate($sid,aid) [after idle  \
-	  [list [namespace current]::send_file_chunk $jlibname $sid]]
+    if {[string length $istate($sid,-progress)]} {
+	uplevel #0 $istate($sid,-progress)  \
+	  [list $jlibname $sid $istate($sid,size) $istate($sid,bytes)]
     }
+    return $data
 }
 
-# jlib::ftrans::send_chunk_error_cb --
-# 
-#       Only errors should be reported.
+# This is called by the stream when either all data have been sent or if
+# there is any network error.
 
-proc jlib::ftrans::send_chunk_error_cb {jlibname sid} {    
+proc jlib::ftrans::close_data {jlibname sid {err ""}} {    
     upvar ${jlibname}::ftrans::istate istate
-    #puts "jlib::ftrans::send_chunk_error_cb (i)"
+    #puts "jlib::ftrans::close_data (i) sid=$sid, err=$err"
 
-    uplevel #0 $istate($sid,cmd) [list $jlibname error $sid {networkerror ""}]
-    ifree $jlibname $sid
+    # Empty -> eof.
+    catch {close $istate($sid,fd)}
+    
+    if {$err eq ""} {
+	set istate($sid,status) "ok"
+    } else {
+	set istate($sid,status) "error"
+	set istate($sid,error) "networkerror"
+    }
+    
+    # Close stream. 
+    # Shall we wait for a result from this query before reporting?
+    set cmd [namespace current]::close_cb
+    jlib::si::send_close $jlibname $sid $cmd
 }
+
+# jlib::ftrans::close_cb --
+# 
+#       This is the callback to 'jlib::si::send_close'.
+#       It is our destructor.
 
 proc jlib::ftrans::close_cb {jlibname type sid subiq} {        
     upvar ${jlibname}::ftrans::istate istate
     #puts "jlib::ftrans::close_cb (i)"
 
-    uplevel #0 $istate($sid,cmd) [list $jlibname $type $sid $subiq]
-            
+    # We may have an error status.
+    set status $istate($sid,status)
+    if {$status eq "error"} {
+	set err $istate($sid,error)
+	uplevel #0 $istate($sid,cmd) [list $jlibname error $sid [list $err ""]]
+    } elseif {$status eq "reset"} {
+	uplevel #0 $istate($sid,cmd) [list $jlibname reset $sid {}]
+    } else {
+	uplevel #0 $istate($sid,cmd) [list $jlibname $type $sid $subiq]
+    }
+    
     # There could be situations, a transfer manager, where we want to keep
     # this information.
     ifree $jlibname $sid
 }
 
-# @@@ NEVER TESTED
-#
+# jlib::ftrans::ireset --
+# 
+#       Reset an initiated transaction.
+
 proc jlib::ftrans::ireset {jlibname sid} {
     upvar ${jlibname}::ftrans::istate istate
     
@@ -390,8 +390,16 @@ proc jlib::ftrans::ireset {jlibname sid} {
 	after cancel $istate($sid,aid)
     }
     set istate($sid,status) "reset"
-    uplevel #0 $istate($sid,cmd) [list $jlibname reset $sid {}]
-    # ifree $jlibname $sid
+    set cmd [namespace current]::close_cb
+    jlib::si::send_close $jlibname $sid $cmd
+}
+
+proc jlib::ftrans::iresetall {jlibname} {
+    
+    foreach spec [initiatorinfo $jlibname] {
+	set sid [lindex $spec 0]
+	ireset $jlibname $sid
+    }
 }
 
 # jlib::ftrans::initiatorinfo --
@@ -404,7 +412,7 @@ proc jlib::ftrans::initiatorinfo {jlibname} {
     set iList [list]
     foreach skey [array names istate *,sid] {
 	set sid $istate($skey)
-	set opts [list]
+	set opts $sid
 	foreach {key value} [array get istate $sid,*] {
 	    set name [string map [list $sid, ""] $key]
 	    lappend opts $name $value

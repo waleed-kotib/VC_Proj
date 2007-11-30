@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ibb.tcl,v 1.21 2007-07-19 06:28:17 matben Exp $
+# $Id: ibb.tcl,v 1.22 2007-11-30 14:38:34 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -43,7 +43,6 @@ namespace eval jlib::ibb {
 
     jlib::si::registertransport $xmlns(ibb) $xmlns(ibb) 80  \
       [namespace current]::si_open   \
-      [namespace current]::si_send   \
       [namespace current]::si_close
     
     jlib::disco::registerfeature $xmlns(ibb)
@@ -131,7 +130,7 @@ proc jlib::ibb::cmdproc {jlibname cmd args} {
 #
 # These are all functions to use by a initiator (sender).
 
-# jlib::ibb::si_open, si_send, si_close --
+# jlib::ibb::si_open, si_close --
 # 
 #       Bindings for si.
 
@@ -143,6 +142,7 @@ proc jlib::ibb::si_open {jlibname jid sid args} {
     set istate($sid,sid) $sid
     set istate($sid,jid) $jid
     set istate($sid,seq) 0
+    set istate($sid,status) ""
     set si_open_cb [namespace current]::si_open_cb
     eval {send_open $jlibname $jid $sid $si_open_cb} $args
     return
@@ -150,9 +150,48 @@ proc jlib::ibb::si_open {jlibname jid sid args} {
 
 proc jlib::ibb::si_open_cb {jlibname sid type subiq args} {
     
+    upvar ${jlibname}::ibb::istate istate
     #puts "jlib::ibb::si_open_cb (i)"    
     
+    # Since this is an async call we may have been reset.
+    if {![info exists istate($sid,sid)]} {
+	return
+    }    
     jlib::si::transport_open_cb $jlibname $sid $type $subiq
+    
+    # If all went well this far we initiate the read/write data process.
+    if {$type eq "result"} {
+	
+	# Tell the profile to prepare to read data (open file).
+	jlib::si::open_data $jlibname $sid
+	si_read $jlibname $sid
+    }    
+}
+
+proc jlib::ibb::si_read {jlibname sid} {
+    
+    upvar ${jlibname}::ibb::istate istate
+    #puts "jlib::ibb::si_read (i)"
+    
+    # Since this is an async call we may have been reset.
+    if {![info exists istate($sid,sid)]} {
+	return
+    }    
+    
+    # We have been reset or something.
+    if {$istate($sid,status) eq "close"} {
+	return
+    }
+    set data [jlib::si::read_data $jlibname $sid]
+    set len [string length $data]
+
+    if {$len > 0} {
+	si_send $jlibname $sid $data
+    } else {
+	
+	# Empty data from the reader means that we are done.
+	jlib::si::close_data $jlibname $sid
+    }
 }
 
 proc jlib::ibb::si_send {jlibname sid data} {
@@ -162,6 +201,11 @@ proc jlib::ibb::si_send {jlibname sid data} {
     
     set jid $istate($sid,jid)
     send_data $jlibname $jid $sid $data [namespace current]::si_send_cb
+
+    # Trick to avoid UI blocking.
+    # @@@ We should have a method to detect if xmpp socket writable.
+    after idle [list after 0 [list \
+      [namespace current]::si_read $jlibname $sid]]
 }
 
 # jlib::ibb::si_send_cb --
@@ -178,21 +222,31 @@ proc jlib::ibb::si_send_cb {jlibname sid type subiq args} {
 	return
     }
     if {[string equal $type "error"]} {
-	jlib::si::transport_send_data_error_cb $jlibname $sid
+	jlib::si::close_data $jlibname $sid error
 	ifree $jlibname $sid
     }
 }
+
+# jlib::ibb::si_close --
+# 
+#       The profile closes us down. It could be a reset.
 
 proc jlib::ibb::si_close {jlibname sid} {
     
     upvar ${jlibname}::ibb::istate istate
     #puts "jlib::ibb::si_close (i)"
 
+    # Keep a status so we can stop sending messages right away.
+    set istate($sid,status) "close"
     set jid $istate($sid,jid)
     set cmd [namespace current]::si_close_cb
 
     send_close $jlibname $jid $sid $cmd
 }
+
+# jlib::ibb::si_close_cb --
+# 
+#       This is our destructor that ends it all.
 
 proc jlib::ibb::si_close_cb {jlibname sid type subiq args} {
     
@@ -231,8 +285,7 @@ proc jlib::ibb::configure {jlibname args} {
 # Arguments:
 # 
 
-proc jlib::ibb::send_open {jlibname jid sid cmd args} {
-    
+proc jlib::ibb::send_open {jlibname jid sid cmd args} {    
     variable xmlns
     upvar ${jlibname}::ibb::opts opts
     
@@ -252,8 +305,7 @@ proc jlib::ibb::send_open {jlibname jid sid cmd args} {
 # 
 # 
 
-proc jlib::ibb::send_data {jlibname jid sid data cmd} {
-    
+proc jlib::ibb::send_data {jlibname jid sid data cmd} {    
     variable xmlns
     variable ampElem
     upvar ${jlibname}::ibb::istate istate
@@ -278,8 +330,7 @@ proc jlib::ibb::send_data {jlibname jid sid data cmd} {
 # Arguments:
 # 
 
-proc jlib::ibb::send_close {jlibname jid sid cmd} {
-    
+proc jlib::ibb::send_close {jlibname jid sid cmd} {    
     variable xmlns
     #puts "jlib::ibb::send_close (i)"
 
