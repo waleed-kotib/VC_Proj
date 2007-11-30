@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.222 2007-10-11 09:15:41 matben Exp $
+# $Id: Roster.tcl,v 1.223 2007-11-30 15:30:13 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1034,6 +1034,27 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
 proc ::Roster::GetMyPresenceIcon {} {
     set status [::Jabber::GetMyStatus]
     return [::Rosticons::Get status/$status]
+}
+
+proc ::Roster::GetPresenceAndStatusText {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    set jlib $jstate(jlib)
+    jlib::splitjid $jid jid2 res
+    if {$res eq ""} {
+	array set presA [lindex [$jlib roster getpresence $jid2] 0]
+    } else {
+	array set presA [$jlib roster getpresence $jid2 -resource $res]
+    }    
+    if {[info exists presA(-show)]} {
+	set str [MapShowToText $presA(-show)]
+    } else {
+	set str [MapShowToText $presA(-type)]
+    }
+    if {[info exists presA(-status)]} {
+	append str " - " $presA(-status)
+    }
+    return $str
 }
 
 proc ::Roster::LoginTrpt {jid3} {
