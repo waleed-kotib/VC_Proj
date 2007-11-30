@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: bytestreams.tcl,v 1.32 2007-11-28 13:20:40 matben Exp $
+# $Id: bytestreams.tcl,v 1.33 2007-11-30 14:38:34 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -127,7 +127,6 @@ namespace eval jlib::bytestreams {
         
     jlib::si::registertransport $xmlns(bs) $xmlns(bs) 40  \
       [namespace current]::si_open   \
-      [namespace current]::si_send   \
       [namespace current]::si_close    
     
     jlib::disco::registerfeature $xmlns(bs)
@@ -250,7 +249,7 @@ proc jlib::bytestreams::i_or_t {jlibname sid} {
 #
 # These are all functions to use by a initiator (sender).
 
-# si_open, si_send, si_close --
+# si_open, si_close --
 # 
 #       Bindings for si.
 
@@ -588,6 +587,7 @@ proc jlib::bytestreams::ifast_select_fast {jlibname sid} {
 proc jlib::bytestreams::si_open_report {jlibname sid type subiq} {
     
     upvar ${jlibname}::bytestreams::istate istate
+    upvar ${jlibname}::bytestreams::static static
     debug "jlib::bytestreams::si_open_report (i)"
    
     if {[info exists istate($sid,timeoutid)]} {
@@ -595,19 +595,63 @@ proc jlib::bytestreams::si_open_report {jlibname sid type subiq} {
 	unset istate($sid,timeoutid)
     }
     jlib::si::transport_open_cb $jlibname $sid $type $subiq
+    
+    # If all went well this far we initiate the read/write data process.
+    if {$type eq "result"} {
+	
+	# Tell the profile to prepare to read data (open file).
+	jlib::si::open_data $jlibname $sid
+	
+	# Initiate the transport when socket is ready for writing.
+	set sock $istate($sid,active,sock)
+	setwritable $jlibname $sid $sock
+    }
 }
 
-proc jlib::bytestreams::si_send {jlibname sid data} {
+# jlib::bytestreams::si_read --
+# 
+#       Read data from the profile via 'si' using its registered reader.
+
+proc jlib::bytestreams::si_read {jlibname sid} {
     
     upvar ${jlibname}::bytestreams::istate istate
-    debug "jlib::bytestreams::si_send (i)"
-    debug "\t len=[string length $data]"
-    
+    debug "jlib::bytestreams::si_read (i)"
+
+    # NB: This should be safe to do since if we have been reset also
+    #     the fileevent handler is removed when socket is closed.
     set s $istate($sid,active,sock)
-    if {[catch {puts -nonewline $s $data}]} {
-	debug "\t failed"
-	jlib::si::transport_send_data_error_cb $jlibname $sid
-	ifinish $jlibname $sid
+    
+    fileevent $s writable {}    
+    if {[catch {eof $s} iseof] || $iseof} {
+	jlib::si::close_data $jlibname $sid error
+	return
+    }
+    set data [jlib::si::read_data $jlibname $sid]
+    set len [string length $data]
+
+    if {$len > 0} {
+	if {[catch {puts -nonewline $s $data}]} {
+	    debug "\t failed"
+	    jlib::si::close_data $jlibname $sid error
+	    return
+	}
+	
+	# Trick to avoid UI blocking.
+	after idle [list after 0 [list \
+	  [namespace current]::setwritable $jlibname $sid $s]]
+    } else {
+	
+	# Empty data from the reader means that we are done.
+	jlib::si::close_data $jlibname $sid
+    }
+}
+
+proc jlib::bytestreams::setwritable {jlibname sid sock} {
+    
+    # We could have been closed since this event comes async.
+    if {[lsearch [file channels] $sock] >= 0} {
+	fileevent $sock writable  \
+	  [list [namespace current]::si_read $jlibname $sid]
     }
 }
 
@@ -620,6 +664,7 @@ proc jlib::bytestreams::si_close {jlibname sid} {
     upvar ${jlibname}::bytestreams::istate istate
     debug "jlib::bytestreams::si_close (i)"
     
+    # We don't have any particular to do here as 'ibb' has.
     jlib::si::transport_close_cb $jlibname $sid result {}
     ifinish $jlibname $sid
 }
@@ -1344,8 +1389,7 @@ proc jlib::bytestreams::connect_cb {jlibname sid result args} {
 	      [list [namespace current]::read_CR $sock $cmd_cr]
 
 	} else {
-	    fileevent $sock readable  \
-	      [list [namespace current]::readable $jlibname $sid $sock]
+	    start_read_data $jlibname $sid $sock
 	}
     }
 }
@@ -1440,10 +1484,7 @@ proc jlib::bytestreams::fast_read_CR_cb {jlibname sid {error ""}} {
 	set tstate($sid,fast,selected) fast
 	set tstate($sid,fast,state)    read
 
-	set sock $tstate($sid,fast,sock)
-	
-	fileevent $sock readable  \
-	  [list [namespace current]::readable $jlibname $sid $sock]
+	start_read_data $jlibname $sid $tstate($sid,fast,sock)
     }
 }
 
@@ -1474,9 +1515,17 @@ proc jlib::bytestreams::read_CR_cb {jlibname sid {error ""}} {
 	set tstate($sid,fast,selected) normal
 	set tstate($sid,state)  read
 	
-	fileevent $sock readable  \
-	  [list [namespace current]::readable $jlibname $sid $sock]
+	start_read_data $jlibname $sid $sock
     }
+}
+
+proc jlib::bytestreams::start_read_data {jlibname sid sock} {
+    
+    upvar ${jlibname}::bytestreams::static static
+
+    fconfigure $sock -buffersize $static(-block-size) -buffering full
+    fileevent $sock readable  \
+      [list [namespace current]::readable $jlibname $sid $sock]
 }
 
 # End connect_socks ------------------------------------------------------------

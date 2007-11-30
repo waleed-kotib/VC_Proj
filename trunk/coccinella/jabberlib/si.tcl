@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: si.tcl,v 1.25 2007-11-24 08:18:27 matben Exp $
+# $Id: si.tcl,v 1.26 2007-11-30 14:38:34 matben Exp $
 # 
 #      There are several layers involved when sending/receiving a file for 
 #      instance. Each layer reports only to the nearest layer above using
@@ -108,7 +108,7 @@ namespace eval jlib::si {
 #       This is used by the streams that do the actual job.
 #       Typically 'name' and 'ns' are xml namespaces and identical.
 
-proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} {
+proc jlib::si::registertransport {name ns priority openProc closeProc} {
     variable trpt    
     #puts "jlib::si::registertransport (i)"
     
@@ -116,7 +116,6 @@ proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} 
     set trpt(list) [lsort -unique -index 1 $trpt(list)]
     set trpt($name,ns)    $ns
     set trpt($name,open)  $openProc
-    set trpt($name,send)  $sendProc
     set trpt($name,close) $closeProc
 
     # Keep these in sync.
@@ -129,13 +128,34 @@ proc jlib::si::registertransport {name ns priority openProc sendProc closeProc} 
     }
 }
 
+# jlib::si::registerreader --
+# 
+#       This lives on the initiator side.
+#       Each profile must register a reader which is then used by the streams
+#       (transport) when writing data to the network. 
+#       The streams shall limit its control to the data handling alone,
+#       and the major control is still with the profile.
+#       In particular, any close operation is initiated by the profile.
+#       This is merely a layer to dispatch reading actions from the stream 
+#       to the profile.
+#       NB: We could do with only a 'read' proc but this is a cleaner interface.
+
+proc jlib::si::registerreader {profile openProc readProc closeProc} {
+    variable reader
+    #puts "jlib::si::registerreader"
+    
+    set reader($profile,open)  $openProc
+    set reader($profile,read)  $readProc
+    set reader($profile,close) $closeProc
+}
+
 # jlib::si::registerprofile --
 # 
 #       This is used by profiles to register handler when receiving a si set
 #       with the specified profile. It contains handlers for 'set', 'read',
 #       and 'close' streams. These belong to the target side.
 
-proc jlib::si::registerprofile {profile openProc readProc closeProc} {    
+proc jlib::si::registerprofile {profile openProc readProc closeProc} {
     variable prof
     #puts "jlib::si::registerprofile (t)"
     
@@ -343,6 +363,57 @@ proc jlib::si::transport_open_cb {jlibname sid type iqChild} {
     eval $istate($sid,openCmd) [list $jlibname $type $sid $iqChild]
 }
 
+# jlib::si::getstate --
+# 
+#       Just an access function to the internal state variables.
+
+proc jlib::si::getstate {jlibname sid} {
+    upvar ${jlibname}::si::istate istate
+    
+    set arr [list]
+    foreach {key value} [array get istate $sid,*] {
+	set name [string map [list "$sid," ""] $key]
+	lappend arr $name $value
+    }
+    return $arr
+}
+
+# jlib::si::open_data, read_data, close_data --
+# 
+#       These are all used by the streams (transports) to handle the data
+#       stream it needs when transmitting.
+#       This is merely a layer to dispatch reading actions from the stream 
+#       to the profile.
+
+proc jlib::si::open_data {jlibname sid} {
+    variable reader
+    upvar ${jlibname}::si::istate istate
+    #puts "jlib::si::open_data (i)"
+    
+    set profile $istate($sid,profile)
+    $reader($profile,open) $jlibname $sid
+}
+
+proc jlib::si::read_data {jlibname sid} {
+    variable reader
+    upvar ${jlibname}::si::istate istate
+    #puts "jlib::si::read_data (i)"
+    
+    set profile $istate($sid,profile)
+    return [$reader($profile,read) $jlibname $sid]
+}
+
+# This is also used to report any errors from transport to profile.
+
+proc jlib::si::close_data {jlibname sid {err ""}} {
+    variable reader
+    upvar ${jlibname}::si::istate istate
+    #puts "jlib::si::close_data (i)"
+    
+    set profile $istate($sid,profile)
+    $reader($profile,close) $jlibname $sid $err
+}
+
 # jlib::si::send_close --
 # 
 #       Used by profile to close down the stream.
@@ -357,6 +428,12 @@ proc jlib::si::send_close {jlibname sid cmd} {
     eval $trpt($stream,close) [list $jlibname $sid]    
 }
 
+# jlib::si::transport_close_cb --
+# 
+#       Called by tansport when closed operation is completed.
+#       It is called as a response (callback) to 'send_close'.
+#       This is our destructor.
+
 proc jlib::si::transport_close_cb {jlibname sid type iqChild} {
     upvar ${jlibname}::si::istate istate
     #puts "jlib::si::transport_close_cb (i)"
@@ -365,47 +442,6 @@ proc jlib::si::transport_close_cb {jlibname sid type iqChild} {
     eval $istate($sid,closeCmd) [list $jlibname $type $sid $iqChild]
     
     ifree $jlibname $sid
-}
-
-# jlib::si::getstate --
-# 
-#       Just an access function to the internal state variables.
-
-proc jlib::si::getstate {jlibname sid} {
-    upvar ${jlibname}::si::istate istate
-    
-    set arr {}
-    foreach {key value} [array get istate $sid,*] {
-	set name [string map [list "$sid," ""] $key]
-	lappend arr $name $value
-    }
-    return $arr
-}
-
-# jlib::si::send_data --
-# 
-#       Opaque calls to send a chunk.
-
-proc jlib::si::send_data {jlibname sid data cmd} {
-    variable trpt
-    upvar ${jlibname}::si::istate istate
-    #puts "jlib::si::send_data (i)"
-    
-    set istate($sid,sendCmd) $cmd
-    set stream $istate($sid,stream)
-    eval $trpt($stream,send) [list $jlibname $sid $data]    
-}
-
-# jlib::si::transport_send_data_error_cb --
-# 
-#       This is a transports way of reporting errors when sending data.
-#       ONLY ERRORS HERE!
-
-proc jlib::si::transport_send_data_error_cb {jlibname sid} {
-    upvar ${jlibname}::si::istate istate
-    #puts "jlib::si::transport_send_data_error_cb (i)"
-        
-    eval $istate($sid,sendCmd) [list $jlibname $sid]
 }
 
 proc jlib::si::ifree {jlibname sid} {    
