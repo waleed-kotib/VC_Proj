@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.255 2007-12-01 11:38:14 matben Exp $
+# $Id: Chat.tcl,v 1.256 2007-12-01 14:08:47 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -197,6 +197,9 @@ namespace eval ::Chat {
     
     # Control how the ancient XEP-0022 (jabber:x:event) is handled.
     set ::config(chat,use-xevents) 1
+    
+    # Set subject on Return or when focus out?
+    set ::config(chat,set-subject) "focusout" ;# return|focusout
     
     # Control how chat state notification is handled.
     set ::config(chat,notify-send) 1
@@ -1482,8 +1485,16 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
 
     # Special bindings for setting subject.
     bind $wsubject <FocusIn>  [list ::Chat::OnFocusInSubject $chattoken]
-    bind $wsubject <FocusOut> [list ::Chat::OnFocusOutSubject $chattoken]
-    bind $wsubject <Return>   [list ::Chat::OnReturnSubject $chattoken]   
+    bind $wsubject <Return>   [list ::Chat::SetSubject $chattoken]   
+
+    switch -- $config(chat,set-subject) {
+	"return" {
+	    bind $wsubject <FocusOut> [list ::Chat::RevokeSubject $chattoken]
+	}
+	"focusout" {
+	    bind $wsubject <FocusOut> [list ::Chat::SetSubject $chattoken]   
+	}
+    }
     
     ::balloonhelp::balloonforwindow $wsubject [mc tooltip-chatsubject]
     ::balloonhelp::balloonforwindow $wpresimage $pstr
@@ -1696,7 +1707,7 @@ proc ::Chat::OnFocusInSubject {chattoken} {
     set chatstate(subjectOld) $chatstate(subject)
 }
 
-proc ::Chat::OnFocusOutSubject {chattoken} {
+proc ::Chat::RevokeSubject {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -1704,7 +1715,7 @@ proc ::Chat::OnFocusOutSubject {chattoken} {
     set chatstate(subject) $chatstate(subjectOld)
 }
 
-proc ::Chat::OnReturnSubject {chattoken} {
+proc ::Chat::SetSubject {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
@@ -1712,6 +1723,10 @@ proc ::Chat::OnReturnSubject {chattoken} {
     set dlgtoken $chatstate(dlgtoken)
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
+    
+    if {$chatstate(subject) eq $chatstate(subjectOld)} {
+	return
+    }
 
     set threadID $chatstate(threadid)
     set chatstate(fromjid) [$jstate(jlib) getrecipientjid $chatstate(fromjid)]
