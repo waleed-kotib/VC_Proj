@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.254 2007-12-01 07:40:18 matben Exp $
+# $Id: Chat.tcl,v 1.255 2007-12-01 11:38:14 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2252,7 +2252,7 @@ proc ::Chat::SetState {chattoken state} {
     set tstate [string map {normal !disabled} $state]
     
     set wtray $dlgstate(wtray)
-    foreach name {send sendfile} {
+    foreach name {send sendfile invite} {
 	$wtray buttonconfigure $name -state $state 
     }
     
@@ -2279,6 +2279,9 @@ proc ::Chat::SetState {chattoken state} {
     if {$state eq "disabled"} {
 	set icon [::Roster::GetPresenceIconFromKey invisible]
 	$chatstate(wpresimage) configure -image $icon
+	set pstr [::Roster::MapShowToText unavailable]
+	append pstr " - " [mc tooltip-chatoffline]
+	::balloonhelp::balloonforwindow $chatstate(wpresimage) $pstr
     }
     set chatstate(state) $state
 }
