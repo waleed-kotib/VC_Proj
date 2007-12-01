@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.215 2007-11-30 12:58:20 matben Exp $
+#   $Id: en.msg,v 1.216 2007-12-01 07:40:18 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -1211,6 +1211,9 @@ if {0} {
 ::msgcat::mcset en tooltip-tkpng	    {Support for PNG images}
 ::msgcat::mcset en tooltip-xanim	    {Support for several animation, video and audio formats}
 ::msgcat::mcset en tooltip-QuickTimeTcl	    {Support for several animation, image, video and audio formats}
+
+::msgcat::mcset en tooltip-chatsubject      {Enter the subject of the conversation, set by pressing Return}
+
 # Me knows :-)
 ::msgcat::mcset en matsShouldReplaceThis {Not yet implemented.}
 
