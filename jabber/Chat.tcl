@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.253 2007-11-30 15:30:13 matben Exp $
+# $Id: Chat.tcl,v 1.254 2007-12-01 07:40:18 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1485,7 +1485,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     bind $wsubject <FocusOut> [list ::Chat::OnFocusOutSubject $chattoken]
     bind $wsubject <Return>   [list ::Chat::OnReturnSubject $chattoken]   
     
-    ::balloonhelp::balloonforwindow $wsubject "Enter the subject of the conversation"
+    ::balloonhelp::balloonforwindow $wsubject [mc tooltip-chatsubject]
     ::balloonhelp::balloonforwindow $wpresimage $pstr
     
     # Notifier label.
@@ -2201,6 +2201,10 @@ proc ::Chat::GetNotebookWpageFromIndex {wnb index} {
     return $wpage
 }
 
+# Chat::SetThreadState --
+# 
+#       Typically called to update the common controls when tab changed.
+
 proc ::Chat::SetThreadState {dlgtoken chattoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
@@ -2209,10 +2213,13 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
     upvar 0 $chattoken chatstate
     upvar ::Jabber::jstate jstate
 
-    Debug 6 "::Chat::SetThreadState chattoken=$chattoken"
+    Debug 4 "::Chat::SetThreadState chattoken=$chattoken"
     
-    jlib::splitjid $chatstate(jid) user res
-    if {[$jstate(jlib) roster isavailable $user]} {
+    # We should be able to chat with ourself.    
+    set jid2 [jlib::barejid $chatstate(jid)]
+    set myjid2 [::Jabber::JlibCmd myjid2]
+    set isme [jlib::jidequal $jid2 $myjid2]
+    if {[$jstate(jlib) roster isavailable $jid2] || $isme} {
 	SetState $chattoken normal
     } else {
 	SetState $chattoken disabled
@@ -2223,7 +2230,6 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
     }
     SetTitle $chattoken
     SetAnyAvatar $chattoken
-    SetState $chattoken normal
 }
 
 # Chat::SetState --
@@ -2241,7 +2247,9 @@ proc ::Chat::SetState {chattoken state} {
     }
     set dlgtoken $chatstate(dlgtoken)
     variable $dlgtoken
-    upvar 0 $dlgtoken dlgstate    
+    upvar 0 $dlgtoken dlgstate   
+    
+    set tstate [string map {normal !disabled} $state]
     
     set wtray $dlgstate(wtray)
     foreach name {send sendfile} {
@@ -2256,13 +2264,21 @@ proc ::Chat::SetState {chattoken state} {
     } else {
 	set jid3 $jid
     }
-    if {[$wtray exists whiteboard] && ![::Roster::IsCoccinella $jid3]} {
-	$wtray buttonconfigure whiteboard -state disabled
+    if {[$wtray exists whiteboard]} {
+	if {[::Roster::IsCoccinella $jid3] && ($state eq "normal")} {
+	    $wtray buttonconfigure whiteboard -state normal
+	} else {
+	    $wtray buttonconfigure whiteboard -state disabled
+	}
     }	
     $chatstate(wtextsnd) configure -state $state
-    $chatstate(wsubject) configure -state $state
+    $chatstate(wsubject) state $tstate
     if {![::Emoticons::None]} {
-	$chatstate(wsmile)   configure -state $state
+	$chatstate(wsmile) configure -state $state
+    }
+    if {$state eq "disabled"} {
+	set icon [::Roster::GetPresenceIconFromKey invisible]
+	$chatstate(wpresimage) configure -image $icon
     }
     set chatstate(state) $state
 }
@@ -3031,7 +3047,6 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
     if {[llength $showE]} {
 	set show [string tolower [wrapper::getcdata $showE]]
     }
-    puts "----------------chatstate(presence)=$chatstate(presence)"
         
     # Skip if duplicate presence. Bug?
     if {[string equal $chatstate(presence) $show]} {
