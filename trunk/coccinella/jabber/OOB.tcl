@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: OOB.tcl,v 1.60 2007-11-02 12:09:18 matben Exp $
+# $Id: OOB.tcl,v 1.61 2007-12-01 16:09:31 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -350,24 +350,38 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
     
     eval {::hooks::run oobSetRequestHook $from $subiq} $args
     
-    array set argsArr $args
-    set ishandled 0
+    array set argsA $args
     
     # Be sure to trace any 'id' attribute for confirmation.
-    if {[info exists argsArr(-id)]} {
-	set id $argsArr(-id)
+    if {[info exists argsA(-id)]} {
+	set id $argsA(-id)
     } else {
-	set id $locals(id)
-	incr locals(id)
+	return 0
     }
     foreach child [wrapper::getchildren $subiq] {
 	set tag  [wrapper::gettag $child]
 	set $tag [wrapper::getcdata $child]
     }
     if {![info exists url]} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc jamessoobnourl2 $from]
-	return $ishandled
+	#::UI::MessageBox -title [mc Error] -icon error -type ok \
+	#  -message [mc jamessoobnourl2 $from]
+	return 0
+    }
+    
+    # Validate URL, determine the server host and port.
+    if {![regexp -nocase {^(([^:]*)://)?([^/:]+)(:([0-9]+))?(/.*)?$} $url \
+      x prefix proto host y port path]} {
+	#::UI::MessageBox -title [mc Error] -icon error -type ok \
+	#  -message [mc jamessoobbad2 $from $url]
+	return 0
+    }
+    if {[string length $proto] == 0} {
+	set proto http
+    }
+    if {$proto ne "http"} {
+	#::UI::MessageBox -title [mc Error] -icon error -type ok \
+	#  -message [mc jamessoonnohttp2 $from $proto]
+	return 0
     }
     set tail [file tail $url]
     set tailDec [uriencode::decodefile $tail]
@@ -376,41 +390,51 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
     if {[info exists desc]} {
 	append str "\n" "[mc Description]: $desc"
     }
-    set msg [mc jamessoobask2 $from $str]
-    set ans [::UI::MessageBox -title [mc {Receive File}] -icon info \
-      -type yesno -default yes -message $msg]
-    if {$ans eq "no"} {	
-	ReturnError $from $id $subiq 406
-	return $ishandled
-    }
     
-    # Validate URL, determine the server host and port.
-    if {![regexp -nocase {^(([^:]*)://)?([^/:]+)(:([0-9]+))?(/.*)?$} $url \
-      x prefix proto host y port path]} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc jamessoobbad2 $from $url]
-	return $ishandled
-    }
-    if {[string length $proto] == 0} {
-	set proto http
-    }
-    if {$proto ne "http"} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc jamessoonnohttp2 $from $proto]
-	return $ishandled
-    }
-    set userDir [::Utils::GetDirIfExist $prefs(userPath)]
-    set localPath [tk_getSaveFile -title [mc {Save File}] \
-      -initialfile $tailDec -initialdir $userDir]
-    if {$localPath == ""} {
-	return $ishandled
-    }
-    set prefs(userPath) [file dirname $localPath]
+    set w [ui::autoname]
+    
+    # Keep instance specific state array.
+    variable $w
+    upvar 0 $w state    
+    
+    set state(w)      $w
+    set state(id)     $id
+    set state(url)    $url
+    set state(from)   $from
+    set state(queryE) $subiq
+    set state(args)   $args
+    
+    set msg [mc jamessoobask2 $from $str]
+    ui::dialog $w -title [mc "Receive File"] -icon info \
+      -type yesno -default yes -message $msg \
+      -command [namespace code ParseSetCmd]
+    
+    return 1
+}
 
-    # And get it.
-    Get $from $url $localPath $id $subiq
-    set ishandled 1
-    return $ishandled
+proc ::OOB::ParseSetCmd {w bt} {
+    global  prefs
+    variable $w
+    upvar 0 $w state    
+    
+    if {$bt eq "no"} {
+	ReturnError $state(from) $state(id) $state(queryE) 406
+    } else {
+	set url $state(url)
+	set tail [file tail $url]
+	set tailDec [uriencode::decodefile $tail]
+	set userDir [::Utils::GetDirIfExist $prefs(userPath)]
+	set localPath [tk_getSaveFile -title [mc "Save File"] \
+	  -initialfile $tailDec -initialdir $userDir]
+	if {$localPath eq ""} {
+	    ReturnError $state(from) $state(id) $state(queryE) 406
+	} else {
+	    set prefs(userPath) [file dirname $localPath]
+	
+	    # And get it.
+	    Get $state(from) $url $localPath $state(id) $state(queryE)
+	}
+    }
 }
 
 proc ::OOB::Get {jid url file id subiq} {
@@ -489,16 +513,16 @@ proc ::OOB::BuildText {w xml args} {
     if {![string equal $attr(xmlns) "jabber:x:oob"]} {
 	error {Not proper xml data here}
     }
-    array set argsArr {
+    array set argsA {
 	-width     30
     }
-    array set argsArr $args
+    array set argsA $args
     set nlines 1
     foreach c [wrapper::getchildren $xml] {
 	switch -- [wrapper::gettag $c] {
 	    desc {
 		set desc [wrapper::getcdata $c]
-		set nlines [expr [string length $desc]/$argsArr(-width) + 1]
+		set nlines [expr [string length $desc]/$argsA(-width) + 1]
 	    }
 	    url {
 		set url [wrapper::getcdata $c]
@@ -508,7 +532,7 @@ proc ::OOB::BuildText {w xml args} {
     
     set bg [option get . backgroundGeneral {}]
     
-    text $w -bd 0 -wrap word -width $argsArr(-width)  \
+    text $w -bd 0 -wrap word -width $argsA(-width)  \
       -background $bg -height $nlines  \
       -highlightthickness 0
     if {[info exists desc] && [info exists url]} {
