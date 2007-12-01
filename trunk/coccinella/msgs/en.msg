@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.217 2007-12-01 11:38:14 matben Exp $
+#   $Id: en.msg,v 1.218 2007-12-01 14:26:12 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -468,6 +468,7 @@
 ::msgcat::mcset en {Chatroom presence change}
 ::msgcat::mcset en {Clear Cache}
 ::msgcat::mcset en {Close page}
+::msgcat::mcset en {Close tab}
 ::msgcat::mcset en {Configure Chatroom}
 ::msgcat::mcset en {Contact Actions}
 ::msgcat::mcset en {Contact Icons}
