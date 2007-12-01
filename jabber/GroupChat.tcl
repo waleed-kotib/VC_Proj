@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.222 2007-11-04 13:54:50 matben Exp $
+# $Id: GroupChat.tcl,v 1.223 2007-12-01 14:26:12 matben Exp $
 
 package require Create
 package require Enter
@@ -1176,7 +1176,7 @@ proc ::GroupChat::DrawCloseButton {dlgtoken} {
       -command [list [namespace current]::ClosePageCmd $dlgtoken]
     place $wclose -anchor ne -relx 1.0 -x -6 -y 6
 
-    ::balloonhelp::balloonforwindow $wclose [mc {Close page}]
+    ::balloonhelp::balloonforwindow $wclose [mc "Close tab"]
     set dlgstate(wclose) $wclose
 }
 
