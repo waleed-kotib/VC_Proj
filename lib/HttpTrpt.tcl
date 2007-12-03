@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: HttpTrpt.tcl,v 1.12 2007-09-25 12:46:27 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.13 2007-12-03 10:33:40 matben Exp $
 
 package require httpex
 package require timing
@@ -79,7 +79,7 @@ proc ::HttpTrpt::Get {url fileName args} {
     variable $token
     upvar 0 $token state
 
-    set w ${wbase}${uid}
+    set w $wbase$uid
     set state(fd)           $fd
     set state(w)            $w
     set state(timetok)      $fd
@@ -150,7 +150,6 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 
     # Update only when minimum time has passed, and only at certain interval.
     set ms [clock clicks -milliseconds]
-    set needupdate 0
     set w $state(w)
 
     # Create progress dialog if not exists.
@@ -160,9 +159,8 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 	    ui::progress::toplevel $w -text $str \
 	      -menu [::UI::GetMainMenu]          \
 	      -cancelcommand [list [namespace current]::CancelBt $token]
-	    set needupdate 1
 	}
-	if {$state(-progressmessage) != {}} {
+	if {$state(-progressmessage) ne ""} {
 	    set msg "[mc Downloading] \"$state(fileTail)\""
 	    uplevel #0 $state(-progressmessage) [list $msg]
 	}
@@ -184,15 +182,6 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 	    uplevel #0 $state(-progressmessage) [list $msg]
 	}
 	set state(lastmillis) $ms
-    }
-
-    # Be silent... except for a necessary update command to not block.
-    if {$needupdate} {
-	if {[string equal $tcl_platform(platform) "windows"]} {
-	    update
-	} else {
-	    update idletasks
-	}
     }
 }
 

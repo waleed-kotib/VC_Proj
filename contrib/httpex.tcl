@@ -9,7 +9,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: httpex.tcl,v 1.25 2007-09-25 12:46:27 matben Exp $
+# $Id: httpex.tcl,v 1.26 2007-12-03 10:33:40 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -123,6 +123,9 @@ namespace eval httpex {
     variable locals
     variable debug 0
     variable codeToText
+    
+    # Test avoiding fcopy and use fileevents instead.
+    variable useFcopy 0
     
     # Only for the config command.
     array set opts {
@@ -560,7 +563,6 @@ proc httpex::Request {method url args} {
 #	Proceeds with the httpex protocol,
 
 proc httpex::Connect {token} {    
-    global  tcl_platform
     variable $token
     variable opts
     variable locals
@@ -572,17 +574,10 @@ proc httpex::Connect {token} {
     fileevent $s writable {}
     catch {after cancel $state(after)}
     
-    if {[string equal $tcl_platform(platform) "macintosh"]} {
-	if {[catch {eof $s} iseof] || $iseof} {
-	    Eof $token $iseof
-	    return
-	}
-    } else {
-	if {[catch {eof $s} iseof] || $iseof ||  \
-	  [string length [fconfigure $s -error]]} {
-	    Eof $token $iseof
-	    return
-	}
+    if {[catch {eof $s} iseof] || $iseof ||  \
+      [string length [fconfigure $s -error]]} {
+	Eof $token $iseof
+	return
     }
     
     # On track :-)
@@ -846,6 +841,7 @@ proc httpex::Event {token} {
     variable $token
     upvar 0 $token state
     variable locals
+    variable useFcopy
     
     Debug 1 "httpex::Event state(state)=$state(state)"
     
@@ -935,7 +931,7 @@ proc httpex::Event {token} {
 	    if {[info exists state(-command)]} {
 		uplevel #0 $state(-command) $token
 	    }
-	    if {[info exists state(-channel)]} {
+	    if {$useFcopy && [info exists state(-channel)]} {
 		
 		# Initiate a sequence of background fcopies
 		CopyStart $s $token
@@ -1294,7 +1290,7 @@ proc httpex::Eof {token {iseof 0}} {
 
 # httpex::Read
 #
-#	Reads from socket to internal variable.
+#	Reads from socket to internal variable or puts to channel.
 #	Used by methods: get, serverpost, serverput.
 #
 # Arguments
@@ -1310,6 +1306,8 @@ proc httpex::Read {s token} {
     
     Debug 1 "httpex::Read"
     
+    fileevent $s readable {}
+
     if {[catch {eof $s} iseof] || $iseof} {
 	Eof $token
 	return
@@ -1325,10 +1323,14 @@ proc httpex::Read {s token} {
 	if {[info exists state(-handler)]} {
 	    set n [eval $state(-handler) {$s $token}]
 	} else {
-	    set block [read $s $blocksize]
-	    set n [string length $block]
+	    set data [read $s $blocksize]
+	    set n [string length $data]
 	    if {$n >= 0} {
-		append state(body) $block
+		if {[info exists state(-channel)]} {
+		    puts -nonewline $state(-channel) $data
+		} else {
+		    append state(body) $data
+		}
 	    }
 	}
 	if {$n >= 0} {
@@ -1351,6 +1353,21 @@ proc httpex::Read {s token} {
 	} else {
 	    Eof $token
 	}
+    } else {
+	
+	# This is a trick to put this event at the back of the queue to
+	# avoid using any 'update'.
+	after idle [list after 0 [list \
+	  [namespace current]::SetReadable $s $token]]
+    }
+}
+
+proc httpex::SetReadable {s token} {    
+    
+    # We could have been closed since this event comes async.
+    if {[lsearch [file channels] $s] >= 0} {
+	fileevent $s readable  \
+	  [list [namespace current]::Read $s $token]
     }
 }
 
