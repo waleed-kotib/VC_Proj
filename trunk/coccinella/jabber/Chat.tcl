@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.257 2007-12-01 14:26:12 matben Exp $
+# $Id: Chat.tcl,v 1.258 2007-12-03 08:13:43 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -198,9 +198,15 @@ namespace eval ::Chat {
     # Control how the ancient XEP-0022 (jabber:x:event) is handled.
     set ::config(chat,use-xevents) 1
     
-    # Set subject on Return or when focus out?
-    set ::config(chat,set-subject) "focusout" ;# return|focusout
+    # Set subject on Return.
+    set ::config(chat,subject-on-return)   1
     
+    # Set subject on FocusOut.
+    set ::config(chat,subject-on-focusout) 0
+
+    # Revoke subject on FocusOut.
+    set ::config(chat,subject-focusout-revoke) 0
+
     # Control how chat state notification is handled.
     set ::config(chat,notify-send) 1
     set ::config(chat,notify-recv) 1
@@ -623,7 +629,11 @@ proc ::Chat::GotMsg {xmldata} {
     } else {
 	set chatstate(displayname) [::Roster::GetDisplayName $jid2]
     }
-    
+    set subjectE [wrapper::getfirstchildwithtag $xmldata "subject"]
+    if {[llength $subjectE]} {
+	set chatstate(subjectThread) [wrapper::getcdata $subjectE]
+    }
+
     set w $dlgstate(w)
 
     # Check for ChatState (XEP-0085) support
@@ -1416,9 +1426,13 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     set chatstate(dlgtoken)         $dlgtoken
     set chatstate(threadid)         $threadID
     set chatstate(nameorjid)        [::Roster::GetNameOrJID $jid2]
-    set chatstate(state)            normal    
+    set chatstate(state)            normal  
+    
+    # The subject entries content (-textvariable).
     set chatstate(subject)          ""
-    set chatstate(lastsubject)      ""
+    
+    # The actual subject sent or received for this thread.
+    set chatstate(subjectThread)    ""
     set chatstate(subjectOld)       ""
     set chatstate(notifier)         ""
     set chatstate(active)           $cprefs(lastActiveRet)
@@ -1484,17 +1498,16 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     pack  $wtop.e  -side top -fill x
 
     # Special bindings for setting subject.
-    bind $wsubject <FocusIn>  [list ::Chat::OnFocusInSubject $chattoken]
-    bind $wsubject <Return>   [list ::Chat::SetSubject $chattoken]   
-
-    switch -- $config(chat,set-subject) {
-	"return" {
-	    bind $wsubject <FocusOut> [list ::Chat::RevokeSubject $chattoken]
-	}
-	"focusout" {
-	    bind $wsubject <FocusOut> [list ::Chat::SetSubject $chattoken]   
-	}
+    bind $wsubject <FocusIn> [list ::Chat::OnFocusInSubject $chattoken]
+    if {$config(chat,subject-on-return)} {
+	bind $wsubject <Return>   [list ::Chat::SetSubject $chattoken]   
     }
+    if {$config(chat,subject-on-focusout)} {
+	bind $wsubject <FocusOut> [list ::Chat::SetSubject $chattoken]   
+    }    
+    if {$config(chat,subject-focusout-revoke)} {
+	bind $wsubject <FocusOut> [list ::Chat::RevokeSubject $chattoken]
+    }   
     
     ::balloonhelp::balloonforwindow $wsubject [mc tooltip-chatsubject]
     ::balloonhelp::balloonforwindow $wpresimage $pstr
@@ -1734,6 +1747,8 @@ proc ::Chat::SetSubject {chattoken} {
     set jid2    [jlib::barejid $jid]
     set myjid   [$jstate(jlib) myjid]
     set subject $chatstate(subject)
+    
+    set chatstate(subjectThread) $subject
     
     set xmldata [jlib::send_message_xmllist $jid  \
       -thread $threadID -type chat -from $myjid -subject $subject]
@@ -2810,7 +2825,13 @@ proc ::Chat::Send {dlgtoken} {
 	return
     }
     
-    SendText $chattoken $text
+    # We may have edited the subject line and not yet sent it.
+    set opts [list]
+    if {$chatstate(subject) ne $chatstate(subjectThread)} {
+	lappend opts -subject $chatstate(subject)
+    }
+    
+    eval {SendText $chattoken $text} $opts
 }
 
 proc ::Chat::SendText {chattoken text args} {
@@ -2847,12 +2868,8 @@ proc ::Chat::SendText {chattoken text args} {
 	return
     }
     
-    # Need to detect if subject changed. If subject was changed it was already
-    # sent alone but some clients (Psi) doesn't recognize this why it is
-    # duplicated here. Good/bad? Skip!
     set opts [list]
     set xlist [list]
-    set chatstate(lastsubject) $chatstate(subject)
     
     # Cancellations of any message composing jabber:x:event
     if {$config(chat,use-xevents)} {
@@ -2897,8 +2914,10 @@ proc ::Chat::SendText {chattoken text args} {
 	lappend opts -xlist $xlist
     }
     if {[info exists argsA(-subject)]} {
-	set chatstate(subject) $argsA(-subject)
-	lappend opts -subject $argsA(-subject)
+	set subject $argsA(-subject)
+	set chatstate(subject) $subject
+	set chatstate(subjectThread) $subject
+	lappend opts -subject $subject
     }
     
     # Put in history file.
@@ -2937,9 +2956,6 @@ proc ::Chat::SendFile {dlgtoken} {
     upvar 0 $chattoken chatstate
     
     ::FTrans::Send $chatstate(fromjid)
-
-    #jlib::splitjid $chatstate(fromjid) jid2 res
-    #::OOB::BuildSet $jid2
 }
 
 proc ::Chat::Settings {dlgtoken} {
