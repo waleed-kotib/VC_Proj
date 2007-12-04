@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.220 2007-12-04 14:56:01 matben Exp $
+#   $Id: en.msg,v 1.221 2007-12-04 15:08:58 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -732,6 +732,7 @@
 ::msgcat::mcset en jamessavaerrsize      {The avatar must be square of size %s.}
 ::msgcat::mcset en jamessbadjid2         {%s is invalid. Do you want to continue anyway?}
 ::msgcat::mcset en jamesschatclose2      {Do you want to close this chat window and loose the complete conversation?}
+::msgcat::mcset en jamesschatinvite      {Do you actually want to invite this user to a new chat room?}
 ::msgcat::mcset en jamesschatoffline2    {This contact is not online anymore and the message is therfore not sent.}
 ::msgcat::mcset en jamessconffailed2     {Cannot enter/create chatroom %s.}
 ::msgcat::mcset en jamessconnbroken      {The connection was unexpectedly broken.}
