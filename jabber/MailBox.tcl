@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.132 2007-11-04 13:54:51 matben Exp $
+# $Id: MailBox.tcl,v 1.133 2007-12-04 07:26:59 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -224,7 +224,7 @@ proc ::MailBox::MessageHook {xmldata uuid} {
 	#     One alternative is to keep an array with entries like
 	#     the history xml format and store as list.
 	set opts [::Jabber::ExtractOptsFromXmldata $xmldata]
-	set messageList [eval {MakeMessageList $bodytxt} $opts]    
+	set messageList [eval {MakeMessageList $body} $opts]    
 	
 	# All messages cached in 'mailbox' array.
 	set mailbox($uidmsg) $messageList
