@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: XMLConsole.tcl,v 1.5 2007-11-17 07:40:52 matben Exp $
+# $Id: XMLConsole.tcl,v 1.6 2007-12-04 07:12:24 matben Exp $
 
 namespace eval ::XMLConsole { 
 
@@ -105,7 +105,7 @@ proc ::XMLConsole::Build {} {
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::checkbutton $frbot.c -style Small.TCheckbutton \
       -text [mc "Pretty format"] -variable $token\(pretty)
-    ttk::button $frbot.btok -text [mc Close] -default active \
+    ttk::button $frbot.btok -text [mc OK] -default active \
       -command [list destroy $w]
     ttk::button $frbot.clear -text [mc Clear] \
       -command [namespace code [list Clear $w]]
