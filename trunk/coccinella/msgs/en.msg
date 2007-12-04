@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.219 2007-12-04 14:54:33 matben Exp $
+#   $Id: en.msg,v 1.220 2007-12-04 14:56:01 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -368,7 +368,7 @@
 ::msgcat::mcset en mLogout               {Logout}
 ::msgcat::mcset en mLogoutFrom           {Logout from %s}
 ::msgcat::mcset en mLogoutTrpt           {Logout from Transport}
-::msgcat::mcset en mLogoutWith...        {Lo&gout With Message...}
+::msgcat::mcset en mLogoutWith...        {Logout With Message...}
 ::msgcat::mcset en mLower                {&Lower}
 ::msgcat::mcset en mMessage...           {&Message...}
 ::msgcat::mcset en mMinimal              {&Minimal}
