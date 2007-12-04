@@ -4,6 +4,7 @@
 
 namespace eval ::Totd {
     
+    return
     if {$::this(vers,full) eq "0.96.4"} {
 	return
     }
