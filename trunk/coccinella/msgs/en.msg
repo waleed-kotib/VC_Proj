@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.218 2007-12-01 14:26:12 matben Exp $
+#   $Id: en.msg,v 1.219 2007-12-04 14:54:33 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -394,7 +394,7 @@
 ::msgcat::mcset en mRaise                {&Raise}
 ::msgcat::mcset en mRedo                 {Re&do}
 ::msgcat::mcset en mRefresh              {Refresh}
-::msgcat::mcset en mRegister...          {Register...}
+::msgcat::mcset en mRegister...          {Re&gister...}
 ::msgcat::mcset en mRemoveAccount...     {&Remove Account...}
 ::msgcat::mcset en mRemoveContact        {&Remove Contact...}
 ::msgcat::mcset en mRemoveListing        {Remove &Listing}
