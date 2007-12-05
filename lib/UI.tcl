@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.177 2007-11-16 14:52:14 matben Exp $
+# $Id: UI.tcl,v 1.178 2007-12-05 13:14:44 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -29,8 +29,8 @@ namespace eval ::UI:: {
     global  this
 
     # Add all event hooks.
-    ::hooks::register initFinalHook           ::UI::InitFinalHook
     ::hooks::register firstLaunchHook         ::UI::FirstLaunchHook
+    ::hooks::register jabberBuildMain         ::UI::JabberBuildMainHook
 
     # Icons
     option add *buttonOKImage            buttonok       widgetDefault
@@ -136,9 +136,15 @@ proc ::UI::Init {} {
     ::Theme::GetImageWithNameEx [option get . buttonOKImage {}]
     ::Theme::GetImageWithNameEx [option get . buttonCancelImage {}]
     ::Theme::GetImageWithNameEx [option get . buttonTrayImage {}]
+    
+    InitDialogs
+
+    if {[tk windowingsystem] eq "aqua"} {
+	InitMac
+    }
 }
 
-proc ::UI::InitFinalHook {} {
+proc ::UI::InitDialogs {} {
         
     # Dialog images.
     foreach name {info error warning question internet} {
@@ -148,15 +154,14 @@ proc ::UI::InitFinalHook {} {
     ui::dialog::setbadge [::Theme::GetImage [option get . badgeImage {}]]
     set im [::Theme::GetImage [option get . applicationImage {}]]
     ui::dialog::setimage coccinella $im
-    ui::dialog defaultmenu [::UI::GetMainMenu]
     ui::dialog layoutpolicy stack
 
     # For ui::openimage
-    option add *Dialog*image.style  Sunken.TLabel  widgetDefault
-    
-    if {[tk windowingsystem] eq "aqua"} {
-	InitMac
-    }
+    option add *Dialog*image.style  Sunken.TLabel  widgetDefault    
+}
+
+proc ::UI::JabberBuildMainHook {} {
+    ui::dialog defaultmenu [::UI::GetMainMenu]
 }
 
 proc ::UI::InitMac {} {
@@ -325,7 +330,6 @@ proc ::UI::InitDlgs {} {
 	jchist          .jchist
 	jhist           .jhist
 	jprofiles       .jprofiles
-	joobs           .joobs
 	jftrans         .jftrans
 	jerrdlg         .jerrdlg
 	jwbinbox        .jwbinbox
@@ -1773,6 +1777,8 @@ proc ::UI::CenterWindow {win} {
 	error "::UI::CenterWindow: $win is not a toplevel window"
     }
     after idle [format {
+	
+	# @@@ This is potentially dangerous!
 	update idletasks
 	set win %s
 	set sw [winfo screenwidth $win]
