@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.96 2007-10-23 13:48:59 matben Exp $
+# $Id: NewMsg.tcl,v 1.97 2007-12-05 08:40:25 matben Exp $
 
 package require ui::entryex
 
@@ -367,6 +367,8 @@ proc ::NewMsg::Build {args} {
     pack  $frsub.esub -side left -fill x -expand 1 -padx 6
     pack  [::Emoticons::MenuButton $frsub.smile -text $wtext] -side right
     pack  [ttk::frame $frsub.space] -side right
+    
+    ::balloonhelp::balloonforwindow $frsub.smile [mc "Insert emoticon"]
     
     # @@@ Maybe this should be handled more systematically?
     if {$locals($w,xdata)} {
