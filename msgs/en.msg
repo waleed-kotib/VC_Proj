@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.221 2007-12-04 15:08:58 matben Exp $
+#   $Id: en.msg,v 1.222 2007-12-06 10:45:59 sdevrieze Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -280,7 +280,7 @@
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset en mAboutCoccinella      {&About Coccinella}
 ::msgcat::mcset en mAction               {&Action}
-::msgcat::mcset en mAddToDictionary      {Add to dictionary}
+::msgcat::mcset en mAddToDictionary      {Add to Dictionary}
 ::msgcat::mcset en mAdHocCommands        {C&ommands}
 ::msgcat::mcset en mAddContact...        {&Add Contact...}
 ::msgcat::mcset en mAddSpeechBubble      {Add Speech Bubble}
@@ -314,6 +314,7 @@
 ::msgcat::mcset en mDash                 {Dash}
 ::msgcat::mcset en mDebug                {&Debug}
 ::msgcat::mcset en mDecreasing           {&Decreasing}
+::msgcat::mcset en mDictionaries         {Dictionaries}
 ::msgcat::mcset en mDiscoverServer...    {&Discover Server...}
 ::msgcat::mcset en mDoNotDisturb         {Do Not Disturb}
 ::msgcat::mcset en mEdit                 {&Edit}
@@ -732,7 +733,7 @@
 ::msgcat::mcset en jamessavaerrsize      {The avatar must be square of size %s.}
 ::msgcat::mcset en jamessbadjid2         {%s is invalid. Do you want to continue anyway?}
 ::msgcat::mcset en jamesschatclose2      {Do you want to close this chat window and loose the complete conversation?}
-::msgcat::mcset en jamesschatinvite      {Do you actually want to invite this user to a new chat room?}
+::msgcat::mcset en jamesschatinvite      {Do you want to invite this contact to a new chatroom?}
 ::msgcat::mcset en jamesschatoffline2    {This contact is not online anymore and the message is therfore not sent.}
 ::msgcat::mcset en jamessconffailed2     {Cannot enter/create chatroom %s.}
 ::msgcat::mcset en jamessconnbroken      {The connection was unexpectedly broken.}
@@ -1008,8 +1009,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jasearch2             {Search contacts with the selected service. A new search form will empty the previous one.}
 ::msgcat::mcset en jasearchwait          {Waiting for Get to be pressed}
 ::msgcat::mcset en jaseliconset2         {Select iconsets for each group. A deselected group will use the normal iconset.}
-::msgcat::mcset en jasubmulti            {%s contacts want to see your presence. Select the contacts who may see your presence.}
-::msgcat::mcset en jasubmultians         {The following contacts have confirmed your presence subsctiptions}
+::msgcat::mcset en jasubmulti            {%s contacts want to see your presence. Select those who may see your presence.}
+::msgcat::mcset en jasubmultians         {The following contacts have confirmed your presence subscription}
 ::msgcat::mcset en jasubopts2            {Entering a nickname and group is optional, and for your personal use only.}
 ::msgcat::mcset en jasubwant2            {May %s see your presence?}
 ::msgcat::mcset en jasuppimagefmts       {The supported image formats are}
