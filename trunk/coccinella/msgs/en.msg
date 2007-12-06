@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.222 2007-12-06 10:45:59 sdevrieze Exp $
+#   $Id: en.msg,v 1.223 2007-12-06 10:55:03 sdevrieze Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -1010,7 +1010,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jasearchwait          {Waiting for Get to be pressed}
 ::msgcat::mcset en jaseliconset2         {Select iconsets for each group. A deselected group will use the normal iconset.}
 ::msgcat::mcset en jasubmulti            {%s contacts want to see your presence. Select those who may see your presence.}
-::msgcat::mcset en jasubmultians         {The following contacts have confirmed your presence subscription}
+::msgcat::mcset en jasubmultians         {The following contacts can see your presence}
 ::msgcat::mcset en jasubopts2            {Entering a nickname and group is optional, and for your personal use only.}
 ::msgcat::mcset en jasubwant2            {May %s see your presence?}
 ::msgcat::mcset en jasuppimagefmts       {The supported image formats are}
