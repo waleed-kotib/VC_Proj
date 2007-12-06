@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.58 2007-10-10 07:25:29 matben Exp $
+# $Id: JPrefs.tcl,v 1.59 2007-12-06 09:11:25 matben Exp $
 
 package require ui::fontselector
 
@@ -44,7 +44,7 @@ proc ::JPrefs::InitPrefsHook { } {
     set prefs(opacity) 100.0
             
     # Save inbox when quit?
-    set jprefs(inboxSave) 0
+    set jprefs(inboxSave) 1
     
     set jprefs(autoLogin) 0
     
@@ -59,7 +59,7 @@ proc ::JPrefs::InitPrefsHook { } {
     # {mejid_1 {jid ?-option value ...?} mejid_2 {...} ...}
     set jprefs(chat,dialogs) {}
     
-    set jprefs(rememberDialogs) 0
+    set jprefs(rememberDialogs) 1
 
 
     # Personal info page:
