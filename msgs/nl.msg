@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.161 2007-12-07 10:15:16 matben Exp $
+#   $Id: nl.msg,v 1.162 2007-12-07 17:54:42 sdevrieze Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -346,7 +346,7 @@
 ::msgcat::mcset nl Ports                 {Poorten}
 # Reference: {Preferences}
 # Find in sources: lib/Preferences.tcl:174
-::msgcat::mcset nl Preferences           {Preferences}
+::msgcat::mcset nl Preferences           {Voorkeuren}
 # Reference: {Previous}
 # Find in sources: components/Totd.tcl:93 contrib/wizard.tcl:220 jabber/Adhoc.tcl:209
 ::msgcat::mcset nl Previous              {Vorige}
@@ -674,10 +674,10 @@
 ::msgcat::mcset nl mAboutCoccinella      {&Over Coccinella...}
 # Reference: {&Action}
 # Find in sources: whiteboard/FilePrefs.tcl:477
-::msgcat::mcset nl mAction               {Actie}
+::msgcat::mcset nl mAction               {&Actie}
 # Reference: {Add to Dictionary}
 # Find in sources: components/Spell.tcl:160
-::msgcat::mcset nl mAddToDictionary      {Add to Dictionary}
+::msgcat::mcset nl mAddToDictionary      {Toevoegen aan woordenboek}
 # Reference: {C&ommands}
 ::msgcat::mcset nl mAdHocCommands        {C&ommando's}
 # Reference: {&Add Contact...}
@@ -743,7 +743,7 @@
 ::msgcat::mcset nl mCreateRoom...        {Chatruimte &aanmaken...}
 # Reference: {Custom Status...}
 # Find in sources: jabber/Status.tcl:750
-::msgcat::mcset nl mCustomStatus...      {Aangepaste aanwezigheid...}
+::msgcat::mcset nl mCustomStatus...      {Aangepaste aanwezig&heid...}
 # Reference: {Cu&t}
 ::msgcat::mcset nl mCut                  {Kni&ppen}
 # Reference: {Dash}
@@ -754,7 +754,7 @@
 # Reference: {&Decreasing}
 ::msgcat::mcset nl mDecreasing           {&Aflopend}
 # Reference: {Dictionaries}
-::msgcat::mcset nl mDictionaries         {Dictionaries}
+::msgcat::mcset nl mDictionaries         {&Woordenboeken}
 # Reference: {&Discover Server...}
 ::msgcat::mcset nl mDiscoverServer...    {&Server waarnemen...}
 # Reference: {Do Not Disturb}
@@ -762,7 +762,7 @@
 ::msgcat::mcset nl mDoNotDisturb         {Niet storen}
 # Reference: {&Edit}
 # Find in sources: jabber/MUC.tcl:989 jabber/Privacy.tcl:167 lib/EditDialogs.tcl:125 whiteboard/Multicast.tcl:93
-::msgcat::mcset nl mEdit                 {Bewerken}
+::msgcat::mcset nl mEdit                 {Be&werken}
 # Reference: {Edit &Bookmarks...}
 ::msgcat::mcset nl mEditBookmarks...     {B&ladwijzers bewerken...}
 # Reference: {Edit &Business Card...}
@@ -780,7 +780,7 @@
 # Reference: {&Error Log...}
 ::msgcat::mcset nl mErrorLog             {&Foutmeldingen...}
 # Reference: {Export}
-::msgcat::mcset nl mExport               {Exporteren}
+::msgcat::mcset nl mExport               {E&xporteren}
 # Reference: {Export Image...}
 ::msgcat::mcset nl mExportImage...       {Afbeelding exporteren...}
 # Reference: {Export Movie...}
@@ -789,7 +789,7 @@
 # Find in sources: jabber/Roster.tcl:85 jabber/Roster.tcl:93 jabber/Status.tcl:40 jabber/Status.tcl:48
 ::msgcat::mcset nl mExtendedAway         {Langdurig afwezig}
 # Reference: {&File}
-::msgcat::mcset nl mFile                 {Bestand}
+::msgcat::mcset nl mFile                 {&Bestand}
 # Reference: {Fill}
 ::msgcat::mcset nl mFill                 {Opvullen}
 # Reference: {Fill Color...}
@@ -805,7 +805,7 @@
 # Reference: {Font}
 ::msgcat::mcset nl mFont                 {Lettertype}
 # Reference: {Font Size}
-::msgcat::mcset nl mFontSize             {Lettergrootte}
+::msgcat::mcset nl mFontSize             {Letter&grootte}
 # Reference: {Grid}
 ::msgcat::mcset nl mGrid                 {Raster}
 # Reference: {&History...}
@@ -813,7 +813,7 @@
 # Reference: {Horizontal}
 ::msgcat::mcset nl mHorizontal           {Horizontaal}
 # Reference: {Huge}
-::msgcat::mcset nl mHugeFont             {Grootst}
+::msgcat::mcset nl mHugeFont             {Groots&t}
 # Reference: {Icon &Set...}
 ::msgcat::mcset nl mIconSet...           {&Emoticon-thema...}
 # Reference: {&Ignore}
@@ -823,16 +823,16 @@
 # Reference: {Image Smaller}
 ::msgcat::mcset nl mImageSmaller         {Afbeelding verkleinen}
 # Reference: {Import}
-::msgcat::mcset nl mImport               {Importeren}
+::msgcat::mcset nl mImport               {I&mporteren}
 # Reference: {&Import Image/Movie...}
 ::msgcat::mcset nl mImportImage/Movie... {Afbeelding/Film &importeren...}
 # Reference: {&Inbox...}
-::msgcat::mcset nl mInbox...             {&Postvak in...}
+::msgcat::mcset nl mInbox...             {Postvak &in...}
 # Reference: {&Increasing}
 ::msgcat::mcset nl mIncreasing           {&Oplopend}
 # Reference: {&Info}
 # Find in sources: whiteboard/Whiteboard.tcl:2238
-::msgcat::mcset nl mInfo                 {Info}
+::msgcat::mcset nl mInfo                 {&Info}
 # Reference: {Invisible}
 # Find in sources: jabber/Roster.tcl:86 jabber/Roster.tcl:94 jabber/Status.tcl:41 jabber/Status.tcl:49
 ::msgcat::mcset nl mInvisible            {Onzichtbaar}
@@ -843,36 +843,36 @@
 # Reference: {Forward Call}
 ::msgcat::mcset nl mJiveForward          {Telefoongesprek omleiden}
 # Reference: {Large}
-::msgcat::mcset nl mLargeFont            {Groter}
+::msgcat::mcset nl mLargeFont            {Gr&oter}
 # Reference: {Larger}
 ::msgcat::mcset nl mLarger               {Breder}
 # Reference: {Larger}
-::msgcat::mcset nl mLargerFont           {Groot}
+::msgcat::mcset nl mLargerFont           {&Groot}
 # Reference: {Last Login/Activity}
 ::msgcat::mcset nl mLastLogin/Activity   {Laatste aanmelden/activiteit}
 # Reference: {&Library}
 # Find in sources: whiteboard/Whiteboard.tcl:2237
-::msgcat::mcset nl mLibrary              {Bibliotheek}
+::msgcat::mcset nl mLibrary              {Bibliothee&k}
 # Reference: {Line Smoothness}
 ::msgcat::mcset nl mLineSmoothness       {Lijngladheid}
 # Reference: {Local Time...}
 ::msgcat::mcset nl mLocalTime            {Lokale tijd...}
 # Reference: {Login...}
-::msgcat::mcset nl mLogin...             {Aanmelden...}
+::msgcat::mcset nl mLogin...             {Aan&melden...}
 # Reference: {Login to %s}
 # Find in sources: jabber/Roster.tcl:526
 ::msgcat::mcset nl mLoginTo              {Aanmelden op %s}
 # Reference: {Login to Transport}
 ::msgcat::mcset nl mLoginTrpt            {Transport aanmelden}
 # Reference: {Logout}
-::msgcat::mcset nl mLogout               {Afmelden}
+::msgcat::mcset nl mLogout               {Af&melden}
 # Reference: {Logout from %s}
 # Find in sources: jabber/Roster.tcl:529
 ::msgcat::mcset nl mLogoutFrom           {Afmelden van %s}
 # Reference: {Logout from Transport}
 ::msgcat::mcset nl mLogoutTrpt           {Transport afmelden}
 # Reference: {Logout With Message...}
-::msgcat::mcset nl mLogoutWith...        {&Met bericht afmelden...}
+::msgcat::mcset nl mLogoutWith...        {Met bericht afmel&den...}
 # Reference: {&Lower}
 ::msgcat::mcset nl mLower                {Naar a&chtergrond}
 # Reference: {&Message...}
@@ -887,7 +887,7 @@
 # Reference: {New &Window}
 ::msgcat::mcset nl mNewWindow            {&Nieuw venster}
 # Reference: {Normal}
-::msgcat::mcset nl mNormal               {Normaal}
+::msgcat::mcset nl mNormal               {&Normaal}
 # Reference: {Not Available}
 # Find in sources: jabber/JUI.tcl:528 jabber/JUI.tcl:593 jabber/Roster.tcl:87 jabber/Roster.tcl:95 jabber/Status.tcl:42 jabber/Status.tcl:50
 ::msgcat::mcset nl mNotAvailable         {Niet beschikbaar}
@@ -911,10 +911,10 @@
 ::msgcat::mcset nl mPieslice             {Taartspie}
 # Reference: {Plu&gins}
 # Find in sources: components/ImageMagic.tcl:62
-::msgcat::mcset nl mPlugins              {Plugins}
+::msgcat::mcset nl mPlugins              {&Plugins}
 # Reference: {&Preferences}
 # Find in sources: whiteboard/Whiteboard.tcl:2236
-::msgcat::mcset nl mPreferences          {Voorkeuren}
+::msgcat::mcset nl mPreferences          {&Voorkeuren}
 # Reference: {&Preferences...}
 ::msgcat::mcset nl mPreferences...       {&Voorkeuren...}
 # Reference: {&Print...}
@@ -929,7 +929,7 @@
 # Find in sources: jabber/MUC.tcl:484
 ::msgcat::mcset nl mRefresh              {&Verversen}
 # Reference: {Re&gister...}
-::msgcat::mcset nl mRegister...          {Registreren...}
+::msgcat::mcset nl mRegister...          {R&egistreren...}
 # Reference: {&Remove Account...}
 ::msgcat::mcset nl mRemoveAccount...     {Account ve&rwijderen...}
 # Reference: {&Remove Contact...}
@@ -962,20 +962,20 @@
 # Reference: {Shift Constrain}
 ::msgcat::mcset nl mShiftConstrain       {Begrenzing roteren}
 # Reference: {Show}
-::msgcat::mcset nl mShow                 {Tonen}
+::msgcat::mcset nl mShow                 {&Tonen}
 # Reference: {Size}
 ::msgcat::mcset nl mSize                 {Grootte}
 # Reference: {Slide Show}
 # Find in sources: components/SlideShow.tcl:196
-::msgcat::mcset nl mSlideShow            {Diavoorstelling}
+::msgcat::mcset nl mSlideShow            {Dia&voorstelling}
 # Reference: {Smaller}
 ::msgcat::mcset nl mSmaller              {Smaller}
 # Reference: {Sort}
 ::msgcat::mcset nl mSort                 {Sorteren}
 # Reference: {Check Spelling}
-::msgcat::mcset nl mCheckSpell           {Check Spelling}
+::msgcat::mcset nl mCheckSpell           {&Automatische spellingcontrole}
 # Reference: {Status}
-::msgcat::mcset nl mStatus               {Aanwezigheid}
+::msgcat::mcset nl mStatus               {Aanwezig&heid}
 # Reference: {Stop &Transactions}
 ::msgcat::mcset nl mStopTrans            {&Transacties beëindigen}
 # Reference: {Straighten}
@@ -1056,7 +1056,7 @@
 # Find in sources: components/BuddyPounce.tcl:574
 ::msgcat::mcset nl {Auto Reply}          {Automatisch beantwoorden}
 # Reference: {Auto-accept}
-::msgcat::mcset nl Auto-accept           {Automatisch accepteren}
+::msgcat::mcset nl Auto-accept           {Automatisch aanvaarden}
 # Reference: {Auto-reject}
 ::msgcat::mcset nl Auto-reject           {Automatisch weigeren}
 # Reference: {Blocking support}
@@ -1101,7 +1101,7 @@
 ::msgcat::mcset nl {Close page}          {Pagina sluiten}
 # Reference: {Close tab}
 # Find in sources: jabber/Chat.tcl:2091 jabber/GroupChat.tcl:1179
-::msgcat::mcset nl {Close tab}           {Close tab}
+::msgcat::mcset nl {Close tab}           {Tabblad sluiten}
 # Reference: {Configure Chatroom}
 # Find in sources: jabber/MUC.tcl:429 jabber/MUC.tcl:440 jabber/MUC.tcl:545 jabber/MUC.tcl:1426
 ::msgcat::mcset nl {Configure Chatroom}  {Chatruimte instellen}
@@ -1227,7 +1227,7 @@
 ::msgcat::mcset nl {Format: mm/dd/yyyy}  {Opmaak: mm/dd/jjjj}
 # Reference: {Forwarded message}
 # Find in sources: jabber/NewMsg.tcl:431
-::msgcat::mcset nl {Forwarded message}   {Forwarded message}
+::msgcat::mcset nl {Forwarded message}   {Doorgestuurd bericht}
 # Reference: {History length}
 # Find in sources: jabber/Chat.tcl:4018
 ::msgcat::mcset nl {History length}      {Lengte van geschiedenis}
@@ -1239,7 +1239,7 @@
 ::msgcat::mcset nl {Incoming Message}    {Inkomend bericht}
 # Reference: {Insert emoticon}
 # Find in sources: jabber/Chat.tcl:1549 jabber/NewMsg.tcl:371
-::msgcat::mcset nl {Insert emoticon}     {Insert emoticon}
+::msgcat::mcset nl {Insert emoticon}     {Emoticon invoegen}
 # Reference: {Invite Contact}
 # Find in sources: jabber/MUC.tcl:137 jabber/MUC.tcl:165
 ::msgcat::mcset nl {Invite Contact}      {Contactpersoon uitnodigen}
@@ -1521,7 +1521,7 @@
 ::msgcat::mcset nl {Thread started}      {Conversatie begonnen op}
 # Reference: {Update Check}
 # Find in sources: components/AutoUpdate.tcl:175
-::msgcat::mcset nl {Update Check}        {Update Check}
+::msgcat::mcset nl {Update Check}        {Controle op updates}
 # Reference: {Use HTTP transport}
 # Find in sources: jabber/Profiles.tcl:1870
 ::msgcat::mcset nl {Use HTTP transport}  {HTTP-transport gebruiken}
@@ -1562,7 +1562,7 @@
 ::msgcat::mcset nl {View Business Card}  {Visitekaart bekijken}
 # Reference: {View business card}
 # Find in sources: jabber/Subscribe.tcl:324 jabber/Subscribe.tcl:358 jabber/Subscribe.tcl:1219 jabber/Subscribe.tcl:1480
-::msgcat::mcset nl {View business card}  {View business card}
+::msgcat::mcset nl {View business card}  {Visitekaart bekijken}
 
 # Reference: {Windows opacity}
 # Find in sources: jabber/JPrefs.tcl:232
@@ -1797,7 +1797,7 @@
 ::msgcat::mcset nl jamesschatclose2      {Wilt u dit chatvenster sluiten en de volledige conversatie verliezen?}
 # Reference: {Do you want to invite this contact to a new chatroom?}
 # Find in sources: jabber/Chat.tcl:1833
-::msgcat::mcset nl jamesschatinvite      {Do you want to invite this contact to a new chatroom?}
+::msgcat::mcset nl jamesschatinvite      {Wilt u deze contactpersoon uitnodigen op een nieuwe chatruimte?}
 # Reference: {This contact is not online anymore and the message is therfore not sent.}
 # Find in sources: jabber/JWB.tcl:804
 ::msgcat::mcset nl jamesschatoffline2    {Deze contactpersoon is niet meer online en het bericht is daarom niet verzonden.}
@@ -1946,7 +1946,7 @@
 ::msgcat::mcset nl jamessooberr404b      {Kan het bestand %s niet verzenden naar %s.}
 # Reference: {%s did not accepted the file %s.}
 # Find in sources: jabber/FTrans.tcl:494 jabber/FTrans.tcl:522
-::msgcat::mcset nl jamessooberr406b      {%s accepteerde het bestand %s niet.}
+::msgcat::mcset nl jamessooberr406b      {%s aanvaarde het bestand %s niet.}
 # Reference: {Cannot open file %s}
 # Find in sources: lib/HttpTrpt.tcl:66
 ::msgcat::mcset nl jamessoobfailopen2    {Kan het bestand %s niet openen}
@@ -2015,13 +2015,13 @@
 ::msgcat::mcset nl jamessstatuscustdtl2  {De meestvoorkomende combinaties zijn makkelijk bereikbaar als menu-ingangen.}
 # Reference: {Subscription request will be accepted in: %s secs.}
 # Find in sources: jabber/Subscribe.tcl:270 jabber/Subscribe.tcl:440 jabber/Subscribe.tcl:730 jabber/Subscribe.tcl:746 jabber/Subscribe.tcl:959 jabber/Subscribe.tcl:1067
-::msgcat::mcset nl jamesssubscautoacc    {Subscription request will be accepted in: %s secs.}
+::msgcat::mcset nl jamesssubscautoacc    {Abonnementsaanvraag wordt aanvaard in: %s seconden.}
 # Reference: {Subscription request will be rejected in: %s secs.}
 # Find in sources: jabber/Subscribe.tcl:290 jabber/Subscribe.tcl:460 jabber/Subscribe.tcl:798 jabber/Subscribe.tcl:814 jabber/Subscribe.tcl:979 jabber/Subscribe.tcl:1084
-::msgcat::mcset nl jamesssubscautorej    {Subscription request will be rejected in: %s secs.}
+::msgcat::mcset nl jamesssubscautorej    {Abonnementsaanvraag wordt geweigerd in: %s seconden.}
 # Reference: {%s additional contacts can see your presence.}
 # Find in sources: jabber/Subscribe.tcl:1407 jabber/Subscribe.tcl:1454
-::msgcat::mcset nl jamesssubscedfancy    {%s additional contacts can see your presence.}
+::msgcat::mcset nl jamesssubscedfancy    {%s extra contactpersonen kunnen uw aanwezigheid zien.}
 # Reference: {Time since %s was last connected}
 # Find in sources: jabber/Jabber.tcl:1531
 ::msgcat::mcset nl jamesstimeconn2       {Tijd sinds laatste verbinding van %s}
@@ -2177,7 +2177,7 @@
 
 # Reference: {On %s, %s %s wrote:}
 # Find in sources: jabber/NewMsg.tcl:938
-::msgcat::mcset nl reply-prefix          {On %s, %s %s wrote:}
+::msgcat::mcset nl reply-prefix          {Op %s, %s schreef %s:}
 
 # Reference: {Shell print command, edit if desired}
 # Find in sources: lib/Dialogs.tcl:119
@@ -2433,7 +2433,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jainmsgshow           {Inkomende berichten in dit venster tonen}
 # Reference: {Invite contact to chatroom %s.}
 # Find in sources: jabber/MUC.tcl:177
-::msgcat::mcset nl jainvitegchat2        {Contactpersoon uitnodigen voor chatruimte %s.}
+::msgcat::mcset nl jainvitegchat2        {Contactpersoon uitnodigen op chatruimte %s.}
 # Reference: {Write Jabber server ip number or name, or choose from the popup menu. You should already have an account with this server.}
 # Find in sources: jabber/Login.tcl:127
 ::msgcat::mcset nl jalogin               {Voer het IP-nummer of de naam van de server in, of kies een server uit het popupmenu. Verzeker u ervan dat u al een account hebt op deze server.}
@@ -2496,7 +2496,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jaseliconset2         {Selecteer pictogrammen voor elke groep. Een gedeselecteerde groep zal de standaard pictogrammen gebruiken.}
 # Reference: {%s contacts want to see your presence. Select those who may see your presence.}
 # Find in sources: jabber/Subscribe.tcl:952 jabber/Subscribe.tcl:1142
-::msgcat::mcset nl jasubmulti            {%s contacts want to see your presence. Select those who may see your presence.}
+::msgcat::mcset nl jasubmulti            {%s contactpersonen willen uw aanwezigheid zien. Selecteer diegenen die uw aanwezigheid mogen zien.}
 # Reference: {Entering a nickname and group is optional, and for your personal use only.}
 # Find in sources: jabber/Subscribe.tcl:256
 ::msgcat::mcset nl jasubopts2            {Een bijnaam en groep invoeren is optioneel en enkel voor persoonlijk gebruik.}
@@ -2641,7 +2641,7 @@ namespace eval ::EditShortcuts:: {
 # Find in sources: whiteboard/GetFileIface.tcl:459
 ::msgcat::mcset nl getnot200             {Antwoord ontvangen van de server %s.\n Foutcode %s\nBericht: %s}
 # Reference: {%s accepted file %s. Initiating file transfer...}
-::msgcat::mcset nl getstarts             {%s accepteerde bestand %s. Het verzenden is gestart...}
+::msgcat::mcset nl getstarts             {%s aanvaarde bestand %s. Het verzenden is gestart...}
 # Reference: {Transfer from %s ended prematurely.}
 ::msgcat::mcset nl getended              {Verzenden van %s stopte te vroeg.}
 # Reference: {Finished downloading file %s from %s.}
@@ -2667,7 +2667,7 @@ namespace eval ::EditShortcuts:: {
 # Find in sources: whiteboard/PutFileIface.tcl:168
 ::msgcat::mcset nl putnot200             {De server op %s antwoorde met een code %s: %s}
 # Reference: {Client at %s accepted file %s. Starts transfer...}
-::msgcat::mcset nl putstarts             {%s accepteerde bestand %s. Het verzenden is gestart...}
+::msgcat::mcset nl putstarts             {%s aanvaarde bestand %s. Het verzenden is gestart...}
 # Reference: {Transfer to %s ended prematurely.}
 ::msgcat::mcset nl putended              {Verzenden naar %s is te vroeg gestopt.}
 # Reference: {Finished putting file "%s" to %s.}
@@ -2839,7 +2839,7 @@ if {0} {
 # bug: this should be M&ood..., but this does not work!
 # Reference: {Mood}
 # Find in sources: components/Mood.tcl:293 components/Mood.tcl:382
-::msgcat::mcset nl mMood                 {Stemming}
+::msgcat::mcset nl mMood                 {Stemmi&ng}
 # Reference: {Angry}
 # Find in sources: components/Mood.tcl:118
 ::msgcat::mcset nl mAngry                {Boos}
@@ -2977,10 +2977,10 @@ if {0} {
 
 # Reference: {Enter the subject of the conversation, set by pressing Return}
 # Find in sources: jabber/Chat.tcl:1514
-::msgcat::mcset nl tooltip-chatsubject   {Enter the subject of the conversation, set by pressing Return}
+::msgcat::mcset nl tooltip-chatsubject   {Voer het onderwerp van het gesprek in, stel in met Enter}
 # Reference: {You need to be logged in to see the presence of this contact}
 # Find in sources: jabber/Chat.tcl:2385
-::msgcat::mcset nl tooltip-chatoffline   {You need to be logged in to see the presence of this contact}
+::msgcat::mcset nl tooltip-chatoffline   {U moet aangemeld zijn om de aanwezigheid van deze contactpersoon te zien}
 
 
 # Me knows :-)
