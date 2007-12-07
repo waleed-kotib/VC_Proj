@@ -18,7 +18,7 @@ Coccinella-0.96.4 (200712??)
  o major rework of subscription dialogs
  o improved component/plugin control
  o si-pub support, used by whiteboard svg mode
-
+ o improved responsiveness during file transfers
 
 Coccinella-0.96.2 (20070919)
 
