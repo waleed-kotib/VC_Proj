@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.227 2007-11-30 08:42:05 matben Exp $
+# $Id: JUI.tcl,v 1.228 2007-12-07 15:43:36 matben Exp $
 
 package provide JUI 1.0
 
@@ -1477,7 +1477,13 @@ proc ::JUI::InfoPostCommand {wmenu} {
     } else {
 	
 	# For aqua we must do this only for .jmain
-	if {[::UI::IsToplevelActive $wDlgs(jmain)]} {
+	set showState normal
+	if {[tk windowingsystem] eq "aqua"} {
+	    if {![::UI::IsToplevelActive $wDlgs(jmain)]} {
+		set showState disabled
+	    }	    
+	}
+	if {$showState eq "normal"} {
 	    ::UI::MenuMethod $wmenu entryconfigure mShow -state normal
 	    
 	    # Set -variable values.
@@ -1656,6 +1662,9 @@ proc ::JUI::DnDXmppBindTarget {win args} {
 }
 
 proc ::JUI::DnDXmppDragEnter {win data type} {
+    
+    Debug 4 "::JUI::DnDXmppDragEnter win=$win, data=$data, type=$type"
+    
     if {[DnDXmppVerify $data $type]} {
 	set wclass [winfo class $win]
 	if {($wclass eq "TEntry") || ($wclass eq "TCombobox")} {
@@ -1679,6 +1688,9 @@ proc ::JUI::DnDXmppDragLeave {win} {
 }
 
 proc ::JUI::DnDXmppDrop {win data type cmd} {
+    
+    Debug 4 "::JUI::DnDXmppDrop win=$win, data=$data, type=$type"
+    
     if {[DnDXmppVerify $data $type]} {
 	set data [DnDXmppExtractJID $data $type]
 	if {$cmd eq ""} {
