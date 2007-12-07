@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.259 2007-12-04 15:08:58 matben Exp $
+# $Id: Chat.tcl,v 1.260 2007-12-07 14:18:04 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -275,7 +275,7 @@ proc ::Chat::StartThreadDlg {args} {
     global  prefs this wDlgs config
 
     variable finished -1
-    variable user ""
+    variable user
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
@@ -287,6 +287,8 @@ proc ::Chat::StartThreadDlg {args} {
 	raise $w
 	return
     }
+    
+    set user ""
     
     ::UI::Toplevel $w -class StartChat  \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox}
@@ -1655,11 +1657,15 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     bind $wtextsnd <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $chattoken]
     if {$havednd} {
-	InitDnD $chattoken $wtextsnd
-	::JUI::DnDXmppBindTarget $wtext \
-	  -command [namespace code [list DnDXmppDrop $chattoken]]
-	::JUI::DnDXmppBindTarget $wtextsnd \
-	  -command [namespace code [list DnDXmppDrop $chattoken]]
+	DnDFileInit $chattoken $wtext
+	DnDFileInit $chattoken $wtextsnd
+	#DnDDebugBind $wtextsnd
+	if {[tk windowingsystem] eq "win32"} {
+	    ::JUI::DnDXmppBindTarget $wtext \
+	      -command [namespace code [list DnDXmppDrop $chattoken]]
+	    ::JUI::DnDXmppBindTarget $wtextsnd \
+	      -command [namespace code [list DnDXmppDrop $chattoken]]
+	}
     }
     
     set chatstate(wthread)  $wthread
@@ -1683,18 +1689,6 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     after idle [list raise [winfo toplevel $wthread]]
     
     return $chattoken
-}
-
-proc ::Chat::DnDXmppDrop {chattoken win data type} {
-        
-    set ans [tk_messageBox -title [mc Warning] -type yesno \
-      -message [mc jamesschatinvite]]
-    
-    if {$ans eq "yes"} {
-	set jidL [::JUI::DnDXmppExtractJID $data $type]
-	set jidL [string map {"," ""} $jidL]
-	Invite $chattoken -jidlist $jidL
-    }
 }
 
 proc ::Chat::NicknameEventHook {xmldata jid nickname} {
@@ -1819,21 +1813,59 @@ proc ::Chat::FindAgain {dlgtoken {dir 1}} {
     }
 }
 
-proc ::Chat::InitDnD {chattoken win} {
+# Chat::DnDXmppDrop --
+# 
+#       This shall handle xmpp:JID contacts as text.
+
+proc ::Chat::DnDXmppDrop {chattoken win data type} {
     
+    Debug 4 "::Chat::DnDXmppDrop win=$win, data=$data, type=$type"
+	 
+    # We shall allow only online contacts.
+    set jidL [::JUI::DnDXmppExtractJID $data $type]
+    set onlineL [list]
+    foreach jid $jidL {
+	if {[::Jabber::JlibCmd roster isavailable $jid]} {
+	    lappend onlineL $jid
+	}
+    }
+    set jidL $onlineL
+    if {[llength $jidL]} {
+	set ans [tk_messageBox -title [mc Warning] -type yesno \
+	  -message [mc jamesschatinvite]]
+	
+	if {$ans eq "yes"} {
+	    set jidL [string map {"," ""} $jidL]
+	    Invite $chattoken -jidlist $jidL
+	}
+    }
+}
+
+# Chat::DnDFileInit --
+# 
+#       This shall handle file drops, text/uri-list.
+
+proc ::Chat::DnDFileInit {chattoken win} {
+
+    dnd cleartarget $win
+
     # Important to register with lower priority (than 50) when dropping
     # JID from roster.
     dnd bindtarget $win text/uri-list <Drop>      \
-     [list ::Chat::DnDDrop $chattoken %W %D %T] 80
+     [list ::Chat::DnDFileDrop $chattoken %W %D %T] 80
     dnd bindtarget $win text/uri-list <DragEnter> \
-     [list ::Chat::DnDEnter $chattoken %W %A %D %T] 80
+     [list ::Chat::DnDFileEnter $chattoken %W %A %D %T] 80
     dnd bindtarget $win text/uri-list <DragLeave> \
-     [list ::Chat::DnDLeave $chattoken %W %D %T] 80
+     [list ::Chat::DnDFileLeave $chattoken %W %D %T] 80
+   
+   DnDDebugDump $win
 }
 
-proc ::Chat::DnDDrop {chattoken win data dndtype} {
+proc ::Chat::DnDFileDrop {chattoken win data type} {
     variable $chattoken
     upvar 0 $chattoken chatstate
+
+    Debug 4 "::Chat::DnDFileDrop win=$win, data=$data, type=$type"
 
     # Take only first file.
     set f [lindex $data 0]
@@ -1845,14 +1877,65 @@ proc ::Chat::DnDDrop {chattoken win data dndtype} {
     ::FTrans::Send $chatstate(jid) -filename $f
 }
 
-proc ::Chat::DnDEnter {chattoken win action data dndtype} {
-    focus $win
+proc ::Chat::DnDFileEnter {chattoken win action data type} {
+    
+    Debug 4 "::Chat::DnDFileEnter win=$win, action=$action, data=$data, type=$type"
+ 
     set act "none"
+    
+    # I get a type="?bad atom?"
+    if {($type eq "text/uri-list") && ($data ne "")} {
+	set act copy
+	focus $win
+    }
     return $act
 }
 
-proc ::Chat::DnDLeave {chattoken win data dndtype} {	
+proc ::Chat::DnDFileLeave {chattoken win data dndtype} {	
     focus [winfo toplevel $win] 
+}
+
+# Chat::DnDDebug* --
+# 
+#       Some debug code.
+
+proc ::Chat::DnDDebugBind {win} {
+    
+    dnd cleartarget $win
+    
+    dnd bindtarget $win text/uri-list <Drop> \
+      [list ::Chat::DnDDebug %W %D %T]
+    dnd bindtarget $win text/uri-list <DragEnter> \
+     [list ::Chat::DnDDebug %W %A %D %T]
+    dnd bindtarget $win text/uri-list <DragLeave> \
+     [list ::Chat::DnDDebug %W %D %T]
+   
+   DnDDebugDump $win
+}
+
+proc ::Chat::DnDDebug {args} {
+    puts "::Chat::DnDDebug $args"
+    return default
+}
+
+proc ::Chat::DnDDebugDump {win} {
+    
+    puts "+++ ::Chat::DnDDebugDump $win"
+    set types [lsort -unique [dnd bindtarget $win]]
+    puts "types=$types"
+    foreach type $types {
+	puts "\t type=$type"
+	foreach event {<DragEnter> <Drag> <DragLeave> <Drop>} {
+	    if {![catch {
+		set script [dnd bindtarget $win $type $event]
+	    }]} {
+		if {$script ne ""} {
+		    set script [string trim $script]
+		    puts "\t\t $event\t [string range $script 0 40]..."
+		}
+	    }
+	}
+    }
 }
 
 proc ::Chat::OnDestroyThread {chattoken} {
