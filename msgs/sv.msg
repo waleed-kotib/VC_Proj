@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Sat Nov 24 07:55:36 CET 2007
+# Generated: Fri Dec 07 09:22:09 CET 2007
 
 # English language version of the Coccinella message catalog.
 #
@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.132 2007-11-24 08:18:27 matben Exp $
+#   $Id: sv.msg,v 1.133 2007-12-07 10:15:17 matben Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -68,7 +68,7 @@
 # Find in sources: lib/PrefHelpers.tcl:127
 ::msgcat::mcset sv Browser               {Browser}
 # Reference: {Cancel}
-# Find in sources: components/BuddyPounce.tcl:290 components/fsdialog.tcl:449 components/fsdialog.tcl:1073 components/fsdialog.tcl:1467 components/ImageMagic.tcl:144 components/JivePhone.tcl:919 components/JivePhone.tcl:1001 components/Phone/AddressBook.tcl:391 components/Phone/AddressBook.tcl:474 components/Phone/Phone.tcl:433 contrib/ui/dialog.tcl:244 contrib/ui/fontselector.tcl:150 contrib/ui/progress.tcl:314 contrib/ui/progress.tcl:323 contrib/wizard.tcl:222 jabber/Adhoc.tcl:201 jabber/Adhoc.tcl:396 jabber/Chat.tcl:329 jabber/Create.tcl:152 jabber/Create.tcl:673 jabber/Disco.tcl:1489 jabber/Disco.tcl:1659 jabber/Enter.tcl:213 jabber/FTrans.tcl:224 jabber/History.tcl:979 jabber/Jabber.tcl:1007 jabber/Jabber.tcl:1936 jabber/Jabber.tcl:2122 jabber/JPubServers.tcl:72 jabber/JUser.tcl:172 jabber/JUser.tcl:618 jabber/Login.tcl:241 jabber/MUC.tcl:205 jabber/MUC.tcl:462 jabber/MUC.tcl:1010 jabber/MUC.tcl:1444 jabber/MUC.tcl:1640 jabber/OOB.tcl:152 jabber/Privacy.tcl:708 jabber/Profiles.tcl:928 jabber/Register.tcl:325 jabber/Register.tcl:1034 jabber/Register.tcl:1315 jabber/Search.tcl:134 jabber/Status.tcl:426 jabber/UserInfo.tcl:357 jabber/VCard.tcl:248 jabber/VCard.tcl:258 lib/Bookmarks.tcl:125 lib/Component.tcl:83 lib/Dialogs.tcl:131 lib/Dialogs.tcl:340 lib/EditDialogs.tcl:142 lib/EditDialogs.tcl:331 lib/Preferences.tcl:240 whiteboard/FilePrefs.tcl:528 whiteboard/ItemInspector.tcl:439 whiteboard/ItemInspector.tcl:801 whiteboard/Multicast.tcl:91
+# Find in sources: components/BuddyPounce.tcl:290 components/fsdialog.tcl:449 components/fsdialog.tcl:1073 components/fsdialog.tcl:1467 components/ImageMagic.tcl:144 components/JivePhone.tcl:919 components/JivePhone.tcl:1001 components/Phone/AddressBook.tcl:391 components/Phone/AddressBook.tcl:474 components/Phone/Phone.tcl:433 contrib/ui/dialog.tcl:244 contrib/ui/fontselector.tcl:150 contrib/ui/progress.tcl:314 contrib/ui/progress.tcl:323 contrib/wizard.tcl:222 jabber/Adhoc.tcl:201 jabber/Adhoc.tcl:396 jabber/Chat.tcl:340 jabber/Create.tcl:152 jabber/Create.tcl:673 jabber/Disco.tcl:1489 jabber/Disco.tcl:1659 jabber/Enter.tcl:213 jabber/FTrans.tcl:224 jabber/History.tcl:979 jabber/Jabber.tcl:1007 jabber/Jabber.tcl:1936 jabber/Jabber.tcl:2122 jabber/JPubServers.tcl:72 jabber/JUser.tcl:172 jabber/JUser.tcl:618 jabber/Login.tcl:241 jabber/MUC.tcl:205 jabber/MUC.tcl:462 jabber/MUC.tcl:1010 jabber/MUC.tcl:1444 jabber/MUC.tcl:1640 jabber/Privacy.tcl:708 jabber/Profiles.tcl:928 jabber/Register.tcl:325 jabber/Register.tcl:1034 jabber/Register.tcl:1315 jabber/Search.tcl:134 jabber/Status.tcl:426 jabber/UserInfo.tcl:357 jabber/VCard.tcl:248 jabber/VCard.tcl:258 lib/Bookmarks.tcl:125 lib/Component.tcl:83 lib/Dialogs.tcl:131 lib/Dialogs.tcl:340 lib/EditDialogs.tcl:142 lib/EditDialogs.tcl:331 lib/Preferences.tcl:240 whiteboard/FilePrefs.tcl:528 whiteboard/ItemInspector.tcl:439 whiteboard/ItemInspector.tcl:801 whiteboard/Multicast.tcl:91
 ::msgcat::mcset sv Cancel                {Avbryt}
 # Reference: {Chatroom}
 # Find in sources: jabber/Create.tcl:109 jabber/Create.tcl:635 jabber/Enter.tcl:153 jabber/GroupChat.tcl:1456 jabber/GroupChat.tcl:1458 jabber/GroupChat.tcl:3353 jabber/GroupChat.tcl:3555
@@ -82,7 +82,7 @@
 # Find in sources: jabber/UserInfo.tcl:454
 ::msgcat::mcset sv Client                {Klient}
 # Reference: {Close}
-# Find in sources: components/AutoUpdate.tcl:269 components/XMLConsole.tcl:108 jabber/GroupChat.tcl:1423 plugins/PluginTextPlain.tcl:225
+# Find in sources: components/AutoUpdate.tcl:269 jabber/GroupChat.tcl:1423 plugins/PluginTextPlain.tcl:225
 ::msgcat::mcset sv Close                 {Stäng}
 # Reference: {Color}
 # Find in sources: whiteboard/CanvasUtils.tcl:1600
@@ -99,7 +99,7 @@
 # Find in sources: jabber/JUI.tcl:896
 ::msgcat::mcset sv Contact               {Kontakt}
 # Reference: {Contacts}
-# Find in sources: jabber/JUI.tcl:461 jabber/Roster.tcl:1338
+# Find in sources: jabber/JUI.tcl:461 jabber/Roster.tcl:1359
 ::msgcat::mcset sv Contacts              {Kontakter}
 # Reference: {Coordinates}
 # Find in sources: whiteboard/ItemInspector.tcl:264
@@ -114,7 +114,7 @@
 # Find in sources: jabber/JPrefs.tcl:111 jabber/JPrefs.tcl:288
 ::msgcat::mcset sv Customization         {Anpassningar}
 # Reference: {Date}
-# Find in sources: components/fsdialog.tcl:511 jabber/History.tcl:942 jabber/MailBox.tcl:658 jabber/NewMsg.tcl:434
+# Find in sources: components/fsdialog.tcl:511 jabber/History.tcl:942 jabber/MailBox.tcl:658 jabber/NewMsg.tcl:436
 ::msgcat::mcset sv Date                  {Datum}
 # Reference: {Default}
 # Find in sources: components/Sounds.tcl:474 components/Sounds.tcl:480 components/Sounds.tcl:560 components/Sounds.tcl:611 components/Sounds.tcl:651 components/Sounds.tcl:671 contrib/ui/fontselector.tcl:152 contrib/ui/openimage.tcl:103 jabber/Emoticons.tcl:741 jabber/Rosticons.tcl:578 jabber/SetupAss.tcl:115 lib/PrefHelpers.tcl:104 whiteboard/WBPrefs.tcl:119 whiteboard/WBPrefs.tcl:120 whiteboard/WBPrefs.tcl:185
@@ -128,7 +128,7 @@
 # Reference: {Department}
 ::msgcat::mcset sv Department            {Avdelning}
 # Reference: {Description}
-# Find in sources: components/Geolocation.tcl:77 jabber/FTrans.tcl:208 jabber/FTrans.tcl:556 jabber/OOB.tcl:136 jabber/OOB.tcl:377 jabber/VCard.tcl:325 whiteboard/WDialogs.tcl:123
+# Find in sources: components/Geolocation.tcl:77 jabber/FTrans.tcl:208 jabber/FTrans.tcl:555 jabber/OOB.tcl:95 jabber/VCard.tcl:325 whiteboard/WDialogs.tcl:123
 ::msgcat::mcset sv Description           {Beskrivning}
 # Reference: {Detect}
 # Find in sources: lib/Proxy.tcl:273
@@ -137,7 +137,7 @@
 # Find in sources: jabber/Disco.tcl:1471 jabber/Disco.tcl:1657 jabber/Enter.tcl:130 jabber/MUC.tcl:1622 jabber/UserInfo.tcl:158
 ::msgcat::mcset sv Discover              {Discover}
 # Reference: {Downloading}
-# Find in sources: lib/HttpTrpt.tcl:166
+# Find in sources: lib/HttpTrpt.tcl:164
 ::msgcat::mcset sv Downloading           {Downloading}
 # Reference: {Edit}
 # Find in sources: jabber/AvatarMB.tcl:520
@@ -155,7 +155,7 @@
 # Find in sources: components/JivePhone.tcl:917 components/JivePhone.tcl:999 components/Phone/AddressBook.tcl:389 components/Phone/AddressBook.tcl:472 jabber/Create.tcl:671 jabber/Enter.tcl:211
 ::msgcat::mcset sv Enter                 {Enter}
 # Reference: {Error}
-# Find in sources: components/AutoUpdate.tcl:121 components/ImageMagic.tcl:76 components/ImageMagic.tcl:92 components/JivePhone.tcl:611 jabber/Adhoc.tcl:143 jabber/Adhoc.tcl:383 jabber/Avatar.tcl:342 jabber/Chat.tcl:379 jabber/Chat.tcl:2464 jabber/Chat.tcl:2744 jabber/Chat.tcl:2789 jabber/Create.tcl:318 jabber/Create.tcl:323 jabber/Create.tcl:328 jabber/Create.tcl:336 jabber/Create.tcl:432 jabber/Create.tcl:472 jabber/Create.tcl:518 jabber/Create.tcl:550 jabber/Create.tcl:583 jabber/Create.tcl:757 jabber/Disco.tcl:1746 jabber/Disco.tcl:1769 jabber/Emoticons.tcl:646 jabber/Emoticons.tcl:655 jabber/Emoticons.tcl:805 jabber/Emoticons.tcl:806 jabber/Emoticons.tcl:840 jabber/Emoticons.tcl:851 jabber/Emoticons.tcl:852 jabber/Enter.tcl:394 jabber/Enter.tcl:446 jabber/Enter.tcl:485 jabber/Enter.tcl:633 jabber/Enter.tcl:645 jabber/Enter.tcl:686 jabber/FTrans.tcl:365 jabber/FTrans.tcl:401 jabber/FTrans.tcl:438 jabber/FTrans.tcl:443 jabber/FTrans.tcl:454 jabber/FTrans.tcl:501 jabber/FTrans.tcl:527 jabber/FTrans.tcl:647 jabber/FTrans.tcl:648 jabber/FTrans.tcl:659 jabber/GroupChat.tcl:355 jabber/GroupChat.tcl:2608 jabber/GroupChat.tcl:2609 jabber/GroupChat.tcl:2617 jabber/GroupChat.tcl:3381 jabber/Jabber.tcl:622 jabber/Jabber.tcl:867 jabber/Jabber.tcl:912 jabber/Jabber.tcl:922 jabber/Jabber.tcl:934 jabber/Jabber.tcl:946 jabber/Jabber.tcl:1491 jabber/Jabber.tcl:1494 jabber/Jabber.tcl:1571 jabber/Jabber.tcl:1572 jabber/Jabber.tcl:1666 jabber/Jabber.tcl:1669 jabber/Jabber.tcl:1985 jabber/Jabber.tcl:2009 jabber/JPubServers.tcl:137 jabber/JPubServers.tcl:211 jabber/JPubServers.tcl:216 jabber/JUser.tcl:243 jabber/JUser.tcl:251 jabber/JUser.tcl:270 jabber/JUser.tcl:333 jabber/JUser.tcl:358 jabber/JWB.tcl:2053 jabber/JWB.tcl:2058 jabber/Login.tcl:465 jabber/Login.tcl:484 jabber/Login.tcl:493 jabber/Login.tcl:798 jabber/Login.tcl:877 jabber/MailBox.tcl:1544 jabber/MailBox.tcl:1622 jabber/MailBox.tcl:1729 jabber/MailBox.tcl:1763 jabber/MUC.tcl:321 jabber/MUC.tcl:323 jabber/MUC.tcl:1163 jabber/MUC.tcl:1248 jabber/MUC.tcl:1358 jabber/MUC.tcl:1519 jabber/MUC.tcl:1547 jabber/MUC.tcl:1724 jabber/MUC.tcl:1725 jabber/MUC.tcl:1745 jabber/MUC.tcl:1746 jabber/NewMsg.tcl:840 jabber/NewMsg.tcl:876 jabber/OOB.tcl:268 jabber/OOB.tcl:334 jabber/OOB.tcl:368 jabber/OOB.tcl:390 jabber/OOB.tcl:398 jabber/Privacy.tcl:880 jabber/Privacy.tcl:896 jabber/Profiles.tcl:1438 jabber/Profiles.tcl:1446 jabber/Profiles.tcl:1624 jabber/Register.tcl:123 jabber/Register.tcl:552 jabber/Register.tcl:558 jabber/Register.tcl:633 jabber/Register.tcl:782 jabber/Register.tcl:846 jabber/Register.tcl:849 jabber/Register.tcl:851 jabber/Register.tcl:910 jabber/Register.tcl:1096 jabber/Register.tcl:1126 jabber/Register.tcl:1187 jabber/Register.tcl:1370 jabber/Search.tcl:262 jabber/Search.tcl:315 jabber/Search.tcl:357 jabber/Search.tcl:454 jabber/SetupAss.tcl:278 jabber/SetupAss.tcl:282 jabber/SetupAss.tcl:291 jabber/UserInfo.tcl:190 jabber/UserInfo.tcl:230 jabber/UserInfo.tcl:259 jabber/UserInfo.tcl:286 jabber/UserInfo.tcl:494 jabber/VCard.tcl:103 jabber/VCard.tcl:104 jabber/VCard.tcl:767 jabber/VCard.tcl:826 jabber/VCard.tcl:872 jabber/VCard.tcl:893 lib/Dialogs.tcl:161 lib/Dialogs.tcl:168 lib/Dialogs.tcl:411 lib/Httpd.tcl:78 lib/HttpTrpt.tcl:71 lib/HttpTrpt.tcl:105 lib/HttpTrpt.tcl:132 lib/HttpTrpt.tcl:229 lib/HttpTrpt.tcl:234 lib/HttpTrpt.tcl:240 lib/Init.tcl:742 lib/Init.tcl:755 lib/Init.tcl:765 lib/MacintoshUtils.tcl:55 lib/MacintoshUtils.tcl:77 lib/MacintoshUtils.tcl:99 lib/PrefUtils.tcl:91 lib/PrefUtils.tcl:217 lib/TheServer.tcl:65 lib/UserActions.tcl:44 lib/UserActions.tcl:72 lib/UserActions.tcl:93 lib/Utils.tcl:379 lib/WindowsUtils.tcl:61 lib/WindowsUtils.tcl:109 lib/WindowsUtils.tcl:151 plugins/HtmlImport.tcl:284 plugins/PluginTextPlain.tcl:254 plugins/WinImport.tcl:283 whiteboard/CanvasCmd.tcl:438 whiteboard/CanvasCmd.tcl:446 whiteboard/CanvasFile.tcl:51 whiteboard/CanvasFile.tcl:72 whiteboard/CanvasFile.tcl:501 whiteboard/CanvasFile.tcl:715 whiteboard/CanvasFile.tcl:746 whiteboard/CanvasFile.tcl:821 whiteboard/FilePrefs.tcl:585 whiteboard/GetFileIface.tcl:401 whiteboard/Import.tcl:74 whiteboard/Import.tcl:78 whiteboard/Import.tcl:1166 whiteboard/Import.tcl:1198 whiteboard/Import.tcl:1301 whiteboard/Import.tcl:2001 whiteboard/Import.tcl:2022 whiteboard/Multicast.tcl:197 whiteboard/Multicast.tcl:233 whiteboard/Multicast.tcl:238 whiteboard/Multicast.tcl:246 whiteboard/Multicast.tcl:253 whiteboard/PutFileIface.tcl:77 whiteboard/PutFileIface.tcl:114 whiteboard/PutFileIface.tcl:125 whiteboard/WBPrefs.tcl:289 whiteboard/Whiteboard.tcl:3225 whiteboard/Whiteboard.tcl:3231
+# Find in sources: components/AutoUpdate.tcl:121 components/ImageMagic.tcl:76 components/ImageMagic.tcl:92 components/JivePhone.tcl:611 jabber/Adhoc.tcl:143 jabber/Adhoc.tcl:383 jabber/Avatar.tcl:342 jabber/Chat.tcl:390 jabber/Chat.tcl:2602 jabber/Chat.tcl:2881 jabber/Chat.tcl:2932 jabber/Create.tcl:318 jabber/Create.tcl:323 jabber/Create.tcl:328 jabber/Create.tcl:336 jabber/Create.tcl:432 jabber/Create.tcl:472 jabber/Create.tcl:518 jabber/Create.tcl:550 jabber/Create.tcl:583 jabber/Create.tcl:757 jabber/Disco.tcl:1748 jabber/Disco.tcl:1771 jabber/Emoticons.tcl:646 jabber/Emoticons.tcl:655 jabber/Emoticons.tcl:805 jabber/Emoticons.tcl:806 jabber/Emoticons.tcl:840 jabber/Emoticons.tcl:851 jabber/Emoticons.tcl:852 jabber/Enter.tcl:394 jabber/Enter.tcl:446 jabber/Enter.tcl:485 jabber/Enter.tcl:633 jabber/Enter.tcl:645 jabber/Enter.tcl:686 jabber/FTrans.tcl:366 jabber/FTrans.tcl:402 jabber/FTrans.tcl:439 jabber/FTrans.tcl:444 jabber/FTrans.tcl:455 jabber/FTrans.tcl:502 jabber/FTrans.tcl:530 jabber/FTrans.tcl:667 jabber/FTrans.tcl:668 jabber/FTrans.tcl:679 jabber/GroupChat.tcl:355 jabber/GroupChat.tcl:2608 jabber/GroupChat.tcl:2609 jabber/GroupChat.tcl:2617 jabber/GroupChat.tcl:3381 jabber/Jabber.tcl:622 jabber/Jabber.tcl:867 jabber/Jabber.tcl:912 jabber/Jabber.tcl:922 jabber/Jabber.tcl:934 jabber/Jabber.tcl:946 jabber/Jabber.tcl:1491 jabber/Jabber.tcl:1494 jabber/Jabber.tcl:1571 jabber/Jabber.tcl:1572 jabber/Jabber.tcl:1666 jabber/Jabber.tcl:1669 jabber/Jabber.tcl:1985 jabber/Jabber.tcl:2009 jabber/JPubServers.tcl:137 jabber/JPubServers.tcl:211 jabber/JPubServers.tcl:216 jabber/JUser.tcl:243 jabber/JUser.tcl:251 jabber/JUser.tcl:270 jabber/JUser.tcl:333 jabber/JUser.tcl:358 jabber/JWB.tcl:2053 jabber/JWB.tcl:2058 jabber/Login.tcl:465 jabber/Login.tcl:484 jabber/Login.tcl:493 jabber/Login.tcl:798 jabber/Login.tcl:877 jabber/MailBox.tcl:1544 jabber/MailBox.tcl:1622 jabber/MailBox.tcl:1729 jabber/MailBox.tcl:1763 jabber/MUC.tcl:321 jabber/MUC.tcl:323 jabber/MUC.tcl:1163 jabber/MUC.tcl:1248 jabber/MUC.tcl:1358 jabber/MUC.tcl:1519 jabber/MUC.tcl:1547 jabber/MUC.tcl:1724 jabber/MUC.tcl:1725 jabber/MUC.tcl:1745 jabber/MUC.tcl:1746 jabber/NewMsg.tcl:842 jabber/NewMsg.tcl:878 jabber/OOB.tcl:70 jabber/OOB.tcl:78 jabber/OOB.tcl:86 jabber/Privacy.tcl:880 jabber/Privacy.tcl:896 jabber/Profiles.tcl:1438 jabber/Profiles.tcl:1446 jabber/Profiles.tcl:1624 jabber/Register.tcl:123 jabber/Register.tcl:552 jabber/Register.tcl:558 jabber/Register.tcl:633 jabber/Register.tcl:782 jabber/Register.tcl:846 jabber/Register.tcl:849 jabber/Register.tcl:851 jabber/Register.tcl:910 jabber/Register.tcl:1096 jabber/Register.tcl:1126 jabber/Register.tcl:1187 jabber/Register.tcl:1370 jabber/Search.tcl:262 jabber/Search.tcl:315 jabber/Search.tcl:357 jabber/Search.tcl:454 jabber/SetupAss.tcl:278 jabber/SetupAss.tcl:282 jabber/SetupAss.tcl:291 jabber/UserInfo.tcl:190 jabber/UserInfo.tcl:230 jabber/UserInfo.tcl:259 jabber/UserInfo.tcl:286 jabber/UserInfo.tcl:494 jabber/VCard.tcl:103 jabber/VCard.tcl:104 jabber/VCard.tcl:767 jabber/VCard.tcl:826 jabber/VCard.tcl:872 jabber/VCard.tcl:893 lib/Dialogs.tcl:161 lib/Dialogs.tcl:168 lib/Dialogs.tcl:411 lib/Httpd.tcl:78 lib/HttpTrpt.tcl:71 lib/HttpTrpt.tcl:105 lib/HttpTrpt.tcl:132 lib/HttpTrpt.tcl:218 lib/HttpTrpt.tcl:223 lib/HttpTrpt.tcl:229 lib/Init.tcl:742 lib/Init.tcl:755 lib/Init.tcl:765 lib/MacintoshUtils.tcl:55 lib/MacintoshUtils.tcl:77 lib/MacintoshUtils.tcl:99 lib/PrefUtils.tcl:91 lib/PrefUtils.tcl:217 lib/TheServer.tcl:65 lib/UserActions.tcl:44 lib/UserActions.tcl:72 lib/UserActions.tcl:93 lib/Utils.tcl:379 lib/WindowsUtils.tcl:61 lib/WindowsUtils.tcl:109 lib/WindowsUtils.tcl:151 plugins/HtmlImport.tcl:284 plugins/PluginTextPlain.tcl:254 plugins/WinImport.tcl:283 whiteboard/CanvasCmd.tcl:438 whiteboard/CanvasCmd.tcl:446 whiteboard/CanvasFile.tcl:51 whiteboard/CanvasFile.tcl:72 whiteboard/CanvasFile.tcl:501 whiteboard/CanvasFile.tcl:715 whiteboard/CanvasFile.tcl:746 whiteboard/CanvasFile.tcl:821 whiteboard/FilePrefs.tcl:585 whiteboard/GetFileIface.tcl:401 whiteboard/Import.tcl:74 whiteboard/Import.tcl:78 whiteboard/Import.tcl:1166 whiteboard/Import.tcl:1198 whiteboard/Import.tcl:1301 whiteboard/Import.tcl:2001 whiteboard/Import.tcl:2022 whiteboard/Multicast.tcl:197 whiteboard/Multicast.tcl:233 whiteboard/Multicast.tcl:238 whiteboard/Multicast.tcl:246 whiteboard/Multicast.tcl:253 whiteboard/PutFileIface.tcl:77 whiteboard/PutFileIface.tcl:114 whiteboard/PutFileIface.tcl:125 whiteboard/WBPrefs.tcl:289 whiteboard/Whiteboard.tcl:3225 whiteboard/Whiteboard.tcl:3231
 ::msgcat::mcset sv Error                 {Fel}
 # Reference: {Exit}
 # Find in sources: jabber/GroupChat.tcl:382 jabber/GroupChat.tcl:826
@@ -167,7 +167,7 @@
 # Find in sources: whiteboard/FilePrefs.tcl:467 whiteboard/WDialogs.tcl:127
 ::msgcat::mcset sv Extensions            {Extensions}
 # Reference: {File}
-# Find in sources: components/Growl.tcl:155 components/Growl.tcl:158 jabber/FTrans.tcl:554 jabber/OOB.tcl:375
+# Find in sources: components/Growl.tcl:155 components/Growl.tcl:158 jabber/FTrans.tcl:553 jabber/OOB.tcl:93
 ::msgcat::mcset sv File                  {Fil}
 # Reference: {Filter}
 # Find in sources: components/fsdialog.tcl:444 jabber/Privacy.tcl:63 jabber/Privacy.tcl:92
@@ -187,7 +187,7 @@
 # Find in sources: jabber/GotMsg.tcl:225 jabber/MailBox.tcl:505
 ::msgcat::mcset sv Forward               {Vidare}
 # Reference: {From}
-# Find in sources: jabber/GotMsg.tcl:249 jabber/MailBox.tcl:655 jabber/NewMsg.tcl:432
+# Find in sources: jabber/GotMsg.tcl:249 jabber/MailBox.tcl:655 jabber/NewMsg.tcl:434
 ::msgcat::mcset sv From                  {Från}
 # Reference: {General}
 # Find in sources: components/UserActivity.tcl:227 jabber/VCard.tcl:286 lib/Preferences.tcl:217 lib/PrefHelpers.tcl:71 lib/PrefNet.tcl:52
@@ -195,7 +195,7 @@
 # Reference: {Get}
 ::msgcat::mcset sv Get                   {Hämta}
 # Reference: {Getting}
-# Find in sources: lib/HttpTrpt.tcl:183
+# Find in sources: lib/HttpTrpt.tcl:181
 ::msgcat::mcset sv Getting               {Hämtar}
 # Reference: {Grant}
 # Find in sources: jabber/MUC.tcl:508
@@ -207,7 +207,7 @@
 # Find in sources: whiteboard/WBPrefs.tcl:110
 ::msgcat::mcset sv Height                {Höjd}
 # Reference: {History}
-# Find in sources: jabber/Chat.tcl:1289 jabber/GroupChat.tcl:658 jabber/History.tcl:944
+# Find in sources: jabber/Chat.tcl:1306 jabber/GroupChat.tcl:658 jabber/History.tcl:944
 ::msgcat::mcset sv History               {Historik}
 # Reference: {Home}
 # Find in sources: jabber/VCard.tcl:441
@@ -231,7 +231,7 @@
 # Find in sources: jabber/Jabber.tcl:719 jabber/JUser.tcl:442 jabber/Subscribe.tcl:437 jabber/Subscribe.tcl:457 jabber/Subscribe.tcl:644 jabber/Subscribe.tcl:673 jabber/Subscribe.tcl:744 jabber/Subscribe.tcl:790 jabber/Subscribe.tcl:812
 ::msgcat::mcset sv Info                  {Info}
 # Reference: {Invite}
-# Find in sources: jabber/Chat.tcl:1303 jabber/GroupChat.tcl:470 jabber/GroupChat.tcl:661
+# Find in sources: jabber/Chat.tcl:1320 jabber/GroupChat.tcl:470 jabber/GroupChat.tcl:661
 ::msgcat::mcset sv Invite                {Bjud in}
 # Reference: {Invitation}
 # Find in sources: jabber/MUC.tcl:374
@@ -248,17 +248,17 @@
 # Find in sources: jabber/Login.tcl:372 jabber/Profiles.tcl:1231 jabber/Profiles.tcl:1233 jabber/Register.tcl:501
 ::msgcat::mcset sv Less                  {Färre}
 # Reference: {Login}
-# Find in sources: jabber/JUI.tcl:884 jabber/JUI.tcl:1549 jabber/Login.tcl:97 jabber/Login.tcl:110 jabber/Login.tcl:239 jabber/Profiles.tcl:1760
+# Find in sources: jabber/JUI.tcl:884 jabber/JUI.tcl:1560 jabber/Login.tcl:97 jabber/Login.tcl:110 jabber/Login.tcl:239 jabber/Profiles.tcl:1760
 ::msgcat::mcset sv Login                 {Logga in}
 # Reference: {Logout}
-# Find in sources: jabber/Jabber.tcl:2120 jabber/JUI.tcl:1541
+# Find in sources: jabber/Jabber.tcl:2120 jabber/JUI.tcl:1552
 ::msgcat::mcset sv Logout                {Logga ut}
 # Reference: {Member}
 ::msgcat::mcset sv Member                {Medlem}
 # Reference: {member}
 ::msgcat::mcset sv member                {medlem}
 # Reference: {Message}
-# Find in sources: components/BuddyPounce.tcl:268 components/Carbon.tcl:183 components/Growl.tcl:71 components/Growl.tcl:73 components/Growl.tcl:92 components/Growl.tcl:104 components/Mood.tcl:297 components/UserActivity.tcl:233 jabber/AutoAway.tcl:270 jabber/AutoAway.tcl:290 jabber/AutoAway.tcl:310 jabber/Create.tcl:431 jabber/Create.tcl:471 jabber/Create.tcl:549 jabber/Create.tcl:755 jabber/Enter.tcl:644 jabber/Enter.tcl:684 jabber/FTrans.tcl:498 jabber/FTrans.tcl:524 jabber/Jabber.tcl:621 jabber/Jabber.tcl:863 jabber/Jabber.tcl:1521 jabber/Jabber.tcl:2008 jabber/Jabber.tcl:2109 jabber/JUser.tcl:332 jabber/MailBox.tcl:499 jabber/MUC.tcl:190 jabber/MUC.tcl:367 jabber/MUC.tcl:808 jabber/MUC.tcl:838 jabber/MUC.tcl:1624 jabber/NewMsg.tcl:231 jabber/OOB.tcl:330 jabber/Profiles.tcl:1623 jabber/Register.tcl:122 jabber/Register.tcl:632 jabber/Register.tcl:1125 jabber/Register.tcl:1186 jabber/Register.tcl:1369 jabber/Search.tcl:356 jabber/Search.tcl:448 jabber/Search.tcl:452 jabber/Status.tcl:852 lib/HttpTrpt.tcl:244
+# Find in sources: components/BuddyPounce.tcl:268 components/Carbon.tcl:183 components/Growl.tcl:71 components/Growl.tcl:73 components/Growl.tcl:92 components/Growl.tcl:104 components/Mood.tcl:297 components/UserActivity.tcl:233 jabber/AutoAway.tcl:293 jabber/AutoAway.tcl:313 jabber/AutoAway.tcl:333 jabber/AutoAway.tcl:369 jabber/Create.tcl:431 jabber/Create.tcl:471 jabber/Create.tcl:549 jabber/Create.tcl:755 jabber/Enter.tcl:644 jabber/Enter.tcl:684 jabber/FTrans.tcl:499 jabber/FTrans.tcl:527 jabber/Jabber.tcl:621 jabber/Jabber.tcl:863 jabber/Jabber.tcl:1521 jabber/Jabber.tcl:2008 jabber/Jabber.tcl:2109 jabber/JUser.tcl:332 jabber/MailBox.tcl:499 jabber/MUC.tcl:190 jabber/MUC.tcl:367 jabber/MUC.tcl:808 jabber/MUC.tcl:838 jabber/MUC.tcl:1624 jabber/NewMsg.tcl:231 jabber/Profiles.tcl:1623 jabber/Register.tcl:122 jabber/Register.tcl:632 jabber/Register.tcl:1125 jabber/Register.tcl:1186 jabber/Register.tcl:1369 jabber/Search.tcl:356 jabber/Search.tcl:448 jabber/Search.tcl:452 jabber/Status.tcl:852 lib/HttpTrpt.tcl:233
 ::msgcat::mcset sv Message               {Meddelande}
 # Reference: {Middle}
 # Find in sources: jabber/VCard.tcl:294
@@ -284,10 +284,10 @@
 # Find in sources: jabber/Privacy.tcl:165
 ::msgcat::mcset sv New                   {Nytt}
 # Reference: {Next}
-# Find in sources: components/Totd.tcl:90 contrib/wizard.tcl:218 contrib/wizard.tcl:581 jabber/Adhoc.tcl:207 jabber/GotMsg.tcl:223 jabber/Register.tcl:323 jabber/Register.tcl:1030 lib/TSearch.tcl:85 lib/WSearch.tcl:72
+# Find in sources: components/Totd.tcl:91 contrib/wizard.tcl:218 contrib/wizard.tcl:581 jabber/Adhoc.tcl:207 jabber/GotMsg.tcl:223 jabber/Register.tcl:323 jabber/Register.tcl:1030 lib/TSearch.tcl:85 lib/WSearch.tcl:72
 ::msgcat::mcset sv Next                  {Nästa}
 # Reference: {Nickname}
-# Find in sources: components/ParseURI.tcl:395 components/ParseURI.tcl:399 jabber/Create.tcl:112 jabber/Create.tcl:639 jabber/Enter.tcl:155 jabber/GroupChat.tcl:3354 jabber/JUser.tcl:137 jabber/JUser.tcl:553 jabber/MUC.tcl:478 jabber/Profiles.tcl:1093 jabber/Subscribe.tcl:314 jabber/Subscribe.tcl:1202 jabber/VCard.tcl:304
+# Find in sources: components/ParseURI.tcl:393 components/ParseURI.tcl:397 jabber/Create.tcl:112 jabber/Create.tcl:639 jabber/Enter.tcl:155 jabber/GroupChat.tcl:3354 jabber/JUser.tcl:137 jabber/JUser.tcl:553 jabber/MUC.tcl:478 jabber/Profiles.tcl:1093 jabber/Subscribe.tcl:314 jabber/Subscribe.tcl:1202 jabber/VCard.tcl:304
 ::msgcat::mcset sv Nickname              {Kortnamn}
 # Reference: {No}
 # Find in sources: contrib/ui/dialog.tcl:246 jabber/Subscribe.tcl:343
@@ -307,7 +307,7 @@
 # Find in sources: jabber/RosterTree.tcl:64
 ::msgcat::mcset sv Offline               {Borta}
 # Reference: {OK}
-# Find in sources: components/BuddyPounce.tcl:288 components/fsdialog.tcl:446 components/fsdialog.tcl:1071 components/fsdialog.tcl:1465 components/ImageMagic.tcl:142 components/Totd.tcl:88 contrib/ui/dialog.tcl:243 contrib/ui/fontselector.tcl:148 jabber/Chat.tcl:327 jabber/Jabber.tcl:1722 jabber/JPubServers.tcl:70 jabber/MUC.tcl:203 jabber/MUC.tcl:1008 jabber/MUC.tcl:1442 jabber/MUC.tcl:1638 jabber/Privacy.tcl:706 jabber/Status.tcl:424 jabber/Subscribe.tcl:1029 lib/Component.tcl:82 whiteboard/ItemInspector.tcl:925 whiteboard/WDialogs.tcl:60 whiteboard/WDialogs.tcl:219
+# Find in sources: components/BuddyPounce.tcl:288 components/fsdialog.tcl:446 components/fsdialog.tcl:1071 components/fsdialog.tcl:1465 components/ImageMagic.tcl:142 components/Totd.tcl:89 components/XMLConsole.tcl:108 contrib/ui/dialog.tcl:243 contrib/ui/fontselector.tcl:148 jabber/Chat.tcl:338 jabber/Jabber.tcl:1722 jabber/JPubServers.tcl:70 jabber/MUC.tcl:203 jabber/MUC.tcl:1008 jabber/MUC.tcl:1442 jabber/MUC.tcl:1638 jabber/Privacy.tcl:706 jabber/Status.tcl:424 jabber/Subscribe.tcl:1029 lib/Component.tcl:82 whiteboard/ItemInspector.tcl:925 whiteboard/WDialogs.tcl:60 whiteboard/WDialogs.tcl:219
 ::msgcat::mcset sv OK                    {OK}
 # Reference: {Online}
 # Find in sources: jabber/RosterTree.tcl:63
@@ -335,6 +335,9 @@
 # Reference: {Play}
 # Find in sources: components/Sounds.tcl:518
 ::msgcat::mcset sv Play                  {Spela upp}
+# Reference: {Plugins}
+# Find in sources: lib/Component.tcl:70 whiteboard/Plugins.tcl:1304 whiteboard/WDialogs.tcl:47
+::msgcat::mcset sv Plugins               {Plugins}
 # Reference: {Port}
 # Find in sources: jabber/Profiles.tcl:1846 lib/Proxy.tcl:206 whiteboard/WDialogs.tcl:180
 ::msgcat::mcset sv Port                  {Nätverksport}
@@ -345,10 +348,10 @@
 # Find in sources: lib/Preferences.tcl:174
 ::msgcat::mcset sv Preferences           {Preferences}
 # Reference: {Previous}
-# Find in sources: components/Totd.tcl:92 contrib/wizard.tcl:220 jabber/Adhoc.tcl:209
+# Find in sources: components/Totd.tcl:93 contrib/wizard.tcl:220 jabber/Adhoc.tcl:209
 ::msgcat::mcset sv Previous              {Förra}
 # Reference: {Print}
-# Find in sources: jabber/Chat.tcl:1293 jabber/GroupChat.tcl:667 jabber/History.tcl:983 jabber/MailBox.tcl:511 jabber/NewMsg.tcl:308 lib/Dialogs.tcl:103 lib/Dialogs.tcl:115 lib/Dialogs.tcl:129
+# Find in sources: jabber/Chat.tcl:1310 jabber/GroupChat.tcl:667 jabber/History.tcl:983 jabber/MailBox.tcl:511 jabber/NewMsg.tcl:308 lib/Dialogs.tcl:103 lib/Dialogs.tcl:115 lib/Dialogs.tcl:129
 ::msgcat::mcset sv Print                 {Utskrift}
 # Reference: {Priority}
 # Find in sources: jabber/Profiles.tcl:1774
@@ -371,7 +374,7 @@
 # Find in sources: jabber/NewMsg.tcl:301
 ::msgcat::mcset sv Quote                 {Citera}
 # Reference: {Rate}
-# Find in sources: jabber/FTrans.tcl:620 lib/HttpTrpt.tcl:177
+# Find in sources: jabber/FTrans.tcl:638 lib/HttpTrpt.tcl:175
 ::msgcat::mcset sv Rate                  {Rate}
 # Reference: {Region}
 # Find in sources: components/Geolocation.tcl:84
@@ -400,7 +403,7 @@
 # Find in sources: whiteboard/WDialogs.tcl:175
 ::msgcat::mcset sv Running               {Running}
 # Reference: {Save}
-# Find in sources: jabber/Chat.tcl:1285 jabber/Chat.tcl:2935 jabber/GroupChat.tcl:655 jabber/GroupChat.tcl:3067 jabber/History.tcl:985 jabber/History.tcl:1334 jabber/Jabber.tcl:1934 jabber/JUser.tcl:616 jabber/MailBox.tcl:508 jabber/NewMsg.tcl:305 jabber/Profiles.tcl:925 jabber/UserInfo.tcl:355 jabber/VCard.tcl:246 lib/Bookmarks.tcl:122 lib/Dialogs.tcl:338 lib/EditDialogs.tcl:139 lib/EditDialogs.tcl:283 lib/Preferences.tcl:237 whiteboard/CanvasFile.tcl:665 whiteboard/FilePrefs.tcl:525 whiteboard/ItemInspector.tcl:437 whiteboard/ItemInspector.tcl:799
+# Find in sources: jabber/Chat.tcl:1302 jabber/Chat.tcl:3073 jabber/GroupChat.tcl:655 jabber/GroupChat.tcl:3067 jabber/History.tcl:985 jabber/History.tcl:1334 jabber/Jabber.tcl:1934 jabber/JUser.tcl:616 jabber/MailBox.tcl:508 jabber/NewMsg.tcl:305 jabber/Profiles.tcl:925 jabber/UserInfo.tcl:355 jabber/VCard.tcl:246 lib/Bookmarks.tcl:122 lib/Dialogs.tcl:338 lib/EditDialogs.tcl:139 lib/EditDialogs.tcl:283 lib/Preferences.tcl:237 whiteboard/CanvasFile.tcl:665 whiteboard/FilePrefs.tcl:525 whiteboard/ItemInspector.tcl:437 whiteboard/ItemInspector.tcl:799
 ::msgcat::mcset sv Save                  {Spara}
 # Reference: {Search}
 # Find in sources: jabber/Search.tcl:92 jabber/Search.tcl:132 lib/TSearch.tcl:80 lib/WSearch.tcl:68
@@ -409,7 +412,7 @@
 # Find in sources: whiteboard/WDialogs.tcl:183
 ::msgcat::mcset sv Secured               {Secured}
 # Reference: {Send}
-# Find in sources: jabber/Chat.tcl:1277 jabber/FTrans.tcl:222 jabber/GroupChat.tcl:652 jabber/GroupChat.tcl:824 jabber/NewMsg.tcl:298 jabber/OOB.tcl:150
+# Find in sources: jabber/Chat.tcl:1294 jabber/FTrans.tcl:222 jabber/GroupChat.tcl:652 jabber/GroupChat.tcl:824 jabber/NewMsg.tcl:298
 ::msgcat::mcset sv Send                  {Skicka}
 # Reference: {Server}
 # Find in sources: jabber/Disco.tcl:1638 jabber/Login.tcl:151 jabber/Profiles.tcl:1080 jabber/Profiles.tcl:1836 jabber/Register.tcl:272 jabber/SetupAss.tcl:136 jabber/SetupAss.tcl:164 whiteboard/WDialogs.tcl:159
@@ -443,10 +446,10 @@
 # Find in sources: components/UserActivity.tcl:230
 ::msgcat::mcset sv Specific              {Specific}
 # Reference: {Stop}
-# Find in sources: jabber/JUI.tcl:1534
+# Find in sources: jabber/JUI.tcl:1545
 ::msgcat::mcset sv Stop                  {Stopp}
 # Reference: {Subject}
-# Find in sources: components/Phone/TPhone.tcl:176 jabber/Chat.tcl:798 jabber/Chat.tcl:1471 jabber/GotMsg.tcl:259 jabber/GroupChat.tcl:2267 jabber/History.tcl:797 jabber/MailBox.tcl:652 jabber/NewMsg.tcl:363 jabber/NewMsg.tcl:436
+# Find in sources: components/Phone/TPhone.tcl:176 jabber/Chat.tcl:815 jabber/Chat.tcl:1493 jabber/GotMsg.tcl:259 jabber/GroupChat.tcl:2267 jabber/History.tcl:797 jabber/MailBox.tcl:652 jabber/NewMsg.tcl:363 jabber/NewMsg.tcl:438
 ::msgcat::mcset sv Subject               {Ämne}
 # Reference: {System}
 # Find in sources: whiteboard/WBPrefs.tcl:150
@@ -460,7 +463,7 @@
 # Reference: {Time}
 ::msgcat::mcset sv Time                  {Tid}
 # Reference: {Timeout}
-# Find in sources: jabber/JPubServers.tcl:207 lib/HttpTrpt.tcl:224
+# Find in sources: jabber/JPubServers.tcl:207 lib/HttpTrpt.tcl:213
 ::msgcat::mcset sv Timeout               {Timeout}
 # Reference: {Title}
 ::msgcat::mcset sv Title                 {Jobbtitel}
@@ -493,12 +496,12 @@
 # Find in sources: components/Sounds.tcl:526
 ::msgcat::mcset sv Volume                {Volume}
 # Reference: {Warning}
-# Find in sources: jabber/Chat.tcl:1659 jabber/Create.tcl:725 jabber/NewMsg.tcl:1018 jabber/NewMsg.tcl:1049 jabber/Profiles.tcl:985 jabber/Profiles.tcl:1586 jabber/Register.tcl:85 lib/EditDialogs.tcl:225 lib/Preferences.tcl:394 lib/Preferences.tcl:455 lib/Preferences.tcl:498 whiteboard/CanvasFile.tcl:548
+# Find in sources: jabber/Chat.tcl:1832 jabber/Create.tcl:725 jabber/NewMsg.tcl:1020 jabber/NewMsg.tcl:1051 jabber/Profiles.tcl:985 jabber/Profiles.tcl:1586 jabber/Register.tcl:85 lib/EditDialogs.tcl:225 lib/Preferences.tcl:394 lib/Preferences.tcl:455 lib/Preferences.tcl:498 whiteboard/CanvasFile.tcl:548
 ::msgcat::mcset sv Warning               {Varning}
 # Reference: {Website}
 ::msgcat::mcset sv Website               {Website}
 # Reference: {Whiteboard}
-# Find in sources: components/SlideShow.tcl:194 jabber/Chat.tcl:1298 jabber/GroupChat.tcl:671 lib/FileCache.tcl:599 whiteboard/FilePrefs.tcl:76 whiteboard/Plugins.tcl:1302 whiteboard/WBPrefs.tcl:73
+# Find in sources: components/SlideShow.tcl:194 jabber/Chat.tcl:1315 jabber/GroupChat.tcl:671 lib/FileCache.tcl:599 whiteboard/FilePrefs.tcl:76 whiteboard/Plugins.tcl:1302 whiteboard/WBPrefs.tcl:73
 ::msgcat::mcset sv Whiteboard            {Skrivtavla}
 # Reference: {Width}
 # Find in sources: whiteboard/WBPrefs.tcl:107
@@ -672,7 +675,7 @@
 # Reference: {&Action}
 # Find in sources: whiteboard/FilePrefs.tcl:477
 ::msgcat::mcset sv mAction               {Utför}
-# Reference: {Add to dictionary}
+# Reference: {Add to Dictionary}
 # Find in sources: components/Spell.tcl:160
 ::msgcat::mcset sv mAddToDictionary      {Add to dictionary}
 # Reference: {C&ommands}
@@ -697,7 +700,7 @@
 # Reference: {Background Color...}
 ::msgcat::mcset sv mBackgroundColor...   {Background Color...}
 # Reference: {Background Image}
-# Find in sources: jabber/Disco.tcl:861 jabber/RosterTree.tcl:808
+# Find in sources: jabber/Disco.tcl:861 jabber/RosterTree.tcl:809
 ::msgcat::mcset sv mBackgroundImage      {Bakgrundsbild}
 # Reference: {&Background Image...}
 ::msgcat::mcset sv mBackgroundImage...   {Bakgrundsbild...}
@@ -715,7 +718,7 @@
 # Find in sources: components/Phone/AddressBook.tcl:654 components/Phone/AddressBook.tcl:657
 ::msgcat::mcset sv mCall                 {Ring}
 # Reference: {Chat}
-# Find in sources: jabber/Chat.tcl:284 jabber/Chat.tcl:296 jabber/Chat.tcl:1843 jabber/Chat.tcl:2880 jabber/Chat.tcl:3634 jabber/JUI.tcl:900 jabber/Roster.tcl:83 jabber/Roster.tcl:91 jabber/Status.tcl:38 jabber/Status.tcl:46
+# Find in sources: jabber/Chat.tcl:295 jabber/Chat.tcl:307 jabber/Chat.tcl:1955 jabber/Chat.tcl:3021 jabber/Chat.tcl:3976 jabber/JUI.tcl:900 jabber/Roster.tcl:83 jabber/Roster.tcl:91 jabber/Status.tcl:38 jabber/Status.tcl:46
 ::msgcat::mcset sv mChat                 {Chatta}
 # Reference: {Cha&t...}
 ::msgcat::mcset sv mChat...              {Chatta...}
@@ -750,6 +753,8 @@
 ::msgcat::mcset sv mDebug                {Debugga}
 # Reference: {&Decreasing}
 ::msgcat::mcset sv mDecreasing           {Minskande}
+# Reference: {Dictionaries}
+::msgcat::mcset sv mDictionaries         {Dictionaries}
 # Reference: {&Discover Server...}
 ::msgcat::mcset sv mDiscoverServer...    {Undersök server...}
 # Reference: {Do Not Disturb}
@@ -866,7 +871,7 @@
 ::msgcat::mcset sv mLogoutFrom           {Logout from %s}
 # Reference: {Logout from Transport}
 ::msgcat::mcset sv mLogoutTrpt           {Logga ut transport}
-# Reference: {Lo&gout With Message...}
+# Reference: {Logout With Message...}
 ::msgcat::mcset sv mLogoutWith...        {Logga ut meddelande...}
 # Reference: {&Lower}
 ::msgcat::mcset sv mLower                {Sänk}
@@ -905,7 +910,7 @@
 # Reference: {Pieslice}
 ::msgcat::mcset sv mPieslice             {Pajsnitt}
 # Reference: {Plu&gins}
-# Find in sources: components/ImageMagic.tcl:62 lib/Component.tcl:70 whiteboard/Plugins.tcl:1304 whiteboard/WDialogs.tcl:47
+# Find in sources: components/ImageMagic.tcl:62
 ::msgcat::mcset sv mPlugins              {Plugginer}
 # Reference: {&Preferences}
 # Find in sources: whiteboard/Whiteboard.tcl:2236
@@ -923,7 +928,7 @@
 # Reference: {Refresh}
 # Find in sources: jabber/MUC.tcl:484
 ::msgcat::mcset sv mRefresh              {Uppdatera}
-# Reference: {Register...}
+# Reference: {Re&gister...}
 ::msgcat::mcset sv mRegister...          {Register...}
 # Reference: {&Remove Account...}
 ::msgcat::mcset sv mRemoveAccount...     {Radera konto...}
@@ -1013,7 +1018,7 @@
 
 # Short texts only. Use english text as database key.
 # Reference: {About %s}
-# Find in sources: lib/Splash.tcl:77 lib/UI.tcl:1251
+# Find in sources: lib/Splash.tcl:77 lib/UI.tcl:1255
 ::msgcat::mcset sv {About %s}            {Om %s}
 # Reference: {About QuickTimeTcl}
 # Find in sources: lib/Dialogs.tcl:469
@@ -1042,7 +1047,7 @@
 # Find in sources: whiteboard/FilePrefs.tcl:491
 ::msgcat::mcset sv {Always ask}          {Always ask}
 # Reference: {Auto Away}
-# Find in sources: jabber/AutoAway.tcl:228 jabber/AutoAway.tcl:251
+# Find in sources: jabber/AutoAway.tcl:250 jabber/AutoAway.tcl:274
 ::msgcat::mcset sv {Auto Away}           {Auto frånvarande}
 # Reference: {Auto Join}
 # Find in sources: jabber/GroupChat.tcl:3355
@@ -1093,8 +1098,10 @@
 # Find in sources: lib/FileCache.tcl:630
 ::msgcat::mcset sv {Clear Cache}         {Clear Cache}
 # Reference: {Close page}
-# Find in sources: jabber/Chat.tcl:1979 jabber/GroupChat.tcl:1179
 ::msgcat::mcset sv {Close page}          {Close page}
+# Reference: {Close tab}
+# Find in sources: jabber/Chat.tcl:2091 jabber/GroupChat.tcl:1179
+::msgcat::mcset sv {Close tab}           {Close tab}
 # Reference: {Configure Chatroom}
 # Find in sources: jabber/MUC.tcl:429 jabber/MUC.tcl:440 jabber/MUC.tcl:545 jabber/MUC.tcl:1426
 ::msgcat::mcset sv {Configure Chatroom}  {Configure Chatroom}
@@ -1105,7 +1112,7 @@
 # Find in sources: jabber/Rosticons.tcl:405
 ::msgcat::mcset sv {Contact Icons}       {Contact Icons}
 # Reference: {Contact ID}
-# Find in sources: jabber/Chat.tcl:314 jabber/JUser.tcl:135 jabber/JWB.tcl:451 jabber/Login.tcl:148 jabber/MUC.tcl:244 jabber/Profiles.tcl:1078 jabber/Subscribe.tcl:1009 jabber/VCard.tcl:306
+# Find in sources: jabber/Chat.tcl:325 jabber/JUser.tcl:135 jabber/JWB.tcl:451 jabber/Login.tcl:148 jabber/MUC.tcl:244 jabber/Profiles.tcl:1078 jabber/Subscribe.tcl:1009 jabber/VCard.tcl:306
 ::msgcat::mcset sv {Contact ID}          {Kontakt ID}
 # Reference: {Contact Name}
 # Find in sources: jabber/RosterAvatar.tcl:370
@@ -1123,7 +1130,7 @@
 # Find in sources: lib/PrefHelpers.tcl:73 lib/PrefHelpers.tcl:116
 ::msgcat::mcset sv {Default Applications} {Default Applications}
 # Reference: {Default group}
-# Find in sources: jabber/Subscribe.tcl:1630
+# Find in sources: jabber/Subscribe.tcl:1633
 ::msgcat::mcset sv {Default group}       {Standard grupp}
 # Reference: {Default nickname}
 # Find in sources: jabber/GroupChat.tcl:3623
@@ -1180,7 +1187,7 @@
 # Find in sources: jabber/History.tcl:852
 ::msgcat::mcset sv {Exit room}           {Exit room}
 # Reference: {Error code}
-# Find in sources: jabber/Create.tcl:430 jabber/Create.tcl:470 jabber/Create.tcl:548 jabber/Create.tcl:754 jabber/Enter.tcl:643 jabber/Enter.tcl:683 jabber/FTrans.tcl:497 jabber/FTrans.tcl:523 jabber/Jabber.tcl:620 jabber/Jabber.tcl:862 jabber/Jabber.tcl:2007 jabber/JUser.tcl:331 jabber/Login.tcl:804 jabber/Login.tcl:826 jabber/OOB.tcl:329 jabber/Profiles.tcl:1622 jabber/Register.tcl:121 jabber/Register.tcl:631 jabber/Register.tcl:1124 jabber/Register.tcl:1185 jabber/Register.tcl:1368 jabber/Search.tcl:355 jabber/Search.tcl:451 lib/HttpTrpt.tcl:243
+# Find in sources: jabber/Create.tcl:430 jabber/Create.tcl:470 jabber/Create.tcl:548 jabber/Create.tcl:754 jabber/Enter.tcl:643 jabber/Enter.tcl:683 jabber/FTrans.tcl:498 jabber/FTrans.tcl:526 jabber/Jabber.tcl:620 jabber/Jabber.tcl:862 jabber/Jabber.tcl:2007 jabber/JUser.tcl:331 jabber/Login.tcl:804 jabber/Login.tcl:826 jabber/Profiles.tcl:1622 jabber/Register.tcl:121 jabber/Register.tcl:631 jabber/Register.tcl:1124 jabber/Register.tcl:1185 jabber/Register.tcl:1368 jabber/Search.tcl:355 jabber/Search.tcl:451 lib/HttpTrpt.tcl:232
 ::msgcat::mcset sv {Error code}          {Error code}
 # Reference: {External Midi Player}
 # Find in sources: components/Sounds.tcl:543
@@ -1192,7 +1199,7 @@
 # Find in sources: lib/FileCache.tcl:601
 ::msgcat::mcset sv {File Cache}          {Filminne}
 # Reference: {File Transfer}
-# Find in sources: jabber/FTrans.tcl:503 jabber/FTrans.tcl:529 jabber/OOB.tcl:336
+# Find in sources: jabber/FTrans.tcl:506 jabber/FTrans.tcl:532
 ::msgcat::mcset sv {File Transfer}       {Filöverföring}
 # Reference: {File Transfer Error}
 # Find in sources: whiteboard/GetFileIface.tcl:130 whiteboard/GetFileIface.tcl:232 whiteboard/GetFileIface.tcl:233 whiteboard/PutFileIface.tcl:236
@@ -1219,10 +1226,10 @@
 # Find in sources: jabber/VCard.tcl:376
 ::msgcat::mcset sv {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 # Reference: {Forwarded message}
-# Find in sources: jabber/NewMsg.tcl:429
+# Find in sources: jabber/NewMsg.tcl:431
 ::msgcat::mcset sv {Forwarded message}   {Forwarded message}
 # Reference: {History length}
-# Find in sources: jabber/Chat.tcl:3676
+# Find in sources: jabber/Chat.tcl:4018
 ::msgcat::mcset sv {History length}      {Historielängd}
 # Reference: {Import Iconset}
 # Find in sources: jabber/Emoticons.tcl:633 jabber/Emoticons.tcl:767 jabber/Emoticons.tcl:826
@@ -1230,6 +1237,9 @@
 # Reference: {Incoming Message}
 # Find in sources: jabber/GotMsg.tcl:207
 ::msgcat::mcset sv {Incoming Message}    {Inkommande meddelande}
+# Reference: {Insert emoticon}
+# Find in sources: jabber/Chat.tcl:1549 jabber/NewMsg.tcl:371
+::msgcat::mcset sv {Insert emoticon}     {Insert emoticon}
 # Reference: {Invite Contact}
 # Find in sources: jabber/MUC.tcl:137 jabber/MUC.tcl:165
 ::msgcat::mcset sv {Invite Contact}      {Bjud in kontakt}
@@ -1250,13 +1260,13 @@
 # Find in sources: jabber/Enter.tcl:463
 ::msgcat::mcset sv {Loading available chatrooms} {Loading available chatrooms}
 # Reference: {Local nickname}
-# Find in sources: jabber/Chat.tcl:3701
+# Find in sources: jabber/Chat.tcl:4044
 ::msgcat::mcset sv {Local nickname}      {Local nickname}
 # Reference: {Local Time}
 # Find in sources: jabber/Jabber.tcl:1576 jabber/UserInfo.tcl:257 jabber/UserInfo.tcl:284
 ::msgcat::mcset sv {Local Time}          {Lokaltid}
 # Reference: {Logged out}
-# Find in sources: jabber/JUI.tcl:1172
+# Find in sources: jabber/JUI.tcl:1183
 ::msgcat::mcset sv {Logged out}          {Utloggad}
 # Reference: {Login as invisible}
 # Find in sources: jabber/Profiles.tcl:1781
@@ -1318,13 +1328,13 @@
 # Find in sources: lib/EditDialogs.tcl:276
 ::msgcat::mcset sv {New shortcut}        {Ny genväg}
 # Reference: {No restriction}
-# Find in sources: jabber/Chat.tcl:3686
+# Find in sources: jabber/Chat.tcl:4028
 ::msgcat::mcset sv {No restriction}      {No restriction}
 # Reference: {No registered history for}
 # Find in sources: jabber/History.tcl:1029
 ::msgcat::mcset sv {No registered history for} {No registered history for}
 # Reference: {More recent than}
-# Find in sources: jabber/Chat.tcl:3679
+# Find in sources: jabber/Chat.tcl:4021
 ::msgcat::mcset sv {More recent than}    {More recent than}
 # Reference: {Once per session}
 ::msgcat::mcset sv {Once per session}    {En gång per start}
@@ -1360,13 +1370,13 @@
 # Find in sources: jabber/Jabber.tcl:861
 ::msgcat::mcset sv {Presence Error}      {Presence fel}
 # Reference: {Presence Subscription}
-# Find in sources: jabber/Jabber.tcl:771 jabber/Jabber.tcl:776 jabber/Jabber.tcl:782 jabber/Jabber.tcl:831 jabber/Subscribe.tcl:206 jabber/Subscribe.tcl:239 jabber/Subscribe.tcl:918 jabber/Subscribe.tcl:937 jabber/Subscribe.tcl:1327 jabber/Subscribe.tcl:1354 jabber/Subscribe.tcl:1361 jabber/Subscribe.tcl:1405 jabber/Subscribe.tcl:1515 jabber/Subscribe.tcl:1535
+# Find in sources: jabber/Jabber.tcl:771 jabber/Jabber.tcl:776 jabber/Jabber.tcl:782 jabber/Jabber.tcl:831 jabber/Subscribe.tcl:206 jabber/Subscribe.tcl:239 jabber/Subscribe.tcl:918 jabber/Subscribe.tcl:937 jabber/Subscribe.tcl:1328 jabber/Subscribe.tcl:1355 jabber/Subscribe.tcl:1364 jabber/Subscribe.tcl:1408 jabber/Subscribe.tcl:1518 jabber/Subscribe.tcl:1538
 ::msgcat::mcset sv {Presence Subscription} {Närvaru prenumeration}
 # Reference: {Profile Name}
 # Find in sources: jabber/MUC.tcl:776 jabber/Profiles.tcl:1516
 ::msgcat::mcset sv {Profile Name}        {Profilnamn}
 # Reference: {Receive File}
-# Find in sources: components/Growl.tcl:154 jabber/FTrans.tcl:561 jabber/OOB.tcl:380
+# Find in sources: components/Growl.tcl:154 jabber/FTrans.tcl:558 jabber/OOB.tcl:112
 ::msgcat::mcset sv {Receive File}        {Receive File}
 # Reference: {Recent Avatars}
 # Find in sources: jabber/AvatarMB.tcl:470
@@ -1375,7 +1385,7 @@
 # Find in sources: whiteboard/FilePrefs.tcl:478
 ::msgcat::mcset sv {Reject file}         {Reject file}
 # Reference: {Relogin on activity}
-# Find in sources: jabber/AutoAway.tcl:313
+# Find in sources: jabber/AutoAway.tcl:336
 ::msgcat::mcset sv {Relogin on activity} {Relogin on activity}
 # Reference: {Relogin on wakeup}
 # Find in sources: components/Carbon.tcl:186
@@ -1407,10 +1417,10 @@
 # Find in sources: whiteboard/CanvasFile.tcl:737
 ::msgcat::mcset sv {Save Canvas Item}    {Save Canvas Item}
 # Reference: {Save File}
-# Find in sources: jabber/FTrans.tcl:584 jabber/MailBox.tcl:2079 jabber/OOB.tcl:403
+# Find in sources: components/ParseURI.tcl:560 jabber/FTrans.tcl:578 jabber/MailBox.tcl:2079 jabber/OOB.tcl:131
 ::msgcat::mcset sv {Save File}           {Spara fil}
 # Reference: {Save Message}
-# Find in sources: jabber/MailBox.tcl:1122 jabber/NewMsg.tcl:960 jabber/NewMsg.tcl:1053
+# Find in sources: jabber/MailBox.tcl:1122 jabber/NewMsg.tcl:962 jabber/NewMsg.tcl:1055
 ::msgcat::mcset sv {Save Message}        {Spara meddelande}
 # Reference: {Save password}
 # Find in sources: jabber/Register.tcl:739
@@ -1428,7 +1438,7 @@
 # Find in sources: jabber/AvatarMB.tcl:685 jabber/VCard.tcl:403 jabber/VCard.tcl:627
 ::msgcat::mcset sv {Select Avatar}       {Select Avatar}
 # Reference: {Select File}
-# Find in sources: jabber/FTrans.tcl:205 jabber/FTrans.tcl:287 jabber/OOB.tcl:132 jabber/OOB.tcl:250 jabber/OOB.tcl:273
+# Find in sources: jabber/FTrans.tcl:205 jabber/FTrans.tcl:287
 ::msgcat::mcset sv {Select File}         {Select File}
 # Reference: {Select Font}
 # Find in sources: contrib/ui/fontselector.tcl:21 jabber/JPrefs.tcl:195
@@ -1437,7 +1447,7 @@
 # Find in sources: jabber/SetupAss.tcl:130
 ::msgcat::mcset sv {Select Server}       {Select Server}
 # Reference: {Send File}
-# Find in sources: jabber/Chat.tcl:1281 jabber/FTrans.tcl:38 jabber/FTrans.tcl:186 jabber/OOB.tcl:98 jabber/OOB.tcl:110
+# Find in sources: jabber/Chat.tcl:1298 jabber/FTrans.tcl:38 jabber/FTrans.tcl:186
 ::msgcat::mcset sv {Send File}           {Skicka fil}
 # Reference: {Send Live}
 # Find in sources: jabber/JWB.tcl:455
@@ -1458,7 +1468,7 @@
 # Find in sources: components/BuddyPounce.tcl:241
 ::msgcat::mcset sv {Show popup}          {Show popup}
 # Reference: {Show offline users}
-# Find in sources: jabber/Roster.tcl:1366
+# Find in sources: jabber/Roster.tcl:1387
 ::msgcat::mcset sv {Show offline users}  {Show offline users}
 # Reference: {Show Text}
 # Find in sources: contrib/ttoolbar.tcl:448
@@ -1467,7 +1477,7 @@
 # Find in sources: contrib/ttoolbar.tcl:444
 ::msgcat::mcset sv {Show Text and Icon}  {Show Text and Icon}
 # Reference: {Show transports}
-# Find in sources: jabber/Roster.tcl:1368
+# Find in sources: jabber/Roster.tcl:1389
 ::msgcat::mcset sv {Show transports}     {Show transports}
 # Reference: {Smooth freehand strokes}
 # Find in sources: whiteboard/WBPrefs.tcl:122
@@ -1551,14 +1561,14 @@
 # Find in sources: jabber/JUser.tcl:629
 ::msgcat::mcset sv {View Business Card}  {View Business Card}
 # Reference: {View business card}
-# Find in sources: jabber/Subscribe.tcl:324 jabber/Subscribe.tcl:358 jabber/Subscribe.tcl:1219 jabber/Subscribe.tcl:1477
+# Find in sources: jabber/Subscribe.tcl:324 jabber/Subscribe.tcl:358 jabber/Subscribe.tcl:1219 jabber/Subscribe.tcl:1480
 ::msgcat::mcset sv {View business card}  {View business card}
 
 # Reference: {Windows opacity}
 # Find in sources: jabber/JPrefs.tcl:232
 ::msgcat::mcset sv {Windows opacity}     {Windows opacity}
 # Reference: {Writing file}
-# Find in sources: jabber/FTrans.tcl:623 lib/HttpTrpt.tcl:159 whiteboard/GetFileIface.tcl:502
+# Find in sources: jabber/FTrans.tcl:641 lib/HttpTrpt.tcl:158 whiteboard/GetFileIface.tcl:502
 ::msgcat::mcset sv {Writing file}        {Skriver fil}
 
 # Chatrooms.
@@ -1589,16 +1599,16 @@
 
 # Time intervals.
 # Reference: {Ten seconds}
-# Find in sources: jabber/Chat.tcl:3682
+# Find in sources: jabber/Chat.tcl:4024
 ::msgcat::mcset sv {Ten seconds}         {Ten seconds}
 # Reference: {One minute}
-# Find in sources: jabber/Chat.tcl:3683
+# Find in sources: jabber/Chat.tcl:4025
 ::msgcat::mcset sv {One minute}          {One minute}
 # Reference: {Ten minutes}
-# Find in sources: jabber/Chat.tcl:3684
+# Find in sources: jabber/Chat.tcl:4026
 ::msgcat::mcset sv {Ten minutes}         {Ten minutes}
 # Reference: {One hour}
-# Find in sources: jabber/Chat.tcl:3685
+# Find in sources: jabber/Chat.tcl:4027
 ::msgcat::mcset sv {One hour}            {One hour}
 
 # Language names.
@@ -1682,7 +1692,7 @@
 # Reference: {Both you and your contact cannot see eachother's presence.}
 ::msgcat::mcset sv subscriptionNone      {Both you and your contact cannot see eachother's presence.}
 # Reference: {You can see your contact's presence, but your contact can't see yours.}
-# Find in sources: jabber/Roster.tcl:1381
+# Find in sources: jabber/Roster.tcl:1402
 ::msgcat::mcset sv subscriptionTo        {You can see your contact's presence, but your contact can't see yours.}
 
 
@@ -1756,10 +1766,10 @@
 # Find in sources: jabber/JUser.tcl:271 jabber/JUser.tcl:393
 ::msgcat::mcset sv jamessaddforeign2     {To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?}
 # Reference: {You need to fill in at least one valid address.}
-# Find in sources: jabber/NewMsg.tcl:877
+# Find in sources: jabber/NewMsg.tcl:879
 ::msgcat::mcset sv jamessaddrmiss        {Du måste fylla i åtminstone en giltig adress.}
 # Reference: {%s allows you to see his/her presence.}
-# Find in sources: jabber/Subscribe.tcl:1328 jabber/Subscribe.tcl:1355
+# Find in sources: jabber/Subscribe.tcl:1329 jabber/Subscribe.tcl:1356
 ::msgcat::mcset sv jamessallowsub2       {%s tillåter dig att se dess närvaro.}
 # Reference: {%s is already in your list. Do you want to continue anyway?}
 # Find in sources: jabber/JUser.tcl:250 jabber/Search.tcl:261
@@ -1780,11 +1790,14 @@
 # Find in sources: jabber/Avatar.tcl:385
 ::msgcat::mcset sv jamessavaerrsize      {We require that the avatar be square of size %s.}
 # Reference: {%s is invalid. Do you want to continue anyway?}
-# Find in sources: jabber/Chat.tcl:378 jabber/Chat.tcl:2788 jabber/Disco.tcl:1745 jabber/MUC.tcl:1249
+# Find in sources: jabber/Chat.tcl:389 jabber/Chat.tcl:2931 jabber/Disco.tcl:1747 jabber/MUC.tcl:1249
 ::msgcat::mcset sv jamessbadjid2         {%s is invalid. Do you want to continue anyway?}
 # Reference: {Do you want to close this chat window and loose the complete conversation?}
-# Find in sources: jabber/Chat.tcl:3212
+# Find in sources: jabber/Chat.tcl:3352
 ::msgcat::mcset sv jamesschatclose2      {Do you want to close this chat window and loose the complete conversation?}
+# Reference: {Do you want to invite this contact to a new chatroom?}
+# Find in sources: jabber/Chat.tcl:1833
+::msgcat::mcset sv jamesschatinvite      {Do you want to invite this contact to a new chatroom?}
 # Reference: {This contact is not online anymore and the message is therfore not sent.}
 # Find in sources: jabber/JWB.tcl:804
 ::msgcat::mcset sv jamesschatoffline2    {This contact is not online anymore and the message is therfore not sent.}
@@ -1852,13 +1865,12 @@
 # Find in sources: jabber/Jabber.tcl:918 jabber/Jabber.tcl:920 jabber/Jabber.tcl:930 jabber/Jabber.tcl:932
 ::msgcat::mcset sv jamessfatalerr        {Receieved a fatal error: %s The connection is closed.}
 # Reference: {Cannot download file %s from %s.}
-# Find in sources: jabber/FTrans.tcl:646
+# Find in sources: jabber/FTrans.tcl:666
 ::msgcat::mcset sv jamessfiletrpterr2    {Cannot download file %s from %s.}
 # Reference: {The selected file does not exist. Select a new one.}
-# Find in sources: jabber/OOB.tcl:274
 ::msgcat::mcset sv jamessfilenotexist    {The selected file does not exist. Select a new one.}
 # Reference: {The MD5 checksums did not match. The file may be corrupt.}
-# Find in sources: jabber/FTrans.tcl:660
+# Find in sources: jabber/FTrans.tcl:680
 ::msgcat::mcset sv jamessfilemd5         {The MD5 checksums did not match. The file may be corrupt.}
 # Reference: {Please fill in all fields before entering chatroom.}
 # Find in sources: jabber/Create.tcl:726 jabber/Enter.tcl:486
@@ -1877,7 +1889,7 @@
 # Find in sources: jabber/Login.tcl:485 jabber/Register.tcl:559
 ::msgcat::mcset sv jamessillegalchar     {Ogiltigt tecken i %s: "%s"!}
 # Reference: {Invalid Contact ID: %s. Please correct and resend.}
-# Find in sources: jabber/NewMsg.tcl:856
+# Find in sources: jabber/NewMsg.tcl:858
 ::msgcat::mcset sv jamessillformresend2  {Invalid Contact ID: %s. Please correct and resend.}
 # Reference: {Cannot create an image from %s.}
 # Find in sources: jabber/Avatar.tcl:378
@@ -1895,19 +1907,18 @@
 # Find in sources: jabber/Login.tcl:805
 ::msgcat::mcset sv jamesslogin409b       {Cannot login because this username is already in use by someone else (%s).}
 # Reference: {There are unsaved messages. Do you still want to quit?}
-# Find in sources: jabber/NewMsg.tcl:1020
+# Find in sources: jabber/NewMsg.tcl:1022
 ::msgcat::mcset sv jamessmsgwarnquit     {There are unsaved messages. Do you still want to quit?}
 # Reference: {The "%s" is missing or is too short!}
 # Find in sources: jabber/Login.tcl:466
 ::msgcat::mcset sv jamessnamemissing     {Fältet %s fattas eller är för kort!}
 # Reference: {%s does not support file transfer.}
-# Find in sources: jabber/FTrans.tcl:366 jabber/FTrans.tcl:402 jabber/FTrans.tcl:455
+# Find in sources: jabber/FTrans.tcl:367 jabber/FTrans.tcl:403 jabber/FTrans.tcl:456
 ::msgcat::mcset sv jamessnofiletrpt2     {%s stöder ej filöverföring.}
 # Reference: {You must select a file to send.}
-# Find in sources: jabber/OOB.tcl:269
 ::msgcat::mcset sv jamessnofile2         {You must select a file to send.}
 # Reference: {Cannot find any chatroom service.}
-# Find in sources: jabber/Chat.tcl:2465 jabber/Create.tcl:584 jabber/GroupChat.tcl:356
+# Find in sources: jabber/Chat.tcl:2603 jabber/Create.tcl:584 jabber/GroupChat.tcl:356
 ::msgcat::mcset sv jamessnogroupchat2    {Cannot find any chatroom service.}
 # Reference: {Cannot find any chatrooms at %s.}
 # Find in sources: jabber/Enter.tcl:395 jabber/Enter.tcl:447
@@ -1916,7 +1927,7 @@
 # Find in sources: jabber/Login.tcl:797
 ::msgcat::mcset sv jamessnosocket3       {Cannot connect to %s. Either there are server or network issues, or you misspelled the server's name.}
 # Reference: {Cannot send when not logged in.}
-# Find in sources: jabber/Chat.tcl:2745 jabber/GroupChat.tcl:2618
+# Find in sources: jabber/Chat.tcl:2882 jabber/GroupChat.tcl:2618
 ::msgcat::mcset sv jamessnotconnected2   {Cannot send when not logged in.}
 # Reference: {Registration with service %s was successful.}
 # Find in sources: jabber/Register.tcl:1190 jabber/Register.tcl:1372
@@ -1925,31 +1936,31 @@
 # Find in sources: jabber/Register.tcl:131
 ::msgcat::mcset sv jamessokunreg2        {You are unregistered from %s.}
 # Reference: {%s wants to send you this file: %sDo you want to receive this file?}
-# Find in sources: components/Growl.tcl:157 jabber/FTrans.tcl:558 jabber/OOB.tcl:379
+# Find in sources: components/Growl.tcl:157 jabber/FTrans.tcl:557 jabber/OOB.tcl:111
 ::msgcat::mcset sv jamessoobask2         {%s wants to send you this file: %sDo you want to receive this file?}
 # Reference: {Received invalid URL from %s. URL: %s}
-# Find in sources: jabber/OOB.tcl:391
+# Find in sources: jabber/OOB.tcl:79
 ::msgcat::mcset sv jamessoobbad2         {Received invallid URL from %s. URL: %s}
 # Reference: {Cannot send the file %s to %s.}
-# Find in sources: jabber/FTrans.tcl:496 jabber/FTrans.tcl:522 jabber/OOB.tcl:328
+# Find in sources: jabber/FTrans.tcl:497 jabber/FTrans.tcl:525
 ::msgcat::mcset sv jamessooberr404b      {Cannot send the file %s to %s.}
 # Reference: {%s did not accepted the file %s.}
-# Find in sources: jabber/FTrans.tcl:493 jabber/FTrans.tcl:519 jabber/OOB.tcl:325
+# Find in sources: jabber/FTrans.tcl:494 jabber/FTrans.tcl:522
 ::msgcat::mcset sv jamessooberr406b      {%s did not accepted the file %s.}
 # Reference: {Cannot open file %s}
 # Find in sources: lib/HttpTrpt.tcl:66
 ::msgcat::mcset sv jamessoobfailopen2    {Cannot open file %s}
 # Reference: {%s did not sent the download location of the file.}
-# Find in sources: jabber/OOB.tcl:369
+# Find in sources: jabber/OOB.tcl:71
 ::msgcat::mcset sv jamessoobnourl2       {%s did not sent the download location of the file.}
 # Reference: {File transfer of %s to %s was successful.}
-# Find in sources: jabber/FTrans.tcl:504 jabber/FTrans.tcl:530 jabber/OOB.tcl:337
+# Find in sources: jabber/FTrans.tcl:507 jabber/FTrans.tcl:533
 ::msgcat::mcset sv jamessoobok2          {Filöverföringen av %s till "%s" lyckad!}
 # Reference: {Cannot download file over HTTP: timeout.}
-# Find in sources: lib/HttpTrpt.tcl:225
+# Find in sources: lib/HttpTrpt.tcl:214
 ::msgcat::mcset sv jamessoobtimeout2     {Cannot download file over HTTP: timeout.}
 # Reference: {The URL from %s does not use the HTTP protocol, but instead %s which is not supported.}
-# Find in sources: jabber/OOB.tcl:399
+# Find in sources: jabber/OOB.tcl:87
 ::msgcat::mcset sv jamessoonnohttp2      {The URL from %s does not use the HTTP protocol, but instead %s which is not supported.}
 # Reference: {This is your own account at %s that acts as a service that transports messages to that IM system. It needs to be in your list. You have a subscription for %s: %s.}
 # Find in sources: jabber/JUser.tcl:440 jabber/JUser.tcl:523
@@ -1985,7 +1996,7 @@
 # Find in sources: jabber/Register.tcl:78
 ::msgcat::mcset sv jamessremoveaccount2  {Vill du verkligen ta bort ditt användarkonto? Den här processen kan inte göras ogjord.}
 # Reference: {Do you want to save this message before closing?}
-# Find in sources: jabber/NewMsg.tcl:1051
+# Find in sources: jabber/NewMsg.tcl:1053
 ::msgcat::mcset sv jamesssavemsg         {Vill du spara det här meddelandet innan fönstret stängs?}
 # Reference: {Cannot search.}
 # Find in sources: jabber/Search.tcl:450
@@ -1994,7 +2005,7 @@
 # Find in sources: jabber/Search.tcl:447
 ::msgcat::mcset sv jamesssearchinval2    {There was an invalid field. Please correct it.}
 # Reference: {Contact ID %s is invalid. Do you want to skip it and send to the rest?}
-# Find in sources: jabber/NewMsg.tcl:853
+# Find in sources: jabber/NewMsg.tcl:855
 ::msgcat::mcset sv jamessskipsendq2      {Contact ID %s is invalid. Do you want to skip it and send to the rest?}
 # Reference: {Select a presence state and optionally enter a message.}
 # Find in sources: jabber/Status.tcl:837
@@ -2009,7 +2020,7 @@
 # Find in sources: jabber/Subscribe.tcl:290 jabber/Subscribe.tcl:460 jabber/Subscribe.tcl:798 jabber/Subscribe.tcl:814 jabber/Subscribe.tcl:979 jabber/Subscribe.tcl:1084
 ::msgcat::mcset sv jamesssubscautorej    {Subscription request will be rejected in: %s secs.}
 # Reference: {%s additional contacts can see your presence.}
-# Find in sources: jabber/Subscribe.tcl:1404 jabber/Subscribe.tcl:1451
+# Find in sources: jabber/Subscribe.tcl:1407 jabber/Subscribe.tcl:1454
 ::msgcat::mcset sv jamesssubscedfancy    {%s additional contacts can see your presence.}
 # Reference: {Time since %s was last connected}
 # Find in sources: jabber/Jabber.tcl:1531
@@ -2167,7 +2178,7 @@ där användarnamnet är okänt).}
 ::msgcat::mcset sv register-trpt-unreg2  {You are about to unregister a transport with a number of dependent contacts. Do you want to remove these contacts as well (Yes), keep them (No), or cancel everything (Cancel).}
 
 # Reference: {On %s, %s %s wrote:}
-# Find in sources: jabber/NewMsg.tcl:936
+# Find in sources: jabber/NewMsg.tcl:938
 ::msgcat::mcset sv reply-prefix          {On %s, %s %s wrote:}
 
 # Reference: {Shell print command, edit if desired}
@@ -2183,19 +2194,19 @@ där användarnamnet är okänt).}
 
 
 # Reference: {Download of file %s finished.}
-# Find in sources: lib/HttpTrpt.tcl:249
+# Find in sources: lib/HttpTrpt.tcl:238
 ::msgcat::mcset sv httptrptok2           {Download of file %s finished.}
 # Reference: {Cannot download the file %s.\nFile transport error: %s}
-# Find in sources: lib/HttpTrpt.tcl:100 lib/HttpTrpt.tcl:131 lib/HttpTrpt.tcl:230
+# Find in sources: lib/HttpTrpt.tcl:100 lib/HttpTrpt.tcl:131 lib/HttpTrpt.tcl:219
 ::msgcat::mcset sv httptrpterror2        {Cannot download the file %s.\nFile transport error: %s}
 # Reference: {The server closed the socket without replying.}
-# Find in sources: jabber/JPubServers.tcl:217 lib/HttpTrpt.tcl:235
+# Find in sources: jabber/JPubServers.tcl:217 lib/HttpTrpt.tcl:224
 ::msgcat::mcset sv httptrpteof           {Servern stängde förbindelsen utan att svara.}
 # Reference: {Cannot download the file %s.}
-# Find in sources: lib/HttpTrpt.tcl:242
+# Find in sources: lib/HttpTrpt.tcl:231
 ::msgcat::mcset sv httptrptnon200a       {Cannot download the file %s.}
 # Reference: {File transport of %s was reset.}
-# Find in sources: lib/HttpTrpt.tcl:255
+# Find in sources: lib/HttpTrpt.tcl:244
 ::msgcat::mcset sv httptrptreset         {Hämtningen av %s återställdes}
 
 # Reference: {Point tool, click to mark, double click to inspect, press to popup}
@@ -2238,31 +2249,31 @@ där användarnamnet är okänt).}
 
 # Preferences:
 # Reference: {By default use active <Return> to send messages}
-# Find in sources: jabber/Chat.tcl:3656
+# Find in sources: jabber/Chat.tcl:3998
 ::msgcat::mcset sv prefchactret2         {By default use active <Return> to send messages}
 # Reference: {Treat normal messages as chat messages}
-# Find in sources: jabber/Chat.tcl:3660
+# Find in sources: jabber/Chat.tcl:4002
 ::msgcat::mcset sv prefchnormal          {Behandla normala meddelanden som chatt meddelanden}
 # Reference: {Double click message in inbox}
-# Find in sources: jabber/Chat.tcl:3665
+# Find in sources: jabber/Chat.tcl:4007
 ::msgcat::mcset sv prefcu2clk            {Dubbelklicka meddelande i inkorgen:}
 # Reference: {Login on %s startup}
 # Find in sources: jabber/JPrefs.tcl:301
 ::msgcat::mcset sv prefcuautologin2      {Login on %s startup}
 # Reference: {Open message in new window}
-# Find in sources: jabber/Chat.tcl:3666
+# Find in sources: jabber/Chat.tcl:4008
 ::msgcat::mcset sv prefcuopen            {Öppna meddelande i nytt fönster}
 # Reference: {Remember open windows between sessions}
 # Find in sources: jabber/JPrefs.tcl:303
 ::msgcat::mcset sv prefcuremdlgs2        {Remember open windows between sessions}
 # Reference: {Reply to sender}
-# Find in sources: jabber/Chat.tcl:3669
+# Find in sources: jabber/Chat.tcl:4011
 ::msgcat::mcset sv prefcureply           {Returnera till avsändaren}
 # Reference: {Save message inbox between sessions}
 # Find in sources: jabber/JPrefs.tcl:299
 ::msgcat::mcset sv prefcusave            {Spara inkorgen mellan sessionerna}
 # Reference: {Show incoming messages in new window}
-# Find in sources: jabber/Chat.tcl:3658
+# Find in sources: jabber/Chat.tcl:4000
 ::msgcat::mcset sv prefcushow            {Visa inkommande meddelande i nytt fönster}
 # Reference: {Store preferences in same folder as program}
 # Find in sources: lib/PrefGeneral.tcl:65
@@ -2292,13 +2303,13 @@ där användarnamnet är okänt).}
 # Find in sources: components/Sounds.tcl:544
 ::msgcat::mcset sv prefmidimsg           {Set midi command to use for playing MIDI sounds. This option is only relevant if you have a sound set with MIDI files. Your system midi player command must have the "command fileName" syntax.}
 # Reference: {Away after}
-# Find in sources: jabber/AutoAway.tcl:263
+# Find in sources: jabber/AutoAway.tcl:286
 ::msgcat::mcset sv prefminaw2            {Away after}
 # Reference: {Extended Away after}
-# Find in sources: jabber/AutoAway.tcl:283
+# Find in sources: jabber/AutoAway.tcl:306
 ::msgcat::mcset sv prefminea2            {Extended Away after}
 # Reference: {Logout after}
-# Find in sources: jabber/AutoAway.tcl:303
+# Find in sources: jabber/AutoAway.tcl:326
 ::msgcat::mcset sv prefminlogout         {Minutes before automatically logout:}
 # Reference: {Use the following external address}
 # Find in sources: lib/Proxy.tcl:267
@@ -2324,16 +2335,16 @@ där användarnamnet är okänt).}
 # Find in sources: lib/Proxy.tcl:196
 ::msgcat::mcset sv prefproxymsg2         {Usage of this HTTP proxy settings is determined by each profile's settings. File transfers will not work if you use an HTTP proxy.}
 # Reference: {Chat on double-click instead of message}
-# Find in sources: jabber/Roster.tcl:1363
+# Find in sources: jabber/Roster.tcl:1384
 ::msgcat::mcset sv prefrochat2           {Chat on double-click instead of message}
 # Reference: {Clear list of contacts on logout}
-# Find in sources: jabber/Roster.tcl:1361
+# Find in sources: jabber/Roster.tcl:1382
 ::msgcat::mcset sv prefroclr2            {Clear list of contacts on logout}
 # Reference: {Remove contact without presence subscription}
-# Find in sources: jabber/Roster.tcl:1359
+# Find in sources: jabber/Roster.tcl:1380
 ::msgcat::mcset sv prefrorm2             {Remove contact without presence subscription}
 # Reference: {Show contacts without any subscription}
-# Find in sources: jabber/Roster.tcl:1370
+# Find in sources: jabber/Roster.tcl:1391
 ::msgcat::mcset sv prefroshowsubno       {Show users without any subscription}
 # Reference: {Enable or disable sounds below}
 # Find in sources: components/Sounds.tcl:505
@@ -2360,19 +2371,19 @@ där användarnamnet är okänt).}
 # Find in sources: jabber/JPrefs.tcl:190
 ::msgcat::mcset sv prefstabui2           {Use tabbed interface}
 # Reference: {Put contacts who add me to their list in}
-# Find in sources: jabber/Subscribe.tcl:1627
+# Find in sources: jabber/Subscribe.tcl:1630
 ::msgcat::mcset sv prefsuauto2           {Flytta nya användare i kontaktlistan till en grupp}
 # Reference: {If someone wants to see my presence and}
-# Find in sources: jabber/Subscribe.tcl:1554
+# Find in sources: jabber/Subscribe.tcl:1557
 ::msgcat::mcset sv prefsuif2             {Om någon vill se min närvaro och...}
 # Reference: {is in my list}
-# Find in sources: jabber/Subscribe.tcl:1556
+# Find in sources: jabber/Subscribe.tcl:1559
 ::msgcat::mcset sv prefsuis2             {is in my list}
 # Reference: {is not in my list}
-# Find in sources: jabber/Subscribe.tcl:1555
+# Find in sources: jabber/Subscribe.tcl:1558
 ::msgcat::mcset sv prefsuisnot2          {is not in my list}
 # Reference: {User has been inactive for a while}
-# Find in sources: jabber/AutoAway.tcl:87
+# Find in sources: jabber/AutoAway.tcl:93
 ::msgcat::mcset sv prefuserinactive      {User has been inactive for a while}
 
 
@@ -2390,13 +2401,13 @@ namespace eval ::EditShortcuts:: {
 
 
 # Reference: {If checked Return sends message, else use Ctrl/Cmd-Return}
-# Find in sources: jabber/Chat.tcl:1516 jabber/GroupChat.tcl:874
+# Find in sources: jabber/Chat.tcl:1548 jabber/GroupChat.tcl:874
 ::msgcat::mcset sv jaactiveret           {Om kryssad så skickar Retur annars använd Ctrl/Cmd-Retur}
 # Reference: {Authorization to server %s was successful. Downloading contacts...}
 # Find in sources: jabber/Login.tcl:745
 ::msgcat::mcset sv jaauthok2             {Authorization to server %s was successful. Downloading contacts...}
 # Reference: {Show or hide the chat history}
-# Find in sources: jabber/Chat.tcl:1515
+# Find in sources: jabber/Chat.tcl:1547
 ::msgcat::mcset sv jachathist            {Visa eller göm chatt historiken}
 # Reference: {Select a service, and enter a chatroom and nickname. Optionally, you can configure the chatroom.}
 # Find in sources: jabber/Create.tcl:98
@@ -2414,7 +2425,7 @@ namespace eval ::EditShortcuts:: {
 # Find in sources: jabber/GroupChat.tcl:1417
 ::msgcat::mcset sv jagclogoutmsg         {Du har loggat ut och lämnat rummet}
 # Reference: {Please enter your desired nickname for the chatroom %s}
-# Find in sources: components/ParseURI.tcl:394
+# Find in sources: components/ParseURI.tcl:392
 ::msgcat::mcset sv jagcreqnick           {Vänligen skriv in ditt önskade kortnamn for rummet %s}
 # Reference: {Synchronize chatroom presence with global presence}
 # Find in sources: jabber/GroupChat.tcl:3580
@@ -2444,7 +2455,7 @@ namespace eval ::EditShortcuts:: {
 # Find in sources: jabber/Jabber.tcl:1914
 ::msgcat::mcset sv janewpass             {Sätt nytt lösenord för:}
 # Reference: {Select an image file for the background. To remove a background image press Remove and Save.}
-# Find in sources: jabber/Disco.tcl:853 jabber/RosterTree.tcl:800
+# Find in sources: jabber/Disco.tcl:853 jabber/RosterTree.tcl:801
 ::msgcat::mcset sv jaopenbgimage         {Välj en bildfil till bakgrund. Tag bort bakgrunden genom att trycka på "Tag bort" och "Spara".}
 # Reference: {You are already registered with this service. These are your current registration settings.}
 # Find in sources: jabber/JForms.tcl:269
@@ -2485,12 +2496,9 @@ namespace eval ::EditShortcuts:: {
 # Reference: {Select iconsets for each group. A deselected group will use the normal iconset.}
 # Find in sources: jabber/Rosticons.tcl:455
 ::msgcat::mcset sv jaseliconset2         {Select iconsets for each group. A deselected group will use the normal iconset.}
-# Reference: {%s contacts want to see your presence. Select the contacts who may see your presence.}
+# Reference: {%s contacts want to see your presence. Select those who may see your presence.}
 # Find in sources: jabber/Subscribe.tcl:952 jabber/Subscribe.tcl:1142
 ::msgcat::mcset sv jasubmulti            {%s contacts want to see your presence. Select the contacts who may see your presence.}
-# Reference: {The following contacts have confirmed your presence subsctiptions}
-# Find in sources: jabber/Subscribe.tcl:1362
-::msgcat::mcset sv jasubmultians         {The following contacts have confirmed your presence subsctiptions}
 # Reference: {Entering a nickname and group is optional, and for your personal use only.}
 # Find in sources: jabber/Subscribe.tcl:256
 ::msgcat::mcset sv jasubopts2            {Kortnamn och grupp är inte obligatoriskt utan enbart för din personliga användning.}
@@ -2498,7 +2506,7 @@ namespace eval ::EditShortcuts:: {
 # Find in sources: jabber/Subscribe.tcl:254
 ::msgcat::mcset sv jasubwant2            {Vill du att %s ska se din närvaro?}
 # Reference: {The supported image formats are}
-# Find in sources: jabber/Avatar.tcl:370 jabber/Disco.tcl:854 jabber/RosterTree.tcl:801
+# Find in sources: jabber/Avatar.tcl:370 jabber/Disco.tcl:854 jabber/RosterTree.tcl:802
 ::msgcat::mcset sv jasuppimagefmts       {Möjliga bildformat är }
 # Reference: {Negotiating TLS security}
 # Find in sources: jabber/Login.tcl:728
@@ -2510,7 +2518,7 @@ namespace eval ::EditShortcuts:: {
 # Find in sources: jabber/Jabber.tcl:1702
 ::msgcat::mcset sv javersinfo            {Versions information för %s}
 # Reference: {Waiting for disco result}
-# Find in sources: jabber/FTrans.tcl:373
+# Find in sources: jabber/FTrans.tcl:374
 ::msgcat::mcset sv jawaitdisco           {Väntar på disco resultat...}
 # Reference: {Contacted %s. Waiting for response}
 # Find in sources: jabber/Login.tcl:690
@@ -2556,7 +2564,7 @@ namespace eval ::EditShortcuts:: {
 # Find in sources: jabber/MUC.tcl:837
 ::msgcat::mcset sv mucBan2               {Ban %s from the chatroom %s.}
 # Reference: {Converting Chat into Conference}
-# Find in sources: jabber/Chat.tcl:2449
+# Find in sources: jabber/Chat.tcl:2587
 ::msgcat::mcset sv mucChat2ConfInv       {Omvandla chatt till konferans.}
 # Reference: {Do you want to destroy the chatroom %s? Optionally, you can point present chatroom participants to an alternative chatroom and tell why the chatroom is destroyed.}
 # Find in sources: jabber/MUC.tcl:1611
@@ -2598,12 +2606,12 @@ namespace eval ::EditShortcuts:: {
 # Find in sources: components/AutoUpdate.tcl:262
 ::msgcat::mcset sv autoupdatedo          {Automatically check for updates}
 # Reference: {Send a file to %s. A description is optional.}
-# Find in sources: jabber/FTrans.tcl:199 jabber/OOB.tcl:124
+# Find in sources: jabber/FTrans.tcl:199
 ::msgcat::mcset sv oobmsg2               {Send a file to %s. A description is optional.}
 
 # Composing events
 # Reference: {%s is composing a reply}
-# Find in sources: jabber/Chat.tcl:3352
+# Find in sources: jabber/Chat.tcl:3492
 ::msgcat::mcset sv chatcompreply         {%s skriver på ett svar}
 # Reference: {%s is on the chat}
 ::msgcat::mcset sv chatcompactive        {%s är med i chatten}
@@ -2947,10 +2955,10 @@ if {0} {
 # Find in sources: jabber/JUser.tcl:152
 ::msgcat::mcset sv tooltip-group         {Group to which this contact should belong to}
 # Reference: {Your nickname for local display}
-# Find in sources: jabber/Chat.tcl:3706
+# Find in sources: jabber/Chat.tcl:4049
 ::msgcat::mcset sv tooltip-localnick     {Your nickname for local display}
 # Reference: {Number of messages to display}
-# Find in sources: jabber/Chat.tcl:3695
+# Find in sources: jabber/Chat.tcl:4038
 ::msgcat::mcset sv tooltip-historymessages {Number of messages to display}
 # Reference: {Select or manually enter a chatroom service}
 # Find in sources: jabber/Create.tcl:123 jabber/Enter.tcl:177
@@ -2968,6 +2976,15 @@ if {0} {
 ::msgcat::mcset sv tooltip-xanim         {Support for several animation, video and audio formats}
 # Reference: {Support for several animation, image, video and audio formats}
 ::msgcat::mcset sv tooltip-QuickTimeTcl  {Support for several animation, image, video and audio formats}
+
+# Reference: {Enter the subject of the conversation, set by pressing Return}
+# Find in sources: jabber/Chat.tcl:1514
+::msgcat::mcset sv tooltip-chatsubject   {Enter the subject of the conversation, set by pressing Return}
+# Reference: {You need to be logged in to see the presence of this contact}
+# Find in sources: jabber/Chat.tcl:2385
+::msgcat::mcset sv tooltip-chatoffline   {You need to be logged in to see the presence of this contact}
+
+
 # Me knows :-)
 # Reference: {Not yet implemented.}
 # Find in sources: jabber/MUC.tcl:1359
