@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.14 2007-11-24 15:06:06 matben Exp $
+# $Id: AutoAway.tcl,v 1.15 2007-12-07 15:22:28 matben Exp $
 
 package require idletime
 
@@ -85,12 +85,12 @@ proc ::AutoAway::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     
     # Auto away page:
-    set jprefs(autoaway)     0
-    set jprefs(xautoaway)    0
-    set jprefs(awaymin)      0
-    set jprefs(xawaymin)     0
+    set jprefs(autoaway)     1
+    set jprefs(xautoaway)    1
+    set jprefs(awaymin)      15
+    set jprefs(xawaymin)     30
     set jprefs(awaymsg)      ""
-    set jprefs(xawaymsg)     [mc prefuserinactive]
+    set jprefs(xawaymsg)     ""
     set jprefs(autologout)   0
     set jprefs(logoutmin)    0
     set jprefs(logoutmsg)    ""
@@ -114,7 +114,7 @@ proc ::AutoAway::InitPrefsHook {} {
     
     # Set busy presence when several active chat tabs.
     set jprefs(aa,busy-chats)     0
-    set jprefs(aa,busy-chats-n)   2
+    set jprefs(aa,busy-chats-n)   3
     set jprefs(aa,busy-chats-msg) ""
 
     ::PrefUtils::Add [list \

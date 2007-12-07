@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.224 2007-12-07 07:19:30 matben Exp $
+#   $Id: en.msg,v 1.225 2007-12-07 15:22:28 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -964,7 +964,6 @@
 ::msgcat::mcset en prefsuif2             {If someone wants to see my presence and}
 ::msgcat::mcset en prefsuis2             {is in my list}
 ::msgcat::mcset en prefsuisnot2          {is not in my list}
-::msgcat::mcset en prefuserinactive      {User has been inactive for a while}
 
 
 # obsolete strings in the paragraph?
