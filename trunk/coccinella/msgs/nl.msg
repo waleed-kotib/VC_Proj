@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.162 2007-12-07 17:54:42 sdevrieze Exp $
+#   $Id: nl.msg,v 1.163 2007-12-07 17:57:04 sdevrieze Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -3064,7 +3064,7 @@ if {0} {
 ::msgcat::mcset nl Exercising            {Lichaamsoefeningen doen}
 # Duplicate:
 # Reference: {Cycling}
-::msgcat::mcset nl en                    {Cycling}
+#::msgcat::mcset nl                       {Cycling}
 # Reference: {Hiking}
 ::msgcat::mcset nl Hiking                {Trektoch maken}
 # Reference: {Jogging}
