@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.223 2007-12-01 14:26:12 matben Exp $
+# $Id: GroupChat.tcl,v 1.224 2007-12-07 14:50:45 matben Exp $
 
 package require Create
 package require Enter
@@ -3528,7 +3528,7 @@ proc ::GroupChat::InitPrefsHook {} {
     # Defaults...    
     set jprefs(defnick)         ""
     set jprefs(gchat,syncPres)  0
-    set jprefs(gchat,useScheme) 0
+    set jprefs(gchat,useScheme) 1
     set jprefs(gchat,colScheme) "Test"
     set jprefs(gchat,cusScheme) {"#ff0000" "#00ff00" "#0000ff" "#ffff00" "#000000"}
     
