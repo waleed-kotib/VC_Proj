@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.67 2007-11-24 08:18:27 matben Exp $
+# $Id: Subscribe.tcl,v 1.68 2007-12-07 07:19:30 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -1302,6 +1302,7 @@ namespace eval ::Subscribed {
     set ::config(subscribed,multi-dlg) 1
     
     # Use a fancy dialog for queued 'subscribed' events.
+    # The "unfancy" one doesn't have its text in catalog.
     set ::config(subscribed,fancy-dlg) 1
 
     variable queue [list]
@@ -1358,6 +1359,8 @@ proc ::Subscribed::ExecQueue {} {
 	if {$config(subscribed,fancy-dlg)} {
 	    FancyDlg
 	} else {
+	    # This string is not in catalog by default.
+	    set str [mc "The following contacts can see your presence"]
 	    ::ui::dialog $w -title [mc "Presence Subscription"] -icon info \
 	      -type ok -message "[mc jasubmultians]:\n"
 	}
