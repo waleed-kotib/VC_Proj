@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: pl.msg,v 1.70 2007-12-07 10:15:16 matben Exp $
+#   $Id: pl.msg,v 1.71 2007-12-08 11:36:58 matben Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -328,7 +328,7 @@
 ::msgcat::mcset pl Password              {Hasło}
 # Reference: {Personal}
 # Find in sources: jabber/VCard.tcl:342
-::msgcat::mcset pl Personal              {Personal}
+::msgcat::mcset pl Personal              {Dane osobiste}
 # Reference: {Phone}
 # Find in sources: components/Growl.tcl:168 components/JivePhone.tcl:479 components/Phone/IAX/IaxPrefs.tcl:99 components/Phone/Phone.tcl:383 components/Phone/Phone.tcl:414 jabber/Rosticons.tcl:558
 ::msgcat::mcset pl Phone                 {Telefon}
@@ -337,7 +337,7 @@
 ::msgcat::mcset pl Play                  {Odtwórz}
 # Reference: {Plugins}
 # Find in sources: lib/Component.tcl:70 whiteboard/Plugins.tcl:1304 whiteboard/WDialogs.tcl:47
-::msgcat::mcset pl Plugins               {Plugins}
+::msgcat::mcset pl Plugins               {Wtyczki}
 # Reference: {Port}
 # Find in sources: jabber/Profiles.tcl:1846 lib/Proxy.tcl:206 whiteboard/WDialogs.tcl:180
 ::msgcat::mcset pl Port                  {Port}
@@ -346,7 +346,7 @@
 ::msgcat::mcset pl Ports                 {Porty}
 # Reference: {Preferences}
 # Find in sources: lib/Preferences.tcl:174
-::msgcat::mcset pl Preferences           {Preferences}
+::msgcat::mcset pl Preferences           {Preferencje}
 # Reference: {Previous}
 # Find in sources: components/Totd.tcl:93 contrib/wizard.tcl:220 jabber/Adhoc.tcl:209
 ::msgcat::mcset pl Previous              {Wstecz}
@@ -677,7 +677,7 @@
 ::msgcat::mcset pl mAction               {Akcja}
 # Reference: {Add to Dictionary}
 # Find in sources: components/Spell.tcl:160
-::msgcat::mcset pl mAddToDictionary      {Add to Dictionary}
+::msgcat::mcset pl mAddToDictionary      {Dodaj do słownika}
 # Reference: {C&ommands}
 ::msgcat::mcset pl mAdHocCommands        {Polecenia Ad-Hoc}
 # Reference: {&Add Contact...}
@@ -754,7 +754,7 @@
 # Reference: {&Decreasing}
 ::msgcat::mcset pl mDecreasing           {Malejąco}
 # Reference: {Dictionaries}
-::msgcat::mcset pl mDictionaries         {Dictionaries}
+::msgcat::mcset pl mDictionaries         {Słowniki}
 # Reference: {&Discover Server...}
 ::msgcat::mcset pl mDiscoverServer...    {&Przeszukaj serwer...}
 # Reference: {Do Not Disturb}
@@ -973,7 +973,7 @@
 # Reference: {Sort}
 ::msgcat::mcset pl mSort                 {Rodzaj}
 # Reference: {Check Spelling}
-::msgcat::mcset pl mCheckSpell           {Check Spelling}
+::msgcat::mcset pl mCheckSpell           {Sprawdzenie pisowni}
 # Reference: {Status}
 ::msgcat::mcset pl mStatus               {Zmień swój status}
 # Reference: {Stop &Transactions}
@@ -1101,7 +1101,7 @@
 ::msgcat::mcset pl {Close page}          {Zamknij stronę}
 # Reference: {Close tab}
 # Find in sources: jabber/Chat.tcl:2091 jabber/GroupChat.tcl:1179
-::msgcat::mcset pl {Close tab}           {Close tab}
+::msgcat::mcset pl {Close tab}           {Zamknij panel}
 # Reference: {Configure Chatroom}
 # Find in sources: jabber/MUC.tcl:429 jabber/MUC.tcl:440 jabber/MUC.tcl:545 jabber/MUC.tcl:1426
 ::msgcat::mcset pl {Configure Chatroom}  {Ustawienia pokoju konferencyjnego}
@@ -1239,7 +1239,7 @@
 ::msgcat::mcset pl {Incoming Message}    {Wiadomość nadchodzi}
 # Reference: {Insert emoticon}
 # Find in sources: jabber/Chat.tcl:1549 jabber/NewMsg.tcl:371
-::msgcat::mcset pl {Insert emoticon}     {Insert emoticon}
+::msgcat::mcset pl {Insert emoticon}     {Wstaw emotikonkę}
 # Reference: {Invite Contact}
 # Find in sources: jabber/MUC.tcl:137 jabber/MUC.tcl:165
 ::msgcat::mcset pl {Invite Contact}      {Zaproś kontakt}
@@ -1360,7 +1360,7 @@
 # Find in sources: whiteboard/FilePrefs.tcl:178 whiteboard/FilePrefs.tcl:483
 ::msgcat::mcset pl {Open with}           {Otwórz poprzez}
 # Reference: {Peer-to-Peer}
-::msgcat::mcset pl Peer-to-Peer          {Peer-to-Peer}
+::msgcat::mcset pl Peer-to-Peer          {Sam-na-sam (P2P)}
 # Reference: {Play sound}
 # Find in sources: components/BuddyPounce.tcl:244
 ::msgcat::mcset pl {Play sound}          {Odtwórz dźwięk}
@@ -1490,10 +1490,10 @@
 ::msgcat::mcset pl {Start chat}          {Rozpocznij rozmowę}
 # Reference: {Start minimized in system tray}
 # Find in sources: components/taskbar/Taskbar.tcl:436
-::msgcat::mcset pl {Start minimized in system tray} {Start minimized in system tray}
+::msgcat::mcset pl {Start minimized in system tray} {Uruchom zminimalizowany na "tacce"}
 # Reference: {Start minimized in taskbar}
 # Find in sources: components/taskbar/Taskbar.tcl:433
-::msgcat::mcset pl {Start minimized in taskbar} {Start minimized in taskbar}
+::msgcat::mcset pl {Start minimized in taskbar} {Uruchom zminimalizowany na pasku}
 # Reference: {Status message}
 # Find in sources: jabber/Status.tcl:409
 ::msgcat::mcset pl {Status message}      {Opis statusu}
@@ -1521,7 +1521,7 @@
 ::msgcat::mcset pl {Thread started}      {Wątek zapoczątkowany}
 # Reference: {Update Check}
 # Find in sources: components/AutoUpdate.tcl:175
-::msgcat::mcset pl {Update Check}        {Update Check}
+::msgcat::mcset pl {Update Check}        {Sprawdzenie możliwości aktualizacji}
 # Reference: {Use HTTP transport}
 # Find in sources: jabber/Profiles.tcl:1870
 ::msgcat::mcset pl {Use HTTP transport}  {Korzystaj z transportu HTTP}
@@ -1562,7 +1562,7 @@
 ::msgcat::mcset pl {View Business Card}  {Spójrz na wizytówkę}
 # Reference: {View business card}
 # Find in sources: jabber/Subscribe.tcl:324 jabber/Subscribe.tcl:358 jabber/Subscribe.tcl:1219 jabber/Subscribe.tcl:1480
-::msgcat::mcset pl {View business card}  {View business card}
+::msgcat::mcset pl {View business card}  {Spójrz na wizytówkę}
 
 # Reference: {Windows opacity}
 # Find in sources: jabber/JPrefs.tcl:232
@@ -2496,7 +2496,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jaseliconset2         {Wybierz zestaw ikonek dla każdej grupy. Grupa nie wybrana będzie korzystać z domyślnego zestawu.}
 # Reference: {%s contacts want to see your presence. Select those who may see your presence.}
 # Find in sources: jabber/Subscribe.tcl:952 jabber/Subscribe.tcl:1142
-::msgcat::mcset pl jasubmulti            {%s contacts want to see your presence. Select those who may see your presence.}
+::msgcat::mcset pl jasubmulti            {%s kontaktów chce śledzić Twój status - wskaż te, którym na to zezwalasz.}
 # Reference: {Entering a nickname and group is optional, and for your personal use only.}
 # Find in sources: jabber/Subscribe.tcl:256
 ::msgcat::mcset pl jasubopts2            {Nadanie pseudonimu i grupy jest całkowicie fakultatywne, i wyłącznie dla Twej osobistej wygody.}
@@ -2763,76 +2763,76 @@ namespace eval ::EditShortcuts:: {
 if {0} {
 # Reference: {Codecs}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:128
-::msgcat::mcset pl Codecs                {Codecs}
+::msgcat::mcset pl Codecs                {Kodeki}
 # Reference: {Devices}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:126
-::msgcat::mcset pl Devices               {Devices}
+::msgcat::mcset pl Devices               {Urządzenia}
 # Reference: {Filters}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:127
-::msgcat::mcset pl Filters               {Filters}
+::msgcat::mcset pl Filters               {Filtry}
 # Reference: {IAX Phone}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:101
-::msgcat::mcset pl {IAX Phone}           {IAX Phone}
+::msgcat::mcset pl {IAX Phone}           {Telefon IAX}
 # Reference: {IAX Account}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:137
-::msgcat::mcset pl {IAX Account}         {IAX Account}
+::msgcat::mcset pl {IAX Account}         {Konto IAX}
     # translation help: http://en.wikipedia.org/wiki/Caller_id
 # Reference: {Caller ID number}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:154
-::msgcat::mcset pl {Caller ID number}    {Caller ID number}
+::msgcat::mcset pl {Caller ID number}    {numer ident. dzwoniącego}
 # Reference: {Caller ID name}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:157
-::msgcat::mcset pl {Caller ID name}      {Caller ID name}
+::msgcat::mcset pl {Caller ID name}      {nazwa ident. dzwoniącego}
 # Reference: {Microphone}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:193
-::msgcat::mcset pl Microphone            {Microphone}
+::msgcat::mcset pl Microphone            {Mikrofon}
 # Reference: {Speakers}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:200
-::msgcat::mcset pl Speakers              {Speakers}
+::msgcat::mcset pl Speakers              {Głośniki}
     # translation help: http://en.wikipedia.org/wiki/Automatic_gain_control
 # Reference: {Automatic gain control (AGC)}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:223
-::msgcat::mcset pl {Automatic gain control (AGC)} {Automatic gain control (AGC)}
+::msgcat::mcset pl {Automatic gain control (AGC)} {Automat. kontrola poziomu odbioru (AGC)}
 # Reference: {Automatically adjust volume levels}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:240
-::msgcat::mcset pl agcTip                {Automatically adjust volume levels}
+::msgcat::mcset pl agcTip                {Automatycznie dopasuj głośność}
     # translation help: http://lists.xiph.org/pipermail/speex-dev/2007-May/005565.html
 # Reference: {Analog automatic gain control (AAGC)}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:225
-::msgcat::mcset pl {Analog automatic gain control (AAGC)} {Analog automatic gain control (AAGC)}
+::msgcat::mcset pl {Analog automatic gain control (AAGC)} {Analogowa automat. kontrola poziomu odbioru (AAGC)}
 # Reference: {Can prevent clipping}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:241
-::msgcat::mcset pl {Can prevent clipping} {Can prevent clipping}
+::msgcat::mcset pl {Can prevent clipping} {Zapobieganie przerywaniu}
     # translation help: http://en.wikipedia.org/wiki/Noise_reduction
 # Reference: {Noise reduction}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:227
-::msgcat::mcset pl {Noise reduction}     {Noise reduction}
+::msgcat::mcset pl {Noise reduction}     {Redukcja szumów}
     # translation help: http://en.wikipedia.org/wiki/Comfort_noise
 # Reference: {Comfort noise}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:229
-::msgcat::mcset pl {Comfort noise}       {Comfort noise}
+::msgcat::mcset pl {Comfort noise}       {Szum biały}
 # Reference: {Artificial background noise to fill silence}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:242
-::msgcat::mcset pl comfortTip            {Artificial background noise to fill silence}
+::msgcat::mcset pl comfortTip            {Sztucznie generowany szum, maskujący ciszę}
 # Reference: {Codec}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:256
-::msgcat::mcset pl Codec                 {Codec}
+::msgcat::mcset pl Codec                 {Kodek}
     # I copied the following descriptions from the websites of these projects; do you think we should ask permission for this?
 # Reference: {iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:272
-::msgcat::mcset pl tooltip-ilbc          {iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
+::msgcat::mcset pl tooltip-ilbc          {iLBC (internet Low Bitrate Codec) jest udostępnianym nieodpłatnie kodekiem, przeznaczonym dla rozmów przez Sieć}
 # Reference: {Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:273
-::msgcat::mcset pl tooltip-speex         {Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
+::msgcat::mcset pl tooltip-speex         {Speex is jest Open-Source-owym formatem kompresji audio przeznaczonym specjalnie dla rozmów}
 # Reference: {Standard used in European digital communication systems (ITU-T)}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:274
-::msgcat::mcset pl tooltip-alaw          {Standard used in European digital communication systems (ITU-T)}
+::msgcat::mcset pl tooltip-alaw          {Standard stosowany w europejskich systemach komunikacji cyfrowej (ITU-T)}
 # Reference: {Standard used in digital communication systems in North America and Japan (ITU-T)}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:275
-::msgcat::mcset pl tooltip-ulaw          {Standard used in digital communication systems in North America and Japan (ITU-T)}
+::msgcat::mcset pl tooltip-ulaw          {Standard stosowany w północnoamerykańskich i japońskich systemach komunikacji cyfrowej (ITU-T)}
 # Reference: {GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
 # Find in sources: components/Phone/IAX/IaxPrefs.tcl:276
-::msgcat::mcset pl tooltip-gsm           {GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
+::msgcat::mcset pl tooltip-gsm           {GSM 06.10 jest prowizorycznym standardem transkodowania mowy (ETSI)}
 }
 
 # Messages for Mood XEP
@@ -2977,11 +2977,10 @@ if {0} {
 
 # Reference: {Enter the subject of the conversation, set by pressing Return}
 # Find in sources: jabber/Chat.tcl:1514
-::msgcat::mcset pl tooltip-chatsubject   {Enter the subject of the conversation, set by pressing Return}
+::msgcat::mcset pl tooltip-chatsubject   {Wpisz temat rozmowy, ustanowisz go naciśnięciem klawisza Return}
 # Reference: {You need to be logged in to see the presence of this contact}
 # Find in sources: jabber/Chat.tcl:2385
-::msgcat::mcset pl tooltip-chatoffline   {You need to be logged in to see the presence of this contact}
-
+::msgcat::mcset pl tooltip-chatoffline   {Musisz być zalogowany/a, by móc obserwować status kontaktu}
 
 # Me knows :-)
 # Reference: {Not yet implemented.}
@@ -3064,7 +3063,7 @@ if {0} {
 ::msgcat::mcset pl Exercising            {Ćwiczenia}
 # Duplicate:
 # Reference: {Cycling}
-::msgcat::mcset pl en                    {Cycling}
+::msgcat::mcset pl en                    {Na rowerze}
 # Reference: {Hiking}
 ::msgcat::mcset pl Hiking                {Podróżuję stopem}
 # Reference: {Jogging}
