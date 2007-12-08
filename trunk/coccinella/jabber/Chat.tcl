@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.260 2007-12-07 14:18:04 matben Exp $
+# $Id: Chat.tcl,v 1.261 2007-12-08 12:11:58 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -480,6 +480,7 @@ proc ::Chat::StartThread {jid args} {
     } else {
 	set chatstate(fromjid) $jid2
     }
+    
     return $chattoken
 }
 
@@ -1425,6 +1426,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     set chatstate(fromjid)          $jid
     set chatstate(jid)              $mjid
     set chatstate(jid2)             $jid2
+    set chatstate(jid3)             $jid
     set chatstate(dlgtoken)         $dlgtoken
     set chatstate(threadid)         $threadID
     set chatstate(nameorjid)        [::Roster::GetNameOrJID $jid2]
@@ -1873,8 +1875,9 @@ proc ::Chat::DnDFileDrop {chattoken win data type} {
     # Strip off any file:// prefix.
     set f [string map {file:// ""} $f]
     set f [uriencode::decodefile $f]
-
-    ::FTrans::Send $chatstate(jid) -filename $f
+    
+    # Must use its full JID.
+    ::FTrans::Send $chatstate(jid3) -filename $f
 }
 
 proc ::Chat::DnDFileEnter {chattoken win action data type} {
@@ -2377,6 +2380,7 @@ proc ::Chat::SetState {chattoken state} {
     } else {
 	set jid3 $jid
     }
+    set chatstate(jid3) $jid3
     if {[$wtray exists whiteboard]} {
 	if {[::Roster::IsCoccinella $jid3] && ($state eq "normal")} {
 	    $wtray buttonconfigure whiteboard -state normal
@@ -3038,7 +3042,8 @@ proc ::Chat::SendFile {dlgtoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    ::FTrans::Send $chatstate(fromjid)
+    parray chatstate *jid*
+    ::FTrans::Send $chatstate(jid3)
 }
 
 proc ::Chat::Settings {dlgtoken} {
