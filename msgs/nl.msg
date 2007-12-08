@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.164 2007-12-08 18:25:40 sdevrieze Exp $
+#   $Id: nl.msg,v 1.165 2007-12-08 19:29:40 sdevrieze Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -671,7 +671,7 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 # Reference: {&About Coccinella}
-::msgcat::mcset nl mAboutCoccinella      {&Over Coccinella...}
+::msgcat::mcset nl mAboutCoccinella      {&Over Coccinella}
 # Reference: {&Action}
 # Find in sources: whiteboard/FilePrefs.tcl:477
 ::msgcat::mcset nl mAction               {&Actie}
@@ -1664,22 +1664,22 @@
 # Splash screen:
 # Reference: {Sourcing Tcl code}
 # Find in sources: Coccinella.tcl:169
-::msgcat::mcset nl splashsource          {Tcl-code laden...}
+::msgcat::mcset nl splashsource          {Tcl-code laden}
 # Reference: {Loading Tcl packages}
 # Find in sources: Coccinella.tcl:200
-::msgcat::mcset nl splashload            {Tcl-pakketten laden...}
+::msgcat::mcset nl splashload            {Tcl-pakketten laden}
 # Reference: {Sourcing Jabber code}
 # Find in sources: Coccinella.tcl:259
-::msgcat::mcset nl splashsourcejabb      {Jabber-code laden...}
+::msgcat::mcset nl splashsourcejabb      {Jabber-code laden}
 # Reference: {Searching for our hostname}
 # Find in sources: Coccinella.tcl:174
-::msgcat::mcset nl splashhost            {Hostnaam detecteren...}
+::msgcat::mcset nl splashhost            {Hostnaam detecteren}
 # Reference: {Initialize}
 # Find in sources: Coccinella.tcl:269
-::msgcat::mcset nl splashinit            {Initializeren...}
+::msgcat::mcset nl splashinit            {Initializeren}
 # Reference: {Set and read preferences}
 # Find in sources: Coccinella.tcl:283
-::msgcat::mcset nl splashprefs           {Voorkeuren lezen en instellen...}
+::msgcat::mcset nl splashprefs           {Voorkeuren lezen en instellen}
 # Reference: {Looking for}
 # Find in sources: lib/Init.tcl:731 lib/Init.tcl:752 lib/Init.tcl:763 lib/Init.tcl:784 lib/Media.tcl:167 whiteboard/Plugins.tcl:408
 ::msgcat::mcset nl splashlook            {Nazien van}
@@ -1946,7 +1946,7 @@
 ::msgcat::mcset nl jamessooberr404b      {Kan het bestand %s niet verzenden naar %s.}
 # Reference: {%s did not accepted the file %s.}
 # Find in sources: jabber/FTrans.tcl:494 jabber/FTrans.tcl:522
-::msgcat::mcset nl jamessooberr406b      {%s aanvaarde het bestand %s niet.}
+::msgcat::mcset nl jamessooberr406b      {%s aanvaardde het bestand %s niet.}
 # Reference: {Cannot open file %s}
 # Find in sources: lib/HttpTrpt.tcl:66
 ::msgcat::mcset nl jamessoobfailopen2    {Kan het bestand %s niet openen}
@@ -2641,7 +2641,7 @@ namespace eval ::EditShortcuts:: {
 # Find in sources: whiteboard/GetFileIface.tcl:459
 ::msgcat::mcset nl getnot200             {Antwoord ontvangen van de server %s.\n Foutcode %s\nBericht: %s}
 # Reference: {%s accepted file %s. Initiating file transfer...}
-::msgcat::mcset nl getstarts             {%s aanvaarde bestand %s. Het verzenden is gestart...}
+::msgcat::mcset nl getstarts             {%s aanvaardde bestand %s. Het verzenden is gestart...}
 # Reference: {Transfer from %s ended prematurely.}
 ::msgcat::mcset nl getended              {Verzenden van %s stopte te vroeg.}
 # Reference: {Finished downloading file %s from %s.}
@@ -2667,7 +2667,7 @@ namespace eval ::EditShortcuts:: {
 # Find in sources: whiteboard/PutFileIface.tcl:168
 ::msgcat::mcset nl putnot200             {De server op %s antwoorde met een code %s: %s}
 # Reference: {Client at %s accepted file %s. Starts transfer...}
-::msgcat::mcset nl putstarts             {%s aanvaarde bestand %s. Het verzenden is gestart...}
+::msgcat::mcset nl putstarts             {%s aanvaardde bestand %s. Het verzenden is gestart...}
 # Reference: {Transfer to %s ended prematurely.}
 ::msgcat::mcset nl putended              {Verzenden naar %s is te vroeg gestopt.}
 # Reference: {Finished putting file "%s" to %s.}
