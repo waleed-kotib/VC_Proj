@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.163 2007-12-07 17:57:04 sdevrieze Exp $
+#   $Id: nl.msg,v 1.164 2007-12-08 18:25:40 sdevrieze Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -967,7 +967,7 @@
 ::msgcat::mcset nl mSize                 {Grootte}
 # Reference: {Slide Show}
 # Find in sources: components/SlideShow.tcl:196
-::msgcat::mcset nl mSlideShow            {Dia&voorstelling}
+::msgcat::mcset nl mSlideShow            {Diavoorstelling}
 # Reference: {Smaller}
 ::msgcat::mcset nl mSmaller              {Smaller}
 # Reference: {Sort}
