@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.15 2007-12-07 15:22:28 matben Exp $
+# $Id: AutoAway.tcl,v 1.16 2007-12-09 15:25:35 matben Exp $
 
 package require idletime
 
@@ -349,18 +349,17 @@ proc ::AutoAway::BuildPage {page} {
     grid columnconfigure $waa 2 -weight 1
 
     if {$config(aa,on-hidden-tabs)} {
-	ttk::checkbutton $waa.htabs -text [mc "Apply auto-away on hidden chat tabs"] \
+	ttk::checkbutton $waa.htabs -text [mc prefaaonhidden] \
 	  -variable [namespace current]::tmpp(aa,on-hidden-tabs)
 	
 	grid  $waa.htabs  -  -  -  -sticky w
 	
-	::balloonhelp::balloonforwindow $waa.htabs \
-	  "If activated then directed auto-away presence will be sent to users on hidden chat tabs"
+	::balloonhelp::balloonforwindow $waa.htabs [mc tooltip-aaonhidden]
     }
     
     if {$config(aa,busy-chats)} {
 	set varName [namespace current]::tmpp(aa,busy-chats)
-	ttk::checkbutton $waa.cbusy -text [mc "Busy when (active chat sessions)"]: \
+	ttk::checkbutton $waa.cbusy -text [mc prefaabusychats]: \
 	  -variable $varName \
 	  -command [namespace code [list SetEntryState [list $waa.ebusy $waa.mbusy] $varName]]
 	ttk::entry $waa.ebusy -font CociSmallFont -width 3  \
@@ -377,8 +376,7 @@ proc ::AutoAway::BuildPage {page} {
 
 	SetEntryState [list $waa.ebusy $waa.mbusy] $varName
 
-	set bstr [mc "When you have <number> or more active chat sessions, presence state will be automatically changed to Busy."]
-	::balloonhelp::balloonforwindow $waa.cbusy $bstr
+	::balloonhelp::balloonforwindow $waa.cbusy [mc tooltip-aabusychats]
     }
     return $page
 }
