@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.165 2007-12-08 19:29:40 sdevrieze Exp $
+#   $Id: nl.msg,v 1.166 2007-12-09 16:24:51 sdevrieze Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -1286,8 +1286,6 @@
 # Reference: {MIME type}
 # Find in sources: whiteboard/FilePrefs.tcl:464
 ::msgcat::mcset nl {MIME type}           {Bestandstype}
-# Reference: {Multi Connect}
-::msgcat::mcset nl {Multi Connect}       {Multiconnecteren}
 # Reference: {My Status}
 # Find in sources: jabber/Status.tcl:396
 ::msgcat::mcset nl {My Status}           {Mijn aanwezigheid}
@@ -1359,8 +1357,6 @@
 # Reference: {Open with}
 # Find in sources: whiteboard/FilePrefs.tcl:178 whiteboard/FilePrefs.tcl:483
 ::msgcat::mcset nl {Open with}           {Openen met}
-# Reference: {Peer-to-Peer}
-::msgcat::mcset nl Peer-to-Peer          {P2P}
 # Reference: {Play sound}
 # Find in sources: components/BuddyPounce.tcl:244
 ::msgcat::mcset nl {Play sound}          {Geluid afspelen}
@@ -2246,6 +2242,7 @@
 
 
 # Preferences:
+::msgcat::mcset nl prefaabusychats       {Niet storen bij (actieve chatsessies)}
 # Reference: {By default use active <Return> to send messages}
 # Find in sources: jabber/Chat.tcl:3998
 ::msgcat::mcset nl prefchactret2         {Gebruik standaard actieve <Enter> om berichten te verzenden}
@@ -2981,7 +2978,7 @@ if {0} {
 # Reference: {You need to be logged in to see the presence of this contact}
 # Find in sources: jabber/Chat.tcl:2385
 ::msgcat::mcset nl tooltip-chatoffline   {U moet aangemeld zijn om de aanwezigheid van deze contactpersoon te zien}
-
+::msgcat::mcset nl tooltip-aabusychats   {Bij evenveel of meer actieve chatsessies dan het opgegeven aantal wordt de aanwezigheid automatisch verandert naar Niet storen.}
 
 # Me knows :-)
 # Reference: {Not yet implemented.}
