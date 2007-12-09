@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: pl.msg,v 1.71 2007-12-08 11:36:58 matben Exp $
+#   $Id: pl.msg,v 1.72 2007-12-09 11:14:52 matben Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -1227,7 +1227,7 @@
 ::msgcat::mcset pl {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 # Reference: {Forwarded message}
 # Find in sources: jabber/NewMsg.tcl:431
-::msgcat::mcset pl {Forwarded message}   {Forwarded message}
+::msgcat::mcset pl {Forwarded message}   {Wiadomość przekazana}
 # Reference: {History length}
 # Find in sources: jabber/Chat.tcl:4018
 ::msgcat::mcset pl {History length}      {Rozmiar dziennika}
@@ -1797,7 +1797,7 @@
 ::msgcat::mcset pl jamesschatclose2      {Czy chcesz zamknąć okno rozmowy, tracą całkowicie jej treść?}
 # Reference: {Do you want to invite this contact to a new chatroom?}
 # Find in sources: jabber/Chat.tcl:1833
-::msgcat::mcset pl jamesschatinvite      {Do you want to invite this contact to a new chatroom?}
+::msgcat::mcset pl jamesschatinvite      {Czy chcesz zaprosić tego rozmówcę do nowego pokoju?}
 # Reference: {This contact is not online anymore and the message is therfore not sent.}
 # Find in sources: jabber/JWB.tcl:804
 ::msgcat::mcset pl jamesschatoffline2    {Ten kontakt wylogował się z sieci, przeto wiadomość dla niego nie została przesłana.}
@@ -2015,13 +2015,13 @@
 ::msgcat::mcset pl jamessstatuscustdtl2  {Najczęściej używane kombinacje są łatwo dostępne jako pozycje menu.}
 # Reference: {Subscription request will be accepted in: %s secs.}
 # Find in sources: jabber/Subscribe.tcl:270 jabber/Subscribe.tcl:440 jabber/Subscribe.tcl:730 jabber/Subscribe.tcl:746 jabber/Subscribe.tcl:959 jabber/Subscribe.tcl:1067
-::msgcat::mcset pl jamesssubscautoacc    {Subscription request will be accepted in: %s secs.}
+::msgcat::mcset pl jamesssubscautoacc    {Prośba o autoryzację zostanie zaakceptowana w ciągu: %s sek.}
 # Reference: {Subscription request will be rejected in: %s secs.}
 # Find in sources: jabber/Subscribe.tcl:290 jabber/Subscribe.tcl:460 jabber/Subscribe.tcl:798 jabber/Subscribe.tcl:814 jabber/Subscribe.tcl:979 jabber/Subscribe.tcl:1084
-::msgcat::mcset pl jamesssubscautorej    {Subscription request will be rejected in: %s secs.}
+::msgcat::mcset pl jamesssubscautorej    {Prośba o autoryzację zostanie odrzucona w ciągu: %s sek.}
 # Reference: {%s additional contacts can see your presence.}
 # Find in sources: jabber/Subscribe.tcl:1407 jabber/Subscribe.tcl:1454
-::msgcat::mcset pl jamesssubscedfancy    {%s additional contacts can see your presence.}
+::msgcat::mcset pl jamesssubscedfancy    {%s kontaktów dodatkowo może śledzić Twój status.}
 # Reference: {Time since %s was last connected}
 # Find in sources: jabber/Jabber.tcl:1531
 ::msgcat::mcset pl jamesstimeconn2       {Czas od momentu ostatniego połączenia %s}
@@ -2177,7 +2177,7 @@
 
 # Reference: {On %s, %s %s wrote:}
 # Find in sources: jabber/NewMsg.tcl:938
-::msgcat::mcset pl reply-prefix          {On %s, %s %s wrote:}
+::msgcat::mcset pl reply-prefix          {W dniu %s, %s %s napisa�(a):}
 
 # Reference: {Shell print command, edit if desired}
 # Find in sources: lib/Dialogs.tcl:119
@@ -3395,7 +3395,7 @@ if {0} {
 # Reference: {Microsoft AVI Video}
 ::msgcat::mcset pl {Microsoft AVI Video} {Microsoft AVI Video}
 # Reference: {Autodesk's FLIC File}
-::msgcat::mcset pl {Autodesk's FLIC File} {Autodesk's FLIC File}
+::msgcat::mcset pl {Autodesk's FLIC File} {Plik FLIC (Autodesk)}
 
 # END --------------------------------------------------------------------------
 
