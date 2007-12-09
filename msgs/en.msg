@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.225 2007-12-07 15:22:28 matben Exp $
+#   $Id: en.msg,v 1.226 2007-12-09 09:55:50 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -532,7 +532,6 @@
 ::msgcat::mcset en {MIDI command}
 ::msgcat::mcset en {MIDI Player}
 ::msgcat::mcset en {MIME type}
-::msgcat::mcset en {Multi Connect}
 ::msgcat::mcset en {My Status}
 ::msgcat::mcset en {NAT Address}
 ::msgcat::mcset en {New Account}
@@ -560,7 +559,6 @@
 ::msgcat::mcset en {Open Image/Movie}
 ::msgcat::mcset en {Open Stream}
 ::msgcat::mcset en {Open with}
-::msgcat::mcset en {Peer-to-Peer}
 ::msgcat::mcset en {Play sound}
 ::msgcat::mcset en {Postal code}
 ::msgcat::mcset en {Presence Error}
