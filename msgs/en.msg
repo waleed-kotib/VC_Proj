@@ -21,7 +21,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.226 2007-12-09 09:55:50 matben Exp $
+#   $Id: en.msg,v 1.227 2007-12-09 14:59:54 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -779,7 +779,7 @@
 ::msgcat::mcset en jamessnotconnected2   {Cannot send when not logged in.}
 ::msgcat::mcset en jamessokreg2          {Registration with service %s was successful.}
 ::msgcat::mcset en jamessokunreg2        {You are unregistered from %s.}
-::msgcat::mcset en jamessoobask2         {%s wants to send you this file: %sDo you want to receive this file?}
+::msgcat::mcset en jamessoobask2         {%s wants to send you this file: %s Do you want to receive this file?}
 ::msgcat::mcset en jamessoobbad2         {Received invalid URL from %s. URL: %s}
 ::msgcat::mcset en jamessooberr404b      {Cannot send the file %s to %s.}
 ::msgcat::mcset en jamessooberr406b      {%s did not accepted the file %s.}
