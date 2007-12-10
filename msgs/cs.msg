@@ -9,6 +9,7 @@
 #       The English catalog is the master of all other catalogs
 #       
 #       Contibutors:
+#         cs  David Stancl	david.stancl@seznam.cz
 #         da  Mogens Pedersen  Mogens.Pedersen@skolekom.dk
 #         de  Hermann J. Beckers (hj dot beckers at onlinehome dot de)
 #         es  Néstor Díaz (n3storm at grupoikusnet.com) 2004
@@ -22,13 +23,12 @@
 #         pl  Zbigniew Baniewski (zb at ispid.com.pl)
 #         ru  Alexander Balezin (xmmp:gescheit@jabber.ttn.ru) gescheit@list.ru
 #         sv  Mats Bengtsson
-#         cs  David Stancl	david.stancl@seznam.cz
 #
 # General type of text, such as "OK", "Cancel", and the like. 
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: cs.msg,v 1.1 2007-12-10 13:51:39 matben Exp $
+#   $Id: cs.msg,v 1.2 2007-12-10 13:56:03 matben Exp $
 
 # Reference: {Abort}
 # Translate, find in sources: contrib/ui/dialog.tcl:248
