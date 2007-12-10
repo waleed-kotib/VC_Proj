@@ -3,6 +3,7 @@
 #       The English catalog is the master of all other catalogs
 #       
 #       Contibutors:
+#         cs  David Stancl	david.stancl@seznam.cz
 #         da  Mogens Pedersen  Mogens.Pedersen@skolekom.dk
 #         de  Hermann J. Beckers (hj dot beckers at onlinehome dot de)
 #         es  Néstor Díaz (n3storm at grupoikusnet.com) 2004
@@ -21,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.228 2007-12-09 15:25:35 matben Exp $
+#   $Id: en.msg,v 1.229 2007-12-10 13:56:03 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -932,7 +933,6 @@
 ::msgcat::mcset en prefdrivesame2        {Store preferences on same drive as program}
 ::msgcat::mcset en prefdriwdef2          {You have chosen to store your preferences in the default location. If you remove or move your personal settings at %s, the preferences in the default location will be used the next time you start %s. Do you want to remove the old preferences?}
 ::msgcat::mcset en prefdriwsame          {You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible. Do you want to continue?}
-::msgcat::mcset en preffilecache2        {The cache is an internal memory where recent files from contacts are stored to increase speed.}
 ::msgcat::mcset en preffilecache2        {Amount of cache to store recent whiteboard files to increase speed.}
 ::msgcat::mcset en preffontmsg           {Warning: by importing any other fonts than the standard three ones (Times, Helvetica or Courier), you must be confident that all remote clients also have this font installed on their system.}
 ::msgcat::mcset en preficonsel2          {The selected iconset will become the default.}
