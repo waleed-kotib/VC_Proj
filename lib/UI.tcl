@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.178 2007-12-05 13:14:44 matben Exp $
+# $Id: UI.tcl,v 1.179 2007-12-10 15:19:00 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -1245,7 +1245,7 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
 	bind  ${wmenu}la <Button-1> [list ::UI::DoTopMenuPopup %W $wmenu]
     }
     
-    set mod $this(modkey)
+    set mod [string map {Control Ctrl} $this(modkey)]
     set i 0
     foreach line $menuDef {
 	foreach {type name cmd accel mopts subdef} $line {
