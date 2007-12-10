@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.83 2007-11-21 13:08:44 matben Exp $
+# $Id: Init.tcl,v 1.84 2007-12-10 13:46:41 matben Exp $
 
 namespace eval ::Init {
     
@@ -381,7 +381,7 @@ proc ::Init::GetAppDirPrefsPath {} {
 	set psplit [file split $this(appPath)]
 	set path [eval file join [lrange $psplit 0 end-1] $this(prefsDriverDir)]
     }
-    return path
+    return $path
 }
 
 # Init::SetPrefsPaths --
