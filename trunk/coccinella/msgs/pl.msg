@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: pl.msg,v 1.72 2007-12-09 11:14:52 matben Exp $
+#   $Id: pl.msg,v 1.73 2007-12-10 13:20:12 matben Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -1743,7 +1743,7 @@
 ::msgcat::mcset pl messpasswddifferent2  {Hasła się nie zgadzają - spróbuj ponownie.}
 # Reference: {The preferences have been changed. Do you want to cancel anyway?}
 # Find in sources: lib/Preferences.tcl:500
-::msgcat::mcset pl messprefschanged      {Dokonano zmian w preferencjach. Czy na pewno ich NIE zapisywać?}
+::msgcat::mcset pl messprefschanged      {Dokonano zmian w preferencjach. Czy na pewno rezygnujesz z zapisu zmian?}
 # Reference: {At least one setting requires a restart of %s.}
 # Find in sources: lib/Preferences.tcl:457
 ::msgcat::mcset pl messprefsrestart2     {Przynajmniej jedno z ustawień wymaga restartu %s.}
@@ -2309,6 +2309,9 @@
 # Reference: {Logout after}
 # Find in sources: jabber/AutoAway.tcl:326
 ::msgcat::mcset pl prefminlogout         {Wylogować po upływie}
+
+::msgcat::mcset pl prefaabusychats       {Przy ilu rozmowach autom. status "nie przeszkadzać" (0 = nigdy)}
+
 # Reference: {Use the following external address}
 # Find in sources: lib/Proxy.tcl:267
 ::msgcat::mcset pl prefnatip2            {Użyj następującego adresu zewnętrznego}
