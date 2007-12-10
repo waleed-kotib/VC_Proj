@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Splash.tcl,v 1.15 2007-10-04 14:01:07 matben Exp $
+# $Id: Splash.tcl,v 1.16 2007-12-10 14:04:17 matben Exp $
    
 package provide Splash 1.0
 
@@ -28,7 +28,7 @@ namespace eval ::Splash:: {
 	
     # Use option database for customization.
     option add *Splash.image               splash           widgetDefault
-    option add *Splash.showMinor           1                widgetDefault
+    option add *Splash.showMinor           0                widgetDefault
     option add *Splash.showCopyright       0                widgetDefault
     option add *Splash.copyrightX          ""               widgetDefault
     option add *Splash.copyrightY          ""               widgetDefault
