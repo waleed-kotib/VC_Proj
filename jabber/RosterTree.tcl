@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.92 2007-10-18 08:02:33 matben Exp $
+# $Id: RosterTree.tcl,v 1.93 2007-12-11 08:53:39 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -454,7 +454,7 @@ proc ::RosterTree::InitDnD {win} {
 	::RosterTree::DnDLeave %W %D %T
     }
 
-    # Sources:
+    # Sources, export both xmpp:JID as text and as a file:
     dnd bindsource $win {text/plain;charset=UTF-8} { 
 	::RosterTree::DnDTextSource %W
     }
@@ -494,13 +494,14 @@ proc ::RosterTree::DnDFileSource {win} {
     set fileL [list]
     foreach jid $jidL {
 	set fileName [file join $this(tmpPath) [uriencode::quote $jid]]$dndSrc(suffix,$os)
-	lappend fileL $fileName
 	set fd [open $fileName w]
 	puts $fd [format $dndSrc(content,$os) "xmpp:$jid?message"]
  	close $fd
+	# @@@ Do I need a "file://" prefix?
+	#lappend fileL $fileName
+	lappend fileL "file://$fileName"
     }
 
-    # @@@ Do I need a "file://" prefix?
     return $fileL
 }
 

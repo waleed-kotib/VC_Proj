@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: WSearch.tcl,v 1.7 2007-09-14 08:11:47 matben Exp $
+# $Id: WSearch.tcl,v 1.8 2007-12-11 08:53:39 matben Exp $
 
 package require snit 1.0
 package require tileutils 0.1
@@ -176,6 +176,10 @@ snit::widgetadaptor UI::WSearch::widget {
 	    $wtext tag add tfound $idxfocus "$idxfocus + $len chars"
 	    $wtext see $idxfocus
 	}
+    }
+    
+    method entry {} {
+	return $wentry
     }
     
     method Close {} {

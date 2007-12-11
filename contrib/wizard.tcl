@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: wizard.tcl,v 1.12 2007-09-13 08:25:37 matben Exp $
+# $Id: wizard.tcl,v 1.13 2007-12-11 08:53:39 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -202,7 +202,7 @@ proc ::wizard::wizard {w args} {
     
     # Build.
     ttk::label $widgets(head) -style Headlabel \
-      -text [mc {Setup Assistant}] -image $options(-image) -compound left
+      -text [mc "Setup Assistant"] -image $options(-image) -compound left
     ttk::separator $w.div1
     pack $widgets(head) -side top -fill x
     pack $w.div1 -side top -fill x

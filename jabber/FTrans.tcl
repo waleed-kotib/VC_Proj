@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.29 2007-11-30 15:30:13 matben Exp $
+# $Id: FTrans.tcl,v 1.30 2007-12-11 08:53:39 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -310,6 +310,7 @@ snit::widget ::FTrans::SendDialog {
 
     method DnDEnter {w action data dndtype} {
 	focus $w
+	# ???
 	set act "none"
 	return $act
     }
