@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.68 2007-12-07 07:19:30 matben Exp $
+# $Id: Subscribe.tcl,v 1.69 2007-12-11 13:29:30 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -1576,27 +1576,7 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     grid $wsubs.min $wsubs.mnot -sticky ew
     grid columnconfigure $wsubs 0 -minsize 24
     grid columnconfigure $wsubs 2 -weight 1 -minsize $minsize
-    
-    
-    if {0} {
-	# BU:
-	ttk::separator $wsubs.s -orient vertical
-	
-	grid  $wsubs.la1  -         -            -sticky w
-	grid  $wsubs.lin  -         $wsubs.lnot  -sticky w
-	grid  x           $wsubs.s  x            -sticky ns -padx 16
-	
-	foreach key {ask accept reject} {
-	    set str $strA($key)
-	    foreach val2 {inrost notinrost} {
-		ttk::radiobutton $wsubs.$val2$key \
-		  -text [mc $str] -value $key  \
-		  -variable [namespace current]::tmpp(subsc,$val2)	      
-	    }
-	    grid  $wsubs.inrost$key  ^  $wsubs.notinrost$key  -sticky w
-	}
-    }
-    
+        
     # Auto dialogs:
     set wtimer $wc.timer
     ttk::frame $wtimer -padding {0 0 0 12}
