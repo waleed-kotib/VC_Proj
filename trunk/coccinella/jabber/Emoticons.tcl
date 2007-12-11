@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.62 2007-10-31 15:46:47 matben Exp $
+# $Id: Emoticons.tcl,v 1.63 2007-12-11 08:53:39 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -888,7 +888,7 @@ proc ::Emoticons::DnDEnter {win action data dndtype} {
     set f [lindex $data 0]
     if {[file extension $f] eq ".jisp"} {
 	focus $win
-	set act "none"
+	set act "default"
     } else {
 	set act "none"
     }

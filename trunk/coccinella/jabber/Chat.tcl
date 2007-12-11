@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.261 2007-12-08 12:11:58 matben Exp $
+# $Id: Chat.tcl,v 1.262 2007-12-11 08:53:39 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1577,7 +1577,8 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
 	set wcont $wtext
     } elseif {$config(ui,aqua-text)} {
 	frame $wtxt
-	set wcont [::UI::Text $wtext -height 12 -width 1 -state disabled -cursor {} -wrap word  \
+	set wcont [::UI::Text $wtext -height 12 -width 1 -state disabled \
+	  -cursor {} -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wysc \
 	  [list grid $wysc -column 1 -row 0 -sticky ns]]]
     } else {
@@ -1640,6 +1641,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     ::hooks::run textSpellableNewHook $wtextsnd
     
     focus $wtextsnd
+    bind $wsubject <Tab> [list ui::TabTo $wtextsnd]
    
     # This is to handle chat state events.
     bind $wtextsnd <KeyPress>  \
@@ -1797,6 +1799,10 @@ proc ::Chat::Find {dlgtoken} {
     if {![winfo exists $wfind]} {
 	UI::WSearch $wfind $chatstate(wtext) -padding {6 2}
 	grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky ew
+	
+	# New tab order.
+	bind $chatstate(wsubject) <Tab> [list ui::TabTo [$wfind entry]]
+	bind $wfind <Destroy> +[list ::Chat::FindOnDestroy $chattoken]
     }
 }
 
@@ -1813,6 +1819,14 @@ proc ::Chat::FindAgain {dlgtoken {dir 1}} {
     if {[winfo exists $wfind]} {
 	$wfind [expr {$dir == 1 ? "Next" : "Previous"}]
     }
+}
+
+proc ::Chat::FindOnDestroy {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+
+    # Restore tab order.
+    bind $chatstate(wsubject) <Tab> [list ui::TabTo $chatstate(wtextsnd)]
 }
 
 # Chat::DnDXmppDrop --

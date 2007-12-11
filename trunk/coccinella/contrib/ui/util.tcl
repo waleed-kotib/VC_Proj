@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.19 2007-09-07 06:51:54 matben Exp $
+# $Id: util.tcl,v 1.20 2007-12-11 08:53:39 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -381,6 +381,11 @@ proc ui::Grab {win} {
     grabWindow $win
     tkwait window $win
     releaseGrab $win
+}
+
+proc ui::TabTo {win} {
+    keynav::traverseTo $win
+    return -code break
 }
 
 # ui::EntryInsert --
