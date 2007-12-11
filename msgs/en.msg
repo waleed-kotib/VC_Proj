@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.230 2007-12-10 14:47:06 matben Exp $
+#   $Id: en.msg,v 1.231 2007-12-11 13:30:53 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -918,7 +918,7 @@
 
 
 # Preferences:
-::msgcat::mcset en prefaaonhidden        {Apply auto-away on hidden chat tabs}
+#::msgcat::mcset en prefaaonhidden        {Apply auto-away on hidden chat tabs}
 ::msgcat::mcset en prefaabusychats       {Do Not Disturb when (active chat sessions)}
 ::msgcat::mcset en prefchactret2         {By default use active <Return> to send messages}
 ::msgcat::mcset en prefchnormal          {Treat normal messages as chat messages}
@@ -1215,7 +1215,7 @@ if {0} {
 
 ::msgcat::mcset en tooltip-chatsubject      {Enter the subject of the conversation, set by pressing Return}
 ::msgcat::mcset en tooltip-chatoffline      {You need to be logged in to see the presence of this contact}
-::msgcat::mcset en tooltip-aaonhidden       {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
+#::msgcat::mcset en tooltip-aaonhidden       {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
 ::msgcat::mcset en tooltip-aabusychats      {When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb.}
 
 
