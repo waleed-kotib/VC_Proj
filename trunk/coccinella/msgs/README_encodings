@@ -39,6 +39,8 @@ Instructions (for unix systems):
     encoding because that is what is used throughout. There are some scripts
     below that can transform a text file back and forth, but safest is to
     use an editor. Alternatively, use the 'iconv' command on unix/linux.
+    On linux there is an editor named Kate which seems good. Be sure it uses
+    utf-8, menu: Tools/Encoding/Unicode (utf8).
 
 5.  Now it is up to you to load up with coffein to suit your mood, and start
     authoring. The syntax for each entry in a message catalog is:
