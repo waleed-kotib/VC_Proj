@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.262 2007-12-11 08:53:39 matben Exp $
+# $Id: Chat.tcl,v 1.263 2007-12-12 14:16:18 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -211,6 +211,9 @@ namespace eval ::Chat {
     set ::config(chat,notify-send) 1
     set ::config(chat,notify-recv) 1
     set ::config(chat,notify-show) 1
+    
+    # Default focus widget when haven't any cached focus for this pane.
+    set ::config(chat,default-focus) "wsubject"
 
     # For easier debug.
     if {0} {
@@ -1640,7 +1643,6 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     
     ::hooks::run textSpellableNewHook $wtextsnd
     
-    focus $wtextsnd
     bind $wsubject <Tab> [list ui::TabTo $wtextsnd]
    
     # This is to handle chat state events.
@@ -1683,7 +1685,10 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     set chatstate(wfind)    $wfind
     
     bind $wthread <Destroy> +[list ::Chat::OnDestroyThread $chattoken]
-    
+
+    set wkey $config(chat,default-focus)
+    focus $chatstate($wkey)
+
     ::UI::SetSashPos $wDlgs(jchat) $wpane
 
     ::Avatar::GetAsyncIfExists $jid2
@@ -2423,7 +2428,7 @@ proc ::Chat::SetState {chattoken state} {
 #       This does not work reliable on MacOSX.
 
 proc ::Chat::SetFocus {dlgtoken chattoken} {
-    global  this
+    global  this config
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
@@ -2443,7 +2448,8 @@ proc ::Chat::SetFocus {dlgtoken chattoken} {
     if {[info exists chatstate(focus)]} {
 	set wfocus $chatstate(focus)
     } else {
-	set wfocus $chatstate(wtextsnd)
+	set wkey $config(chat,default-focus)
+	set wfocus $chatstate($wkey)
     }
     
     # This seems to be needed on macs.
