@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.mac,v 1.173 2007-12-12 08:09:08 matben Exp $
+#   $Id: sv.mac,v 1.174 2007-12-12 13:18:04 matben Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -2364,6 +2364,9 @@ där användarnamnet är okänt).}
 # Reference: {Use tabbed interface}
 # Find in sources: jabber/JPrefs.tcl:190
 ::msgcat::mcset sv prefstabui2           {Använd flikar}
+
+::msgcat::mcset en prefsuaasecs          {Fönstret stängs efter (sekunder)}
+::msgcat::mcset en prefsuaatimer         {Om automatiskt acceptera/neka så visa fönster med nedräkning}
 # Reference: {Put contacts who add me to their list in}
 # Find in sources: jabber/Subscribe.tcl:1630
 ::msgcat::mcset sv prefsuauto2           {Flytta nya användare i kontaktlistan till en grupp}
