@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.99 2007-11-15 08:56:14 matben Exp $
+# $Id: Profiles.tcl,v 1.100 2007-12-12 10:33:24 matben Exp $
 
 package require ui::megaentry
 
@@ -563,6 +563,8 @@ proc ::Profiles::Get {name key} {
 
 proc ::Profiles::Exists {name} {
     global  config
+    variable profiles
+    variable cprofiles
     
     if {$config(profiles,do)} {
 	set prof $cprofiles
