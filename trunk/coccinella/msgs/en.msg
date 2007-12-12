@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.231 2007-12-11 13:30:53 matben Exp $
+#   $Id: en.msg,v 1.232 2007-12-12 08:54:27 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -960,10 +960,13 @@
 ::msgcat::mcset en prefsounvoou2         {Select voice for outgoing write}
 ::msgcat::mcset en prefssresize2         {Resize window to fit slides}
 ::msgcat::mcset en prefstabui2           {Use tabbed interface}
+::msgcat::mcset en prefsuaasecs          {The dialog is closed after (Seconds)}
+::msgcat::mcset en prefsuaatimer         {If auto-accept/reject show dialog with timer}
 ::msgcat::mcset en prefsuauto2           {Put contacts who add me to their list in}
 ::msgcat::mcset en prefsuif2             {If someone wants to see my presence and}
 ::msgcat::mcset en prefsuis2             {is in my list}
 ::msgcat::mcset en prefsuisnot2          {is not in my list}
+
 
 
 # obsolete strings in the paragraph?

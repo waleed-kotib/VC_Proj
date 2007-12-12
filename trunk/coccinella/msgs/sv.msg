@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Wed Dec 12 08:55:07 CET 2007
+# Generated: Wed Dec 12 09:52:22 CET 2007
 
 # English language version of the Coccinella message catalog.
 #
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.137 2007-12-12 08:09:08 matben Exp $
+#   $Id: sv.msg,v 1.138 2007-12-12 08:54:27 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -968,10 +968,13 @@ där användarnamnet är okänt).}
 ::msgcat::mcset sv prefsounvoou2         {Välj röst för utgående text}
 ::msgcat::mcset sv prefssresize2         {Anpassa fönsterstorleken till bildvisningen}
 ::msgcat::mcset sv prefstabui2           {Använd flikar}
+::msgcat::mcset sv prefsuaasecs          {Fönstret stängs efter (sekunder)}
+::msgcat::mcset sv prefsuaatimer         {Om automatiskt acceptera/neka så visa fönster med nedräkning}
 ::msgcat::mcset sv prefsuauto2           {Flytta nya användare i kontaktlistan till en grupp}
 ::msgcat::mcset sv prefsuif2             {Om någon vill se min närvaro och...}
 ::msgcat::mcset sv prefsuis2             {är i min lista}
 ::msgcat::mcset sv prefsuisnot2          {inte är i min lista}
+
 
 
 # obsolete strings in the paragraph?
