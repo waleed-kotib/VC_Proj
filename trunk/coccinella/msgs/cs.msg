@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Wed Dec 12 14:13:31 CET 2007
+# Generated: Thu Dec 13 09:37:09 CET 2007
 
 # English language version of the Coccinella message catalog.
 #
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: cs.msg,v 1.4 2007-12-12 13:18:03 matben Exp $
+#   $Id: cs.msg,v 1.5 2007-12-13 08:41:52 matben Exp $
 
 ::msgcat::mcset cs Abort                 {Storno}
 ::msgcat::mcset cs Action                {Akce}
@@ -659,6 +659,7 @@
 ::msgcat::mcset cs {One hour}            {Hodina}
 
 # Language names.
+::msgcat::mcset cs Czeck                 {Czeck}
 ::msgcat::mcset cs Danish                {Dánština}
 ::msgcat::mcset cs Dutch                 {Holandština}
 ::msgcat::mcset cs English               {Angličtina}
@@ -673,6 +674,7 @@
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
+::msgcat::mcset cs nativeCzeck           {Czeck}
 ::msgcat::mcset cs nativeDanish          {Dansk}
 ::msgcat::mcset cs nativeDutch           {Nederlands}
 ::msgcat::mcset cs nativeEnglish         {English}
@@ -966,9 +968,7 @@
 ::msgcat::mcset cs prefsounvoou2         {Vyber hlas pro odchozí text}
 ::msgcat::mcset cs prefssresize2         {Změnit velikost okna, aby se prezentace vešly}
 ::msgcat::mcset cs prefstabui2           {Používat záložky}
-# Translate
 ::msgcat::mcset cs prefsuaasecs          {The dialog is closed after (Seconds)}
-# Translate
 ::msgcat::mcset cs prefsuaatimer         {If auto-accept/reject show dialog with timer}
 ::msgcat::mcset cs prefsuauto2           {Vložit kontakty, které si mě chtějí přidat do seznamu}
 ::msgcat::mcset cs prefsuif2             {Jesliže někdo chce vidět můj stav a}
@@ -1135,55 +1135,33 @@ namespace eval ::EditShortcuts:: {
 # IAX Phone
 # Note to translators: these strings are not yet activated
 if {0} {
-# Translate
 ::msgcat::mcset cs Codecs                {Codecs}
-# Translate
 ::msgcat::mcset cs Devices               {Devices}
-# Translate
 ::msgcat::mcset cs Filters               {Filters}
-# Translate
 ::msgcat::mcset cs {IAX Phone}           {IAX Phone}
-# Translate
 ::msgcat::mcset cs {IAX Account}         {IAX Account}
     # translation help: http://en.wikipedia.org/wiki/Caller_id
-# Translate
 ::msgcat::mcset cs {Caller ID number}    {Caller ID number}
-# Translate
 ::msgcat::mcset cs {Caller ID name}      {Caller ID name}
-# Translate
 ::msgcat::mcset cs Microphone            {Microphone}
-# Translate
 ::msgcat::mcset cs Speakers              {Speakers}
     # translation help: http://en.wikipedia.org/wiki/Automatic_gain_control
-# Translate
 ::msgcat::mcset cs {Automatic gain control (AGC)} {Automatic gain control (AGC)}
-# Translate
 ::msgcat::mcset cs agcTip                {Automatically adjust volume levels}
     # translation help: http://lists.xiph.org/pipermail/speex-dev/2007-May/005565.html
-# Translate
 ::msgcat::mcset cs {Analog automatic gain control (AAGC)} {Analog automatic gain control (AAGC)}
-# Translate
 ::msgcat::mcset cs {Can prevent clipping} {Can prevent clipping}
     # translation help: http://en.wikipedia.org/wiki/Noise_reduction
-# Translate
 ::msgcat::mcset cs {Noise reduction}     {Noise reduction}
     # translation help: http://en.wikipedia.org/wiki/Comfort_noise
-# Translate
 ::msgcat::mcset cs {Comfort noise}       {Comfort noise}
-# Translate
 ::msgcat::mcset cs comfortTip            {Artificial background noise to fill silence}
-# Translate
 ::msgcat::mcset cs Codec                 {Codec}
     # I copied the following descriptions from the websites of these projects; do you think we should ask permission for this?
-# Translate
 ::msgcat::mcset cs tooltip-ilbc          {iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
-# Translate
 ::msgcat::mcset cs tooltip-speex         {Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
-# Translate
 ::msgcat::mcset cs tooltip-alaw          {Standard used in European digital communication systems (ITU-T)}
-# Translate
 ::msgcat::mcset cs tooltip-ulaw          {Standard used in digital communication systems in North America and Japan (ITU-T)}
-# Translate
 ::msgcat::mcset cs tooltip-gsm           {GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
 }
 

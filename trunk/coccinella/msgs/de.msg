@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Wed Dec 12 14:10:47 CET 2007
+# Generated: Thu Dec 13 09:37:29 CET 2007
 
 # English language version of the Coccinella message catalog.
 #
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: de.msg,v 1.102 2007-12-12 13:18:03 matben Exp $
+#   $Id: de.msg,v 1.103 2007-12-13 08:41:53 matben Exp $
 
 ::msgcat::mcset de Abort                 {Abbruch}
 ::msgcat::mcset de Action                {Aktion}
@@ -659,6 +659,7 @@
 ::msgcat::mcset de {One hour}            {1 Stunde}
 
 # Language names.
+::msgcat::mcset de Czeck                 {Czeck}
 ::msgcat::mcset de Danish                {Dänisch}
 ::msgcat::mcset de Dutch                 {Niederländisch}
 ::msgcat::mcset de English               {Englisch}
@@ -673,6 +674,7 @@
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
+::msgcat::mcset de nativeCzeck           {Czeck}
 ::msgcat::mcset de nativeDanish          {Dansk}
 ::msgcat::mcset de nativeDutch           {Nederlands}
 ::msgcat::mcset de nativeEnglish         {English}
@@ -924,9 +926,7 @@
 
 
 # Preferences:
-# Translate
 ::msgcat::mcset de prefaaonhidden        {Apply auto-away on hidden chat tabs}
-# Translate
 ::msgcat::mcset de prefaabusychats       {Do Not Disturb when (active chat sessions)}
 ::msgcat::mcset de prefchactret2         {By default use active <Return> to send messages}
 ::msgcat::mcset de prefchnormal          {Normale Nachrichten als Chat-Nachrichten behandeln}
@@ -968,9 +968,7 @@
 ::msgcat::mcset de prefsounvoou2         {Select voice for outgoing write}
 ::msgcat::mcset de prefssresize2         {Resize window to fit slides}
 ::msgcat::mcset de prefstabui2           {Tabulator-Oberfläche benutzen}
-# Translate
 ::msgcat::mcset de prefsuaasecs          {The dialog is closed after (Seconds)}
-# Translate
 ::msgcat::mcset de prefsuaatimer         {If auto-accept/reject show dialog with timer}
 ::msgcat::mcset de prefsuauto2           {Setze Kontakte, die mich in ihre Liste aufnehmen, in}
 ::msgcat::mcset de prefsuif2             {Wenn jemand meine Präsenz sehen möchte und}
@@ -1137,55 +1135,33 @@ namespace eval ::EditShortcuts:: {
 # IAX Phone
 # Note to translators: these strings are not yet activated
 if {0} {
-# Translate
 ::msgcat::mcset de Codecs                {Codecs}
-# Translate
 ::msgcat::mcset de Devices               {Devices}
-# Translate
 ::msgcat::mcset de Filters               {Filters}
-# Translate
 ::msgcat::mcset de {IAX Phone}           {IAX Phone}
-# Translate
 ::msgcat::mcset de {IAX Account}         {IAX Account}
     # translation help: http://en.wikipedia.org/wiki/Caller_id
-# Translate
 ::msgcat::mcset de {Caller ID number}    {Caller ID number}
-# Translate
 ::msgcat::mcset de {Caller ID name}      {Caller ID name}
-# Translate
 ::msgcat::mcset de Microphone            {Microphone}
-# Translate
 ::msgcat::mcset de Speakers              {Speakers}
     # translation help: http://en.wikipedia.org/wiki/Automatic_gain_control
-# Translate
 ::msgcat::mcset de {Automatic gain control (AGC)} {Automatic gain control (AGC)}
-# Translate
 ::msgcat::mcset de agcTip                {Automatically adjust volume levels}
     # translation help: http://lists.xiph.org/pipermail/speex-dev/2007-May/005565.html
-# Translate
 ::msgcat::mcset de {Analog automatic gain control (AAGC)} {Analog automatic gain control (AAGC)}
-# Translate
 ::msgcat::mcset de {Can prevent clipping} {Can prevent clipping}
     # translation help: http://en.wikipedia.org/wiki/Noise_reduction
-# Translate
 ::msgcat::mcset de {Noise reduction}     {Noise reduction}
     # translation help: http://en.wikipedia.org/wiki/Comfort_noise
-# Translate
 ::msgcat::mcset de {Comfort noise}       {Comfort noise}
-# Translate
 ::msgcat::mcset de comfortTip            {Artificial background noise to fill silence}
-# Translate
 ::msgcat::mcset de Codec                 {Codec}
     # I copied the following descriptions from the websites of these projects; do you think we should ask permission for this?
-# Translate
 ::msgcat::mcset de tooltip-ilbc          {iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
-# Translate
 ::msgcat::mcset de tooltip-speex         {Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
-# Translate
 ::msgcat::mcset de tooltip-alaw          {Standard used in European digital communication systems (ITU-T)}
-# Translate
 ::msgcat::mcset de tooltip-ulaw          {Standard used in digital communication systems in North America and Japan (ITU-T)}
-# Translate
 ::msgcat::mcset de tooltip-gsm           {GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
 }
 
@@ -1250,9 +1226,7 @@ if {0} {
 
 ::msgcat::mcset de tooltip-chatsubject   {Enter the subject of the conversation, set by pressing Return}
 ::msgcat::mcset de tooltip-chatoffline   {You need to be logged in to see the presence of this contact}
-# Translate
 ::msgcat::mcset de tooltip-aaonhidden    {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
-# Translate
 ::msgcat::mcset de tooltip-aabusychats   {When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb.}
 
 

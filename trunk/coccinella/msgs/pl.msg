@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Wed Dec 12 14:13:13 CET 2007
+# Generated: Thu Dec 13 09:37:43 CET 2007
 
 # English language version of the Coccinella message catalog.
 #
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: pl.msg,v 1.74 2007-12-12 13:18:03 matben Exp $
+#   $Id: pl.msg,v 1.75 2007-12-13 08:41:53 matben Exp $
 
 ::msgcat::mcset pl Abort                 {Przerwij}
 ::msgcat::mcset pl Action                {akcja}
@@ -659,6 +659,7 @@
 ::msgcat::mcset pl {One hour}            {Godzina}
 
 # Language names.
+::msgcat::mcset pl Czeck                 {Czeck}
 ::msgcat::mcset pl Danish                {Duński}
 ::msgcat::mcset pl Dutch                 {Niderlandzki}
 ::msgcat::mcset pl English               {Angielski}
@@ -673,6 +674,7 @@
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
+::msgcat::mcset pl nativeCzeck           {Czeck}
 ::msgcat::mcset pl nativeDanish          {Dansk}
 ::msgcat::mcset pl nativeDutch           {Nederlands}
 ::msgcat::mcset pl nativeEnglish         {English}
@@ -924,7 +926,6 @@
 
 
 # Preferences:
-# Translate
 ::msgcat::mcset pl prefaaonhidden        {Apply auto-away on hidden chat tabs}
 ::msgcat::mcset pl prefaabusychats       {Przy ilu rozmowach autom. status "nie przeszkadzać" (0 = nigdy)}
 ::msgcat::mcset pl prefchactret2         {Domyślnie naciśnięcie <Return> powoduje wysłanie wiadomości}
@@ -967,9 +968,7 @@
 ::msgcat::mcset pl prefsounvoou2         {Wybierz głos dla tekstu wysyłanego}
 ::msgcat::mcset pl prefssresize2         {Przewymiaruj okno adekwatnie do wymiarów "slajdów"}
 ::msgcat::mcset pl prefstabui2           {Używaj interfejsu z zakładkami}
-# Translate
 ::msgcat::mcset pl prefsuaasecs          {The dialog is closed after (Seconds)}
-# Translate
 ::msgcat::mcset pl prefsuaatimer         {If auto-accept/reject show dialog with timer}
 ::msgcat::mcset pl prefsuauto2           {Podaj kontakty, które dodały mnie do swoich list}
 ::msgcat::mcset pl prefsuif2             {Jeśli ktokolwiek chce mojej autoryzacji, tudzież}
@@ -1136,55 +1135,33 @@ namespace eval ::EditShortcuts:: {
 # IAX Phone
 # Note to translators: these strings are not yet activated
 if {0} {
-# Translate
 ::msgcat::mcset pl Codecs                {Codecs}
-# Translate
 ::msgcat::mcset pl Devices               {Devices}
-# Translate
 ::msgcat::mcset pl Filters               {Filters}
-# Translate
 ::msgcat::mcset pl {IAX Phone}           {IAX Phone}
-# Translate
 ::msgcat::mcset pl {IAX Account}         {IAX Account}
     # translation help: http://en.wikipedia.org/wiki/Caller_id
-# Translate
 ::msgcat::mcset pl {Caller ID number}    {Caller ID number}
-# Translate
 ::msgcat::mcset pl {Caller ID name}      {Caller ID name}
-# Translate
 ::msgcat::mcset pl Microphone            {Microphone}
-# Translate
 ::msgcat::mcset pl Speakers              {Speakers}
     # translation help: http://en.wikipedia.org/wiki/Automatic_gain_control
-# Translate
 ::msgcat::mcset pl {Automatic gain control (AGC)} {Automatic gain control (AGC)}
-# Translate
 ::msgcat::mcset pl agcTip                {Automatically adjust volume levels}
     # translation help: http://lists.xiph.org/pipermail/speex-dev/2007-May/005565.html
-# Translate
 ::msgcat::mcset pl {Analog automatic gain control (AAGC)} {Analog automatic gain control (AAGC)}
-# Translate
 ::msgcat::mcset pl {Can prevent clipping} {Can prevent clipping}
     # translation help: http://en.wikipedia.org/wiki/Noise_reduction
-# Translate
 ::msgcat::mcset pl {Noise reduction}     {Noise reduction}
     # translation help: http://en.wikipedia.org/wiki/Comfort_noise
-# Translate
 ::msgcat::mcset pl {Comfort noise}       {Comfort noise}
-# Translate
 ::msgcat::mcset pl comfortTip            {Artificial background noise to fill silence}
-# Translate
 ::msgcat::mcset pl Codec                 {Codec}
     # I copied the following descriptions from the websites of these projects; do you think we should ask permission for this?
-# Translate
 ::msgcat::mcset pl tooltip-ilbc          {iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
-# Translate
 ::msgcat::mcset pl tooltip-speex         {Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
-# Translate
 ::msgcat::mcset pl tooltip-alaw          {Standard used in European digital communication systems (ITU-T)}
-# Translate
 ::msgcat::mcset pl tooltip-ulaw          {Standard used in digital communication systems in North America and Japan (ITU-T)}
-# Translate
 ::msgcat::mcset pl tooltip-gsm           {GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
 }
 
@@ -1249,9 +1226,7 @@ if {0} {
 
 ::msgcat::mcset pl tooltip-chatsubject   {Wpisz temat rozmowy, ustanowisz go naciśnięciem klawisza Return}
 ::msgcat::mcset pl tooltip-chatoffline   {Musisz być zalogowany/a, by móc obserwować status kontaktu}
-# Translate
 ::msgcat::mcset pl tooltip-aaonhidden    {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
-# Translate
 ::msgcat::mcset pl tooltip-aabusychats   {When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb.}
 
 
