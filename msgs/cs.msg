@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Thu Dec 13 09:37:09 CET 2007
+# Generated: Thu Dec 13 11:23:38 CET 2007
 
 # English language version of the Coccinella message catalog.
 #
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: cs.msg,v 1.5 2007-12-13 08:41:52 matben Exp $
+#   $Id: cs.msg,v 1.6 2007-12-13 10:25:01 matben Exp $
 
 ::msgcat::mcset cs Abort                 {Storno}
 ::msgcat::mcset cs Action                {Akce}
@@ -320,7 +320,7 @@
 ::msgcat::mcset cs mCut                  {Vys&tříhnout}
 ::msgcat::mcset cs mDash                 {Čára}
 ::msgcat::mcset cs mDebug                {&Ladění}
-::msgcat::mcset cs mDecreasing           {M&enší}
+::msgcat::mcset cs mDecreasing           {S&estupně}
 ::msgcat::mcset cs mDictionaries         {Slovníky}
 ::msgcat::mcset cs mDiscoverServer...    {Prozkoumat &služby...}
 ::msgcat::mcset cs mDoNotDisturb         {Nerušit}
@@ -357,7 +357,7 @@
 ::msgcat::mcset cs mImport               {Import}
 ::msgcat::mcset cs mImportImage/Movie... {&Importovat obrázek/film...}
 ::msgcat::mcset cs mInbox...             {Sch&ránka...}
-::msgcat::mcset cs mIncreasing           {Vě&tší}
+::msgcat::mcset cs mIncreasing           {Vzes&tupně}
 ::msgcat::mcset cs mInfo                 {&Info}
 ::msgcat::mcset cs mInvisible            {Neviditelný}
 ::msgcat::mcset cs mItalic               {Kurzíva}
@@ -580,7 +580,7 @@
 ::msgcat::mcset cs {Remove Avatar}       {Smazat avatara}
 ::msgcat::mcset cs {Remove Contact}      {Smazat kontakt}
 ::msgcat::mcset cs {Remove Item}         {Smazat položku}
-::msgcat::mcset cs {Requires a restart of} {Vyžaduje restart %s}
+::msgcat::mcset cs {Requires a restart of} {%s vyžaduje restart}
 ::msgcat::mcset cs {Retype password}     {Heslo znovu}
 ::msgcat::mcset cs {Save As}             {Uložit jako}
 ::msgcat::mcset cs {Save As GIF}         {Uložit jako GIF}
@@ -589,7 +589,7 @@
 ::msgcat::mcset cs {Save Message}        {Uložit zprávu}
 ::msgcat::mcset cs {Save password}       {Uložit heslo}
 ::msgcat::mcset cs {Save to disk}        {Uložit na disk}
-::msgcat::mcset cs {Scramble password}   {Scramble heslo}
+::msgcat::mcset cs {Scramble password}   {Náhodné heslo}
 ::msgcat::mcset cs {Search results}      {Výsledky hledání}
 ::msgcat::mcset cs {Select Avatar}       {Vyběr avatara}
 ::msgcat::mcset cs {Select File}         {Výběr souboru}
@@ -659,7 +659,7 @@
 ::msgcat::mcset cs {One hour}            {Hodina}
 
 # Language names.
-::msgcat::mcset cs Czeck                 {Czeck}
+::msgcat::mcset cs Czeck                 {Čeština}
 ::msgcat::mcset cs Danish                {Dánština}
 ::msgcat::mcset cs Dutch                 {Holandština}
 ::msgcat::mcset cs English               {Angličtina}
@@ -674,7 +674,7 @@
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
-::msgcat::mcset cs nativeCzeck           {Czeck}
+::msgcat::mcset cs nativeCzeck           {Čeština}
 ::msgcat::mcset cs nativeDanish          {Dansk}
 ::msgcat::mcset cs nativeDutch           {Nederlands}
 ::msgcat::mcset cs nativeEnglish         {English}
@@ -968,8 +968,8 @@
 ::msgcat::mcset cs prefsounvoou2         {Vyber hlas pro odchozí text}
 ::msgcat::mcset cs prefssresize2         {Změnit velikost okna, aby se prezentace vešly}
 ::msgcat::mcset cs prefstabui2           {Používat záložky}
-::msgcat::mcset cs prefsuaasecs          {The dialog is closed after (Seconds)}
-::msgcat::mcset cs prefsuaatimer         {If auto-accept/reject show dialog with timer}
+::msgcat::mcset cs prefsuaasecs          {Okno se zavře za (vteřiny)}
+::msgcat::mcset cs prefsuaatimer         {Jestliže je nastaveno automatické přijetí/odmítnutí, zobrazit na chvíli okno}
 ::msgcat::mcset cs prefsuauto2           {Vložit kontakty, které si mě chtějí přidat do seznamu}
 ::msgcat::mcset cs prefsuif2             {Jesliže někdo chce vidět můj stav a}
 ::msgcat::mcset cs prefsuis2             {je v mém seznamu}
