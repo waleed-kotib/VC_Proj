@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.75 2007-11-20 13:40:57 matben Exp $
+# $Id: Utils.tcl,v 1.76 2007-12-13 13:24:35 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -510,6 +510,7 @@ proc ::Utils::LanguageMenubutton {w varName args} {
     
     # Add entries here for new message catalogs.
     array set code2Name {
+	cs {Czech}
 	da {Danish} 
 	nl {Dutch} 
 	en {English} 
