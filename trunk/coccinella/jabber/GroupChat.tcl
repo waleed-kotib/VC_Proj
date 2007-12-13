@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.224 2007-12-07 14:50:45 matben Exp $
+# $Id: GroupChat.tcl,v 1.225 2007-12-13 14:33:22 matben Exp $
 
 package require Create
 package require Enter
@@ -1717,8 +1717,11 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
 	TreeInitDB
     }
     
+    # BUG: Having -showrootlines 0 still indents the complete tree;
+    #      Must switch off completely -showlines 0
     treectrl $T -selectmode extended  \
       -showroot 0 -showrootbutton 0 -showbuttons 0 -showheader 0  \
+      -showrootlines 0 -showlines 0 \
       -yscrollcommand [list ::UI::ScrollSet $wysc     \
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \
       -borderwidth 0 -highlightthickness 0            \
