@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Wed Dec 12 09:52:22 CET 2007
+# Generated: Thu Dec 13 09:36:55 CET 2007
 
 # English language version of the Coccinella message catalog.
 #
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.138 2007-12-12 08:54:27 matben Exp $
+#   $Id: sv.msg,v 1.139 2007-12-13 08:41:53 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -659,6 +659,7 @@
 ::msgcat::mcset sv {One hour}            {En timma}
 
 # Language names.
+::msgcat::mcset sv Czeck                 {Czeck}
 ::msgcat::mcset sv Danish                {Danska}
 ::msgcat::mcset sv Dutch                 {Holländska}
 ::msgcat::mcset sv English               {Engelska}
@@ -673,6 +674,7 @@
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
+::msgcat::mcset sv nativeCzeck           {Czeck}
 ::msgcat::mcset sv nativeDanish          {Dansk}
 ::msgcat::mcset sv nativeDutch           {Nederlands}
 ::msgcat::mcset sv nativeEnglish         {English}
