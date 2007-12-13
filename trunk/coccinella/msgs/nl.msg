@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.168 2007-12-13 13:59:22 sdevrieze Exp $
+#   $Id: nl.msg,v 1.169 2007-12-13 21:00:08 sdevrieze Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -2538,7 +2538,7 @@ namespace eval ::EditShortcuts:: {
 # Setup assistant:
 # Reference: {This setup assistant will help you to configure the most important settings to get started with %s.}
 # Find in sources: jabber/SetupAss.tcl:100
-::msgcat::mcset nl suintro1a             {Deze installatieassistant zal u helpen bij de belangrijkste instellingen om van start te kunnen gaan met %s.}
+::msgcat::mcset nl suintro1a             {Deze installatieassistant zal u helpen bij de belangrijkste instellingen om te kunnen starten met %s.}
 # Reference: {Any time you can press Previous to go back. Press Next to proceed.}
 # Find in sources: jabber/SetupAss.tcl:102
 ::msgcat::mcset nl suintro3a             {U kunt altijd op Vorige drukken om terug te keren. Druk Volgende om door te gaan.}
