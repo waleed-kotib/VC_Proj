@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.234 2007-12-13 13:23:48 matben Exp $
+#   $Id: en.msg,v 1.235 2007-12-13 21:01:36 sdevrieze Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -668,7 +668,7 @@
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
-::msgcat::mcset en nativeCzech      Czech
+::msgcat::mcset en nativeCzech      Čeština
 ::msgcat::mcset en nativeDanish     Dansk
 ::msgcat::mcset en nativeDutch      Nederlands
 ::msgcat::mcset en nativeEnglish    English
