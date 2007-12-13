@@ -27,7 +27,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.166 2007-12-09 16:24:51 sdevrieze Exp $
+#   $Id: nl.msg,v 1.167 2007-12-13 11:47:42 sdevrieze Exp $
 
 # Reference: {Abort}
 # Find in sources: contrib/ui/dialog.tcl:248
@@ -1608,6 +1608,8 @@
 ::msgcat::mcset nl {One hour}            {Eén uur}
 
 # Language names.
+# Reference: {Czeck}
+::msgcat::mcset nl Czeck                 {Tsjechisch}
 # Reference: {Danish}
 ::msgcat::mcset nl Danish                {Deens}
 # Reference: {Dutch}
@@ -1633,6 +1635,8 @@
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
+# Reference: {Czeck}
+::msgcat::mcset nl nativeCzeck           {Čeština}
 # Reference: {Dansk}
 ::msgcat::mcset nl nativeDanish          {Dansk}
 # Reference: {Nederlands}
