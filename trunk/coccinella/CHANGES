@@ -5,7 +5,7 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.96.4 (200712??)
+Coccinella-0.96.4 (20071214)
 
  o enabled stream image file transfer in whiteboard SVG mode
  o colored nicknames with user selected color schemes
@@ -18,7 +18,7 @@ Coccinella-0.96.4 (200712??)
  o major rework of subscription dialogs
  o improved component/plugin control
  o si-pub support, used by whiteboard svg mode
- o improved responsiveness during file transfers
+ o improved responsiveness during file transfer
 
 Coccinella-0.96.2 (20070919)
 
