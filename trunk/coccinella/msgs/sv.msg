@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.140 2007-12-13 13:23:48 matben Exp $
+#   $Id: sv.msg,v 1.141 2007-12-14 07:21:48 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -674,7 +674,7 @@
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
-::msgcat::mcset sv nativeCzech           {Czech}
+::msgcat::mcset sv nativeCzech           {Čeština}
 ::msgcat::mcset sv nativeDanish          {Dansk}
 ::msgcat::mcset sv nativeDutch           {Nederlands}
 ::msgcat::mcset sv nativeEnglish         {English}
