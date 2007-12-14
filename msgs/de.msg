@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: de.msg,v 1.104 2007-12-13 13:23:47 matben Exp $
+#   $Id: de.msg,v 1.105 2007-12-14 07:21:47 matben Exp $
 
 ::msgcat::mcset de Abort                 {Abbruch}
 ::msgcat::mcset de Action                {Aktion}
@@ -674,7 +674,7 @@
 
 # Same languge names but with their native names.
 # See the other catalogs to get these.
-::msgcat::mcset de nativeCzech           {Czech}
+::msgcat::mcset de nativeCzech           {Čeština}
 ::msgcat::mcset de nativeDanish          {Dansk}
 ::msgcat::mcset de nativeDutch           {Nederlands}
 ::msgcat::mcset de nativeEnglish         {English}
