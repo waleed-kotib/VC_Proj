@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.140 2007-11-30 08:42:05 matben Exp $
+# $Id: Disco.tcl,v 1.141 2007-12-19 13:33:34 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -92,7 +92,9 @@ namespace eval ::Disco:: {
     variable wtab   -
     variable wtree  -
     variable wdisco -
-    
+   
+    variable treeRefCount 0
+
     set ::config(disco,show-head-on-result)  1
     set ::config(disco,add-server-show-head) 1
     set ::config(disco,add-server-autolist)  1
@@ -1204,11 +1206,19 @@ proc ::Disco::TreeItem {vstruct} {
     variable wtree    
     variable wdisco
     variable treeuid
+    variable treeRefCount
     upvar ::Jabber::jstate  jstate
     upvar ::Jabber::jprefs  jprefs
 
     ::Debug 4 "::Disco::TreeItem vstruct='$vstruct'"
-
+    
+    # This is for debug purposes:
+    # https://bugs.launchpad.net/coccinella/+bug/141344
+    incr treeRefCount
+    if {$treeRefCount > 20} {
+	puts "+++ max refCount had been reached, likely a circular reference in disco tree: vstruct=$vstruct"
+    }
+    
     # We disco servers jid 'items+info', and disco its childrens 'info'.    
     
     set jid   [lindex $vstruct end 0]
@@ -1302,6 +1312,7 @@ proc ::Disco::TreeItem {vstruct} {
 	    ::ITree::Sort $wtree $vstruct -increasing -dictionary
 	}
     }
+    incr treeRefCount -1
 }
 
 proc ::Disco::MakeBalloonHelp {vstruct} {
