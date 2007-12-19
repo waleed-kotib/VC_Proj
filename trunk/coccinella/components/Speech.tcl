@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Speech.tcl,v 1.17 2007-11-17 07:40:52 matben Exp $
+# $Id: Speech.tcl,v 1.18 2007-12-19 07:52:55 matben Exp $
 
 namespace eval ::Speech {
     variable sprefs
@@ -103,6 +103,10 @@ proc ::Speech::Verify {} {
       ($sprefs(voiceOther-$plat) eq "")} {
 	set sprefs(voiceOther-$plat) [lindex $voices 1]
     }
+    
+    # Always keep shortcut names.
+    set sprefs(voiceUs)    $sprefs(voiceUs-$plat)
+    set sprefs(voiceOther) $sprefs(voiceOther-$plat)
 }
 
 proc ::Speech::SpeakMessage2 {xmldata} {
@@ -198,17 +202,9 @@ proc ::Speech::SpeakWBText {who str} {
     variable sprefs
         
     set punct {[.,;?!]}
-    set voice ""    
-
-    switch -- $who {
-	me {
-	    set voice $sprefs(voiceUs)
-	}
-	other {
-	    set voice $sprefs(voiceOther)
-	}
-    }
     if {$sprefs(speakWBText) && [string match *${punct}* $str] && ($str ne "")} {
+	set key [string map {me Us other Other} $who]
+	set voice $sprefs(voice$key)
 	Speak $str $voice
     }
 }
@@ -297,6 +293,7 @@ proc ::Speech::SavePrefsHook {} {
 	foreach {key value} [array get tmpPrefs] {
 	    set sprefs($key) $tmpPrefs($key)
 	}
+	Verify
     }
 }
 
