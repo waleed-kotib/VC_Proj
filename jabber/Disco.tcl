@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.143 2007-12-20 14:01:25 matben Exp $
+# $Id: Disco.tcl,v 1.144 2007-12-20 14:20:49 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1946,22 +1946,6 @@ proc ::Disco::AccessIsCategoryType {jid {node ""}} {
     }
 }
 
-proc ::Disco::AccessJIDsForFeature {feature} {
-    variable cacheInfo
-    
-    if {[info exists cacheInfo($feature,featurelist)]} {
-	set cacheInfo($feature,featurelist) [lsort -unique $cacheInfo($feature,featurelist)]
-	return $cacheInfo($feature,featurelist)
-    } else {
-	return [::Jabber::Jlib disco getjidsforfeature $jid $node]
-    }    
-}
-
-proc ::Disco::AccessJIDsForCategory {feature} {
-    variable cacheInfo
-
-}
-
 #--- Support functions for caching disco info results --------------------------
 
 namespace eval ::Disco {
@@ -2054,13 +2038,6 @@ proc ::Disco::CacheGet {jidNode} {
 proc ::Disco::CacheSet {jidNode queryE} {
     variable cacheQueryA    
     set cacheQueryA($jidNode) $queryE
-}
-
-if {0} {
-    set fileName [file join $this(prefsPath) discoInfoCache]
-    ::Disco::CacheWrite $fileName
-    
-    ::Disco::CacheInit $fileName
 }
 
 #-------------------------------------------------------------------------------
