@@ -1,0 +1,5 @@
+
+README-libraries
+
+The Coccinella is built using Tcl/Tk which is a multiplatform scripting 
+language which only needs a runtime environment.
