@@ -5,6 +5,10 @@
 
 Not to mention all bugfixes and rewrites.
 
+Coccinella-0.96.4.1 (200712??)
+
+ o disco info results are cached
+
 Coccinella-0.96.4 (20071214)
 
  o enabled stream image file transfer in whiteboard SVG mode

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.41 2007-11-17 07:40:52 matben Exp $
+# $Id: Sounds.tcl,v 1.42 2007-12-20 14:01:25 matben Exp $
 
 namespace eval ::Sounds {
 	
@@ -374,10 +374,10 @@ proc ::Sounds::Presence {jid presence args} {
     set from [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $from]
     
-    set wasAvail [::Jabber::JlibCmd roster wasavailable $jid]
+    set wasAvail [::Jabber::Jlib roster wasavailable $jid]
     
     # Alert sounds.
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
+    if {[::Jabber::Jlib service isroom $jid2]} {
 	PlayWhenIdle groupchatpres
     } elseif {[string equal $presence "unavailable"]} {
 	PlayWhenIdle offline
@@ -389,7 +389,7 @@ proc ::Sounds::Presence {jid presence args} {
 	    set show $argsA(-show)
 	}
 	set oldShow ""
-	array set oldPresA [::Jabber::JlibCmd roster getoldpresence $from]
+	array set oldPresA [::Jabber::Jlib roster getoldpresence $from]
 	if {[info exists oldPresA(-show)]} {
 	    set oldShow $oldPresA(-show)
 	}

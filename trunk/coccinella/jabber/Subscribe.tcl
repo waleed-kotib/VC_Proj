@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.70 2007-12-12 08:54:27 matben Exp $
+# $Id: Subscribe.tcl,v 1.71 2007-12-20 14:01:26 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -581,8 +581,8 @@ proc ::Subscribe::CloseCmd {w w} {
     upvar 0 $w state
         
     # Deny presence to this user.
-    ::Jabber::JlibCmd send_presence -to $state(jid) -type "unsubscribed"
-    ::Jabber::JlibCmd roster send_remove $state(jid)
+    ::Jabber::Jlib send_presence -to $state(jid) -type "unsubscribed"
+    ::Jabber::Jlib roster send_remove $state(jid)
 
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
     unset -nocomplain state
@@ -636,7 +636,7 @@ proc ::SubscribeAuto::HandleAccept {jid} {
     } elseif {$config(subscribe,auto-accept-plain)} {
 	::SubscribeAuto::AcceptAfter $jid
     } else {
-	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
+	::Jabber::Jlib send_presence -to $jid -type "subscribed"
 
 	# Auto subscribe to subscribers to me.
 	::SubscribeAuto::SendSubscribe $jid
@@ -667,8 +667,8 @@ proc ::SubscribeAuto::HandleReject {jid} {
     } elseif {$config(subscribe,auto-reject-plain)} {
 	::SubscribeAuto::RejectAfter $jid
     } else {
-	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
-	::Jabber::JlibCmd roster send_remove $jid
+	::Jabber::Jlib send_presence -to $jid -type "unsubscribed"
+	::Jabber::Jlib roster send_remove $jid
 	set msg [mc jamessautoreject2 $jid]
 	::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	
@@ -755,15 +755,15 @@ proc ::SubscribeAuto::AcceptCmd {jid w button} {
     upvar ::Jabber::jprefs jprefs
     
     if {$button eq "accept" || $button eq ""} {
-	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
+	::Jabber::Jlib send_presence -to $jid -type "subscribed"
 	SendSubscribe $jid
 
 	if {$config(subscribe,auto-accept-send-msg)} {
 	    SendAcceptMsg $jid
 	}
     } else {
-	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
-	::Jabber::JlibCmd roster send_remove $jid
+	::Jabber::Jlib send_presence -to $jid -type "unsubscribed"
+	::Jabber::Jlib roster send_remove $jid
     }
 }
 
@@ -822,13 +822,13 @@ proc ::SubscribeAuto::RejectCmd {jid w button} {
     global  config
     
     if {$button eq "reject" || $button eq ""} {
-	::Jabber::JlibCmd send_presence -to $jid -type "unsubscribed"
-	::Jabber::JlibCmd roster send_remove $jid
+	::Jabber::Jlib send_presence -to $jid -type "unsubscribed"
+	::Jabber::Jlib roster send_remove $jid
 	if {$config(subscribe,auto-reject-send-msg)} {
 	    SendRejectMsg $jid
 	}
     } else {
-	::Jabber::JlibCmd send_presence -to $jid -type "subscribed"
+	::Jabber::Jlib send_presence -to $jid -type "subscribed"
     }
 }
 
@@ -836,7 +836,7 @@ proc ::SubscribeAuto::SendRejectMsg {jid} {
     
     set autoRejectMsg "Your request has been automatically refused by the peers IM client software. It wasn't an action taken by your party"
     
-    ::Jabber::JlibCmd send_message $jid -subject "Auto rejection" \
+    ::Jabber::Jlib send_message $jid -subject "Auto rejection" \
       -message $autoRejectMsg
 }
 
@@ -844,7 +844,7 @@ proc ::SubscribeAuto::SendAcceptMsg {jid} {
     
     set autoAcceptMsg "Your request has been automatically accepted by the peers IM client software. It wasn't an action taken by your party"
     
-    ::Jabber::JlibCmd send_message $jid -subject "Auto acception" \
+    ::Jabber::Jlib send_message $jid -subject "Auto acception" \
       -message $autoAcceptMsg
 }
 
@@ -1196,7 +1196,7 @@ proc ::SubscribeMulti::More {w row} {
 	set imvcard [::Theme::GetImage [option get $w vcardImage {}]]
 
 	# Find all our groups for any jid.
-	set allGroups [::Jabber::JlibCmd roster getgroups]
+	set allGroups [::Jabber::Jlib roster getgroups]
 	set values [concat [list [mc None]] $allGroups]
 		
 	ttk::label $wcont.lnick -text "[mc {Nickname}]:" -anchor e

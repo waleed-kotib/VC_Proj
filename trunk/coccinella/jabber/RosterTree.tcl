@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.93 2007-12-11 08:53:39 matben Exp $
+# $Id: RosterTree.tcl,v 1.94 2007-12-20 14:01:26 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -518,7 +518,7 @@ proc ::RosterTree::DnDDrop {win data dndtype x y} {
 	    set tag [GetTagOfItem $item]
 	    if {[lindex $tag 0] eq "jid"} {
 		set jid [lindex $tag 1]
-		if {[::Jabber::JlibCmd roster isavailable $jid]} {
+		if {[::Jabber::Jlib roster isavailable $jid]} {
 		    ::FTrans::Send $jid -filename $f
 		}
 	    }
@@ -539,7 +539,7 @@ proc ::RosterTree::DnDDrag {win action actions data dndtype x y} {
 	    set tag [GetTagOfItem $item]
 	    if {[lindex $tag 0] eq "jid"} {
 		set jid [lindex $tag 1]
-		if {[::Jabber::JlibCmd roster isavailable $jid]} {
+		if {[::Jabber::Jlib roster isavailable $jid]} {
 		    $T selection add $item
 		    set act "copy"
 		}

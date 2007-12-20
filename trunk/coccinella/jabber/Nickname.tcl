@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Nickname.tcl,v 1.6 2007-08-20 13:41:44 matben Exp $
+# $Id: Nickname.tcl,v 1.7 2007-12-20 14:01:26 matben Exp $
 
 # @@@ There is one thing I don't yet understand. While I always publish any 
 # nickname when I log on, online users will receive the event, but what about
@@ -71,9 +71,9 @@ proc ::Nickname::LoginHook {} {
     variable xmlns
    
     # Disco server for pubsub/pep support.
-    set server [::Jabber::JlibCmd getserver]
-    ::Jabber::JlibCmd pep have $server [namespace code HavePEP]
-    ::Jabber::JlibCmd pubsub register_event [namespace code Event] \
+    set server [::Jabber::Jlib getserver]
+    ::Jabber::Jlib pep have $server [namespace code HavePEP]
+    ::Jabber::Jlib pubsub register_event [namespace code Event] \
       -node $xmlns(nick)
 }
 
@@ -107,7 +107,7 @@ proc ::Nickname::Publish {nickname} {
     #set itemE [wrapper::createtag item -subtags [list [Element $nickname]]]
     set itemE [wrapper::createtag item \
       -attrlist [list id current] -subtags [list [Element $nickname]]]
-    ::Jabber::JlibCmd pep publish $xmlns(nick) $itemE
+    ::Jabber::Jlib pep publish $xmlns(nick) $itemE
     
     ::hooks::run setNicknameHook $nickname
 }
@@ -115,7 +115,7 @@ proc ::Nickname::Publish {nickname} {
 proc ::Nickname::Retract {} {
     variable xmlns
     
-    ::Jabber::JlibCmd pep retract $xmlns(nick) -notify 1
+    ::Jabber::Jlib pep retract $xmlns(nick) -notify 1
     ::hooks::run setNicknameHook ""
 }
 

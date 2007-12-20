@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.31 2007-11-17 07:40:52 matben Exp $
+# $Id: JivePhone.tcl,v 1.32 2007-12-20 14:01:25 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -120,7 +120,7 @@ proc ::JivePhone::InitState { } {
 proc ::JivePhone::LoginHook { } {
     
     set server [::Jabber::GetServerJid]
-    ::Jabber::JlibCmd disco get_async items $server ::JivePhone::OnDiscoServer   
+    ::Jabber::Jlib disco get_async items $server ::JivePhone::OnDiscoServer   
 }
 
 proc ::JivePhone::OnDiscoServer {jlibname type from subiq args} {
@@ -130,9 +130,9 @@ proc ::JivePhone::OnDiscoServer {jlibname type from subiq args} {
         
     # See comments above what my opinion is...
     if {$type eq "result"} {
-	set childs [::Jabber::JlibCmd disco children $from]
+	set childs [::Jabber::Jlib disco children $from]
 	foreach service $childs {
-	    set name [::Jabber::JlibCmd disco name $service]
+	    set name [::Jabber::Jlib disco name $service]
 	    
 	    Debug "\t service=$service, name=$name"
 
@@ -171,12 +171,12 @@ proc ::JivePhone::DiscoForUsers {} {
     set users [::Jabber::RosterCmd getusers]
     
     # We add ourselves to this list to figure out if we've got a jive phone.
-    lappend users [::Jabber::JlibCmd getthis myjid2]
+    lappend users [::Jabber::Jlib getthis myjid2]
     
     foreach jid $users {
 	jlib::splitjidex $jid node domain -	
 	if {[::Jabber::GetServerJid] eq $domain} {
-	    ::Jabber::JlibCmd disco get_async info $state(service)  \
+	    ::Jabber::Jlib disco get_async info $state(service)  \
 	      ::JivePhone::OnDiscoUserNode -node $node
 	}
     }
@@ -191,7 +191,7 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
     
     if {$type eq "result"} {
 	set node [wrapper::getattribute $subiq "node"]
-	set havePhone [::Jabber::JlibCmd disco hasfeature $feature(jivephone)  \
+	set havePhone [::Jabber::Jlib disco hasfeature $feature(jivephone)  \
 	  $from $node]
 
 	Debug "\t from=$from, node=$node, havePhone=$havePhone"
@@ -202,7 +202,7 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
 	    # @@@ But if we've already got phone presence?
 
 	    # Really stupid! It assumes user exist on login server.
-	    set server [::Jabber::JlibCmd getserver]
+	    set server [::Jabber::Jlib getserver]
 	    set jid [jlib::joinjid $node $server ""]
 	    #puts "\t jid=$jid"
 	    
@@ -210,7 +210,7 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
 	    #set state(phone,$jid)
 
 	    # Since we added ourselves to the list take action if have phone.
-	    set myjid2 [::Jabber::JlibCmd getthis myjid2]
+	    set myjid2 [::Jabber::Jlib getthis myjid2]
 	    if {[jlib::jidequal $jid $myjid2]} {
 		WeHavePhone
 	    } else {
@@ -544,7 +544,7 @@ proc ::JivePhone::OnDial {w type {jid ""}} {
     set phoneElem [wrapper::createtag "phone-action"  \
       -attrlist $attr -subtags [list $extensionElem]]
 
-    ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
+    ::Jabber::Jlib send_iq set [list $phoneElem]  \
       -to $state(service) -command [list ::JivePhone::DialCB $dnid]
 
     ::hooks::run jivePhoneEvent $command $dnid $callID
@@ -572,7 +572,7 @@ proc ::JivePhone::DialJID {jid type {callID ""}} {
     set phoneElem [wrapper::createtag "phone-action"  \
       -attrlist $attr -subtags [list $extensionElem]]
 
-    ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
+    ::Jabber::Jlib send_iq set [list $phoneElem]  \
       -to $state(service) -command [list ::JivePhone::DialCB $jid]
 
     ::hooks::run jivePhoneEvent $command $jid $callID
@@ -599,7 +599,7 @@ proc ::JivePhone::DialExtension {extension type {callID ""}} {
     set phoneElem [wrapper::createtag "phone-action"  \
       -attrlist $attr -subtags [list $extensionElem]]
 
-    ::Jabber::JlibCmd send_iq set [list $phoneElem]  \
+    ::Jabber::Jlib send_iq set [list $phoneElem]  \
       -to $state(service) -command [list ::JivePhone::DialCB $extension]
 
     ::hooks::run jivePhoneEvent $command $extension $callID

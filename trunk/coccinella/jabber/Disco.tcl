@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.142 2007-12-20 07:26:25 matben Exp $
+# $Id: Disco.tcl,v 1.143 2007-12-20 14:01:25 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -105,6 +105,9 @@ namespace eval ::Disco:: {
     
     # If number children smaller than this do disco#info.
     set ::config(disco,info-limit) 12
+    
+    # Shall we cache disco-info results?
+    set ::config(disco,cache-info) 1
 }
 
 proc ::Disco::InitPrefsHook {} {
@@ -210,8 +213,13 @@ proc ::Disco::InitMenus {} {
 }
 
 proc ::Disco::NewJlibHook {jlibName} {
+    global  this config
 	    
     $jlibName disco registerhandler ::Disco::Handler
+    if {$config(disco,cache-info)} {
+	set fileName [file join $this(prefsPath) discoInfoCache]
+	CacheInit $fileName
+    }
 }
 
 # Disco::LoginHook --
@@ -312,6 +320,7 @@ proc ::Disco::GetItems {jid args} {
 }
 
 proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
+    global  config
     variable wtree
     variable wtab
     upvar ::Jabber::jstate jstate
@@ -325,6 +334,10 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 	::Jabber::AddErrorLog $from "([lindex $queryE 0]) [lindex $queryE 1]"
 	AddServerErrorCheck $from
     } else {
+	
+	if {$config(disco,cache-info)} {
+	    CacheSet [list $from $node] $queryE
+	}
 	
 	# The info contains the name attribute (optional) which may
 	# need to be set since we get items before name.
@@ -344,10 +357,12 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 	
 	set vlist [::ITree::FindEndItems $wtree [list $from $node]]
 	set cattypes [$jstate(jlib) disco types $from $node]
+	set acctypes [AccessTypes $from $node]
 
 	foreach vstruct $vlist {
-	    set icon [::Servicons::GetFromTypeList $cattypes]
-	    set name [$jstate(jlib) disco name $from $node]
+	    set icon [::Servicons::GetFromTypeList $acctypes]
+	    #set name [$jstate(jlib) disco name $from $node]
+	    set name [AccessName $from $node]
 	    set opts [list] 
 	    if {$name ne ""} {
 		lappend opts -text $name
@@ -511,7 +526,8 @@ proc ::Disco::IsJidBranchCategory {jid} {
         
     # Ad-hoc way to figure out if dir or not. Use the category attribute.
     set isdir 0
-    set types [$jstate(jlib) disco types $jid]
+    #set types [$jstate(jlib) disco types $jid]
+    set types [AccessTypes $jid]
     foreach type $types {
 	set category [lindex [split $type /] 0]
 	if {[info exists branchCategory($category)] && \
@@ -538,7 +554,8 @@ proc ::Disco::IsBranchNode {jid node} {
 	}
     } else {
 	set isdir 1
-	if {[$jstate(jlib) disco iscategorytype hierarchy/leaf $jid $node]} {
+	#if {[$jstate(jlib) disco iscategorytype hierarchy/leaf $jid $node]} 
+	if {[AccessIsCategoryType "hierarchy/leaf" $jid $node]} {
 	    set isdir 0
 	}
     }
@@ -1226,7 +1243,8 @@ proc ::Disco::TreeItem {vstruct {level 0}} {
 	}
     }    
 
-    set cattypes [$jstate(jlib) disco types $jid $node]
+    #set cattypes [$jstate(jlib) disco types $jid $node]
+    set cattypes [AccessTypes $jid $node]
     set isconference [expr {[lsearch -glob $cattypes conference/*] < 0 ? 0 : 1}]
     
     jlib::splitjid $jid jid2 res
@@ -1255,7 +1273,8 @@ proc ::Disco::TreeItem {vstruct {level 0}} {
 	    set isdir 0
 	    set icon [::Roster::GetPresenceIconFromJid $jid]
 	} else {
-	    set name [$jstate(jlib) disco name $jid $node]
+	    #set name [$jstate(jlib) disco name $jid $node]
+	    set name [AccessName $jid $node]
 	    if {$name eq ""} {
 		if {$node eq ""} {
 		    set name [jlib::unescapejid $jid]
@@ -1270,7 +1289,8 @@ proc ::Disco::TreeItem {vstruct {level 0}} {
 		if {$isroom} {
 		    set icon [::Servicons::Get conference/text]
 		} elseif {$node ne ""} {
-		    set xtypes [$jstate(jlib) disco types $jid]
+		    #set xtypes [$jstate(jlib) disco types $jid]
+		    set xtypes [AccessTypes $jid]
 		    set icon [::Servicons::GetFromTypeList $xtypes]
 		}
 	    }
@@ -1327,7 +1347,8 @@ proc ::Disco::MakeBalloonHelp {vstruct} {
     if {$node ne ""} {
 	append msg "\nnode: $node"
     }
-    set types [$jstate(jlib) disco types $jid $node]
+    #set types [$jstate(jlib) disco types $jid $node]
+    set types [AccessTypes $jid $node]
     if {$types != {}} {
 	append msg "\ntype: $types"
     }
@@ -1529,6 +1550,7 @@ proc ::Disco::BuildInfoPage {win jid {node ""}} {
     $wtext insert end "Feature\tXML namespace\n" head
     
     set features [$jstate(jlib) disco features $jid $node]
+    #set features [AccessFeatures $jid $node]
     
     set tfont [$wtext cget -font]
     set maxw 0
@@ -1813,11 +1835,12 @@ proc ::Disco::MainMenuPostHook {type wmenu} {
 	
 	if {[::JUI::GetConnectState] eq "connectfin"} {
 	    set num 0
-	    set server [::Jabber::JlibCmd getserver]
-	    set jidL [::Jabber::JlibCmd disco getjidsforfeature "jabber:iq:register"]
+	    set server [::Jabber::Jlib getserver]
+	    set jidL [::Jabber::Jlib disco getjidsforfeature "jabber:iq:register"]
 	    set jidL [lsearch -all -not -inline $jidL $server]
 	    foreach jid $jidL {
-		set name [::Jabber::JlibCmd disco name $jid]
+		#set name [::Jabber::Jlib disco name $jid]
+		set name [AccessName $jid]
 		$m add command -label $name  \
 		  -command [list ::GenRegister::NewDlg -server $jid -autoget 1]
 		incr num
@@ -1854,6 +1877,190 @@ proc ::Disco::OnMenuExportVCardHook {} {
 	    ::VCard::ExportXMLFromJID $jid
 	}
     }    
+}
+
+#--- Common accessor functions which first call cache and then disco -----------
+#
+#       All these functions checks the cache first and then the 'disco'.
+#       The order is insignificant since 'disco' results are placed in cache
+#       when received.
+#       
+#       NB: These must be used to display passive information only!
+#           Like names and icons and to identify transports for associated users.
+#           Else its results can come from other servers!
+
+proc ::Disco::AccessName {jid {node ""}} {
+    variable cacheInfo
+
+    set jid [jlib::jidmap $jid]
+    if {[info exists cacheInfo($jid,$node,name)]} {
+	return $cacheInfo($jid,$node,name)
+    } else {
+	return [::Jabber::Jlib disco name $jid $node]
+    }
+}
+
+proc ::Disco::AccessFeatures {jid {node ""}} {
+    variable cacheInfo
+    
+    set jid [jlib::jidmap $jid]
+    if {[info exists cacheInfo($jid,$node,features)]} {
+	return $cacheInfo($jid,$node,features)
+    } else {
+	return [::Jabber::Jlib disco features $jid $node]
+    }
+}
+
+proc ::Disco::AccessHasFeature {feature jid {node ""}} {
+    variable cacheInfo
+    
+    set jid [jlib::jidmap $jid]
+    if {[info exists cacheInfo($jid,$node,features)]} {
+	set features $cacheInfo($jid,$node,features)
+	return [expr [lsearch -exact $features $feature] < 0 ? 0 : 1]
+    } else {
+	return [::Jabber::Jlib disco features $jid $node]
+    }
+}
+
+proc ::Disco::AccessTypes {jid {node ""}} {
+    variable cacheInfo
+
+    set jid [jlib::jidmap $jid]
+    if {[info exists cacheInfo($jid,$node,cattypes)]} {
+	return $cacheInfo($jid,$node,cattypes)
+    } else {
+	return [::Jabber::Jlib disco types $jid $node]
+    }
+}
+
+proc ::Disco::AccessIsCategoryType {jid {node ""}} {
+    variable cacheInfo
+    
+    set jid [jlib::jidmap $jid]
+    if {[info exists cacheInfo($jid,$node,cattypes)]} {
+	set types $cacheInfo($jid,$node,cattypes)
+	return [expr [lsearch -glob $types $cattype] < 0 ? 0 : 1]
+    } else {
+	return [::Jabber::Jlib disco types $jid $node]
+    }
+}
+
+proc ::Disco::AccessJIDsForFeature {feature} {
+    variable cacheInfo
+    
+    if {[info exists cacheInfo($feature,featurelist)]} {
+	set cacheInfo($feature,featurelist) [lsort -unique $cacheInfo($feature,featurelist)]
+	return $cacheInfo($feature,featurelist)
+    } else {
+	return [::Jabber::Jlib disco getjidsforfeature $jid $node]
+    }    
+}
+
+proc ::Disco::AccessJIDsForCategory {feature} {
+    variable cacheInfo
+
+}
+
+#--- Support functions for caching disco info results --------------------------
+
+namespace eval ::Disco {
+    
+    # Store complete query elements for each JID+node combination as:
+    #   cacheQueryA(JID node) queryE
+    # where {JID node} is a proper list.
+    variable cacheQueryA
+    
+    variable cacheInfo
+}
+
+proc ::Disco::CacheInit {fileName} {
+    CacheRead $fileName
+    CacheParse
+}
+
+proc ::Disco::CacheRead {fileName} {
+    variable cacheQueryA
+    
+    set fd [open $fileName r]
+    fconfigure $fd -encoding utf-8
+    
+    # Protect from file corruption.
+    catch {eval [read $fd]}
+    close $fd
+}
+
+proc ::Disco::CacheWrite {fileName} {
+    variable cacheQueryA
+    
+    set fd [open $fileName w]
+    fconfigure $fd -encoding utf-8
+    puts $fd "array set cacheQueryA {"
+    foreach {key value} [array get cacheQueryA] {
+	puts $fd [list $key $value]
+    }
+    puts $fd "}"
+    close $fd
+}
+
+proc ::Disco::CacheParse {} {
+    variable cacheQueryA
+    variable cacheInfo
+    
+    foreach {jidNode queryE} [array get cacheQueryA] {
+	lassign $jidNode jid node
+	
+	foreach c [wrapper::getchildren $queryE] {
+	    unset -nocomplain attr
+	    array set attr [wrapper::getattrlist $c]
+	    
+	    # There can be one or many of each 'identity' and 'feature'.
+	    switch -- [wrapper::gettag $c] {
+		identity {
+		    set category $attr(category)
+		    set ctype    $attr(type)
+		    set name     ""
+		    if {[info exists attr(name)]} {
+			set name $attr(name)
+		    }			
+		    set cacheInfo($jid,$node,name) $name
+		    set cattype $category/$ctype
+		    lappend cacheInfo($jid,$node,cattypes) $cattype
+		    lappend cacheInfo($cattype,typelist) $jid
+		    set cacheInfo($cattype,typelist) \
+		      [lsort -unique $cacheInfo($cattype,typelist)]
+		}
+		feature {
+		    set feature $attr(var)
+		    lappend cacheInfo($jid,$node,features) $feature
+		    lappend cacheInfo($feature,featurelist) $jid		    
+		}
+	    }
+	}
+    }
+    
+}
+
+proc ::Disco::CacheGet {jidNode} {
+    variable cacheQueryA
+    
+    if {[info exists cacheQueryA($jidNode)]} {
+	return $cacheQueryA($jidNode)
+    } else {
+	return 
+    }
+}
+
+proc ::Disco::CacheSet {jidNode queryE} {
+    variable cacheQueryA    
+    set cacheQueryA($jidNode) $queryE
+}
+
+if {0} {
+    set fileName [file join $this(prefsPath) discoInfoCache]
+    ::Disco::CacheWrite $fileName
+    
+    ::Disco::CacheInit $fileName
 }
 
 #-------------------------------------------------------------------------------

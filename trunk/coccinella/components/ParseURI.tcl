@@ -70,7 +70,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ParseURI.tcl,v 1.47 2007-11-27 07:42:08 matben Exp $
+# $Id: ParseURI.tcl,v 1.48 2007-12-20 14:01:25 matben Exp $
 
 package require uriencode
 
@@ -326,7 +326,7 @@ proc ::ParseURI::DoDisco {token} {
     }
     set cmd ::ParseURI::Noop
     if {$type eq "get"} {
-	eval {::Jabber::JlibCmd disco send_get $request $cmd $state(jid)} $opts
+	eval {::Jabber::Jlib disco send_get $request $cmd $state(jid)} $opts
     } else {
 	# Not implemented
     }
@@ -427,7 +427,7 @@ proc ::ParseURI::EnterRoomCB {token type args} {
 	    if {[info exists state(query,jid)]} {
 		set tojid $state(query,jid)
 		jlib::splitjid $state(jid) roomjid res
-		::Jabber::JlibCmd muc invite $roomjid $tojid
+		::Jabber::Jlib muc invite $roomjid $tojid
 	    }
 	    
 	    # Check that this is actually a whiteboard.
@@ -486,7 +486,7 @@ proc ::ParseURI::DoProbe {token} {
     variable $token
     upvar 0 $token state
 
-    ::Jabber::JlibCmd send_presence -to $state(jid) -type "probe"
+    ::Jabber::Jlib send_presence -to $state(jid) -type "probe"
     Free $token
 }
 
@@ -511,9 +511,9 @@ proc ::ParseURI::DoPubsub {token} {
 	Free $token
 	return
     }
-    set myjid [::Jabber::JlibCmd myjid]
+    set myjid [::Jabber::Jlib myjid]
     set myjid2 [jlib::barejid $myjid]
-    eval {::Jabber::JlibCmd pubsub $action $state(jid) $myjid2} $opts
+    eval {::Jabber::Jlib pubsub $action $state(jid) $myjid2} $opts
     Free $token
 }
 
@@ -534,7 +534,7 @@ proc ::ParseURI::DoRecvfile {token} {
     }
     
     # We do a sipub request to get the file.
-    ::Jabber::JlibCmd sipub start $state(jid) $queryA(sid) \
+    ::Jabber::Jlib sipub start $state(jid) $queryA(sid) \
       [namespace code [list DoRecvfileCB $token]]
 }
 
@@ -567,7 +567,7 @@ proc ::ParseURI::DoRecvfileCB {token type startingE} {
 	    set dlgtoken [::FTrans::ObjectReceive $state(jid) $fileName $queryA(size)]	    
 	    
 	    # We shall be prepared to get the si-set request.
-	    ::Jabber::JlibCmd sipub set_accept_handler $sid \
+	    ::Jabber::Jlib sipub set_accept_handler $sid \
 	      -channel $fd \
 	      -progress [list ::FTrans::TProgress $dlgtoken] \
 	      -command  [list ::FTrans::TCommand $dlgtoken]
@@ -590,7 +590,7 @@ proc ::ParseURI::DoRemove {token} {
     variable $token
     upvar 0 $token state
 
-    ::Jabber::JlibCmd roster send_remove $state(jid)
+    ::Jabber::Jlib roster send_remove $state(jid)
     Free $token
 }
 
@@ -610,7 +610,7 @@ proc ::ParseURI::DoRoster {token} {
 	    }
 	}
     }
-    eval {::Jabber::JlibCmd roster send_set $state(jid)} $opts
+    eval {::Jabber::Jlib roster send_set $state(jid)} $opts
     Free $token
 }
 
@@ -626,8 +626,8 @@ proc ::ParseURI::DoSubscribe {token} {
     variable $token
     upvar 0 $token state
 
-    ::Jabber::JlibCmd roster send_set $state(jid)
-    ::Jabber::JlibCmd send_presence -to $state(jid) -type "subscribe"
+    ::Jabber::Jlib roster send_set $state(jid)
+    ::Jabber::Jlib send_presence -to $state(jid) -type "subscribe"
     Free $token
 }
 
@@ -643,7 +643,7 @@ proc ::ParseURI::DoUnsubscribe {token} {
     variable $token
     upvar 0 $token state
 
-    ::Jabber::JlibCmd send_presence -to $state(jid) -type "unsubscribe"
+    ::Jabber::Jlib send_presence -to $state(jid) -type "unsubscribe"
     Free $token
 }
 

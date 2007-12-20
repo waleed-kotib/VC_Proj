@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.133 2007-12-04 07:26:59 matben Exp $
+# $Id: MailBox.tcl,v 1.134 2007-12-20 14:01:26 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -1473,7 +1473,7 @@ proc ::MailBox::ReplyTo {} {
 	set body    [lindex $mailbox($uid) $mailboxindex(message)]
 	set xmldata [list]
     }    
-    set to [::Jabber::JlibCmd getrecipientjid $from]
+    set to [::Jabber::Jlib getrecipientjid $from]
     if {![regexp -nocase {^ *re:} $subject]} {
 	set subject "Re: $subject"
     }

@@ -23,7 +23,7 @@
 #            2) Configurable nick alert
 #            3) Implement -command for error notice
 #  
-# $Id: IRCActions.tcl,v 1.8 2007-11-17 07:40:52 matben Exp $
+# $Id: IRCActions.tcl,v 1.9 2007-12-20 14:01:25 matben Exp $
 
 namespace eval ::IRCActions {
     
@@ -124,7 +124,7 @@ proc ::IRCActions::Join {roomjid room} {
     if {[string first "@" $room] < 0} {
 	set joinJID ${room}@${domain}
     }
-    set nick [::Jabber::JlibCmd muc mynick $roomjid]
+    set nick [::Jabber::Jlib muc mynick $roomjid]
     ::Enter::EnterRoom $joinJID $nick -command [namespace code ErrorJoin]
 }
 
@@ -135,7 +135,7 @@ proc ::IRCActions::ErrorJoin {type args} {
 proc ::IRCActions::Nick {roomjid nick} {
     
     # Do this for all rooms we participate?
-    ::Jabber::JlibCmd muc setnick $roomjid $nick \
+    ::Jabber::Jlib muc setnick $roomjid $nick \
       -command [namespace code ErrorNick]
 }
 
@@ -155,7 +155,7 @@ proc ::IRCActions::Msg {roomjid value} {
 }
 
 proc ::IRCActions::Topic {roomjid subject} {
-    ::Jabber::JlibCmd send_message $roomjid -type groupchat -subject $subject
+    ::Jabber::Jlib send_message $roomjid -type groupchat -subject $subject
 }
 
 proc ::IRCActions::Invite {roomjid value} {
@@ -167,7 +167,7 @@ proc ::IRCActions::Invite {roomjid value} {
 	set room ${room}@${domain}
     }    
     set jid $room/$nick
-    ::Jabber::JlibCmd muc invite $roomjid $jid
+    ::Jabber::Jlib muc invite $roomjid $jid
 }
 
 proc ::IRCActions::Kick {roomjid value} {
@@ -180,7 +180,7 @@ proc ::IRCActions::Kick {roomjid value} {
     }    
     
     # Must be this room and no other.
-    ::Jabber::JlibCmd muc setrole $roomjid $nick "none" 
+    ::Jabber::Jlib muc setrole $roomjid $nick "none" 
 }
 
 proc ::IRCActions::Leave {roomjid value} {
@@ -199,7 +199,7 @@ proc ::IRCActions::Complete {roomjid} {
     set stop  [$wtext index "insert -1 c wordend"]
     set str   [$wtext get $start $stop]
 
-    set participants [::Jabber::JlibCmd muc participants $roomjid]
+    set participants [::Jabber::Jlib muc participants $roomjid]
     set nicks [list]
     set matched 0
     foreach jid $participants {
@@ -235,7 +235,7 @@ proc ::IRCActions::ParseWordHook {type jid w word tagList} {
 	    }
 	    chat {
 		set jid2 [jlib::barejid $jid]
-		if {[::Jabber::JlibCmd service isroom $jid2]} {
+		if {[::Jabber::Jlib service isroom $jid2]} {
 		    set nick $jid
 		} else {
 		    set nick [::Roster::GetDisplayName $jid2]
@@ -277,7 +277,7 @@ proc ::IRCActions::DisplayHook {xmldata} {
     
     set from [wrapper::getattribute $xmldata from]
     set roomjid [jlib::barejid $from]
-    set nick [::Jabber::JlibCmd muc mynick $roomjid]
+    set nick [::Jabber::Jlib muc mynick $roomjid]
     set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     if {[string match -nocase *$nick* $body]} {    
 	::Sounds::PlayWhenIdle newmsg

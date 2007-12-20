@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: ICQ.tcl,v 1.17 2007-11-17 07:40:52 matben Exp $
+# $Id: ICQ.tcl,v 1.18 2007-12-20 14:01:25 matben Exp $
 
 namespace eval ::ICQ {
     
@@ -47,7 +47,7 @@ proc ::ICQ::InvestigateRoster { } {
     variable vcardnick
     
     set server [::Jabber::GetServerJid]
-    set icqHosts [::Jabber::JlibCmd disco getjidsforcategory "gateway/icq"]
+    set icqHosts [::Jabber::Jlib disco getjidsforcategory "gateway/icq"]
     
     ::Debug 4 "::ICQ::InvestigateRoster icqHosts=$icqHosts"
 
@@ -76,7 +76,7 @@ proc ::ICQ::InvestigateRoster { } {
 	    if {$name eq ""} {
 		
 		# Get vCard
-		::Jabber::JlibCmd vcard send_get $jid \
+		::Jabber::Jlib vcard send_get $jid \
 		  [list [namespace current]::VCardGetCB $jid]
 	    }
 	}	
@@ -101,7 +101,7 @@ proc ::ICQ::VCardGetCB {from jlibName type subiq} {
 	    set nick     [wrapper::getcdata $nickElem]
 	    set vcardnick($from) $name
 	    jlib::splitjid $from jid2 res
-	    ::Jabber::JlibCmd roster send_set $jid2 -name $nick
+	    ::Jabber::Jlib roster send_set $jid2 -name $nick
 	}
     }
 }

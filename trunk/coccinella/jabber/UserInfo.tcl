@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.33 2007-09-28 07:56:56 matben Exp $
+# $Id: UserInfo.tcl,v 1.34 2007-12-20 14:01:26 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -61,7 +61,7 @@ proc ::UserInfo::Get {jid {node ""}} {
     jlib::splitjid $jid jid2 res
 
     set avail [::Jabber::RosterCmd isavailable $jid]
-    set room  [::Jabber::JlibCmd service isroom $jid2]
+    set room  [::Jabber::Jlib service isroom $jid2]
     
     set priv(w)       $wDlgs(juserinfo)${uid}
     set priv(jid)     $jid
