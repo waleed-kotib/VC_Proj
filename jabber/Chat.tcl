@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.263 2007-12-12 14:16:18 matben Exp $
+# $Id: Chat.tcl,v 1.264 2007-12-20 14:01:25 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -436,7 +436,7 @@ proc ::Chat::StartThread {jid args} {
     array set argsA $args
     set havedlg 0
     set jid2 [jlib::barejid $jid]
-    set isroom [::Jabber::JlibCmd service isroom $jid2]
+    set isroom [::Jabber::Jlib service isroom $jid2]
 
     # Make unique thread id.
     if {[info exists argsA(-thread)]} {
@@ -630,7 +630,7 @@ proc ::Chat::GotMsg {xmldata} {
     set chatstate(fromjid) $jid
     
     # Is this really needed here?
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
+    if {[::Jabber::Jlib service isroom $jid2]} {
 	set chatstate(displayname) [jlib::resourcejid $jid]
     } else {
 	set chatstate(displayname) [::Roster::GetDisplayName $jid2]
@@ -889,7 +889,7 @@ proc ::Chat::MessageGetMyName {chattoken jid} {
     upvar ::Jabber::jprefs jprefs
     
     set jid2 [jlib::barejid $jid]
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
+    if {[::Jabber::Jlib service isroom $jid2]} {
 	set name [jlib::resourcejid $jid]
     } else {
 	jlib::splitjidex $jid node host res	    
@@ -971,7 +971,7 @@ proc ::Chat::MakeAndInsertHistory {chattoken} {
     
     # If chatting with a room member we must use jid3.
     set jid2 $chatstate(jid2)
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
+    if {[::Jabber::Jlib service isroom $jid2]} {
 	set jidH $chatstate(jid)	
     } else {
 	set jidH $jid2	
@@ -1039,7 +1039,7 @@ proc ::Chat::GetHistory {chattoken args} {
     set threadID $chatstate(threadid)
 
     # If chatting with a room member we must use jid3.
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
+    if {[::Jabber::Jlib service isroom $jid2]} {
         set jidH $chatstate(jid)
     } else {
         set jidH $jid2
@@ -1452,7 +1452,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     set chatstate(havesent)         0
     set chatstate(themed)           $jprefs(chat,themed)
 
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
+    if {[::Jabber::Jlib service isroom $jid2]} {
 	set chatstate(displayname) [jlib::resourcejid $jid]
     } else {
 	set chatstate(displayname) [::Roster::GetDisplayName $jid2]
@@ -1708,7 +1708,7 @@ proc ::Chat::NicknameEventHook {xmldata jid nickname} {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
-	if {![::Jabber::JlibCmd service isroom $jid2]} {
+	if {![::Jabber::Jlib service isroom $jid2]} {
 	    set chatstate(displayname) [::Roster::GetDisplayName $jid2]
 	}
 	set chatstate(nameorjid)   [::Roster::GetNameOrJID $jid2]
@@ -1846,7 +1846,7 @@ proc ::Chat::DnDXmppDrop {chattoken win data type} {
     set jidL [::JUI::DnDXmppExtractJID $data $type]
     set onlineL [list]
     foreach jid $jidL {
-	if {[::Jabber::JlibCmd roster isavailable $jid]} {
+	if {[::Jabber::Jlib roster isavailable $jid]} {
 	    lappend onlineL $jid
 	}
     }
@@ -2352,7 +2352,7 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
     
     # We should be able to chat with ourself.    
     set jid2 [jlib::barejid $chatstate(jid)]
-    set myjid2 [::Jabber::JlibCmd myjid2]
+    set myjid2 [::Jabber::Jlib myjid2]
     set isme [jlib::jidequal $jid2 $myjid2]
     if {[$jstate(jlib) roster isavailable $jid2] || $isme} {
 	SetState $chattoken normal
@@ -2394,7 +2394,7 @@ proc ::Chat::SetState {chattoken state} {
     # Must use full JID.
     set jid $chatstate(jid)
     if {[jlib::isbarejid $jid]} {
-	set res [::Jabber::JlibCmd roster gethighestresource $jid]
+	set res [::Jabber::Jlib roster gethighestresource $jid]
 	set jid3 $jid/$res
     } else {
 	set jid3 $jid
@@ -2672,7 +2672,7 @@ proc ::Chat::InviteSendHistory {chattoken roomjid} {
     upvar ::Jabber::jstate jstate
     
     set jid2 $chatstate(jid2)
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
+    if {[::Jabber::Jlib service isroom $jid2]} {
 	set jidH $chatstate(jid)	
     } else {
 	set jidH $jid2	
@@ -3029,7 +3029,7 @@ proc ::Chat::SendText {chattoken text args} {
     
     # Put in history file.
     # Need to reconstruct our xmldata. Add -from for our history record.
-    set myjid [::Jabber::JlibCmd myjid]
+    set myjid [::Jabber::Jlib myjid]
     set xmldata [eval {jlib::send_message_xmllist $jid  \
        -thread $threadID -type chat -body $text -from $myjid} $opts]
     ::History::XPutItem send $jid2 $xmldata
@@ -3089,7 +3089,7 @@ proc ::Chat::Whiteboard {dlgtoken} {
     # We must be sure to have a full JID here since we must be sure of its
     # capabilities.
     set jid $chatstate(jid)
-    set res [::Jabber::JlibCmd roster gethighestresource $jid]
+    set res [::Jabber::Jlib roster gethighestresource $jid]
     set jid3 $jid/$res
     if {![::JWB::HaveWhiteboard $jid3]} {
 	::JWB::NewWhiteboardTo $jid3 -type chat
@@ -3152,7 +3152,7 @@ proc ::Chat::RegisterPresence {chattoken} {
     # Important: we register per chattoken and not per JID to allow
     # multiple threads per JID!
     set jid2 $chatstate(jid2)
-    if {[::Jabber::JlibCmd service isroom $jid2]} {
+    if {[::Jabber::Jlib service isroom $jid2]} {
 	set presenceReg  \
 	  [list [namespace code [list PresenceEvent $chattoken]] \
 	  -from $chatstate(jid)]
@@ -3164,14 +3164,14 @@ proc ::Chat::RegisterPresence {chattoken} {
     
     # Cache it so it gets properly deregistered.
     set chatstate(presenceReg) $presenceReg
-    eval {::Jabber::JlibCmd presence_register_ex} $presenceReg
+    eval {::Jabber::Jlib presence_register_ex} $presenceReg
 }
 
 proc ::Chat::DeregisterPresence {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    eval {::Jabber::JlibCmd presence_deregister_ex} $chatstate(presenceReg)
+    eval {::Jabber::Jlib presence_deregister_ex} $chatstate(presenceReg)
 }
 
 proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
@@ -3602,7 +3602,7 @@ proc ::Chat::XEventSendCompose {chattoken} {
 	  [wrapper::createtag "composing"] \
 	  [wrapper::createtag "id" -chdata $id]]]]
 	
-	eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
+	eval {::Jabber::Jlib send_message $chatstate(jid) -xlist $xelems} $opts
     }
 }
 
@@ -3647,7 +3647,7 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
 	  [wrapper::createtag "x" -attrlist {xmlns jabber:x:event}  \
 	  -subtags [list [wrapper::createtag "id" -chdata $id]]]]
 	
-	eval {::Jabber::JlibCmd send_message $chatstate(jid) -xlist $xelems} $opts
+	eval {::Jabber::Jlib send_message $chatstate(jid) -xlist $xelems} $opts
     }
 }
 
@@ -3691,7 +3691,7 @@ proc ::Chat::SendChatState {chattoken state} {
 	set csE [list [wrapper::createtag $state \
 	  -attrlist [list xmlns $xmppxmlns(chatstates)]]]
 
-	::Jabber::JlibCmd send_message $chatstate(jid)  \
+	::Jabber::Jlib send_message $chatstate(jid)  \
 	  -thread $chatstate(threadid) -type chat -xlist $csE
     }
 }

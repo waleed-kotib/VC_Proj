@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: LiveRosterImage.tcl,v 1.3 2007-11-17 07:40:52 matben Exp $
+#  $Id: LiveRosterImage.tcl,v 1.4 2007-12-20 14:01:25 matben Exp $
 
 namespace eval ::LiveRosterImage {
 
@@ -54,8 +54,8 @@ proc ::LiveRosterImage::Draw {} {
 	return
     }
 
-    set show [::Jabber::JlibCmd mypresence]
-    set status [::Jabber::JlibCmd mypresencestatus]
+    set show [::Jabber::Jlib mypresence]
+    set status [::Jabber::Jlib mypresencestatus]
     set showStr [::Roster::MapShowToText $show]
 
     # Find size for each line and adjust the font size.

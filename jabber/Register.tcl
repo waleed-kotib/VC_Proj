@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.89 2007-09-28 13:02:19 matben Exp $
+# $Id: Register.tcl,v 1.90 2007-12-20 14:01:26 matben Exp $
 
 package provide Register 1.0
 
@@ -1276,7 +1276,7 @@ proc ::GenRegister::Simple {w args} {
     ttk::frame $wmid
     pack $wmid -side top -fill both -expand 1
     
-    set regServers [::Jabber::JlibCmd disco getjidsforfeature "jabber:iq:register"]
+    set regServers [::Jabber::Jlib disco getjidsforfeature "jabber:iq:register"]
 
     ttk::label $wmid.lserv -text "[mc Service]:"
     ttk::combobox $wmid.combo -state readonly  \

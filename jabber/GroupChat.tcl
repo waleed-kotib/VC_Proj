@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.225 2007-12-13 14:33:22 matben Exp $
+# $Id: GroupChat.tcl,v 1.226 2007-12-20 14:01:25 matben Exp $
 
 package require Create
 package require Enter
@@ -293,7 +293,7 @@ proc ::GroupChat::OnMenuCreate {} {
 }
 
 proc ::GroupChat::IsInRoom {roomjid} {
-    if {[lsearch -exact [::Jabber::JlibCmd service allroomsin] $roomjid] < 0} {
+    if {[lsearch -exact [::Jabber::Jlib service allroomsin] $roomjid] < 0} {
 	return 0
     } else {
 	return 1
@@ -389,7 +389,7 @@ proc ::GroupChat::EnterHook {roomjid protocol} {
     
     SetProtocol $roomjid $protocol
     
-    ::Jabber::JlibCmd presence_register_ex [namespace code PresenceEvent] \
+    ::Jabber::Jlib presence_register_ex [namespace code PresenceEvent] \
       -from2 $roomjid
 }
 
@@ -1055,7 +1055,7 @@ proc ::GroupChat::OnReturnSubject {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    ::Jabber::JlibCmd send_message $chatstate(roomjid) -type groupchat \
+    ::Jabber::Jlib send_message $chatstate(roomjid) -type groupchat \
       -subject $chatstate(subject)
     focus $chatstate(w)
 }
@@ -1416,7 +1416,7 @@ proc ::GroupChat::SetLogout {chattoken} {
     InsertTagString $chattoken $prefix syspre
     InsertTagString $chattoken "  [mc jagclogoutmsg]\n" systext    
 
-    set nick [::Jabber::JlibCmd service mynick $chatstate(roomjid)]
+    set nick [::Jabber::Jlib service mynick $chatstate(roomjid)]
     set myjid $chatstate(roomjid)/$nick
     TreeRemoveUser $chattoken $myjid
 
@@ -1833,7 +1833,7 @@ proc ::GroupChat::TreeButtonRelease {chattoken T x y} {
 
 	if {[lindex $tags 0] eq "jid"} {
 	    set jid [lindex $tags 1]
-	    set nick [::Jabber::JlibCmd service mynick $chatstate(roomjid)]
+	    set nick [::Jabber::Jlib service mynick $chatstate(roomjid)]
 	    set myjid $chatstate(roomjid)/$nick
 	    if {[jlib::jidequal $jid $myjid]} {
 		set cmd [list ::GroupChat::TreeEditTimerCancel $chattoken]
@@ -2195,7 +2195,7 @@ proc ::GroupChat::InsertMessage {chattoken xmldata} {
     }
     
     # This can be room name or nick name.
-    set mynick [::Jabber::JlibCmd service mynick $roomjid]
+    set mynick [::Jabber::Jlib service mynick $roomjid]
     set myroomjid $roomjid/$mynick
     if {[jlib::jidequal $myroomjid $from]} {
 	set whom me
@@ -2459,7 +2459,7 @@ proc ::GroupChat::Exit {chattoken} {
 	$jstate(jlib) service exitroom $roomjid	
 	::hooks::run groupchatExitRoomHook $roomjid
 
-	set nick [::Jabber::JlibCmd service mynick $roomjid]
+	set nick [::Jabber::Jlib service mynick $roomjid]
 	set myroomjid $roomjid/$nick
 	set attr [list from $myroomjid to $roomjid type unavailable]
 	set xmldata [wrapper::createtag "presence" -attrlist $attr]
@@ -2586,10 +2586,10 @@ proc ::GroupChat::SetNick {chattoken nick} {
     upvar 0 $chattoken chatstate
 
     set jid $chatstate(roomjid)/$nick
-    ::Jabber::JlibCmd service setnick $chatstate(roomjid) $nick \
+    ::Jabber::Jlib service setnick $chatstate(roomjid) $nick \
       -command [list ::GroupChat::SetNickCB $chattoken]
     
-    #::Jabber::JlibCmd send_presence -to $jid \
+    #::Jabber::Jlib send_presence -to $jid \
     #  -command [list ::GroupChat::SetNickCB $chattoken]
 }
 
@@ -2645,7 +2645,7 @@ proc ::GroupChat::SendChat {chattoken} {
     }
 
     if {[string length $text]} {	
-	::Jabber::JlibCmd send_message $roomjid -type groupchat -body $text
+	::Jabber::Jlib send_message $roomjid -type groupchat -body $text
     }
 }
 
@@ -2851,7 +2851,7 @@ proc ::GroupChat::SetUser {roomjid jid3} {
     }
     
     # Associate a color sceme index for each user except ourself.
-    set mynick [::Jabber::JlibCmd service mynick $roomjid]
+    set mynick [::Jabber::Jlib service mynick $roomjid]
     set myroomjid $roomjid/$mynick
     if {![jlib::jidequal $myroomjid $jid3]} {
 	set mstack $chatstate(mstack)
@@ -2941,7 +2941,7 @@ proc ::GroupChat::Popup {chattoken w tag x y} {
             
     set clicked ""
     set jid ""
-    set nick [::Jabber::JlibCmd service mynick $chatstate(roomjid)]
+    set nick [::Jabber::Jlib service mynick $chatstate(roomjid)]
     set myjid $chatstate(roomjid)/$nick
     if {[lindex $tag 0] eq "role"} {
 	set clicked role
@@ -3072,7 +3072,7 @@ proc ::GroupChat::Save {dlgtoken} {
     
     if {[string length $ans]} {
 	set allText [::Text::TransformToPureText $wtext]
-	set mynick [::Jabber::JlibCmd service mynick $roomjid]
+	set mynick [::Jabber::Jlib service mynick $roomjid]
 	set myroomjid $roomjid/$mynick
 	set fd [open $ans w]
 	fconfigure $fd -encoding utf-8
@@ -3477,7 +3477,7 @@ proc ::GroupChat::DoAnyAutoJoin {} {
 		if {[info exists opts(-nick)]} {
 		    set nick $opts(-nick)
 		} else {
-		    jlib::splitjidex [::Jabber::JlibCmd myjid] nick - -
+		    jlib::splitjidex [::Jabber::Jlib myjid] nick - -
 		}
 		set eopts [list -command ::GroupChat::BookmarkAutoJoinCB]
 		if {[info exists opts(-password)]} {

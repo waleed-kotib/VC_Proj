@@ -26,7 +26,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Gateway.tcl,v 1.6 2007-07-22 07:54:53 matben Exp $
+# $Id: Gateway.tcl,v 1.7 2007-12-20 14:01:25 matben Exp $
 
 package provide Gateway 1.0
 
@@ -95,7 +95,7 @@ namespace eval ::Gateway {
 
 proc ::Gateway::GetGatewayTypeFromJID {jid} {
     set gtype ""
-    set cattypes [::Jabber::JlibCmd disco types $jid]
+    set cattypes [::Jabber::Jlib disco types $jid]
     regexp {gateway/([^ ]+)} $cattypes - gtype
     return $gtype
 }
@@ -112,7 +112,7 @@ proc ::Gateway::DiscoHook {type from queryE args} {
     set gtype [GetGatewayTypeFromJID $from]
     set mjid [jlib::jidmap $from]
     if {![info exists gateway(prompt,$gtype)]} {
-	::Jabber::JlibCmd iq_get $xmlns(gateway) -to $from \
+	::Jabber::Jlib iq_get $xmlns(gateway) -to $from \
 	  -xml:lang [jlib::getlang] \
 	  -command [namespace code [list OnGateway $mjid]]
     }
@@ -204,7 +204,7 @@ proc ::Gateway::GetJIDFromPrompt {prompt gatewayjid cmd} {
     variable xmlns
     
     set promptE [wrapper::createtag prompt -chdata $prompt]
-    ::Jabber::JlibCmd iq_get $xmlns(gateway) \
+    ::Jabber::Jlib iq_get $xmlns(gateway) \
       -to $gatewayjid -sublists [list $promptE] \
       -command [namespace code [list OnGetJIDFromPrompt $cmd]]
 }

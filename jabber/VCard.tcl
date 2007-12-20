@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.77 2007-10-24 13:08:52 matben Exp $
+# $Id: VCard.tcl,v 1.78 2007-12-20 14:01:26 matben Exp $
 
 package provide VCard 1.0
 
@@ -61,7 +61,7 @@ proc ::VCard::Fetch {type {jid {}}} {
     if {$type eq "own"} {
 	
 	# We must use the 2-tier jid here!
-        set jid [::Jabber::JlibCmd myjid2]
+        set jid [::Jabber::Jlib myjid2]
     }
     
     # @@@ Should use a named array as token instead of using namespaces.
@@ -81,10 +81,10 @@ proc ::VCard::Fetch {type {jid {}}} {
     # We should query the server for this and then fill in.
     ::JUI::SetStatusMessage "[mc vcardget2 $jid]..."
     if {$type eq "own"} {
-	::Jabber::JlibCmd vcard send_get_own  \
+	::Jabber::Jlib vcard send_get_own  \
 	  [list [namespace current]::FetchCallback $token]
     } else {
-	::Jabber::JlibCmd vcard send_get $jid  \
+	::Jabber::Jlib vcard send_get $jid  \
 	  [list [namespace current]::FetchCallback $token]
     }
 }
@@ -684,7 +684,7 @@ proc ::VCard::CreateList {token} {
 
 proc ::VCard::SetVCard {token}  {
 
-    eval {::Jabber::JlibCmd vcard send_set ::VCard::SetVCardCallback} \
+    eval {::Jabber::Jlib vcard send_set ::VCard::SetVCardCallback} \
       [CreateList $token]
     
     # Sync the photo (also empty) with our avatar.
@@ -704,14 +704,14 @@ proc ::VCard::SyncAvatar {token} {
 
     # @@@ Update presence hashes only if changed photo. TODO check.
     if {[info exists elem(photo_binval)]} {
-	::Jabber::JlibCmd avatar set_data $elem(photo_binval) $elem(photo_type)
+	::Jabber::Jlib avatar set_data $elem(photo_binval) $elem(photo_type)
 	::Avatar::SetShareOption 1
 	::Avatar::SetMyAvatarFromBase64 $elem(photo_binval) $elem(photo_type)
 
 	# Need to do this ourselves.
-	::Jabber::JlibCmd send_presence -keep 1
+	::Jabber::Jlib send_presence -keep 1
     } else {
-	::Jabber::JlibCmd avatar unset_data
+	::Jabber::Jlib avatar unset_data
 	::Avatar::UnsetAndUnshareMyAvatar
     }
 }
@@ -812,7 +812,7 @@ proc ::VCard::ExportXMLFromJID {jid} {
     set f [uriencode::quote $jid].xml
     set fileName [tk_getSaveFile -defaultextension .xml -initialfile $f]
     if {$fileName ne ""} {
-	::Jabber::JlibCmd vcard send_get $jid \
+	::Jabber::Jlib vcard send_get $jid \
 	  [namespace code [list ExportJIDCB $jid $fileName]]
     }
 }
@@ -838,7 +838,7 @@ proc ::VCard::ExportXML {token jid} {
 
 proc ::VCard::SaveToFile {token fileName jid} {
     
-    set vcardE [eval {::Jabber::JlibCmd vcard create} [CreateList $token]]
+    set vcardE [eval {::Jabber::Jlib vcard create} [CreateList $token]]
     SaveElementToFile $fileName $jid $vcardE
 }
 
@@ -894,7 +894,7 @@ proc ::VCard::ImportFromFile {fileName} {
 	  -message "Not a proper vCard XML format"
 	return
     }
-    ::Jabber::JlibCmd send_iq "set" [list $xmllist]
+    ::Jabber::Jlib send_iq "set" [list $xmllist]
     tinydom::cleanup $token
 }
 
@@ -961,7 +961,7 @@ proc ::VCard::ImportVCFtoXML {fileName} {
     close $fd
 
     
-    set vcardE [eval {::Jabber::JlibCmd vcard create} $opts]
+    set vcardE [eval {::Jabber::Jlib vcard create} $opts]
     
 }
 

@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.35 2007-11-17 07:40:52 matben Exp $
+#  $Id: Mood.tcl,v 1.36 2007-12-20 14:01:25 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -163,9 +163,9 @@ proc ::Mood::LoginHook {} {
     variable xmlns
    
     # Disco server for pubsub/pep support.
-    set server [::Jabber::JlibCmd getserver]
-    ::Jabber::JlibCmd pep have $server [namespace code HavePEP]
-    ::Jabber::JlibCmd pubsub register_event [namespace code Event] \
+    set server [::Jabber::Jlib getserver]
+    ::Jabber::Jlib pep have $server [namespace code HavePEP]
+    ::Jabber::Jlib pubsub register_event [namespace code Event] \
       -node $xmlns(mood)
 }
 
@@ -176,8 +176,8 @@ proc ::Mood::HavePEP {jlibname have} {
     if {$have} {
 
 	# Get our own published mood and fill in.
-	set myjid2 [::Jabber::JlibCmd  myjid2]
-	::Jabber::JlibCmd pubsub items $myjid2 $xmlns(mood) \
+	set myjid2 [::Jabber::Jlib  myjid2]
+	::Jabber::Jlib pubsub items $myjid2 $xmlns(mood) \
 	  -command [namespace code ItemsCB]
 	::JUI::RegisterMenuEntry action $menuDef
     }
@@ -255,13 +255,13 @@ proc ::Mood::Publish {mood {text ""}} {
     set itemE [wrapper::createtag item \
       -attrlist [list id current] -subtags [list $moodE]]
 
-    ::Jabber::JlibCmd pep publish $xmlns(mood) $itemE
+    ::Jabber::Jlib pep publish $xmlns(mood) $itemE
 }
 
 proc ::Mood::Retract {} {
     variable xmlns
     
-    ::Jabber::JlibCmd pep retract $xmlns(mood) -notify 1
+    ::Jabber::Jlib pep retract $xmlns(mood) -notify 1
 }
 
 #--------------------------------------------------------------

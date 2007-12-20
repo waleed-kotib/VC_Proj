@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JingleIax.tcl,v 1.38 2007-10-26 14:12:43 matben Exp $
+# $Id: JingleIax.tcl,v 1.39 2007-12-20 14:01:25 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -206,7 +206,7 @@ proc ::JingleIAX::SessionInitiate {jid} {
     
     Debug "::JingleIAX::SessionInitiate $jid"
 
-    set state(sid) [::Jabber::JlibCmd jingle initiate iax $jid  \
+    set state(sid) [::Jabber::Jlib jingle initiate iax $jid  \
       [list $mediaElem] [list $transportElem] ::JingleIAX::SessionInitiateCB]
 }
 
@@ -240,7 +240,7 @@ proc ::JingleIAX::SessionTerminate {} {
     
     # @@@ Do we need to take any further action (iaxclient::hangup)?
 
-    ::Jabber::JlibCmd jingle send_set $state(sid) "session-terminate"  \
+    ::Jabber::Jlib jingle send_set $state(sid) "session-terminate"  \
       ::JingleIAX::EmptyCB
     set state(sid) ""
 }
@@ -290,7 +290,7 @@ proc ::JingleIAX::SessionInitiateHandler {from jingle sid id} {
     # entity MUST acknowledge receipt of the session initiation request, then 
     # terminate the session.
 
-    ::Jabber::JlibCmd send_iq result {} -to $from -id $id
+    ::Jabber::Jlib send_iq result {} -to $from -id $id
     
     # Must check that we are free to answer.
     if {([iaxclient::state] eq "free") && ($state(sid) eq "")} {
@@ -299,7 +299,7 @@ proc ::JingleIAX::SessionInitiateHandler {from jingle sid id} {
     } else {
 	
 	# Need a direct call since state(sid) can be busy with another sid.
-	::Jabber::JlibCmd jingle send_set $sid "session-terminate"  \
+	::Jabber::Jlib jingle send_set $sid "session-terminate"  \
 	  ::JingleIAX::EmptyCB
     }
 }
@@ -338,9 +338,9 @@ proc ::JingleIAX::TransportAccept {from} {
       -attrlist [list xmlns $xmlns(transport) version 2] \
       -subtags $candidateElems]
 
-    ::Jabber::JlibCmd jingle send_set $state(sid) "transport-accept"  \
+    ::Jabber::Jlib jingle send_set $state(sid) "transport-accept"  \
       ::JingleIAX::EmptyCB [list $transportElem]
-    ::Jabber::JlibCmd jingle send_set $state(sid) "session-accept"    \
+    ::Jabber::Jlib jingle send_set $state(sid) "session-accept"    \
       ::JingleIAX::EmptyCB
 }
 
@@ -373,14 +373,14 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
         set secure [wrapper::getattribute $transport secure]
 
         if { ($transportType ne $xmlns(transport)) && ($version ne 2) } {
-	    ::Jabber::JlibCmd jingle send_error $from $id unsupported-transports
+	    ::Jabber::Jlib jingle send_error $from $id unsupported-transports
 	    SessionTerminate
             return
         }
 
         set candidateList [wrapper::getchildswithtag $transport candidate]
         if {$candidateList eq {}} {
-	    ::Jabber::JlibCmd jingle send_error $from $id unsupported-media
+	    ::Jabber::Jlib jingle send_error $from $id unsupported-media
 	    SessionTerminate
 	    return
 	}
@@ -390,7 +390,7 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
 		set candidateDesc($name,ip) [wrapper::getattribute $candidate ip]
 		set candidateDesc($name,port) [wrapper::getattribute $candidate port]
 	    } else {
-		::Jabber::JlibCmd send_iq_error $from $id 404 cancel bad-request
+		::Jabber::Jlib send_iq_error $from $id 404 cancel bad-request
 		SessionTerminate
 		return
 	    }
@@ -446,7 +446,7 @@ proc ::JingleIAX::TransportAcceptHandler {from jingle sid id} {
 	# @@@ We should provide a list of candidates to ::Phone::DialJingle.
 	# There should be some kind of callback from 'DialJingle' for this???
 	Debug "\t ::Phone::DialJingle ip=$ip, port=$port"
-	set myjid [::Jabber::JlibCmd getthis myjid]
+	set myjid [::Jabber::Jlib getthis myjid]
         if {0} {
 	    ::Phone::DialJingle $ip $port $from $myjid $user $password
 	} else {
@@ -460,7 +460,7 @@ proc ::JingleIAX::SessionTerminateHandler {from jingle sid id} {
     
     Debug "::JingleIAX::SessionTerminateHandler from=$from"
     
-    ::Jabber::JlibCmd send_iq result {} -to $from -id $id
+    ::Jabber::Jlib send_iq result {} -to $from -id $id
     set state(sid) ""
     
     # @@@ Do we need to take any further action (iaxclient::hangup)?
@@ -479,10 +479,10 @@ proc ::JingleIAX::PresenceHangUpHook {jid type args} {
 
     if {$type eq "unavailable"} {
 	set sid $state(sid)
-	if {[::Jabber::JlibCmd jingle havesession $sid]} {
+	if {[::Jabber::Jlib jingle havesession $sid]} {
 	    array set argsA $args
 	    set from $argsA(-from)
-	    set jjid [::Jabber::JlibCmd jingle getvalue $sid jid]
+	    set jjid [::Jabber::Jlib jingle getvalue $sid jid]
 	    if {[jlib::jidequal $jjid $from]} {
 		::Phone::HangupJingle
 	    }
@@ -526,7 +526,7 @@ proc ::JingleIAX::PresenceHook {jid type args} {
     if {0} {
 	set ext [::Jabber::RosterCmd getcapsattr $from ext]
 	if {[lsearch $ext iax] >= 0} {
-	    ::Jabber::JlibCmd caps disco_ext $from iax ::JingleIAX::CapsDiscoCB
+	    ::Jabber::Jlib caps disco_ext $from iax ::JingleIAX::CapsDiscoCB
 	}
     }
 }
@@ -552,7 +552,7 @@ proc ::JingleIAX::SendJinglePresence {type} {
     Debug "::JingleIAX::SendJinglePresence type=$type"
 
     # Send Info to all the contacts on the roster that Jingle Extended Presence.
-    ::Jabber::JlibCmd register_presence_stanza [GetXPresence $type]  \
+    ::Jabber::Jlib register_presence_stanza [GetXPresence $type]  \
       -type available
     ::Jabber::SyncStatus
 }
@@ -601,7 +601,7 @@ proc ::JingleIAX::SetChatButtonState {chattoken} {
 
     # Must use full JID.
     if {[jlib::isbarejid $jid]} {
-	set res [::Jabber::JlibCmd roster gethighestresource $jid]
+	set res [::Jabber::Jlib roster gethighestresource $jid]
 	set jid3 $jid/$res
     } else {
 	set jid3 $jid

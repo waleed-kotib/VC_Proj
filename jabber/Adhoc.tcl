@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Adhoc.tcl,v 1.12 2007-09-13 08:25:37 matben Exp $
+# $Id: Adhoc.tcl,v 1.13 2007-12-20 14:01:25 matben Exp $
 
 # @@@ Maybe all this should be a component?
 
@@ -56,14 +56,14 @@ proc ::Adhoc::DiscoInfoHook {type from queryE args} {
 	return
     }
     set node [wrapper::getattribute $queryE node]
-    if {[::Jabber::JlibCmd disco hasfeature $xmlns(commands) $from]} {
+    if {[::Jabber::Jlib disco hasfeature $xmlns(commands) $from]} {
 	GetCommandList $from [namespace code GetCommandListCB]
     }
 }
 
 proc ::Adhoc::GetCommandList {jid cmd} {
     variable xmlns
-    ::Jabber::JlibCmd disco get_async items $jid $cmd -node $xmlns(commands)
+    ::Jabber::Jlib disco get_async items $jid $cmd -node $xmlns(commands)
 }
 
 proc ::Adhoc::GetCommandListCB {jlibname type from queryE args} {
@@ -73,7 +73,7 @@ proc ::Adhoc::GetCommandListCB {jlibname type from queryE args} {
 proc ::Adhoc::PostMenuHook {m clicked jid node} {
     variable xmlns
     
-    if {![::Jabber::JlibCmd disco hasfeature $xmlns(commands) $jid $node]} {
+    if {![::Jabber::Jlib disco hasfeature $xmlns(commands) $jid $node]} {
 	return
     }
     set name mAdHocCommands
@@ -84,7 +84,7 @@ proc ::Adhoc::PostMenuHook {m clicked jid node} {
     }
     $m entryconfigure $midx -state normal
     set mt [$m entrycget $midx -menu]
-    set xmllist [::Jabber::JlibCmd disco getxml items $jid $xmlns(commands)]
+    set xmllist [::Jabber::Jlib disco getxml items $jid $xmlns(commands)]
     set queryE [wrapper::getfirstchildwithtag $xmllist query]
     foreach itemE [::wrapper::getchildren $queryE] {
 	if {[wrapper::gettag $itemE] eq "item"} {
@@ -105,7 +105,7 @@ proc ::Adhoc::FindLabelForJIDNode {jid node} {
     variable xmlns
 
     set label $jid
-    set xmllist [::Jabber::JlibCmd disco getxml items $jid $xmlns(commands)]
+    set xmllist [::Jabber::Jlib disco getxml items $jid $xmlns(commands)]
     set queryE [wrapper::getfirstchildwithtag $xmllist query]
     foreach itemE [::wrapper::getchildren $queryE] {
 	if {[wrapper::gettag $itemE] eq "item"} {
@@ -129,7 +129,7 @@ proc ::Adhoc::Execute {jid node} {
 
     set commandE [wrapper::createtag command \
       -attrlist [list xmlns $xmlns(commands) node $node action execute]]
-    ::Jabber::JlibCmd send_iq set [list $commandE] -to $jid \
+    ::Jabber::Jlib send_iq set [list $commandE] -to $jid \
       -command [namespace code [list ExecuteCB $jid $node]] \
       -xml:lang [jlib::getlang]
 }
@@ -358,7 +358,7 @@ proc ::Adhoc::Action {w action} {
       sessionid $state(sessionid)]
     set commandE [wrapper::createtag command \
       -attrlist $attr -subtags $xdataEs]
-    ::Jabber::JlibCmd send_iq set [list $commandE] -to $state(jid) \
+    ::Jabber::Jlib send_iq set [list $commandE] -to $state(jid) \
       -command [namespace code [list ActionCB $w]] \
       -xml:lang [jlib::getlang]
 }
@@ -448,7 +448,7 @@ proc ::Adhoc::Cancel {w} {
     set attr [list xmlns $xmlns(commands) node $state(node) action cancel \
       sessionid $state(sessionid)]
     set commandE [wrapper::createtag command -attrlist $attr]
-    ::Jabber::JlibCmd send_iq set [list $commandE] -to $state(jid) \
+    ::Jabber::Jlib send_iq set [list $commandE] -to $state(jid) \
       -xml:lang [jlib::getlang]
 }
 

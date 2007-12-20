@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: disco.tcl,v 1.53 2007-12-20 09:36:07 matben Exp $
+# $Id: disco.tcl,v 1.54 2007-12-20 14:01:26 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -661,7 +661,8 @@ proc jlib::disco::hasfeature {jlibname feature jid {node ""}} {
 
     set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,features)]} {
-	return [expr [lsearch -exact $info($jid,$node,features) $feature] < 0 ? 0 : 1]
+	set features $info($jid,$node,features)
+	return [expr [lsearch -exact $features $feature] < 0 ? 0 : 1]
     } else {
 	return 0
     }
@@ -693,11 +694,8 @@ proc jlib::disco::iscategorytype {jlibname cattype jid {node ""}} {
     
     set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,cattypes)]} {
-	if {[lsearch -glob $info($jid,$node,cattypes) $cattype] >= 0} {
-	    return 1
-	} else {
-	    return 0
-	}
+	set types $info($jid,$node,cattypes)
+	return [expr [lsearch -glob $types $cattype] < 0 ? 0 : 1]
     } else {
 	return 0
     }
@@ -830,41 +828,6 @@ proc jlib::disco::nodes {jlibname jid {node ""}} {
 	return
     }
 }
-
-# Testing............
-
-proc jlib::disco::parentlist {jlibname jid {node ""}} {
-    
-    upvar ${jlibname}::disco::items items
-
-    set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,$node,paL)]} {
-	set items($jid,$node,paL) [lsort -unique $items($jid,$node,paL)]
-	return $items($jid,$node,paL)
-    } else {
-	return
-    }
-}
-
-proc jlib::disco::getparentrecursive {jlibname jid {node ""}} {
-    
-    upvar ${jlibname}::disco::items items
-
-    set jid [jlib::jidmap $jid]
-    if {[info exists items($jid,$node,paL)]} {
-	set plist [list]
-	set pitem $items($jid,$node,paL)
-	while {$pitem ne {}} {
-	    
-	
-	}
-	
-    } else {
-	return
-    }
-}
-
-#....................
 
 proc jlib::disco::handle_get {discotype jlibname from queryE args} {
     

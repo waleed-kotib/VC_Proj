@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.13 2007-11-19 12:57:29 matben Exp $
+# $Id: ChatTheme.tcl,v 1.14 2007-12-20 14:01:25 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -382,7 +382,7 @@ proc ::ChatTheme::OnAvatarHash {jid} {
 	}
     }
     if {$have} {
-	set hash [::Jabber::JlibCmd avatar get_hash $jid]
+	set hash [::Jabber::Jlib avatar get_hash $jid]
 	if {$hash ne ""} {
 	    ::Avatar::GetAsyncIfExists $jid
 	}

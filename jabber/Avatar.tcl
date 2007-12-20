@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.42 2007-11-11 08:35:22 matben Exp $
+# $Id: Avatar.tcl,v 1.43 2007-12-20 14:01:25 matben Exp $
 
 # @@@ Issues:
 # 
@@ -200,7 +200,7 @@ proc ::Avatar::JabberInitHook {jlibname} {
     }
     ReadHashmap $aprefs(hashmapFile)
     
-    ::Jabber::JlibCmd avatar configure -command ::Avatar::OnNewHash
+    ::Jabber::Jlib avatar configure -command ::Avatar::OnNewHash
 }
 
 proc ::Avatar::LoginHook {} {
@@ -1006,7 +1006,7 @@ proc ::Avatar::PresenceHook {jid type args} {
 	return
     }
     set jid2 [jlib::barejid $jid]
-    set hash [::Jabber::JlibCmd avatar get_hash $jid2]
+    set hash [::Jabber::Jlib avatar get_hash $jid2]
     if {$hash eq ""} {
 	
 	# Clear any cached hash map we may have. Not the image though.

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.223 2007-11-30 15:30:13 matben Exp $
+# $Id: Roster.tcl,v 1.224 2007-12-20 14:01:26 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -403,7 +403,7 @@ proc ::Roster::SendRemove {jidrm} {
 
 proc ::Roster::Unregister {jid} {    
     ::Register::Remove $jid
-    ::Jabber::JlibCmd roster send_remove [jlib::barejid $jid]
+    ::Jabber::Jlib roster send_remove [jlib::barejid $jid]
 }
     
 # Roster::RegisterPopupEntry --
@@ -519,7 +519,7 @@ proc ::Roster::PostMenuCmd {m mType clicked jidL status} {
 	set midx [::AMenu::GetMenuIndex $m mLoginTrpt]
 	if {$midx ne ""} {
 	    set jid [lindex $jidL 0]
-	    set types [::Jabber::JlibCmd disco types $jid]
+	    set types [::Jabber::Jlib disco types $jid]
 	    if {[regexp {gateway/([^ ]+)} $types - trpt]} {
 		if {[HaveNameForTrpt $trpt]} {
 		    set tname [GetNameFromTrpt $trpt]

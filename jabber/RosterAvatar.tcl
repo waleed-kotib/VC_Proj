@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.46 2007-11-10 15:44:59 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.47 2007-12-20 14:01:26 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -775,7 +775,7 @@ proc ::RosterAvatar::OnAvatarHash {jid2} {
     
     # If removed (empty hash) we do this right away, else the -autoget and
     # hooks fixes it.
-    set hash [::Jabber::JlibCmd avatar get_hash $jid2]
+    set hash [::Jabber::Jlib avatar get_hash $jid2]
     if {$hash eq ""} {
 	OnAvatarPhoto $jid2
     }
@@ -799,7 +799,7 @@ proc ::RosterAvatar::OnAvatarPhoto {jid2} {
     if {($styleName ne "avatar") && ($styleName ne "avatarlarge")} {
 	return
     }
-    set hash [::Jabber::JlibCmd avatar get_hash $jid2]
+    set hash [::Jabber::Jlib avatar get_hash $jid2]
     if {$hash eq ""} {
 	set type remove
     } else {

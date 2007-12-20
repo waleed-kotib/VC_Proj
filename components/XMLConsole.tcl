@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: XMLConsole.tcl,v 1.6 2007-12-04 07:12:24 matben Exp $
+# $Id: XMLConsole.tcl,v 1.7 2007-12-20 14:01:25 matben Exp $
 
 namespace eval ::XMLConsole { 
 
@@ -205,8 +205,8 @@ proc ::XMLConsole::Build {} {
 
     ::UI::SetWindowGeometry $w
     
-    ::Jabber::JlibCmd tee_recv add [namespace code [list Recv $w]]
-    ::Jabber::JlibCmd tee_send add [namespace code [list Send $w]]
+    ::Jabber::Jlib tee_recv add [namespace code [list Recv $w]]
+    ::Jabber::Jlib tee_send add [namespace code [list Send $w]]
     
     return $w
 }
@@ -218,7 +218,7 @@ proc ::XMLConsole::DoSend {w} {
     set wstext $state(send)
     set xml [string trim [$wstext get 1.0 end]]
     
-    ::Jabber::JlibCmd sendraw $xml
+    ::Jabber::Jlib sendraw $xml
     $wstext delete 1.0 end
     
     set wtext $state(text)
@@ -286,8 +286,8 @@ proc ::XMLConsole::Free {w} {
 
     set opts(pretty) $state(pretty)
 
-    ::Jabber::JlibCmd tee_recv remove [namespace code [list Recv $w]]
-    ::Jabber::JlibCmd tee_send remove [namespace code [list Send $w]]
+    ::Jabber::Jlib tee_recv remove [namespace code [list Recv $w]]
+    ::Jabber::Jlib tee_send remove [namespace code [list Send $w]]
     
     unset -nocomplain $w
 }

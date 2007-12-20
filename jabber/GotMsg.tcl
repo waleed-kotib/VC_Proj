@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GotMsg.tcl,v 1.56 2007-11-04 13:54:50 matben Exp $
+# $Id: GotMsg.tcl,v 1.57 2007-12-20 14:01:25 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -115,7 +115,7 @@ proc ::GotMsg::Show {thisMsgId} {
     
     set msgIdDisplay $thisMsgId
     lassign [::MailBox::GetContentList $thisMsgId] subject jid date body
-    set jid [::Jabber::JlibCmd getrecipientjid $jid]
+    set jid [::Jabber::Jlib getrecipientjid $jid]
     set jidtxt $jid
     set smartdate [::Utils::SmartClockFormat [clock scan $date]]
     

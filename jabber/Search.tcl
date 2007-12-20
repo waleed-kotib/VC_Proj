@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.40 2007-11-17 14:15:05 matben Exp $
+# $Id: Search.tcl,v 1.41 2007-12-20 14:01:26 matben Exp $
 
 package provide Search 1.0
 
@@ -411,7 +411,7 @@ proc ::Search::DoSearch {w} {
     # Returns the hierarchical xml list starting with the <x> element.
     set subelements [::JForms::GetXML $state(formtoken)]
     set server $state(server)
-    ::Jabber::JlibCmd search_set $server  \
+    ::Jabber::Jlib search_set $server  \
       [namespace code [list ResultCallback $w $server]] -subtags $subelements
 }
 

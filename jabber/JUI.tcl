@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.228 2007-12-07 15:43:36 matben Exp $
+# $Id: JUI.tcl,v 1.229 2007-12-20 14:01:25 matben Exp $
 
 package provide JUI 1.0
 
@@ -566,8 +566,8 @@ proc ::JUI::CombiBoxLoginHook {} {
     set wnick $combiBox(wnick)
     $wnick configure -text $ujid
 
-    set server [::Jabber::JlibCmd getserver]
-    ::Jabber::JlibCmd pep have $server [namespace code CombiBoxHavePEP]
+    set server [::Jabber::Jlib getserver]
+    ::Jabber::Jlib pep have $server [namespace code CombiBoxHavePEP]
 }
 
 proc ::JUI::CombiBoxHavePEP {jlib have} {
@@ -1160,7 +1160,7 @@ proc ::JUI::LoginHook {} {
     
     set w $jwapp(w)
     if {[info exists jwapp(secure)] && [winfo exists $jwapp(secure)]} {
-	set sasl [::Jabber::JlibCmd connect feature sasl]
+	set sasl [::Jabber::Jlib connect feature sasl]
 	if {$sasl} {
 	    set name [::Theme::GetImage [option get $w secureImage {}]]
 	    $jwapp(secure) configure -image $name

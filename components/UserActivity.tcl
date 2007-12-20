@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.11 2007-11-17 07:40:52 matben Exp $
+#  $Id: UserActivity.tcl,v 1.12 2007-12-20 14:01:25 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -177,9 +177,9 @@ proc ::UserActivity::LoginHook {} {
     variable xmlns
    
     # Disco server for pubsub/pep support.
-    set server [::Jabber::JlibCmd getserver]
-    ::Jabber::JlibCmd pep have $server [namespace code HavePEP]
-    ::Jabber::JlibCmd pubsub register_event [namespace code Event] \
+    set server [::Jabber::Jlib getserver]
+    ::Jabber::Jlib pep have $server [namespace code HavePEP]
+    ::Jabber::Jlib pubsub register_event [namespace code Event] \
       -node $xmlns(activity)
 }
 
@@ -248,9 +248,9 @@ proc ::UserActivity::Dlg {} {
     ConfigSpecificMenu $w $state(activity)
             
     # Get our own published activity and fill in.
-    set myjid2 [::Jabber::JlibCmd  myjid2]
+    set myjid2 [::Jabber::Jlib  myjid2]
     set cb [namespace code [list ItemsCB $w]]
-    ::Jabber::JlibCmd pubsub items $myjid2 $xmlns(activity) -command $cb
+    ::Jabber::Jlib pubsub items $myjid2 $xmlns(activity) -command $cb
 
 }
 
@@ -389,13 +389,13 @@ proc ::UserActivity::Publish {w} {
     set itemE [wrapper::createtag item \
       -attrlist [list id current] -subtags [list $activityE]]
 
-    ::Jabber::JlibCmd pep publish $xmlns(activity) $itemE
+    ::Jabber::Jlib pep publish $xmlns(activity) $itemE
 }
 
 proc ::UserActivity::Retract {w} {
     variable xmlns
 
-    ::Jabber::JlibCmd pep retract $xmlns(activity) -notify 1
+    ::Jabber::Jlib pep retract $xmlns(activity) -notify 1
 }
 
 # UserActivity::Event --

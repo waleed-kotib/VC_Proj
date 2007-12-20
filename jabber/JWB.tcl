@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.91 2007-11-24 08:18:27 matben Exp $
+# $Id: JWB.tcl,v 1.92 2007-12-20 14:01:26 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -931,16 +931,16 @@ proc ::JWB::SVGImageImportElem {w cmd args} {
     
     if {[string equal $jwbstate($w,type) "groupchat"]} {
 	set isRoom 1
-    } elseif {[::Jabber::JlibCmd service isroom $jid]} {
+    } elseif {[::Jabber::Jlib service isroom $jid]} {
 	set isRoom 1
     } else {
 	set isRoom 0
     }
     if {$isRoom} {
-	set nick [::Jabber::JlibCmd service mynick $jid]
+	set nick [::Jabber::Jlib service mynick $jid]
 	set myjid $jid/$nick
     } else {
-	set myjid [::Jabber::JlibCmd myjid]
+	set myjid [::Jabber::Jlib myjid]
     }
 
     # Create the sipub element to embed in <image/>
@@ -1427,7 +1427,7 @@ proc ::JWB::SVGImageHandlerEx {w imageE opts} {
     }
     
     # We do a sipub request to get the file.
-    ::Jabber::JlibCmd sipub start $from $spid \
+    ::Jabber::Jlib sipub start $from $spid \
       [namespace code [list SVGImageStartCB $w $imageE $opts]]
 }
 
@@ -1474,7 +1474,7 @@ proc ::JWB::SVGImageStartCB {w imageE opts type startingE} {
 	::Import::ObjectNew $sid $w $dstPath $optsL
 
 	# We shall be prepared to get the si-set request.
-	::Jabber::JlibCmd sipub set_accept_handler $sid \
+	::Jabber::Jlib sipub set_accept_handler $sid \
 	  -channel $fd \
 	  -progress [namespace code [list SVGImageStreamProgress $w]] \
 	  -command  [namespace code [list SVGImageStreamCmd $w]]

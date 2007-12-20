@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: OOB.tcl,v 1.62 2007-12-02 15:26:45 matben Exp $
+# $Id: OOB.tcl,v 1.63 2007-12-20 14:01:26 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -159,7 +159,7 @@ proc ::OOB::HttpCmd {jid id subiq token status {errmsg ""}} {
 
     switch -- $status {
 	ok {
-	    ::Jabber::JlibCmd send_iq "result" {} -to $jid -id $id
+	    ::Jabber::Jlib send_iq "result" {} -to $jid -id $id
 	}
 	reset {
 	    ReturnError $jid $id $subiq 406
@@ -190,7 +190,7 @@ proc ::OOB::ReturnError {jid id subiq ncode} {
     set errElem [wrapper::createtag "error" -attrlist \
       [list code $ncode type $type] -subtags [list $subElem]]
     
-    ::Jabber::JlibCmd send_iq "error" [list $subiq $errElem] -to $jid -id $id
+    ::Jabber::Jlib send_iq "error" [list $subiq $errElem] -to $jid -id $id
 }
 
 # OOB::BuildText --

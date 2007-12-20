@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.27 2007-11-17 07:40:52 matben Exp $
+# $Id: Growl.tcl,v 1.28 2007-12-20 14:01:24 matben Exp $
 
 namespace eval ::Growl { 
 
@@ -132,7 +132,7 @@ proc ::Growl::PresenceHook {jid type args} {
 	# This just translates the show code into a readable text.
 	set showMsg [::Roster::MapShowToText $show]
 	set djid [::Roster::GetDisplayName $jid]
-	if {[::Jabber::JlibCmd service isroom $jid]} {
+	if {[::Jabber::Jlib service isroom $jid]} {
 	    if {[info exists argsA(-from)]} {
 		set djid $argsA(-from)
 	    } 

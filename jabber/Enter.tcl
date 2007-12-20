@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.18 2007-09-15 13:16:12 matben Exp $
+# $Id: Enter.tcl,v 1.19 2007-12-20 14:01:25 matben Exp $
 
 package provide Enter 1.0
 
@@ -97,7 +97,7 @@ proc ::Enter::Build {protocol args} {
 	if {$nickname ne ""} {
 	    set state(nickname) $nickname
 	} else {
-	    jlib::splitjidex [Jabber::JlibCmd myjid] node - -
+	    jlib::splitjidex [Jabber::Jlib myjid] node - -
 	    set state(nickname) [jlib::unescapestr $node]
 	}
     } else {
