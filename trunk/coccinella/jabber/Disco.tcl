@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.144 2007-12-20 14:20:49 matben Exp $
+# $Id: Disco.tcl,v 1.145 2007-12-20 14:27:24 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -83,6 +83,8 @@ namespace eval ::Disco:: {
     variable regPopMenuType [list]
 
     variable dlguid 0
+    
+    variable cacheFile [file join $::this(prefsPath) discoInfoCache]
 
     # Use a unique canvas tag in the tree widget for each jid put there.
     # This is needed for the balloons that need a real canvas tag, and that
@@ -214,11 +216,11 @@ proc ::Disco::InitMenus {} {
 
 proc ::Disco::NewJlibHook {jlibName} {
     global  this config
-	    
+    variable cacheFile
+    
     $jlibName disco registerhandler ::Disco::Handler
     if {$config(disco,cache-info)} {
-	set fileName [file join $this(prefsPath) discoInfoCache]
-	CacheInit $fileName
+	CacheInit $cacheFile
     }
 }
 
@@ -235,7 +237,13 @@ proc ::Disco::LoginHook {} {
 }
 
 proc ::Disco::LogoutHook {} {
+    global  config
     variable wtab
+    variable cacheFile
+    
+    if {$config(disco,cache-info)} {
+	CacheWrite $cacheFile
+    }
     
     if {[winfo exists $wtab]} {
 	set wnb [::JUI::GetNotebook]
