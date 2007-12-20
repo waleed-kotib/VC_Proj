@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: disco.tcl,v 1.52 2007-10-02 08:18:08 matben Exp $
+# $Id: disco.tcl,v 1.53 2007-12-20 09:36:07 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -469,59 +469,7 @@ proc jlib::disco::parse_get_items {jlibname from queryE} {
 	
 	# Keep list of parents since not unique.
 	lappend items($jid,$node,paL) $pitem
-	
-	#--------------------------
-	if {0} {
-	    
-	# Case (2) above is particularly problematic since an entity jid's
-	# position in the disco tree is not unique.
-	if {$node eq ""} {
-	    
-	    # This is a jid.
-	    if {$pnode eq ""} {
-
-		# case (0):
-		set xcase 0
-		set items($jid,parent) $from
-		set items($jid,parents) [concat $items($from,parents) \
-		  [list $from]]
-	    } else {
-
-		# case (2):
-		# The owning entity is required to describe this item. BAD.
-		set xcase 2
-		set items(2,$from,$pnode,$jid,$node,parent) $from
-		set items(2,$from,$pnode,$jid,$node,parents) $from
-	    }
-	} else {
-	    
-	    # This is a node. case (1) or (3):
-	    # Init if the first one.
-	    if {$pnode eq ""} {
-		set xcase 3
-		set items($jid,$node,pnode) [list]
-		set items($jid,$node,pnodes) [list]
-	    } else {
-		set xcase 1
-		set items($jid,$node,pnode) $pnode
-		set items($jid,$node,pnodes)  \
-		  [concat $items($from,$pnode,pnodes) [list $pnode]]
-	    }
-	}
-	if {$xcase == 2} {
-
-	    # The owning entity is required to describe this item. BAD.
-	    set items(2,$from,$pnode,$jid,$node,parent2) $pitem
-	    set items(2,$from,$pnode,$jid,$node,parents2) \
-	      [concat $items($from,$pnode,parents2) [list $pitem]]
-	} else {
-	    set items($jid,$node,parent2) $pitem
-	    set items($jid,$node,parents2) [concat $items($from,$pnode,parents2) \
-	      [list $pitem]]
-	}
-	}
-	#-----------------------------
-	
+		
 	# Cache the optional attributes.
 	# Any {jid node} must have identical attributes and childrens.
 	foreach key {name action} {
