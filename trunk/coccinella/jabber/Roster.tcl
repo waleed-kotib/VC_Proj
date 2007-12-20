@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.224 2007-12-20 14:01:26 matben Exp $
+# $Id: Roster.tcl,v 1.225 2007-12-20 14:54:08 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -989,8 +989,6 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     
     array set argsA $args
     
-    ::Debug 6 "GetPresenceIcon jid=$jid, presence=$presence, args=$args"
-    
     # Construct the 'type/sub' specifying the icon.
     set itype status
     set isub  $presence
@@ -1014,7 +1012,8 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     if {![jlib::jidequal $host $jstate(server)]} {
 	
 	# If empty we have likely not yet browsed etc.
-	set cattype [lindex [$jstate(jlib) disco types $host] 0]
+	#set cattype [lindex [$jstate(jlib) disco types $host] 0]
+	set cattype [lindex [::Disco::AccessTypes $host] 0]
 	set subtype [lindex [split $cattype /] 1]
 	if {[lsearch -exact [::Rosticons::GetTypes] $subtype] >= 0} {
 	    set itype $subtype
