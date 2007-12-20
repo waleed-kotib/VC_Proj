@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.141 2007-12-19 13:33:34 matben Exp $
+# $Id: Disco.tcl,v 1.142 2007-12-20 07:26:25 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -93,8 +93,6 @@ namespace eval ::Disco:: {
     variable wtree  -
     variable wdisco -
    
-    variable treeRefCount 0
-
     set ::config(disco,show-head-on-result)  1
     set ::config(disco,add-server-show-head) 1
     set ::config(disco,add-server-autolist)  1
@@ -1200,25 +1198,18 @@ proc ::Disco::CloseTreeCmd {w vstruct} {
 #
 # Arguments:
 #       vstruct     {{jid node} {jid node} ...}
+#       level       this is the recursion level of TreeItem calls.
 #
 
-proc ::Disco::TreeItem {vstruct} {    
+proc ::Disco::TreeItem {vstruct {level 0}} {    
     variable wtree    
     variable wdisco
     variable treeuid
-    variable treeRefCount
     upvar ::Jabber::jstate  jstate
     upvar ::Jabber::jprefs  jprefs
 
     ::Debug 4 "::Disco::TreeItem vstruct='$vstruct'"
-    
-    # This is for debug purposes:
-    # https://bugs.launchpad.net/coccinella/+bug/141344
-    incr treeRefCount
-    if {$treeRefCount > 20} {
-	puts "+++ max refCount had been reached, likely a circular reference in disco tree: vstruct=$vstruct"
-    }
-    
+        
     # We disco servers jid 'items+info', and disco its childrens 'info'.    
     
     set jid   [lindex $vstruct end 0]
@@ -1299,9 +1290,15 @@ proc ::Disco::TreeItem {vstruct} {
     # Note: jid and node childs can be mixed!
     set cstructs [$jstate(jlib) disco childs $jid $node]
         
-    foreach c $cstructs {
-	set cv [concat $vstruct [list $c]]
-	TreeItem $cv
+    # In order to avoid circular references in the disco tree we allow only
+    # the first level of recursion. Circular reference is when an item has
+    # itself as a child.
+    incr level
+    if {$level < 2} {
+	foreach c $cstructs {
+	    set cv [concat $vstruct [list $c]]
+	    TreeItem $cv $level
+	}
     }
     
     # Sort after all childrens have been added.
@@ -1312,7 +1309,6 @@ proc ::Disco::TreeItem {vstruct} {
 	    ::ITree::Sort $wtree $vstruct -increasing -dictionary
 	}
     }
-    incr treeRefCount -1
 }
 
 proc ::Disco::MakeBalloonHelp {vstruct} {
