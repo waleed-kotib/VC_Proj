@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.266 2007-12-21 09:44:55 matben Exp $
+# $Id: Chat.tcl,v 1.267 2007-12-21 14:04:20 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1431,6 +1431,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     } else {
 	set chatstate(minjid) $jid2
     }
+    set isroom [::Jabber::Jlib service isroom $jid2]
     
     set chatstate(exists)           1
     set chatstate(fromjid)          $jid
@@ -1441,6 +1442,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     set chatstate(threadid)         $threadID
     set chatstate(nameorjid)        [::Roster::GetNameOrJID $jid2]
     set chatstate(state)            normal  
+    set chatstate(isroom)           $isroom
     
     # The subject entries content (-textvariable).
     set chatstate(subject)          ""
@@ -1459,7 +1461,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     set chatstate(havesent)         0
     set chatstate(themed)           $jprefs(chat,themed)
 
-    if {[::Jabber::Jlib service isroom $jid2]} {
+    if {$isroom} {
 	set chatstate(displayname) [jlib::resourcejid $jid]
     } else {
 	set chatstate(displayname) [::Roster::GetDisplayName $jid2]
@@ -2738,13 +2740,13 @@ proc ::Chat::BuildSavedDialogs {} {
 	return
     }
     set mejidmap $jstate(mejidmap)
-    array set dlgArr $jprefs(chat,dialogs)
-    if {![info exists dlgArr($mejidmap)]} {
+    array set dlgA $jprefs(chat,dialogs)
+    if {![info exists dlgA($mejidmap)]} {
 	return
     }
     
     # Build dialog only if not exists.
-    foreach spec $dlgArr($mejidmap) {
+    foreach spec $dlgA($mejidmap) {
 	set jid  [lindex $spec 0]
 	set opts [lindex $spec 1 end]
 	set chattoken [GetTokenFrom chat jid [jlib::ESC $jid]*]
@@ -2766,17 +2768,19 @@ proc ::Chat::SaveDialogs {} {
 	return
     }
     set mejidmap $cprefs(lastmejid)
-    array set dlgArr $jprefs(chat,dialogs)
-    #array unset dlgArr [ESCglobs $mejidmap]
-    unset -nocomplain dlgArr($mejidmap)
+    array set dlgA $jprefs(chat,dialogs)
+    unset -nocomplain dlgA($mejidmap)
     
     foreach chattoken [GetTokenList chat] {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
-	lappend dlgArr($mejidmap) [list $chatstate(jid2)]
+	# [Bug 177749] Do not remember private chatroom chats
+	if {!$chatstate(isroom)} {
+	    lappend dlgA($mejidmap) [list $chatstate(jid2)]
+	}
     }
-    set jprefs(chat,dialogs) [array get dlgArr]
+    set jprefs(chat,dialogs) [array get dlgA]
 }
 
 proc ::Chat::ConfigureTextTags {w wtext} {
