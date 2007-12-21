@@ -55,9 +55,27 @@ Instructions (for unix systems):
     You are free to pick the underlined character which suits your language 
     yourself.
 
-6.  Your new language catalog should now be loaded automatically.
+6.  Some of the strings contain one or more "%s". These will be replaced by
+    variables when the string is displayed. You need to see the code if you
+    want to know the replacement variable.
 
-7.  Some components and packages have their own catalogs inside
+    In some cases your language may have a different grammar than English,
+    and there may be situations where the order of the replacement variables
+    must change. In such situations you need to add positional codes.
+    An example discribes it best:
+
+    {This is the %s and %s attempt} FIRST SECOND 
+    This is the FIRST and SECOND attempt 
+
+    {This is the %2$s and %1$s attempt} FIRST SECOND 
+    This is the SECOND and FIRST attempt 
+
+    You just replace "%s" with "%#$s" where # is an integer describing the 
+    position.
+
+7.  Your new language catalog should now be loaded automatically.
+
+8.  Some components and packages have their own catalogs inside
     coccinella/msgs/components, see the README-msgs-components file inside
     this directory. The process is essentially repeated for each directory.
 
