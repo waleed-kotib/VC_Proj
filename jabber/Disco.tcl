@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.145 2007-12-20 14:27:24 matben Exp $
+# $Id: Disco.tcl,v 1.146 2007-12-21 15:03:24 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -220,7 +220,9 @@ proc ::Disco::NewJlibHook {jlibName} {
     
     $jlibName disco registerhandler ::Disco::Handler
     if {$config(disco,cache-info)} {
-	CacheInit $cacheFile
+	if {[file exists $cacheFile]} {
+	    CacheInit $cacheFile
+	}
     }
 }
 
