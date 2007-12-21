@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.265 2007-12-21 07:23:16 matben Exp $
+# $Id: Chat.tcl,v 1.266 2007-12-21 09:44:55 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -579,6 +579,9 @@ proc ::Chat::GotMsg {xmldata} {
     set body   [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     set thread [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata thread]]
 
+    # In case we chat with a room participant we must keep the resource part!
+    set isroom [::Jabber::Jlib service isroom $mjid2]
+    
     # We must follow the thread...
     # There are several cases to deal with: Have thread page, have dialog?
     if {($thread ne "") && $config(chat,allow-multi-thread-per-jid)} {
@@ -587,7 +590,11 @@ proc ::Chat::GotMsg {xmldata} {
 	
 	# Try to find a reasonable fallback for clients that fail here (Psi).
 	# Find if we have registered any chat for this jid 2/3.
-	set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
+	if {$isroom} {
+	    set chattoken [GetTokenFrom chat jid $mjid]
+	} else {
+	    set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
+	}
 	if {$chattoken eq ""} {
 	    
 	    # Need to create a new thread ID.
@@ -630,7 +637,7 @@ proc ::Chat::GotMsg {xmldata} {
     set chatstate(fromjid) $jid
     
     # Is this really needed here?
-    if {[::Jabber::Jlib service isroom $jid2]} {
+    if {$isroom} {
 	set chatstate(displayname) [jlib::resourcejid $jid]
     } else {
 	set chatstate(displayname) [::Roster::GetDisplayName $jid2]
