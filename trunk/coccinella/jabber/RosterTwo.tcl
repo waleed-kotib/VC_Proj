@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTwo.tcl,v 1.25 2007-11-03 11:38:55 matben Exp $
+# $Id: RosterTwo.tcl,v 1.26 2007-12-21 08:39:13 matben Exp $
 
 package require RosterTree
 
@@ -178,7 +178,7 @@ proc ::RosterTwo::CreateItem {jid presence args} {
     if {!$jprefs(rost,showOffline) && ($presence eq "unavailable")} {
 	return
     }
-    set istrpt [::Roster::IsTransportHeuristics $jid]
+    set istrpt [::Roster::IsTransportEx $jid]
     if {$istrpt && !$jprefs(rost,showTrpts)} {
 	return
     }

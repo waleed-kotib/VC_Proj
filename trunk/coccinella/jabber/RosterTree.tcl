@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.94 2007-12-20 14:01:26 matben Exp $
+# $Id: RosterTree.tcl,v 1.95 2007-12-21 08:39:13 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1132,7 +1132,7 @@ proc ::RosterTree::OnPopup {x y} {
 	jid {
 	    set jid3 [lindex $tags 1]
 	    set jidL [list $jid3]
-	    set istrpt [::Roster::IsTransportHeuristics $jid3]
+	    set istrpt [::Roster::IsTransportEx $jid3]
 	    if {$istrpt} {
 		lappend clicked trpt
 	    } else {
@@ -1426,7 +1426,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     }
     
     # Filter out those we don't want to see.
-    set istrpt [::Roster::IsTransportHeuristics $jid]
+    set istrpt [::Roster::IsTransportEx $jid]
     if {$istrpt} {
 	if {!$jprefs(rost,showTrpts)} {
 	    return
@@ -1588,7 +1588,7 @@ proc ::RosterTree::BasePostProcessDiscoInfo {from column elem} {
     foreach jid $jidL {
 	
 	# Ordinary users and so far unrecognized transports.
-	set istrpt [::Roster::IsTransportHeuristics $jid]
+	set istrpt [::Roster::IsTransportEx $jid]
 	set icon [::Roster::GetPresenceIconFromJid $jid]
 	set tag [list jid $jid]	
 	
@@ -1642,7 +1642,7 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
     # since a user may be logged in from more than one resource.
     # Note that some (icq) transports have 3-tier items that are unavailable!
 
-    set istrpt [::Roster::IsTransportHeuristics $jid]
+    set istrpt [::Roster::IsTransportEx $jid]
     set server $jstate(server)
 
     if {[info exists argsA(-name)] && ($argsA(-name) ne "")} {
