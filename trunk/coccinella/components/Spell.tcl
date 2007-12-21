@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Spell.tcl,v 1.9 2007-11-17 07:40:52 matben Exp $
+# $Id: Spell.tcl,v 1.10 2007-12-21 13:50:14 matben Exp $
 
 package require spell
 
@@ -30,6 +30,10 @@ namespace eval ::Spell {
 	    set programs $::env(ProgramFiles)
 	}
 	spell::addautopath [file join $programs Aspell bin]
+    }
+    if {$::tcl_platform(os) eq "Darwin"} {
+	# Seems not always in PATH variable.
+	spell::addautopath /sw/bin/
     }
     if {![spell::have]} {
 	return
