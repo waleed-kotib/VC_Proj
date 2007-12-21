@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.264 2007-12-20 14:01:25 matben Exp $
+# $Id: Chat.tcl,v 1.265 2007-12-21 07:23:16 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1961,6 +1961,8 @@ proc ::Chat::DnDDebugDump {win} {
 }
 
 proc ::Chat::OnDestroyThread {chattoken} {
+    global  config
+    upvar ::Jabber::jprefs jprefs
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -1973,6 +1975,10 @@ proc ::Chat::OnDestroyThread {chattoken} {
         SendChatState $chattoken $chatstate(chatstate)
     }
     DeregisterPresence $chattoken
+    
+    if {$jprefs(aa,on-hidden-tabs)} {
+	AAReset $chattoken
+    }
     
     # Call the hook just before deleting the state array so we can ask it.
     ::hooks::run deleteChatThreadHook $chattoken
@@ -2294,10 +2300,8 @@ proc ::Chat::TabChanged {dlgtoken} {
         foreach ichattoken $chattokens {
             if { $ichattoken eq $chattoken } {
                 ChangeChatState $ichattoken focus
-		AACancel $ichattoken
             } else {
                 ChangeChatState $ichattoken lostfocus
-		AAStart $ichattoken
             }
             upvar 0 $ichattoken ichatstate
             SendChatState $ichattoken $ichatstate(chatstate)
@@ -3919,6 +3923,7 @@ proc ::Chat::AAStart {chattoken} {
 	set id [after $ms [namespace code [list AACmd $chattoken xa]]]
 	set chatstate(aa,id-xa) $id
     }
+    #bind $chatstate(wthread) <Destroy> +[list ::Chat::AAOnDestroyThread $chattoken]
 }
 
 proc ::Chat::AACancel {chattoken} {
@@ -3928,17 +3933,24 @@ proc ::Chat::AACancel {chattoken} {
 
     #puts "::Chat::AACancel chattoken=$chattoken"
     
+    AAReset $chattoken
+    if {[info exists chatstate(aa,show)]} {
+	::Jabber::SetStatus $jstate(show) -status $jstate(status) \
+	  -to $chatstate(jid)
+	unset chatstate(aa,show)
+    }
+}
+
+proc ::Chat::AAReset {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
     if {[info exists chatstate(aa,id-away)]} {
 	after cancel $chatstate(aa,id-away)
     }
     if {[info exists chatstate(aa,id-xa)]} {
 	after cancel $chatstate(aa,id-xa)
     }    
-    if {[info exists chatstate(aa,show)]} {
-	::Jabber::SetStatus $jstate(show) -status $jstate(status) \
-	  -to $chatstate(jid)
-	unset chatstate(aa,show)
-    }
 }
 
 proc ::Chat::AACmd {chattoken show} {
@@ -3948,7 +3960,7 @@ proc ::Chat::AACmd {chattoken show} {
     upvar ::Jabber::jstate jstate
 
     #puts "::Chat::AACmd chattoken=$chattoken"
-    
+        
     # Auto away and extended away are only set when the
     # current status has a lower priority than away or xa respectively.
     set currPrio [::AutoAway::GetPriorityForShow $jstate(show)]
