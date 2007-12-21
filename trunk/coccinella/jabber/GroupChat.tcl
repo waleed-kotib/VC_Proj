@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.226 2007-12-20 14:01:25 matben Exp $
+# $Id: GroupChat.tcl,v 1.227 2007-12-21 14:34:11 matben Exp $
 
 package require Create
 package require Enter
@@ -197,6 +197,8 @@ namespace eval ::GroupChat:: {
     variable buttonPressMillis 1000
     variable waitUntilEditMillis 2000
 
+    # Shall we automatically rejoin open groupchat on login?
+    set ::config(groupchat,login-autojoin) 1
 }
 
 proc ::GroupChat::InitHook {} {
@@ -790,6 +792,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set chatstate(ignore,$roomjid)  0
     set chatstate(afterids)       {}
     set chatstate(nhiddenmsgs)    0
+    set chatstate(mynick)         [::Jabber::Jlib service mynick $roomjid]
     
     # For the tabs and title etc.
     if {$chatstate(roomName) ne ""} {
@@ -2599,6 +2602,9 @@ proc ::GroupChat::SetNickCB {chattoken jlib xmldata} {
     
     set from [wrapper::getattribute $xmldata from]
     set type [wrapper::getattribute $xmldata type]
+
+    set chatstate(mynick) [::Jabber::Jlib service mynick $chatstate(roomjid)]
+
     if {[string equal $type "error"]} {
 	set errspec [jlib::getstanzaerrorspec $xmldata]
 	set errmsg ""
@@ -2610,7 +2616,7 @@ proc ::GroupChat::SetNickCB {chattoken jlib xmldata} {
 	set str [mc mucIQError2 $roomName]
 	append str "\n[mc Error]: $errmsg"
 	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
-    }    
+    }
 }
 
 proc ::GroupChat::Send {dlgtoken} {
@@ -3141,14 +3147,26 @@ proc ::GroupChat::LogoutHook {} {
 }
 
 proc ::GroupChat::LoginHook {} {
+    global  config
     
-    # @@@ Perhaps we should autojoin any open groupchat dialogs?
-    
+    # Perhaps we should autojoin any open groupchat dialogs?
+    if {$config(groupchat,login-autojoin)} {
+	JoinAllOpen
+    }
     foreach chattoken [GetTokenList chat] {
 	variable $chattoken
 	upvar 0 $chattoken chatstate
 
 	$chatstate(wbtstatus) state {!disabled}
+    }
+}
+
+proc ::GroupChat::JoinAllOpen {} {
+    
+    foreach chattoken [GetTokenList chat] {
+	variable $chattoken
+	upvar 0 $chattoken chatstate
+	::Enter::EnterRoom $chatstate(roomjid) $chatstate(mynick)
     }
 }
 
