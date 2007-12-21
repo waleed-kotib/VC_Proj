@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.225 2007-12-20 14:54:08 matben Exp $
+# $Id: Roster.tcl,v 1.226 2007-12-21 08:39:13 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -939,7 +939,7 @@ proc ::Roster::IsCoccinella {jid3} {
     upvar ::Jabber::xmppxmlns xmppxmlns
     
     set ans 0
-    if {![IsTransportHeuristics $jid3]} {
+    if {![IsTransportEx $jid3]} {
 	set node [$jstate(jlib) roster getcapsattr $jid3 node]
 	# NB: We must treat both the 1.3 and 1.4 caps XEP!
 	if {$node eq $coccixmlns(caps)} {
@@ -1255,6 +1255,29 @@ proc ::Roster::IsTransportHeuristics {jid} {
     }
     if {!$transport} {
 	set transport [IsTransport $jid]
+    }
+    return $transport
+}
+
+# Roster::IsTransportEx --
+# 
+#       Figures out if a JID is a transport using cached disco-info results.
+#       NB: This should only be used passively, that is, for detection etc.
+
+proc ::Roster::IsTransportEx {jid} {
+    upvar ::Jabber::jstate jstate
+    
+    set transport 0
+    jlib::splitjidex $jid node host res
+    if {$node eq ""} {
+	if {$host ne $jstate(server)} {
+	    set types [::Disco::AccessTypes $host]
+	    
+	    # Strip out any "gateway/xmpp".
+	    set gateways [lsearch -inline -glob $types gateway/*]
+	    set gateways [lsearch -inline -not $gateways gateway/xmpp]
+	    set transport [llength $gateways]
+	}
     }
     return $transport
 }
