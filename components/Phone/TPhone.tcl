@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: TPhone.tcl,v 1.3 2007-07-18 09:40:10 matben Exp $
+# $Id: TPhone.tcl,v 1.4 2007-12-22 14:52:22 matben Exp $
 
 #-------------------------------------------------------------------------------
 # USAGE:
@@ -34,7 +34,6 @@
 #
 #-------------------------------------------------------------------------------
 
-package require tile
 package require tkpng
 
 package provide TPhone 0.1

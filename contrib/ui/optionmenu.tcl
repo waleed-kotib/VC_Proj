@@ -6,10 +6,9 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.19 2007-10-03 06:48:16 matben Exp $
+# $Id: optionmenu.tcl,v 1.20 2007-12-22 14:52:22 matben Exp $
 
 package require snit 1.0
-package require tile
 
 package provide ui::optionmenu 0.1
 
