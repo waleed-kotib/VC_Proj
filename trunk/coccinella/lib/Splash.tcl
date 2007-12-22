@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Splash.tcl,v 1.16 2007-12-10 14:04:17 matben Exp $
+# $Id: Splash.tcl,v 1.17 2007-12-22 11:57:52 matben Exp $
    
 package provide Splash 1.0
 
@@ -28,8 +28,11 @@ namespace eval ::Splash:: {
 	
     # Use option database for customization.
     option add *Splash.image               splash           widgetDefault
-    option add *Splash.showMinor           0                widgetDefault
+    option add *Splash.showMinor           1                widgetDefault
     option add *Splash.showCopyright       0                widgetDefault
+    option add *Splash.minorX              362              widgetDefault
+    option add *Splash.minorY              219              widgetDefault
+    option add *Splash.minorColor          "#ef2910"        widgetDefault
     option add *Splash.copyrightX          ""               widgetDefault
     option add *Splash.copyrightY          ""               widgetDefault
     option add *Splash.copyrightText1      $text1           widgetDefault
@@ -108,9 +111,12 @@ proc ::Splash::SplashScreen {} {
       -font CociTinyFont -text $startMsg -fill $textcol
     
     # Print patch level for dev versions.
-    if {$showMinor && ($this(vers,release) ne "")} {
-	$w.can create text 418 [expr $imHeight - 42] -anchor nw  \
-	  -font {Helvetica -18} -text ".$this(vers,release)" -fill #ef2910
+    if {$this(vers,minorRelease) && $showMinor} {
+	set x [option get $w minorX {}]
+	set y [option get $w minorY {}]
+	set c [option get $w minorColor {}]
+	$w.can create text $x $y -anchor sw  \
+	  -font {Helvetica -18} -text ".$this(vers,minorRelease)" -fill $c
     }
     if {$showCopyright} {
 	set text1 [option get $w copyrightText1 {}]
