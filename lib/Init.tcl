@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.86 2007-12-19 07:57:07 matben Exp $
+# $Id: Init.tcl,v 1.87 2007-12-22 11:57:51 matben Exp $
 
 namespace eval ::Init {
     
@@ -495,8 +495,21 @@ proc ::Init::SetThisVersion {} {
     set this(vers,major)    0
     set this(vers,minor)   96
     set this(vers,release)  5
+    
+    # NB: The 'minorRelease' number is only used for released versions and not
+    #     in cvs or so called daily builds. cvs always have odd 'release'
+    #     numbers and 'minorRelease' equal to 0. 
+    #     A minor release has always a nonzero 'minorRelease' number and
+    #     an even 'release' number one minus the cvs 'release' number.
+    #     An example: if the cvs version id 0.96.5 we can create a series
+    #     of minor releases 0.96.4.1, 0.96.4.2, 0.96.4.3, ...
+    set this(vers,minorRelease) 0
+    
     set this(vers,full) $this(vers,major).$this(vers,minor).$this(vers,release)
-
+    if {$this(vers,minorRelease)} {
+	append this(vers,full) .$this(vers,minorRelease)
+    }
+    
     # This is used only to track upgrades.
     set this(vers,previous) $this(vers,full)
 }
