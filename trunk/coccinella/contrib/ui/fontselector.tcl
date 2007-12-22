@@ -6,10 +6,9 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: fontselector.tcl,v 1.8 2007-09-16 07:39:11 matben Exp $
+# $Id: fontselector.tcl,v 1.9 2007-12-22 14:52:22 matben Exp $
 
 package require snit 1.0
-package require tile
 package require msgcat
 package require ui::util
 

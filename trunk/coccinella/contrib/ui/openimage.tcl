@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: openimage.tcl,v 1.4 2007-09-13 08:25:37 matben Exp $
+# $Id: openimage.tcl,v 1.5 2007-12-22 14:52:22 matben Exp $
 
 # Public commands:
 # 
@@ -16,7 +16,6 @@
 # @@@ Add support for dnd
 
 package require snit 1.0
-package require tile
 package require msgcat
 package require ui::util
 

@@ -6,10 +6,9 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: comboboxex.tcl,v 1.2 2007-07-19 06:28:11 matben Exp $
+# $Id: comboboxex.tcl,v 1.3 2007-12-22 14:52:22 matben Exp $
 
 package require snit 1.0
-package require tile
 package require msgcat
 
 package provide ui::comboboxex 0.1

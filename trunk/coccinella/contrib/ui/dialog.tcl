@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.36 2007-11-20 13:40:57 matben Exp $
+# $Id: dialog.tcl,v 1.37 2007-12-22 14:52:22 matben Exp $
 
 # Public commands:
 # 
@@ -17,7 +17,6 @@
 #   ui::dialog::setbadge image
 
 package require snit 1.0
-package require tile
 package require msgcat
 package require ui::util
 

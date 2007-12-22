@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.87 2007-12-22 11:57:51 matben Exp $
+# $Id: Init.tcl,v 1.88 2007-12-22 14:52:22 matben Exp $
 
 namespace eval ::Init {
     
@@ -730,7 +730,7 @@ proc ::Init::LoadPackages {} {
 	if {[package vcompare $vers 0.8] >= 0} {
 	    set this(tile08) 1
 	}
-    } elseif {[llength [info commands ::ttk::style]]} {
+    } elseif {$::tk_version >= 8.5 && ![regexp {^8\.5[ab]} $::tk_patchLevel]} {
 	# 8.5b1+
 	namespace eval ::tile {} 
 	interp alias {} style {} ::ttk::style

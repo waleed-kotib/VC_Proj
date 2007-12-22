@@ -5,10 +5,9 @@
 #  Copyright (c) 2004 Googie
 #  Copyright (c) 2004 Pat Thoyts <patthoyts@users.sourceforge.net>
 #
-# $Id: keramik.tcl,v 1.1 2005-12-13 13:57:52 matben Exp $
+# $Id: keramik.tcl,v 1.2 2007-12-22 14:52:22 matben Exp $
 
 package require Tk 8.4;                 # minimum version for Tile
-package require tile 0.5;               # depends upon tile 0.5
 
 namespace eval tile {
     namespace eval theme {

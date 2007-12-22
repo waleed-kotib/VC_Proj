@@ -6,10 +6,9 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: progress.tcl,v 1.10 2007-07-19 06:28:12 matben Exp $
+# $Id: progress.tcl,v 1.11 2007-12-22 14:52:22 matben Exp $
 
 package require snit 1.0
-package require tile 0.7
 package require msgcat
 package require ui::util
 

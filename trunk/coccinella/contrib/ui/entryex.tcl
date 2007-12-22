@@ -6,10 +6,9 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: entryex.tcl,v 1.5 2007-07-19 06:28:12 matben Exp $
+# $Id: entryex.tcl,v 1.6 2007-12-22 14:52:22 matben Exp $
 
 package require snit 1.0
-package require tile
 package require msgcat
 
 package provide ui::entryex 0.1
