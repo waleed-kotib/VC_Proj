@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JingleIax.tcl,v 1.39 2007-12-20 14:01:25 matben Exp $
+# $Id: JingleIax.tcl,v 1.40 2007-12-24 09:31:14 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -498,7 +498,7 @@ proc ::JingleIAX::PresenceHook {jid type args} {
 
     # Beware! jid without resource!
     Debug "::JingleIAX::PresenceHook jid=$jid, type=$type"
-    
+        
     if {$type ne "available"} {
 	return
     }
@@ -516,7 +516,7 @@ proc ::JingleIAX::PresenceHook {jid type args} {
 
     # Set roster status icon if user has extended presence.
     set xelem [::Jabber::RosterCmd getx $from "jingle/media/audio"]
-    if {$xelem ne {}} {
+    if {[llength $xelem]} {
 	set status [wrapper::getattribute $xelem type]
 	set image [::Rosticons::Get [string tolower phone/$status]]
 	::RosterTree::StyleSetItemAlternative $from jivephone image $image

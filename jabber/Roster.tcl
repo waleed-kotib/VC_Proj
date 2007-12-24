@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.226 2007-12-21 08:39:13 matben Exp $
+# $Id: Roster.tcl,v 1.227 2007-12-24 09:31:14 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -99,6 +99,12 @@ namespace eval ::Roster:: {
     set timer(msg,ms) 10000
     set timer(exitroster,secs) 0
     set timer(pres,secs) 4
+    
+    # How to display multiple available resources.
+    #   highest-prio : only the one with highest priority
+    #   all          : all
+    set ::config(roster,multi-resources) "highest-prio"
+    #set ::config(roster,multi-resources) "all"
 }
 
 proc ::Roster::EarlyInitHook {} {
@@ -617,11 +623,11 @@ proc ::Roster::PushProc {jlibname what {jid {}} args} {
 	remove {
 	    
 	    # Must remove all resources, and jid2 if no resources.
-    	    set resList [$jlib roster getresources $jid]
-	    foreach res $resList {
+    	    set resL [$jlib roster getresources $jid]
+	    foreach res $resL {
 		::RosterTree::StyleDeleteItem $jid/$res
 	    }
-	    if {$resList eq {}} {
+	    if {$resL eq {}} {
 		::RosterTree::StyleDeleteItem $jid
 	    }
 	}
@@ -671,8 +677,8 @@ proc ::Roster::PresenceEvent {jlibname xmldata} {
     # @@@ So far we preprocess the presence element to an option list.
     #     In the future it is better not to.
     set opts [list -from $from -type $type -resource $res -xmldata $xmldata]
-    set x {}
-    set extras {}
+    set x [list]
+    set extras [list]
     foreach E [wrapper::getchildren $xmldata] {
 	set tag [wrapper::gettag $E]
 	set chdata [wrapper::getcdata $E]
@@ -778,7 +784,7 @@ proc ::Roster::ExitRoster {} {
 # Results:
 #       updates tree.
 
-proc ::Roster::SetItem {jid args} {    
+proc ::Roster::SetItem {jid args} {
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     variable inroster
@@ -794,9 +800,9 @@ proc ::Roster::SetItem {jid args} {
     set jlib $jstate(jlib)
 
     if {!$inroster} {
-    	set resList [$jlib roster getresources $jid]
-	if {[llength $resList]} {
-	    foreach res $resList {
+    	set resL [$jlib roster getresources $jid]
+	if {[llength $resL]} {
+	    foreach res $resL {
 		::RosterTree::StyleDeleteItem $jid/$res
 	    }
 	} else {
@@ -815,22 +821,17 @@ proc ::Roster::SetItem {jid args} {
 	}
     }
     if {$add} {
-    
-	# Add only the one with highest priority.
-	set jid2 [jlib::barejid $jid]
-	set res [$jlib roster gethighestresource $jid2]
-	array set presA [$jlib roster getpresence $jid2 -resource $res]
-
-	# For online users we replace the actual resource with max priority one.
-	# Make sure we do not duplicate resource for jid3 roster items!
-	if {$res ne ""} {
-	    set jid $jid2/$res
-	}
-	
-	# Put in our roster tree. Append any resource if available.
-	set items [eval {
-	    ::RosterTree::StyleCreateItem $jid $presA(-type)
-	} $args [array get presA]]
+	set rjid $jid
+	set jid2 $rjid
+	set isavailable [$jlib roster isavailable $rjid]
+	if {!$isavailable} {
+	    array set presA [$jlib roster getpresence $rjid -resource ""]
+	    set items [eval {
+		::RosterTree::StyleCreateItem $rjid "unavailable"
+	    } $args [array get presA]]
+	} else {
+	    NewAvailableItem $rjid
+	}	
 
 	if {!$inroster && [llength $items]} {
 
@@ -874,41 +875,52 @@ proc ::Roster::Presence {jid presence args} {
     #      presence 'from' attribute.
     #      For unavailable JID always us the roster item JID.
 
+    # Multiple resources:
+    # Need to loop through all resources and see where they should be.
+    # If no available resources then item is unavailable.
+    # If any available resource then put 
+        
     set jlib $jstate(jlib)
     set rjid [$jlib roster getrosterjid $jid]
+    set jid2 $rjid
         
-    # This gets a list '-name ... -groups ...' etc. from our roster.
-    set itemAttr [$jlib roster getrosteritem $rjid]
+    # Must remove all resources, and jid2 if no resources.
+    # NB: this gets us also unavailable presence stanzas.
+    set resL [$jlib roster getresources $jid2]
+    foreach res $resL {
+	::RosterTree::StyleDeleteItem $jid2/$res
+    }
+    #puts "---- resL=$resL"
     
-    # First remove if there, then add in the right tree dir.
-    ::RosterTree::StyleDeleteItem $jid
-
     set items [list]
+    set isavailable [$jlib roster isavailable $rjid]
     
-    # Put in our roster tree.
-    if {[string equal $presence "unavailable"]} {
+    if {!$isavailable} {
 	
 	# XMPP specifies that an 'unavailable' element is sent *after* 
 	# we've got a subscription='remove' element. Skip it!
 	# Problems with transports that have /registered?
 	
+	# We free up any cached item alt for unavailable JID.
 	::RosterTree::FreeItemAlternatives $jid
+	    
+	# This gets a list '-name ... -groups ...' etc. from our roster.
+	set itemAttr [$jlib roster getrosteritem $rjid]
 	
 	# Add only to offline if no other jid2/* available.
 	# If not in roster we don't get 'isavailable'.
 	set isavailable [$jlib roster isavailable $rjid]
 	if {!$isavailable} {
 	    set items [eval {
-		::RosterTree::StyleCreateItem $rjid $presence
+		::RosterTree::StyleCreateItem $rjid "unavailable"
 	    } $itemAttr $args]
 	}
-    } elseif {[string equal $presence "available"]} {
+    } else {
+
 	if {[IsCoccinella $jid]} {
 	    ::RosterTree::StyleCacheAltImage $jid whiteboard $icons(whiteboard12)
 	}
-	set items [eval {
-	    ::RosterTree::StyleCreateItem $jid $presence
-	} $itemAttr $args]
+	NewAvailableItem $rjid
     }
     
     # This minimizes the cost of sorting.
@@ -918,11 +930,67 @@ proc ::Roster::Presence {jid presence args} {
 	set pitem [::RosterTree::GetParent [lindex $items 0]]
 	::RosterTree::SortAtIdle $pitem $jprefs(rost,sort)
     }
+    return
+}
+
+# Roster::NewAvailableItem --
+# 
+#       This is a utility function used by both roster items and presence
+#       events to set an available roster item. It handles multiple available
+#       resources and process them according to our settings.
+#       
+# Arguments:
+#       jid         must be the roster JID, typically without a resource part
+#       
+# Results:
+#       none.
+
+proc ::Roster::NewAvailableItem {jid2} {
+    global  config
+    upvar ::Jabber::jstate jstate
+    	
+    set jlib $jstate(jlib)
+
+    # This gets a list '-name ... -groups ...' etc. from our roster.
+    set itemAttr [$jlib roster getrosteritem $jid2]
+    
+    switch -- $config(roster,multi-resources) {
+	
+	"highest-prio" {
+
+	    # Add only the one with highest priority.
+	    set res [$jlib roster gethighestresource $jid2]
+	    array set presA [$jlib roster getpresence $jid2 -resource $res]
+	    
+	    # For online users we replace the actual resource with max priority one.
+	    # Make sure we do not duplicate resource for jid3 roster items!
+	    if {$res ne ""} {
+		set jid $jid2/$res
+	    }	
+	    
+	    lappend [eval {
+		::RosterTree::StyleCreateItem $jid "available"
+	    } $itemAttr [array get presA]]
+	}
+	"all" {
+	
+	    set resOnL [$jlib roster getresources $jid2 -type available]
+	    foreach res $resOnL {
+		if {$res ne ""} {
+		    set jid $jid2/$res
+		}
+		array unset presA
+		array set presA [$jlib roster getpresence $jid2 -resource $res]
+		lappend items [eval {
+		    ::RosterTree::StyleCreateItem $jid "available"
+		} $itemAttr [array get presA]]
+	    }
+	}	
+    }
 }
 
 proc ::Roster::InRoster {} {
     variable inroster
-
     return $inroster
 }
 

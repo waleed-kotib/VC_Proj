@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.48 2007-12-21 08:39:13 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.49 2007-12-24 09:31:14 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -1142,6 +1142,9 @@ proc ::RosterAvatar::SetAltImage {jid key image} {
     set mjid [jlib::jidmap $jid]
     set tag [list jid $mjid]
     set item [FindWithTag $tag]
+    if {$item eq ""} {
+	return
+    }
     
     if {[info exists altImageKeyToElem($key)]} {
 	set elem $altImageKeyToElem($key)
