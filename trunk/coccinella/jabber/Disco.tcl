@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.147 2007-12-24 08:27:56 matben Exp $
+# $Id: Disco.tcl,v 1.148 2007-12-24 08:34:55 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1952,7 +1952,7 @@ proc ::Disco::AccessIsCategoryType {cattype jid {node ""}} {
 	set types $cacheInfo($jid,$node,cattypes)
 	return [expr [lsearch -glob $types $cattype] < 0 ? 0 : 1]
     } else {
-	return [::Jabber::Jlib disco types $jid $node]
+	return [::Jabber::Jlib disco iscategorytype $cattype $jid $node]
     }
 }
 
