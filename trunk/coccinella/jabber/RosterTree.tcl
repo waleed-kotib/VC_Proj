@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.96 2007-12-24 09:31:14 matben Exp $
+# $Id: RosterTree.tcl,v 1.97 2007-12-24 10:09:55 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1006,7 +1006,7 @@ proc ::RosterTree::ActionDoubleClick {jid} {
 	if {[$jstate(jlib) roster isavailable $jid]} {
 	    
 	    # We let Chat handle this internally.
-	    ::Chat::StartThread $jid
+	    ::Chat::StartThread $jid2
 	} else {
 	    ::NewMsg::Build -to $jid2
 	}

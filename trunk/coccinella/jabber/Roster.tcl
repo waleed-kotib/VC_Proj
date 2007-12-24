@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.227 2007-12-24 09:31:14 matben Exp $
+# $Id: Roster.tcl,v 1.228 2007-12-24 10:09:55 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -119,7 +119,7 @@ proc ::Roster::InitMenus {} {
     # Standard popup menu.
     set mDefs {
 	{command     mMessage...      {::NewMsg::Build -to $jid -tolist $jidlist} }
-	{command     mChat...         {::Chat::StartThread $jid3} }
+	{command     mChat...         {::Chat::StartThread $jid} }
 	{command     mSendFile...     {::FTrans::Send $jid3} }
 	{separator}
 	{command     mAddContact...   {::JUser::NewDlg} }
@@ -498,6 +498,27 @@ proc ::Roster::DoPopup {jidL clicked status group x y} {
 	}
 	set mType [concat $mType $regPopMenuType]
     }
+    
+    # Trick to handle multiple online resources.
+    if {[llength $jidL] == 1} {
+	set resOnL [::Jabber::Jlib roster getresources $jid2 -type available]
+	set idx [lsearch -glob $mDef *mChat...*]
+	if {$idx >= 0 && [llength $resOnL] > 1} {
+	    
+	    set mSub [list]
+	    set str $jid2
+	    append str " ([mc Default])"
+	    lappend mSub [list command $str [list ::Chat::StartThread $jid2]]
+	    lappend mSub [list separator]
+	    foreach res $resOnL {
+		set xjid $jid2/$res
+		lappend mSub [list command $xjid [list ::Chat::StartThread $xjid]]
+	    }
+	    set mChatM [list cascade mChat... $mSub]
+	    set mDef [lreplace $mDef $idx $idx $mChatM]
+	}
+    }
+    
     
     # Make the appropriate menu.
     set m $wDlgs(jpopuproster)
