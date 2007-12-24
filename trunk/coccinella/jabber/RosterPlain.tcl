@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.46 2007-10-11 09:15:41 matben Exp $
+# $Id: RosterPlain.tcl,v 1.47 2007-12-24 09:31:14 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -556,6 +556,7 @@ proc ::RosterPlain::SetItemAlternative {jid key type value} {
 
 # This proc is duplicated for all styles BAD!
 # Since it makes assumptions about the elements: 'eAltImage*'.
+
 proc ::RosterPlain::SetAltImage {jid key image} {
     variable T
     variable altImageKeyToElem
@@ -567,6 +568,9 @@ proc ::RosterPlain::SetAltImage {jid key image} {
     set mjid [jlib::jidmap $jid]
     set tag [list jid $mjid]
     set item [FindWithTag $tag]
+    if {$item eq ""} {
+	return
+    }
     
     if {[info exists altImageKeyToElem($key)]} {
 	set elem $altImageKeyToElem($key)

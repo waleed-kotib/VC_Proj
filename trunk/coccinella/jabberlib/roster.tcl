@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.62 2007-10-11 09:12:59 matben Exp $
+# $Id: roster.tcl,v 1.63 2007-12-24 09:31:14 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -859,7 +859,7 @@ proc jlib::roster::getpresence {jlibname jid args} {
     if {![info exists presA($jid,res)] || ($presA($jid,res) eq "")} {
 	if {[info exists argsA(-type)] &&  \
 	  [string equal $argsA(-type) "available"]} {
-	    return {}
+	    return
 	} else {
 	    if {$haveRes} {
 		return [list -resource $resource -type unavailable]
@@ -869,7 +869,7 @@ proc jlib::roster::getpresence {jlibname jid args} {
 	}
     }
     
-    set result {}
+    set result [list]
     if {$haveRes} {
 
 	# Return presence only from the specified resource.
@@ -885,7 +885,7 @@ proc jlib::roster::getpresence {jlibname jid args} {
 	}
 	if {[info exists argsA(-type)] &&  \
 	  ![string equal $argsA(-type) $presA($jid3,type)]} {
-	    return {}
+	    return
 	}
 	foreach key $rostGlobals(presTags) {
 	    if {[info exists presA($jid3,$key)]} {
@@ -1123,7 +1123,7 @@ proc jlib::roster::getresources {jlibname jid args} {
 	if {[info exists argsA(-type)]} {
 	    
 	    # Need to loop through all resources for this jid.
-	    set resList {}
+	    set resL [list]
 	    set type $argsA(-type)
 	    foreach res $presA($jid,res) {
 
@@ -1134,10 +1134,10 @@ proc jlib::roster::getresources {jlibname jid args} {
 		    set jid3 $jid/$res
 		}
 		if {[string equal $argsA(-type) $presA($jid3,type)]} {
-		    lappend resList $res
+		    lappend resL $res
 		}
 	    }
-	    return $resList
+	    return $resL
 	} else {
 	    return $presA($jid,res)
 	}
@@ -1168,7 +1168,7 @@ proc jlib::roster::getmatchingjids2 {jlibname jid args} {
 #       jid:        a jid without any resource (jid2).
 #       
 # Results:
-#       a resource for this jid or empty.
+#       a resource for this jid or empty if unavailable.
 
 proc jlib::roster::gethighestresource {jlibname jid} {
 

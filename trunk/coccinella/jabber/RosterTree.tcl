@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.95 2007-12-21 08:39:13 matben Exp $
+# $Id: RosterTree.tcl,v 1.96 2007-12-24 09:31:14 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -245,6 +245,8 @@ proc ::RosterTree::StyleDeleteItem {jid} {
 #       Sets an alternative image or text for the specified jid.
 #       An alternative attribute set here is only a hint to the roster style
 #       which is free to ignore it.
+#       The roster item may not be displayed, for instance, there can be
+#       a higher resource set.
 #       
 # Arguments:
 #       jid
