@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.227 2007-12-21 14:34:11 matben Exp $
+# $Id: GroupChat.tcl,v 1.228 2007-12-27 08:28:10 matben Exp $
 
 package require Create
 package require Enter
@@ -523,9 +523,7 @@ proc ::GroupChat::GotMsg {xmldata} {
     
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
-    
-    ::Debug 2 "::GroupChat::GotMsg"
-    
+        
     set from [wrapper::getattribute $xmldata from]
     if {$from eq ""} {
 	return
