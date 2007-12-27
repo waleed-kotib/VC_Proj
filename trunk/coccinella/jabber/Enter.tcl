@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.19 2007-12-20 14:01:25 matben Exp $
+# $Id: Enter.tcl,v 1.20 2007-12-27 09:12:24 matben Exp $
 
 package provide Enter 1.0
 
@@ -474,6 +474,7 @@ proc ::Enter::BusyEnterDlgIncr {token {num 1}} {
 # Enter::PrepPrepDoEnter --
 # 
 #       Just checks that we have got nick & room name, and then calls PrepDoEnter.
+#       Also does the escaping of room name.
 
 proc ::Enter::PrepPrepDoEnter {token} {
     variable $token
@@ -485,6 +486,11 @@ proc ::Enter::PrepPrepDoEnter {token} {
 	::UI::MessageBox -type ok -icon error -title [mc Error] \
 	  -message [mc jamessgchatfields2]
     } else {
+	
+	# We need to do the JID escaping here.
+	set node [jlib::escapestr $state(roomname)]
+	set roomjid [jlib::jidmap $node@$state(server)]
+	set state(roomjid) $roomjid
 	PrepDoEnter $token
     }
 }
@@ -500,12 +506,7 @@ proc ::Enter::PrepDoEnter {token} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
     
-    ::Debug 4 ""
-
-    set node [jlib::escapestr $state(roomname)]
-    set roomjid [jlib::jidmap $node@$state(server)]
     set service $state(server)
-    set state(roomjid) $roomjid
     
     if {$state(protocol) eq "muc"} {
 	set hasmuc [$jstate(jlib) disco hasfeature $xmppxmlns(muc) $service]
