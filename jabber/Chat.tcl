@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.268 2007-12-27 08:28:10 matben Exp $
+# $Id: Chat.tcl,v 1.269 2007-12-27 08:46:15 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -579,11 +579,19 @@ proc ::Chat::GotMsg {xmldata} {
 	
 	# Try to find a reasonable fallback for clients that fail here (Psi).
 	# Find if we have registered any chat for this jid 2/3.
-	if {$isroom} {
-	    set chattoken [GetTokenFrom chat jid $mjid]
-	} else {
+# 	if {$isroom} {
+# 	    set chattoken [GetTokenFrom chat jid $mjid]
+# 	} else {
+# 	    set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
+# 	}
+
+	# Try to respect any full JID so that we may chat with two separate
+	# resources simultaneously.
+	set chattoken [GetTokenFrom chat jid $mjid]
+	if {$chattoken eq ""} {
 	    set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
 	}
+	
 	if {$chattoken eq ""} {
 	    
 	    # Need to create a new thread ID.
