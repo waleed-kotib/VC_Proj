@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.267 2007-12-21 14:04:20 matben Exp $
+# $Id: Chat.tcl,v 1.268 2007-12-27 08:28:10 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -396,13 +396,12 @@ proc ::Chat::DoStart {w} {
 	}
     }    
     
-    # User must be online.
-    if {![$jstate(jlib) roster isavailable $jid]} {
-	set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
-	  -default no  \
-	  -message "The user you intend chatting with,\
-	  \"$user\", is not online, and this chat makes no sense.\
-	  Do you want to chat anyway?"]
+    # If we have got a full JID warn if not available.
+    if {[jlib::isfulljid $jid] && ![$jstate(jlib) roster isavailable $jid]} {
+# 	set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
+# 	  -default no -message "The user you intend chatting with,\
+# 	  \"$user\", is not online, and this chat makes no sense.\
+# 	  Do you want to chat anyway?"]
     }
     
     ::UI::SaveWinGeom $w
@@ -419,7 +418,8 @@ proc ::Chat::DoStart {w} {
 #       initiating a new chat or sending a new message that is not a reply.
 # 
 # Arguments:
-#       jid
+#       jid         JID which must be kept as is whether bare or full.
+#                   Any mapping must be made by the caller.
 #       args        -message, -thread
 #       
 # Results:
@@ -435,8 +435,6 @@ proc ::Chat::StartThread {jid args} {
     
     array set argsA $args
     set havedlg 0
-    set jid2 [jlib::barejid $jid]
-    set isroom [::Jabber::Jlib service isroom $jid2]
 
     # Make unique thread id.
     if {[info exists argsA(-thread)]} {
@@ -450,13 +448,8 @@ proc ::Chat::StartThread {jid args} {
 	}
     } else {
 	if {$config(chat,start-jid-same)} {
-	    if {$isroom} {
-		set mjid [jlib::jidmap $jid]
-		set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid]]
-	    } else {
-		set mjid2 [jlib::jidmap $jid2]
-		set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid2]*]
-	    }
+	    set mjid [jlib::jidmap $jid]
+	    set chattoken [GetTokenFrom chat jid [jlib::ESC $mjid]]
 	    if {$chattoken ne ""} {
 		set havedlg 1
 		upvar 0 $chattoken chatstate
@@ -478,11 +471,7 @@ proc ::Chat::StartThread {jid args} {
     }
   
     # Since we initated this thread need to set recipient to jid2 unless room.
-    if {$isroom} {
-	set chatstate(fromjid) $jid
-    } else {
-	set chatstate(fromjid) $jid2
-    }
+    set chatstate(fromjid) $jid
     
     return $chattoken
 }
