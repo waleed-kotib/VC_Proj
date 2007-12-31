@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.229 2007-12-31 08:48:01 matben Exp $
+# $Id: Roster.tcl,v 1.230 2007-12-31 15:06:31 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -987,7 +987,9 @@ proc ::Roster::NewAvailableItem {jid2} {
 	    # Make sure we do not duplicate resource for jid3 roster items!
 	    if {$res ne ""} {
 		set jid $jid2/$res
-	    }	
+	    } else {
+		set jid $jid2
+	    }
 	    
 	    set items [eval {
 		::RosterTree::StyleCreateItem $jid "available"
@@ -1000,6 +1002,8 @@ proc ::Roster::NewAvailableItem {jid2} {
 	    foreach res $resOnL {
 		if {$res ne ""} {
 		    set jid $jid2/$res
+		} else {
+		    set jid $jid2
 		}
 		array unset presA
 		array set presA [$jlib roster getpresence $jid2 -resource $res]
