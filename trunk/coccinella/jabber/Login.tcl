@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.134 2007-11-15 08:56:14 matben Exp $
+# $Id: Login.tcl,v 1.135 2007-12-31 08:10:39 matben Exp $
 
 package provide Login 1.0
 
@@ -460,8 +460,8 @@ proc ::Login::DoLogin {} {
     # Check 'server', 'username' and 'password' if acceptable.
     foreach name {server username password} {
 	upvar 0 $name var
-	if {[string length $var] <= 1} {
-	    set mcname [mc [string totitle $nsme]]
+	if {![string length $var]} {
+	    set mcname [mc [string totitle $name]]
 	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
 	      -message [mc jamessnamemissing $mcname]
 	    return
