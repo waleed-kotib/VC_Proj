@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.228 2007-12-24 10:09:55 matben Exp $
+# $Id: Roster.tcl,v 1.229 2007-12-31 08:48:01 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -851,7 +851,7 @@ proc ::Roster::SetItem {jid args} {
 		::RosterTree::StyleCreateItem $rjid "unavailable"
 	    } $args [array get presA]]
 	} else {
-	    NewAvailableItem $rjid
+	    set items [NewAvailableItem $rjid]
 	}	
 
 	if {!$inroster && [llength $items]} {
@@ -941,7 +941,7 @@ proc ::Roster::Presence {jid presence args} {
 	if {[IsCoccinella $jid]} {
 	    ::RosterTree::StyleCacheAltImage $jid whiteboard $icons(whiteboard12)
 	}
-	NewAvailableItem $rjid
+	set items [NewAvailableItem $rjid]
     }
     
     # This minimizes the cost of sorting.
@@ -964,7 +964,7 @@ proc ::Roster::Presence {jid presence args} {
 #       jid         must be the roster JID, typically without a resource part
 #       
 # Results:
-#       none.
+#       list of item ids added.
 
 proc ::Roster::NewAvailableItem {jid2} {
     global  config
@@ -989,12 +989,13 @@ proc ::Roster::NewAvailableItem {jid2} {
 		set jid $jid2/$res
 	    }	
 	    
-	    lappend [eval {
+	    set items [eval {
 		::RosterTree::StyleCreateItem $jid "available"
 	    } $itemAttr [array get presA]]
 	}
 	"all" {
 	
+	    set items [list]
 	    set resOnL [$jlib roster getresources $jid2 -type available]
 	    foreach res $resOnL {
 		if {$res ne ""} {
@@ -1008,6 +1009,7 @@ proc ::Roster::NewAvailableItem {jid2} {
 	    }
 	}	
     }
+    return $items
 }
 
 proc ::Roster::InRoster {} {
