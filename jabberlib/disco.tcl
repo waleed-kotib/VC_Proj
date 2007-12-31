@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: disco.tcl,v 1.54 2007-12-20 14:01:26 matben Exp $
+# $Id: disco.tcl,v 1.55 2007-12-31 07:52:39 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -518,6 +518,10 @@ proc jlib::disco::parse_get_info {jlibname from queryE} {
 		# node MAY also possess an identity other than 
 		# "hierarchy/branch" or "hierarchy/leaf". 
 
+		# Protect for entities which don't follow the rules.
+		if {![info exists attr(category)] || ![info exists attr(type)]} {
+		    continue
+		}
 		set category $attr(category)
 		set ctype    $attr(type)
 		set name     ""
