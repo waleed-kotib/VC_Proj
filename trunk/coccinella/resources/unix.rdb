@@ -30,7 +30,7 @@
 ! tk standard widgets (clam theme background)
 !
 *Menu.background:                    #dcdad5
-*Menu.borderWidth:                   0
+*Menu.borderWidth:                   1
 *Menu.activeBorderWidth:             1
 *Scrollbar.borderWidth:              1
 *Scrollbar.width:                    12
