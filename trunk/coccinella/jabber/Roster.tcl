@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.230 2007-12-31 15:06:31 matben Exp $
+# $Id: Roster.tcl,v 1.231 2008-01-01 11:54:26 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -961,34 +961,34 @@ proc ::Roster::Presence {jid presence args} {
 #       resources and process them according to our settings.
 #       
 # Arguments:
-#       jid         must be the roster JID, typically without a resource part
+#       jid         must be the roster JID, typically a bare JID
 #       
 # Results:
 #       list of item ids added.
 
-proc ::Roster::NewAvailableItem {jid2} {
+proc ::Roster::NewAvailableItem {jid} {
     global  config
     upvar ::Jabber::jstate jstate
     	
     set jlib $jstate(jlib)
 
     # This gets a list '-name ... -groups ...' etc. from our roster.
-    set itemAttr [$jlib roster getrosteritem $jid2]
+    set itemAttr [$jlib roster getrosteritem $jid]
     
     switch -- $config(roster,multi-resources) {
 	
 	"highest-prio" {
 
 	    # Add only the one with highest priority.
+	    set jid2 [jlib::barejid $jid]
 	    set res [$jlib roster gethighestresource $jid2]
 	    array set presA [$jlib roster getpresence $jid2 -resource $res]
 	    
 	    # For online users we replace the actual resource with max priority one.
-	    # Make sure we do not duplicate resource for jid3 roster items!
+	    # NB1: do not duplicate resource for jid3 roster items!
+	    # NB2: treat case with available empty resource (transports).
 	    if {$res ne ""} {
 		set jid $jid2/$res
-	    } else {
-		set jid $jid2
 	    }
 	    
 	    set items [eval {
@@ -1002,8 +1002,6 @@ proc ::Roster::NewAvailableItem {jid2} {
 	    foreach res $resOnL {
 		if {$res ne ""} {
 		    set jid $jid2/$res
-		} else {
-		    set jid $jid2
 		}
 		array unset presA
 		array set presA [$jlib roster getpresence $jid2 -resource $res]
