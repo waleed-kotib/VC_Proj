@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: pubsub.tcl,v 1.20 2007-08-11 06:44:34 matben Exp $
+# $Id: pubsub.tcl,v 1.21 2008-01-01 09:05:27 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -203,7 +203,7 @@ proc jlib::pubsub::default {jlibname to args} {
 	    }
 	}
     }
-    set subtags [list [wrapper::createtag default]
+    set subtags [list [wrapper::createtag default]]
     set xmllist [list [wrapper::createtag pubsub \
       -attrlist [list xmlns $xmlns(owner)] -subtags $subtags]]
     eval {jlib::send_iq $jlibname get $xmllist} $opts
