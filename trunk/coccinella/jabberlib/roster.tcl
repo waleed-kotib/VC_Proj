@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.63 2007-12-24 09:31:14 matben Exp $
+# $Id: roster.tcl,v 1.64 2008-01-01 14:30:59 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -128,6 +128,18 @@ namespace eval jlib::roster {
     # ...and the presence arrays: 'presA($jid/$resource,...)'
     # The list of resources is treated separately (presA($jid,res))
     set rostGlobals(presTags) {type status priority show x}
+    
+    # Used for sorting resources.
+    variable statusPrio
+    array set statusPrio {
+	chat            1
+	available       2
+	away            3
+	xa              4
+	dnd             5
+	invisible       6
+	unavailable     7
+    }
 
     # Note: jlib::ensamble_register is last in this file!
 }
@@ -1173,16 +1185,20 @@ proc jlib::roster::getmatchingjids2 {jlibname jid args} {
 proc jlib::roster::gethighestresource {jlibname jid} {
 
     upvar ${jlibname}::roster::presA presA
+    variable statusPrio
    
     Debug 2 "roster::gethighestresource jid='$jid'"
     
     set jid [jlib::jidmap $jid]
-    set maxres ""
+    set maxResL [list]
+    
+    # @@@ Perhaps this sorting shall be made when receiving presence instead?
+
     if {[info exists presA($jid,res)]} {
 	
 	# Find the resource corresponding to the highest priority (D=0).
-	set maxpri 0
-	set maxres [lindex $presA($jid,res) 0]
+	set maxPrio -128
+	
 	foreach res $presA($jid,res) {
 
 	    # Be sure to handle empty resources as well: '1234@icq.host'
@@ -1193,17 +1209,44 @@ proc jlib::roster::gethighestresource {jlibname jid} {
 	    }
 	    if {[info exists presA($jid3,type)]} {
 		if {$presA($jid3,type) eq "available"} {
+		    set prio 0
 		    if {[info exists presA($jid3,priority)]} {
-			if {$presA($jid3,priority) > $maxpri} {
-			    set maxres $res
-			    set maxpri $presA($jid3,priority)
-			}
+			set prio $presA($jid3,priority)
+		    }
+		    if {$prio > $maxPrio} {
+			set maxPrio $prio
+			set maxResL [list $res]
+		    } elseif {$prio == $maxPrio} {
+			lappend maxResL $res
 		    }
 		}
 	    }
 	}
     }
-    return $maxres
+    if {[llength $maxResL] == 1} {
+	set maxRes [lindex $maxResL 0]
+    } elseif {[llength $maxResL] > 1} {
+
+	# Sort according to show attributes.
+	set resIndL [list]
+	foreach res $maxResL {
+	    if {$res eq ""} {
+		set jid3 $jid
+	    } else {
+		set jid3 $jid/$res
+	    }
+	    set show "available"
+	    if {[info exists presA($jid3,show)]} {
+		set show $presA($jid3,show)
+	    }
+	    lappend resIndL [list $res $statusPrio($show)]
+	}
+	set resIndL [lsort -integer -index 1 $resIndL]
+	set maxRes [lindex $resIndL 0 0]
+    } else {
+	set maxRes ""
+    }
+    return $maxRes
 }
 
 proc jlib::roster::getmaxpriorityjid2 {jlibname jid} {
