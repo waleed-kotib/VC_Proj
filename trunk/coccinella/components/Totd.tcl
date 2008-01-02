@@ -10,7 +10,7 @@ namespace eval ::Totd {
     }
     component::define Totd "Useful tips"
 
-    option add *Totd.icon       coci-es-shadow-128      widgetDefault
+    option add *Totd.icon       bug-128                 widgetDefault
     option add *Totd*Text.font  CociDefaultFont         50
 }
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.10 2007-11-18 15:08:36 matben Exp $
+# $Id: Servicons.tcl,v 1.11 2008-01-02 13:33:57 matben Exp $
 
 package require Icondef
 
@@ -135,8 +135,6 @@ proc ::Servicons::Get {key} {
     variable priv
     variable alias
 
-    # @@@ For gateways we could use a rosticon instead to get the sets match
-    
     set key [string map [array get alias] $key]
     if {[string match gateway/* $key]} {
 	set gtype [lindex [split $key /] 1]/available
