@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: spell.tcl,v 1.17 2007-11-06 15:01:23 matben Exp $
+# $Id: spell.tcl,v 1.18 2008-01-02 08:20:10 matben Exp $
 
 # TODO: try to simplify the async (fileevent) part of this similar
 #       to spell::wordserial perhaps.
@@ -201,7 +201,7 @@ proc spell::alldicts {} {
 	set L [list]
 	set cmd [AutoExecOK aspell]
 	if {[llength $cmd]} {
-	    set names [exec $cmd dicts]
+	    set names [eval exec $cmd dicts]
 	    set L [lsort -unique [lapply {regsub {(-.+)}} $names [list ""]]]
 	    set static(dicts) $L
 	}
@@ -224,7 +224,7 @@ proc spell::getdict {} {
     # NB: aspell and ispell work differently here.
     if {$static(speller) eq "aspell"} {
 	set cmd [AutoExecOK aspell]
-	set lang [exec $cmd dump config lang]
+	set lang [eval exec $cmd dump config lang]
 	return $lang
     }
     return
