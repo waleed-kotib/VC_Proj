@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.38 2008-01-02 08:50:17 matben Exp $
+# $Id: Rosticons.tcl,v 1.39 2008-01-02 09:11:49 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -81,7 +81,7 @@ namespace eval ::Rosticons:: {
 	msn             "Crystal"
 	phone           "plain"
 	sms             "Crystal"
-	smtp            "default"
+	smtp            "Crystal"
 	status          "Crystal"
 	yahoo           "Crystal"
     }
