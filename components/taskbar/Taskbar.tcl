@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.37 2007-11-23 11:18:02 matben Exp $
+# $Id: Taskbar.tcl,v 1.38 2008-01-02 14:49:57 matben Exp $
 
 package require balloonhelp
 
@@ -137,7 +137,7 @@ proc ::Taskbar::X11Init {} {
     }
     set wmenu $wtray.pop
 
-    option add *taskbarIcon   coccinella32   widgetDefault
+    option add *taskbarIcon   bug-32   widgetDefault
 
     set image [::Theme::GetImage [option get . taskbarIcon {}]]
     ::tktray::icon $wtray -image $image
