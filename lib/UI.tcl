@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.179 2007-12-10 15:19:00 matben Exp $
+# $Id: UI.tcl,v 1.180 2008-01-02 13:33:57 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -43,8 +43,10 @@ namespace eval ::UI:: {
     option add *internet64Image          internet64     widgetDefault
 
     #option add *badgeImage               Coccinella     widgetDefault
-    option add *badgeImage               coci-es-shadow-32     widgetDefault
-    option add *applicationImage         coccinella64   widgetDefault
+    #option add *badgeImage               coci-es-shadow-32     widgetDefault
+    option add *badgeImage               bug-32         widgetDefault
+    #option add *applicationImage         coccinella64   widgetDefault
+    option add *applicationImage         bug-64         widgetDefault
     
     # components stuff.
     variable menuSpecPublic

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.50 2007-12-12 14:37:17 matben Exp $
+# $Id: SetupAss.tcl,v 1.51 2008-01-02 13:33:57 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -204,7 +204,7 @@ proc ::SetupAss::SetupAss {} {
     ttk::frame $p5.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p5.fr.msg1 -style Small.TLabel \
       -wraplength 260 -justify left -text [mc sufinmsg2]
-    ttk::label $p5.fr.piga -image [::Theme::GetImage coci-es-shadow-128]
+    ttk::label $p5.fr.piga -image [::Theme::GetImage bug-128]
     
     grid  $p5.fr.msg1  -sticky n
     grid  $p5.fr.piga  -pady 8
