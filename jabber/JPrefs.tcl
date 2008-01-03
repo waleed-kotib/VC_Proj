@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.59 2007-12-06 09:11:25 matben Exp $
+# $Id: JPrefs.tcl,v 1.60 2008-01-03 14:49:09 matben Exp $
 
 package require ui::fontselector
 
@@ -303,7 +303,7 @@ proc ::JPrefs::BuildCustomPage {page} {
     ttk::checkbutton $wcu.rem -text [mc prefcuremdlgs2] \
       -variable [namespace current]::tmpJPrefs(rememberDialogs)
     if {[string equal $this(platform) "windows"]} {
-	ttk::checkbutton $wcu.not -text  "Show notfier window" \
+	ttk::checkbutton $wcu.not -text [mc "Show notifier window"] \
 	  -variable [namespace current]::tmpJPrefs(notifier,state)
     }
     
