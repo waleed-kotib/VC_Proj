@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.236 2008-01-02 13:33:57 matben Exp $
+#   $Id: en.msg,v 1.237 2008-01-03 14:49:09 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -496,6 +496,7 @@
 ::msgcat::mcset en {Edit Profiles}
 ::msgcat::mcset en {Email addresses}
 ::msgcat::mcset en {Email client}
+::msgcat::mcset en {Enable nickname coloring}
 ::msgcat::mcset en {Enter Chatroom}
 ::msgcat::mcset en {Enter/Create Chatroom}
 ::msgcat::mcset en {Exit room}
@@ -595,6 +596,7 @@
 ::msgcat::mcset en {Setup Assistant}
 ::msgcat::mcset en {Show Icon}
 ::msgcat::mcset en {Show navigation buttons}
+::msgcat::mcset en {Show notifier window}
 ::msgcat::mcset en {Show popup}
 ::msgcat::mcset en {Show offline users}
 ::msgcat::mcset en {Show Text}

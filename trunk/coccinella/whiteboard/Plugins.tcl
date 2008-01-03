@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Plugins.tcl,v 1.31 2007-11-25 15:55:32 matben Exp $
+# $Id: Plugins.tcl,v 1.32 2008-01-03 14:49:10 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -1322,7 +1322,7 @@ proc ::Plugins::BuildPrefsPage {page} {
     pack  $pbl  -side top -anchor w
     
     set str [mc prefplugctrl2]
-    append str " [mc {Requires a restart}]."
+    append str " " [mc "Requires a restart of" $prefs(appName)] "."
     ttk::label $pbl.lhead -wraplength 300 -justify left \
       -text $str -padding {0 0 0 4}
     pack $pbl.lhead -side top -anchor w
