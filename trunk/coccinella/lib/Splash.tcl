@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Splash.tcl,v 1.17 2007-12-22 11:57:52 matben Exp $
+# $Id: Splash.tcl,v 1.18 2008-01-03 14:06:36 matben Exp $
    
 package provide Splash 1.0
 
@@ -145,11 +145,7 @@ proc ::Splash::SetMsg {msg} {
     # Update needed to force display (bad?).
     if {[winfo exists $topwin]} {
 	$canwin itemconfigure tsplash -text $startMsg
-	if {[string equal $this(platform) "macosx"]} {
-	    update
-	} else {
-	    update idletasks
-	}
+	update
     }
 }
 
