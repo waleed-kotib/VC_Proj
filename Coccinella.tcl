@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.174 2008-01-02 14:53:50 matben Exp $	
+# $Id: Coccinella.tcl,v 1.175 2008-01-03 10:20:15 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -158,7 +158,7 @@ switch [tk windowingsystem] {
     }
     x11 {
 	if {[package vcompare [info patchlevel] 8.4.8] >= 0} {
-	    wm iconphoto . -default [::Theme::GetImage bug-32]
+	    wm iconphoto . -default [::Theme::GetImage coccinella22]
 	}
     }
 }
