@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.38 2008-01-02 14:49:57 matben Exp $
+# $Id: Taskbar.tcl,v 1.39 2008-01-03 14:24:16 matben Exp $
 
 package require balloonhelp
 
@@ -174,7 +174,7 @@ proc ::Taskbar::InitHook {} {
       -tearoffcommand [namespace current]::TearOff -title $prefs(theAppName)
     
     set subPath [file join $this(images) 16]
-    set COCI [::Theme::GetImage coccinella $subPath]
+    set COCI [::Theme::GetImage bug $subPath]
     set INFO [::Theme::GetImage info $subPath]
     set SET  [::Theme::GetImage settings $subPath]
     set MSG  [::Theme::GetImage newmsg $subPath]
