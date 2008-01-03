@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.78 2007-12-20 14:01:26 matben Exp $
+# $Id: VCard.tcl,v 1.79 2008-01-03 13:08:42 matben Exp $
 
 package provide VCard 1.0
 
@@ -703,7 +703,7 @@ proc ::VCard::SyncAvatar {token} {
     upvar ${token}::priv priv
 
     # @@@ Update presence hashes only if changed photo. TODO check.
-    if {[info exists elem(photo_binval)]} {
+    if {[info exists elem(photo_type)] && [info exists elem(photo_binval)]} {
 	::Jabber::Jlib avatar set_data $elem(photo_binval) $elem(photo_type)
 	::Avatar::SetShareOption 1
 	::Avatar::SetMyAvatarFromBase64 $elem(photo_binval) $elem(photo_type)
