@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.194 2007-11-10 15:44:59 matben Exp $
+# $Id: jabberlib.tcl,v 1.195 2008-01-04 13:41:32 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -423,7 +423,7 @@ proc jlib::init_inst {jlibname} {
 # 
 #       Cache this info for effectiveness. It is needed at application level.
 
-proc jlib::havesasl { } {
+proc jlib::havesasl {} {
     variable statics
     
     if {![info exists statics(sasl)]} {
@@ -440,7 +440,7 @@ proc jlib::havesasl { } {
 # 
 #       Cache this info for effectiveness. It is needed at application level.
 
-proc jlib::havetls { } {
+proc jlib::havetls {} {
     variable statics
     
     if {![info exists statics(tls)]} {
@@ -451,6 +451,10 @@ proc jlib::havetls { } {
 	}
     }
     return $statics(tls)
+}
+
+proc jlib::havecompress {} {
+    return [expr {![catch {package require jlib::compress}]}]
 }
 
 # jlib::register_package --
