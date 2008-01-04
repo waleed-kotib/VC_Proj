@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.101 2008-01-04 13:41:32 matben Exp $
+# $Id: Profiles.tcl,v 1.102 2008-01-04 15:37:29 matben Exp $
 
 package require ui::megaentry
 
@@ -2005,7 +2005,7 @@ proc ::Profiles::NotebookSetDefaults {token server} {
 proc ::Profiles::NotebookVerifyValid {token} {
     variable $token
     upvar 0 $token state
-    
+        
     if {![jlib::havesasl]} {
 	set state(secure) 0
     }
