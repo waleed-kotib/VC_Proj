@@ -14,7 +14,7 @@
 #      This is currently of version 2.0.1 so we rely on this when doing
 #      package require. Beware!
 #      
-# $Id: compress.tcl,v 1.8 2007-08-14 12:21:24 matben Exp $
+# $Id: compress.tcl,v 1.9 2008-01-04 13:41:32 matben Exp $
 
 package require jlib
 package require -exact zlib 2.0.1
@@ -45,7 +45,7 @@ proc jlib::compress::start {jlibname cmd} {
     variable xmlns
     variable methods
     
-    #puts "jlib::compress::start"
+    # puts "jlib::compress::start"
     
     # Instance specific namespace.
     namespace eval ${jlibname}::compress {
@@ -72,7 +72,7 @@ proc jlib::compress::start {jlibname cmd} {
 
 proc jlib::compress::features_write {jlibname} {
     
-     #puts "jlib::compress::features_write"
+     # puts "jlib::compress::features_write"
     
      $jlibname trace_stream_features {}
      compress $jlibname
@@ -88,7 +88,7 @@ proc jlib::compress::compress {jlibname} {
     variable xmlns
     upvar ${jlibname}::compress::state state
     
-    #puts "jlib::compress::compress"
+    # puts "jlib::compress::compress"
        
     # Note: If the initiating entity did not understand any of the advertised 
     # compression methods, it SHOULD ignore the compression option and 
@@ -114,7 +114,7 @@ proc jlib::compress::compress {jlibname} {
 
 proc jlib::compress::parse {jlibname xmldata} {
     
-    #puts "jlib::compress::parse"
+    # puts "jlib::compress::parse"
     
     set tag [wrapper::gettag $xmldata]
     
@@ -134,7 +134,7 @@ proc jlib::compress::parse {jlibname xmldata} {
 
 proc jlib::compress::compressed {jlibname xmldata} {
     
-    #puts "jlib::compress::compressed"
+    # puts "jlib::compress::compressed"
     
     # Example 5. Receiving Entity Acknowledges Stream Compression 
     #     <compressed xmlns='http://jabber.org/protocol/compress'/> 
@@ -183,7 +183,7 @@ proc jlib::compress::in {jlibname cdata} {
 
 proc jlib::compress::failure {jlibname xmldata} {
     
-    #puts "jlib::compress::failure"
+    # puts "jlib::compress::failure"
     
     set c [wrapper::getchildren $xmldata]
     if {[llength $c]} {
@@ -199,7 +199,7 @@ proc jlib::compress::finish {jlibname {errcode ""} {errmsg ""}} {
     upvar ${jlibname}::compress::state state
     variable xmlns
     
-    #puts "jlib::compress:finish errcode=$errcode, errmsg=$errmsg"
+    # puts "jlib::compress:finish errcode=$errcode, errmsg=$errmsg"
 
     # NB: We must keep our state array for the lifetime of the stream.
     $jlibname trace_stream_features {}
@@ -216,7 +216,7 @@ proc jlib::compress::reset {jlibname} {
     
     upvar ${jlibname}::compress::state state
 
-    #puts "jlib::compress::reset"
+    # puts "jlib::compress::reset"
     
     if {[info exists state(compress)]} {
 	$state(compress) close

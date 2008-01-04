@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.135 2007-12-31 08:10:39 matben Exp $
+# $Id: Login.tcl,v 1.136 2008-01-04 13:41:32 matben Exp $
 
 package provide Login 1.0
 
@@ -343,6 +343,7 @@ proc ::Login::TraceMenuVar {name key op} {
 	}
 	set resource $tmpProfArr($profile,-resource)
 	set jid [jlib::joinjid $username $server $resource]
+	::Profiles::NotebookVerifyValid $wtabnb
 	::Profiles::NotebookSetAnyConfigState $wtabnb $profile
 	::Profiles::NotebookDefaultWidgetStates $wtabnb
     }

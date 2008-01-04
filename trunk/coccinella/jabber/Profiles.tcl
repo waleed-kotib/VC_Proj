@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.100 2007-12-12 10:33:24 matben Exp $
+# $Id: Profiles.tcl,v 1.101 2008-01-04 13:41:32 matben Exp $
 
 package require ui::megaentry
 
@@ -1759,7 +1759,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::notebook $w -style Small.TNotebook -padding {4}
 
     # Login options.
-    $w add [ttk::frame $w.log] -text [mc {Login}] -sticky news
+    $w add [ttk::frame $w.log] -text [mc "Login"] -sticky news
 
     set wlog $w.log.f
     ttk::frame $wlog -padding [option get . notebookPageSmallPadding {}]
@@ -1827,10 +1827,10 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     
     grid  $wcon.se     -            -sticky ew -pady 1    
 
-    if {!$this(package,tls)} {
+    if {![jlib::havetls]} {
 	$wse.tls state {disabled}
     }
-    if {[catch {package require jlib::compress}]} {
+    if {![jlib::havecompress]} {
 	$wse.comp state {disabled}
     }
 
@@ -1958,10 +1958,10 @@ proc ::Profiles::NotebookSecCmd {w} {
 	} else {
 	    $wstate(sasl) state {disabled}
 	}
-	if {[catch {package require jlib::compress}]} {
-	    $wstate(comp)  state {disabled}
+	if {[jlib::havecompress]} {
+	    $wstate(comp) state {!disabled}
 	} else {
-	    $wstate(comp)  state {!disabled}
+	    $wstate(comp) state {disabled}
 	}
     } else {
 	$wstate(mssl)  state {disabled}
@@ -1995,6 +1995,25 @@ proc ::Profiles::NotebookSetDefaults {token server} {
     foreach {key value} [GetDefaultOpts $server] {
 	set name [string trimleft $key "-"]
 	set state($name) $value
+    }
+}
+
+# Profiles::NotebookVerifyValid --
+# 
+#       Make sure current notebook state is indeed supported.
+
+proc ::Profiles::NotebookVerifyValid {token} {
+    variable $token
+    upvar 0 $token state
+    
+    if {![jlib::havesasl]} {
+	set state(secure) 0
+    }
+    if {![jlib::havetls]} {
+	set state(method) sasl
+    }
+    if {![jlib::havecompress]} {
+	set state(compress) 0
     }
 }
 

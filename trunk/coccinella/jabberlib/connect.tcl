@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.31 2007-11-15 08:56:14 matben Exp $
+# $Id: connect.tcl,v 1.32 2008-01-04 13:41:32 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -279,7 +279,7 @@ proc jlib::connect::connect {jlibname jid password args} {
     variable options
     
     debug "jlib::connect::connect jid=$jid, args=$args"
-        
+            
     # Instance specific namespace.
     #   'state' only lives until connection finalized
     #   'feature' lives until stream is closed
