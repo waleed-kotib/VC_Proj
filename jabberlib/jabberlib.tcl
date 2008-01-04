@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.195 2008-01-04 13:41:32 matben Exp $
+# $Id: jabberlib.tcl,v 1.196 2008-01-04 15:29:52 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -454,7 +454,16 @@ proc jlib::havetls {} {
 }
 
 proc jlib::havecompress {} {
-    return [expr {![catch {package require jlib::compress}]}]
+    variable statics
+    
+    if {![info exists statics(compress)]} {
+	if {[catch {package require jlib::compress}]} {
+	    set statics(compress) 0
+	} else {
+	    set statics(compress) 1
+	}
+    }
+    return $statics(compress)
 }
 
 # jlib::register_package --
