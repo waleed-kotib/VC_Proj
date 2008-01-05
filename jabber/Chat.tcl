@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.270 2008-01-05 13:32:10 matben Exp $
+# $Id: Chat.tcl,v 1.271 2008-01-05 14:00:26 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -3091,14 +3091,9 @@ proc ::Chat::GetFullJID {chattoken} {
 	if {[::Jabber::Jlib roster isavailable $jid3]} {
 	    return $jid3
 	} else {
-	    set jid $chatstate(jid)
-	    if {[jlib::isbarejid $jid]} {
-		set res [::Jabber::Jlib roster gethighestresource $jid]
-		set jid3 $jid/$res
-	    } else {
-		set jid3 $jid
-	    }
-	    return $jid3
+	    set jid2 $chatstate(jid2)
+	    set res [::Jabber::Jlib roster gethighestresource $jid2]
+	    return $jid2/$res
 	}
     }
 }
