@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.269 2007-12-27 08:46:15 matben Exp $
+# $Id: Chat.tcl,v 1.270 2008-01-05 13:32:10 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -631,6 +631,7 @@ proc ::Chat::GotMsg {xmldata} {
 
     # We may have reset its jid to a 2-tier jid if it has been offline.
     set chatstate(jid)     $mjid
+    set chatstate(jid3)    $mjid
     set chatstate(fromjid) $jid
     
     # Is this really needed here?
@@ -1900,9 +1901,9 @@ proc ::Chat::DnDFileDrop {chattoken win data type} {
     # Strip off any file:// prefix.
     set f [string map {file:// ""} $f]
     set f [uriencode::decodefile $f]
-    
+
     # Must use its full JID.
-    ::FTrans::Send $chatstate(jid3) -filename $f
+    ::FTrans::Send [GetFullJID $chattoken] -filename $f
 }
 
 proc ::Chat::DnDFileEnter {chattoken win action data type} {
@@ -2969,7 +2970,7 @@ proc ::Chat::SendText {chattoken text args} {
 
     # According to XMPP we should send to 3-tier jid if still online,
     # else to 2-tier.
-    set chatstate(fromjid) [$jstate(jlib) getrecipientjid $chatstate(fromjid)]
+    set chatstate(fromjid) [$jlib getrecipientjid $chatstate(fromjid)]
     set jid [jlib::jidmap $chatstate(fromjid)]
     set jid2 [jlib::barejid $jid]
     set chatstate(jid) $jid
@@ -3071,11 +3072,35 @@ proc ::Chat::TraceJid {dlgtoken name junk1 junk2} {
 proc ::Chat::SendFile {dlgtoken} {
      
     set chattoken [GetActiveChatToken $dlgtoken]
+    ::FTrans::Send [GetFullJID $chattoken]
+}
+
+# Chat::GetFullJID --
+# 
+#       Use this for file transfers, for instance, where we MUST have the
+#       full JID for disco.
+
+proc ::Chat::GetFullJID {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    parray chatstate *jid*
-    ::FTrans::Send $chatstate(jid3)
+    set jid3 $chatstate(jid3)
+    if {$chatstate(isroom)} {
+	return $jid3
+    } else {
+	if {[::Jabber::Jlib roster isavailable $jid3]} {
+	    return $jid3
+	} else {
+	    set jid $chatstate(jid)
+	    if {[jlib::isbarejid $jid]} {
+		set res [::Jabber::Jlib roster gethighestresource $jid]
+		set jid3 $jid/$res
+	    } else {
+		set jid3 $jid
+	    }
+	    return $jid3
+	}
+    }
 }
 
 proc ::Chat::Settings {dlgtoken} {
