@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.64 2008-01-01 14:30:59 matben Exp $
+# $Id: roster.tcl,v 1.65 2008-01-05 11:00:58 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -663,11 +663,18 @@ proc jlib::roster::presence {jlibname xmldata} {
 	set chdata [wrapper::getcdata $E]
 	
 	switch -- $tag {
-	    status - priority {
+	    priority {
+		if {[string is integer -strict $chdata]} {
+		    set presA($mjid,$tag) $chdata
+		}
+	    }
+	    status {
 		set presA($mjid,$tag) $chdata
 	    }
 	    show {
-		set presA($mjid,$tag) [string tolower $chdata]
+		if {[regexp {^(away|chat|dnd|xa)$} $chdata]} {
+		    set presA($mjid,$tag) $chdata
+		}
 	    }
 	    x {
 		set ns [wrapper::getattribute $E xmlns]
