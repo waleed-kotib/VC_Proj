@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.30 2007-12-11 08:53:39 matben Exp $
+# $Id: FTrans.tcl,v 1.31 2008-01-05 08:22:35 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -114,10 +114,10 @@ proc ::FTrans::MD5 {fileName} {
     # 7ea44817f6def146ee180d0fff114b87  sigslot.pdf
     set hash ""
     if {[llength [set cmd [auto_execok md5]]]} {
-	set ans [exec $cmd [list $fileName]]
+	set ans [eval exec $cmd [list $fileName]]
 	regexp { +([0-9a-f]+$)} $ans - hash
     } elseif {[llength [set cmd [auto_execok md5sum]]]} {
-	set ans [exec $cmd [list $fileName]]
+	set ans [eval exec $cmd [list $fileName]]
 	regexp {^([0-9a-f]+)} $ans - hash
     }
     return $hash
