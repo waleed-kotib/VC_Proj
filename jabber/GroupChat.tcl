@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.229 2008-01-06 08:32:18 matben Exp $
+# $Id: GroupChat.tcl,v 1.230 2008-01-06 13:39:27 matben Exp $
 
 package require Create
 package require Enter
@@ -965,7 +965,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     grid rowconfigure    $wfrusers 0 -weight 1
     
     $wpaneh add $wfrchat  -weight 1
-    $wpaneh add $wfrusers -weight 1
+    $wpaneh add $wfrusers -weight 0
     
     # The tags.
     ConfigureTextTags $w $wtext
@@ -1726,7 +1726,7 @@ proc ::GroupChat::Tree {chattoken w T wysc} {
       -yscrollcommand [list ::UI::ScrollSet $wysc     \
       [list grid $wysc -row 0 -column 1 -sticky ns]]  \
       -borderwidth 0 -highlightthickness 0            \
-      -height 0 -width 20
+      -height 0 -width 120
 
     # State for ignore.
     $T state define ignore
