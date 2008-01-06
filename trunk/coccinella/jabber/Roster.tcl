@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.231 2008-01-01 11:54:26 matben Exp $
+# $Id: Roster.tcl,v 1.232 2008-01-06 08:32:19 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -852,7 +852,7 @@ proc ::Roster::SetItem {jid args} {
 	    } $args [array get presA]]
 	} else {
 	    set items [NewAvailableItem $rjid]
-	}	
+	}
 
 	if {!$inroster && [llength $items]} {
 

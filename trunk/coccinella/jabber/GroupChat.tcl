@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.228 2007-12-27 08:28:10 matben Exp $
+# $Id: GroupChat.tcl,v 1.229 2008-01-06 08:32:18 matben Exp $
 
 package require Create
 package require Enter
@@ -923,7 +923,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     # Pane for chat and users list.
     ttk::paned $wpaneh -orient horizontal
     $wpanev add $wpaneh -weight 1
-    $wpanev add $wfrsend -weight 1
+    $wpanev add $wfrsend -weight 0
     
     # Chat text widget.
     if {$config(ui,aqua-text)} {
