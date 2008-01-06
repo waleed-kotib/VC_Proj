@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.271 2008-01-05 14:00:26 matben Exp $
+# $Id: Chat.tcl,v 1.272 2008-01-06 08:32:18 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1639,7 +1639,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     grid rowconfigure $wtxtsnd 0 -weight 1
     
     $wpane add $wtxt -weight 1
-    $wpane add $wtxtsnd -weight 1
+    $wpane add $wtxtsnd -weight 0
 
     if {$jprefs(chatFont) ne ""} {
 	$wtextsnd configure -font $jprefs(chatFont)
