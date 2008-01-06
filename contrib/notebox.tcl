@@ -6,51 +6,35 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: notebox.tcl,v 1.3 2007-07-19 06:28:11 matben Exp $
+#  $Id: notebox.tcl,v 1.4 2008-01-06 12:11:00 matben Exp $
 
 package provide notebox 1.0
 
 namespace eval ::notebox:: {
-
-    variable this
     
+    array set fontPlat {
+	unix    {Helvetica 10}
+	windows {Arial 8}
+	macosx  {Geneva 9}
+    }
+
     option add *Notebox.millisecs                  0         widgetDefault
     option add *Notebox.anchor                     se        widgetDefault
 
-    option add *Notebox.background                 #ffff9f   50
+    option add *Notebox.background                 "#ffff9f" 50
     option add *Notebox.foreground                 black     30
     option add *Notebox.Message.width              160       widgetDefault
 
-    option add *Notebox.closeButtonBgWinxp         #ca2208   widgetDefault
-    
-    switch -- $::tcl_platform(platform) {
-	unix {
-	    set this(platform) $::tcl_platform(platform)
-	    if {[package vcompare [info tclversion] 8.3] == 1} {	
-		if {[string equal [tk windowingsystem] "aqua"]} {
-		    set this(platform) "macosx"
-		}
-	    }
-	}
-	windows - macintosh {
-	    set this(platform) $::tcl_platform(platform)
-	}
-    }
-    
-    switch -- $this(platform) {
-	unix {
-	    option add *Notebox.font {Helvetica 10} widgetDefault
-	}
-	windows {
-	    option add *Notebox.font {Arial 8} widgetDefault
-	}
-	macintosh - macosx {
-	    option add *Notebox.font {Geneva 9} widgetDefault
-	}
-    }
+    option add *Notebox.closeButtonBgWinxp         "#ca2208" widgetDefault
+    option add *Notebox.closeButtonImage           ""        widgetDefault
+        
+    option add *Notebox.font $fontPlat($::this(platform)) widgetDefault
+
     set MAX_INT 0x7FFFFFFF
     set hex [format {%x} [expr {int($MAX_INT*rand())}]]
     set w .notebox$hex
+    
+    variable this
     set this(w) $w
     set this(uid) 0
     set this(x) [expr [winfo screenwidth .] - 30]
@@ -64,26 +48,16 @@ proc ::notebox::setposition {x y} {
     set this(y) $y
 }
 
-proc ::notebox::Build { } {
+proc ::notebox::Build {} {
     variable this
 
     set w $this(w)
     toplevel $w -class Notebox -bd 0 -relief flat
     wm resizable $w 0 0 
     
-    switch -- $this(platform) {
-	macintosh {
-	    if {[package vcompare [info tclversion] 8.3] == 1} {
-		::tk::unsupported::MacWindowStyle style $w floatSideProc
-	    } else {
-		unsupported1 style $w floatSideProc
-	    }
-	    frame $w.f -height 32 -width 0
-	    pack  $w.f -side left -fill y
-	}
+    switch -- $::this(platform) {
 	macosx {
-	    tk::unsupported::MacWindowStyle style $w floating \
-	      {sideTitlebar closeBox}
+	    tk::unsupported::MacWindowStyle style $w floating {sideTitlebar closeBox}
 	    frame $w.f -height 32 -width 0
 	    pack  $w.f -side left -fill y
 	}
@@ -110,19 +84,24 @@ proc ::notebox::DrawWinxpButton {c r} {
     set width  [$c cget -width]
     set width2 [expr {$width/2}]
 
-    set red  [option get $this(w) closeButtonBgWinxp {}]
-    
-    # Be sure to offset ovals to put center pixel at (1,1).
-    if {[string match mac* $this(platform)]} {
-	$c create oval -$rm -$rm  $r $r -tags bt -outline {} -fill $red
-	set id1 [$c create line -$a -$a $a  $a -tags bt -fill white]
-	set id2 [$c create line -$a  $a $a -$a -tags bt -fill white]
+    set im [option get $this(w) closeButtonImage {}]
+    if {$im ne ""} {
+	$c create image $width2 $width2 -image $im -anchor center
     } else {
-	$c create oval -$rm -$rm $rm $rm -tags bt -outline $red -fill $red
-	set id1 [$c create line -$a -$a $ap  $ap -tags bt -fill white]
-	set id2 [$c create line -$a  $a $ap -$ap -tags bt -fill white]
+	set red [option get $this(w) closeButtonBgWinxp {}]
+	
+	# Be sure to offset ovals to put center pixel at (1,1).
+	if {[string match mac* $this(platform)]} {
+	    $c create oval -$rm -$rm  $r $r -tags bt -outline {} -fill $red
+	    set id1 [$c create line -$a -$a $a  $a -tags bt -fill white]
+	    set id2 [$c create line -$a  $a $a -$a -tags bt -fill white]
+	} else {
+	    $c create oval -$rm -$rm $rm $rm -tags bt -outline $red -fill $red
+	    set id1 [$c create line -$a -$a $ap  $ap -tags bt -fill white]
+	    set id2 [$c create line -$a  $a $ap -$ap -tags bt -fill white]
+	}
+	$c move bt $width2 $width2
     }
-    $c move bt $width2 $width2
     $c bind bt <ButtonPress-1> [list destroy $this(w)]
 }
 
@@ -173,7 +152,7 @@ proc ::notebox::SetGeometry {t} {
     wm geometry $w +${newx}+${newy}
 }
 
-proc ::notebox::Destroy { } {
+proc ::notebox::Destroy {} {
     variable this
     
     catch {destroy $this(w)}
