@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.89 2008-01-08 11:22:06 matben Exp $
+# $Id: Init.tcl,v 1.90 2008-01-09 07:44:16 matben Exp $
 
 namespace eval ::Init {
     
@@ -494,7 +494,7 @@ proc ::Init::SetThisVersion {} {
     # default file, never read.
     set this(vers,major)    0
     set this(vers,minor)   96
-    set this(vers,release)  4
+    set this(vers,release)  5
     
     # NB: The 'minorRelease' number is only used for released versions and not
     #     in cvs or so called daily builds. cvs always have odd 'release'
@@ -503,7 +503,7 @@ proc ::Init::SetThisVersion {} {
     #     an even 'release' number one minus the cvs 'release' number.
     #     An example: if the cvs version id 0.96.5 we can create a series
     #     of minor releases 0.96.4.1, 0.96.4.2, 0.96.4.3, ...
-    set this(vers,minorRelease) 1
+    set this(vers,minorRelease) 0
     
     set this(vers,full) $this(vers,major).$this(vers,minor).$this(vers,release)
     if {$this(vers,minorRelease)} {
