@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.272 2008-01-06 08:32:18 matben Exp $
+# $Id: Chat.tcl,v 1.273 2008-01-13 08:06:35 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2734,7 +2734,7 @@ proc ::Chat::BuildSavedDialogs {} {
     if {!$jprefs(rememberDialogs)} {
 	return
     }
-    if {$jprefs(chat,dialogs) == {}} {
+    if {![llength $jprefs(chat,dialogs)]} {
 	return
     }
     set mejidmap $jstate(mejidmap)
@@ -2775,7 +2775,11 @@ proc ::Chat::SaveDialogs {} {
 
 	# [Bug 177749] Do not remember private chatroom chats
 	if {!$chatstate(isroom)} {
-	    lappend dlgA($mejidmap) [list $chatstate(jid2)]
+	    
+	    # [Bug 182121] Coccinella 0.96.4.1 show error window on start 
+	    if {[jlib::jidvalidate $chatstate(jid2)]} {
+		lappend dlgA($mejidmap) [list $chatstate(jid2)]
+	    }
 	}
     }
     set jprefs(chat,dialogs) [array get dlgA]

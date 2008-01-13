@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: History.tcl,v 1.35 2007-11-20 15:27:45 matben Exp $
+# $Id: History.tcl,v 1.36 2008-01-13 08:06:35 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -188,10 +188,14 @@ proc ::History::XGetAllFileNames {jid} {
 proc ::History::XGetAllNXMLFileNames {jid} {
     global  this
     
-    set mjid [jlib::jidmap $jid]
-    set rootTail [uriencode::quote $mjid]
-    set nfiles [glob -nocomplain -directory $this(historyPath) ${rootTail}-*.nxml]
-    return [lsort -dictionary $nfiles]
+    # [Bug 182121] Coccinella 0.96.4.1 show error window on start 
+    if {$jid ne ""} {
+	set mjid [jlib::jidmap $jid]
+	set rootTail [uriencode::quote $mjid]
+	set nfiles [glob -nocomplain -directory $this(historyPath) ${rootTail}-*.nxml]
+	return [lsort -dictionary $nfiles]
+    }
+    return
 }
 
 proc ::History::XGetAllXMLFileNames {jid} {
