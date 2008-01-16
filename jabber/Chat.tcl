@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.274 2008-01-16 07:29:20 matben Exp $
+# $Id: Chat.tcl,v 1.275 2008-01-16 14:43:43 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1457,6 +1457,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     set chatstate(nhiddenmsgs)      0
     set chatstate(havehistory)      0
     set chatstate(havesent)         0
+    set chatstate(lasttext)         ""
     set chatstate(themed)           $jprefs(chat,themed)
 
     if {$isroom} {
@@ -1664,6 +1665,10 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     if {[string equal [tk windowingsystem] "aqua"]} {
 	bind $wtextsnd <Command-KeyPress> {# nothing}
     }
+    bind $wtextsnd <$this(modkey)-KeyPress-Up> \
+      [namespace code [list OnKeyUp $chattoken]]
+    bind $wtextsnd <$this(modkey)-KeyPress-Down> \
+      [namespace code [list OnKeyDown $chattoken]]
 
     bind $wtextsnd <Return>  \
       [list [namespace current]::ReturnKeyPress $chattoken]    
@@ -2888,6 +2893,21 @@ proc ::Chat::ActiveCmd {chattoken} {
     set cprefs(lastActiveRet) $chatstate(active)
 }
 
+proc ::Chat::OnKeyUp {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+   
+    $chatstate(wtextsnd) delete 1.0 end
+    $chatstate(wtextsnd) insert end $chatstate(lasttext)
+}
+
+proc ::Chat::OnKeyDown {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+ 
+    $chatstate(wtextsnd) delete 1.0 end
+}
+
 # Suggestion from marc@bruenink.de.
 # 
 #       inactive mode: 
@@ -3044,6 +3064,7 @@ proc ::Chat::SendText {chattoken text args} {
 	set chatstate(subjectThread) $subject
 	lappend opts -subject $subject
     }
+    set chatstate(lasttext) $text
     
     # Put in history file.
     # Need to reconstruct our xmldata. Add -from for our history record.
