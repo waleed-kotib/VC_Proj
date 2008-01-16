@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.273 2008-01-13 08:06:35 matben Exp $
+# $Id: Chat.tcl,v 1.274 2008-01-16 07:29:20 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1771,7 +1771,8 @@ proc ::Chat::SetSubject {chattoken} {
       -thread $threadID
     set chatstate(subjectOld) $chatstate(subject)
     set dlgstate(lastsentsecs) [clock seconds]
-    focus $chatstate(w)
+    
+    focus $chatstate(wtextsnd)
 }
 
 proc ::Chat::MenuEditPostHook {wmenu} {
