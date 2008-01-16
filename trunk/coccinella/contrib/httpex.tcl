@@ -9,7 +9,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: httpex.tcl,v 1.26 2007-12-03 10:33:40 matben Exp $
+# $Id: httpex.tcl,v 1.27 2008-01-16 08:26:16 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -51,6 +51,10 @@
 #       The '-progress' argument is a tcl procedure: 
 #       progressProc {token totalsize currentsize}
 #       'totalsize' can be 0 if no Content-Length attribute.
+#       
+# httpex::geturl url ?-channel channame -key value ...?
+#       Simplified httpex::get which only invokes any -command when final.
+#       Can be used in place for http::geturl when getting url.
 #
 # httpex::head url ?-key value ...?
 #       Makes a HEAD request to url. The -channel key is not allowed.
@@ -342,6 +346,23 @@ proc httpex::post {url args} {
 
 proc httpex::put {url args} {
     return [eval {Request put $url} $args]
+}
+
+# httpex::geturl --
+# 
+#       As httpex::get but -command only invoked when final.
+
+proc httpex::geturl {url args} {
+    set argsA(-command) ""
+    array set argsA $args
+    set argsA(-command) [list [namespace current]::geturlcmd $argsA(-command)]
+    eval {get $url} [array get argsA]
+}
+
+proc httpex::geturlcmd {cmd token} {
+    if {([state $token] eq "final") && [llength $cmd]} {
+	uplevel #0 $cmd $token
+    }
 }
 
 # httpex::Request --
