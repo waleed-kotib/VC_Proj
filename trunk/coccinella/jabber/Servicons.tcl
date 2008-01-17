@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.11 2008-01-02 13:33:57 matben Exp $
+# $Id: Servicons.tcl,v 1.12 2008-01-17 14:06:17 matben Exp $
 
 package require Icondef
 
@@ -46,13 +46,13 @@ namespace eval ::Servicons:: {
     }
 }
 
-proc ::Servicons::InitPrefsHook { } {
+proc ::Servicons::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
 
     set jprefs(serv,iconSet)  "default"    
 }
 
-proc ::Servicons::Init { } {
+proc ::Servicons::Init {} {
     global  this
     
     variable priv
@@ -179,13 +179,13 @@ proc ::Servicons::GetFromTypeList {typelist} {
     return ""
 }
 
-proc ::Servicons::GetTypes { } {
+proc ::Servicons::GetTypes {} {
     variable priv
    
     return $priv(alltypes)
 }
 
-proc ::Servicons::GetAllSets { } {
+proc ::Servicons::GetAllSets {} {
     global  this
     variable priv
     variable state

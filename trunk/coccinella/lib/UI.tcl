@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.180 2008-01-02 13:33:57 matben Exp $
+# $Id: UI.tcl,v 1.181 2008-01-17 14:06:17 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -50,7 +50,9 @@ namespace eval ::UI:: {
     
     # components stuff.
     variable menuSpecPublic
-    set menuSpecPublic(wpaths) {}
+    set menuSpecPublic(wpaths) [list]
+    
+    variable regAccelerators [list]
     
     variable icons
 
@@ -1290,7 +1292,7 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
 		# @@@ No spaces allowed in variables!
 		set cmd [subst -nocommands $cmd]
 		if {[string length $accel]} {
-		    lappend mopts -accelerator ${mod}+${accel}
+		    lappend mopts -accelerator $mod+$accel
 		}
 		eval {$m add $type -label $locname -command $cmd} $mopts 
 	    }
@@ -1390,6 +1392,7 @@ proc ::UI::SetMenubarAcceleratorBinds {w wmenubar} {
     variable menuKeyToIndex
     variable mapWmenuToWtop
     variable cachedMenuSpec
+    variable regAccelerators
         
     foreach {wmenu wtop} [array get mapWmenuToWtop $wmenubar.*] {
 	foreach line $cachedMenuSpec($wtop,$wmenu) {
@@ -1409,6 +1412,11 @@ proc ::UI::SetMenubarAcceleratorBinds {w wmenubar} {
 		bind $w <$this(modkey)-$prefix$key> [lindex $line 2]
 	    }
 	}
+    }
+    
+    foreach spec $regAccelerators {
+	lassign $spec key cmd
+	bind $w <$this(modkey)-$key> $cmd
     }
 }
 
@@ -1436,6 +1444,19 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenu} {
 	    bind $w <$this(modkey)-$prefix$key> [lindex $line 2]
 	}
     }
+}
+
+# UI::RegisterAccelerator --
+# 
+#       This is a way to register an accelerator key which is not handled
+#       with the other Menu code.
+
+proc ::UI::RegisterAccelerator {key cmd} {
+    global  this
+    variable regAccelerators
+    
+    set key [string tolower $key]
+    lappend regAccelerators [list $key $cmd]
 }
 
 proc ::UI::BuildAppleMenu {w wmenuapple state} {

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.230 2008-01-04 13:52:36 matben Exp $
+# $Id: JUI.tcl,v 1.231 2008-01-17 14:06:17 matben Exp $
 
 package provide JUI 1.0
 
@@ -321,6 +321,8 @@ proc ::JUI::Build {w} {
 	  -postcommand [list ::JUI::EditPostCommand $wmenu.edit]
     }
     $w configure -menu $wmenu
+    ::UI::RegisterAccelerator "B" \
+      [list ::Status::ExInvokeMainCustomDIalog $wmenu.action]
     ::UI::SetMenubarAcceleratorBinds $w $wmenu
     
     # Global frame.

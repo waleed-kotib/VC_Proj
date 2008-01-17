@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.47 2007-12-20 14:01:26 matben Exp $
+# $Id: Status.tcl,v 1.48 2008-01-17 14:06:17 matben Exp $
 
 package provide Status 1.0
 
@@ -580,9 +580,18 @@ proc ::Status::ExBuildMainMenu {m} {
     
     set menuVar [namespace current]::menuVar($m)
     set $menuVar $jstate(show+status)
-    ExBuildMenu $m $menuVar  \
+    ExBuildMenu $m $menuVar \
       -command [list [namespace current]::ExMainCmd $m]   
     return $m
+}
+
+proc ::Status::ExInvokeMainCustomDIalog {m} {
+    upvar ::Jabber::jstate jstate
+    
+    set menuVar [namespace current]::menuVar($m)
+    set $menuVar $jstate(show+status)
+   
+    ExCustomDlg $menuVar -command [list [namespace current]::ExMainCmd $m]   
 }
 
 # Status::ExButton --
@@ -674,7 +683,7 @@ proc ::Status::ExPostCmd {m varName opts} {
 #       menu widget
 
 proc ::Status::ExBuildMenu {m varName args} {
-    global  config
+    global  config this
     upvar ::Jabber::jprefs jprefs
     variable mapShowElemToText
 
@@ -720,6 +729,7 @@ proc ::Status::ExBuildMenu {m varName args} {
     
     set len $config(status,menu,entry,len)
     set len2 [expr {$len-2}]
+    set mod [string map {Control Ctrl} $this(modkey)]
     
     foreach show $showL {
 	set opts [list]
@@ -747,7 +757,7 @@ proc ::Status::ExBuildMenu {m varName args} {
 	}
 	$m add separator
     }
-    $m add command -label [mc mCustomStatus...]  \
+    $m add command -label [mc mCustomStatus...] -accelerator $mod+B \
       -command [concat ::Status::ExCustomDlg $varName $args]
     update idletasks
     
@@ -755,6 +765,14 @@ proc ::Status::ExBuildMenu {m varName args} {
 	uplevel #0 $postCommand
     }
     return $m
+}
+
+proc ::Status::ExOnMenuCustomStatus {m} {
+    
+    if {[llength [grab current]]} { return }
+    if {[::JUI::GetConnectState] eq "connectfin"} {
+
+    }
 }
 
 proc ::Status::ExMenuSetState {m which state} {
