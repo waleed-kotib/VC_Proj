@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.230 2008-01-06 13:39:27 matben Exp $
+# $Id: GroupChat.tcl,v 1.231 2008-01-17 07:59:31 matben Exp $
 
 package require Create
 package require Enter
@@ -790,6 +790,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set chatstate(ignore,$roomjid)  0
     set chatstate(afterids)       {}
     set chatstate(nhiddenmsgs)    0
+    set chatstate(lasttext)       ""
     set chatstate(mynick)         [::Jabber::Jlib service mynick $roomjid]
     
     # For the tabs and title etc.
@@ -995,7 +996,12 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
         
     ::UI::SetSashPos groupchatDlgVert $wpanev
     ::UI::SetSashPos groupchatDlgHori $wpaneh
-    
+
+    bind $wtextsend <$this(modkey)-KeyPress-Up> \
+      [namespace code [list OnKeyUp $chattoken]]
+    bind $wtextsend <$this(modkey)-KeyPress-Down> \
+      [namespace code [list OnKeyDown $chattoken]]
+
     bind $wtextsend <Return> \
       [list [namespace current]::ReturnKeyPress $chattoken]
     bind $wtextsend <$this(modkey)-Return> \
@@ -2639,6 +2645,7 @@ proc ::GroupChat::SendChat {chattoken} {
     # There might by smiley icons in the text widget. Parse them to text.
     set text [::Text::TransformToPureText $wtextsend]
     set text [string trimright $text]
+    set chatstate(lasttext) $text
     
     # Clear send.
     $wtextsend delete 1.0 end
@@ -2660,6 +2667,21 @@ proc ::GroupChat::ActiveCmd {chattoken} {
     
     # Remember last setting.
     set cprefs(lastActiveRet) $chatstate(active)
+}
+
+proc ::GroupChat::OnKeyUp {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+   
+    $chatstate(wtextsend) delete 1.0 end
+    $chatstate(wtextsend) insert end $chatstate(lasttext)
+}
+
+proc ::GroupChat::OnKeyDown {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+ 
+    $chatstate(wtextsend) delete 1.0 end
 }
 
 # Suggestion from marc@bruenink.de.

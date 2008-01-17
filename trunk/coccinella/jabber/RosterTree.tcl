@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.97 2007-12-24 10:09:55 matben Exp $
+# $Id: RosterTree.tcl,v 1.98 2008-01-17 07:59:31 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1421,7 +1421,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
     upvar ::Jabber::jstate  jstate
     upvar ::Jabber::jprefs  jprefs
     
-    #::Debug 6 "::RosterTree::CreateItemBase jid=$jid, presence=$presence"
+    #::Debug 4 "::RosterTree::CreateItemBase jid=$jid, presence=$presence, $args"
 
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
@@ -1495,8 +1495,8 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 	    }
 	    set tag [list jid $mjid]
 	    set item [CreateWithTag $tag $pitem]
+	    lappend itemTagL $item $tag 
 	}
-	lappend itemTagL $item $tag 
     } else {
 	
 	# No groups associated with this item.
@@ -1516,7 +1516,6 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 	}
     }
         
-    # @@@ wrong if several groups.
     return $itemTagL
 }
 
