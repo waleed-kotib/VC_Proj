@@ -26,7 +26,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Gateway.tcl,v 1.7 2007-12-20 14:01:25 matben Exp $
+# $Id: Gateway.tcl,v 1.8 2008-01-17 14:28:44 matben Exp $
 
 package provide Gateway 1.0
 
@@ -54,6 +54,7 @@ namespace eval ::Gateway {
 	jabber      Jabber
 	msn         MSN
 	smtp        Email
+	tlen        Tlen
 	x-gadugadu  Gadu-Gadu
 	xmpp        Jabber
 	yahoo       Yahoo
@@ -67,6 +68,7 @@ namespace eval ::Gateway {
     set promptText(irc)        "IRC"
     set promptText(msn)        "MSN Address"
     set promptText(smtp)       "Email Address"
+    set promptText(tlen)       "Tlen Address"
     set promptText(x-gadugadu) "Gadu Address"
     set promptText(xmpp)       "Jabber ID"
     set promptText(yahoo)      "Yahoo ID"
@@ -88,6 +90,7 @@ namespace eval ::Gateway {
 	jabber      userName@%s
 	msn         userName%%hotmail.com@%s
 	smtp        userName%%emailserver@%s
+	tlen        userName@%s
 	xmpp        userName@%s
 	yahoo       userName@%s
     }
