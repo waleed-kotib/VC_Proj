@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.48 2007-12-20 14:01:25 matben Exp $
+# $Id: JUser.tcl,v 1.49 2008-01-17 14:28:44 matben Exp $
 
 package provide JUser 1.0
 
@@ -77,7 +77,7 @@ proc ::JUser::NewDlg {args} {
     ::UI::Toplevel $w -class JUser \
       -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox} -closecommand [namespace current]::CloseCmd
-    wm title $w [mc {Add Contact}]
+    wm title $w [mc "Add Contact"]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jrostadduser)]]
     if {$nwin == 1} {
@@ -108,7 +108,7 @@ proc ::JUser::NewDlg {args} {
 	set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
 
 	ttk::label $wall.head -style Headlabel \
-	  -text [mc {Add Contact}] -compound left \
+	  -text [mc "Add Contact"] -compound left \
 	  -image [list $im background $imd]
 	pack $wall.head -side top -fill both -expand 1
 	

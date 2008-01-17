@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.39 2008-01-02 09:11:49 matben Exp $
+# $Id: Rosticons.tcl,v 1.40 2008-01-17 14:28:44 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -273,11 +273,11 @@ proc ::Rosticons::Get {statuskey} {
 	    return ""
 	}
     } else {
+
+	# Check if this type is active. Use 'status' as fallback.
 	if {![info exists jprefs(rost,icons,use,$type)]} {
 	    set type status
 	}
-
-	# Check if this type is active. Use 'status' as fallback.
 	if {!$jprefs(rost,icons,use,$type)} {
 	    set type status
 	}
