@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoUpdate.tcl,v 1.28 2008-01-08 11:22:05 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.29 2008-01-17 14:06:17 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -31,7 +31,7 @@ namespace eval ::AutoUpdate {
     # Allow the update url to be set via the option database.
     set urlEN     "http://coccinella.sourceforge.net/updates/update_en.xml"
     set urlFormat "http://coccinella.sourceforge.net/updates/update_%s.xml"
-#     set urlEN     "http://coccinella.sourceforge.net/updates/update_test.xml"
+#     set urlEN     "http://coccinella.sourceforge.net/updates/update_0.96.4.1.xml"
 #     set urlFormat "http://coccinella.sourceforge.net/updates/update_test_%s.xml"
 
     set ::config(autoupdate,do)        1
