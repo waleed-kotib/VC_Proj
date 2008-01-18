@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: WBPrefs.tcl,v 1.16 2007-09-15 13:16:14 matben Exp $
+# $Id: WBPrefs.tcl,v 1.17 2008-01-18 12:49:31 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -33,15 +33,15 @@ namespace eval ::WBPrefs:: {
     ::hooks::register prefsDestroyHook       ::WBPrefs::DestroyPrefsHook
 }
 
-proc ::WBPrefs::InitPrefsHook { } {
+proc ::WBPrefs::InitPrefsHook {} {
     global  prefs
     upvar ::Jabber::jprefs jprefs
     
     # Whiteboard scrollregion.
     set prefs(canScrollWidth)     1800
     set prefs(canScrollHeight)    1200
-    set prefs(mincanScrollWidth)  1800
-    set prefs(mincanScrollHeight) 1200
+    set prefs(mincanScrollWidth)  600
+    set prefs(mincanScrollHeight) 400
 
     # Defaults...
     set prefs(canvasFonts) [list Times Helvetica Courier]
@@ -292,7 +292,7 @@ proc ::WBPrefs::PushBtRemove {indSel wapp} {
     $wapp delete $indSel	
 }
     
-proc ::WBPrefs::PushBtSave { } {
+proc ::WBPrefs::PushBtSave {} {
     global  prefs    
     variable wlbwb
 
@@ -301,7 +301,7 @@ proc ::WBPrefs::PushBtSave { } {
     ::WB::BuildAllFontMenus $prefs(canvasFonts)
 }
 
-proc ::WBPrefs::HaveFontListEdits { } {
+proc ::WBPrefs::HaveFontListEdits {} {
     global  prefs
     variable wlbwb
     
@@ -320,7 +320,7 @@ proc ::WBPrefs::PushBtStandard {wapp} {
     eval $wapp insert 0 {Times Helvetica Courier}
 }
 
-proc ::WBPrefs::SavePrefsHook { } {
+proc ::WBPrefs::SavePrefsHook {} {
     global  prefs
     variable tmpPrefs
     
@@ -347,7 +347,7 @@ proc ::WBPrefs::SavePrefsHook { } {
     }
 }
 
-proc ::WBPrefs::CancelPrefsHook { } {
+proc ::WBPrefs::CancelPrefsHook {} {
     global  prefs
     variable tmpPrefs
 	
@@ -363,7 +363,7 @@ proc ::WBPrefs::CancelPrefsHook { } {
     }
 }
 
-proc ::WBPrefs::UserDefaultsPrefsHook { } {
+proc ::WBPrefs::UserDefaultsPrefsHook {} {
     global  prefs
     variable tmpPrefs
     variable wlbwb
@@ -375,7 +375,7 @@ proc ::WBPrefs::UserDefaultsPrefsHook { } {
     }
 }
 
-proc ::WBPrefs::DestroyPrefsHook { } {
+proc ::WBPrefs::DestroyPrefsHook {} {
     variable tmpPrefs
     
     unset -nocomplain tmpPrefs
