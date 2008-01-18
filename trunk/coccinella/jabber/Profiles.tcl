@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.102 2008-01-04 15:37:29 matben Exp $
+# $Id: Profiles.tcl,v 1.103 2008-01-18 13:30:52 matben Exp $
 
 package require ui::megaentry
 
@@ -1585,8 +1585,8 @@ proc ::Profiles::FrameDeleteCmd {w} {
     
     # The present state may be something that has not been stored yet.
     if {[info exists state(prof,$profile,server)]} {
-	set ans [::UI::MessageBox -title [mc Warning]  \
-	  -type yesnocancel -icon warning -default yes  \
+	set ans [::UI::MessageBox -title [mc Warning] \
+	  -type yesnocancel -icon warning -default no \
 	  -parent [winfo toplevel $w] -message [mc jamessprofaskrem2]]
     }
     set delete 0
