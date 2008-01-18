@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.90 2007-12-20 14:01:26 matben Exp $
+# $Id: Register.tcl,v 1.91 2008-01-18 09:31:52 matben Exp $
 
 package provide Register 1.0
 
@@ -1118,18 +1118,20 @@ proc ::GenRegister::GetCB {token jlibName type subiq} {
 	return
     }
     $state(wsearrows) stop
+    set state(stattxt) ""
+    $state(wbtget)       state !disabled
+    $state(wcomboserver) state !disabled
     
     if {[string equal $type "error"]} {
 	set str [mc jamesserrregget2]
-	append str "\n" "[mc {Error code}]: [lindex $iqchild 0]\n"
-	append str "[mc Message]: [lindex $iqchild 1]"
+	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
+	append str "[mc Message]: [lindex $subiq 1]"
 	::ui::dialog -type ok -title [mc Error] -icon error -message $str
 	return
     }
     set wform $state(wform)
     set childs [wrapper::getchildren $subiq]
 
-    set state(stattxt) ""
     if {[winfo exists $wform]} {
 	destroy $wform
     }
@@ -1141,7 +1143,6 @@ proc ::GenRegister::GetCB {token jlibName type subiq} {
     $state(wbtregister) configure -default active
     $state(wbtget)      configure -default disabled    
     $state(wbtregister) state !disabled
-    $state(wbtget)      state !disabled
 }
 
 proc ::GenRegister::DoRegister {token} {   
