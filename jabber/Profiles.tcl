@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.103 2008-01-18 13:30:52 matben Exp $
+# $Id: Profiles.tcl,v 1.104 2008-01-18 13:34:33 matben Exp $
 
 package require ui::megaentry
 
@@ -36,6 +36,9 @@ namespace eval ::Profiles:: {
     set ::config(profiles,style)      "jid"  ;# jid | parts
     set ::config(profiles,show-head)  1
     set ::config(profiles,ask-register-on-new)  1
+    
+    # When we remove a profile shall we be asked to also unregister account?
+    set ::config(profiles,ask-unregister-on-rm) 1
     set ::config(profiles,display-in-prefs)     0
     set ::config(profiles,font-size)  normal ;# normal | small
     set ::config(profiles,warn-on-cancel) 1
@@ -1575,6 +1578,7 @@ proc ::Profiles::FrameNewCmd {w} {
 }
 
 proc ::Profiles::FrameDeleteCmd {w} {
+    global  config
     variable $w
     upvar 0 $w state
     
@@ -1584,10 +1588,12 @@ proc ::Profiles::FrameDeleteCmd {w} {
     set ans "no"
     
     # The present state may be something that has not been stored yet.
-    if {[info exists state(prof,$profile,server)]} {
-	set ans [::UI::MessageBox -title [mc Warning] \
-	  -type yesnocancel -icon warning -default no \
-	  -parent [winfo toplevel $w] -message [mc jamessprofaskrem2]]
+    if {$config(profiles,ask-unregister-on-rm)} {
+	if {[info exists state(prof,$profile,server)]} {
+	    set ans [::UI::MessageBox -title [mc Warning] \
+	      -type yesnocancel -icon warning -default no \
+	      -parent [winfo toplevel $w] -message [mc jamessprofaskrem2]]
+	}
     }
     set delete 0
     if {$ans eq "yes"} {
