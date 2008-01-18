@@ -26,7 +26,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Gateway.tcl,v 1.8 2008-01-17 14:28:44 matben Exp $
+# $Id: Gateway.tcl,v 1.9 2008-01-18 09:17:23 matben Exp $
 
 package provide Gateway 1.0
 
@@ -56,6 +56,7 @@ namespace eval ::Gateway {
 	smtp        Email
 	tlen        Tlen
 	x-gadugadu  Gadu-Gadu
+	x-tlen      Tlen
 	xmpp        Jabber
 	yahoo       Yahoo
     }
@@ -68,8 +69,8 @@ namespace eval ::Gateway {
     set promptText(irc)        "IRC"
     set promptText(msn)        "MSN Address"
     set promptText(smtp)       "Email Address"
-    set promptText(tlen)       "Tlen Address"
     set promptText(x-gadugadu) "Gadu Address"
+    set promptText(x-tlen)     "Tlen Address"
     set promptText(xmpp)       "Jabber ID"
     set promptText(yahoo)      "Yahoo ID"
     
@@ -178,7 +179,7 @@ proc ::Gateway::GetTemplateJID {type} {
 proc ::Gateway::GetPrompt {type} {
     variable gateway
     variable promptText
-
+    
     if {[info exists gateway(prompt,$type)]} {
 	return $gateway(prompt,$type)
     } elseif {[info exists promptText($type)]} {

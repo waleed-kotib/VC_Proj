@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.232 2008-01-06 08:32:19 matben Exp $
+# $Id: Roster.tcl,v 1.233 2008-01-18 09:17:23 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1186,37 +1186,42 @@ namespace eval ::Roster:: {
     # name description ...
     # Excluding smtp since it works differently.
     variable trptToAddressName {
-	jabber      {Jabber ID}
-	xmpp        {Jabber ID}
-	icq         {ICQ (number)}
-	aim         {AIM}
-	msn         {MSN}
-	yahoo       {Yahoo}
-	irc         {IRC}
-	x-gadugadu  {Gadu-Gadu}
-	gadu-gadu   {Gadu-Gadu}
+	jabber      "Jabber ID"
+	xmpp        "Jabber ID"
+	icq         "ICQ (number)"
+	aim         "AIM"
+	msn         "MSN"
+	yahoo       "Yahoo"
+	irc         "IRC"
+	x-gadugadu  "Gadu-Gadu"
+	gadu-gadu   "Gadu-Gadu"
+	tlen        "Tlen"
+	x-tlen      "Tlen"
     }
     variable trptToName {
-	jabber      {Jabber}
-	xmpp        {Jabber}
-	icq         {ICQ}
-	aim         {AIM}
-	msn         {MSN}
-	yahoo       {Yahoo}
-	irc         {IRC}
-	gadugadu    {Gadu-Gadu}
-	gadu-gadu   {Gadu-Gadu}
-	x-gadugadu  {Gadu-Gadu}
+	jabber      "Jabber"
+	xmpp        "Jabber"
+	icq         "ICQ"
+	aim         "AIM"
+	msn         "MSN"
+	yahoo       "Yahoo"
+	irc         "IRC"
+	gadugadu    "Gadu-Gadu"
+	gadu-gadu   "Gadu-Gadu"
+	x-gadugadu  "Gadu-Gadu"
+	tlen        "Tlen"
+	x-tlen      "Tlen"
     }
     variable nameToTrpt {
-	{Jabber}           xmpp
-	{ICQ}              icq
-	{AIM}              aim
-	{MSN}              msn
-	{Yahoo}            yahoo
-	{IRC}              irc
-	{Gadu-Gadu}        x-gadugadu
-	{Gadu-Gadu}        gadu-gadu
+	"Jabber"           xmpp
+	"ICQ"              icq
+	"AIM"              aim
+	"MSN"              msn
+	"Yahoo"            yahoo
+	"IRC"              irc
+	"Gadu-Gadu"        x-gadugadu
+	"Gadu-Gadu"        gadu-gadu
+	"Tlen"             tlen
     }
     
     variable  trptToNameArr
