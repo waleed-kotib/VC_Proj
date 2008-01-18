@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.231 2008-01-17 07:59:31 matben Exp $
+# $Id: GroupChat.tcl,v 1.232 2008-01-18 13:16:07 matben Exp $
 
 package require Create
 package require Enter
@@ -2463,14 +2463,14 @@ proc ::GroupChat::Exit {chattoken} {
     $jstate(jlib) presence_deregister_ex [namespace code PresenceEvent]  \
       -from2 $roomjid
     if {[::Jabber::IsConnected]} {
-	$jstate(jlib) service exitroom $roomjid	
-	::hooks::run groupchatExitRoomHook $roomjid
-
 	set nick [::Jabber::Jlib service mynick $roomjid]
 	set myroomjid $roomjid/$nick
 	set attr [list from $myroomjid to $roomjid type unavailable]
 	set xmldata [wrapper::createtag "presence" -attrlist $attr]
 	::History::XPutItem send $roomjid $xmldata
+
+	$jstate(jlib) service exitroom $roomjid	
+	::hooks::run groupchatExitRoomHook $roomjid
     }
 }
 
