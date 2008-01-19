@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.48 2008-01-17 14:06:17 matben Exp $
+# $Id: Status.tcl,v 1.49 2008-01-19 15:17:36 matben Exp $
 
 package provide Status 1.0
 
@@ -585,15 +585,6 @@ proc ::Status::ExBuildMainMenu {m} {
     return $m
 }
 
-proc ::Status::ExInvokeMainCustomDIalog {m} {
-    upvar ::Jabber::jstate jstate
-    
-    set menuVar [namespace current]::menuVar($m)
-    set $menuVar $jstate(show+status)
-   
-    ExCustomDlg $menuVar -command [list [namespace current]::ExMainCmd $m]   
-}
-
 # Status::ExButton --
 # 
 #       Generic way to set any status.
@@ -771,8 +762,17 @@ proc ::Status::ExOnMenuCustomStatus {m} {
     
     if {[llength [grab current]]} { return }
     if {[::JUI::GetConnectState] eq "connectfin"} {
-
+	ExInvokeMainCustomDIalog $m
     }
+}
+
+proc ::Status::ExInvokeMainCustomDIalog {m} {
+    upvar ::Jabber::jstate jstate
+    
+    set menuVar [namespace current]::menuVar($m)
+    set $menuVar $jstate(show+status)
+   
+    ExCustomDlg $menuVar -command [list [namespace current]::ExMainCmd $m]   
 }
 
 proc ::Status::ExMenuSetState {m which state} {
