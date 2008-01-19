@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.231 2008-01-17 14:06:17 matben Exp $
+# $Id: JUI.tcl,v 1.232 2008-01-19 15:17:36 matben Exp $
 
 package provide JUI 1.0
 
@@ -164,7 +164,7 @@ proc ::JUI::Init {} {
 	{cascade     mStatus        {}                                {} {} {}}
 	{separator}
 	{command     mSearch...     {::Search::OnMenu}                {}}
-	{command     mAddContact... {::JUser::OnMenu}                 {}}
+	{command     mAddContact... {::JUser::OnMenu}                 U}
 	{cascade     mRegister...   {}                                {} {} {}}
 	{command     mDiscoverServer... {::Disco::OnMenuAddServer}    D}
 	{separator}
@@ -310,19 +310,19 @@ proc ::JUI::Build {w} {
     # Note that in 8.0 on Macintosh and Windows, all commands in a menu systems
     # are executed before any are posted. This is due to the limitations in the 
     # individual platforms' menu managers.
-    $wmenu.file configure  \
+    $wmenu.file configure \
       -postcommand [list ::JUI::FilePostCommand $wmenu.file]
     $wmenu.action configure  \
       -postcommand [list ::JUI::ActionPostCommand $wmenu.action]
-    $wmenu.info configure  \
+    $wmenu.info configure \
       -postcommand [list ::JUI::InfoPostCommand $wmenu.info]
     if {[tk windowingsystem] eq "aqua"} {
-	$wmenu.edit configure  \
+	$wmenu.edit configure \
 	  -postcommand [list ::JUI::EditPostCommand $wmenu.edit]
     }
     $w configure -menu $wmenu
     ::UI::RegisterAccelerator "B" \
-      [list ::Status::ExInvokeMainCustomDIalog $wmenu.action]
+      [list ::Status::ExOnMenuCustomStatus $wmenu.action]
     ::UI::SetMenubarAcceleratorBinds $w $wmenu
     
     # Global frame.
