@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.40 2008-01-17 14:28:44 matben Exp $
+# $Id: Rosticons.tcl,v 1.41 2008-01-19 14:52:09 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -230,7 +230,7 @@ proc ::Rosticons::GetAllTypeSets {} {
 #                       application/* and phone/* are special
 #       
 # Results:
-#       a valid image.
+#       a valid image or empty.
 
 proc ::Rosticons::Get {statuskey} {
     variable icons
@@ -311,9 +311,34 @@ proc ::Rosticons::Get {statuskey} {
 	if {[info exists icons($key)]} {
 	    return $icons($key)
 	}
+	#puts "xxxxxxxxxxxxxxxxxxxxxxxxx"
 	
 	# If still not matched select type=status which must be there.
-	return $icons(status/$suborig)
+	set sub $suborig
+	#puts "1 status/$sub"
+	if {[info exists icons(status/$sub)]} {
+	    #puts "1 info exists icons(status/$sub)"
+	    return $icons(status/$sub)
+	}
+	set sub [string map {invisible offline} $sub]
+	set sub [string map {ask offline} $sub]
+	set sub [string map {chat online} $sub]
+	set key status/$sub
+	#puts "2 $key"
+	if {[info exists icons($key)]} {
+	    #puts "2 info exists icons(status/$sub)"
+	    return $icons($key)
+	}
+	set sub [string map {xa away} $sub]
+	set sub [string map {dnd away} $sub]
+	set key status/$sub
+	#puts "3 $key"
+	if {[info exists icons($key)]} {
+	    #puts "3 info exists icons(status/$sub)"
+	    return $icons($key)
+	}
+	
+	return
     }
 }
     
