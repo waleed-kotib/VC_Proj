@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.91 2008-01-18 09:31:52 matben Exp $
+# $Id: Register.tcl,v 1.92 2008-01-21 13:28:40 matben Exp $
 
 package provide Register 1.0
 
@@ -668,7 +668,11 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
 	  -justify left -anchor w
 	grid  $wfr.instr  -  -sticky ew
     }
-
+    
+    # Be sure to handle a situation where there was no 'password' field.
+    # Not sure how this happens.
+    set state(elem,password) ""
+    
     foreach tag {username password} {
 	if {[info exists data($tag)]} {
 	    set str "[mc [string totitle $tag]]:"
@@ -777,7 +781,7 @@ proc ::RegisterEx::SendRegister {token} {
     ::Debug 2 "::RegisterEx::SendRegister"
 
     # Error checking.
-    if {[info exists state(elem,password)]} {
+    if {[info exists state(elem,password)] && [info exists state(elem,password2)]} {
 	if {$state(elem,password) ne $state(elem,password2)} {
 	    ::UI::MessageBox -icon error -title [mc Error] \
 	      -message [mc messpasswddifferent2] -parent $state(w)
@@ -833,10 +837,9 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
     }
     set server   $state(-server)
     set username [string trim $state(elem,username)]
+    set username [jlib::escapestr $username]
     set password [string trim $state(elem,password)]
     set resource [::Profiles::MachineResource]
-    
-    set username [jlib::escapestr $username]
 
     if {[string equal $type "error"]} {
 	set errcode [lindex $theQuery 0]
@@ -863,7 +866,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	} else {
 	    ::Profiles::Set $pname $server $username {}
 	}
-	if {$config(registerex,autologin)} {
+	if {$config(registerex,autologin) && ($password ne "")} {
 	    
 	    # Go on and authenticate.
 	    set jid [jlib::joinjid $username $server $resource]
