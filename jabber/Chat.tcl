@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.275 2008-01-16 14:43:43 matben Exp $
+# $Id: Chat.tcl,v 1.276 2008-01-21 13:58:59 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -734,6 +734,8 @@ proc ::Chat::GotNormalMsg {xmldata uuid} {
     global  prefs
     upvar ::Jabber::jprefs jprefs
         
+    set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
+
     # Whiteboard messages are handled elsewhere. A guard:
     if {$jprefs(chat,normalAsChat) && ($body ne "")} {
 	GotMsg $xmldata
