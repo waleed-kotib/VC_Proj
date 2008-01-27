@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: can2svg.tcl,v 1.25 2007-09-26 12:10:44 matben Exp $
+# $Id: can2svg.tcl,v 1.26 2008-01-27 08:19:36 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -1029,7 +1029,51 @@ proc can2svg::MakeImageAttr {coo opts args} {
     return $attrList
 }
 
-proc can2svg::ImageCoordsToAttr {coo opts} {
+# Function Ê Ê: can2svg::ImageCoordsToAttr 
+# ------------------------------ ------------------------------ --------- 
+# Returns Ê Ê : list of x y width and height including description 
+# Parameters Ê: coo Ê- coordinates of the image 
+# Ê Ê Ê Ê Ê Ê Ê opts - argument list -anchor nw ... 
+#
+# Description : 
+# fixme (Roger) 01/25/2008 :Why not using the bounding box? 
+#
+# Written Ê Ê : 2002-2007, Mats 
+# Rewritten Ê : 01/25/2008, Roger 
+# ------------------------------ ------------------------------ --------- 
+
+proc can2svg::ImageCoordsToAttr {coo opts} { 
+    
+    array set optArr {-anchor nw}
+    array set optArr $opts
+    
+    if {![info exists optArr(-image)]} { 
+	return -code error "Missing -image option; can't parse that" 
+    } 
+    set theImage $optArr(-image) 
+
+    lassign $coo x0 y0
+    set w [image width $theImage]
+    set h [image height $theImage]
+    
+    set x [expr {$x0 - $w/2.0}] 
+    set y [expr {$y0 - $h/2.0}] 
+
+    if { "center" ne $optArr(-anchor) } { 
+	foreach orientation [split $optArr(-anchor) {}] { 
+	    switch $orientation { 
+		n { set y $y0 } 
+		s { set y [expr {$y0 - $w}] } 
+		e { set x [expr {$x0 - $h}] } 
+		w { set x $x0 } 
+		default {} 
+	    } 
+	} 
+    } 
+    return [list "x" $x "y" $y "width" $w "height" $h] 
+}
+
+proc can2svg::ImageCoordsToAttrBU {coo opts} {
     array set optA {-anchor nw}
     array set optA $opts
     if {[info exists optA(-image)]} {
