@@ -3,13 +3,15 @@
 #	URI parsing and fetch
 #
 # Copyright (c) 2000 Zveno Pty Ltd
+# Copyright (c) 2006 Pierre DAVID <Pierre.David@crc.u-strasbg.fr>
+# Copyright (c) 2006 Andreas Kupries <andreas_kupries@users.sourceforge.net>
 # Steve Ball, http://www.zveno.com/
 # Derived from urls.tcl by Andreas Kupries
 #
 # TODO:
 #	Handle www-url-encoding details
 #
-# CVS: $Id: uri.tcl,v 1.1 2005-08-28 13:37:03 matben Exp $
+# CVS: $Id: uri.tcl,v 1.2 2008-02-06 13:57:24 matben Exp $
 
 package require Tcl 8.2
 
@@ -259,7 +261,7 @@ proc ::uri::JoinFtp args {
 }
 
 proc ::uri::SplitHttps {url} {
-    uri::SplitHttp $url
+    return [SplitHttp $url]
 }
 
 proc ::uri::SplitHttp {url} {
@@ -291,15 +293,17 @@ proc ::uri::SplitHttp {url} {
     set searchPattern   "\\?(${search})\$"
     set fragmentPattern "#(${segment})\$"
 
-    # slash off possible query
+    # slash off possible query. the 'search' regexp, while official,
+    # is not good enough. We have apparently lots of urls in the wild
+    # which contain unquoted urls with queries in a query. The RE
+    # finds the embedded query, not the actual one. Using string first
+    # now instead of a RE
 
-    if {[regexp -indices -- $searchPattern $url match query]} {
-	set from [lindex $query 0]
-	set to   [lindex $query 1]
-
-	set parts(query) [string range $url $from $to]
-
-	set url [string replace $url [lindex $match 0] end]
+    if {[set pos [string first ? $url]] >= 0} {
+	incr pos
+	set parts(query) [string range   $url $pos end]
+	incr pos -1
+	set url          [string replace $url $pos end]
     }
 
     # slash off possible fragment
@@ -325,17 +329,16 @@ proc ::uri::SplitHttp {url} {
 }
 
 proc ::uri::JoinHttp {args} {
-    eval [linsert $args 0 uri::JoinHttpInner http 80]
+    return [eval [linsert $args 0 ::uri::JoinHttpInner http 80]]
 }
 
 proc ::uri::JoinHttps {args} {
-    eval [linsert $args 0 uri::JoinHttpInner https 443]
+    return [eval [linsert $args 0 ::uri::JoinHttpInner https 443]]
 }
 
 proc ::uri::JoinHttpInner {scheme defport args} {
-    array set components [list \
-	host {} port $defport path {} query {} \
-    ]
+    array set components {host {} path {} query {}}
+    set       components(port) $defport
     array set components $args
 
     set port {}
@@ -455,6 +458,82 @@ proc ::uri::JoinNews args {
     }
     array set components $args
     return news:$components(message-id)$components(newsgroup-name)
+}
+
+proc ::uri::SplitLdaps {url} {
+    ::uri::SplitLdap $url
+}
+
+proc ::uri::SplitLdap {url} {
+    # @c Splits the given Ldap-<a url> into its constituents.
+    # @a url: The url to split, without! scheme specification.
+    # @r List containing the constituents, suitable for 'array set'.
+
+    # general syntax:
+    # //<host>:<port>/<dn>?<attrs>?<scope>?<filter>?<extensions>
+    #
+    #   where <host> and <port> are as described in Section 5 of RFC 1738.
+    #   No user name or password is allowed.
+    #   If omitted, the port defaults to 389 for ldap, 636 for ldaps
+    #   <dn> is the base DN for the search
+    #   <attrs> is a comma separated list of attributes description
+    #   <scope> is either "base", "one" or "sub".
+    #   <filter> is a RFC 2254 filter specification
+    #   <extensions> are documented in RFC 2255
+    #
+
+    array set parts {host {} port {} dn {} attrs {} scope {} filter {} extensions {}}
+
+    #          host        port           dn          attrs       scope               filter     extns
+    set re {//([^:?/]+)(?::([0-9]+))?(?:/([^?]+)(?:\?([^?]*)(?:\?(base|one|sub)?(?:\?([^?]*)(?:\?(.*))?)?)?)?)?}
+
+    if {! [regexp $re $url match parts(host) parts(port) \
+		parts(dn) parts(attrs) parts(scope) parts(filter) \
+		parts(extensions)]} then {
+	return -code error "unable to match URL \"$url\""
+    }
+
+    set parts(attrs) [::split $parts(attrs) ","]
+
+    return [array get parts]
+}
+
+proc ::uri::JoinLdap {args} {
+    return [eval [linsert $args 0 ::uri::JoinLdapInner ldap 389]]
+}
+
+proc ::uri::JoinLdaps {args} {
+    return [eval [linsert $args 0 ::uri::JoinLdapInner ldaps 636]]
+}
+
+proc ::uri::JoinLdapInner {scheme defport args} {
+    array set components {host {} port {} dn {} attrs {} scope {} filter {} extensions {}}
+    set       components(port) $defport
+    array set components $args
+
+    set port {}
+    if {[string length $components(port)] && $components(port) != $defport} {
+	set port :$components(port)
+    }
+
+    set url "$scheme://$components(host)$port"
+
+    set components(attrs) [::join $components(attrs) ","]
+
+    set s ""
+    foreach c {dn attrs scope filter extensions} {
+	if {[string equal $c "dn"]} then {
+	    append s "/"
+	} else {
+	    append s "?"
+	}
+	if {! [string equal $components($c) ""]} then {
+	    append url "${s}$components($c)"
+	    set s ""
+	}
+    }
+
+    return $url
 }
 
 proc ::uri::GetUPHP {urlvar} {
@@ -731,7 +810,7 @@ proc ::uri::canonicalize uri {
     # In the text above 'ignore' means
     # 'return the url unchanged to the caller'.
 
-    if {[catch {array set u [uri::split $uri]}]} {
+    if {[catch {array set u [::uri::split $uri]}]} {
 	return $uri
     }
     if {![info exists u(path)]} {
@@ -754,7 +833,7 @@ proc ::uri::canonicalize uri {
     if { $uri == ".." } { set uri "/" }
 
     set u(path) $uri
-    set uri [eval [linsert [array get u] 0 uri::join]]
+    set uri [eval [linsert [array get u] 0 ::uri::join]]
 
     return $uri
 }
@@ -795,6 +874,13 @@ proc ::uri::canonicalize uri {
 # mid	message-id
 #		message-id/content-id
 # cid	content-id
+# ------------------------------------------------
+#
+# (RFC 2255)
+# ------------------------------------------------
+# scheme	basic syntax of scheme specific part
+# ------------------------------------------------
+# ldap		//<host>:<port>/<dn>?<attrs>?<scope>?<filter>?<extensions>
 # ------------------------------------------------
 
 # FTP
@@ -929,4 +1015,20 @@ uri::register prospero {
     variable	url		"prospero:$schemepart"
 }
 
-package provide uri 1.1.4
+# LDAP
+uri::register ldap {
+    variable	hostOrPort \
+        [set [namespace parent [namespace current]]::basic::hostOrPort]
+
+    # very crude parsing
+    variable	dn		{[^?]*}
+    variable	attrs		{[^?]*}
+    variable	scope		"base|one|sub"
+    variable	filter		{[^?]*}
+    # extensions are not handled yet
+
+    variable	schemepart	"//${hostOrPort}(/${dn}(\?${attrs}(\?(${scope})(\?${filter})?)?)?)?"
+    variable	url		"ldap:$schemepart"
+}
+
+package provide uri 1.2.1

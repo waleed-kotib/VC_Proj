@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.79 2008-01-03 13:08:42 matben Exp $
+# $Id: VCard.tcl,v 1.80 2008-02-06 13:57:25 matben Exp $
 
 package provide VCard 1.0
 
@@ -583,7 +583,7 @@ proc ::VCard::DnDDrop {etoken w data type} {
 	
     # Strip off any file:// prefix.
     set f [string map {file:// ""} $f]
-    set f [uriencode::decodefile $f]
+    set f [::uri::urn::unquote $f]
     if {[VerifyPhotoFile $f]} {
 	SetPhotoFile $etoken $f
     }

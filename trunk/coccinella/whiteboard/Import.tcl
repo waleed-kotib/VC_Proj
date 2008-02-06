@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Import.tcl,v 1.34 2007-11-23 15:25:22 matben Exp $
+# $Id: Import.tcl,v 1.35 2008-02-06 13:57:25 matben Exp $
 
 package require http
 package require httpex
@@ -527,7 +527,7 @@ proc ::Import::DrawQuickTimeTcl {wcan optsVar args} {
     
     # 'fileName' can be the cached name. If -url use its tail instead.
     if {[info exists optsA(-url)]} {
-	set name [::uriencode::decodefile [file tail $optsA(-url)]]
+	set name [::uri::urn::unquote [file tail $optsA(-url)]]
     } else {
 	set name $fileName
     }
@@ -632,7 +632,7 @@ proc ::Import::DrawSnack {wcan optsVar args} {
     
     # 'fileName' can be the cached name. If -url use its tail instead.
     if {[info exists optsA(-url)]} {
-	set name [::uriencode::decodefile [file tail $optsA(-url)]]
+	set name [::uri::urn::unquote [file tail $optsA(-url)]]
     } else {
 	set name $fileName
     }
@@ -773,7 +773,7 @@ proc ::Import::HttpGet2 {w url opts} {
     upvar 0 $gettoken getstate
 
     # We store file names with cached names to avoid name clashes.
-    set fileTail [::uriencode::decodefile [file tail $url]]
+    set fileTail [::uri::urn::unquote [file tail $url]]
     set dstPath [::FileCache::MakeCacheFileName $fileTail]
 
     set getstate(w)          $w
@@ -855,7 +855,7 @@ proc ::Import::ObjectNew {token w dstPath opts} {
     
     array set optsA $opts
     set url $optsA(-url)
-    set tail [::uriencode::decodefile [file tail $url]]
+    set tail [::uri::urn::unquote [file tail $url]]
     set ms [clock clicks -milliseconds]
     
     set state(w)        $w
@@ -1156,7 +1156,7 @@ proc ::Import::HttpGetQuickTimeTcl {w url opts args} {
     set getstate(transport) quicktimehttp
     set getstate(qtstate) ""
     set getstate(mapped) 0
-    set getstate(tail)   [::uriencode::decodefile [file tail $url]]
+    set getstate(tail)   [::uri::urn::unquote [file tail $url]]
     
     # Here we should do this connection async!!!
     set callback [list [namespace current]::QuickTimeTclCallback $gettoken]

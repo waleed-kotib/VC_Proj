@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.14 2007-12-20 14:01:25 matben Exp $
+# $Id: ChatTheme.tcl,v 1.15 2008-02-06 13:57:25 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -480,7 +480,7 @@ proc ::ChatTheme::ImageCmd {token url} {
     # a counter and use a new uri: "otherAvatar-[incr uid]" to trigger this
     
     set name ""
-    set durl [uriencode::decodeurl $url]
+    set durl [::uri::urn::unquote $url]
     if {[string match "myAvatar*" $url]} {
 	
 	# Scale to size...

@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: groupchat.tcl,v 1.9 2007-07-19 06:28:17 matben Exp $
+# $Id: groupchat.tcl,v 1.10 2008-02-06 13:57:25 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -24,9 +24,9 @@
 package provide groupchat 1.0
 package provide jlib::groupchat 1.0
 
-namespace eval jlib { }
+namespace eval jlib {}
 
-namespace eval jlib::groupchat { }
+namespace eval jlib::groupchat {}
 
 # jlib::groupchat --
 #
@@ -42,7 +42,7 @@ proc jlib::groupchat::init {jlibname} {
     namespace eval ${jlibname}::groupchat {
 	variable rooms
     }
-    set gchat(allroomsin) {}
+    set gchat(allroomsin) [list]
 }
 
 # jlib::groupchat::enter --

@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: FileCache.tcl,v 1.27 2007-09-25 12:46:27 matben Exp $
+# $Id: FileCache.tcl,v 1.28 2008-02-06 13:57:25 matben Exp $
 # 
 #       The input key can be: 
 #               1) a full url, must be uri encoded 
@@ -328,7 +328,7 @@ proc ::FileCache::IsLocal {key} {
     set islocal 0
     if {[regexp {[^:]*://[^/]+/(.*)} $key match path]} {
 	if {![string match "../*" $path]} {
-	    set path [file nativename [uriencode::decodefile $path]]
+	    set path [file nativename [::uri::urn::unquote $path]]
 	    set abspath [file join $basedir $path]
 	    if {[file exists $abspath] && [file isfile $abspath]} {
 		set islocal 1

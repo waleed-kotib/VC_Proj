@@ -7,7 +7,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: WinImport.tcl,v 1.13 2007-09-25 12:46:27 matben Exp $
+# $Id: WinImport.tcl,v 1.14 2008-02-06 13:57:25 matben Exp $
 
 #package require WindowsUtils
 
@@ -226,7 +226,7 @@ proc ::WinImport::Import {wcan optListVar args} {
 
     set desc [::Types::GetDescriptionForMime $mime]
     if {[info exists optArr(-url)]} {
-	set name [::uriencode::decodefile [file tail $optArr(-url)]]
+	set name [::uri::urn::unquote [file tail $optArr(-url)]]
     } else {
 	set name [file tail $fileName]
     }

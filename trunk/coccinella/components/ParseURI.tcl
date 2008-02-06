@@ -70,7 +70,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ParseURI.tcl,v 1.48 2007-12-20 14:01:25 matben Exp $
+# $Id: ParseURI.tcl,v 1.49 2008-02-06 13:57:24 matben Exp $
 
 package require uriencode
 
@@ -116,7 +116,7 @@ proc ::ParseURI::Parse {args} {
 	return
     }
     set uri [lindex $args [incr idx]]
-    set uri [uriencode::decodeurl $uri]
+    set uri [::uri::urn::unquote $uri]
     
     ::Debug 2 "::ParseURI::Parse uri=$uri"
 

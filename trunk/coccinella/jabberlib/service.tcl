@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: service.tcl,v 1.26 2007-07-19 06:28:17 matben Exp $
+# $Id: service.tcl,v 1.27 2008-02-06 13:57:25 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -45,7 +45,7 @@
 
 package provide service 1.0
 
-namespace eval jlib { }
+namespace eval ::jlib {}
 
 namespace eval jlib::service {
     

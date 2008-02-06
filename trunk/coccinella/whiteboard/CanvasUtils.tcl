@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasUtils.tcl,v 1.44 2007-09-14 13:17:09 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.45 2008-02-06 13:57:25 matben Exp $
 
 package require sha1
 package require can2svg
@@ -1109,7 +1109,7 @@ proc ::CanvasUtils::SVGForeignObjectHandler {w xmllist paropts transformList arg
 		    xlink:href {
 			if {[string match "file:/*" $val]} {
 			    set haveXlink 1
-			    set path [uriencode::decodefile $val]
+			    set path [::uri::urn::unquote $val]
 			    set path [string map {file:/// /} $path]
 			    lappend cmd -file $path
 			} elseif {[string match "http:/*" $val]} {
