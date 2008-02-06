@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.98 2008-01-17 07:59:31 matben Exp $
+# $Id: RosterTree.tcl,v 1.99 2008-02-06 13:57:25 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -512,7 +512,7 @@ proc ::RosterTree::DnDDrop {win data dndtype x y} {
     set T $win
     set f [lindex $data 0]
     set f [string map {"file://" ""} $f]
-    set f [uriencode::decodefile $f]
+    set f [::uri::urn::unquote $f]
     set id [$T identify $x $y]
     if {[lindex $id 0] eq "item"} {
 	lassign $id where item arg1 arg2 arg3 arg4

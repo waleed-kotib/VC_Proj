@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.26 2007-11-10 15:44:59 matben Exp $
+# $Id: AvatarMB.tcl,v 1.27 2008-02-06 13:57:25 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -255,7 +255,7 @@ proc ::AvatarMB::DnDDrop {w data type} {
 	
     # Strip off any file:// prefix.
     set f [string map {file:// ""} $f]
-    set f [uriencode::decodefile $f]
+    set f [::uri::urn::unquote $f]
     if {[VerifyPhotoFile $f]} {
 	SetFileToShare $f
     }

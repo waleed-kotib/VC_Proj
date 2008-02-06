@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: svg2can.tcl,v 1.41 2007-09-26 12:10:44 matben Exp $
+# $Id: svg2can.tcl,v 1.42 2008-02-06 13:57:24 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -626,7 +626,7 @@ proc svg2can::ParseImage {xmllist paropts transformL args} {
 	
 	switch -glob -- $xlinkhref {
 	    file:/* {			
-		set path [uriencode::decodefile $xlinkhref]
+		set path [::uri::urn::unquote $xlinkhref]
 		set path [string map {file:/// /} $path]
 		if {[string length $paroptsA(-imagehandler)]} {		    
 		    set cmd [concat create image $x $y $opts]
@@ -719,7 +719,7 @@ proc svg2can::ParseImageEx {xmllist paropts transAttr args} {
 
 	switch -glob -- $xlinkhref {
 	    file:/* {			
-		set path [uriencode::decodefile $xlinkhref]
+		set path [::uri::urn::unquote $xlinkhref]
 		set path [string map {file:/// /} $path]
 		if {[string length $paroptsA(-imagehandler)]} {		    
 		    set cmd [concat create image $x $y $opts]

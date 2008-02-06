@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GetFileIface.tcl,v 1.15 2007-09-16 14:55:28 matben Exp $
+# $Id: GetFileIface.tcl,v 1.16 2008-02-06 13:57:25 matben Exp $
 
 package require getfile
 package require uriencode
@@ -66,7 +66,7 @@ proc ::GetFileIface::GetFile {w sock fileName opts} {
     
     # Unquote the disallowed characters according to the RFC for URN scheme.
     # ref: RFC2141 sec2.2
-    set fileTail [::uriencode::decodefile $fileName]
+    set fileTail [::uri::urn::unquote $fileName]
 
     # We store file names with cached names to avoid name clashes.
     set dstpath [::FileCache::MakeCacheFileName $fileTail]
@@ -180,7 +180,7 @@ proc ::GetFileIface::GetFileFromServer {w ip port path opts} {
     
     # Unquote the disallowed characters according to the RFC for URN scheme.
     # ref: RFC2141 sec2.2
-    set fileTail [::uriencode::decodefile [file tail $path]]
+    set fileTail [::uri::urn::unquote [file tail $path]]
 
     # We store file names with cached names to avoid name clashes.
     set dstpath [::FileCache::MakeCacheFileName $fileTail]

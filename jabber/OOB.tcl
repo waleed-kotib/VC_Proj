@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: OOB.tcl,v 1.63 2007-12-20 14:01:26 matben Exp $
+# $Id: OOB.tcl,v 1.64 2008-02-06 13:57:25 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -88,7 +88,7 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
 	return 0
     }
     set tail [file tail $url]
-    set tailDec [uriencode::decodefile $tail]
+    set tailDec [::uri::urn::unquote $tail]
     
     set str "[mc File]: $tailDec"
     if {[info exists desc]} {
@@ -126,7 +126,7 @@ proc ::OOB::ParseSetCmd {w bt} {
     } else {
 	set url $state(url)
 	set tail [file tail $url]
-	set tailDec [uriencode::decodefile $tail]
+	set tailDec [::uri::urn::unquote $tail]
 	set userDir [::Utils::GetDirIfExist $prefs(userPath)]
 	set localPath [tk_getSaveFile -title [mc "Save File"] \
 	  -initialfile $tailDec -initialdir $userDir]

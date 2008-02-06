@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.31 2008-01-05 08:22:35 matben Exp $
+# $Id: FTrans.tcl,v 1.32 2008-02-06 13:57:25 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -304,7 +304,7 @@ snit::widget ::FTrans::SendDialog {
 	    
 	# Strip off any file:// prefix.
 	set f [string map {file:// ""} $f]
-	set f [uriencode::decodefile $f]
+	set f [::uri::urn::unquote $f]
 	set fileName $f
     }
 

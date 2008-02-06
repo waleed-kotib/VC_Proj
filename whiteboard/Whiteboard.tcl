@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.87 2007-10-08 12:09:17 matben Exp $
+# $Id: Whiteboard.tcl,v 1.88 2008-02-06 13:57:25 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -3210,7 +3210,7 @@ proc ::WB::DnDDrop {wcan data type x y} {
 	
 	# Strip off any file:// prefix.
 	set f [string map {file:// ""} $f]
-	set f [uriencode::decodefile $f]
+	set f [::uri::urn::unquote $f]
 	
 	# Allow also .can files to be dropped.
 	if {[file extension $f] eq ".can"} {

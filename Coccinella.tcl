@@ -12,7 +12,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.175 2008-01-03 10:20:15 matben Exp $	
+# $Id: Coccinella.tcl,v 1.176 2008-02-06 13:57:24 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -206,6 +206,8 @@ set packages(generic) {
     pipes
     tileutils
     undo
+    uri
+    uri::urn
     utils
 }
 set packages(uibase) {

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.276 2008-01-21 13:58:59 matben Exp $
+# $Id: Chat.tcl,v 1.277 2008-02-06 13:57:25 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1908,7 +1908,7 @@ proc ::Chat::DnDFileDrop {chattoken win data type} {
 	
     # Strip off any file:// prefix.
     set f [string map {file:// ""} $f]
-    set f [uriencode::decodefile $f]
+    set f [::uri::urn::unquote $f]
 
     # Must use its full JID.
     ::FTrans::Send [GetFullJID $chattoken] -filename $f

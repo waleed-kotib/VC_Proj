@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.92 2007-12-20 14:01:26 matben Exp $
+# $Id: JWB.tcl,v 1.93 2008-02-06 13:57:25 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -917,7 +917,7 @@ proc ::JWB::SVGImageImportElem {w cmd args} {
     set url [lindex $cmd [incr idx]]
     set dir [can2svg::config -httpbasedir]
     array set uri [::uri::split $url http]
-    set path [uriencode::decodeurl $uri(path)]
+    set path [::uri::urn::unquote $uri(path)]
     set fileName [file normalize [file join $dir $path]]
     if {![file exists $fileName]} {
 	return
@@ -1462,7 +1462,7 @@ proc ::JWB::SVGImageStartCB {w imageE opts type startingE} {
 	set sid [wrapper::getattribute $startingE sid]
 	set url [wrapper::getattribute $imageE xlink:href]  
 	    
-	set tail [::uriencode::decodefile [file tail $url]]
+	set tail [::uri::urn::unquote [file tail $url]]
 	set dstPath [::FileCache::MakeCacheFileName $tail]
 	set fd [open $dstPath w]
 	
@@ -1505,7 +1505,7 @@ proc ::JWB::SVGPrepare {wcan url mime opts} {
     
     set prep ""
     array set optsA $opts
-    set tail [::uriencode::decodefile [file tail $url]]
+    set tail [::uri::urn::unquote [file tail $url]]
     set do [::Plugins::GetDoWhatForMime $mime]
     if {($do eq "") || ($do eq "unavailable")} {
 	set prep "mime-unsupported"

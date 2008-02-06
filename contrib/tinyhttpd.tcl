@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.32 2007-07-19 06:28:11 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.33 2008-02-06 13:57:24 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -555,7 +555,7 @@ proc ::tinyhttpd::HandleRequest {token} {
 
 	    # Make local absolute path.
 	    set relpath [string trimleft $path /]
-	    set relpath [uriencode::decodefile $relpath]
+	    set relpath [::uri::urn::unquote $relpath]
 	    set apath   [file join $options(-rootdirectory) $relpath]
 	    set state(rpath) $relpath
 	    set state(apath) [file nativename [file normalize $apath]]
