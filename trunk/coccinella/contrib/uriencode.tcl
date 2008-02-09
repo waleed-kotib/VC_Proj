@@ -5,9 +5,7 @@
 # 	extend the uri package to deal with URN (RFC 2141)
 # 	see http://www.normos.org/ietf/rfc/rfc2141.txt
 # 	
-# $Id: uriencode.tcl,v 1.3 2008-02-06 13:57:24 matben Exp $
-
-# TODO: replace this with uri::urn
+# $Id: uriencode.tcl,v 1.4 2008-02-09 14:33:17 matben Exp $
 
 package provide uriencode 1.0
 
@@ -85,15 +83,11 @@ proc uriencode::quoteurl {url} {
 }
 
 proc uriencode::decodefile {file} {
-
     return [uriencode::decodeurl $file]
 }
 
 proc uriencode::decodeurl {url} {
-
-    regsub -all {\+} $url { } url
-    regsub -all {%([0-9a-hA-H]{2})} $url {[format %c 0x\1]} url
-    return [subst $url]
+    return [::uri::urn::unquote $url]
 }
 
 #-----------------------------------------------------------------------
