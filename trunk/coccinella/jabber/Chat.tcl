@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.277 2008-02-06 13:57:25 matben Exp $
+# $Id: Chat.tcl,v 1.278 2008-02-10 09:43:21 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2077,7 +2077,7 @@ proc ::Chat::AvatarDnDFileSource {chattoken win} {
     set jid2 $chatstate(jid2)
     set cachedFile [::Avatar::GetCachedFileNameJID $jid2]
     if {[file exists $cachedFile]} {
-	set tail [uriencode::quote $jid2]
+	set tail [::uri::urn::quote $jid2]
 	set suff [file extension $cachedFile]
 	set fileName [file join $this(tmpPath) $tail]$suff
 	file copy -force $cachedFile $fileName

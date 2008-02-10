@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.99 2008-02-06 13:57:25 matben Exp $
+# $Id: RosterTree.tcl,v 1.100 2008-02-10 09:43:22 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -495,7 +495,7 @@ proc ::RosterTree::DnDFileSource {win} {
     set jidL [lapply jlib::jidmap [lapply jlib::barejid [GetExtSelectedJID]]]
     set fileL [list]
     foreach jid $jidL {
-	set fileName [file join $this(tmpPath) [uriencode::quote $jid]]$dndSrc(suffix,$os)
+	set fileName [file join $this(tmpPath) [::uri::urn::quote $jid]]$dndSrc(suffix,$os)
 	set fd [open $fileName w]
 	puts $fd [format $dndSrc(content,$os) "xmpp:$jid?message"]
  	close $fd
