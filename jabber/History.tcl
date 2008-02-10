@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: History.tcl,v 1.36 2008-01-13 08:06:35 matben Exp $
+# $Id: History.tcl,v 1.37 2008-02-10 09:43:22 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -152,7 +152,7 @@ proc ::History::XGetPutFileName {jid} {
     if {[info exists jidToFile($mjid)] && [file exists $jidToFile($mjid)]} {
 	return $jidToFile($mjid)
     }
-    set rootTail [uriencode::quote $mjid]
+    set rootTail [::uri::urn::quote $mjid]
     set files [XGetAllXMLFileNames $mjid]
     if {[llength $files] == 0} {
 	
@@ -191,7 +191,7 @@ proc ::History::XGetAllNXMLFileNames {jid} {
     # [Bug 182121] Coccinella 0.96.4.1 show error window on start 
     if {$jid ne ""} {
 	set mjid [jlib::jidmap $jid]
-	set rootTail [uriencode::quote $mjid]
+	set rootTail [::uri::urn::quote $mjid]
 	set nfiles [glob -nocomplain -directory $this(historyPath) ${rootTail}-*.nxml]
 	return [lsort -dictionary $nfiles]
     }
@@ -202,7 +202,7 @@ proc ::History::XGetAllXMLFileNames {jid} {
     global  this
     
     set mjid [jlib::jidmap $jid]
-    set rootTail [uriencode::quote $mjid]
+    set rootTail [::uri::urn::quote $mjid]
     set xfiles [glob -nocomplain -directory $this(historyPath) ${rootTail}-*.xml]
     return [lsort -dictionary $xfiles]
 }
@@ -911,7 +911,7 @@ proc ::History::XInsertText {w} {
 proc ::History::PutToFileEx {jid args} {
     global  this
     
-    set path [file join $this(historyPath) [uriencode::quote $jid]]    
+    set path [file join $this(historyPath) [::uri::urn::quote $jid]]    
     if {![catch {open $path a} fd]} {
 	#fconfigure $fd -encoding utf-8
 	puts $fd "set message(\[incr uid]) {$args}"
@@ -1092,7 +1092,7 @@ proc ::History::InsertText {w} {
     array set argsA $state(argsA)
 
     set mjid [jlib::jidmap $jid]
-    set path [file join $this(historyPath) [uriencode::quote $mjid]] 
+    set path [file join $this(historyPath) [::uri::urn::quote $mjid]] 
 
     set clockFormat         [option get $wchatframe clockFormat {}]
     set clockFormatNotToday [option get $wchatframe clockFormatNotToday {}]
@@ -1191,7 +1191,7 @@ proc ::History::FindAgain {w {dir 1}} {
 proc ::History::ReadMessageFile {jid} {
     global  this
     
-    set fileName [file join $this(historyPath) [uriencode::quote $jid]] 
+    set fileName [file join $this(historyPath) [::uri::urn::quote $jid]] 
     return [ReadMessageFromFile $fileName $jid]
 }
 
@@ -1215,7 +1215,7 @@ proc ::History::HaveMessageFile {jid} {
     global  this
     
     set mjid [jlib::jidmap $jid]
-    set fileName [file join $this(historyPath) [uriencode::quote $mjid]] 
+    set fileName [file join $this(historyPath) [::uri::urn::quote $mjid]] 
     if {[file exists $fileName]} {
 	return 1
     } else {
@@ -1227,7 +1227,7 @@ proc ::History::GetMessageFile {jid} {
     global  this
     
     set mjid [jlib::jidmap $jid]
-    set fileName [file join $this(historyPath) [uriencode::quote $mjid]] 
+    set fileName [file join $this(historyPath) [::uri::urn::quote $mjid]] 
     if {[file exists $fileName]} {
 	return $fileName
     } else {
@@ -1312,7 +1312,7 @@ proc ::History::ClearHistory {jid wtext} {
     $wtext configure -state normal
     $wtext delete 1.0 end
     $wtext configure -state disabled
-    set path [file join $this(historyPath) [uriencode::quote $jid]] 
+    set path [file join $this(historyPath) [::uri::urn::quote $jid]] 
     if {[file exists $path]} {
 	file delete $path
     }
@@ -1336,7 +1336,7 @@ proc ::History::SaveHistory {jid wtext} {
     global  this
 	
     set ans [tk_getSaveFile -title [mc Save] \
-      -initialfile "Chat [uriencode::quote $jid].txt"]
+      -initialfile "Chat [::uri::urn::quote $jid].txt"]
 
     if {$ans ne ""} {
 	set allText [::Text::TransformToPureText $wtext]

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.80 2008-02-06 13:57:25 matben Exp $
+# $Id: VCard.tcl,v 1.81 2008-02-10 09:43:22 matben Exp $
 
 package provide VCard 1.0
 
@@ -535,7 +535,7 @@ proc ::VCard::AvatarDnDFileSource {etoken win} {
     
     if {[info exists elem(photo_type)] && [info exists elem(photo_binval)]} {
 
-	set tail [uriencode::quote $elem(jid)]
+	set tail [::uri::urn::quote $elem(jid)]
 	set suff [::Types::GetSuffixListForMime $elem(photo_type)]
 	set fileName [file join $this(tmpPath) $tail]$suff
 	set fd [open $fileName w]
@@ -809,7 +809,7 @@ proc ::VCard::OnMenuExportHook {} {
 }
 
 proc ::VCard::ExportXMLFromJID {jid} {
-    set f [uriencode::quote $jid].xml
+    set f [::uri::urn::quote $jid].xml
     set fileName [tk_getSaveFile -defaultextension .xml -initialfile $f]
     if {$fileName ne ""} {
 	::Jabber::Jlib vcard send_get $jid \
@@ -829,7 +829,7 @@ proc ::VCard::ExportJIDCB {jid fileName jlib type vcardE} {
 }
 
 proc ::VCard::ExportXML {token jid} {
-    set f [uriencode::quote $jid].xml
+    set f [::uri::urn::quote $jid].xml
     set fileName [tk_getSaveFile -defaultextension .xml -initialfile $f]
     if {$fileName ne ""} {
 	SaveToFile $token $fileName $jid

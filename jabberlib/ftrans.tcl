@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: ftrans.tcl,v 1.30 2007-11-30 14:38:34 matben Exp $
+# $Id: ftrans.tcl,v 1.31 2008-02-10 09:43:22 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -219,7 +219,7 @@ proc jlib::ftrans::uri {jid fileName mime} {
     append uri2 ";" "mime-type=$mime"
     append uri2 ";" "name=$tail"
     append uri2 ";" "size=$size"
-    set uri2 [uriencode::quote $uri2]
+    set uri2 [::uri::urn::quote $uri2]
     
     return $uri$uri2
 }

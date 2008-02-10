@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.15 2008-02-06 13:57:25 matben Exp $
+# $Id: ChatTheme.tcl,v 1.16 2008-02-10 09:43:21 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -442,7 +442,7 @@ proc ::ChatTheme::Parse {jid str} {
 proc ::ChatTheme::ParseWord {word} {
     
     if {[::Emoticons::Exists $word]} {
-	return "<img src=\"[uriencode::quote $word]\"/>"
+	return "<img src=\"[::uri::urn::quote $word]\"/>"
     } elseif {[ParseURI $word]} {
 	return "<a href=\"$word\">$word</a>"
     } else {

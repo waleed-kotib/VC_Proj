@@ -5,35 +5,13 @@
 # 	extend the uri package to deal with URN (RFC 2141)
 # 	see http://www.normos.org/ietf/rfc/rfc2141.txt
 # 	
-# $Id: uriencode.tcl,v 1.4 2008-02-09 14:33:17 matben Exp $
+# $Id: uriencode.tcl,v 1.5 2008-02-10 09:43:21 matben Exp $
+
+package require uri::urn
 
 package provide uriencode 1.0
 
-namespace eval uriencode {
-
-    variable esc {%[0-9a-fA-F]{2}}
-    variable trans {a-zA-Z0-9$_.+!*'(,):=@;-}
-}
-
-# Quote the disallowed characters according to the RFC for URN scheme.
-# ref: RFC2141 sec2.2
-
-proc uriencode::quote {str} {
-    variable trans
-    
-    set ndx 0
-    while {[regexp -start $ndx -indices -- "\[^$trans\]" $str r]} {
-	set ndx [lindex $r 0]
-	scan [string index $str $ndx] %c chr
-	set rep %[format %.2X $chr]
-	if {[string match $rep %00]} {
-	    error "invalid character: character $chr is not allowed"
-	}
-	set str [string replace $str $ndx $ndx $rep]
-	incr ndx 3
-    }
-    return $str
-}
+namespace eval uriencode {}
 
 # uriencode::quotepath --
 # 
@@ -47,19 +25,19 @@ proc uriencode::quotepath {path} {
 
     if {!$isrel} {
 	
-	# An absolute non mac path. 
+	# An absolute path. 
 	# Be sure to get rid of unix style "/" and windows "C:/"
   	set plist [file split [string trimleft $path /]]
-	set qpath [uriencode::quote [string trimright [lindex $plist 0] /]]
+	set qpath [::uri::urn::quote [string trimright [lindex $plist 0] /]]
 	foreach str [lrange $plist 1 end] {
-	    lappend qpath [uriencode::quote $str]
+	    lappend qpath [::uri::urn::quote $str]
 	}	
     } else {
 	
-	# A relative non mac path.
+	# A relative path.
 	set qpath [list]
 	foreach str [file split $path] {
-	    lappend qpath [uriencode::quote $str]
+	    lappend qpath [::uri::urn::quote $str]
 	}
     }
     
@@ -83,7 +61,7 @@ proc uriencode::quoteurl {url} {
 }
 
 proc uriencode::decodefile {file} {
-    return [uriencode::decodeurl $file]
+    return [::uri::urn::unquote $file]
 }
 
 proc uriencode::decodeurl {url} {
