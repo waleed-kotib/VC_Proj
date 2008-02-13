@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: getfile.tcl,v 1.4 2007-07-19 06:28:11 matben Exp $
+# $Id: getfile.tcl,v 1.5 2008-02-13 08:17:36 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -57,6 +57,9 @@ namespace eval getfile {
     set get(opts) {-blocksize -command -displayname -mimetype -progress -size}
     set get(clientopts) {-blocksize -command -displayname -mimetype -optlist \
       -progress -size -timeout}
+
+    # Workaround for the "fcopy bug".
+    variable useFcopy 0 
 
     variable urlTypes
     array set urlTypes {
@@ -132,6 +135,7 @@ proc getfile::get {sock fileName args} {
     
     variable get
     variable codeToText
+    variable useFcopy
 
     Debug 2 "getfile::get fileName=$fileName, args='$args'"
     
@@ -209,7 +213,11 @@ proc getfile::get {sock fileName args} {
     }
     
     # Initiate a sequence of background fcopies
-    CopyStart $sock $fd $token 
+    if {$useFcopy} {
+	CopyStart $sock $fd $token 
+    } else {
+	fileevent $sock readable [list ::getfile::Read $sock $token]	
+    }
     ::Debug 4 "getfile::get exit"
     
     return $token
@@ -605,6 +613,66 @@ proc getfile::CopyDone {token count {error {}}} {
 	}
     } else {
 	CopyStart $s $fd $token
+    }
+}
+
+proc ::getfile::Read {s token} {
+    global errorInfo errorCode
+    variable $token
+    upvar 0 $token state
+
+    fileevent $s readable {}
+
+    set done 0
+    set blocksize $state(-blocksize)
+
+    if {[string length [fconfigure $s -error]]} {
+	Finish $token network-error
+    } elseif {[catch {eof $s} iseof] || $iseof} {
+
+	# It is the put side that takes action to close socket, and we are
+	# likely to receive it here.
+	# When transporting text files between different platforms
+	# line ending translations screw up the total size which may change.
+	Finish $token "" 1
+	set state(status) ok
+	if {[info exists state(-command)]} {
+	    if {[catch {eval $state(-command) {$token ok finished}} err]} {
+		set state(error) [list $err $errorInfo $errorCode]
+		set state(status) error
+	    }
+	}
+    } else {
+	set fd $state(fd)
+	if {[catch {
+	    set data [read $s $blocksize]
+	    set n [string length $data]
+	    if {$n >= 0} {
+		puts -nonewline $fd $data
+	    }
+	} err]} {
+	    Finish $token network-error
+	    return
+	} else {
+	    incr state(currentsize) $n
+	    if {[info exists state(-progress)]} {
+		eval $state(-progress) {$token $state(totalsize) $state(currentsize)}
+	    }
+	}
+	
+	# This is a trick to put this event at the back of the queue to
+	# avoid using any 'update'.
+	after idle [list after 0 [list \
+	  [namespace current]::SetReadable $s $token]]
+    }
+}
+
+proc ::getfile::SetReadable {s token} {    
+    
+    # We could have been closed since this event comes async.
+    if {[lsearch [file channels] $s] >= 0} {
+	fileevent $s readable  \
+	  [list [namespace current]::Read $s $token]
     }
 }
 

@@ -9,7 +9,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: httpex.tcl,v 1.27 2008-01-16 08:26:16 matben Exp $
+# $Id: httpex.tcl,v 1.28 2008-02-13 08:17:36 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -957,8 +957,7 @@ proc httpex::Event {token} {
 		# Initiate a sequence of background fcopies
 		CopyStart $s $token
 	    } else {
-		Debug 2 "\tfileevent readable httpex::Read"
-		fileevent $s readable [list httpex::Read $s $token]
+		SetReadable $s $token
 	    }
 	}
     } elseif {$n > 0} {
