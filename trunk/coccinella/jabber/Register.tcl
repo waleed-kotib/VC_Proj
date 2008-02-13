@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.92 2008-01-21 13:28:40 matben Exp $
+# $Id: Register.tcl,v 1.93 2008-02-13 13:24:40 matben Exp $
 
 package provide Register 1.0
 
@@ -596,11 +596,11 @@ proc ::RegisterEx::ConnectCB {token cuid jlibname status {errcode ""} {errmsg ""
 	SetState $token {!disabled}
 	NotBusy $token
 	::JUI::SetConnectState "disconnect"
-	$jstate(jlib) connect free
 	if {$errcode ne "reset"} {
 	    set str [::Login::GetErrorStr $errcode $errmsg]
 	    ::UI::MessageBox -icon error -type ok -message $str
 	}
+	$jstate(jlib) connect free
     }
 }
 
