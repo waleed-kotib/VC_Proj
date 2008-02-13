@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: putfile.tcl,v 1.7 2007-07-19 06:28:11 matben Exp $
+# $Id: putfile.tcl,v 1.8 2008-02-13 08:17:36 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -60,7 +60,10 @@ namespace eval putfile {
       -mimetype}
     set put(toClientOpts) {-blocksize -command -filetail -mimetype -optlist  \
       -progress}
-    
+  
+    # Test avoiding fcopy and use fileevents instead.
+    variable useFcopy 0
+
     variable urlTypes
     array set urlTypes {
 	http	{80 ::socket}
@@ -312,6 +315,7 @@ proc putfile::Connect {token} {
 proc putfile::Response {token} {    
     global errorInfo errorCode    
     variable codeToText
+    variable useFcopy
     variable $token
     upvar 0 $token state
     
@@ -379,7 +383,11 @@ proc putfile::Response {token} {
     }
     
     # Initiate a sequence of background fcopies
-    CopyStart $state(fd) $s $token 
+    if {$useFcopy} {
+	CopyStart $state(fd) $s $token 
+    } else {
+	SetWritable $s $token
+    }
 }
 
 # putfile::CopyStart
@@ -449,6 +457,65 @@ proc putfile::CopyDone {token count {error {}}} {
 	}
     } else {
 	CopyStart $fd $s $token
+    }
+}
+
+proc putfile::Write {s token} {
+    global errorInfo errorCode    
+    
+    variable $token
+    upvar 0 $token state
+
+    set fd $state(fd)
+    set blocksize $state(-blocksize)
+
+    if {[string length [fconfigure $s -error]]} {
+	Finish $token network-error
+    } elseif {[catch {eof $s} iseof] || $iseof} {
+	set msg ""
+	if {$state(totalsize) > $state(currentsize)} {
+	    set msg ended
+	}
+	Eof $token
+	Finish $token $msg
+    } elseif {[catch {eof $fd} iseof] || $iseof} {
+	Finish $token "" 1
+	set state(status) ok
+	if {[info exists state(-command)]} {
+	    if {[catch {eval $state(-command) {$token ok finished}} err]} {
+		set state(error) [list $err $errorInfo $errorCode]
+		set state(status) error
+	    }
+	}
+    } else {
+	if {[catch {
+	    set data [read $fd $blocksize]
+	    set n [string length $data]
+	    incr state(currentsize) $n
+	    if {$n >= 0} {
+		puts -nonewline $s $data
+	    }	    
+	} err]} {
+	    Finish $token network-error
+	} else {
+	    if {[info exists state(-progress)]} {
+		eval $state(-progress) {$token $state(totalsize) $state(currentsize)}
+	    }
+
+	    # This is a trick to put this event at the back of the queue to
+	    # avoid using any 'update'.
+	    after idle [list after 0 [list \
+	      [namespace current]::SetWritable $s $token]]
+	}
+    }
+}
+
+proc putfile::SetWritable {s token} {    
+    
+    # We could have been closed since this event comes async.
+    if {[lsearch [file channels] $s] >= 0} {
+	fileevent $s writable  \
+	  [list [namespace current]::Write $s $token]
     }
 }
 

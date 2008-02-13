@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.33 2008-02-06 13:57:24 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.34 2008-02-13 08:17:36 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -56,7 +56,10 @@ namespace eval ::tinyhttpd:: {
     variable langfile
     variable inited 0
     variable uid 0
-        
+    
+    # Workaround for the "fcopy bug".
+    variable useFcopy 0 
+    
     set this(path)          [file dirname [info script]]
     set this(httpvers)      1.0
     set this(accept-ranges) 1
@@ -775,6 +778,7 @@ proc ::tinyhttpd::PutResponse {token httpcode abspath} {
     variable http
     variable timing
     variable priv
+    variable useFcopy
     
     Debug 2 "::tinyhttpd::PutResponse httpcode=$httpcode, abspath=$abspath"
     
@@ -859,10 +863,7 @@ proc ::tinyhttpd::PutResponse {token httpcode abspath} {
 	fconfigure $fd -translation binary
 	fconfigure $s  -translation binary
 	flush $s
-	
-	# Seems necessary (?) to avoid blocking the UI. BAD!!!
-	#update
-	
+		
 	# Background copy. Be sure to switch off all fileevents on channel.
 	fileevent  $s readable {}
 	fileevent  $s writable {}
@@ -870,7 +871,11 @@ proc ::tinyhttpd::PutResponse {token httpcode abspath} {
 	set timing($token) [list [clock clicks -milliseconds] 0]
 	
 	# Initialize the stream copy.
-	CopyStart $s $token
+	if {$useFcopy} {
+	    CopyStart $s $token
+	} else {
+	    SetWritable $s $token
+	}
     }
 }
 
@@ -931,8 +936,6 @@ proc ::tinyhttpd::CopyStart {s token} {
     upvar 0 $token state    
     variable priv
     
-    #Debug 6 "CopyStart::"
-
     if {$state(haverange) && [string is integer $state(range,end)]} {
 	set offset [tell $state(fd)]
 	if {[expr {$offset + $state(chunk)}] > $state(range,end)} {
@@ -982,6 +985,66 @@ proc ::tinyhttpd::CopyDone {token bytes {error {}}} {
 	Finish $token
     } else {
 	CopyStart $s $token
+    }
+}
+
+# tinyhttpd::Write --
+# 
+#       Read a chunk from file and write to socket.
+#       This is instead of using 'fcopy'.
+#       Must only be called when socket is writable using fileevent.
+
+proc tinyhttpd::Write {s token} {
+    variable $token
+    upvar 0 $token state    
+        
+    fileevent $s writable {}
+
+    set fd $state(fd)
+
+    if {$state(haverange) && [string is integer $state(range,end)]} {
+	set offset [tell $state(fd)]
+	if {[expr {$offset + $state(chunk)}] > $state(range,end)} {
+	    set state(chunk) [expr {$state(range,end) - $offset + 1}]
+	}
+    }
+
+    if {[string length [fconfigure $s -error]]} {
+	Finish $token network-error
+    } elseif {[catch {eof $s} iseof] || $iseof} {
+	Finish $token eof
+    } elseif {[catch {eof $fd} iseof] || $iseof} {
+	Finish $token
+    } elseif {$state(haverange) && \
+      ([tell $state(fd)] >= [expr $state(range,end) + 1])} {
+	Finish $token	
+    } else {
+	if {[catch {
+	    set data [read $fd $state(chunk)]
+	    set n [string length $data]
+	    incr state(currentsize) $n
+	    if {$n >= 0} {
+		puts -nonewline $s $data
+	    }	    
+	} err]} {
+	    Finish $token network-error
+	} else {
+	    lappend timing($token) [clock clicks -milliseconds] $state(currentsize)
+	    
+	    # This is a trick to put this event at the back of the queue to
+	    # avoid using any 'update'.
+	    after idle [list after 0 [list \
+	      [namespace current]::SetWritable $s $token]]
+	}
+    }
+}
+
+proc tinyhttpd::SetWritable {s token} {    
+    
+    # We could have been closed since this event comes async.
+    if {[lsearch [file channels] $s] >= 0} {
+	fileevent $s writable  \
+	  [list [namespace current]::Write $s $token]
     }
 }
 
