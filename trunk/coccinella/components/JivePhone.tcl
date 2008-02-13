@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.32 2007-12-20 14:01:25 matben Exp $
+# $Id: JivePhone.tcl,v 1.33 2008-02-13 10:06:05 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -85,7 +85,7 @@ proc ::JivePhone::Init {} {
 
     #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
     variable wtab -
-    variable abline
+    variable abline [list]
 
     set popMenuDef(addressbook) {
         mJiveCall      jid       {::JivePhone::DialExtension $jid "DIAL"}
@@ -270,9 +270,7 @@ proc ::JivePhone::LogoutHook { } {
     unset -nocomplain state
 
     destroy $wtab
-    if { [info exists abline] } {
-        unset abline
-    }
+    set abline [list]
 
     InitState
 }
@@ -695,7 +693,7 @@ proc ::JivePhone::Build {w args} {
 
     #--------- Load Entries of AddressBook into NewPage Tab ---------
     LoadEntries
-    if { $abline ne "" } {
+    if { [llength $abline] } {
         foreach {name phone} $abline {
             set opts {-text "$name ($phone)"}
             if {$name ne ""} {
@@ -713,6 +711,7 @@ proc ::JivePhone::LoadEntries {} {
     
     set fileName [file join $this(prefsPath) addressbook.csv]
 
+    set abline [list]
     if { [ file exists $fileName ] } {
         set hFile [open $fileName "r"]
         while {[eof $hFile] <= 0} {
@@ -722,10 +721,7 @@ proc ::JivePhone::LoadEntries {} {
                lappend abline $i
            }
         }
-
         close $hFile
-    } else {
-        set abline ""
     }
 }
 
