@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: tinyhttpd.tcl,v 1.34 2008-02-13 08:17:36 matben Exp $
+# $Id: tinyhttpd.tcl,v 1.35 2008-02-18 13:54:38 matben Exp $
 
 # ########################### USAGE ############################################
 #
@@ -26,6 +26,7 @@
 #      ::tinyhttpd::avergaebytespersec
 #      ::tinyhttpd::cleanup
 #      ::tinyhttpd::mount absPath name
+#      ::tinyhttpd::mountfile absFilePath
 #      ::tinyhttpd::unmount name
 #      ::tinyhttpd::allmounted
 #      ::tinyhttpd::registercgicommand path command
@@ -41,7 +42,7 @@ package require uriencode
 
 package provide tinyhttpd 1.0
 
-namespace eval ::tinyhttpd:: {
+namespace eval ::tinyhttpd {
         
     # Keep track of useful things.
     variable priv
@@ -52,6 +53,7 @@ namespace eval ::tinyhttpd:: {
     variable this
     variable timing
     variable mounts
+    variable fmounts
     variable cgibin
     variable langfile
     variable inited 0
@@ -558,10 +560,12 @@ proc ::tinyhttpd::HandleRequest {token} {
 
 	    # Make local absolute path.
 	    set relpath [string trimleft $path /]
-	    set relpath [::uri::urn::unquote $relpath]
-	    set apath   [file join $options(-rootdirectory) $relpath]
-	    set state(rpath) $relpath
-	    set state(apath) [file nativename [file normalize $apath]]
+	    set rpathun [::uri::urn::unquote $relpath]
+	    set apath [file join $options(-rootdirectory) $rpathun]
+	    set npath [file nativename [file normalize $apath]]
+	    set state(rpath)   $relpath
+	    set state(rpathun) $rpathun
+	    set state(apath)   $npath
 	    set state(targetabspath) $state(apath)
 	    
 	    set state(chunk)     $options(-chunk)
@@ -684,18 +688,19 @@ proc ::tinyhttpd::Respond {token} {
     variable options
     variable priv
     variable mounts
+    variable fmounts
     variable cgibin
     
     Debug 2 "Respond:: $token"
             
-    set cmd     $state(cmd)
-    set relpath $state(rpath)    
-    set abspath $state(apath)
+    set cmd   $state(cmd)
+    set rpath $state(rpath)    
+    set apath $state(apath)
 
     set state(state) responding
 
-    Debug 2 "\t relpath=$relpath"
-    Debug 2 "\t abspath=$abspath"
+    Debug 2 "\t rpath=$rpath"
+    Debug 2 "\t apath=$apath"
     
     set httpcode 200
     set ismounted  0
@@ -706,7 +711,7 @@ proc ::tinyhttpd::Respond {token} {
 	    PutIfError $token 416
 	    return
 	}	
-    } elseif {[regexp ^$priv(rpath,cgi)/(.*)$ $relpath match subpath]} {	
+    } elseif {[regexp ^$priv(rpath,cgi)/(.*)$ $rpath m subpath]} {	
 
 	# See if cgi-bin. Handle over control.
 	if {[info exists cgibin($subpath)]} {
@@ -717,7 +722,7 @@ proc ::tinyhttpd::Respond {token} {
 	    Put404 $token
 	}
 	return
-    } elseif {[regexp ^$priv(rpath,mnt)/(.*)$ $relpath match subpath]} {		
+    } elseif {[regexp ^$priv(rpath,mnt)/(.*)$ $rpath m subpath]} {
 	
 	# See first if this is a "mounted" directory.
 	# Find name of mounted from subpath.
@@ -729,6 +734,8 @@ proc ::tinyhttpd::Respond {token} {
 	    set abspath [eval {file join $mounts($mname)} $rest]
 	    set abspath [file normalize $abspath]
 	    set state(targetabspath) $abspath
+	} elseif {[info exists fmounts($subpath)]} {
+	    set abspath $fmounts($subpath)	    
 	} else {
 	    Put404 $token
 	    return
@@ -736,18 +743,18 @@ proc ::tinyhttpd::Respond {token} {
 	Debug 2 "\t abspath=$abspath"
     }
     
-    if {[file isdirectory $abspath]} {
+    if {[file isdirectory $apath]} {
 
 	# If directory given then search for the '-defaultindexfile',
 	# or if no one, possibly return directory listing, else 404.
 
-	set indexfile [file join $abspath $options(-defaultindexfile)]
+	set indexfile [file join $apath $options(-defaultindexfile)]
 	if {[file exists $indexfile]} {
 	    set abspath $indexfile
 	} elseif {$options(-directorylisting)} {
 	    
 	    # No default html file exists, return directory listing.
-	    PutHtmlDirList $token $abspath
+	    PutHtmlDirList $token $apath
 	    return
 	} else {
 	    Put404 $token
@@ -1143,7 +1150,7 @@ proc ::tinyhttpd::BuildHtmlForDir {token} {
     Debug 2 "BuildHtmlForDir:"
     
     set style   $options(-style)
-    set relpath [string trimright $state(rpath) /]
+    set relpath [string trimright $state(rpathun) /]
     set abspath $state(targetabspath)    
     
     Debug 4 "\t relpath=$relpath"
@@ -1308,7 +1315,7 @@ proc ::tinyhttpd::PutPlain404 {token} {
 #       
 # Results:
 
-proc ::tinyhttpd::stop { } {    
+proc ::tinyhttpd::stop {} {    
     variable priv
     variable options
     
@@ -1323,12 +1330,12 @@ proc ::tinyhttpd::stop { } {
 # 
 # 
 
-proc ::tinyhttpd::anyactive { } {
+proc ::tinyhttpd::anyactive {} {
 
     return [expr {[llength [getTokenList]] > 1} ? 1 : 0]
 }
 
-proc tinyhttpd::getTokenList { } {
+proc tinyhttpd::getTokenList {} {
     
     set ns [namespace current]
     return [concat  \
@@ -1343,7 +1350,7 @@ proc tinyhttpd::getTokenList { } {
 # 
 # 
 
-proc ::tinyhttpd::bytestransported { } {
+proc ::tinyhttpd::bytestransported {} {
     variable timing
     
     set totbytes 0
@@ -1357,7 +1364,7 @@ proc ::tinyhttpd::bytestransported { } {
 # 
 # 
 
-proc ::tinyhttpd::avergaebytespersec { } {
+proc ::tinyhttpd::avergaebytespersec {} {
     variable timing
     
     set totbytes 0
@@ -1374,7 +1381,7 @@ proc ::tinyhttpd::avergaebytespersec { } {
 # 
 # 
 
-proc ::tinyhttpd::cleanup { } {
+proc ::tinyhttpd::cleanup {} {
     variable priv
     variable options
     variable timing
@@ -1470,6 +1477,10 @@ proc ::tinyhttpd::unixpath {path} {
     return $upath
 }
 
+# tinyhttpd::mount --
+# 
+#       Mounts a directory on the httpd virtual file tree.
+
 proc ::tinyhttpd::mount {path name} {
     variable mounts
     
@@ -1484,14 +1495,38 @@ proc ::tinyhttpd::mount {path name} {
 
 proc ::tinyhttpd::unmount {name} {
     variable mounts
-    
     unset -nocomplain mounts($name)
 }
 
-proc ::tinyhttpd::allmounted { } {
+proc ::tinyhttpd::allmounted {} {
     variable mounts
+    return [array get mounts]
+}
+
+# tinyhttpd::mountfile --
+# 
+#       Mounts a file on the httpd virtual file tree.
+#       Returns relative mounted path.
+
+proc ::tinyhttpd::mountfile {fileName} {
+    variable fmounts
+    variable priv
     
-    return [array names mounts]
+    set tail [uriencode::quotepath [file tail $fileName]]
+    set name [file join [uuid] $tail]
+    set rpath [file join $priv(rpath,mnt) $name]
+    set fmounts($name) $fileName
+    return $rpath
+}
+
+proc ::tinyhttpd::unmountfile {name} {
+    variable fmounts
+    unset -nocomplain fmounts($name)
+}
+
+proc ::tinyhttpd::allfmounts {} {
+    variable fmounts
+    return [array get fmounts]
 }
 
 proc ::tinyhttpd::registercgicommand {path cmd} {
@@ -1512,10 +1547,10 @@ proc ::tinyhttpd::unregistercgicommand {path} {
     unset -nocomplain cgibin($name)
 }
 
-proc ::tinyhttpd::allcgibins { } {
+proc ::tinyhttpd::allcgibins {} {
     variable cgibin
     
-    return [array names cgibin]
+    return [array get cgibin]
 }
 
 # Simple message catalog support.
@@ -1547,6 +1582,18 @@ proc ::tinyhttpd::McLoad {} {
 	eval [read $fid]
 	close $fid
     }
+}
+
+# tinyhttpd::uuid --
+# 
+#       Simplified uuid generator. See the uuid package for a better one.
+
+proc ::tinyhttpd::uuid {} {
+    set MAX_INT 0x7FFFFFFF
+    # Bugfix Eric Hassold from Evolane
+    set hex1 [format {%x} [expr {[clock clicks] & $MAX_INT}]]
+    set hex2 [format {%x} [expr {int($MAX_INT*rand())}]]
+    return $hex1-$hex2
 }
 
 proc ::tinyhttpd::Debug {num str} {
