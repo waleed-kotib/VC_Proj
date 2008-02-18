@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.76 2007-12-13 13:24:35 matben Exp $
+# $Id: Utils.tcl,v 1.77 2008-02-18 13:54:38 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -442,10 +442,9 @@ proc ::Utils::GetFontListFromName {fontSpec} {
 #       for our built in http server.
 
 proc ::Utils::GetHttpFromFile {filePath} {
-    global  prefs this
-    
-    set relPath [::tfileutils::relative $this(httpdRootPath) $filePath]
-    set relPath [uriencode::quotepath $relPath]
+    global  prefs
+
+    set relPath [::tinyhttpd::mountfile $filePath]
     set ip [::Network::GetThisPublicIP]
     return "http://${ip}:$prefs(httpdPort)/$relPath"
 }
