@@ -12,7 +12,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: saslmd5.tcl,v 1.12 2007-11-05 08:53:14 matben Exp $
+# $Id: saslmd5.tcl,v 1.13 2008-02-19 07:30:38 matben Exp $
 
 package require base64
 package require md5 2.0
@@ -471,6 +471,28 @@ proc saslmd5::parse_challenge {str} {
     }
     return $challenge
 }
+
+# RFC 2831 2.1
+# Char categories as per spec...
+# Build up a regexp for splitting the challenge into key value pairs.
+
+proc saslmd5::parse_challengePT {str} {
+    puts "str=$str"
+        
+    set sep "\\\]\\\[\\\\()<>@,;:\\\"\\\?= \\\{\\\} \t"
+    set tok {0123456789ABCDEFGHIJKLMNOPQRS TUVWXYZabcdefghijklmnopqrstuvw xyz\-\|\~\!\#\$\%\&\*\+\.\^\_\ `}
+    set sqot {(?:\'(?:\\.|[^\'\\])*\')}
+    set dqot {(?:\"(?:\\.|[^\"\\])*\")}
+    set parameters {}
+    regsub -all "(\[${tok}\]+)=(${dqot}|(?:\[$ {tok}\]+))(?:\[${sep}\]+|$)" \
+      $str {\1 \2 } parameters
+    puts "parameters=$parameters"
+    return $parameters
+}
+
+# Fails when quotes are missing:
+# str=nonce="1142339597",qop="auth",charset=utf-8,algorithm=md5-sess
+# parameters=nonce "1142339597" qop "auth" charset=utf-8,algorithm=md5-sess
 
 proc saslmd5::free {token} {
     variable $token

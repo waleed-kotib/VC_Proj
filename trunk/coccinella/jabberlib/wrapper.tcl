@@ -10,7 +10,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: wrapper.tcl,v 1.38 2007-11-10 11:54:35 matben Exp $
+# $Id: wrapper.tcl,v 1.39 2008-02-19 07:30:38 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -68,7 +68,7 @@
 #       030910   added accessor functions to get/set xmllist elements
 #       031103   added splitxml command
 
-package provide wrapper 1.0
+package provide wrapper 1.2
     
 # We have a dummy version number 99.0 as a workaround for the buggy tclparser.
 package require xml 99.0
@@ -124,31 +124,43 @@ proc wrapper::new {streamstartcmd streamendcmd parsecmd errorcmd} {
     
     # Create the actual XML parser. It is created in our present namespace,
     # at least for the tcl parser!!!
-    set wrapper($id,parser) [xml::parser]
-    
-    # Investigate which parser class we've got, and act consequently.
-    set classes [::xml::parserclass info names]
-    if {[lsearch $classes "expat"] >= 0} {
-	set wrapper($id,class) "expat"
-	$wrapper($id,parser) configure   \
-	  -final 0    \
-	  -reportempty 1   \
-	  -elementstartcommand  [list [namespace current]::elementstart $id]   \
-	  -elementendcommand    [list [namespace current]::elementend $id]     \
-	  -characterdatacommand [list [namespace current]::chdata $id]         \
-	  -ignorewhitespace     1                                              \
-	  -defaultexpandinternalentities 0
+
+    if {[llength [package provide tdom]]} {
+	set wrapper($id,parser) [xml::parser -namespace 1]
+	set wrapper($id,class) "tdom"
+	$wrapper($id,parser) configure \
+	  -final 0 Ê\
+	  -elementstartcommand Ê[list [namespace current]::elementstart $id] Ê \
+	  -elementendcommand Ê Ê[list [namespace current]::elementend $id] Ê Ê \
+	  -characterdatacommand [list [namespace current]::chdata $id] Ê Ê Ê Ê \
+	  -ignorewhitespace Ê Ê 0
     } else {
-	set wrapper($id,class) "tcl"
-	$wrapper($id,parser) configure   \
-	  -final 0    \
-	  -reportempty 1   \
-	  -elementstartcommand  [list [namespace current]::elementstart $id]   \
-	  -elementendcommand    [list [namespace current]::elementend $id]     \
-	  -characterdatacommand [list [namespace current]::chdata $id]         \
-	  -errorcommand         [list [namespace current]::xmlerror $id]       \
-	  -ignorewhitespace     1                                              \
-	  -defaultexpandinternalentities 0
+	set wrapper($id,parser) [xml::parser]
+    
+	# Investigate which parser class we've got, and act consequently.
+	set classes [::xml::parserclass info names]
+	if {[lsearch $classes "expat"] >= 0} {
+	    set wrapper($id,class) "expat"
+	    $wrapper($id,parser) configure   \
+	      -final 0    \
+	      -reportempty 1   \
+	      -elementstartcommand  [list [namespace current]::elementstart $id]   \
+	      -elementendcommand    [list [namespace current]::elementend $id]     \
+	      -characterdatacommand [list [namespace current]::chdata $id]         \
+	      -ignorewhitespace     1                                              \
+	      -defaultexpandinternalentities 0
+	} else {
+	    set wrapper($id,class) "tcl"
+	    $wrapper($id,parser) configure   \
+	      -final 0    \
+	      -reportempty 1   \
+	      -elementstartcommand  [list [namespace current]::elementstart $id]   \
+	      -elementendcommand    [list [namespace current]::elementend $id]     \
+	      -characterdatacommand [list [namespace current]::chdata $id]         \
+	      -errorcommand         [list [namespace current]::xmlerror $id]       \
+	      -ignorewhitespace     1                                              \
+	      -defaultexpandinternalentities 0
+	}
     }
     
     # Experiment.
@@ -203,7 +215,7 @@ proc wrapper::parse {id xml} {
 #       event right from an element callback, everyhting will be out of sync.
 #       
 # Arguments:
-#       p:           the parser.
+#       id: Ê Ê Ê Ê Êthe wrapper id
 #       xml:         raw xml data to be parsed.
 #       
 # Results:
@@ -267,6 +279,14 @@ proc wrapper::elementstart {id tagname attrlist args} {
 	lappend attrlist xmlns [lindex $argsarr(-namespacedecls) 0]
     }
     
+    if {$wrapper($id,class) eq "tdom"} {
+	if {[set ndx [string last : $tagname]] != -1} {
+	    set ns [string range $tagname 0 [expr {$ndx - 1}]]
+	    set tagname [string range $tagname [incr ndx] end]
+	    lappend attrlist xmlns $ns
+	}
+    }
+
     if {$wrapper($id,level) == 0} {
 	
 	# We got a root tag, such as <stream:stream>
@@ -331,10 +351,11 @@ proc wrapper::elementend {id tagname args} {
 	set childlevel $wrapper($id,level)
 	
 	# Insert the child tree in the parent tree.
+	# Avoid adding to the level 1 else we just consume memory forever [PT]
 	set level [incr wrapper($id,level) -1]
-	append_child $id $level $wrapper($id,tree,$childlevel)
-
-	if {$level == 1} {
+	if {$level > 1} {
+	    append_child $id $level $wrapper($id,tree,$childlevel)
+	} elseif {$level == 1} {
 	    
 	    # We've got an end tag of a command tag, and it's time to
 	    # deliver our parse tree to the registered callback proc.
@@ -398,6 +419,18 @@ proc wrapper::chdata {id chardata} {
       [lreplace $wrapper($id,tree,$level) 3 3 "$chdata"]
 }
 
+# wrapper::free -- 
+# 
+# Ê Ê Êtdom doesn't permit freeing a parser from within a callback. So 
+# Ê Ê Êwe keep trying until it works. 
+# 
+
+proc wrapper::free {id} { 
+    if {[catch {$id free}]} { 
+	after 100 [list [namespace origin free] $id] 
+    } 
+} 
+
 # wrapper::reset --
 #
 #       Resets the wrapper and XML parser to be prepared for a fresh new 
@@ -413,29 +446,46 @@ proc wrapper::chdata {id chardata} {
 proc wrapper::reset {id} {   
     variable wrapper
     
-    # This resets the actual XML parser. Not sure this is actually needed.
-    $wrapper($id,parser) reset
-    
-    # Unfortunately it also removes all our callbacks and options.
-    if {$wrapper($id,class) eq "expat"} {
-	$wrapper($id,parser) configure   \
-	  -final 0    \
-	  -reportempty 1   \
-	  -elementstartcommand  [list [namespace current]::elementstart $id]   \
-	  -elementendcommand    [list [namespace current]::elementend $id]     \
-	  -characterdatacommand [list [namespace current]::chdata $id]         \
-	  -ignorewhitespace     1                                              \
-	  -defaultexpandinternalentities 0
+    if {$wrapper($id,class) eq "tdom"} {
+	
+	# We cannot reset a tdom expat parser from within a callback. However,
+	# we can always replace it with a new one.
+	set old $wrapper($id,parser)
+	after idle [list [namespace origin free] $old]
+	set wrapper($id,parser) [xml::parser -namespace 1]
+	
+	$wrapper($id,parser) configure Ê \
+	  -final 0 Ê Ê\
+	  -elementstartcommand Ê[list [namespace current]::elementstart $id] Ê \
+	  -elementendcommand Ê Ê[list [namespace current]::elementend $id] Ê Ê \
+	  -characterdatacommand [list [namespace current]::chdata $id] Ê Ê Ê Ê \
+	  -ignorewhitespace Ê Ê 0
     } else {
-	$wrapper($id,parser) configure   \
-	  -final 0    \
-	  -reportempty 1   \
-	  -elementstartcommand  [list [namespace current]::elementstart $id]   \
-	  -elementendcommand    [list [namespace current]::elementend $id]     \
-	  -characterdatacommand [list [namespace current]::chdata $id]         \
-	  -errorcommand         [list [namespace current]::xmlerror $id]       \
-	  -ignorewhitespace     1                                              \
-	  -defaultexpandinternalentities 0
+    
+	# This resets the actual XML parser. Not sure this is actually needed.
+	$wrapper($id,parser) reset
+	
+	# Unfortunately it also removes all our callbacks and options.
+	if {$wrapper($id,class) eq "expat"} {
+	    $wrapper($id,parser) configure   \
+	      -final 0    \
+	      -reportempty 1   \
+	      -elementstartcommand  [list [namespace current]::elementstart $id]   \
+	      -elementendcommand    [list [namespace current]::elementend $id]     \
+	      -characterdatacommand [list [namespace current]::chdata $id]         \
+	      -ignorewhitespace     1                                              \
+	      -defaultexpandinternalentities 0
+	} else {
+	    $wrapper($id,parser) configure   \
+	      -final 0    \
+	      -reportempty 1   \
+	      -elementstartcommand  [list [namespace current]::elementstart $id]   \
+	      -elementendcommand    [list [namespace current]::elementend $id]     \
+	      -characterdatacommand [list [namespace current]::chdata $id]         \
+	      -errorcommand         [list [namespace current]::xmlerror $id]       \
+	      -ignorewhitespace     1                                              \
+	      -defaultexpandinternalentities 0
+	}
     }
 
     # Cleanup internal state vars.
