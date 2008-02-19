@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.74 2007-11-05 08:53:14 matben Exp $
+# $Id: tileutils.tcl,v 1.75 2008-02-19 15:34:17 matben Exp $
 #
 
 package require treeutil
@@ -39,9 +39,14 @@ namespace eval tile {
     foreach name [tile::availableThemes] {
 	
 	# @@@ We could be more economical here and load theme only when needed.
-	if {[catch {package require ${::tileutils::ns}::$name}]} {
-	    continue
+	if {[info exists ::ttk::currentTheme]} { 
+	    set tname ttk::theme::$name
+	} else {
+	    set tname tile::theme::$name
 	}
+	if {[catch {package require $tname}]} {
+	    continue
+	}	    
 
 	# Set only the switches that are not in [style configure .]
 	# or [style map .].

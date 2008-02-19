@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.60 2008-01-03 14:49:09 matben Exp $
+# $Id: JPrefs.tcl,v 1.61 2008-02-19 15:34:17 matben Exp $
 
 package require ui::fontselector
 
@@ -164,6 +164,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	      $name [set tileThemeArr($name) [string totitle $name]]
 	}
     }
+    set menuDef [list]
     foreach {theme name} $tileThemeList {
 	if {![catch {package require tile::theme::$theme}]} {
 	    lappend menuDef [list $name -value $theme]
