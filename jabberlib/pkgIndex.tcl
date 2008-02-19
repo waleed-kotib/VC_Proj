@@ -18,7 +18,7 @@ package ifneeded service        1.0 [list source [file join $dir service.tcl]]
 package ifneeded stanzaerror    1.0 [list source [file join $dir stanzaerror.tcl]]
 package ifneeded streamerror    1.0 [list source [file join $dir streamerror.tcl]]
 package ifneeded tinydom        0.1 [list source [file join $dir tinydom.tcl]]
-package ifneeded wrapper        1.0 [list source [file join $dir wrapper.tcl]]
+package ifneeded wrapper        1.2 [list source [file join $dir wrapper.tcl]]
 
 package ifneeded jlib::avatar      0.1 [list source [file join $dir avatar.tcl]]
 package ifneeded jlib::bind        0.1 [list source [file join $dir bind.tcl]]
