@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: ttoolbar.tcl,v 1.17 2007-09-13 08:25:37 matben Exp $
+# $Id: ttoolbar.tcl,v 1.18 2008-02-19 15:34:17 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -81,12 +81,18 @@ proc ::ttoolbar::Init { } {
 	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAJAAkAAAQacAxAKzCmBHtx
 	tp5HUGEolMbYYQWYbZbEUREAOw==
     }
+    puts "tile::availableThemes=[tile::availableThemes]"
     
     foreach name [tile::availableThemes] {
 	
-	if {[catch {package require tile::theme::$name}]} {
-	    continue
+	if {[info exists ::ttk::currentTheme]} { 
+	    set tname ttk::theme::$name
+	} else {
+	    set tname tile::theme::$name
 	}
+	if {[catch {package require $tname}]} {
+	    continue
+	}	    
 
 	style theme settings $name {
 	    
