@@ -1,6 +1,4 @@
-#!/bin/sh
-# the next line restarts using wish \
-	exec wish "$0" -visual best "$@"
+#!/usr/bin/env wish
       
 #  Coccinella.tcl ---
 #  
@@ -8,11 +6,11 @@
 #       It controls the startup sequence and therefore needs a number
 #       of code files/images to be succesful.
 #      
-#  Copyright (c) 1999-2007  Mats Bengtsson
+#  Copyright (c) 1999-2008  Mats Bengtsson
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.176 2008-02-06 13:57:24 matben Exp $	
+# $Id: Coccinella.tcl,v 1.177 2008-02-19 10:13:02 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
