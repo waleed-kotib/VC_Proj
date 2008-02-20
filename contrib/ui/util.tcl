@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.20 2007-12-11 08:53:39 matben Exp $
+# $Id: util.tcl,v 1.21 2008-02-20 15:14:37 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -421,6 +421,8 @@ proc ui::EntryInsert {win s} {
     }    
     if {$type eq "tk"} {
 	::tk::EntrySeeInsert $win
+    } elseif {[info commands ::ttk::style] ne ""} {
+	ttk::entry::See $win insert
     } else {
 	tile::entry::See $win insert
     }

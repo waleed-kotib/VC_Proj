@@ -2,11 +2,11 @@
 #  
 #      This file contains handy support code for the tile package.
 #      
-#  Copyright (c) 2005-2007  Mats Bengtsson
+#  Copyright (c) 2005-2008  Mats Bengtsson
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.75 2008-02-19 15:34:17 matben Exp $
+# $Id: tileutils.tcl,v 1.76 2008-02-20 15:14:37 matben Exp $
 #
 
 package require treeutil
@@ -19,32 +19,24 @@ if {[tk windowingsystem] eq "aqua"} {
     interp alias {} ttk::scrollbar {} scrollbar
 }
 
-# Fixes by Eric Hassold from Evolane while waiting for tile 0.8...
-
 proc ::ttk::deprecated'warning {old new} { } 
-
-set ::tileutils::ns tile::theme
-
-namespace eval ::tile {} 
-if {![info exists ::tile::currentTheme]} { 
-    if {[info exists ::ttk::currentTheme]} { 
-	upvar \#0 ::ttk::currentTheme ::tile::currentTheme 
-	set ::tileutils::ns ttk::theme
-    } 
-}
-
 
 namespace eval tile {
     
-    foreach name [tile::availableThemes] {
+    if {$::this(ttk)} {
+	set styleCmd ttk::style
+	set tns ttk::theme
+	set themes [ttk::themes]
+    } else {
+	set styleCmd style
+	set tns tile::theme
+	set themes [tile::availableThemes]
+    }
+
+    foreach name $themes {
 	
 	# @@@ We could be more economical here and load theme only when needed.
-	if {[info exists ::ttk::currentTheme]} { 
-	    set tname ttk::theme::$name
-	} else {
-	    set tname tile::theme::$name
-	}
-	if {[catch {package require $tname}]} {
+	if {[catch {package require ${tns}::$name}]} {
 	    continue
 	}	    
 
@@ -59,72 +51,72 @@ namespace eval tile {
 	    set showLines 1
 	}
 	
-	style theme settings $name {
+	$styleCmd theme settings $name {
 
-	    style configure . -highlightthickness $highlightThickness
+	    $styleCmd configure . -highlightthickness $highlightThickness
 
 	    # Avoid overwrite non-standard themes. Trick!
 	    eval {
-		style configure Listbox -background white
-	    } [style configure Listbox]
+		$styleCmd configure Listbox -background white
+	    } [$styleCmd configure Listbox]
 	    eval {
-		style configure Text -background white
-	    } [style configure Text]
+		$styleCmd configure Text -background white
+	    } [$styleCmd configure Text]
 	    eval {
-		style configure TreeCtrl \
+		$styleCmd configure TreeCtrl \
 		  -background white -itembackground {gray90 {}} \
 		  -showlines $showLines -usetheme 0
-	    } [style configure TreeCtrl]
+	    } [$styleCmd configure TreeCtrl]
 	    
 	    switch $name {
 		alt {
-		    array set colors [array get ${::tileutils::ns}::alt::colors]
-		    style configure TreeCtrl \
+		    array set colors [array get ${tns}::alt::colors]
+		    $styleCmd configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		aqua {
-		    style configure TreeCtrl \
+		    $styleCmd configure TreeCtrl \
 		      -itembackground {"#dedeff" {}} -usetheme 1
 		}
 		clam {
-		    array set colors [array get ${::tileutils::ns}::clam::colors]
-		    style configure TreeCtrl \
+		    array set colors [array get ${tns}::clam::colors]
+		    $styleCmd configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		classic {
-		    array set colors [array get ${::tileutils::ns}::classic::colors]
-		    style configure TreeCtrl \
+		    array set colors [array get ${tns}::classic::colors]
+		    $styleCmd configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		default {
-		    array set colors [array get ${::tileutils::ns}::default::colors]
+		    array set colors [array get ${tns}::default::colors]
 		}
 		keramik {
-		    array set colors [array get ${::tileutils::ns}::keramik::colors]
-		    style configure TreeCtrl \
+		    array set colors [array get ${tns}::keramik::colors]
+		    $styleCmd configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		step {
-		    array set colors [array get ${::tileutils::ns}::step::colors]
-		    style configure TreeCtrl \
+		    array set colors [array get ${tns}::step::colors]
+		    $styleCmd configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		winnative {
-		    style map Menu \
+		    $styleCmd map Menu \
 		      -background {active SystemHighlight} \
 		      -foreground {active SystemHighlightText disabled SystemGrayText}
-		    style configure TreeCtrl \
+		    $styleCmd configure TreeCtrl \
 		      -itembackground {"#dedeff" {}}
 		}
 		winxpblue {
-		    style configure TreeCtrl \
+		    $styleCmd configure TreeCtrl \
 		      -background white -itembackground {gray92 gray84}
 		}
 		xpnative {
-		    style map Menu \
+		    $styleCmd map Menu \
 		      -background {active SystemHighlight} \
 		      -foreground {active SystemHighlightText disabled SystemGrayText}
-		    style configure TreeCtrl \
+		    $styleCmd configure TreeCtrl \
 		      -itembackground {"#dedeff" {}}
 		}
 	    }
@@ -194,8 +186,15 @@ proc tileutils::configure {args} {
 }
 
 proc tileutils::ThemeChanged {} {
+    global this
     variable options
     
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }
+
     # Give interested parties a chance to read a new option database file etc.
     if {$options(-themechanged) ne {}} {
 	uplevel #0 $options(-themechanged)
@@ -209,19 +208,19 @@ proc tileutils::ThemeChanged {} {
     # etc. and then cache all in style(name) and map(name).
 
     array set style [list -foreground black]
-    array set style [style configure .]
-    array set map   [style map .]
+    array set style [$styleCmd configure .]
+    array set map   [$styleCmd map .]
     
     # Override any class specific settings for some widgets.
     array set textStyle [array get style]
-    array set textStyle [style configure Text]
+    array set textStyle [$styleCmd configure Text]
     array set lbStyle [array get style]
-    array set lbStyle [style configure Listbox]
+    array set lbStyle [$styleCmd configure Listbox]
     array set treeStyle [array get style]
-    array set treeStyle [style configure TreeCtrl]
+    array set treeStyle [$styleCmd configure TreeCtrl]
 
-    array set menuMap [style map .]
-    array set menuMap [style map Menu]
+    array set menuMap [$styleCmd map .]
+    array set menuMap [$styleCmd map Menu]
 
     # We configure the resource database here as well since it saves code.
     # Seems X11 has some system option db that must be overridden.
@@ -306,8 +305,14 @@ proc tileutils::ThemeChanged {} {
 #   This is for pure tk widgets and not the ttk ones.
 
 proc tileutils::ChaseArrowsThemeChanged {win} {
+    global this
     
-    array set style [style configure .]    
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }
+    array set style [$styleCmd configure .]    
     if {[info exists style(-background)]} {
 	set color $style(-background)
 	$win configure -background $color
@@ -315,18 +320,24 @@ proc tileutils::ChaseArrowsThemeChanged {win} {
 }
 
 proc tileutils::ListboxThemeChanged {win} {
+    global this
     
     if {[winfo class $win] ne "Listbox"} {
 	return
     }
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }    
 	    
     # Some themes miss this one.
     array set style [list -foreground black]
-    array set style [style configure .]    
+    array set style [$styleCmd configure .]    
     array set lbStyle [array get style]
-    array set lbStyle [style configure Listbox]
-    array set map   [style map .]
-    array set map   [style map Listbox]
+    array set lbStyle [$styleCmd configure Listbox]
+    array set map   [$styleCmd map .]
+    array set map   [$styleCmd map Listbox]
 
     if {[info exists style(-background)]} {
 	# highlightBackground is drawn outside the border and must blend
@@ -349,10 +360,16 @@ proc tileutils::ListboxThemeChanged {win} {
 }
 
 proc tileutils::MenuThemeChanged {win} {
+    global this
 
     if {[winfo class $win] ne "Menu"} {
 	return
     }
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }    
         
     # @@@ I could think of an alternative here:
     # style theme settings default {
@@ -363,10 +380,10 @@ proc tileutils::MenuThemeChanged {win} {
     
     # Some themes miss this one.
     array set style [list -foreground black]
-    array set style [style configure .]    
-    array set style [style configure Menu]    
-    array set map   [style map .]
-    array set map   [style map Menu]
+    array set style [$styleCmd configure .]    
+    array set style [$styleCmd configure Menu]    
+    array set map   [$styleCmd map .]
+    array set map   [$styleCmd map Menu]
     
     if {[info exists style(-background)]} {
 	set color $style(-background)
@@ -400,13 +417,19 @@ proc tileutils::MenuThemeChanged {win} {
 }
 
 proc tileutils::SpinboxThemeChanged {win} {
+    global this
     
     if {[winfo class $win] ne "Spinbox"} {
 	return
     }
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }    
     array set style [list -foreground black]
-    array set style [style configure .]    
-    array set style [style configure Spinbox]    
+    array set style [$styleCmd configure .]    
+    array set style [$styleCmd configure Spinbox]    
     
     if {[info exists style(-background)]} {
 	set color $style(-background)
@@ -428,14 +451,20 @@ proc tileutils::SpinboxThemeChanged {win} {
 }
 
 proc tileutils::TextThemeChanged {win} {
+    global this
     
     if {[winfo class $win] ne "Text"} {
 	return
     }
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }    
     array set style [list -foreground black]
-    array set style [style configure .]    
-    array set style [style configure Text]    
-    array set styleB [style configure .]    
+    array set style [$styleCmd configure .]    
+    array set style [$styleCmd configure Text]    
+    array set styleB [$styleCmd configure .]    
     
     if {[info exists styleB(-background)]} {
 	# highlightBackground is drawn inside the border and must blend
@@ -462,16 +491,22 @@ proc tileutils::TextThemeChanged {win} {
 #       TreeCtrl is a bit special.
 
 proc tileutils::TreeCtrlThemeChanged {win} {
+    global this
     
     if {[winfo class $win] ne "TreeCtrl"} {
 	return
     }
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }    
     
     # Style options.
     array set style [list -foreground black]
-    array set style [style configure .]    
+    array set style [$styleCmd configure .]    
     array set treeStyle [array get style]
-    array set treeStyle [style configure TreeCtrl]
+    array set treeStyle [$styleCmd configure TreeCtrl]
     $win configure -background $treeStyle(-background) \
       -usetheme $treeStyle(-usetheme) -showlines $treeStyle(-showlines)
     
@@ -502,10 +537,16 @@ proc tileutils::TreeCtrlThemeChanged {win} {
 }
 
 proc tileutils::WaveLabelThemeChanged {win} {
-
+    global this
+    
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }    
     if {[winfo class $win] eq "WaveLabel"} {
 	array set style [list -foreground black]
-	array set style [style configure .]    
+	array set style [$styleCmd configure .]    
 
 	if {[info exists style(-background)]} {
 	    set color $style(-background)
@@ -530,65 +571,70 @@ proc tileutils::configstyles {name} {
 	invalidfg   "#ff0000"
 	invalidbg   "#ffffb0"
     }
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }    
     
-    style theme settings $name {
+    $styleCmd theme settings $name {
 	
 	# Set invalid state maps.
-	style map TEntry  \
+	$styleCmd map TEntry  \
 	  -fieldbackground [list invalid $colors(invalidbg)]  \
 	  -foreground [list invalid $colors(invalidfg)]       \
 	  -background [list invalid $colors(invalidbg)]
-	style map TCombobox  \
+	$styleCmd map TCombobox  \
 	  -fieldbackground [list invalid $colors(invalidbg)]  \
 	  -foreground [list invalid $colors(invalidfg)]       \
 	  -background [list invalid $colors(invalidbg)]
 
-	style layout Headlabel {
+	$styleCmd layout Headlabel {
 	    Headlabel.border -children {
 		Headlabel.padding -children {
 		    Headlabel.label -side left
 		}
 	    }
 	}
-	style configure Headlabel \
+	$styleCmd configure Headlabel \
 	  -font CociLargeFont -padding {20 6 20 6} -anchor w -space 12
 	
-	style layout Popupbutton {
+	$styleCmd layout Popupbutton {
 	    Popupbutton.border -children {
 		Popupbutton.padding -children {
 		    Popupbutton.Combobox.downarrow
 		}
 	    }
 	}
-	style configure Popupbutton -padding 6
+	$styleCmd configure Popupbutton -padding 6
 	
-	style configure Small.TCheckbutton -font CociSmallFont
-	style configure Small.TRadiobutton -font CociSmallFont
-	style configure Small.TMenubutton  -font CociSmallFont
-	style configure Small.TLabel       -font CociSmallFont
-	style configure Small.TLabelframe  -font CociSmallFont
-	style configure Small.TButton      -font CociSmallFont
-	style configure Small.TEntry       -font CociSmallFont
-	style configure Small.TNotebook    -font CociSmallFont
-	style configure Small.TCombobox    -font CociSmallFont
-	style configure Small.TScale       -font CociSmallFont
-	style configure Small.Horizontal.TScale  -font CociSmallFont
-	style configure Small.Vertical.TScale    -font CociSmallFont
+	$styleCmd configure Small.TCheckbutton -font CociSmallFont
+	$styleCmd configure Small.TRadiobutton -font CociSmallFont
+	$styleCmd configure Small.TMenubutton  -font CociSmallFont
+	$styleCmd configure Small.TLabel       -font CociSmallFont
+	$styleCmd configure Small.TLabelframe  -font CociSmallFont
+	$styleCmd configure Small.TButton      -font CociSmallFont
+	$styleCmd configure Small.TEntry       -font CociSmallFont
+	$styleCmd configure Small.TNotebook    -font CociSmallFont
+	$styleCmd configure Small.TCombobox    -font CociSmallFont
+	$styleCmd configure Small.TScale       -font CociSmallFont
+	$styleCmd configure Small.Horizontal.TScale  -font CociSmallFont
+	$styleCmd configure Small.Vertical.TScale    -font CociSmallFont
 	
-	style configure Small.Toolbutton   -font CociSmallFont
-	style configure Small.TNotebook.Tab  -font CociSmallFont
-	style configure Small.Tab          -font CociSmallFont
+	$styleCmd configure Small.Toolbutton   -font CociSmallFont
+	$styleCmd configure Small.TNotebook.Tab  -font CociSmallFont
+	$styleCmd configure Small.Tab          -font CociSmallFont
 	
 	if {$name eq "clam"} {
-	    style configure TButton           \
+	    $styleCmd configure TButton           \
 	      -width -9 -padding {5 3}
-	    style configure TMenubutton       \
+	    $styleCmd configure TMenubutton       \
 	      -width -9 -padding {5 3}
-	    style configure Small.TButton     \
+	    $styleCmd configure Small.TButton     \
 	      -font CociSmallFont             \
 	      -padding {5 1}                  \
 	      -width -9
-	    style configure Small.TMenubutton \
+	    $styleCmd configure Small.TMenubutton \
 	      -font CociSmallFont             \
 	      -padding {5 1}                  \
 	      -width -9
@@ -597,46 +643,46 @@ proc tileutils::configstyles {name} {
 	# @@@ These shall be removed when library/tile is updated!
 	if {[info exists ::tile::version]} {
 	    if {[package vcompare $::tile::version 0.7.3] >= 0} {
-		style configure TCheckbutton -padding {2}
-		style configure TRadiobutton -padding {2}
+		$styleCmd configure TCheckbutton -padding {2}
+		$styleCmd configure TRadiobutton -padding {2}
 	    }
 	}
 	
 	# My custom styles.
 	# 
 	# Sunken label:
-	style layout Sunken.TLabel {
+	$styleCmd layout Sunken.TLabel {
 	    Sunken.background -sticky news -children {
 		Sunken.padding -sticky news -children {
 		    Sunken.label -sticky news
 		}
 	    }
 	}	    
-	style element create Sunken.background image $tiles(sunken) \
+	$styleCmd element create Sunken.background image $tiles(sunken) \
 	  -border {4 4 4 4} -padding {6 3} -sticky news	    
 	
-	style configure Sunken.TLabel -foregeound white
-	style map       Sunken.TLabel  \
+	$styleCmd configure Sunken.TLabel -foregeound white
+	$styleCmd map       Sunken.TLabel  \
 	  -foreground {{background} "#dedede" {!background} white}
-	style configure Small.Sunken.TLabel -font CociSmallFont
+	$styleCmd configure Small.Sunken.TLabel -font CociSmallFont
 	
 	# Sunken entry:
-	style element create SunkenWhite.background image $tiles(sunkenWhite) \
+	$styleCmd element create SunkenWhite.background image $tiles(sunkenWhite) \
 	  -border {4 4 4 4} -padding {6 3} -sticky news	    
 	
-	style layout Sunken.TEntry {
+	$styleCmd layout Sunken.TEntry {
 	    SunkenWhite.background -sticky news -children {
 		Entry.padding -sticky news -children {
 		    Entry.textarea -sticky news
 		}
 	    }
 	}
-	style map Sunken.TEntry  \
+	$styleCmd map Sunken.TEntry  \
 	  -foreground {{background} "#363636" {} black}
-	style configure Small.Sunken.TEntry -font CociSmallFont
+	$styleCmd configure Small.Sunken.TEntry -font CociSmallFont
 	
 	# Sunken mini menubutton.
-	style layout SunkenMenubutton {
+	$styleCmd layout SunkenMenubutton {
 	    Sunken.background -sticky news -children {
 		Sunken.padding -sticky news -children {
 		    Sunken.label -sticky news
@@ -644,12 +690,12 @@ proc tileutils::configstyles {name} {
 		SunkenMenubutton.indicator -sticky se
 	    }
 	}
-	style element create SunkenMenubutton.indicator image $tiles(downArrowContrast) \
+	$styleCmd element create SunkenMenubutton.indicator image $tiles(downArrowContrast) \
 	  -sticky e -padding {0}
-	style configure SunkenMenubutton -padding {0}
+	$styleCmd configure SunkenMenubutton -padding {0}
 
 	# Search entry (from Michael Kirkham).
-	set pad [style configure TEntry -padding]
+	set pad [$styleCmd configure TEntry -padding]
 	switch -- [llength $pad] {
 	    0 { set pad [list 4 0 0 0] }
 	    1 { set pad [list [expr {$pad+4}] $pad $pad $pad] }
@@ -660,10 +706,10 @@ proc tileutils::configstyles {name} {
 	    4 { lset pad 0 [expr {[lindex $pad 0]+4}] }
 	}
 
-	style element create searchEntryIcon image $tiles(search) \
+	$styleCmd element create searchEntryIcon image $tiles(search) \
 	  -padding {8 0 0 0} -sticky {}
 
-	style layout Search.TEntry {
+	$styleCmd layout Search.TEntry {
 	    Entry.field -children {
 		searchEntryIcon -side left
 		Entry.padding -children {
@@ -671,65 +717,65 @@ proc tileutils::configstyles {name} {
 		}
 	    }
 	}
-	style configure Search.TEntry -padding $pad
-	style map Search.TEntry -image [list disabled $tiles(search)] \
+	$styleCmd configure Search.TEntry -padding $pad
+	$styleCmd map Search.TEntry -image [list disabled $tiles(search)] \
 	  -fieldbackground [list invalid $colors(invalidbg)]  \
 	  -foreground [list invalid $colors(invalidfg)]       \
 	  -background [list invalid $colors(invalidbg)]
 
-	style configure Small.Search.TEntry -font CociSmallFont
+	$styleCmd configure Small.Search.TEntry -font CociSmallFont
 	
 	# Safari type button.
 	unset -nocomplain foreground
-	array set foreground [style map . -foreground]
+	array set foreground [$styleCmd map . -foreground]
 	
-	if {$this(tile08)} {
-	    style element create Safari.background image \
+	if {$this(ttk)} {
+	    $styleCmd element create Safari.background image \
 	      [list $tiles(blank)                         \
 	      {background}                 $tiles(blank)  \
 	      {active !disabled !pressed}  $tiles(oval)   \
 	      {pressed !disabled}          $tiles(ovalDark)] \
 	      -border {6 6 6 6} -padding {0} -sticky news
 	} else {
-	    style element create Safari.background image $tiles(blank)  \
+	    $styleCmd element create Safari.background image $tiles(blank)  \
 	      -border {6 6 6 6} -padding {0} -sticky news  \
 	      -map [list  \
 	      {background}                 $tiles(blank)  \
 	      {active !disabled !pressed}  $tiles(oval)   \
 	      {pressed !disabled}          $tiles(ovalDark)]
 	}
-	style layout Safari {
+	$styleCmd layout Safari {
 	    Safari.background -children {
 		Safari.padding -children {
 		    Safari.label
 		}
 	    }
 	}	    
-	style configure Safari  \
+	$styleCmd configure Safari  \
 	  -padding {6 0 6 1} -relief flat -font CociSmallFont
 	unset -nocomplain foreground(active)
 	unset -nocomplain foreground(selected)
 	unset -nocomplain foreground(focus)
 	set foreground([list active !disabled]) white
-	style map Safari -foreground [array get foreground] -background {}
+	$styleCmd map Safari -foreground [array get foreground] -background {}
 	
 	# Safari type label.
-	style element create LSafari.background image $tiles(oval)  \
+	$styleCmd element create LSafari.background image $tiles(oval)  \
 	  -border {6 6 6 6} -padding {0} -sticky news
-	style layout LSafari {
+	$styleCmd layout LSafari {
 	    LSafari.background -children {
 		LSafari.padding -children {
 		    LSafari.label
 		}
 	    }
 	}	    
-	style configure LSafari  \
+	$styleCmd configure LSafari  \
 	  -padding {8 2 8 3} -relief flat -font CociSmallFont -foreground white	
-	style map LSafari -foreground {background "#dedede"}
+	$styleCmd map LSafari -foreground {background "#dedede"}
 	
 	# Aqua type plain arrow checkbutton.
-	if {$this(tile08)} {
-	    style element create arrowCheckIcon image \
+	if {$this(ttk)} {
+	    $styleCmd element create arrowCheckIcon image \
 	      [list $tiles(open) \
 	      {!active !background  selected} $tiles(close)     \
 	      { active !background !selected} $tiles(openDark)  \
@@ -738,7 +784,7 @@ proc tileutils::configstyles {name} {
 	      {!active  background  selected} $tiles(closeLight)] \
 	      -sticky w -border {0}
 	} else {
-	    style element create arrowCheckIcon image $tiles(open) \
+	    $styleCmd element create arrowCheckIcon image $tiles(open) \
 	      -sticky w -border {0} \
 	      -map [list \
 	      {!active !background  selected} $tiles(close)     \
@@ -747,18 +793,18 @@ proc tileutils::configstyles {name} {
 	      {!active  background !selected} $tiles(openLight) \
 	      {!active  background  selected} $tiles(closeLight)]
 	}
-	style layout Arrow.TCheckbutton {
+	$styleCmd layout Arrow.TCheckbutton {
 	    Arrow.border -sticky news -border 0 -children {
 		Arrow.padding -sticky news -border 0 -children {
 		    arrowCheckIcon -side left
 		}
 	    }
 	}
-	style configure Arrow.TCheckbutton  \
+	$styleCmd configure Arrow.TCheckbutton  \
 	  -padding {0} -borderwidth 0 -relief flat
 	
 	# Aqua type arrow checkbutton with text.
-	style layout ArrowText.TCheckbutton {
+	$styleCmd layout ArrowText.TCheckbutton {
 	    ArrowText.border -sticky news -border 0 -children {
 		ArrowText.padding -sticky news -border 0 -children {
 		    arrowCheckIcon -side left
@@ -766,12 +812,12 @@ proc tileutils::configstyles {name} {
 		}
 	    }
 	}
-	style configure ArrowText.TCheckbutton  \
+	$styleCmd configure ArrowText.TCheckbutton  \
 	  -padding {0} -borderwidth 6 -relief flat
-	style configure ArrowText.TCheckbutton -font CociSmallFont
+	$styleCmd configure ArrowText.TCheckbutton -font CociSmallFont
 	
 	# Url clickable link:
-	style layout Url {
+	$styleCmd layout Url {
 	    Url.background -children {
 		Url.padding -children {
 		    Url.label
@@ -788,13 +834,13 @@ proc tileutils::configstyles {name} {
 	if {[info exists foreground(disabled)]} {
 	    set mapA(disabled) $foreground(disabled)
 	}
-	style configure Url  \
+	$styleCmd configure Url  \
 	  -padding 2 -relief flat -font $fonts(underlineDefault) -foreground blue
-	style map Url -foreground [array get mapA]
-	style configure Small.Url -font $fonts(underlineSmall)
+	$styleCmd map Url -foreground [array get mapA]
+	$styleCmd configure Small.Url -font $fonts(underlineSmall)
 	
 	# This is a toolbutton style menubutton with a small downarrow.
-	style layout MiniMenubutton {
+	$styleCmd layout MiniMenubutton {
 	    Toolbutton.border -sticky nswe -children {
 		Toolbutton.padding -sticky nswe -children {
 		    MiniMenubutton.indicator -side right
@@ -802,25 +848,25 @@ proc tileutils::configstyles {name} {
 		}
 	    }
 	}
-	style element create MiniMenubutton.indicator image $tiles(downArrow) \
+	$styleCmd element create MiniMenubutton.indicator image $tiles(downArrow) \
 	  -sticky e -padding {6 2}
-	style configure MiniMenubutton -padding 6
+	$styleCmd configure MiniMenubutton -padding 6
 	
 	# Just a very basic button with image and/or text.
-	style layout Plain {
+	$styleCmd layout Plain {
 	    Plain.border -sticky news -border 1 -children {
 		Plain.padding -sticky news -border 1 -children {
 		    Plain.label
 		}
 	    }
 	}
-	style configure Plain  \
+	$styleCmd configure Plain  \
 	  -padding {0} -borderwidth 0 -relief flat
 
-	style configure Small.Plain -font CociSmallFont
+	$styleCmd configure Small.Plain -font CociSmallFont
 	
 	# As Plain but Plainer
-	style layout Plainer {
+	$styleCmd layout Plainer {
 	    Plain.label
 	}
 
@@ -828,11 +874,11 @@ proc tileutils::configstyles {name} {
 	# Test------------------
 	if {0} {
 	    # Plain border element.
-	    style element create border from classic
-	    style layout BorderFrame {
+	    $styleCmd element create border from classic
+	    $styleCmd layout BorderFrame {
 		BorderFrame.border -sticky nswe
 	    }
-	    style configure BorderFrame  \
+	    $styleCmd configure BorderFrame  \
 	      -relief solid -borderwidth 1 -background gray50
 	}
     }    
@@ -891,17 +937,29 @@ set dir [file join [file dirname [info script]] tiles]
 tileutils::LoadImages $dir {*.gif *.png}
 tileutils::MakeFonts
     
-foreach name [tile::availableThemes] {
+if {$this(ttk)} {
+    set tns ttk::theme
+    set themes [ttk::themes]
+} else {
+    set tns tile::theme
+    set themes [tile::availableThemes]
+}
+
+foreach name $themes {
     
     # @@@ We could be more economical here and load theme only when needed.
-    if {[catch {package require ${::tileutils::ns}::$name}]} {
+    if {[catch {package require ${tns}::$name}]} {
 	continue
     }
     tileutils::configstyles $name    
 }
 
 # Tiles button bindings must be duplicated.
-tile::CopyBindings TButton TUrl
+if {$this(ttk)} {
+    ttk::copyBindings TButton TUrl
+} else {
+    tile::CopyBindings TButton TUrl
+}
 bind TUrl <Enter>	   {+%W configure -cursor hand2 }
 bind TUrl <Leave>	   {+%W configure -cursor arrow }
 
@@ -1111,7 +1169,7 @@ if {0} {
 	set imfocus [$S copy [image create photo]]
 	$S destroy
 	
-	if {$this(tile08)} {
+	if {$this(ttk)} {
 	    style element create RRAqua.background image \
 	      [list $imborder {focus} $imfocus] \
 	      -border {12 12 12 12} -padding {0} -sticky news

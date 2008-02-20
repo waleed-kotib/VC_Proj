@@ -6,10 +6,15 @@
 # To use this automatically within tile, the tile-using application should
 # use tile::availableThemes and tile::setTheme 
 #
-# $Id: pkgIndex.tcl,v 1.1 2005-12-13 13:57:52 matben Exp $
+# $Id: pkgIndex.tcl,v 1.2 2008-02-20 15:14:37 matben Exp $
 
 if {![file isdirectory [file join $dir keramik]]} { return }
 if {![package vsatisfies [package provide Tcl] 8.4]} { return }
 
-package ifneeded tile::theme::keramik 0.3.2 \
-    [list source [file join $dir keramik.tcl]]
+if {[info tclversion] >= 8.5} {
+    package ifneeded ttk::theme::keramik 0.3.2 \
+      [list source [file join $dir keramik.tcl]]
+} else {
+    package ifneeded tile::theme::keramik 0.3.2 \
+      [list source [file join $dir keramik.tcl]]
+}

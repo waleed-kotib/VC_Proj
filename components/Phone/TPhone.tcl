@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: TPhone.tcl,v 1.4 2007-12-22 14:52:22 matben Exp $
+# $Id: TPhone.tcl,v 1.5 2008-02-20 15:14:37 matben Exp $
 
 #-------------------------------------------------------------------------------
 # USAGE:
@@ -45,6 +45,7 @@ namespace eval ::TPhone {
 }
 
 proc ::TPhone::Init {} {
+    global this
     variable inited
     variable imagePath
     variable images
@@ -58,21 +59,28 @@ proc ::TPhone::Init {} {
 	    set images($name) [::Theme::GetImage $name $subPath]
 	}
     }
+    if {$::this(ttk)} {
+	set styleCmd ttk::style
+	set themes [ttk::themes]
+    } else {
+	set styleCmd style
+	set themes [tile::availableThemes]
+    }
     
-    foreach name [tile::availableThemes] {
-	style theme settings $name {
+    foreach name $themes {
+	$styleCmd theme settings $name {
 	    
-	    style layout Phone.TButton {
+	    $styleCmd layout Phone.TButton {
 		Phone.border -children {
 		    Phone.padding -children {
 			Phone.label -side left
 		    }
 		}
 	    }
-	    style configure Phone.TButton  \
+	    $styleCmd configure Phone.TButton  \
 	      -padding {0} -borderwidth 0 -relief flat
 
-	    style layout Phone.Toolbutton {
+	    $styleCmd layout Phone.Toolbutton {
 		Phone.label
 	    }
 	}

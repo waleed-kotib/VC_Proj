@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: progress.tcl,v 1.11 2007-12-22 14:52:22 matben Exp $
+# $Id: progress.tcl,v 1.12 2008-02-20 15:14:37 matben Exp $
 
 package require snit 1.0
 package require msgcat
@@ -16,8 +16,11 @@ package provide ui::progress 0.1
 
 namespace eval ui::progress {
        
-    style configure TProgressFrame.TButton -font DlgSmallFont
-
+    if {[info commands ::ttk::style] ne ""} {
+	ttk::style configure TProgressFrame.TButton -font DlgSmallFont
+    } else {
+	style configure TProgressFrame.TButton -font DlgSmallFont
+    }
     option add *ProgressWindow.title   [::msgcat::mc Progress]     widgetDefault
 
     option add *TProgressFrame.font     DlgDefaultFont             widgetDefault

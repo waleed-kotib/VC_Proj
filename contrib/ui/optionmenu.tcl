@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.20 2007-12-22 14:52:22 matben Exp $
+# $Id: optionmenu.tcl,v 1.21 2008-02-20 15:14:37 matben Exp $
 
 package require snit 1.0
 
@@ -124,6 +124,8 @@ snit::widgetadaptor ui::optionmenu::widget {
 
 	# Build the menu.
 
+	set menuImages [expr {[tk windowingsystem] ne "aqua" || [info tclversion] >= 8.5}]
+
 	foreach mdef $options(-menulist) {
 	    array unset opts
 	    set name [lindex $mdef 0]
@@ -140,7 +142,7 @@ snit::widgetadaptor ui::optionmenu::widget {
 		if {[info exists opts(-image)]} {
 		    set val2im($value) $opts(-image)
 		}
-		if {[tk windowingsystem] eq "aqua"} {
+		if {!$menuImages} {
 		    unset -nocomplain opts(-image)
 		}
 		if {[set len [string length $name]] > $maxLen} {

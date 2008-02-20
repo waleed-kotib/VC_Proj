@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: ttoolbar.tcl,v 1.18 2008-02-19 15:34:17 matben Exp $
+# $Id: ttoolbar.tcl,v 1.19 2008-02-20 15:14:37 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -81,32 +81,35 @@ proc ::ttoolbar::Init { } {
 	AAAAAAAAAAAAAAAAAAAAACH5BAEAAAAALAAAAAAJAAkAAAQacAxAKzCmBHtx
 	tp5HUGEolMbYYQWYbZbEUREAOw==
     }
-    puts "tile::availableThemes=[tile::availableThemes]"
+    if {[info exists ::ttk::currentTheme]} { 
+	set styleCmd ttk::style
+	set tns ttk::theme
+	set themes [ttk::themes]
+    } else {
+	set styleCmd style
+	set tns tile::theme
+	set themes [tile::availableThemes]
+    }
     
-    foreach name [tile::availableThemes] {
+    foreach name $themes {
 	
-	if {[info exists ::ttk::currentTheme]} { 
-	    set tname ttk::theme::$name
-	} else {
-	    set tname tile::theme::$name
-	}
-	if {[catch {package require $tname}]} {
+	if {[catch {package require ${tns}::$name}]} {
 	    continue
 	}	    
 
-	style theme settings $name {
+	$styleCmd theme settings $name {
 	    
 	    # This produces fairly hard edged borders.
-	    style layout TToolbar.TButton {
+	    $styleCmd layout TToolbar.TButton {
 		TToolbar.border -children {
 		    TToolbar.padding -children {
 			TToolbar.label -side left
 		    }
 		}
 	    }
-	    style configure TToolbar.TButton   \
+	    $styleCmd configure TToolbar.TButton   \
 	      -padding 2 -relief flat -borderwidth 1
-	    style map TToolbar.TButton -relief {
+	    $styleCmd map TToolbar.TButton -relief {
 		disabled flat
 		selected sunken
 		pressed  sunken

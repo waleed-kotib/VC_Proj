@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.177 2008-02-19 10:13:02 matben Exp $	
+# $Id: Coccinella.tcl,v 1.178 2008-02-20 15:14:37 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -22,6 +22,10 @@ package provide app-Coccinella 1.0
 if {[catch {package require Tk 8.4}]} {
     return -code error "We need Tk 8.4 or later here. Run Wish!"
 }
+
+# Hack on MacOSX to avoid all old installed packages.
+set auto_path [lsearch -all -not -inline $auto_path "/System/Library/Tcl"]
+set auto_path [lsearch -all -not -inline $auto_path "/Network/Library/Tcl"]
 
 # The main window "." shall never be displayed. Use it for QT sounds etc.
 wm withdraw .
@@ -68,7 +72,7 @@ switch -- $this(platform) {
     macosx {
 	
 	# CoreGraphics don't align to pixel boundaries by default!
-	set tk::mac::useCGDrawing 0
+	#set tk::mac::useCGDrawing 0
     }
 }
 
@@ -175,12 +179,22 @@ update
 
 set state(launchStatus) tile
 set prefs(tileTheme) [option get . prefs_tileTheme {}]
-if {[lsearch -exact [tile::availableThemes] $prefs(tileTheme)] >= 0} {
-    tile::setTheme $prefs(tileTheme)
-} elseif {[tk windowingsystem] eq "x11"} {
-    
-    # We use the 'clam' theme as a fallback (and default in resources).
-    catch {tile::setTheme clam}
+if {$this(ttk)} {
+    if {[lsearch -exact [ttk::themes] $prefs(tileTheme)] >= 0} {
+	ttk::setTheme $prefs(tileTheme)
+    } elseif {[tk windowingsystem] eq "x11"} {
+	
+	# We use the 'clam' theme as a fallback (and default in resources).
+	catch {ttk::setTheme clam}
+    }
+} else {
+    if {[lsearch -exact [tile::availableThemes] $prefs(tileTheme)] >= 0} {
+	tile::setTheme $prefs(tileTheme)
+    } elseif {[tk windowingsystem] eq "x11"} {
+	
+	# We use the 'clam' theme as a fallback (and default in resources).
+	catch {tile::setTheme clam}
+    }
 }
 # To help the transition from tile pre 0.8.0
 proc GetCurrentTheme {} {
@@ -274,6 +288,8 @@ FactoryDefaults
 # To provide code to be run before loading componenets.
 ::Debug 2 "--> earlyInitHook"
 ::hooks::run earlyInitHook
+
+#foreach p $auto_path {puts $p}
 
 # Components.
 ::Debug 2 "++> component::load"

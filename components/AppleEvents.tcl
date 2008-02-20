@@ -18,9 +18,26 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# $Id: AppleEvents.tcl,v 1.9 2007-11-17 07:40:52 matben Exp $
+# $Id: AppleEvents.tcl,v 1.10 2008-02-20 15:14:37 matben Exp $
 
 namespace eval ::AppleEvents {
+    
+    # Bails with: 
+    #     Thread 0 Crashed:
+    # 0   libSystem.B.dylib             	0x94a1547a __kill + 10
+    # 1   libSystem.B.dylib             	0x94a8c782 raise + 26
+    # 2   libSystem.B.dylib             	0x94a9bd3f abort + 73
+    # 3   com.tcltk.tcllibrary          	0x0a07f1c2 Tcl_Panic + 0
+    # 4   com.tcltk.tcllibrary          	0x0a07f1dd Tcl_Panic + 27
+    # 5   com.tcltk.tcllibrary          	0x0a096a4d TclpFree + 104
+    # 6   com.tcltk.tcllibrary          	0x0a07ccb4 TclFreeObj + 208
+    # 7   com.tcltk.tcllibrary          	0x0a0a2beb Tcl_ObjSetVar2 + 123
+    # 8   com.tcltk.tcllibrary          	0x0a0a2c8e Tcl_SetVar2Ex + 96
+    # 9   net.jguyer.tclae              	0x0ec5b474 TclaeInitObjectAccessors + 87
+    # 10  net.jguyer.tclae              	0x0ec59a5e Tclae_Init + 317
+    # 11  com.tcltk.tcllibrary          	0x0a0732ba Tcl_LoadObjCmd + 2164
+    
+    return
     
     if {![string equal $::this(platform) "macosx"]} {
 	return

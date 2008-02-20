@@ -10,7 +10,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: balloonhelp.tcl,v 1.27 2007-07-19 06:28:11 matben Exp $
+# $Id: balloonhelp.tcl,v 1.28 2008-02-20 15:14:37 matben Exp $
 
 package require treeutil
 
@@ -75,13 +75,21 @@ proc ::balloonhelp::Build { } {
     label $w.info -bg $bg -fg $fg -wraplength $wrap -justify $just -takefocus 0
     pack  $w.info -side left -fill y
 
-    wm overrideredirect $w 1
-    wm transient $w
     wm withdraw  $w
     wm resizable $w 0 0 
     
     if {[tk windowingsystem] eq "aqua"} {
-	tk::unsupported::MacWindowStyle style $w help none
+	if {[info tclversion] >= 8.5} {
+	    tk::unsupported::MacWindowStyle style $w \
+	      help {noActivates hideOnSuspend} 
+	} else {
+	    wm overrideredirect $w 1
+	    wm transient $w	
+	    tk::unsupported::MacWindowStyle style $w help none
+	}
+    } else {
+	wm overrideredirect $w 1
+	wm transient $w	
     }
 
     array set wmArr [wm attributes $w]
