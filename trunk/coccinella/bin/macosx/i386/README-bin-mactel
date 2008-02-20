@@ -1,3 +1,9 @@
  README for bin/macosx/i386/
 
 This is where all dylibs for the Intel Mac OS X go.
+But we keep them Universal so that ppc can use them as well.
+But we may limit the minimum MacOSX version.
+Typically they are built with:
+
+export CFLAGS="-arch ppc -arch i386 \
+   -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.3"
