@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.107 2007-10-08 12:09:17 matben Exp $
+# $Id: Preferences.tcl,v 1.108 2008-02-20 15:14:37 matben Exp $
  
 package require mnotebook
 
@@ -276,7 +276,13 @@ proc ::Preferences::Build {args} {
 
 proc ::Preferences::TreeCtrl {T wysc} {
     global  this
-    
+
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }
+
     treectrl $T -selectmode single -showroot 0 -showrootbutton 0 -showbuttons 1 \
       -showheader 0 -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list pack $wysc -side right -fill y]]  \
@@ -290,8 +296,8 @@ proc ::Preferences::TreeCtrl {T wysc} {
     set fillT {white {selected focus} black {selected !focus}}
 
     array set style [list -foreground black -itembackground {}]
-    array set style [style configure .]
-    array set style [style configure TreeCtrl]
+    array set style [$styleCmd configure .]
+    array set style [$styleCmd configure TreeCtrl]
 
     set itemBackground $style(-itembackground)    
     set itemFill $style(-foreground)

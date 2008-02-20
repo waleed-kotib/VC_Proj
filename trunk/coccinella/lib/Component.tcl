@@ -18,14 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Component.tcl,v 1.3 2007-11-25 15:51:59 matben Exp $
+# $Id: Component.tcl,v 1.4 2008-02-20 15:14:37 matben Exp $
    
 package require component
 
 package provide Component 1.0
 
 namespace eval ::Component {
-    
+        
     # Add all event hooks.
     ::hooks::register prefsInitHook  ::Component::InitPrefsHook
 }

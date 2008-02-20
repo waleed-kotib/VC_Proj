@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.90 2008-01-09 07:44:16 matben Exp $
+# $Id: Init.tcl,v 1.91 2008-02-20 15:14:37 matben Exp $
 
 namespace eval ::Init {
     
@@ -721,35 +721,29 @@ proc ::Init::LoadPackages {} {
     
     # Take precautions and load only our own tile, treectrl.
     # Side effects??? It fools statically linked tile in tclkits
+    # this(ttk) should be set for 8.5 and tile 0.8+
 
-    set this(tile08) 0
+    set this(ttk) 0
 
     # tile may be statically linked (Windows).
     if {[lsearch -exact [info loaded] {{} tile}] >= 0} {
 	set vers [package require tile 0.7]
 	if {[package vcompare $vers 0.8] >= 0} {
-	    set this(tile08) 1
+	    set this(ttk) 1
 	}
-    } elseif {$::tk_version >= 8.5 && ![regexp {^8\.5[ab]} $::tk_patchLevel]} {
-	# 8.5b1+
+    } elseif {[info commands ::ttk::style] ne ""} {
 	namespace eval ::tile {} 
-	interp alias {} style {} ::ttk::style
-	interp alias {} ::tile::availableThemes {} ::ttk::themes
-	interp alias {} ::tile::setTheme {} ::ttk::setTheme
-	interp alias {} ::tile::CopyBindings {} ::ttk::copyBindings
-	set this(tile08) 1
+	#interp alias {} style {} ::ttk::style
+	#interp alias {} ::tile::availableThemes {} ::ttk::themes
+	#interp alias {} ::tile::setTheme {} ::ttk::setTheme
+	#interp alias {} ::tile::CopyBindings {} ::ttk::copyBindings
+	set this(ttk) 1
     } else {
     
 	# We must be sure script libraries for tile come from us (tcl_findLibrary).
 	::Splash::SetMsg "[mc splashlook] tile..."
 	namespace eval ::tile {}
 	set ::tile::library [file join $this(binLibPath) tile]
-	
-	# tileqt has its own library support.
-	if {[tk windowingsystem] eq "x11"} {
-	    namespace eval ::tileqt {}
-	    set ::tileqt::library [file join $this(binLibPath) tileqt]
-	}
 
 	if {[catch {uplevel #0 [list package require tile 0.7]} msg]} {
 	    tk_messageBox -icon error -title [mc Error] \
@@ -757,8 +751,14 @@ proc ::Init::LoadPackages {} {
 	    exit
 	}
 	if {[package vcompare $msg 0.8] >= 0} {
-	    set this(tile08) 1
+	    set this(ttk) 1
 	}
+    }
+	
+    # tileqt has its own library support.
+    if {[tk windowingsystem] eq "x11"} {
+	namespace eval ::tileqt {}
+	set ::tileqt::library [file join $this(binLibPath) tileqt]
     }
     
     # treectrl is required.

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.47 2007-12-24 09:31:14 matben Exp $
+# $Id: RosterPlain.tcl,v 1.48 2008-02-20 15:14:37 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -140,10 +140,16 @@ proc ::RosterPlain::Configure {_T} {
 	set outline gray
     }
     set minH 17
-    
+
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }
+
     array set style [list -itembackground {}]
-    array set style [style configure .]
-    array set style [style configure TreeCtrl]
+    array set style [$styleCmd configure .]
+    array set style [$styleCmd configure TreeCtrl]
     set itemBackground $style(-itembackground)
         
     # One pixel from the top border line and two pixels below since border
@@ -256,14 +262,21 @@ proc ::RosterPlain::ThemeChanged {} {
 }
 
 proc ::RosterPlain::ConfigureStyles {} {
+    global this
     variable T
     variable fillT
     variable fillNum
-    
+
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }
+
     array set style [list -foreground black -itembackground {} \
       -itemaccentfill $fillNum]
-    array set style [style configure .]
-    array set style [style configure TreeCtrl]
+    array set style [$styleCmd configure .]
+    array set style [$styleCmd configure TreeCtrl]
 
     set fill $style(-foreground)
     if {[info exists style(-itemfill)]} {

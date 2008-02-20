@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.49 2008-01-19 15:17:36 matben Exp $
+# $Id: Status.tcl,v 1.50 2008-02-20 15:14:37 matben Exp $
 
 package provide Status 1.0
 
@@ -236,12 +236,14 @@ proc ::Status::BuildGenericMenu {mt varName args} {
     
     set entries {available {} away chat dnd xa invisible {} unavailable}
 
+    set menuImages [expr {[tk windowingsystem] ne "aqua" || [info tclversion] >= 8.5}]
+    
     foreach name $entries {
-	if {$name == {}} {
+	if {$name eq {}} {
 	    $mt add separator
 	} else {
-	    set opts {}
-	    if {[tk windowingsystem] ne "aqua"} {
+	    set opts [list]
+	    if {$menuImages} {
 		set opts [list -compound left \
 		  -image [::Rosticons::Get status/$name]]
 	    }
@@ -312,13 +314,15 @@ proc ::Status::BuildMenuDef { } {
     set entries {available {} away chat dnd xa invisible {} unavailable}
     set statMenuDef {}
 
+    set menuImages [expr {[tk windowingsystem] ne "aqua" || [info tclversion] >= 8.5}]
+
     foreach name $entries {
 	if {$name == {}} {
 	    lappend statMenuDef {separator}
 	} else {
 	    set mName $mapShowTextToMLabel($name)
 	    set cmd [list ::Jabber::SetStatus $name]
-	    if {[tk windowingsystem] eq "aqua"} {
+	    if {!$menuImages} {
 		set opts [list -variable ::Jabber::jstate(show) -value $name]
 	    } else {
 		set opts [list -variable ::Jabber::jstate(show) -value $name \
@@ -722,9 +726,11 @@ proc ::Status::ExBuildMenu {m varName args} {
     set len2 [expr {$len-2}]
     set mod [string map {Control Ctrl} $this(modkey)]
     
+    set menuImages [expr {[tk windowingsystem] ne "aqua" || [info tclversion] >= 8.5}]
+
     foreach show $showL {
 	set opts [list]
-	if {[tk windowingsystem] ne "aqua"} {
+	if {$menuImages} {
 	    set opts [list -compound left \
 	      -image [::Rosticons::Get status/$show]]
 	}

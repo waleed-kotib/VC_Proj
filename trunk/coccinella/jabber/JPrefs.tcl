@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.61 2008-02-19 15:34:17 matben Exp $
+# $Id: JPrefs.tcl,v 1.62 2008-02-20 15:14:37 matben Exp $
 
 package require ui::fontselector
 
@@ -156,9 +156,16 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	step            "Step"
     }
     array set tileThemeArr $tileThemeList
+    if {$this(ttk)} {
+	set themes [ttk::themes]
+	set tns ttk::theme
+    } else {
+	set themes [tile::availableThemes]
+	set tns tile::theme
+    }
     
     # Add in any available loadable themes:
-    foreach name [tile::availableThemes] {
+    foreach name $themes {
 	if {![info exists tileThemeArr($name)]} {
 	    lappend tileThemeList \
 	      $name [set tileThemeArr($name) [string totitle $name]]
@@ -166,7 +173,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     }
     set menuDef [list]
     foreach {theme name} $tileThemeList {
-	if {![catch {package require tile::theme::$theme}]} {
+	if {![catch {package require ${tns}::$theme}]} {
 	    lappend menuDef [list $name -value $theme]
 	}
     }
@@ -209,10 +216,16 @@ proc ::JPrefs::BuildAppearancePage {page} {
     #   ::tile::currentTheme and prefs(tileTheme)
     ttk::label $wap.lskin -text "[mc Skin]:"
     
-    ui::optionmenu $wap.bskin -menulist $menuDef \
-      -variable [namespace current]::tmpPrefs(tileTheme) \
-      -command tile::setTheme
-
+    if {$this(ttk)} {
+	ui::optionmenu $wap.bskin -menulist $menuDef \
+	  -variable [namespace current]::tmpPrefs(tileTheme) \
+	  -command ttk::setTheme
+    } else {
+	ui::optionmenu $wap.bskin -menulist $menuDef \
+	  -variable [namespace current]::tmpPrefs(tileTheme) \
+	  -command tile::setTheme
+    }
+    
     # This has been disabled since it starts a child interpreter which needs
     # another ::tileqt::library.
     set tileqt 0

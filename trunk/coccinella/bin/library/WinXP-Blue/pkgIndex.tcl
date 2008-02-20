@@ -6,10 +6,15 @@
 # To use this automatically within tile, the tile-using application should
 # use tile::availableThemes and tile::setTheme 
 #
-# $Id: pkgIndex.tcl,v 1.1 2007-08-20 14:07:52 matben Exp $
+# $Id: pkgIndex.tcl,v 1.2 2008-02-20 15:14:37 matben Exp $
 
 if {![file isdirectory [file join $dir WinXP-Blue]]} { return }
 if {![package vsatisfies [package provide Tcl] 8.4]} { return }
 
-package ifneeded tile::theme::winxpblue 0.5 \
+if {[info tclversion] >= 8.5} {
+    package ifneeded ttk::theme::winxpblue 0.5 \
+      [list source [file join $dir WinXP-Blue.tcl]]
+} else {
+    package ifneeded tile::theme::winxpblue 0.5 \
     [list source [file join $dir WinXP-Blue.tcl]]
+}

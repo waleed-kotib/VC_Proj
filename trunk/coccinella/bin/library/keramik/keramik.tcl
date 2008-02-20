@@ -5,11 +5,11 @@
 #  Copyright (c) 2004 Googie
 #  Copyright (c) 2004 Pat Thoyts <patthoyts@users.sourceforge.net>
 #
-# $Id: keramik.tcl,v 1.2 2007-12-22 14:52:22 matben Exp $
+# $Id: keramik.tcl,v 1.3 2008-02-20 15:14:37 matben Exp $
 
-package require Tk 8.4;                 # minimum version for Tile
+package require Tk 8.5;                 # minimum version for Tile
 
-namespace eval tile {
+namespace eval ttk {
     namespace eval theme {
         namespace eval keramik {
             variable version 0.3.2
@@ -17,11 +17,10 @@ namespace eval tile {
     }
 }
 
-namespace eval tile::theme::keramik {
-
+namespace eval ttk::theme::keramik {
+    
     variable imgdir [file join [file dirname [info script]] keramik]
     variable I
-    array set I [tile::LoadImages $imgdir *.gif]
 
     variable colors
     array set colors {
@@ -32,21 +31,40 @@ namespace eval tile::theme::keramik {
         -selectfg   "#000000"
         -disabledfg "#aaaaaa"
     }
+    if {[info commands ::ttk::style] ne ""} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }
 
-    style theme create keramik -parent alt -settings {
+    proc LoadImages {imgdir {patterns {*.gif}}} {
+	foreach pattern $patterns {
+	    foreach file [glob -directory $imgdir $pattern] {
+		set img [file tail [file rootname $file]]
+		if {![info exists images($img)]} {
+		    set images($img) [image create photo -file $file]
+		}
+	    }
+	}
+	return [array get images]
+    }
+
+    array set I [LoadImages $imgdir *.gif]
+    
+    $styleCmd theme create keramik -parent alt -settings {
 
 
         # -----------------------------------------------------------------
         # Theme defaults
         #
-        style default . \
+        $styleCmd configure . \
             -borderwidth 1 \
             -background $colors(-frame) \
             -troughcolor $colors(-lighter) \
             -font TkDefaultFont \
             ;
 
-        style map . -foreground [list disabled $colors(-disabledfg)]
+        $styleCmd map . -foreground [list disabled $colors(-disabledfg)]
                 
         # -----------------------------------------------------------------
         # Button elements
@@ -55,7 +73,7 @@ namespace eval tile::theme::keramik {
         #  - the checkbutton and radiobutton have the focus drawn around 
         #    the whole widget - hence the new layouts.
         #
-        style layout TButton {
+        $styleCmd layout TButton {
             Button.background
             Button.button -children {
                 Button.focus -children {
@@ -63,7 +81,7 @@ namespace eval tile::theme::keramik {
                 }
             }
         }
-        style layout Toolbutton {
+        $styleCmd layout Toolbutton {
             Toolbutton.background
             Toolbutton.button -children {
                 Toolbutton.focus -children {
@@ -71,27 +89,30 @@ namespace eval tile::theme::keramik {
                 }
             }
         }
-        style element create button image $I(button-n) \
-            -border {8 6 8 16} -padding {6 6} -sticky news \
-            -map [list {pressed !disabled} $I(button-p) \
+        $styleCmd element create button image \
+	    [list $I(button-n) \
+	              {pressed !disabled} $I(button-p) \
                       {active !selected}  $I(button-h) \
                       selected $I(button-s) \
-                      disabled $I(button-d)]
-        style default TButton -padding {10 6}
+                      disabled $I(button-d)] \
+            -border {8 6 8 16} -padding {6 6} -sticky news
+		      
+        $styleCmd configure TButton -padding {10 6}
 
-        style element create Toolbutton.button image $I(tbar-n) \
-            -border {2 8 2 16} -padding {2 2} -sticky news \
-            -map [list {pressed !disabled} $I(tbar-p) \
+        $styleCmd element create Toolbutton.button image \
+            [list $I(tbar-n) \
+	              {pressed !disabled} $I(tbar-p) \
                       {active !selected}   $I(tbar-a) \
-                      selected             $I(tbar-p)]
+                      selected             $I(tbar-p)] \
+            -border {2 8 2 16} -padding {2 2} -sticky news
 
-        style element create Checkbutton.indicator image $I(check-u) \
-            -width 20 -sticky w \
-            -map [list selected $I(check-c)]
+        $styleCmd element create Checkbutton.indicator image \
+            [list $I(check-u) selected $I(check-c)] \
+            -width 20 -sticky w
 
-        style element create Radiobutton.indicator image $I(radio-u) \
-            -width 20 -sticky w \
-            -map [list  selected $I(radio-c)]
+        $styleCmd element create Radiobutton.indicator image \
+            [list  $I(radio-u) selected $I(radio-c)] \
+            -width 20 -sticky w
 
         # The layout for the menubutton is modified to have a button element
         # drawn on top of the background. This means we can have transparent
@@ -99,7 +120,7 @@ namespace eval tile::theme::keramik {
         # region on the right for the arrow. So we draw the indicator as a
         # sibling element to the button, and draw it after (ie on top of) the
         # button image.
-        style layout TMenubutton {
+        $styleCmd layout TMenubutton {
             Menubutton.background
             Menubutton.button -children {
                 Menubutton.focus -children {
@@ -110,12 +131,12 @@ namespace eval tile::theme::keramik {
             }
             Menubutton.indicator -side right
         }
-        style element create Menubutton.button image $I(mbut-n) \
-            -map [list {active !disabled} $I(mbut-a) \
+        $styleCmd element create Menubutton.button image \
+            [list $I(mbut-n) {active !disabled} $I(mbut-a) \
                       {pressed !disabled} $I(mbut-a) \
                       {disabled}          $I(mbut-d)] \
             -border {7 10 29 15} -padding {7 4 29 4} -sticky news
-        style element create Menubutton.indicator image $I(mbut-arrow-n) \
+        $styleCmd element create Menubutton.indicator image $I(mbut-arrow-n) \
             -width 11 -sticky w -padding {0 0 18 0}
 
         # -----------------------------------------------------------------
@@ -123,7 +144,7 @@ namespace eval tile::theme::keramik {
         #  - the scrollbar has three arrow buttons, two at the bottom and
         #    one at the top.
         #
-        style layout Vertical.TScrollbar {
+        $styleCmd layout Vertical.TScrollbar {
             Scrollbar.background 
             Scrollbar.trough -children {
                 Scrollbar.uparrow -side top
@@ -133,7 +154,7 @@ namespace eval tile::theme::keramik {
             }
         }
         
-        style layout Horizontal.TScrollbar {
+        $styleCmd layout Horizontal.TScrollbar {
             Scrollbar.background 
             Scrollbar.trough -children {
                 Scrollbar.leftarrow -side left
@@ -143,51 +164,51 @@ namespace eval tile::theme::keramik {
             }
         }
 
-        style default TScrollbar -width 16
+        $styleCmd configure TScrollbar -width 16
 
-        style element create Horizontal.Scrollbar.thumb image $I(hsb-n) \
-            -border {6 4} -width 15 -height 16 -sticky news \
-            -map [list {pressed !disabled} $I(hsb-p)]
+        $styleCmd element create Horizontal.Scrollbar.thumb image \
+            [list $I(hsb-n) {pressed !disabled} $I(hsb-p)] \
+            -border {6 4} -width 15 -height 16 -sticky news
         
-        style element create Vertical.Scrollbar.thumb image $I(vsb-n) \
-            -border {4 6} -width 16 -height 15 -sticky news \
-            -map [list {pressed !disabled} $I(vsb-p)]
+        $styleCmd element create Vertical.Scrollbar.thumb image \
+            [list $I(vsb-n) {pressed !disabled} $I(vsb-p)] \
+            -border {4 6} -width 16 -height 15 -sticky news
         
-        style element create Scale.slider image $I(hslider-n) \
+        $styleCmd element create Scale.slider image $I(hslider-n) \
             -border 3
         
-        style element create Vertical.Scale.slider image $I(vslider-n) \
+        $styleCmd element create Vertical.Scale.slider image $I(vslider-n) \
             -border 3
         
-        style element create Horizontal.Progress.bar image $I(hsb-n) \
+        $styleCmd element create Horizontal.Progress.bar image $I(hsb-n) \
             -border {6 4}
         
-        style element create Vertical.Progress.bar image $I(vsb-n) \
+        $styleCmd element create Vertical.Progress.bar image $I(vsb-n) \
             -border {4 6}
         
-        style element create uparrow image $I(arrowup-n) \
-            -map [list {pressed !disabled} $I(arrowup-p)]
+        $styleCmd element create uparrow image \
+            [list $I(arrowup-n) {pressed !disabled} $I(arrowup-p)]
                   
-        style element create downarrow image $I(arrowdown-n) \
-            -map [list {pressed !disabled} $I(arrowdown-p)]
+        $styleCmd element create downarrow image \
+            [list $I(arrowdown-n) {pressed !disabled} $I(arrowdown-p)]
 
-        style element create rightarrow image $I(arrowright-n) \
-            -map [list {pressed !disabled} $I(arrowright-p)]
+        $styleCmd element create rightarrow image \
+            [list $I(arrowright-n) {pressed !disabled} $I(arrowright-p)]
 
-        style element create leftarrow image $I(arrowleft-n) \
-            -map [list {pressed !disabled} $I(arrowleft-p)]
+        $styleCmd element create leftarrow image \
+            [list $I(arrowleft-n) {pressed !disabled} $I(arrowleft-p)]
         
         # -----------------------------------------------------------------
         # Notebook elements
         #
-        style element create tab image $I(tab-n) \
-            -map [list selected $I(tab-p) active $I(tab-p)] \
+        $styleCmd element create tab image \
+            [list $I(tab-n) selected $I(tab-p) active $I(tab-p)] \
             -border {6 6 6 2} -height 12
 
 	## Labelframes.
 	#
-	style default TLabelframe -borderwidth 2 -relief groove
+	$styleCmd configure TLabelframe -borderwidth 2 -relief groove
     }
 }
 
-package provide tile::theme::keramik $::tile::theme::keramik::version
+package provide ttk::theme::keramik $::ttk::theme::keramik::version

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.27 2008-02-06 13:57:25 matben Exp $
+# $Id: AvatarMB.tcl,v 1.28 2008-02-20 15:14:37 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -72,22 +72,32 @@ proc ::AvatarMB::Init {} {
     image create photo $blank -width 4 -height 4
     $blank blank
 
-    foreach name [tile::availableThemes] {
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+	set tns ttk::theme
+	set themes [ttk::themes]
+    } else {
+	set styleCmd style
+	set tns tile::theme
+	set themes [tile::availableThemes]
+    }
+
+    foreach name $themes {
 	
 	# @@@ We could be more economical here and load theme only when needed.
-	if {[catch {package require tile::theme::$name}]} {
+	if {[catch {package require ${tns}::$name}]} {
 	    continue
 	}	
 
-	style theme settings $name {
+	$styleCmd theme settings $name {
 	 	    
 	    set activeDef "#3874d1"
 	    set active $activeDef
 	    array unset style
 	    array unset map
 	    array set style [list -foreground black]
-	    array set style [style configure .]    
-	    array set map   [style map .]
+	    array set style [$styleCmd configure .]    
+	    array set map   [$styleCmd map .]
 
 	    if {[info exists map(-background)]} {
 		foreach {mstate mcol} $map(-background) {
@@ -123,18 +133,18 @@ proc ::AvatarMB::Init {} {
 	    $activeim blank
 	    $activeim put [list [list $active $active] [list $active $active]]
 	    
-	    if {$this(tile08)} {
-		style element create FMenu.background image \
+	    if {$this(ttk)} {
+		$styleCmd element create FMenu.background image \
 		  [list $blank {active !disabled} $activeim] \
 		  -padding {0} -sticky news
 	    } else {
-		style element create FMenu.background image $blank  \
+		$styleCmd element create FMenu.background image $blank  \
 		  -padding {0} -sticky news  \
 		  -map [list {active !disabled} $activeim]
 	    }
 	    if {0} {
 		# Tile BUG
-		style layout FMenu {
+		$styleCmd layout FMenu {
 		    FMenu.background -sticky news -border 1 -children {
 			FMenu.padding -sticky news -border 1 -children {
 			    FMenu.label -side left
@@ -142,16 +152,16 @@ proc ::AvatarMB::Init {} {
 		    }
 		}
 	    }
-	    style layout FMenu {
+	    $styleCmd layout FMenu {
 		FMenu.background -children {
 		    FMenu.padding -children {
 			FMenu.label -side left
 		    }
 		}
 	    }	    
-	    style configure FMenu  \
+	    $styleCmd configure FMenu  \
 	      -padding {18 2 10 2} -borderwidth 0 -relief flat
-	    style map FMenu -foreground [array get foreground]
+	    $styleCmd map FMenu -foreground [array get foreground]
 	}
     }
     
@@ -435,12 +445,19 @@ proc ::AvatarMB::PositionOnScreen {mb x y} {
 }
 
 proc ::AvatarMB::Menu {m args} {
+    global this
     variable widget
-    
+
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }
+
     set active "#3874d1"
     array set style [list -foreground black -background gray80]
-    array set style [style configure .]    
-    array set map   [style map .]
+    array set style [$styleCmd configure .]    
+    array set map   [$styleCmd map .]
 
     if {[info exists map(-background)]} {
 	foreach {mstate mcol} $map(-background) {
