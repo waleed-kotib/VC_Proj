@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: jlibhttp.tcl,v 1.16 2008-02-21 13:52:39 matben Exp $
+# $Id: jlibhttp.tcl,v 1.17 2008-02-21 14:15:47 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -636,6 +636,7 @@ proc jlib::http::Connect {jlibname} {
 	set host $opts(host)
 	set port $opts(port)
     }
+    Debug 2 "\t host=$host, port=$port"
     set priv(dum,err)  ""
     set priv(dum,wait) 1
     set s [socket -async $host $port]
