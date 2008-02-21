@@ -5,11 +5,11 @@
 #          A DNS TXT Resource Record Format for XMPP Connection Methods 
 #      and client DNS SRV records (XMPP Core sect. 14.3)
 #      
-#  Copyright (c) 2006  Mats Bengtsson
+#  Copyright (c) 2006-2008  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: jlibdns.tcl,v 1.5 2007-07-19 06:28:17 matben Exp $
+# $Id: jlibdns.tcl,v 1.6 2008-02-21 15:00:39 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -18,9 +18,29 @@
 #      
 #   SYNOPSIS
 #      jlib::dns::get_addr_port domain cmd
-#      jlib::dns::get_http_bind_url domain cmd
+#      jlib::dns::get_http_bind_url domain cmd   OUTDATED
 #      jlib::dns::get_http_poll_url domain cmd
-
+#      jlib::dns::get_http_bosh_url domain cmd
+#
+############################# 7.1.2 Initial Registration #######################
+#
+# <method>
+#   <name>_xmpp-client-httppoll</name>
+#   <desc>HTTP Polling connection method</desc>
+#   <syntax>
+#     The http: or https: URL at which to contact the HTTP Polling connection manager or proxy
+#   </syntax>
+#   <doc>XEP-0025</doc>
+# </method>
+# 
+# <method>
+#   <name>_xmpp-client-xbosh</name>
+#   <desc>XMPP Over Bosh connection method</desc>
+#   <syntax>
+#     The http: or https: URL at which to contact the HTTP Binding connection manager or proxy
+#   </syntax>
+#   <doc>XEP-0206</doc>
+# </method>
 
 package require dns 9.9    ;# Fake version to avoid loding buggy version.
 package require jlib
@@ -35,9 +55,10 @@ namespace eval jlib::dns {
 	poll        _xmppconnect
     }
 
-    variable name
-    array set name {
+    variable nameA
+    array set nameA {
 	bind        _xmpp-client-httpbind
+	bosh        _xmpp-client-xbosh
 	poll        _xmpp-client-httppoll
     }
 }
@@ -101,21 +122,26 @@ proc jlib::dns::isUInt16 {n} {
       ? 1 : 0]
 }
 
-proc jlib::dns::get_http_bind_url {domain cmd} {
-    
+proc jlib::dns::get_http_bind_url {domain cmd} {    
     set name _xmppconnect.$domain
     return [dns::resolve $name -type TXT  \
       -command [list [namespace current]::http_cb bind $cmd]]
 }
 
+proc jlib::dns::get_http_bosh_url {domain cmd args} {
+    set name _xmppconnect.$domain
+    return [eval {dns::resolve $name -type TXT  \
+      -command [list [namespace current]::http_cb bosh $cmd]} $args]
+}
+
 proc jlib::dns::get_http_poll_url {domain cmd args} {
-    
     set name _xmppconnect.$domain
     return [eval {dns::resolve $name -type TXT  \
       -command [list [namespace current]::http_cb poll $cmd]} $args]
 }
 
 proc jlib::dns::http_cb {attr cmd token} {
+    variable nameA
         
     set found 0
     if {[dns::status $token] eq "ok"} {
@@ -124,16 +150,9 @@ proc jlib::dns::http_cb {attr cmd token} {
 	    array unset rr
 	    array set rr $reply
 	    if {[info exists rr(rdata)]} {
-		if {$attr eq "bind"} {
-		    if {[regexp {_xmpp-client-httpbind=(.*)} $rr(rdata) - url]} {
-			set found 1
-			uplevel #0 $cmd [list $url]
-		    }
-		} elseif {$attr eq "poll"} {
-		    if {[regexp {_xmpp-client-httppoll=(.*)} $rr(rdata) - url]} {
-			set found 1
-			uplevel #0 $cmd [list $url]
-		    }
+		if {[regexp "$nameA($attr)=(.*)" $rr(rdata) - url]} {
+		    set found 1
+		    uplevel #0 $cmd [list $url]
 		}
 	    }
 	}
