@@ -1,12 +1,13 @@
 # jlibhttp.tcl ---
 #  
 #      Provides a http transport mechanism for jabberlib. 
+#      Implements the deprecated XEP-0025: Jabber HTTP Polling protocol.
 #      
 # Copyright (c) 2002-2005  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: jlibhttp.tcl,v 1.15 2007-07-19 06:28:17 matben Exp $
+# $Id: jlibhttp.tcl,v 1.16 2008-02-21 13:52:39 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -90,7 +91,7 @@ proc jlib::http::new {jlibname url args} {
 
     array set opts {
 	-keylength              64
-	-maxpollms           16000
+	-maxpollms            8000
 	-minpollms            4000
 	-proxyhost              ""
 	-proxyport              80
@@ -218,7 +219,9 @@ proc jlib::http::transportinit {jlibname} {
 proc jlib::http::transportreset {jlibname} {
 
     upvar ${jlibname}::http::priv priv
-    
+  
+    Debug 2 "jlib::http::transportreset"
+
     # Stop polling and resends.
     if {[string length $priv(afterid)]} {
 	catch {after cancel $priv(afterid)}
@@ -229,6 +232,14 @@ proc jlib::http::transportreset {jlibname} {
     # If we have got cached xml to send must post it now and ignore response.
     if {[string length $priv(xml)] > 2} {
 	Post $jlibname
+    }
+    
+    if {[info exists priv(dum,sock)]} {
+	catch {close $priv(dum,sock)}
+    }
+    if {[info exists priv(token)]} {
+	::http::cleanup $priv(token)
+	unset priv(token)
     }
 }
 
@@ -440,7 +451,6 @@ proc jlib::http::PostXML {jlibname xml} {
 	# Always keep a scheduled post at 'maxpollms' (or something else),
 	# and let any subsequent events reschedule if at an earlier time.
 	if {[string equal $priv(state) "instream"]} {
-	    #SchedulePost $jlibname $opts(-maxpollms)
 	    SchedulePost $jlibname maxpollms
 	}
     }
@@ -492,6 +502,7 @@ proc jlib::http::Response {jlibname token} {
 	    set haveContentType 0
 	    
 	    foreach {key value} $state(meta) {
+
 		if {[string equal -nocase $key "set-cookie"]} {
 		    
 		    # Extract the 'ID' from the Set-Cookie key.
@@ -533,10 +544,24 @@ proc jlib::http::Response {jlibname token} {
 		    }
 		    set haveCookie 1
 		} elseif {[string equal -nocase $key "content-type"]} {
-		    if {![string match -nocase "*text/xml*" $value]} {
+		    
+		    # Responses from the server have Content-Type: text/xml. 
+		    # Both the request and response bodies are UTF-8       
+		    # encoded text, even if an HTTP header to the contrary 
+		    # exists. 
+		    # ejabberd: Content-Type {text/plain; charset=utf-8}
+
+		    set typeOK 0
+		    if {[string match -nocase "*text/xml*" $value]} {
+			set typeOK 1
+		    } elseif {[regexp -nocase { *text/plain; *charset=utf-8} $value]} {
+			set typeOK 1
+		    }
+		    
+		    if {!$typeOK} {
 			# This is an invalid response.
 			set errmsg "Content-Type in HTTP header is "
-			append "\"$value\" expected \"text/xml\""
+			append errmsg "\"$value\" expected \"text/xml\""
 			Error $jlibname error $errmsg
 			return
 		    }
@@ -602,6 +627,8 @@ proc jlib::http::Connect {jlibname} {
     upvar ${jlibname}::http::opts opts
     upvar ${jlibname}::http::priv priv
     
+    Debug 2 "jlib::http::Connect"
+    
     if {[string length $opts(-proxyhost)] && [string length $opts(-proxyport)]} {
 	set host $opts(-proxyhost)
 	set port $opts(-proxyport)
@@ -619,6 +646,10 @@ proc jlib::http::Connect {jlibname} {
 proc jlib::http::Writable {jlibname} {
     
     upvar ${jlibname}::http::priv priv
+
+    Debug 2 "jlib::http::Writable"
+
+    # NB: This is called async and we may have been reset.
         
     set s $priv(dum,sock)
     if {[catch {eof $s} iseof] || $iseof} {
