@@ -10,7 +10,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: balloonhelp.tcl,v 1.28 2008-02-20 15:14:37 matben Exp $
+# $Id: balloonhelp.tcl,v 1.29 2008-02-22 11:15:50 matben Exp $
 
 package require treeutil
 
@@ -23,7 +23,6 @@ namespace eval ::balloonhelp:: {
     variable w .balloonhelp
     
     set locals(active) 1
-    set locals(initted) 0
     set locals(fadeout) {0.95 0.9 0.85 0.8 0.75 0.7 0.65 0.6 0.55 0.5 0.4 0.3 0.2}
     set locals(fadeout) {0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2}
 
@@ -54,11 +53,10 @@ proc ::balloonhelp::Init { } {
     variable w
     variable locals
 
-    if {!$locals(initted)} {
+    if {![winfo exists $w]} {
 	Build
 	set locals(millisecs) [option get $w millisecs {}]
 	set locals(timeout)   [option get $w timeout {}]
-	set locals(initted) 1
     }
 }
 
@@ -79,9 +77,11 @@ proc ::balloonhelp::Build { } {
     wm resizable $w 0 0 
     
     if {[tk windowingsystem] eq "aqua"} {
-	if {[info tclversion] >= 8.5} {
-	    tk::unsupported::MacWindowStyle style $w \
-	      help {noActivates hideOnSuspend} 
+	if {0 && [info tclversion] >= 8.5} {
+	    wm overrideredirect $w 1
+	    wm transient $w	
+ 	    tk::unsupported::MacWindowStyle style $w \
+ 	      help {noActivates hideOnSuspend} 
 	} else {
 	    wm overrideredirect $w 1
 	    wm transient $w	

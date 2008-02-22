@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.28 2008-02-20 15:14:37 matben Exp $
+# $Id: AvatarMB.tcl,v 1.29 2008-02-22 11:15:50 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -476,8 +476,12 @@ proc ::AvatarMB::Menu {m args} {
         
     toplevel $m -class AvatarMBMenu -bd 0 -relief flat -takefocus 0
     
-    wm overrideredirect $m 1
-    wm transient $m
+    if {([tk windowingsystem] eq "aqua") && ([info tclversion] >= 8.5)} {
+	tk::unsupported::MacWindowStyle style $m help {noActivates hideOnSuspend}
+    } else {
+	wm overrideredirect $m 1
+	wm transient $m
+    }
     wm resizable $m 0 0 
     
     ttk::frame $m.f -padding {0 4}

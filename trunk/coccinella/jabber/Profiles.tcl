@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.104 2008-01-18 13:34:33 matben Exp $
+# $Id: Profiles.tcl,v 1.105 2008-02-22 11:15:50 matben Exp $
 
 package require ui::megaentry
 
@@ -1762,7 +1762,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set wstate(token) $token
 
     # Tabbed notebook for more options.
-    ttk::notebook $w -style Small.TNotebook -padding {4}
+    ttk::notebook $w -style Small.TNotebook -padding {2 4 2 2}
 
     # Login options.
     $w add [ttk::frame $w.log] -text [mc "Login"] -sticky news
