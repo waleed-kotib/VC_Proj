@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: jlibhttp.tcl,v 1.17 2008-02-21 14:15:47 matben Exp $
+# $Id: jlibhttp.tcl,v 1.18 2008-02-22 08:00:48 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -101,6 +101,7 @@ proc jlib::http::new {jlibname url args} {
 	-timeout             30000
 	-usekeys                 1
 	header                  ""
+	port                    80
 	proxyheader             ""
 	url                     ""
 	pollupfactor           0.8
@@ -112,7 +113,9 @@ proc jlib::http::new {jlibname url args} {
     }
     set opts(url)  $url
     set opts(host) $host
-    set opts(port) $port
+    if {$port ne ""} {
+	set opts(port) $port
+    }
     array set opts $args
 
     set priv(id)      0
@@ -451,7 +454,8 @@ proc jlib::http::PostXML {jlibname xml} {
 	# Always keep a scheduled post at 'maxpollms' (or something else),
 	# and let any subsequent events reschedule if at an earlier time.
 	if {[string equal $priv(state) "instream"]} {
-	    SchedulePost $jlibname maxpollms
+	    #SchedulePost $jlibname maxpollms
+	    SchedulePost $jlibname minpollms
 	}
     }
 }
