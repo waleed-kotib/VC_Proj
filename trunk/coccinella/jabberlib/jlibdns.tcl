@@ -9,7 +9,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: jlibdns.tcl,v 1.6 2008-02-21 15:00:39 matben Exp $
+# $Id: jlibdns.tcl,v 1.7 2008-02-22 08:00:48 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -65,7 +65,7 @@ namespace eval jlib::dns {
 
 proc jlib::dns::get_addr_port {domain cmd args} {
     
-    # dns::resolve my throw error!
+    # dns::resolve may throw error!
     set name _xmpp-client._tcp.$domain
     return [eval {dns::resolve $name -type SRV  \
       -command [list [namespace current]::addr_cb $cmd]} $args]
@@ -122,10 +122,10 @@ proc jlib::dns::isUInt16 {n} {
       ? 1 : 0]
 }
 
-proc jlib::dns::get_http_bind_url {domain cmd} {    
+proc jlib::dns::get_http_bind_url {domain cmd args} {    
     set name _xmppconnect.$domain
-    return [dns::resolve $name -type TXT  \
-      -command [list [namespace current]::http_cb bind $cmd]]
+    return [eval {dns::resolve $name -type TXT  \
+      -command [list [namespace current]::http_cb bind $cmd]} $args]
 }
 
 proc jlib::dns::get_http_bosh_url {domain cmd args} {
