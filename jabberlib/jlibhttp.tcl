@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: jlibhttp.tcl,v 1.18 2008-02-22 08:00:48 matben Exp $
+# $Id: jlibhttp.tcl,v 1.19 2008-02-23 06:46:45 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -91,7 +91,7 @@ proc jlib::http::new {jlibname url args} {
 
     array set opts {
 	-keylength              64
-	-maxpollms            8000
+	-maxpollms           16000
 	-minpollms            4000
 	-proxyhost              ""
 	-proxyport              80
@@ -107,8 +107,8 @@ proc jlib::http::new {jlibname url args} {
 	pollupfactor           0.8
 	polldownfactor         1.2
     }
-    if {![regexp -nocase {^(([^:]*)://)?([^/:]+)(:([0-9]+))?(/.*)?$} $url \
-      - prefix proto host - port filepath]} {
+    set RE {^(([^:]*)://)?([^/:]+)(:([0-9]+))?(/.*)?$}
+    if {![regexp -nocase $RE $url - prefix proto host - port filepath]} {
 	return -code error "the url \"$url\" is not valid"
     }
     set opts(url)  $url
@@ -160,6 +160,7 @@ proc jlib::http::InitState {jlibname} {
     set priv(xml)        ""
     set priv(id)         0
     set priv(first)      1
+    set priv(first)      0
     set priv(postms)    -1
     set priv(ip)         ""
     set priv(lastpostms) [clock clicks -milliseconds]
@@ -236,11 +237,8 @@ proc jlib::http::transportreset {jlibname} {
     if {[string length $priv(xml)] > 2} {
 	Post $jlibname
     }
-    
-    if {[info exists priv(dum,sock)]} {
-	catch {close $priv(dum,sock)}
-    }
     if {[info exists priv(token)]} {
+	::http::reset $priv(token)
 	::http::cleanup $priv(token)
 	unset priv(token)
     }
@@ -355,7 +353,7 @@ proc jlib::http::SchedulePost {jlibname when} {
     if {$afterms < 0} {
 	set afterms 0
     }
-    set priv(afterms)    $afterms
+    set priv(afterms)    [expr int($afterms)]
     set priv(nextpostms) [expr {$nowms + $afterms}]
     set priv(postms)     [expr {$priv(nextpostms) - $priv(lastpostms)}]
 
@@ -417,46 +415,63 @@ proc jlib::http::PostXML {jlibname xml} {
     } else {
 	set query "$priv(id),$xml"
     }
-    
-    # If this is the first post do a dummy parallell connection to find out ip.
-    if {$priv(first)} {
-	if {[catch {Connect $jlibname} msg]} {
-	    Debug 2 "\t Connect failed: $msg"
-	    Error $jlibname networkerror $msg
-	    return
-	}
-    }
     set priv(status) "wait"
     if {[string equal $priv(state) "reset"]} {
 	set cmdProc [namespace current]::NoopResponse
     } else {
 	set cmdProc [list [namespace current]::Response $jlibname]
     }
+    set progProc [list [namespace current]::Progress $jlibname]
     
     Debug 2 "POST: $query"
     
     # -query forces a POST request.
     # Make sure we send it as text dispite the application/* type.???
     if {[catch {
-	set token [::http::geturl $opts(url)  \
-	  -timeout $opts(-timeout)            \
-	  -headers $opts(header)              \
-	  -query   $query                     \
-	  -command $cmdProc]
+	set token [::http::geturl $opts(url)   \
+	  -timeout  $opts(-timeout)            \
+	  -headers  $opts(header)              \
+	  -query    $query                     \
+	  -queryprogress $progProc             \
+	  -command  $cmdProc]
     } msg]} {
 	Debug 2 "\t post failed: $msg"
 	Error $jlibname networkerror $msg
     } else {
-	set priv(lastpostms) [clock clicks -milliseconds]
 	set priv(token) $token
-
+	
+	# Compute time for next post.
+	set ms [clock clicks -milliseconds]
+	if {$xml eq ""} {
+	    set when [expr {$opts(polldownfactor) * ($ms - $priv(lastpostms))}]
+	    set when [Min $when $opts(-maxpollms)]
+	    set when [Max $when $opts(-minpollms)]
+	} else {
+	    set when minpollms
+	}
+	set priv(lastpostms) $ms
+	
 	# Reschedule next post unless 'reset'.
 	# Always keep a scheduled post at 'maxpollms' (or something else),
 	# and let any subsequent events reschedule if at an earlier time.
 	if {[string equal $priv(state) "instream"]} {
-	    #SchedulePost $jlibname maxpollms
-	    SchedulePost $jlibname minpollms
+	    SchedulePost $jlibname $when
 	}
+    }
+}
+
+# jlib::http::Progress --
+# 
+#       Only useful the first post to get socket and our own IP.
+
+proc jlib::http::Progress {jlibname token args} {
+    
+    upvar ${jlibname}::http::priv priv
+
+    if {$priv(ip) eq ""} {
+	# @@@ When we switch to httpex we will add a method for this.
+	set s [set $token\(sock)]
+	set priv(ip) [lindex [fconfigure $s -sockname] 0]
     }
 }
 
@@ -477,20 +492,6 @@ proc jlib::http::Response {jlibname token} {
     # We may have been 'reset' after this post was sent!
     if {[string equal $priv(state) "reset"]} {
 	return
-    }
-    
-    # Either we've already made the connection to the server and have ip,
-    # or we have to wait here which doesn't create any harm since already
-    # a callback.
-    if {$priv(first)} {
-	set priv(first) 0
-	if {$priv(dum,wait)} {
-	    vwait ${jlibname}::http::priv(dum,wait)
-	}
-	if {[string length $priv(dum,err)]} {
-	    Error $jlibname error $priv(dum,err)
-	    return
-	}
     }
     set status [::http::status $token]
     
@@ -565,7 +566,8 @@ proc jlib::http::Response {jlibname token} {
 		    if {!$typeOK} {
 			# This is an invalid response.
 			set errmsg "Content-Type in HTTP header is "
-			append errmsg "\"$value\" expected \"text/xml\""
+			append errmsg $value
+			append errmsg " expected \"text/xml\" or \"text/plain\""
 			Error $jlibname error $errmsg
 			return
 		    }
@@ -619,56 +621,6 @@ proc jlib::http::NoopResponse {token} {
     ::http::cleanup $token
 }
 
-# jlib::http::Connect --
-# 
-#       Initiates a dummy server connection.
-#       One way to get our real ip number since we can't get it from 
-#       the http package. Timout if any is handled by the http package.
-#       May throw error!
-
-proc jlib::http::Connect {jlibname} {
-    
-    upvar ${jlibname}::http::opts opts
-    upvar ${jlibname}::http::priv priv
-    
-    Debug 2 "jlib::http::Connect"
-    
-    if {[string length $opts(-proxyhost)] && [string length $opts(-proxyport)]} {
-	set host $opts(-proxyhost)
-	set port $opts(-proxyport)
-    } else {
-	set host $opts(host)
-	set port $opts(port)
-    }
-    Debug 2 "\t host=$host, port=$port"
-    set priv(dum,err)  ""
-    set priv(dum,wait) 1
-    set s [socket -async $host $port]
-    set priv(dum,sock) $s
-    fileevent $s writable [list [namespace current]::Writable $jlibname]
-}
-
-proc jlib::http::Writable {jlibname} {
-    
-    upvar ${jlibname}::http::priv priv
-
-    Debug 2 "jlib::http::Writable"
-
-    # NB: This is called async and we may have been reset.
-        
-    set s $priv(dum,sock)
-    if {[catch {eof $s} iseof] || $iseof} {
-	set priv(dum,err) "eof"	
-    } elseif {[catch {
-	set priv(ip) [lindex [fconfigure $s -sockname] 0]
-	close $s
-    }]} {
-	set priv(dum,err) "eof"
-    }
-    unset priv(dum,sock)
-    set priv(dum,wait) 0    
-}
-
 # jlib::http::Error --
 # 
 #       Only network errors and server errors are reported here.
@@ -680,9 +632,6 @@ proc jlib::http::Error {jlibname status {errmsg ""}} {
     Debug 2 "jlib::http::Error status=$status, errmsg=$errmsg"
     
     set priv(status) "error"
-    if {[info exists priv(dum,sock)]} {
-	catch {close $priv(dum,sock)}
-    }
     if {[info exists priv(token)]} {
 	::http::cleanup $priv(token)
 	unset priv(token)
@@ -690,6 +639,14 @@ proc jlib::http::Error {jlibname status {errmsg ""}} {
     
     # @@@ We should perhaps be more specific here.
     jlib::reporterror $jlibname networkerror $errmsg
+}
+
+proc jlib::http::Min {x y} {
+    return [expr {$x <= $y ? $x : $y}]
+}
+
+proc jlib::http::Max {x y} {
+    return [expr {$x >= $y ? $x : $y}]
 }
 
 proc jlib::http::Debug {num str} {
