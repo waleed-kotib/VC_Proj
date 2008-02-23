@@ -9,7 +9,7 @@
 #  
 #  This file is distributed under BSD style license.
 #
-# $Id: httpex.tcl,v 1.28 2008-02-13 08:17:36 matben Exp $
+# $Id: httpex.tcl,v 1.29 2008-02-23 06:36:17 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -64,6 +64,10 @@
 #
 #	  -query data
 #	  -querychannel name
+#       
+# httpex::posturl url ?-key value ...?
+#       Simplified httpex::post which only invokes any -command when final.
+#       Can be used in place for http::geturl -query when POST url.
 #       
 # httpex::put url ?-key value ...?
 #       Puts local data to server. The channame is typically a file descriptor
@@ -355,11 +359,22 @@ proc httpex::put {url args} {
 proc httpex::geturl {url args} {
     set argsA(-command) ""
     array set argsA $args
-    set argsA(-command) [list [namespace current]::geturlcmd $argsA(-command)]
+    set argsA(-command) [list [namespace current]::compatcmd $argsA(-command)]
     eval {get $url} [array get argsA]
 }
 
-proc httpex::geturlcmd {cmd token} {
+# httpex::posturl --
+# 
+#       As httpex::post but -command only invoked when final.
+
+proc httpex::posturl {url args} {
+    set argsA(-command) ""
+    array set argsA $args
+    set argsA(-command) [list [namespace current]::compatcmd $argsA(-command)]
+    eval {post $url} [array get argsA]
+}
+
+proc httpex::compatcmd {cmd token} {
     if {([state $token] eq "final") && [llength $cmd]} {
 	uplevel #0 $cmd $token
     }
