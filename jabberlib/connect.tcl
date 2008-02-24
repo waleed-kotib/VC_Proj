@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.32 2008-01-04 13:41:32 matben Exp $
+# $Id: connect.tcl,v 1.33 2008-02-24 08:26:54 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -309,6 +309,7 @@ proc jlib::connect::connect {jlibname jid password args} {
     set state(args)     $args
     set state(error)    ""
     set state(state)    ""
+    set state(httpurl)  ""
 
     foreach name {ssl tls sasl compress} {
 	set state(use$name) 0
