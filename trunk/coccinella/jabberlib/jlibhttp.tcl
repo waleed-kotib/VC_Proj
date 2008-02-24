@@ -3,11 +3,11 @@
 #      Provides a http transport mechanism for jabberlib. 
 #      Implements the deprecated XEP-0025: Jabber HTTP Polling protocol.
 #      
-# Copyright (c) 2002-2005  Mats Bengtsson
+# Copyright (c) 2002-2008  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: jlibhttp.tcl,v 1.19 2008-02-23 06:46:45 matben Exp $
+# $Id: jlibhttp.tcl,v 1.20 2008-02-24 08:26:54 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -42,9 +42,6 @@
 #                 "scheduled" http post is scheduled as timer event
 #                 "wait"      http post made, waiting for response
 #                 "error"     error status
-
-# TODO: more flexible posting (from Response?) that dynamically schedules
-#       the timing interval.
 
 package require jlib
 package require http 2.4
@@ -232,6 +229,7 @@ proc jlib::http::transportreset {jlibname} {
     }
     set priv(afterid) ""
     set priv(state)   "reset"
+    set priv(ip)      ""
     
     # If we have got cached xml to send must post it now and ignore response.
     if {[string length $priv(xml)] > 2} {
