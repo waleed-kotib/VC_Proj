@@ -10,7 +10,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: balloonhelp.tcl,v 1.30 2008-02-25 15:20:05 matben Exp $
+# $Id: balloonhelp.tcl,v 1.31 2008-02-25 15:28:45 matben Exp $
 
 package require treeutil
 
@@ -73,7 +73,11 @@ proc ::balloonhelp::Toplevel {w} {
  
     switch -- [tk windowingsystem] {
 	aqua {
-	    tk::unsupported::MacWindowStyle style $w help hideOnSuspend
+	    if {[info tclversion] >= 8.5} {
+		tk::unsupported::MacWindowStyle style $w help hideOnSuspend
+	    } else {
+		tk::unsupported::MacWindowStyle style $w help none
+	    }
 	    # NB: If we do this before 'unsupported' it takes focus !?
 	    wm resizable $w 0 0 
 	}
