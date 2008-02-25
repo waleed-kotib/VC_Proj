@@ -10,7 +10,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: balloonhelp.tcl,v 1.29 2008-02-22 11:15:50 matben Exp $
+# $Id: balloonhelp.tcl,v 1.30 2008-02-25 15:20:05 matben Exp $
 
 package require treeutil
 
@@ -23,8 +23,8 @@ namespace eval ::balloonhelp:: {
     variable w .balloonhelp
     
     set locals(active) 1
-    set locals(fadeout) {0.95 0.9 0.85 0.8 0.75 0.7 0.65 0.6 0.55 0.5 0.4 0.3 0.2}
-    set locals(fadeout) {0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2}
+    set locals(alpha) 0
+    set locals(fadeout) {0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.15 0.1 0.05}
 
     # Java style popup: light blue schemata: bg=#D8E1F4, bd=#4A6EBC
     # Standard: light yellow: bg=#FFFF9F
@@ -49,7 +49,7 @@ namespace eval ::balloonhelp:: {
     }
 }
 
-proc ::balloonhelp::Init { } {    
+proc ::balloonhelp::Init {} {    
     variable w
     variable locals
 
@@ -57,47 +57,49 @@ proc ::balloonhelp::Init { } {
 	Build
 	set locals(millisecs) [option get $w millisecs {}]
 	set locals(timeout)   [option get $w timeout {}]
+
+	array set wmA [wm attributes $w]
+	if {[info exists wmA(-alpha)]} {
+	    set locals(alpha) 1
+	}
     }
 }
 
-proc ::balloonhelp::Build { } {    
+proc ::balloonhelp::Toplevel {w} {
+
+    toplevel $w -class Balloonhelp -bd 0 -relief flat
+    wm overrideredirect $w 1
+    wm withdraw  $w
+ 
+    switch -- [tk windowingsystem] {
+	aqua {
+	    tk::unsupported::MacWindowStyle style $w help hideOnSuspend
+	    # NB: If we do this before 'unsupported' it takes focus !?
+	    wm resizable $w 0 0 
+	}
+	default {
+	    wm transient $w
+	    wm resizable $w 0 0
+	}
+    }
+    return $w
+}
+
+proc ::balloonhelp::Build {} {    
     variable w
     variable locals
-    
-    toplevel $w -class Balloonhelp -bd 0 -relief flat -takefocus 0
+
+    Toplevel $w
+
+    # Inherit toplevel's db values.
     set bg   [option get $w background {}]
     set fg   [option get $w foreground {}]
     set wrap [option get $w wrapLength {}]
     set just [option get $w justify {}]
 
-    label $w.info -bg $bg -fg $fg -wraplength $wrap -justify $just -takefocus 0
+    label $w.info -bg $bg -fg $fg -wraplength $wrap -justify $just
     pack  $w.info -side left -fill y
-
-    wm withdraw  $w
-    wm resizable $w 0 0 
-    
-    if {[tk windowingsystem] eq "aqua"} {
-	if {0 && [info tclversion] >= 8.5} {
-	    wm overrideredirect $w 1
-	    wm transient $w	
- 	    tk::unsupported::MacWindowStyle style $w \
- 	      help {noActivates hideOnSuspend} 
-	} else {
-	    wm overrideredirect $w 1
-	    wm transient $w	
-	    tk::unsupported::MacWindowStyle style $w help none
-	}
-    } else {
-	wm overrideredirect $w 1
-	wm transient $w	
-    }
-
-    array set wmArr [wm attributes $w]
-    if {[info exists wmArr(-alpha)]} {
-	set locals(alpha) 1
-    } else {
-	set locals(alpha) 0
-    }
+    return $w
 }
 
 proc ::balloonhelp::configure {args} {    
@@ -262,9 +264,6 @@ proc ::balloonhelp::Cancel {win} {
     if {[winfo exists $w]} {
 	wm withdraw $w
     }
-    if {[info exists locals(focus)] && ($locals(focus) ne $w)} {
-	# catch {focus $locals(focus)}
-    }
 }
 
 proc ::balloonhelp::Timeout {win} {
@@ -301,15 +300,10 @@ proc ::balloonhelp::Show {win type} {
     if {![winfo exists $win]} {
 	unset -nocomplain locals(pending)
 	return
-    }
-    set wfocus [focus]
-    if {$wfocus ne $w} {
-	set locals(focus) $wfocus
-    }
-    
+    }    
     set exists 0
     set msg ""
-    set bbox {}
+    set bbox [list]
     
     if {$locals(active)} {
 	
@@ -396,9 +390,6 @@ proc ::balloonhelp::Show {win type} {
 	    if {$locals(alpha)} {
 		wm attributes $w -alpha 1.0
 	    }
-
-	    # A trick to avoid the balloonhelp taking focus (mac).
-	    after idle [list catch [list focus $wfocus]]
 	}
 	if {$locals(timeout)} {
 	    set locals(timeoutID)  \

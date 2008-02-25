@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.179 2008-02-22 11:15:49 matben Exp $	
+# $Id: Coccinella.tcl,v 1.180 2008-02-25 15:20:05 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -22,10 +22,6 @@ package provide app-Coccinella 1.0
 if {[catch {package require Tk 8.4}]} {
     return -code error "We need Tk 8.4 or later here. Run Wish!"
 }
-
-# Hack on MacOSX to avoid all old installed packages.
-set auto_path [lsearch -all -not -inline $auto_path "/System/Library/Tcl"]
-set auto_path [lsearch -all -not -inline $auto_path "/Network/Library/Tcl"]
 
 # The main window "." shall never be displayed. Use it for QT sounds etc.
 wm withdraw .

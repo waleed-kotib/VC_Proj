@@ -7,7 +7,9 @@ Not to mention all bugfixes and rewrites.
 
 Coccinella-0.96.6 (200803??)
 
- o
+ o all universal builds on macosx
+ o HTTP transport more reliable and optimized
+ o compatible with Tcl/Tk 8.5
 
 
 Coccinella-0.96.4.1 (20080108)

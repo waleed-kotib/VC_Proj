@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements a megawidget menubutton for setting avatar.
 #      
-#  Copyright (c) 2006  Mats Bengtsson
+#  Copyright (c) 2006-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.29 2008-02-22 11:15:50 matben Exp $
+# $Id: AvatarMB.tcl,v 1.30 2008-02-25 15:20:05 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -167,6 +167,22 @@ proc ::AvatarMB::Init {} {
     
     bind AvatarMBMenu <FocusIn> {}
     bind AvatarMBMenu <Destroy> {+::AvatarMB::MenuFree %W}
+    bind AvatarMBMenu <Map>	{ ::AvatarMB::MapPopdown %W }
+    bind AvatarMBMenu <Unmap>	{ ::AvatarMB::UnmapPopdown %W }
+    #bind AvatarMBMenu <Key>     {puts "Key %K"}
+}
+
+proc ::AvatarMB::MapPopdown {w} {
+    
+    #puts "::AvatarMB::MapPopdown w=$w"
+    ttk::globalGrab $w
+    focus -force $w
+}
+
+proc ::AvatarMB::UnmapPopdown {w} {
+    
+    #puts "::AvatarMB::UnmapPopdown"
+    ttk::releaseGrab $w
 }
 
 proc ::AvatarMB::Button {mb args} {
@@ -327,7 +343,7 @@ proc ::AvatarMB::Popdown {mb} {
     
     # This will direct all events to the menu even if the mouse is outside!
     # Buggy on mac.
-    grab -global $menu
+    #grab -global $menu
 }
 
 proc ::AvatarMB::TransferGrab {mb} {
@@ -371,7 +387,6 @@ proc ::AvatarMB::PostMenu {mb} {
 
     set menu $mb.menu
     Menu $menu
-    wm withdraw $menu
     update idletasks
     
     # PositionAlign sould perhaps be an option.
@@ -379,7 +394,11 @@ proc ::AvatarMB::PostMenu {mb} {
     foreach {x y} [PositionAlign $mb $xstate(-postalign) $x $y] { break }
     foreach {x y} [PositionOnScreen $mb $x $y] { break }
     wm geometry $menu +$x+$y
+    switch -- [tk windowingsystem] {
+	x11 - win32 { wm transient $popdown [winfo toplevel $mb] }
+    }
     wm deiconify $menu
+    raise $menu
 }
 
 proc ::AvatarMB::PostPosition {mb dir} {
@@ -444,9 +463,32 @@ proc ::AvatarMB::PositionOnScreen {mb x y} {
     return [list $x $y]
 }
 
+proc ::AvatarMB::MenuToplevel {m} {
+    
+    toplevel $m -class AvatarMBMenu -bd 0 -relief flat
+    wm withdraw $m
+    switch -- [tk windowingsystem] {
+	default -
+	x11 {
+	    wm overrideredirect $m true
+	}
+	win32 {
+	    wm overrideredirect $m true
+	}
+	aqua {
+	    tk::unsupported::MacWindowStyle style $m \
+	    	help {noActivates hideOnSuspend}
+	    wm resizable $m 0 0
+	}
+    }
+    return $m
+}
+
 proc ::AvatarMB::Menu {m args} {
     global this
     variable widget
+    
+    puts "::AvatarMB::Menu"
 
     if {$this(ttk)} {
 	set styleCmd ttk::style
@@ -474,15 +516,7 @@ proc ::AvatarMB::Menu {m args} {
     set widget(lightactive) $lightactive
     set widget(border)      $border
         
-    toplevel $m -class AvatarMBMenu -bd 0 -relief flat -takefocus 0
-    
-    if {([tk windowingsystem] eq "aqua") && ([info tclversion] >= 8.5)} {
-	tk::unsupported::MacWindowStyle style $m help {noActivates hideOnSuspend}
-    } else {
-	wm overrideredirect $m 1
-	wm transient $m
-    }
-    wm resizable $m 0 0 
+    MenuToplevel $m
     
     ttk::frame $m.f -padding {0 4}
     pack $m.f -fill both -expand 1
@@ -548,7 +582,7 @@ proc ::AvatarMB::Menu {m args} {
     BindFMenu $f.clear
     pack $f.clear -side top -anchor w -fill x
     
-    ttk::button $f.remove -style FMenu  -text [mc Remove] \
+    ttk::button $f.remove -style FMenu -text [mc Remove] \
       -command ::AvatarMB::MenuRemove
     BindFMenu $f.remove
     pack $f.remove -side top -anchor w -fill x
@@ -559,6 +593,7 @@ proc ::AvatarMB::Menu {m args} {
     if {[info exists wmA(-alpha)]} {
 	wm attributes $m -alpha 0.92
     }
+    puts "bindtags=[bindtags $m]"
     return $m
 }
 
@@ -573,8 +608,8 @@ proc ::AvatarMB::MenuFree {m} {
 # Generic FMenu code.
 
 proc ::AvatarMB::BindFMenu {w} {
-    bind $w <Enter>           { %W state active }
-    bind $w <Leave>           { %W state !active }
+    bind $w <Enter>           { %W state active; puts "<Enter>" }
+    bind $w <Leave>           { %W state !active; puts "<Leave>"}
     bind $w <B1-Enter>        { %W state pressed; %W state active }
     bind $w <B1-Leave>        { %W state !pressed; %W state !active }
     bind $w <ButtonPress-1>   { AvatarMB::MenuPress %W }
@@ -583,6 +618,7 @@ proc ::AvatarMB::BindFMenu {w} {
 
 proc ::AvatarMB::AvatarEnter {w} {
     variable widget
+    puts "::AvatarMB::AvatarEnter"
     if {[$w cget -state] eq "normal"} {
 	$w   configure -bg $widget(active)
 	$w.l configure -bg $widget(lightactive)
@@ -591,6 +627,7 @@ proc ::AvatarMB::AvatarEnter {w} {
 
 proc ::AvatarMB::AvatarLeave {w} {
     variable widget
+    puts "::AvatarMB::AvatarLeave"
     if {[$w cget -state] eq "normal"} {
 	$w   configure -bg $widget(border)
 	$w.l configure -bg $widget(background)
@@ -598,6 +635,7 @@ proc ::AvatarMB::AvatarLeave {w} {
 }
 
 proc ::AvatarMB::MenuPress {w} {
+    puts "::AvatarMB::MenuPress"
     MenuActivate $w
     return -code break
 }
@@ -750,4 +788,30 @@ proc ::AvatarMB::OnButtonRelease {m x y} {
     MenuUnpost $m
 }
 
+if {0} {
+    # experimental
+    proc _Post {} {
+	set w ._exp_menu
+	toplevel $w -class Junk
+	wm withdraw $w
+	$w configure -relief solid -borderwidth 0
+	tk::unsupported::MacWindowStyle style $w help {noActivates hideOnSuspend}
+	wm resizable $w 0 0
+	grid [label $w.l1 -text M] [label $w.l2 -text A] 
+	grid [label $w.l3 -text T] [label $w.l4 -text S] 
+	foreach i {1 2 3 4} {
+	    bindtags $w.l$i [list $w.l$i JunkL Label $w all]
+	}
+	bind JunkL <Enter> {puts "<Enter>"}
+	bind JunkL <Leave> {puts "<Leave>"}
+	update idletasks
+	wm geometry $w +200+200
+	switch -- [tk windowingsystem] {
+	    x11 - win32 { wm transient $popdown [winfo toplevel .] }
+	}
+	wm deiconify $w
+	raise $w
+	
+    }
+}
 

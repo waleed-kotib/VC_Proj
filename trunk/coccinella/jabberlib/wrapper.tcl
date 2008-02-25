@@ -6,11 +6,11 @@
 # procedures are called by functions in jabberlib, and
 # they in turn call the TclXML library functions.
 #
-#  Copyright (c) 2002-2007  Mats Bengtsson
+#  Copyright (c) 2002-2008  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: wrapper.tcl,v 1.39 2008-02-19 07:30:38 matben Exp $
+# $Id: wrapper.tcl,v 1.40 2008-02-25 15:20:05 matben Exp $
 # 
 # ########################### INTERNALS ########################################
 # 
@@ -129,11 +129,11 @@ proc wrapper::new {streamstartcmd streamendcmd parsecmd errorcmd} {
 	set wrapper($id,parser) [xml::parser -namespace 1]
 	set wrapper($id,class) "tdom"
 	$wrapper($id,parser) configure \
-	  -final 0 Ê\
-	  -elementstartcommand Ê[list [namespace current]::elementstart $id] Ê \
-	  -elementendcommand Ê Ê[list [namespace current]::elementend $id] Ê Ê \
-	  -characterdatacommand [list [namespace current]::chdata $id] Ê Ê Ê Ê \
-	  -ignorewhitespace Ê Ê 0
+	  -final 0  \
+	  -elementstartcommand  [list [namespace current]::elementstart $id]  \
+	  -elementendcommand    [list [namespace current]::elementend $id]    \
+	  -characterdatacommand [list [namespace current]::chdata $id]        \
+	  -ignorewhitespace
     } else {
 	set wrapper($id,parser) [xml::parser]
     
@@ -215,7 +215,7 @@ proc wrapper::parse {id xml} {
 #       event right from an element callback, everyhting will be out of sync.
 #       
 # Arguments:
-#       id: Ê Ê Ê Ê Êthe wrapper id
+#       id:          the wrapper id
 #       xml:         raw xml data to be parsed.
 #       
 # Results:
@@ -421,8 +421,8 @@ proc wrapper::chdata {id chardata} {
 
 # wrapper::free -- 
 # 
-# Ê Ê Êtdom doesn't permit freeing a parser from within a callback. So 
-# Ê Ê Êwe keep trying until it works. 
+#      tdom doesn't permit freeing a parser from within a callback. So 
+#      we keep trying until it works. 
 # 
 
 proc wrapper::free {id} { 
@@ -454,12 +454,12 @@ proc wrapper::reset {id} {
 	after idle [list [namespace origin free] $old]
 	set wrapper($id,parser) [xml::parser -namespace 1]
 	
-	$wrapper($id,parser) configure Ê \
-	  -final 0 Ê Ê\
-	  -elementstartcommand Ê[list [namespace current]::elementstart $id] Ê \
-	  -elementendcommand Ê Ê[list [namespace current]::elementend $id] Ê Ê \
-	  -characterdatacommand [list [namespace current]::chdata $id] Ê Ê Ê Ê \
-	  -ignorewhitespace Ê Ê 0
+	$wrapper($id,parser) configure  \
+	  -final 0  \
+	  -elementstartcommand  [list [namespace current]::elementstart $id]   \
+	  -elementendcommand    [list [namespace current]::elementend $id]     \
+	  -characterdatacommand [list [namespace current]::chdata $id]         \
+	  -ignorewhitespace
     } else {
     
 	# This resets the actual XML parser. Not sure this is actually needed.
