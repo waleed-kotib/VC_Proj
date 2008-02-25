@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.30 2008-02-25 15:20:05 matben Exp $
+# $Id: AvatarMB.tcl,v 1.31 2008-02-25 15:28:45 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -476,8 +476,13 @@ proc ::AvatarMB::MenuToplevel {m} {
 	    wm overrideredirect $m true
 	}
 	aqua {
-	    tk::unsupported::MacWindowStyle style $m \
-	    	help {noActivates hideOnSuspend}
+	    if {[info tclversion] >= 8.5} {
+		tk::unsupported::MacWindowStyle style $m \
+		  help {noActivates hideOnSuspend}
+	    } else {
+		tk::unsupported::MacWindowStyle style $m \
+		  help none
+	    }
 	    wm resizable $m 0 0
 	}
     }
@@ -795,7 +800,11 @@ if {0} {
 	toplevel $w -class Junk
 	wm withdraw $w
 	$w configure -relief solid -borderwidth 0
-	tk::unsupported::MacWindowStyle style $w help {noActivates hideOnSuspend}
+	if {[info tclversion] >= 8.5} {
+	    tk::unsupported::MacWindowStyle style $w help {noActivates hideOnSuspend}
+	} else {
+	    tk::unsupported::MacWindowStyle style $w help none
+	}
 	wm resizable $w 0 0
 	grid [label $w.l1 -text M] [label $w.l2 -text A] 
 	grid [label $w.l3 -text T] [label $w.l4 -text S] 
