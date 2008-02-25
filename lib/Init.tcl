@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.91 2008-02-20 15:14:37 matben Exp $
+# $Id: Init.tcl,v 1.92 2008-02-25 15:20:06 matben Exp $
 
 namespace eval ::Init {
     
@@ -566,6 +566,16 @@ proc ::Init::MakePrefsDirs {} {
 
 proc ::Init::SetAutoPath {} {
     global  auto_path this prefs
+    
+    # Hack on MacOSX to avoid all old installed packages.
+    if {$this(platform) eq "macosx"} {
+	set auto_path [lsearch -all -not -inline $auto_path "/System/Library/Tcl"]
+	set auto_path [lsearch -all -not -inline $auto_path "/System/Library/Frameworks"]
+	set auto_path [lsearch -all -not -inline $auto_path "/Network/Library/Tcl"]
+	set auto_path [lsearch -all -not -inline $auto_path "/Network/Library/Frameworks"]
+	set auto_path [lsearch -all -not -inline $auto_path "~/Library/Tcl"]
+	set auto_path [lsearch -all -not -inline $auto_path "~/Library/Frameworks"]
+    }
     
     # Add our lib and whiteboard directory to our search path.
     lappend auto_path [file join $this(path) lib]
