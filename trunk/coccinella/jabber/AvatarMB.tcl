@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.31 2008-02-25 15:28:45 matben Exp $
+# $Id: AvatarMB.tcl,v 1.32 2008-02-26 15:17:25 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -167,22 +167,8 @@ proc ::AvatarMB::Init {} {
     
     bind AvatarMBMenu <FocusIn> {}
     bind AvatarMBMenu <Destroy> {+::AvatarMB::MenuFree %W}
-    bind AvatarMBMenu <Map>	{ ::AvatarMB::MapPopdown %W }
-    bind AvatarMBMenu <Unmap>	{ ::AvatarMB::UnmapPopdown %W }
-    #bind AvatarMBMenu <Key>     {puts "Key %K"}
-}
-
-proc ::AvatarMB::MapPopdown {w} {
-    
-    #puts "::AvatarMB::MapPopdown w=$w"
-    ttk::globalGrab $w
-    focus -force $w
-}
-
-proc ::AvatarMB::UnmapPopdown {w} {
-    
-    #puts "::AvatarMB::UnmapPopdown"
-    ttk::releaseGrab $w
+    bind AvatarMBMenu <Map>	{ ::AvatarMB::MenuMap %W }
+    bind AvatarMBMenu <Unmap>	{ ::AvatarMB::MenuUnmap %W }
 }
 
 proc ::AvatarMB::Button {mb args} {
@@ -346,6 +332,25 @@ proc ::AvatarMB::Popdown {mb} {
     #grab -global $menu
 }
 
+proc ::AvatarMB::MenuMap {w} {
+    
+    #puts "::AvatarMB::MenuMap w=$w"
+    #ttk::globalGrab $w
+    focus -force $w
+    SaveGrabInfo $w
+
+    # This will direct all events to the menu even if the mouse is outside!
+    # Buggy on mac.
+    grab -global $w
+}
+
+proc ::AvatarMB::MenuUnmap {w} {
+    
+    #puts "::AvatarMB::MenuUnmap"
+    #ttk::releaseGrab $w
+    ::AvatarMB::RestoreOldGrab
+}
+
 proc ::AvatarMB::TransferGrab {mb} {
     variable state
 
@@ -476,14 +481,21 @@ proc ::AvatarMB::MenuToplevel {m} {
 	    wm overrideredirect $m true
 	}
 	aqua {
-	    if {[info tclversion] >= 8.5} {
-		tk::unsupported::MacWindowStyle style $m \
-		  help {noActivates hideOnSuspend}
-	    } else {
-		tk::unsupported::MacWindowStyle style $m \
-		  help none
+# 	    if {[info tclversion] >= 8.5} {
+# 		tk::unsupported::MacWindowStyle style $m \
+# 		  help {noActivates hideOnSuspend}
+# 	    } else {
+# 		tk::unsupported::MacWindowStyle style $m \
+# 		  help none
+# 	    }
+	    # Test variants.
+	    if {1} {
+		wm overrideredirect $m true
+		wm transient $m	    
+		wm resizable $m 0 0
+	    } elseif {0} {
+		
 	    }
-	    wm resizable $m 0 0
 	}
     }
     return $m
@@ -493,7 +505,7 @@ proc ::AvatarMB::Menu {m args} {
     global this
     variable widget
     
-    puts "::AvatarMB::Menu"
+    #puts "::AvatarMB::Menu"
 
     if {$this(ttk)} {
 	set styleCmd ttk::style
@@ -522,6 +534,8 @@ proc ::AvatarMB::Menu {m args} {
     set widget(border)      $border
         
     MenuToplevel $m
+    
+    #bind $m <Button-1> {+"puts B1"}
     
     ttk::frame $m.f -padding {0 4}
     pack $m.f -fill both -expand 1
@@ -598,7 +612,6 @@ proc ::AvatarMB::Menu {m args} {
     if {[info exists wmA(-alpha)]} {
 	wm attributes $m -alpha 0.92
     }
-    puts "bindtags=[bindtags $m]"
     return $m
 }
 
@@ -613,8 +626,8 @@ proc ::AvatarMB::MenuFree {m} {
 # Generic FMenu code.
 
 proc ::AvatarMB::BindFMenu {w} {
-    bind $w <Enter>           { %W state active; puts "<Enter>" }
-    bind $w <Leave>           { %W state !active; puts "<Leave>"}
+    bind $w <Enter>           { %W state active }
+    bind $w <Leave>           { %W state !active }
     bind $w <B1-Enter>        { %W state pressed; %W state active }
     bind $w <B1-Leave>        { %W state !pressed; %W state !active }
     bind $w <ButtonPress-1>   { AvatarMB::MenuPress %W }
@@ -623,7 +636,7 @@ proc ::AvatarMB::BindFMenu {w} {
 
 proc ::AvatarMB::AvatarEnter {w} {
     variable widget
-    puts "::AvatarMB::AvatarEnter"
+    #puts "::AvatarMB::AvatarEnter"
     if {[$w cget -state] eq "normal"} {
 	$w   configure -bg $widget(active)
 	$w.l configure -bg $widget(lightactive)
@@ -632,7 +645,7 @@ proc ::AvatarMB::AvatarEnter {w} {
 
 proc ::AvatarMB::AvatarLeave {w} {
     variable widget
-    puts "::AvatarMB::AvatarLeave"
+    #puts "::AvatarMB::AvatarLeave"
     if {[$w cget -state] eq "normal"} {
 	$w   configure -bg $widget(border)
 	$w.l configure -bg $widget(background)
