@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.92 2008-02-25 15:20:06 matben Exp $
+# $Id: Init.tcl,v 1.93 2008-02-27 09:05:23 matben Exp $
 
 namespace eval ::Init {
     
@@ -185,6 +185,14 @@ proc ::Init::SetThis {mainScript} {
 	    set machine "i686"
 	}
 	set machineSpecPath [file join $tcl_platform(os) $machine]
+    } elseif {$this(platform) eq "macosx"} {
+	
+	# We keep universal builds for 8.5 in 'i386'.
+	if {[info tclversion] >= 8.5} {
+	    set machineSpecPath i386
+	} else {
+	    set machineSpecPath $tcl_platform(machine)
+	}
     } else {
 	set machineSpecPath $tcl_platform(machine)
     }
