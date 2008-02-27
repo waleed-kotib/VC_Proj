@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.261 2007-12-20 14:01:26 matben Exp $
+# $Id: Jabber.tcl,v 1.262 2008-02-27 13:55:34 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -958,16 +958,17 @@ proc ::Jabber::DebugCmd {} {
     
     variable jstate
     
-    if {$jstate(debugCmd)} {
-	if {$this(platform) eq "windows" || [string match "mac*" $this(platform)]} {
-	    console show
+    switch -- $this(platform) windows - macosx {
+	if {$jstate(debugCmd)} {
+	    catch {
+		console show
+		console title "Coccinella Console"
+	    }
+	    jlib::setdebug 2
+	} else {
+	    catch {console hide}
+	    jlib::setdebug 0
 	}
-	jlib::setdebug 2
-    } else {
-	if {$this(platform) eq "windows" || [string match "mac*" $this(platform)]} {
-	    console hide
-	}
-	jlib::setdebug 0
     }
 }
 
@@ -991,7 +992,7 @@ proc ::Jabber::ErrorLogDlg {} {
 	return
     }
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc
-    wm title $w [mc {Error Log (noncriticals)}]
+    wm title $w [mc "Error Log (noncriticals)"]
     
     # Global frame.
     ttk::frame $w.frall
