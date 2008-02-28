@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.232 2008-01-18 13:16:07 matben Exp $
+# $Id: GroupChat.tcl,v 1.233 2008-02-28 13:36:00 matben Exp $
 
 package require Create
 package require Enter
@@ -3328,7 +3328,7 @@ proc ::GroupChat::BookmarkSendSet {} {
     variable bookmarks
     upvar ::Jabber::jstate jstate
     
-    set confElems {}
+    set confElems [list]
     foreach bmark $bookmarks {
 	set name [lindex $bmark 0]
 	set jid  [lindex $bmark 1]
@@ -3346,7 +3346,7 @@ proc ::GroupChat::BookmarkSendSet {} {
 		}
 	    }
 	}
-	set confChilds {}
+	set confChilds [list]
 	foreach {tag value} $elems {
 	    lappend confChilds [wrapper::createtag $tag -chdata $value]
 	}
@@ -3419,7 +3419,7 @@ proc ::GroupChat::BookmarkSendGetCB {type queryElem args} {
     }
     
     if {$type eq "error"} {
-	::UI::MessageBox -type ok -icon [mc Error]  \
+	::UI::MessageBox -type ok -icon error -title [mc Error]  \
 	  -message "Failed to obtain conference bookmarks: [lindex $queryElem 1]"
 	destroy $dlg
     } else {
