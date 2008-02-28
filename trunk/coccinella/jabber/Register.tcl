@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.93 2008-02-13 13:24:40 matben Exp $
+# $Id: Register.tcl,v 1.94 2008-02-28 10:15:05 matben Exp $
 
 package provide Register 1.0
 
@@ -590,8 +590,7 @@ proc ::RegisterEx::ConnectCB {token cuid jlibname status {errcode ""} {errmsg ""
 	return
     }
     if {$status eq "ok"} {
-	$jstate(jlib) register_get [namespace code [list GetCB $token $cuid]] \
-	  -to $state(-server)
+	$jstate(jlib) register_get [namespace code [list GetCB $token $cuid]]
     } elseif {$status eq "error"} {
 	SetState $token {!disabled}
 	NotBusy $token
@@ -818,7 +817,6 @@ proc ::RegisterEx::SendRegister {token} {
     set queryElem [wrapper::createtag "query" \
       -attrlist {xmlns jabber:iq:register} -subtags $subL]
     $jstate(jlib) send_iq "set" [list $queryElem] \
-      -to $state(-server) \
       -command [list [namespace current]::SendRegisterCB $token]
 }
 
