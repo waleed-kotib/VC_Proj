@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: tinyfileutils.tcl,v 1.10 2007-08-02 07:57:44 matben Exp $
+# $Id: tinyfileutils.tcl,v 1.11 2008-02-28 07:51:25 matben Exp $
 
 package provide tinyfileutils 1.0
 
@@ -199,7 +199,11 @@ proc ::tfileutils::appendfile {dstFile args} {
 #   returns a file name
 #
 
-proc ::tfileutils::tempfile {tmpdir prefix} {
+proc ::tfileutils::tempfile {tmpdir {prefix {}}} {
+    return [file normalize [TempFile $tmpdir $prefix]]
+}
+
+proc ::tfileutils::TempFile {tmpdir prefix} {
 
     set chars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     set nrand_chars 10
@@ -208,12 +212,12 @@ proc ::tfileutils::tempfile {tmpdir prefix} {
     set permission 0600
     set channel ""
     set checked_dir_writable 0
-    set mypid [pid]
+
     for {set i 0} {$i < $maxtries} {incr i} {
 	set newname $prefix
 	for {set j 0} {$j < $nrand_chars} {incr j} {
 	    append newname [string index $chars \
-	      [expr {([string range [clock clicks] end-9 end] ^ $mypid) % 62}]]
+		    [expr {int(rand()*62)}]]
 	}
 	set newname [file join $tmpdir $newname]
 	if {[file exists $newname]} {
