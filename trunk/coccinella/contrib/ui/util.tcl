@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.22 2008-02-29 13:39:58 matben Exp $
+# $Id: util.tcl,v 1.23 2008-02-29 15:30:11 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -384,9 +384,9 @@ proc ui::Grab {win} {
 }
 
 proc ui::TabTo {win} {
-    if {[info command keynav::traverseTo] ne ""} {
+    if {[info command ::keynav::traverseTo] ne ""} {
 	keynav::traverseTo $win
-    } elseif {[info command ttk::traverseTo] ne ""} {
+    } elseif {[info command ::ttk::traverseTo] ne ""} {
 	ttk::traverseTo $win
     }
     return -code break
