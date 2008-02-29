@@ -10,7 +10,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: balloonhelp.tcl,v 1.31 2008-02-25 15:28:45 matben Exp $
+# $Id: balloonhelp.tcl,v 1.32 2008-02-29 12:55:36 matben Exp $
 
 package require treeutil
 
@@ -47,6 +47,9 @@ namespace eval ::balloonhelp:: {
 	    option add *Balloonhelp.font {Geneva 9} widgetDefault
 	}
     }
+    if {[tk windowingsystem] eq "aqua"} {
+	bind Balloonhelp <Map> { ::balloonhelp::OnMap %W }
+    }
 }
 
 proc ::balloonhelp::Init {} {    
@@ -67,7 +70,7 @@ proc ::balloonhelp::Init {} {
 
 proc ::balloonhelp::Toplevel {w} {
 
-    toplevel $w -class Balloonhelp -bd 0 -relief flat
+    toplevel $w -class Balloonhelp -bd 0 -relief flat -takefocus 0
     wm overrideredirect $w 1
     wm withdraw  $w
  
@@ -101,7 +104,8 @@ proc ::balloonhelp::Build {} {
     set wrap [option get $w wrapLength {}]
     set just [option get $w justify {}]
 
-    label $w.info -bg $bg -fg $fg -wraplength $wrap -justify $just
+    label $w.info -bg $bg -fg $fg -wraplength $wrap -justify $just \
+      -takefocus 0
     pack  $w.info -side left -fill y
     return $w
 }
@@ -401,6 +405,10 @@ proc ::balloonhelp::Show {win type} {
 	}
     }
     unset -nocomplain locals(pending)
+}
+
+proc ::balloonhelp::OnMap {w} {
+    # This could help resetting focus from balloonhelp but seems not needed.
 }
 
 # SetPosition --

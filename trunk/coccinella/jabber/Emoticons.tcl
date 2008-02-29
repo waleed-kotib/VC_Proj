@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.64 2008-02-06 13:57:25 matben Exp $
+# $Id: Emoticons.tcl,v 1.65 2008-02-29 12:55:36 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -215,6 +215,7 @@ proc ::Emoticons::LoadTmpIconSet {path} {
 	if {$priv(havezip)} {
 	    set mountpath [file join [file dirname $path] $name]
 	    if {[catch {
+		#puts "path=$path, mountpath=$mountpath"
 		set fdzip [vfs::zip::Mount $path $mountpath]
 	    } err]} {
 		return -code error $err
@@ -801,6 +802,7 @@ proc ::Emoticons::PrefsSetCmd {value} {
 	    if {[catch {
 		LoadTmpIconSet $state($tmpSet,path)
 	    } err]} {
+		puts "catch LoadTmpIconSet err=$err"
 		set str [mc jamessemoticonfail2 $tmpSet]
 		append str "\n" "[mc Error]: $err"
 		::UI::MessageBox -icon error -title [mc Error] \
