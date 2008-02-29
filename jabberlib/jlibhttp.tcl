@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: jlibhttp.tcl,v 1.20 2008-02-24 08:26:54 matben Exp $
+# $Id: jlibhttp.tcl,v 1.21 2008-02-29 12:55:36 matben Exp $
 # 
 # USAGE ########################################################################
 #
@@ -40,7 +40,7 @@
 # 
 # priv(status):   ""          inactive
 #                 "scheduled" http post is scheduled as timer event
-#                 "wait"      http post made, waiting for response
+#                 "pending"   http post made, waiting for response
 #                 "error"     error status
 
 package require jlib
@@ -150,18 +150,22 @@ proc jlib::http::InitState {jlibname} {
     upvar ${jlibname}::http::priv priv
     upvar ${jlibname}::http::opts opts
 
-    set priv(state)      ""
-    set priv(status)     ""
+    set ms [clock clicks -milliseconds]
     
-    set priv(afterid)    ""
-    set priv(xml)        ""
-    set priv(id)         0
-    set priv(first)      1
-    set priv(first)      0
-    set priv(postms)    -1
-    set priv(ip)         ""
-    set priv(lastpostms) [clock clicks -milliseconds]
-    set priv(keys)       {}
+    set priv(state)       ""
+    set priv(status)      ""
+    
+    set priv(afterid)     ""
+    set priv(xml)         ""
+    set priv(lastxml)     ""     ; # Last posted xml.
+    set priv(id)          0
+    set priv(first)       1
+    set priv(first)       0
+    set priv(postms)     -1
+    set priv(ip)          ""
+    set priv(lastpostms)  $ms
+    set priv(2lastpostms) $ms
+    set priv(keys)        {}
     if {$opts(-usekeys)} {
 	set priv(keys) [NewKeySequence [NewSeed] $opts(-keylength)]
     }
@@ -224,7 +228,7 @@ proc jlib::http::transportreset {jlibname} {
     Debug 2 "jlib::http::transportreset"
 
     # Stop polling and resends.
-    if {[string length $priv(afterid)]} {
+    if {$priv(afterid) ne ""} {
 	catch {after cancel $priv(afterid)}
     }
     set priv(afterid) ""
@@ -273,12 +277,12 @@ proc jlib::http::send {jlibname xml} {
     
     append priv(xml) $xml
     
-    # If no post scheduled we shall post right away.
-    if {![string length $priv(afterid)]} {
+    # If this is our first post we shall post right away.
+    if {$priv(status) eq ""} {
 	Post $jlibname
-    } else {
-	
-	# Else post as soon as possible.
+
+	# Unless we already have a pending event, post as soon as possible.
+    } elseif {$priv(status) ne "pending"} {
 	PostASAP $jlibname
     }
 }
@@ -293,32 +297,66 @@ proc jlib::http::PostASAP {jlibname} {
     
     upvar ${jlibname}::http::priv priv
     upvar ${jlibname}::http::opts opts
-
+    
     Debug 2 "jlib::http::PostASAP"
     
-    #        now (case A)         now (case B)
-    #           |                    |
-    #  ---------------------------------------------------> time
-    #   |                 ->|                       ->|
-    # last post            min                       max
-    
-    # We shall always use '-minpollms' when there is something to send.
-    set nowms [clock clicks -milliseconds]
-    set minms [expr {$priv(lastpostms) + $opts(-minpollms)}]
-    if {$nowms < $minms} {
-	
-	# Case A:
-	# If next post is scheduled after min, then repost at min instead.
-	if {$priv(nextpostms) > $minms} {
-	    SchedulePost $jlibname minpollms
-	}
+    if {$priv(afterid) eq ""} {
+	SchedulePost $jlibname minpollms
     } else {
 	
-	# Case B:
-	# We have already waited longer than '-minpollms'.
-	after cancel $priv(afterid)
-	set priv(afterid) ""
-	Post $jlibname
+	#        now (case A)         now (case B)
+	#           |                    |
+	#  ---------------------------------------------------> time
+	#   |                 ->|                       ->|
+	# last post            min                       max
+	
+	# We shall always use '-minpollms' when there is something to send.
+	set nowms [clock clicks -milliseconds]
+	set minms [expr {$priv(lastpostms) + $opts(-minpollms)}]
+	if {$nowms < $minms} {
+	    
+	    # Case A:
+	    # If next post is scheduled after min, then repost at min instead.
+	    if {$priv(nextpostms) > $minms} {
+		SchedulePost $jlibname minpollms
+	    }
+	} else {
+	    
+	    # Case B:
+	    # We have already waited longer than '-minpollms'.
+	    after cancel $priv(afterid)
+	    set priv(afterid) ""
+	    Post $jlibname
+	}
+    }
+}
+
+# jlib::http::Schedule --
+#
+#       Computes the time for the next post and calls SchedulePost.
+
+proc jlib::http::Schedule {jlibname} {
+    
+    upvar ${jlibname}::http::priv priv
+    upvar ${jlibname}::http::opts opts
+    
+    Debug 2 "jlib::http::Schedule len priv(lastxml)=[string length $priv(lastxml)]"
+    
+    # Compute time for next post.
+    set ms [clock clicks -milliseconds]
+    if {$priv(lastxml) eq ""} {
+	set when [expr {$opts(polldownfactor) * ($ms - $priv(2lastpostms))}]
+	set when [Min $when $opts(-maxpollms)]
+	set when [Max $when $opts(-minpollms)]
+    } else {
+	set when minpollms
+    }
+    
+    # Reschedule next post unless 'reset'.
+    # Always keep a scheduled post at 'maxpollms' (or something else),
+    # and let any subsequent events reschedule if at an earlier time.
+    if {[string equal $priv(state) "instream"]} {
+	SchedulePost $jlibname $when
     }
 }
 
@@ -355,7 +393,7 @@ proc jlib::http::SchedulePost {jlibname when} {
     set priv(nextpostms) [expr {$nowms + $afterms}]
     set priv(postms)     [expr {$priv(nextpostms) - $priv(lastpostms)}]
 
-    if {[string length $priv(afterid)]} {
+    if {$priv(afterid) ne ""} {
 	after cancel $priv(afterid)
     }
     set priv(status) "scheduled"
@@ -413,7 +451,7 @@ proc jlib::http::PostXML {jlibname xml} {
     } else {
 	set query "$priv(id),$xml"
     }
-    set priv(status) "wait"
+    set priv(status) "pending"
     if {[string equal $priv(state) "reset"]} {
 	set cmdProc [namespace current]::NoopResponse
     } else {
@@ -433,28 +471,15 @@ proc jlib::http::PostXML {jlibname xml} {
 	  -queryprogress $progProc             \
 	  -command  $cmdProc]
     } msg]} {
+	# @@@ We could have a method here to retry a number of times before
+	#     giving up.
 	Debug 2 "\t post failed: $msg"
 	Error $jlibname networkerror $msg
     } else {
 	set priv(token) $token
-	
-	# Compute time for next post.
-	set ms [clock clicks -milliseconds]
-	if {$xml eq ""} {
-	    set when [expr {$opts(polldownfactor) * ($ms - $priv(lastpostms))}]
-	    set when [Min $when $opts(-maxpollms)]
-	    set when [Max $when $opts(-minpollms)]
-	} else {
-	    set when minpollms
-	}
-	set priv(lastpostms) $ms
-	
-	# Reschedule next post unless 'reset'.
-	# Always keep a scheduled post at 'maxpollms' (or something else),
-	# and let any subsequent events reschedule if at an earlier time.
-	if {[string equal $priv(state) "instream"]} {
-	    SchedulePost $jlibname $when
-	}
+	set priv(lastxml) $xml
+	set priv(2lastpostms) $priv(lastpostms)
+	set priv(lastpostms) [clock clicks -milliseconds]
     }
 }
 
@@ -494,111 +519,116 @@ proc jlib::http::Response {jlibname token} {
     set status [::http::status $token]
     
     Debug 2 "\t status=$status, ::http::ncode=[::http::ncode $token]"
-
-    switch -- $status {
-	ok {	    
-	    if {[::http::ncode $token] != 200} {
-		Error $jlibname error [::http::ncode $token]
-		return
-	    }	    
-	    set haveCookie 0
-	    set haveContentType 0
+    
+    if {$status eq "ok"} {
+	if {[::http::ncode $token] != 200} {
+	    Error $jlibname error [::http::ncode $token]
+	    return
+	}	    
+	set haveCookie 0
+	set haveContentType 0
+	
+	foreach {key value} $state(meta) {
 	    
-	    foreach {key value} $state(meta) {
-
-		if {[string equal -nocase $key "set-cookie"]} {
-		    
-		    # Extract the 'ID' from the Set-Cookie key.
-		    foreach pair [split $value ";"] {
-			set pair [string trim $pair]
-			if {[string equal -nocase -length 3 "ID=" $pair]} {
-			    set id [string range $pair 3 end]
-			    break
-			}
+	    if {[string equal -nocase $key "set-cookie"]} {
+		
+		# Extract the 'ID' from the Set-Cookie key.
+		foreach pair [split $value ";"] {
+		    set pair [string trim $pair]
+		    if {[string equal -nocase -length 3 "ID=" $pair]} {
+			set id [string range $pair 3 end]
+			break
 		    }
-
-		    if {![info exists id]} {
-			Error $jlibname error \
-			  "Set-Cookie in HTTP header \"$value\" invalid"
-			return
-		    }
+		}
+		
+		if {![info exists id]} {
+		    Error $jlibname error \
+		      "Set-Cookie in HTTP header \"$value\" invalid"
+		    return
+		}
+		
+		# Invesitigate the ID:
+		set ids [split $id :]
+		if {[llength $ids] == 2} {
 		    
-		    # Invesitigate the ID:
-		    set ids [split $id :]
-		    if {[llength $ids] == 2} {
-
-			# Any identifier that ends in ':0' indicates an error.
-			if {[string equal [lindex $ids 1] "0"]} {
+		    # Any identifier that ends in ':0' indicates an error.
+		    if {[string equal [lindex $ids 1] "0"]} {
 			
-			    #   ID=0:0  Unknown Error. The response body can 
-			    #           contain a textual error message. 
-			    #   ID=-1:0 Server Error.
-			    #   ID=-2:0 Bad Request.
-			    #   ID=-3:0 Key Sequence Error .
-			    set code [lindex $ids 0]
-			    if {[info exists errcode($code)]} {
-				set errmsg $errcode($code)
-			    } else {
-				set errmsg "Server error $id"
-			    }
-			    Error $jlibname error $errmsg
-			    return
+			#   ID=0:0  Unknown Error. The response body can 
+			#           contain a textual error message. 
+			#   ID=-1:0 Server Error.
+			#   ID=-2:0 Bad Request.
+			#   ID=-3:0 Key Sequence Error .
+			set code [lindex $ids 0]
+			if {[info exists errcode($code)]} {
+			    set errmsg $errcode($code)
+			} else {
+			    set errmsg "Server error $id"
 			}
-		    }
-		    set haveCookie 1
-		} elseif {[string equal -nocase $key "content-type"]} {
-		    
-		    # Responses from the server have Content-Type: text/xml. 
-		    # Both the request and response bodies are UTF-8       
-		    # encoded text, even if an HTTP header to the contrary 
-		    # exists. 
-		    # ejabberd: Content-Type {text/plain; charset=utf-8}
-
-		    set typeOK 0
-		    if {[string match -nocase "*text/xml*" $value]} {
-			set typeOK 1
-		    } elseif {[regexp -nocase { *text/plain; *charset=utf-8} $value]} {
-			set typeOK 1
-		    }
-		    
-		    if {!$typeOK} {
-			# This is an invalid response.
-			set errmsg "Content-Type in HTTP header is "
-			append errmsg $value
-			append errmsg " expected \"text/xml\" or \"text/plain\""
 			Error $jlibname error $errmsg
 			return
 		    }
-		    set haveContentType 1
 		}
+		set haveCookie 1
+	    } elseif {[string equal -nocase $key "content-type"]} {
+		
+		# Responses from the server have Content-Type: text/xml. 
+		# Both the request and response bodies are UTF-8       
+		# encoded text, even if an HTTP header to the contrary 
+		# exists. 
+		# ejabberd: Content-Type {text/plain; charset=utf-8}
+		
+		set typeOK 0
+		if {[string match -nocase "*text/xml*" $value]} {
+		    set typeOK 1
+		} elseif {[regexp -nocase { *text/plain; *charset=utf-8} $value]} {
+		    set typeOK 1
+		}
+		
+		if {!$typeOK} {
+		    # This is an invalid response.
+		    set errmsg "Content-Type in HTTP header is "
+		    append errmsg $value
+		    append errmsg " expected \"text/xml\" or \"text/plain\""
+		    Error $jlibname error $errmsg
+		    return
+		}
+		set haveContentType 1
 	    }
-	    if {!$haveCookie} {
-		Error $jlibname error "missing Set-Cookie in HTTP header"
-		return
-	    }
-	    if {!$haveContentType} {
-		Error $jlibname error "missing Content-Type in HTTP header"
-		return
-	    }
-	    set priv(id) $id
-	    
-	    set body [::http::data $token]
-	    Debug 2 "POLL: $body"
-	    
-	    # Send away to jabberlib for parsing and processing.
-	    if {[string length $body] > 2} {
-		[namespace parent]::recv $jlibname $body
-	    }
-	    
-	    # Reschedule at minpollms.
-	    if {[string length $body] > 2} {
-		PostASAP $jlibname
-	    }	    
 	}
-	default {
-	    Error $jlibname $status [::http::error $token]
+	if {!$haveCookie} {
+	    Error $jlibname error "missing Set-Cookie in HTTP header"
 	    return
 	}
+	if {!$haveContentType} {
+	    Error $jlibname error "missing Content-Type in HTTP header"
+	    return
+	}
+	set priv(id) $id
+	set priv(lastxml) ""	
+	set body [::http::data $token]
+	Debug 2 "POLL: $body"
+	
+	# Send away to jabberlib for parsing and processing.
+	if {[string length $body] > 2} {
+	    [namespace parent]::recv $jlibname $body
+	}
+	
+	# Reschedule new POST.
+	# NB: We always rescedule from the POST callback to avoid queuing
+	#     up requests which can distort the order and make a 
+	#     'key sequence error'
+	if {[string length $body] > 2} {
+	    SchedulePost $jlibname minpollms
+	} else {
+	    Schedule $jlibname
+	}
+    } else {
+	
+	# @@@ We could have a method here to retry a number of times before
+	#     giving up.
+	Error $jlibname $status [::http::error $token]
+	return
     }
     
     # And cleanup after each post.
