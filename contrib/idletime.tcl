@@ -6,7 +6,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-#  $Id: idletime.tcl,v 1.9 2008-02-29 13:49:00 matben Exp $
+#  $Id: idletime.tcl,v 1.10 2008-03-01 10:36:28 matben Exp $
 
 package provide idletime 1.0
 
@@ -108,16 +108,14 @@ proc ::idletime::poll {} {
     variable status 
     
     set idlesecs [expr {[eval $inactiveProc]/1000}]
-    puts "::idletime::poll idlesecs=$idlesecs"
-    if {[array exists state]} {
-	parray state
-    }
-    if {[array exists shot]} {
-	parray shot
-    }
    
     foreach {name secs} [array get state] {
-	puts "\t name=$name, secs=$secs"
+	
+	# Protect for the situation where any handler is removed when
+	# doing the callback! [Bug #196306]
+	if {![info exists state($name)]} {
+	    continue
+	}
 	if {$idlesecs >= $secs} {
 	    
 	    # Fire!
