@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.32 2008-02-26 15:17:25 matben Exp $
+# $Id: AvatarMB.tcl,v 1.33 2008-03-02 14:39:02 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -400,7 +400,7 @@ proc ::AvatarMB::PostMenu {mb} {
     foreach {x y} [PositionOnScreen $mb $x $y] { break }
     wm geometry $menu +$x+$y
     switch -- [tk windowingsystem] {
-	x11 - win32 { wm transient $popdown [winfo toplevel $mb] }
+	x11 - win32 { wm transient $menu [winfo toplevel $mb] }
     }
     wm deiconify $menu
     raise $menu
