@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.234 2008-01-19 15:17:36 matben Exp $
+# $Id: Roster.tcl,v 1.235 2008-03-03 14:21:20 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -903,15 +903,19 @@ proc ::Roster::Presence {jid presence args} {
         
     set jlib $jstate(jlib)
     set rjid [$jlib roster getrosterjid $jid]
-    set jid2 $rjid
+    #set jid2 $rjid
+    set jid2 [jlib::barejid $jid]
         
     # Must remove all resources, and jid2 if no resources.
     # NB: this gets us also unavailable presence stanzas.
-    set resL [$jlib roster getresources $jid2]
+    # We MUST have the bare JID else we wont get any resources!
+
+    ::RosterTree::StyleDeleteItem $rjid
+    #set resL [$jlib roster getresources $jid2]
+    set resL [$jlib roster getresources $rjid]
     foreach res $resL {
 	::RosterTree::StyleDeleteItem $jid2/$res
     }
-    #puts "---- resL=$resL"
     
     set items [list]
     set isavailable [$jlib roster isavailable $rjid]
