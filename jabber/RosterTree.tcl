@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.101 2008-03-03 14:21:21 matben Exp $
+# $Id: RosterTree.tcl,v 1.102 2008-03-03 14:39:18 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1665,7 +1665,7 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
 	if {[info exists argsA(-show)]} {
 	    set sstr [::Roster::MapShowToText $argsA(-show)]
 	    append str " ($sstr)" 
-	} elseif {[info exists argsA(-status)]} {
+	} elseif {[info exists argsA(-status)] && ($argsA(-status) ne "")} {
 	    append str " ($argsA(-status))"
 	}
     }
