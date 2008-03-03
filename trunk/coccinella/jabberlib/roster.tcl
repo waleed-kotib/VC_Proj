@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.65 2008-01-05 11:00:58 matben Exp $
+# $Id: roster.tcl,v 1.66 2008-03-03 14:21:20 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -1119,11 +1119,12 @@ proc jlib::roster::getask {jlibname jid} {
 
 # jlib::roster::getresources --
 #
-#       Returns a list of all resources for this jid or empty.
+#       Returns a list of all resources for this JID or empty.
 #
 # Arguments:
 #       jlibname:   the instance of this jlib.
-#       jid:        a jid without any resource (jid2).
+#       jid:        a JID without any resource (jid2) typically.
+#                   it must be the JID which is reported by roster.
 #       args        ?-type?
 #                   -type: return presence for (un)available only.
 #       
@@ -1161,7 +1162,34 @@ proc jlib::roster::getresources {jlibname jid args} {
 	    return $presA($jid,res)
 	}
     } else {
-	return ""
+	
+	# If the roster JID is something like: icq.home.se/registered
+	set jid2 [jlib::barejid $jid]
+	if {[info exists presA($jid2,res)]} {
+	    if {[info exists argsA(-type)]} {
+		
+		# Need to loop through all resources for this jid.
+		set resL [list]
+		set type $argsA(-type)
+		foreach res $presA($jid2,res) {
+    
+		    # Be sure to handle empty resources as well: '1234@icq.host'
+		    if {$res eq ""} {
+			set jid3 $jid2
+		    } else {
+			set jid3 $jid2/$res
+		    }
+		    if {[string equal $argsA(-type) $presA($jid3,type)]} {
+			lappend resL $res
+		    }
+		}
+		return $resL
+	    } else {
+		return $presA($jid2,res)
+	    }
+	} else {
+	    return
+	}
     }
 }
 

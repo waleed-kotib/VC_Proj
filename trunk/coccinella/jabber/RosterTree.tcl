@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.100 2008-02-10 09:43:22 matben Exp $
+# $Id: RosterTree.tcl,v 1.101 2008-03-03 14:21:21 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1558,7 +1558,7 @@ proc ::RosterTree::DeleteItemBase {jid} {
     
     set mjid3 [jlib::jidmap $jid]
     jlib::splitjid $mjid3 mjid2 res
-        
+    
     set tag [list jid $mjid2]
     DeleteWithTag $tag
     if {$res ne ""} {
