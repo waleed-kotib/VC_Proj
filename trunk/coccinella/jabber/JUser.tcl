@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.49 2008-01-17 14:28:44 matben Exp $
+# $Id: JUser.tcl,v 1.50 2008-03-06 14:36:19 matben Exp $
 
 package provide JUser 1.0
 
@@ -40,7 +40,7 @@ namespace eval ::JUser:: {
     set ::config(adduser,show-head)              1
 }
 
-proc ::JUser::QuitAppHook { } {
+proc ::JUser::QuitAppHook {} {
     global  wDlgs
     
     ::UI::SaveWinGeom $wDlgs(jrostadduser)    
@@ -56,6 +56,11 @@ proc ::JUser::OnMenu {} {
 # JUser::NewDlg --
 # 
 #       Add new user dialog.
+#       
+# Arguments:
+#       args:     -jid JID to add
+#                 
+#       
 
 proc ::JUser::NewDlg {args} {
     global  this prefs wDlgs config

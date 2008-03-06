@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.71 2007-12-20 14:01:26 matben Exp $
+# $Id: Subscribe.tcl,v 1.72 2008-03-06 14:36:19 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -249,7 +249,7 @@ proc ::Subscribe::NewDlg {jid args} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
-    set name [GetDisplayName $jid]
+    set name [::Roster::GetDisplayName $jid]
     
     set str [mc jasubwant2 $name]
     if {!$havesubsc} {
@@ -640,7 +640,8 @@ proc ::SubscribeAuto::HandleAccept {jid} {
 
 	# Auto subscribe to subscribers to me.
 	::SubscribeAuto::SendSubscribe $jid
-	set msg [mc jamessautoaccepted2 $jid]
+	set name [::Roster::GetDisplayName $jid]
+	set msg [mc jamessautoaccepted2 $name]
 	::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	
 	if {$config(subscribe,auto-accept-send-msg)} {
@@ -669,7 +670,8 @@ proc ::SubscribeAuto::HandleReject {jid} {
     } else {
 	::Jabber::Jlib send_presence -to $jid -type "unsubscribed"
 	::Jabber::Jlib roster send_remove $jid
-	set msg [mc jamessautoreject2 $jid]
+	set name [::Roster::GetDisplayName $jid]
+	set msg [mc jamessautoreject2 $name]
 	::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	
 	if {$config(subscribe,auto-reject-send-msg)} {
@@ -739,7 +741,7 @@ proc ::SubscribeAuto::AcceptTimer {w jid secs} {
 	incr secs -1
 	if {$secs <= 0} {
 	    $w invoke accept
-	    set name [::Subscribe::GetDisplayName $jid]
+	    set name [::Roster::GetDisplayName $jid]
 	    set msg [mc jamessautoaccepted2 $name]
 	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	} else {
@@ -807,7 +809,7 @@ proc ::SubscribeAuto::RejectTimer {w jid secs} {
 	incr secs -1
 	if {$secs <= 0} {
 	    $w invoke reject
-	    set name [::Subscribe::GetDisplayName $jid]
+	    set name [::Roster::GetDisplayName $jid]
 	    set msg [mc jamessautoreject2 $name]
 	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	} else {
@@ -1154,7 +1156,7 @@ proc ::SubscribeMulti::AddJID {w jid} {
     set state($row,name)  $name
     set state($row,group) $group
     
-    set jstr [::Subscribe::GetDisplayName $jid]
+    set jstr [::Roster::GetDisplayName $jid]
     set jlen [font measure CociDefaultFont $jstr]
     if {$jlen > 240} {
 	set len [string length $jstr]
@@ -1325,8 +1327,9 @@ proc ::Subscribed::Handle {jid} {
     if {$config(subscribed,multi-dlg)} {
 	Queue $jid
     } else {
+	set name [::Roster::GetDisplayName $jid]
 	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
-	  -message [mc jamessallowsub2 $jid]
+	  -message [mc jamessallowsub2 $name]
     }
 }
 
@@ -1352,8 +1355,9 @@ proc ::Subscribed::ExecQueue {} {
     set len [llength $queue]
     if {$len == 1} {
 	set jid [lindex $queue 0]
+	set name [::Roster::GetDisplayName $jid]
 	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
-	  -message [mc jamessallowsub2 $jid]
+	  -message [mc jamessallowsub2 $name]
     } elseif {$len > 1} {
 	set w $wDlgs(jsubsced)
 	if {$config(subscribed,fancy-dlg)} {
@@ -1391,7 +1395,7 @@ proc ::Subscribed::AddJIDPlain {w jid {first 0}} {
     if {!$first} {
 	append msg ", "
     }
-    append msg [::Subscribe::GetDisplayName $jid]
+    append msg [::Roster::GetDisplayName $jid]
     $w configure -message $msg
 }
 
@@ -1453,7 +1457,7 @@ proc ::Subscribed::AddJIDFancy {w jid {first 0}} {
     set nusers [expr {$nrow + 1}]
     $state(label) configure -text [mc jamesssubscedfancy $nusers]
   
-    set jstr [::Subscribe::GetDisplayName $jid]
+    set jstr [::Roster::GetDisplayName $jid]
     set jlen [font measure CociSmallFont $jstr]
     if {$jlen > 220} {
 	set len [string length $jstr]
