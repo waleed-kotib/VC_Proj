@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.94 2008-02-28 10:15:05 matben Exp $
+# $Id: Register.tcl,v 1.95 2008-03-06 14:36:19 matben Exp $
 
 package provide Register 1.0
 
@@ -74,7 +74,7 @@ proc ::Register::Remove {{jid {}}} {
 	}
     }
     if {$login} {
-	set ans [::UI::MessageBox -icon warning -title [mc {Remove Account}] \
+	set ans [::UI::MessageBox -icon warning -title [mc "Remove Account"] \
 	  -type yesno -default no -message [mc jamessremoveaccount2]]
 	if {$ans eq "yes"} {
 	    set remove 1
@@ -127,8 +127,9 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
 	if {[jlib::jidequal $jid $jstate(server)]} {
 	    ::Jabber::DoCloseClientConnection
 	}
+	set name [::Roster::GetDisplayName $jid]
 	ui::dialog -icon info -title [mc Unregister] -type ok  \
-	  -message [mc jamessokunreg2 [jlib::unescapejid $jid]]
+	  -message [mc jamessokunreg2 $name]
     }
 }
 
@@ -1183,7 +1184,7 @@ proc ::GenRegister::ResultCallback {token type subiq args} {
     set jid $state(server)
 
     if {[string equal $type "error"]} {
-	set str [mc jamesserrregset2 [jlib::unescapejid $jid]]
+	set str [mc jamesserrregset2 $jid]
 	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
 	append str "[mc Message]: [lindex $subiq 1]"
 	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
