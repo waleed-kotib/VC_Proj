@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.235 2008-03-03 14:21:20 matben Exp $
+# $Id: Roster.tcl,v 1.236 2008-03-07 10:29:29 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -182,7 +182,7 @@ proc ::Roster::InitMenus {} {
     set mDefs {
 	{command     mLastLogin/Activity  {::Jabber::GetLast $jid} }
 	{command     mBusinessCard...     {::VCard::Fetch other $jid} }
-	{command     mAddContact...       {::JUser::NewDlg} }
+	{command     mAddContact...       {::JUser::NewDlg -transportjid $jid3} }
 	{command     mEditContact...      {::JUser::EditDlg $jid} }
 	{command     mVersion             {::Jabber::GetVersion $jid3} }
 	{command     mLoginTrpt           {::Roster::LoginTrpt $jid3} }
@@ -194,7 +194,7 @@ proc ::Roster::InitMenus {} {
     set mTypes {
 	{mLastLogin/Activity  {user}                }
 	{mBusinessCard...     {user}                }
-	{mAddContact...       {}                    }
+	{mAddContact...       {trpt}                }
 	{mEditContact...      {user}                }
 	{mVersion             {user}                }
 	{mLoginTrpt           {trpt unavailable}    }

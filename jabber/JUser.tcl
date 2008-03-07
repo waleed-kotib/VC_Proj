@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.50 2008-03-06 14:36:19 matben Exp $
+# $Id: JUser.tcl,v 1.51 2008-03-07 10:29:29 matben Exp $
 
 package provide JUser 1.0
 
@@ -58,7 +58,8 @@ proc ::JUser::OnMenu {} {
 #       Add new user dialog.
 #       
 # Arguments:
-#       args:     -jid JID to add
+#       args:   -jid JID to add
+#               -transportjid JID
 #                 
 #       
 
@@ -163,6 +164,14 @@ proc ::JUser::NewDlg {args} {
     if {[info exists argsA(-jid)]} {
 	set state(jid) [jlib::unescapejid $argsA(-jid)]
     }
+    if {[info exists argsA(-transportjid)]} {
+	set trptjid $argsA(-transportjid)
+	if {[info exists state(servicetype,$trptjid)]} {
+	    set type $state(servicetype,$trptjid)
+	    set state(gjid) $trptjid
+	    set state(jid) [::Gateway::GetPrompt $type]
+	}
+    }
     
     # Cache state variables for the dialog.
     set state(wjid)   $frmid.ejid
@@ -236,7 +245,6 @@ proc ::JUser::DoAdd {token} {
     
     # The user inputs the chat systems native ID typically. Get JID.
     set jid [::Gateway::GetJIDFromPromptHeuristics $state(jid) $type]        
-    #set jid   [jlib::escapejid $state(jid)]
     set name  $state(name)
     set group $state(group)
     
