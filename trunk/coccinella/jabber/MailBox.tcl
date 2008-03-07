@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.134 2007-12-20 14:01:26 matben Exp $
+# $Id: MailBox.tcl,v 1.135 2008-03-07 10:29:29 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -583,7 +583,7 @@ proc ::MailBox::Build {args} {
 	break
     }
     $wpane add $wfrmbox -weight 1
-    $wpane add $wfrmsg  -weight 1
+    $wpane add $wfrmsg  -weight 0
     
     set locals(wfrmbox)  $wfrmbox
     set locals(wtbl)     $wtbl
