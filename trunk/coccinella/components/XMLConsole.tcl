@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: XMLConsole.tcl,v 1.7 2007-12-20 14:01:25 matben Exp $
+# $Id: XMLConsole.tcl,v 1.8 2008-03-07 10:40:05 matben Exp $
 
 namespace eval ::XMLConsole { 
 
@@ -193,8 +193,8 @@ proc ::XMLConsole::Build {} {
 	$wtext configure -state disabled
     }
     
-    $wpane add $wlog  -weight 2
-    $wpane add $wsend -weight 1
+    $wpane add $wlog  -weight 1
+    $wpane add $wsend -weight 0
     
     set state(send)   $wtext
     set state(pretty) $opts(pretty)
