@@ -51,6 +51,7 @@ package ifneeded TkInteractor 1.0 [list source [file join $dir TkInteractorPacka
 package ifneeded tree 1.0 [list source [file join $dir tree.tcl]]
 package ifneeded TreeCtrlDnD 0.1 [list source [file join $dir TreeCtrlDnD.tcl]]
 package ifneeded treeutil 1.0 [list source [file join $dir treeutil.tcl]]
+package ifneeded ttk::dialog 0.8 [list source [file join $dir dialog.tcl]]
 package ifneeded ttoolbar 1.0 [list source [file join $dir ttoolbar.tcl]]
 package ifneeded undo 0.1 [list source [file join $dir undo.tcl]]
 package ifneeded uri 1.2.1 [list source [file join $dir uri.tcl]]
