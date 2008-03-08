@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: TtkDialog.tcl,v 1.8 2007-11-18 08:21:20 matben Exp $
+#  $Id: TtkDialog.tcl,v 1.9 2008-03-08 15:51:32 matben Exp $
 
 namespace eval ::TtkDialog {
     
@@ -26,6 +26,9 @@ namespace eval ::TtkDialog {
 	return
     }
     if {[catch {package require ui::dialog}]} {
+	return
+    }
+    if {[catch {package require ttk::dialog}]} {
 	return
     }
 
