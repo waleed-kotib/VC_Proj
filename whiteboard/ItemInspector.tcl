@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ItemInspector.tcl,v 1.16 2007-09-14 13:17:09 matben Exp $
+# $Id: ItemInspector.tcl,v 1.17 2008-03-10 14:08:10 matben Exp $
 
 package provide ItemInspector 1.0
 
@@ -39,9 +39,7 @@ namespace eval ::ItemInspector::  {
     
     # Maps 0, 1 to and from false, true. Strange in tcl8.3; bezier? boolean?
     variable boolFull2Short
-    variable boolShort2Full
     array set boolFull2Short {false 0 true 1}
-    array set boolShort2Full {0 false 1 true bezier true}
         
     # Filter away options that we don't want to be set or displayed.
     variable notWantedOpts
@@ -169,7 +167,6 @@ proc ::ItemInspector::Build {wcan itemid args} {
 
     # The local namespace variables.
     variable boolFull2Short
-    variable boolShort2Full
     variable notWantedOpts
 
     array set argsArr {
@@ -381,7 +378,8 @@ proc ::ItemInspector::Build {wcan itemid args} {
 		    if {$val eq ""}  {
 			set state($op) "false"
 		    } else  {
-			set state($op) $boolShort2Full($val)
+			set state($op) \
+			  [string map {0 false 1 true bezier true} $val]
 		    }
 		} elseif {[string equal $op "-dash"]}  {
 		    set state($op) $dashShort2Full($val)
@@ -666,7 +664,6 @@ proc ::ItemInspector::Movie {wcan winfr args} {
     
     variable skipMovieOpts
     variable boolFull2Short
-    variable boolShort2Full
     variable uid
 
     set w $wDlgs(iteminsp)m[incr uid]
@@ -819,7 +816,6 @@ proc ::ItemInspector::MovieConfigure {token} {
     upvar 0 $token state
 
     variable boolFull2Short
-    variable boolShort2Full
     
     set wmov $state(wmov)
     
