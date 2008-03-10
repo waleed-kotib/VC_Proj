@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.28 2007-12-20 14:01:24 matben Exp $
+# $Id: Growl.tcl,v 1.29 2008-03-10 14:22:31 matben Exp $
 
 namespace eval ::Growl { 
 
@@ -111,6 +111,10 @@ proc ::Growl::PresenceHook {jid type args} {
     if {![::UI::IsAppInFront]} {
 	
 	if {[::Roster::IsTransportHeuristics $jid]} {
+	    return
+	}
+	set myjid2 [::Jabber::Jlib myjid2]
+	if {[jlib::jidequal $myjid2 [jlib::barejid $jid]]} {
 	    return
 	}
 	
