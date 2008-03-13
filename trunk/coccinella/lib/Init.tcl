@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.93 2008-02-27 09:05:23 matben Exp $
+# $Id: Init.tcl,v 1.94 2008-03-13 07:55:40 matben Exp $
 
 namespace eval ::Init {
     
@@ -502,7 +502,7 @@ proc ::Init::SetThisVersion {} {
     # default file, never read.
     set this(vers,major)    0
     set this(vers,minor)   96
-    set this(vers,release)  5
+    set this(vers,release)  7
     
     # NB: The 'minorRelease' number is only used for released versions and not
     #     in cvs or so called daily builds. cvs always have odd 'release'
