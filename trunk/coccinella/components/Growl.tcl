@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.29 2008-03-10 14:22:31 matben Exp $
+# $Id: Growl.tcl,v 1.30 2008-03-14 13:19:35 matben Exp $
 
 namespace eval ::Growl { 
 
@@ -42,7 +42,7 @@ proc ::Growl::Init {} {
     component::register Growl
     
     # There are some nice 64x64 error & info icons as well.
-    set cociFile [file join $this(imagePath) Coccinella.png]
+    set cociFile [file join $this(imagePath) bug-128.png]
     
     # Use translated strings as keys, else Growls settings wont be translatable.
     set all {"Message" "Status" "File" "Phone" "Mood"}
@@ -106,13 +106,20 @@ proc ::Growl::ChatMessageHook {xmldata} {
 
 proc ::Growl::PresenceHook {jid type args} {
     variable cociFile
-    
+
     # Notify only if in background.
     if {![::UI::IsAppInFront]} {
-	
+	array set argsA $args
+	set xmldata $argsA(-xmldata)
+	set from [wrapper::getattribute $xmldata from]
+	set jid $from
+	 
+	# Skip transports since they are us.
 	if {[::Roster::IsTransportHeuristics $jid]} {
 	    return
 	}
+	
+	# Skip myself.
 	set myjid2 [::Jabber::Jlib myjid2]
 	if {[jlib::jidequal $myjid2 [jlib::barejid $jid]]} {
 	    return
@@ -123,7 +130,10 @@ proc ::Growl::PresenceHook {jid type args} {
 	if {$delay ne ""} {
 	    return
 	}
-	array set argsA $args
+	if {![::Jabber::Jlib roster anychange $jid {type show status}]} {
+	    return
+	}
+	
 	set show $type
 	if {[info exists argsA(-show)]} {
 	    set show $argsA(-show)
