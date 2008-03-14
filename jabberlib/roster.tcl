@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.66 2008-03-03 14:21:20 matben Exp $
+# $Id: roster.tcl,v 1.67 2008-03-14 13:19:35 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -176,6 +176,7 @@ proc jlib::roster::init {jlibname args} {
     $jlibname iq_register set "jabber:iq:roster" [namespace code set_handler]
         
     # Register for presence. Be sure they are first in order.
+    # @@@ We should have a separate internal register API to avoid any conflicts.
     $jlibname presence_register_int available   \
       [namespace code presence_handler] 10
     $jlibname presence_register_int unavailable \
@@ -1424,6 +1425,40 @@ proc jlib::roster::wasavailable {jlibname jid} {
 	}
 	return 0
     }
+}
+
+# jlib::roster::anychange --
+#
+#       Returns boolean telling us if any presence attributes as listed
+#       in 'nameList' has changed.
+#
+# Arguments:
+#       jlibname:   the instance of this jlib.
+#       jid:        the JID as reported in presence
+#       nameList:   type | status | priority | show, D=type
+#
+# Results:
+#       0/1.
+
+proc jlib::roster::anychange {jlibname jid {nameList type}} {
+    
+    upvar ${jlibname}::roster::presA presA
+    upvar ${jlibname}::roster::oldpresA oldpresA
+    
+    set jid [jlib::jidmap $jid]
+    
+    foreach name $nameList {
+	set have1 [info exists presA($jid,$name)]
+	set have2 [info exists oldpresA($jid,$name)]	
+	if {$have1 && $have2} {
+	    if {$presA($jid,$name) ne $oldpresA($jid,$name)} {
+		return 1
+	    }
+	} elseif {($have1 && !$have2) || (!$have1 && $have2)} {
+	    return 1
+	} 
+    }
+    return 0
 }
 
 # jlib::roster::gettype --
