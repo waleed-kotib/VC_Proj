@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.232 2008-01-19 15:17:36 matben Exp $
+# $Id: JUI.tcl,v 1.233 2008-03-16 10:54:51 matben Exp $
 
 package provide JUI 1.0
 
@@ -126,8 +126,6 @@ proc ::JUI::Init {} {
     variable inited
             
     set mDefsFile {
-	{command   mPreferences...     {::Preferences::Build}     {}}
-	{separator}
 	{command   mNewAccount...      {::RegisterEx::OnMenu}     {}}
 	{command   mRemoveAccount...   {::Register::OnMenuRemove} {}}	
 	{command   mNewPassword...     {::Jabber::Passwd::OnMenu} {}}
@@ -149,10 +147,11 @@ proc ::JUI::Init {} {
 	{command   mQuit               {::UserActions::DoQuit}    Q}
     }
     if {[tk windowingsystem] eq "aqua"} {
-	set closeM [list {command   mCloseWindow  {::UI::CloseWindowEvent}  W}]
-	set menuDefs(rost,file) [concat $closeM $mDefsFile]
+	set mDefsClose [list {command   mCloseWindow  {::UI::CloseWindowEvent}  W}]
+	set menuDefs(rost,file) [concat $mDefsClose {separator} $mDefsFile]
     } else {    
-	set menuDefs(rost,file) $mDefsFile
+	set mDefsPrefs [list {command   mPreferences...  {::Preferences::Build}  {}}]
+	set menuDefs(rost,file) [concat $mDefsPrefs {separator} $mDefsFile]
     }
         
     set menuDefs(rost,action) {    
