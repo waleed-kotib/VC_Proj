@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.182 2008-03-16 14:28:54 matben Exp $
+# $Id: UI.tcl,v 1.183 2008-03-16 16:29:04 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -183,6 +183,12 @@ proc ::UI::InitCommonBinds {} {
     
     bind Text <$this(modkey)-a> {
 	%W tag add sel 1.0 end
+    }
+    bind Entry <$this(modkey)-a> {
+	%W selection range 0 end
+    }
+    bind TEntry <$this(modkey)-a> {
+	%W selection range 0 end
     }
     
     # Read only text widget bindings.
@@ -1698,8 +1704,14 @@ proc ::UI::FindPreviousEvent {} {
 
 proc ::UI::OnMenuAll {} {
     if {[winfo exists [focus]]} {
-	if {[winfo class [focus]] eq "Text"} {
-	    [focus] tag add sel 1.0 end
+	set w [focus]
+	switch -- [winfo class [focus]] {
+	    Text {
+		$w tag add sel 1.0 end
+	    }
+	    Entry - TEntry {
+		$w selection range 0 end
+	    }
 	}
     }
 }

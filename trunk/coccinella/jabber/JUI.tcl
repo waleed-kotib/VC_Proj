@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.234 2008-03-16 14:28:54 matben Exp $
+# $Id: JUI.tcl,v 1.235 2008-03-16 16:29:04 matben Exp $
 
 package provide JUI 1.0
 
@@ -1362,10 +1362,12 @@ proc ::JUI::EditPostCommand {wmenu} {
     }	
     ::UI::MenuMethod $wmenu entryconfigure mAll -state disabled
     if {[winfo exists [focus]]} {
-	if {[winfo class [focus]] eq "Text"} {
-	    ::UI::MenuMethod $wmenu entryconfigure mAll -state normal
+	switch -- [winfo class [focus]] {
+	    Text - Entry - TEntry {
+		::UI::MenuMethod $wmenu entryconfigure mAll -state normal
+	    }
 	}
-    }    
+    }
     ::UI::MenuMethod $wmenu entryconfigure mFind -state disabled
     ::UI::MenuMethod $wmenu entryconfigure mFindNext -state disabled
     ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state disabled
