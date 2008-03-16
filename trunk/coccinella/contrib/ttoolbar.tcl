@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: ttoolbar.tcl,v 1.19 2008-02-20 15:14:37 matben Exp $
+# $Id: ttoolbar.tcl,v 1.20 2008-03-16 15:59:15 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -39,7 +39,7 @@
 
 package provide ttoolbar 1.0
 
-namespace eval ::ttoolbar::  {
+namespace eval ::ttoolbar {
     
     namespace export ttoolbar
     
@@ -230,6 +230,9 @@ proc ::ttoolbar::ttoolbar {w args} {
 	  -command [list ::ttoolbar::CollapseCmd $w] \
 	  -variable ::ttoolbar::${w}::locals(collapse)
 	pack $w.arrow -side left -anchor n	
+	bind $w       <<ButtonPopup>> [list ::ttoolbar::Popup $w %x %y]
+	bind $w.f     <<ButtonPopup>> [list ::ttoolbar::Popup $w %x %y]
+	bind $w.f.pad <<ButtonPopup>> [list ::ttoolbar::Popup $w %x %y]
 	bind $w.arrow <<ButtonPopup>> [list ::ttoolbar::Popup $w %x %y]
     }
     pack $w.f -fill both -expand 1
@@ -454,7 +457,7 @@ proc ::ttoolbar::Popup {w x y} {
       -command [list $w configure -compound both] \
       -variable [namespace current]::menutmp  \
       -value both
-    $m add radiobutton -label [::msgcat::mc {Show Text}] \
+    $m add radiobutton -label [::msgcat::mc "Show Text"] \
       -command [list $w configure -compound text] \
       -variable [namespace current]::menutmp  \
       -value text
