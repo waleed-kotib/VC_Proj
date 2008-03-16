@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.237 2008-01-03 14:49:09 matben Exp $
+#   $Id: en.msg,v 1.238 2008-03-16 10:54:11 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -280,6 +280,7 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset en mAboutCoccinella      {&About Coccinella}
+::msgcat::mcset en mAboutQuickTimeTcl    {About QuickTimeTcl}
 ::msgcat::mcset en mAction               {&Action}
 ::msgcat::mcset en mAddToDictionary      {Add to Dictionary}
 ::msgcat::mcset en mAdHocCommands        {C&ommands}
