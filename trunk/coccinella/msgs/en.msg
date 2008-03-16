@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.238 2008-03-16 10:54:11 matben Exp $
+#   $Id: en.msg,v 1.239 2008-03-16 14:28:54 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -286,6 +286,7 @@
 ::msgcat::mcset en mAdHocCommands        {C&ommands}
 ::msgcat::mcset en mAddContact...        {&Add Contact...}
 ::msgcat::mcset en mAddSpeechBubble      {Add Speech Bubble}
+::msgcat::mcset en mAll                  {All}
 ::msgcat::mcset en mArc                  {Arc}
 ::msgcat::mcset en mArcs                 {Arcs}
 ::msgcat::mcset en mAttachMessage        {Attach Message...}

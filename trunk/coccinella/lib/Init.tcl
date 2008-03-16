@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.94 2008-03-13 07:55:40 matben Exp $
+# $Id: Init.tcl,v 1.95 2008-03-16 14:28:54 matben Exp $
 
 namespace eval ::Init {
     
@@ -209,13 +209,9 @@ proc ::Init::SetThis {mainScript} {
 	set this(binPath) {}
     }
     
-    switch -- $this(platform) {
-	macosx {
-	    set this(modkey) Command
-	}
-	default {
-	    set this(modkey) Control
-	}
+    switch -- [tk windowingsystem] {
+	"aqua"  { set this(modkey) Command }
+	default { set this(modkey) Control }
     }
     
     # Find user name.
