@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.33 2008-02-24 08:26:54 matben Exp $
+# $Id: connect.tcl,v 1.34 2008-03-16 12:57:09 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -202,6 +202,11 @@ proc jlib::connect::configure {args} {
 			return -code error "missing jlibsasl package"
 		    }
 		}
+		-port {
+		    if {![string is integer $state(-port)]} {
+			return -code error "the -port must be an integer"
+		    }
+		}
 	    }
 	    set options($key) $value
 	}
@@ -300,16 +305,18 @@ proc jlib::connect::connect {jlibname jid password args} {
     #   o state(host) is the DNS SRV record or server if DNS failed
     #   o set one timeout on the complete sequence
 
-    set state(jid)      $jid
-    set state(username) $username
-    set state(server)   $server
-    set state(host)     $server
-    set state(resource) $resource
-    set state(password) $password
-    set state(args)     $args
-    set state(error)    ""
-    set state(state)    ""
-    set state(httpurl)  ""
+    set state(jid)         $jid
+    set state(username)    $username
+    set state(server)      $server
+    set state(host)        $server
+    set state(resource)    $resource
+    set state(password)    $password
+    set state(args)        $args
+    set state(error)       ""
+    set state(state)       ""
+    set state(httpurl)     ""
+    set state(dns_srv)     [list]   ; # list of {host port} DNS TXT records
+    set state(dns_srv_idx) 0        ; # index of dns_srv currently tried
 
     foreach name {ssl tls sasl compress} {
 	set state(use$name) 0
@@ -454,6 +461,12 @@ proc jlib::connect::async_error {jlibname err {msg ""}} {
     finish $jlibname $err $msg
 }
 
+# jlib::connect::dns_srv_cb --
+#
+#       This is our callback from the jlib::dns call.
+#
+#       addrPort: {{soumar.jabbim.cz 5222} {nezmar.jabbim.cz 5222} ...}
+
 proc jlib::connect::dns_srv_cb {jlibname addrPort {err ""}} {
     upvar ${jlibname}::connect::state state
     
@@ -463,6 +476,10 @@ proc jlib::connect::dns_srv_cb {jlibname addrPort {err ""}} {
     if {$err eq ""} {
 	set state(host) [lindex $addrPort 0 0]
 	set state(port) [lindex $addrPort 0 1]
+	
+	# Collect multiple DNS TXT record responses so we may try them in order.
+	set state(dns_srv) $addrPort
+	set state(dns_srv_idx) 0
 	
 	# Try ad-hoc method for port number for ssl connections (5223).
 	if {$state(usessl)} {
@@ -508,6 +525,10 @@ proc jlib::connect::http_init {jlibname} {
     init_stream $jlibname
 }
 
+# jlib::connect::tcp_connect --
+#
+#       Try make a TCP connection to state(host/port).
+
 proc jlib::connect::tcp_connect {jlibname} {    
     upvar ${jlibname}::connect::state state
     
@@ -519,10 +540,38 @@ proc jlib::connect::tcp_connect {jlibname} {
     }    
     if {[catch {
 	set state(sock) [autosocks::socket $state(host) $state(port) \
-	  -command [list jlib::connect::socks_cb $jlibname]]
+	  -command [list jlib::connect::tcp_cb $jlibname]]
     } err]} {
-	finish $jlibname network-failure
+	tcp_cb $jlibname network-failure
     }
+}
+
+proc jlib::connect::tcp_cb {jlibname status} {
+    upvar ${jlibname}::connect::state state
+    
+    debug "jlib::connect::tcp_cb status=$status"
+    
+    # If we have multiple DNS TXT records try them in order.
+    if {$status eq "ok"} {
+	tcp_writable $jlibname
+    } else {
+	set len [llength $state(dns_srv)]
+	set idx $state(dns_srv_idx)
+	if {$len && ($idx < [expr {$len-1}])} {
+	    incr idx
+	    set state(dns_srv_idx) $idx
+	    set state(host) [lindex $state(dns_srv) $idx 0]
+	    set state(port) [lindex $state(dns_srv) $idx 1]
+	    
+	    # If -port set this always takes precedence.
+	    if {[string is integer -strict $state(-port)]} {
+		set state(port) $state(-port)
+	    }
+	    tcp_connect $jlibname
+	} else {
+	    finish $jlibname network-failure
+	}
+    }    
 }
 
 proc jlib::connect::socks_cb {jlibname status} {
