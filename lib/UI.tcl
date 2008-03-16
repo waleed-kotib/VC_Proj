@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.181 2008-01-17 14:06:17 matben Exp $
+# $Id: UI.tcl,v 1.182 2008-03-16 14:28:54 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -180,6 +180,10 @@ proc ::UI::InitMac {} {
 
 proc ::UI::InitCommonBinds {} {
     global  this
+    
+    bind Text <$this(modkey)-a> {
+	%W tag add sel 1.0 end
+    }
     
     # Read only text widget bindings.
     # Usage: bindtags $w [linsert [bindtags $w] 0 ReadOnlyText]
@@ -1691,6 +1695,14 @@ proc ::UI::FindPreviousEvent {} {
 
 # For menu commands.
 # Note that we must allow CloseWindowEvent on grabbed window.
+
+proc ::UI::OnMenuAll {} {
+    if {[winfo exists [focus]]} {
+	if {[winfo class [focus]] eq "Text"} {
+	    [focus] tag add sel 1.0 end
+	}
+    }
+}
 
 proc ::UI::OnMenuFind {} {
     if {[llength [grab current]]} { return }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.233 2008-03-16 10:54:51 matben Exp $
+# $Id: JUI.tcl,v 1.234 2008-03-16 14:28:54 matben Exp $
 
 package provide JUI 1.0
 
@@ -221,6 +221,8 @@ proc ::JUI::Init {} {
 	{command   mCut              {::UI::CutEvent}           X}
 	{command   mCopy             {::UI::CopyEvent}          C}
 	{command   mPaste            {::UI::PasteEvent}         V}
+	{separator}
+	{command   mAll              {::UI::OnMenuAll}          A}
 	{separator}
 	{command   mFind             {::UI::OnMenuFind}         F}
 	{command   mFindNext         {::UI::OnMenuFindAgain}    G}
@@ -1358,6 +1360,12 @@ proc ::JUI::EditPostCommand {wmenu} {
     foreach {mkey mstate} [::UI::GenericCCPMenuStates] {
 	::UI::MenuMethod $wmenu entryconfigure $mkey -state $mstate
     }	
+    ::UI::MenuMethod $wmenu entryconfigure mAll -state disabled
+    if {[winfo exists [focus]]} {
+	if {[winfo class [focus]] eq "Text"} {
+	    ::UI::MenuMethod $wmenu entryconfigure mAll -state normal
+	}
+    }    
     ::UI::MenuMethod $wmenu entryconfigure mFind -state disabled
     ::UI::MenuMethod $wmenu entryconfigure mFindNext -state disabled
     ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state disabled
