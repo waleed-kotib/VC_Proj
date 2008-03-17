@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.88 2008-02-06 13:57:25 matben Exp $
+# $Id: Whiteboard.tcl,v 1.89 2008-03-17 08:51:10 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -42,7 +42,7 @@ package require UI
 
 package provide Whiteboard 1.0
 
-namespace eval ::WB:: {
+namespace eval ::WB {
         
     # Add all event hooks.
     ::hooks::register firstLaunchHook     ::WB::FirstLaunchHook
@@ -738,7 +738,7 @@ proc ::WB::BuildWhiteboard {w args} {
     # Notebook widget path to be packed into wapp(ccon).
     set wapp(nb)        $w.fmain.nb
     
-    set canvasImages {}
+    set canvasImages [list]
     
     # Init some of the state variables.
     # Inherit from the factory + preferences state.
@@ -749,10 +749,14 @@ proc ::WB::BuildWhiteboard {w args} {
     }
     set state(msg) ""
     
-    ::UI::Toplevel $w -class TopWhiteboard -closecommand ::WB::CloseHook
+    ::UI::Toplevel $w -class TopWhiteboard \
+      -macclass {document {toolbarButton standardDocument}} \
+      -closecommand ::WB::CloseHook
     wm withdraw $w
     wm title $w $opts(-title)
     
+    bind $w <<ToolbarButton>> [list ::WB::OnToolbarButton $w]
+
     set iconResize [::Theme::GetImage [option get $w resizeHandleImage {}]]
     set wbicons(resizehandle) $iconResize
     if {!$iconsInitted} {
@@ -795,6 +799,7 @@ proc ::WB::BuildWhiteboard {w args} {
     
     ttk::separator $w.tsep -orient horizontal
     pack  $w.tsep  -side top -fill x
+    set wapp(tsep) $w.tsep
     
     # Make frame for toolbar + canvas.
     frame $w.fmain
@@ -805,7 +810,7 @@ proc ::WB::BuildWhiteboard {w args} {
     ttk::frame $w.fmain.frleft.pad.f
     frame $w.fmain.cc -bd 1 -relief raised
 
-    pack  $w.fmain            -side top -fill both -expand 1
+    pack  $w.fmain            -side bottom -fill both -expand 1
     pack  $w.fmain.frleft     -side left -fill y
     pack  $w.fmain.frleft.f   -fill both
     pack  $w.fmain.frleft.f.tool -side top
@@ -868,6 +873,34 @@ proc ::WB::BuildWhiteboard {w args} {
     }
     
     ::hooks::run whiteboardPostBuildHook $w
+}
+
+proc ::WB::OnToolbarButton {w} {
+    upvar ::WB::${w}::wapp wapp
+
+    if {[llength [grab current]]} { return }
+    if {[winfo ismapped $wapp(tbar)]} {
+	HideToolbar $w
+	set show 0
+    } else {
+	ShowToolbar $w
+	set show 1
+    }
+    ::hooks::run uiWhiteboardToggleToolbar $show
+}
+
+proc ::WB::HideToolbar {w} {
+    upvar ::WB::${w}::wapp wapp
+    
+    pack forget $wapp(tbar)
+    pack forget $wapp(tsep)
+}
+
+proc ::WB::ShowToolbar {w} {
+    upvar ::WB::${w}::wapp wapp
+    
+    pack $wapp(tbar) -side top -fill x
+    pack $wapp(tsep) -side top -fill x
 }
 
 # WB::NewCanvas --

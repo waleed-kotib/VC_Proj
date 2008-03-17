@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.233 2008-02-28 13:36:00 matben Exp $
+# $Id: GroupChat.tcl,v 1.234 2008-03-17 08:51:10 matben Exp $
 
 package require Create
 package require Enter
@@ -608,9 +608,11 @@ proc ::GroupChat::Build {roomjid} {
         
     # Toplevel of class GroupChat.
     ::UI::Toplevel $w -class GroupChat \
-      -usemacmainmenu 1 -macstyle documentProc  \
-      -closecommand ::GroupChat::CloseCmd
+      -macclass {document {toolbarButton standardDocument}} \
+      -usemacmainmenu 1 -closecommand ::GroupChat::CloseCmd
     
+    bind $w <<ToolbarButton>> [list ::GroupChat::OnToolbarButton $dlgtoken]
+
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
@@ -680,6 +682,7 @@ proc ::GroupChat::Build {roomjid} {
     # Top separator.
     ttk::separator $w.frall.divt -orient horizontal
     pack $w.frall.divt -side top -fill x
+    set dlgstate(tsep) $w.frall.divt
     
     # Having the frame with room frame as a sibling makes it possible
     # to pack it in a different place.
@@ -717,6 +720,37 @@ proc ::GroupChat::Build {roomjid} {
     bind $tag <Destroy> +[list ::GroupChat::OnDestroyDlg $dlgtoken]
     
     return $dlgtoken
+}
+
+proc ::GroupChat::OnToolbarButton {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
+    if {[llength [grab current]]} { return }
+    if {[winfo ismapped $dlgstate(wtop)]} {
+	HideToolbar $dlgtoken
+	set show 0
+    } else {
+	ShowToolbar $dlgtoken
+	set show 1
+    }
+    ::hooks::run uiGroupChatToggleToolbar $show
+}
+
+proc ::GroupChat::HideToolbar {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    pack forget $dlgstate(wtop)
+    pack forget $dlgstate(tsep)
+}
+
+proc ::GroupChat::ShowToolbar {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    pack $dlgstate(wtop) -side top -fill x
+    pack $dlgstate(tsep) -side top -fill x
 }
 
 # GroupChat::BuildRoomWidget --
