@@ -9,16 +9,16 @@
 #  
 #  See the README file for license, bugs etc.
 #  
-# $Id: MSSpeech.tcl,v 1.6 2007-07-19 06:28:11 matben Exp $
+# $Id: MSSpeech.tcl,v 1.7 2008-03-17 13:28:29 matben Exp $
 
-namespace eval ::MSSpeech:: {
+namespace eval ::MSSpeech {
 
     # Main speech object.
     variable idVoice
     variable voiceName2ObjectArr
 }
 
-proc ::MSSpeech::Init { } {
+proc ::MSSpeech::Init {} {
         
     variable idVoice
     variable voiceName2ObjectArr
@@ -46,7 +46,7 @@ proc ::MSSpeech::Speak {msg {voice ""}} {
     variable allVoices
 
     # 1 means async.
-    if {$voice == ""} {
+    if {$voice eq ""} {
 	$idVoice Speak $msg 1
     } else {
 	set ind [lsearch $allVoices $voice]
@@ -63,16 +63,18 @@ proc ::MSSpeech::Speak {msg {voice ""}} {
 		    set voiceName2ObjectArr($voice) $id
 		}
 	    }
-	    $voiceName2ObjectArr($voice) Speak $msg 1
+	    catch {
+		$voiceName2ObjectArr($voice) Speak $msg 1
+	    }
 	}
     }
 }
 
-proc ::MSSpeech::GetVoices { } {
+proc ::MSSpeech::GetVoices {} {
     
     variable idVoice
     
-    set voices {}
+    set voices [list]
     set idVoicesToken [$idVoice GetVoices]
     ::tcom::foreach item $idVoicesToken {
 	lappend voices [$item GetDescription]
