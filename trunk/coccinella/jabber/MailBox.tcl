@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.135 2008-03-07 10:29:29 matben Exp $
+# $Id: MailBox.tcl,v 1.136 2008-03-17 08:51:10 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -67,9 +67,9 @@ namespace eval ::MailBox:: {
 
     # Standard widgets.
     if {[tk windowingsystem] eq "aqua"} {
-	option add *MailBox*mid.padding                {12 10 12 18}    50
+	option add *MailBox*mid.padding            {12 10 12 18}    50
     } else {
-	option add *MailBox*mid.padding                {10  8 10  8}    50
+	option add *MailBox*mid.padding            {10  8 10  8}    50
     }
     option add *MailBox*Text.borderWidth           0                50
     option add *MailBox*Text.relief                flat             50
@@ -460,12 +460,14 @@ proc ::MailBox::Build {args} {
     
     # Toplevel of class MailBox.
     ::UI::Toplevel $w -class MailBox \
-      -macstyle documentProc -usemacmainmenu 1 \
-      -closecommand ::MailBox::CloseHook
+      -macclass {document {toolbarButton standardDocument}} \
+      -usemacmainmenu 1 -closecommand ::MailBox::CloseHook
     wm title $w [mc Inbox]
 
     set locals(w) $w
-    
+
+    bind $w <<ToolbarButton>> { ::MailBox::OnToolbarButton %W }
+
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
@@ -519,11 +521,12 @@ proc ::MailBox::Build {args} {
     # D = 
     ttk::separator $w.frall.divt -orient horizontal
     pack $w.frall.divt -side top -fill x
+    set locals(tsep) $w.frall.divt
     
     # D = 
     set wmid $w.frall.mid
     ttk::frame $wmid
-    pack $wmid -side top -fill both -expand 1
+    pack $wmid -side bottom -fill both -expand 1
 
     # Frame to serve as container for the pane geometry manager.
     # D =
@@ -616,6 +619,36 @@ proc ::MailBox::Build {args} {
       [list [namespace current]::UpdateDateAndTime $wtbl]]
     
     bind $wtbl <Destroy> +[namespace code OnDestroyTree]
+}
+
+proc ::MailBox::OnToolbarButton {w} {
+    variable locals
+        
+    if {[llength [grab current]]} { return }
+    if {[winfo ismapped $locals(wtbar)]} {
+	HideToolbar
+	set show 0
+    } else {
+	ShowToolbar
+	set show 1
+    }
+    ::hooks::run uiMailBoxToggleToolbar $show
+}
+
+proc ::MailBox::HideToolbar {} {
+    variable locals
+    variable state
+    
+    pack forget $locals(wtbar)
+    pack forget $locals(tsep)
+}
+
+proc ::MailBox::ShowToolbar {} {
+    variable locals
+    variable state
+    
+    pack $locals(wtbar) -side top -fill x
+    pack $locals(tsep)  -side top -fill x
 }
 
 # MailBox::TreeCtrl --

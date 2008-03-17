@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.278 2008-02-10 09:43:21 matben Exp $
+# $Id: Chat.tcl,v 1.279 2008-03-17 08:51:09 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1244,7 +1244,10 @@ proc ::Chat::Build {threadID jid} {
     
     # Toplevel with class Chat.
     ::UI::Toplevel $w -class Chat \
-      -usemacmainmenu 1 -macstyle documentProc -closecommand ::Chat::CloseCmd
+      -macclass {document {toolbarButton standardDocument}} \
+      -usemacmainmenu 1 -closecommand ::Chat::CloseCmd
+
+    bind $w <<ToolbarButton>> [list ::Chat::OnToolbarButton $dlgtoken]
 
     # Global frame.
     ttk::frame $w.frall
@@ -1335,11 +1338,12 @@ proc ::Chat::Build {threadID jid} {
     # D =
     ttk::separator $w.frall.divt -orient horizontal
     pack $w.frall.divt -side top -fill x
+    set dlgstate(tsep) $w.frall.divt
 
     # Having the frame with thread frame as a sibling makes it possible
     # to pack it in a different place.
     ttk::frame $wcont
-    pack $wcont -side top -fill both -expand 1
+    pack $wcont -side bottom -fill both -expand 1
     
     # Use an extra frame that contains everything thread specific.
     set chattoken [BuildThread $dlgtoken $wthread $threadID $jid]
@@ -1377,6 +1381,37 @@ proc ::Chat::Build {threadID jid} {
     
     focus $w
     return $dlgtoken
+}
+
+proc ::Chat::OnToolbarButton {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+
+    if {[llength [grab current]]} { return }
+    if {[winfo ismapped $dlgstate(wtop)]} {
+	HideToolbar $dlgtoken
+	set show 0
+    } else {
+	ShowToolbar $dlgtoken
+	set show 1
+    }
+    ::hooks::run uiChatToggleToolbar $show
+}
+
+proc ::Chat::HideToolbar {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    pack forget $dlgstate(wtop)
+    pack forget $dlgstate(tsep)
+}
+
+proc ::Chat::ShowToolbar {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    pack $dlgstate(wtop) -side top -fill x
+    pack $dlgstate(tsep) -side top -fill x
 }
 
 # Chat::BuildThread --

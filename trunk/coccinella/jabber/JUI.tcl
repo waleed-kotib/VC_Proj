@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.235 2008-03-16 16:29:04 matben Exp $
+# $Id: JUI.tcl,v 1.236 2008-03-17 08:51:10 matben Exp $
 
 package provide JUI 1.0
 
@@ -288,14 +288,16 @@ proc ::JUI::Build {w} {
 	Init
     }
     ::UI::Toplevel $w -class JMain \
-      -macstyle documentProc -closecommand ::JUI::CloseHook  \
-      -allowclose 0
+      -macclass {document {toolbarButton standardDocument}} \
+      -closecommand ::JUI::CloseHook -allowclose 0
     wm title $w $prefs(appName)
     ::UI::SetWindowGeometry $w
-    
+
     set jwapp(w)     $w
     set jwapp(jmain) $w
-    
+
+    bind $w <<ToolbarButton>> ::JUI::OnToolbarButton
+
     # Make main menus.
     set wmenu $w.menu
     set jwapp(wmenu) $wmenu
@@ -964,6 +966,10 @@ proc ::JUI::RosterMoveToPage {} {
     raise $wroster
     
     set jprefs(ui,main,show,notebook) 1
+}
+
+proc ::JUI::OnToolbarButton {} {
+    OnMenuToggleToolbar
 }
 
 proc ::JUI::OnMenuToggleToolbar {} {
