@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.76 2008-02-20 15:14:37 matben Exp $
+# $Id: tileutils.tcl,v 1.77 2008-03-17 14:28:31 matben Exp $
 #
 
 package require treeutil
@@ -160,6 +160,7 @@ namespace eval ::tileutils {
     }
     BindFirst ThemeChanged <<ThemeChanged>> {tileutils::ThemeChanged }
     BindFirst ChaseArrows  <<ThemeChanged>> {tileutils::ChaseArrowsThemeChanged %W }
+    BindFirst Entry        <<ThemeChanged>> {tileutils::EntryThemeChanged %W }
     BindFirst Listbox      <<ThemeChanged>> {tileutils::ListboxThemeChanged %W }
     BindFirst Spinbox      <<ThemeChanged>> {tileutils::SpinboxThemeChanged %W }
     BindFirst Text         <<ThemeChanged>> {tileutils::TextThemeChanged %W }
@@ -229,7 +230,9 @@ proc tileutils::ThemeChanged {} {
     } else {
 	set priority startupFile
     }
-    
+    if {[GetCurrentTheme] eq "aqua"} {
+	set style(-background) systemDialogBackgroundActive
+    }
     if {[info exists style(-background)]} {
 	set color $style(-background)
 	option add *ChaseArrows.background      $color $priority
@@ -312,10 +315,29 @@ proc tileutils::ChaseArrowsThemeChanged {win} {
     } else {
 	set styleCmd style
     }
-    array set style [$styleCmd configure .]    
-    if {[info exists style(-background)]} {
+    array set style [$styleCmd configure .]
+    if {[GetCurrentTheme] eq "aqua"} {
+	$win configure -background systemDialogBackgroundActive
+    } elseif {[info exists style(-background)]} {
 	set color $style(-background)
 	$win configure -background $color
+    }
+}
+
+proc tileutils::EntryThemeChanged {win} {
+    global this
+    
+    if {$this(ttk)} {
+	set styleCmd ttk::style
+    } else {
+	set styleCmd style
+    }
+    array set style [$styleCmd configure .]
+    if {[GetCurrentTheme] eq "aqua"} {
+	$win configure -highlightbackground systemDialogBackgroundActive
+    } elseif {[info exists style(-background)]} {
+	set color $style(-background)
+	$win configure -highlightbackground $color
     }
 }
 
@@ -339,7 +361,9 @@ proc tileutils::ListboxThemeChanged {win} {
     array set map   [$styleCmd map .]
     array set map   [$styleCmd map Listbox]
 
-    if {[info exists style(-background)]} {
+    if {[GetCurrentTheme] eq "aqua"} {
+	$win configure -highlightbackground systemDialogBackgroundActive
+    } elseif {[info exists style(-background)]} {
 	# highlightBackground is drawn outside the border and must blend
 	# with normal background.
 	set color $style(-background)
@@ -350,8 +374,8 @@ proc tileutils::ListboxThemeChanged {win} {
 	$win configure -selectbackground $color
     }
     if {[info exists lbStyle(-selectborderwidth)]} {
-	set color $lbStyle(-selectborderwidth)
-	$win configure -selectborderwidth $color
+	set width $lbStyle(-selectborderwidth)
+	$win configure -selectborderwidth $width
     }
     if {[info exists lbStyle(-selectforeground)]} {
 	set color $lbStyle(-selectforeground)
@@ -431,6 +455,9 @@ proc tileutils::SpinboxThemeChanged {win} {
     array set style [$styleCmd configure .]    
     array set style [$styleCmd configure Spinbox]    
     
+    if {[GetCurrentTheme] eq "aqua"} {
+	set style(-background) systemDialogBackgroundActive
+    }
     if {[info exists style(-background)]} {
 	set color $style(-background)
 	$win configure -buttonbackground $color
