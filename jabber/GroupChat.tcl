@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.234 2008-03-17 08:51:10 matben Exp $
+# $Id: GroupChat.tcl,v 1.235 2008-03-17 08:56:02 matben Exp $
 
 package require Create
 package require Enter
@@ -687,7 +687,7 @@ proc ::GroupChat::Build {roomjid} {
     # Having the frame with room frame as a sibling makes it possible
     # to pack it in a different place.
     ttk::frame $wcont
-    pack $wcont -side top -fill both -expand 1
+    pack $wcont -side bottom -fill both -expand 1
     
     # Use an extra frame that contains everything room specific.
     set chattoken [BuildRoomWidget $dlgtoken $wroom $roomjid]
