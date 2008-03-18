@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.34 2008-03-16 12:57:09 matben Exp $
+# $Id: connect.tcl,v 1.35 2008-03-18 09:01:41 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -471,7 +471,18 @@ proc jlib::connect::dns_srv_cb {jlibname addrPort {err ""}} {
     upvar ${jlibname}::connect::state state
     
     debug "jlib::connect::dns_srv_cb addrPort=$addrPort, err=$err"
-   
+
+    if {![info exists state(state)]} {
+	# We do not exist. dns::reset seems to be buggy!
+	return
+    }
+    
+    # dns doesn't seem to use the 'err' argument in this case.
+    set status [::dns::status $state(dnstoken)]
+    if {$status eq "reset"} {
+	return
+    }
+    
     # We never let a failure stop us here. Use host as fallback.
     if {$err eq ""} {
 	set state(host) [lindex $addrPort 0 0]
@@ -500,6 +511,16 @@ proc jlib::connect::dns_http_cb {jlibname url {err ""}} {
 
     debug "jlib::connect::dns_http_cb url=$url, err=$err"
     
+    if {![info exists state(state)]} {
+	# We do not exist. dns::reset seems to be buggy!
+	return
+    }
+    
+    # dns doesn't seem to use the 'err' argument in this case.
+    set status [::dns::status $state(dnstoken)]
+    if {$status eq "reset"} {
+	return
+    }
     unset -nocomplain state(dnstoken)
     if {$err eq ""} {
 	set state(httpurl) $url
@@ -955,6 +976,11 @@ proc jlib::connect::finish {jlibname {errcode ""} {errmsg ""}} {
     }
     if {$errcode ne ""} {
 	set status error
+    
+	# We can be called before the socket has been registered with jlib.
+	if {[info exists state(sock)]} {
+	    catch {close $state(sock)}
+	}
 
 	# This 'kills' the connection. Needed for both tcp and http!
 	# after idle seems necessary when resetting xml parser from callback

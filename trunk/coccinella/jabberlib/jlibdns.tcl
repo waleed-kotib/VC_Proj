@@ -9,7 +9,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: jlibdns.tcl,v 1.7 2008-02-22 08:00:48 matben Exp $
+# $Id: jlibdns.tcl,v 1.8 2008-03-18 09:01:41 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -168,8 +168,8 @@ proc jlib::dns::http_cb {attr cmd token} {
 }
 
 proc jlib::dns::reset {token} {    
-    dns::reset $token
-    dns::cleanup $token
+    ::dns::reset $token
+    ::dns::cleanup $token
 }
 
 # Test
@@ -178,6 +178,7 @@ if {0} {
     jlib::dns::get_addr_port gmail.com cb
     jlib::dns::get_addr_port jabber.ru cb
     jlib::dns::get_addr_port jabber.com cb
+    jlib::dns::get_addr_port jabber.cz cb
     # Missing 
     jlib::dns::get_http_poll_url gmail.com cb    
     jlib::dns::get_http_poll_url jabber.ru cb    
