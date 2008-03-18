@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.236 2008-03-17 08:51:10 matben Exp $
+# $Id: JUI.tcl,v 1.237 2008-03-18 16:14:21 matben Exp $
 
 package provide JUI 1.0
 
@@ -97,7 +97,7 @@ namespace eval ::JUI:: {
     set ::config(url,bugs) "https://bugs.launchpad.net/coccinella/+filebug"
         
     set ::config(ui,status,menu)        dynamic   ;# plain|dynamic
-    set ::config(ui,main,infoLabel)     server    ;# mejid|mejidres|status|server
+    set ::config(ui,main,infoType)     server    ;# mejid|mejidres|status|server
     set ::config(ui,main,slots)         0
     set ::config(ui,main,combi-status)  1
     set ::config(ui,main,toy-status)    0
@@ -281,6 +281,7 @@ proc ::JUI::Build {w} {
     variable menuDefs
     variable jwapp
     variable inited
+    variable locals
 
     ::Debug 2 "::JUI::Build w=$w"
     
@@ -404,9 +405,13 @@ proc ::JUI::Build {w} {
 	    ::Status::ExMainButton $wfstat.bst ::Jabber::jstate(show+status)
 	}
 	
-	set infoLabel $config(ui,main,infoLabel)
+	set infoType $config(ui,main,infoType)
 	ttk::frame $wfstat.cont
-	ttk::label $wfstat.me -textvariable ::Jabber::jstate($infoLabel) -anchor w
+	if {0} {
+	    ttk::label $wfstat.me -textvariable ::Jabber::jstate($infoType) -anchor w
+	} else {
+	    BuildStatusMB $wfstat.me
+	}
 	pack  $wfstat.ava  -side right -pady 1
 	pack  $wfstat.bst  $wfstat.cont  $wfstat.me  -side left
 	pack  $wfstat.me  -padx 6 -pady 4 -fill x -expand 1
@@ -494,6 +499,44 @@ proc ::JUI::Build {w} {
 	RosterMoveFromPage
     }
     return $w
+}
+
+proc ::JUI::BuildStatusMB {win} {
+    global  config
+    variable locals
+	    
+    set infoType $config(ui,main,infoType)
+   
+    ttk::menubutton $win -style SunkenMenubutton \
+      -textvariable ::Jabber::jstate($infoType)
+    set m $win.m
+    set locals(infoType) $infoType
+    
+    menu $m -tearoff 0
+    $m add radiobutton -value mejid    -label [mc "My JID"]      \
+      -command ::JUI::StatusMBCmd \
+      -variable [namespace current]::locals(infoType)
+    $m add radiobutton -value mejidres -label [mc "My Full JID"] \
+      -command ::JUI::StatusMBCmd \
+      -variable [namespace current]::locals(infoType)
+    $m add radiobutton -value server   -label [mc "Host Name"]   \
+      -command ::JUI::StatusMBCmd \
+      -variable [namespace current]::locals(infoType)
+    $m add radiobutton -value status   -label [mc "My Status"]   \
+      -command ::JUI::StatusMBCmd \
+      -variable [namespace current]::locals(infoType)
+    
+    $win configure -menu $m
+    return $win
+}
+
+proc ::JUI::StatusMBCmd {} {
+    variable jwapp
+    variable locals
+    
+#     puts "::JUI::StatusMBCmd locals(infoType)=$locals(infoType)"
+    set infoType $locals(infoType)  
+    $jwapp(myjid) configure -textvariable ::Jabber::jstate($infoType)
 }
 
 #--- Presence Combi Box --------------------------------------------------------

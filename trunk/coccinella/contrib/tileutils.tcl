@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.77 2008-03-17 14:28:31 matben Exp $
+# $Id: tileutils.tcl,v 1.78 2008-03-18 16:14:21 matben Exp $
 #
 
 package require treeutil
@@ -719,7 +719,8 @@ proc tileutils::configstyles {name} {
 	}
 	$styleCmd element create SunkenMenubutton.indicator image $tiles(downArrowContrast) \
 	  -sticky e -padding {0}
-	$styleCmd configure SunkenMenubutton -padding {0}
+	$styleCmd configure SunkenMenubutton \
+	  -padding {0} -foregeound white -font CociSmallFont
 
 	# Search entry (from Michael Kirkham).
 	set pad [$styleCmd configure TEntry -padding]
@@ -897,7 +898,30 @@ proc tileutils::configstyles {name} {
 	    Plain.label
 	}
 
-	
+	# Notebook experiments.
+	if {$this(ttk)} {
+	    $styleCmd element create crossIcon image \
+	      [list $tiles(crossAqua) \
+	      { active !background} $tiles(crossAquaActive)] \
+	      -padding {20 0 0 0} -sticky {}
+	} else {
+	    $styleCmd element create crossIcon image \
+	      $tiles(crossAqua) \
+	      -map [list { active !background} $tiles(crossAquaActive)] \
+	      -padding {20 0 0 0} -sticky {}
+	}
+	$styleCmd layout X.TNotebook {
+	    Notebook.client -sticky nswe
+	}
+	$styleCmd layout X.TNotebook.Tab {
+	    Notebook.tab -sticky nswe -children {
+		Notebook.padding -expand 1 -sticky nswe -children {
+		    crossIcon -side right
+		    Notebook.label -expand 1 -sticky nswe
+		}
+	    }
+	}
+
 	# Test------------------
 	if {0} {
 	    # Plain border element.
@@ -909,6 +933,15 @@ proc tileutils::configstyles {name} {
 	      -relief solid -borderwidth 1 -background gray50
 	}
     }    
+}
+
+if {0} {
+    toplevel .t
+    ttk::notebook .t.nb -style X.TNotebook -padding 10
+    .t.nb add [ttk::label .t.nb.l1 -text Mast] -text Mats
+    .t.nb add [ttk::label .t.nb.l2 -text YYYY] -text XXXX
+    .t.nb add [ttk::label .t.nb.l3 -text XXXX] -text YYYY
+    pack .t.nb
 }
 
 # tileutils::LoadImages --
