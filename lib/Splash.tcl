@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Splash.tcl,v 1.18 2008-01-03 14:06:36 matben Exp $
+# $Id: Splash.tcl,v 1.19 2008-03-18 16:14:21 matben Exp $
    
 package provide Splash 1.0
 
@@ -75,6 +75,9 @@ proc ::Splash::SplashScreen {} {
     if {[tk windowingsystem] eq "aqua"} {
 	::tk::unsupported::MacWindowStyle style $w floating {closeBox}
     } else {
+	if {([tk windowingsystem] eq "win32") && ([info tclversion] >= 8.5)} {
+	    wm attributes $w -toolwindow 1
+	}
 	wm transient $w
     }
     wm title $w [mc {About %s} $prefs(theAppName)]

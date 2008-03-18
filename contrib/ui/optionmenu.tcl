@@ -2,11 +2,11 @@
 # 
 #       Menubutton with associated menu.
 # 
-# Copyright (c) 2005-2007 Mats Bengtsson
+# Copyright (c) 2005-2008 Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.21 2008-02-20 15:14:37 matben Exp $
+# $Id: optionmenu.tcl,v 1.22 2008-03-18 16:14:21 matben Exp $
 
 package require snit 1.0
 
@@ -34,12 +34,12 @@ snit::widgetadaptor ui::optionmenu::widget {
     variable val2im
     variable longest
 
-    delegate option * to hull except {-menulist -command -variable}
+    delegate option * to hull except {-command -menulist -variable}
     delegate method * to hull
     
     option -command  -default {}
     option -menulist -default {} -configuremethod OnConfigMenulist
-    option -variable
+    option -variable -default {} -configuremethod OnConfigVariable
     
     constructor {args} {
 	from args -textvariable
@@ -112,6 +112,23 @@ snit::widgetadaptor ui::optionmenu::widget {
     method OnConfigMenulist {option value} {
 	set options($option) $value
 	$self BuildMenuList
+    }
+    
+    method OnConfigVariable {option value} {
+	# @@@ NB: Minimal tested!
+	if {$options(-variable) ne ""} {
+	    trace remove variable $options(-variable) write [list $self Trace]
+	}
+	set options($option) $value
+	
+	if {$options(-variable) ne ""} {
+	    trace add variable $options(-variable) write [list $self Trace]
+	}
+	set value [set $options(-variable)]
+	if {[info exists val2name($value)]} {
+	    set menuValue $value
+	    set nameVar $val2name($value)
+	}
     }
     
     method BuildMenuList {} {
@@ -201,7 +218,7 @@ if {0} {
 	{MSN    -value msn3}
 	{Yahoo  -value yahoo}
     }
-    #set var 0
+    set var 0
     proc Cmd {value} {puts "Cmd value=$value"}
 
     toplevel .t
