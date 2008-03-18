@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the registration UI parts for jabber.
 #      
-#  Copyright (c) 2001-2007  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.95 2008-03-06 14:36:19 matben Exp $
+# $Id: Register.tcl,v 1.96 2008-03-18 09:02:50 matben Exp $
 
 package provide Register 1.0
 
@@ -382,7 +382,6 @@ proc ::RegisterEx::New {args} {
 
 proc ::RegisterEx::OnGet {token} {
     Get $token
-    puts "::RegisterEx::OnGet"
     
     # Stop tophandler from executing.
     return -code break
@@ -464,7 +463,7 @@ proc ::RegisterEx::Cancel {token} {
     upvar 0 $token state
     
     set state(finished) 0
-    ::Jabber::DoCloseClientConnection
+    Reset
 }
 
 proc ::RegisterEx::CloseAny {} {
@@ -480,8 +479,16 @@ proc ::RegisterEx::CloseCmd {token w} {
     
     ::UI::SaveWinPrefixGeom $wDlgs(jreg)
     set state(finished) 0
-    ::Jabber::DoCloseClientConnection
+    Reset
     return stop
+}
+
+proc ::RegisterEx::Reset {} {
+    
+    ::Debug 2 "\t ::RegisterEx::Reset"
+    ::Jabber::Jlib connect reset
+    ::Jabber::Jlib connect free
+    ::Jabber::DoCloseClientConnection
 }
 
 proc ::RegisterEx::Free {token} { 
