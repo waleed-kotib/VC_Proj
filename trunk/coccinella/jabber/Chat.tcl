@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.281 2008-03-19 09:19:32 matben Exp $
+# $Id: Chat.tcl,v 1.282 2008-03-19 10:34:46 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -171,6 +171,9 @@ namespace eval ::Chat {
 
     # Bindtags instead of binding to toplevel.
     bind ChatToplevel <Destroy> {+::Chat::OnDestroyToplevel %W}
+    
+    # Binding tag for the close croos in notebook tabs.
+    bind ChatTab <ButtonPress-1> [namespace code [list OnCloseTab %W %x %y]]
 
     variable chatStateMap 
     array set chatStateMap {
@@ -231,9 +234,6 @@ namespace eval ::Chat {
     if {$::config(chat,try-themed) && ![catch {package require ChatTheme}]} {
 	set haveTheme 1
     }
-    
-    # Binding tag for the close croos in notebook tabs.
-    bind NBCloseTab <ButtonPress-1> [namespace code [list OnCloseTab %W %x %y]]
 }
 
 # Chat::OnToolButton --
@@ -2142,6 +2142,7 @@ proc ::Chat::AvatarNewPhotoHook {jid2} {
 #       notebook and pages.
 
 proc ::Chat::NewPage {dlgtoken threadID jid} {
+    global  this
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     upvar ::Jabber::jprefs jprefs
@@ -2155,7 +2156,9 @@ proc ::Chat::NewPage {dlgtoken threadID jid} {
 
 	# Repack the ChatThread in notebook page.
 	MoveThreadToPage $dlgtoken $chattoken
-	DrawCloseButton $dlgtoken
+	if {!$this(ttk)} {
+	    DrawCloseButton $dlgtoken
+	}
     } 
 
     # Make fresh page with chat widget.
@@ -2202,7 +2205,7 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
     bind $wnb <<NotebookTabChanged>> \
       [list [namespace current]::TabChanged $dlgtoken]
     ttk::notebook::enableTraversal $wnb
-    bindtags $wnb [linsert [bindtags $wnb] 0 NBCloseTab]
+    bindtags $wnb [linsert [bindtags $wnb] 0 ChatTab]
     pack $wnb -in $wcont -fill both -expand true -side right
 
     set wpage $wnb.p[incr dlgstate(uid)]

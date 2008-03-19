@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.235 2008-03-17 08:56:02 matben Exp $
+# $Id: GroupChat.tcl,v 1.236 2008-03-19 10:34:46 matben Exp $
 
 package require Create
 package require Enter
@@ -196,6 +196,9 @@ namespace eval ::GroupChat:: {
     # @@@ Should get this from a global reaource.
     variable buttonPressMillis 1000
     variable waitUntilEditMillis 2000
+    
+    # Binding tag for the close croos in notebook tabs.
+    bind GroupChatTab <ButtonPress-1> [namespace code [list OnCloseTab %W %x %y]]
 
     # Shall we automatically rejoin open groupchat on login?
     set ::config(groupchat,login-autojoin) 1
@@ -1179,6 +1182,7 @@ proc ::GroupChat::OnDestroyChat {chattoken} {
 #       notebook and pages.
 
 proc ::GroupChat::NewPage {dlgtoken roomjid args} {
+    global  this
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
     upvar ::Jabber::jprefs jprefs
@@ -1192,7 +1196,9 @@ proc ::GroupChat::NewPage {dlgtoken roomjid args} {
 
 	# Repack the GroupChatRoom in notebook page.
 	MoveRoomToPage $dlgtoken $chattoken
-	DrawCloseButton $dlgtoken
+	if {!$this(ttk)} {
+	    DrawCloseButton $dlgtoken
+	}
     } 
 
     # Make fresh page with chat widget.
@@ -1235,10 +1241,11 @@ proc ::GroupChat::MoveRoomToPage {dlgtoken chattoken} {
     
     pack forget $wroom
 
-    ttk::notebook $wnb
+    ttk::notebook $wnb -style X.TNotebook
     bind $wnb <<NotebookTabChanged>> \
       [list [namespace current]::TabChanged $dlgtoken]
     ttk::notebook::enableTraversal $wnb
+    bindtags $wnb [linsert [bindtags $wnb] 0 GroupChatTab]
     pack $wnb -in $wcont -fill both -expand true -side right
 
     set wpage $wnb.p[incr dlgstate(uid)]
@@ -1279,6 +1286,31 @@ proc ::GroupChat::MakeNewPage {dlgtoken roomjid args} {
     return $chattoken
 }
 
+# GroupChat::OnCloseTab --
+#
+#       ButtonPress-1 binding on notebook used for close crosses.
+
+proc ::GroupChat::OnCloseTab {win x y} {
+    
+    set id [$win identify $x $y]
+    if {$id eq "crossIcon"} {
+	set index [$win index @$x,$y]
+	set dlgtoken [GetAllTokensFrom dlg w [winfo toplevel $win]]
+	variable $dlgtoken
+	upvar 0 $dlgtoken dlgstate
+
+	# Much better using dicts here!
+	foreach {key chattoken} [array get dlgstate wpage2token,*] {
+	    set wpage [string map {wpage2token, ""} $key]
+	    if {[$win index $wpage] == $index} {
+		Exit $chattoken
+		CloseRoomPage $chattoken
+		return -code break
+	    }
+	}
+    }
+}
+
 proc ::GroupChat::DeletePage {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -1298,6 +1330,10 @@ proc ::GroupChat::DeletePage {chattoken} {
     
     # If only a single page left then reparent and delete notebook.
     if {[llength $dlgstate(chattokens)] == 1} {
+	
+	# Be sure to remove also the remaining wpage2token.
+	array unset dlgstate wpage2token,*
+
 	set chattoken [lindex $dlgstate(chattokens) 0]
 	variable $chattoken
 	upvar 0 $chattoken chatstate
