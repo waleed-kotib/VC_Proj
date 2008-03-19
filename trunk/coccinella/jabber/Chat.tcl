@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.280 2008-03-18 16:14:21 matben Exp $
+# $Id: Chat.tcl,v 1.281 2008-03-19 09:19:32 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -231,6 +231,9 @@ namespace eval ::Chat {
     if {$::config(chat,try-themed) && ![catch {package require ChatTheme}]} {
 	set haveTheme 1
     }
+    
+    # Binding tag for the close croos in notebook tabs.
+    bind NBCloseTab <ButtonPress-1> [namespace code [list OnCloseTab %W %x %y]]
 }
 
 # Chat::OnToolButton --
@@ -2199,6 +2202,7 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
     bind $wnb <<NotebookTabChanged>> \
       [list [namespace current]::TabChanged $dlgtoken]
     ttk::notebook::enableTraversal $wnb
+    bindtags $wnb [linsert [bindtags $wnb] 0 NBCloseTab]
     pack $wnb -in $wcont -fill both -expand true -side right
 
     set wpage $wnb.p[incr dlgstate(uid)]
@@ -2238,6 +2242,31 @@ proc ::Chat::MakeNewPage {dlgtoken threadID jid} {
     return $chattoken
 }
 
+# Chat::OnCloseTab --
+#
+#       ButtonPress-1 binding on notebook used for close crosses.
+
+proc ::Chat::OnCloseTab {win x y} {
+    
+    set id [$win identify $x $y]
+    if {$id eq "crossIcon"} {
+	set index [$win index @$x,$y]
+	set dlgtoken [GetAllTokensFrom dlg w [winfo toplevel $win]]
+	variable $dlgtoken
+	upvar 0 $dlgtoken dlgstate
+
+	# Much better using dicts here!
+	foreach {key chattoken} [array get dlgstate wpage2token,*] {
+	    set wpage [string map {wpage2token, ""} $key]
+	    if {[$win index $wpage] == $index} {
+		XEventSendCancelCompose $chattoken
+		CloseThreadPage $chattoken
+		return -code break
+	    }
+	}
+    }
+}
+
 proc ::Chat::CloseThreadPage {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
@@ -2253,7 +2282,7 @@ proc ::Chat::CloseThreadPage {chattoken} {
 proc ::Chat::DeletePage {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    
+        
     set dlgtoken $chatstate(dlgtoken)
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
@@ -2269,6 +2298,10 @@ proc ::Chat::DeletePage {chattoken} {
     
     # If only a single page left then reparent and delete notebook.
     if {[llength $dlgstate(chattokens)] == 1} {
+	
+	# Be sure to remove also the remaining wpage2token.
+	array unset dlgstate wpage2token,*
+	
 	set chattoken [lindex $dlgstate(chattokens) 0]
 	variable $chattoken
 	upvar 0 $chattoken chatstate
