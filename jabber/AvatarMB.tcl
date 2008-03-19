@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.33 2008-03-02 14:39:02 matben Exp $
+# $Id: AvatarMB.tcl,v 1.34 2008-03-19 13:38:02 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -92,6 +92,11 @@ proc ::AvatarMB::Init {} {
 	$styleCmd theme settings $name {
 	 	    
 	    set activeDef "#3874d1"
+	    # Can't find the right named color here.
+	    if {0 && $this(ttk) && ([tk windowingsystem] eq "aqua")} {
+		lassign [winfo rgb . systemMenuBackgroundSelected] r g b
+ 		set activeDef [format "#%02x%02x%02x" $r $g $b]
+	    }
 	    set active $activeDef
 	    array unset style
 	    array unset map
