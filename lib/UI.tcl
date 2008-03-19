@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.183 2008-03-16 16:29:04 matben Exp $
+# $Id: UI.tcl,v 1.184 2008-03-19 13:16:56 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -189,6 +189,44 @@ proc ::UI::InitCommonBinds {} {
     }
     bind TEntry <$this(modkey)-a> {
 	%W selection range 0 end
+    }
+    if {[tk windowingsystem] eq "aqua"} {
+	
+	# Entry
+	bind Entry <Command-Left> {
+	    %W icursor 0
+	    %W selection clear
+	}
+	bind Entry <Command-Right> {
+	    %W icursor end
+	    %W selection clear
+	}
+	bind Entry <Control-Left> {
+	    %W icursor 0
+	    %W selection clear
+	}
+	bind Entry <Control-Right> {
+	    %W icursor end
+	    %W selection clear
+	}
+	
+	# TEntry
+	bind TEntry <Command-Left> {
+	    %W icursor 0
+	    %W selection clear
+	}
+	bind TEntry <Command-Right> {
+	    %W icursor end
+	    %W selection clear
+	}
+	bind TEntry <Control-Left> {
+	    %W icursor 0
+	    %W selection clear
+	}
+	bind TEntry <Control-Right> {
+	    %W icursor end
+	    %W selection clear
+	}	
     }
     
     # Read only text widget bindings.
