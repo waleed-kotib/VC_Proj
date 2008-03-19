@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.78 2008-03-18 16:14:21 matben Exp $
+# $Id: tileutils.tcl,v 1.79 2008-03-19 09:19:32 matben Exp $
 #
 
 package require treeutil
@@ -898,18 +898,16 @@ proc tileutils::configstyles {name} {
 	    Plain.label
 	}
 
-	# Notebook experiments.
-	if {$this(ttk)} {
-	    $styleCmd element create crossIcon image \
-	      [list $tiles(crossAqua) \
-	      { active !background} $tiles(crossAquaActive)] \
-	      -padding {20 0 0 0} -sticky {}
-	} else {
-	    $styleCmd element create crossIcon image \
-	      $tiles(crossAqua) \
-	      -map [list { active !background} $tiles(crossAquaActive)] \
-	      -padding {20 0 0 0} -sticky {}
-	}
+	# Notebook experiments:
+	
+	# No tabs.
+	$styleCmd layout Plain.TNotebook.Tab null
+	$styleCmd layout Plain.TNotebook null
+
+	# With close crosses. 
+	# active map wont work here since complete tab triggers it.
+	$styleCmd element create crossIcon image \
+	  $tiles(crossAqua) -sticky {}
 	$styleCmd layout X.TNotebook {
 	    Notebook.client -sticky nswe
 	}
@@ -933,15 +931,6 @@ proc tileutils::configstyles {name} {
 	      -relief solid -borderwidth 1 -background gray50
 	}
     }    
-}
-
-if {0} {
-    toplevel .t
-    ttk::notebook .t.nb -style X.TNotebook -padding 10
-    .t.nb add [ttk::label .t.nb.l1 -text Mast] -text Mats
-    .t.nb add [ttk::label .t.nb.l2 -text YYYY] -text XXXX
-    .t.nb add [ttk::label .t.nb.l3 -text XXXX] -text YYYY
-    pack .t.nb
 }
 
 # tileutils::LoadImages --
