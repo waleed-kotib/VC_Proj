@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.237 2008-03-18 16:14:21 matben Exp $
+# $Id: JUI.tcl,v 1.238 2008-03-19 14:02:00 matben Exp $
 
 package provide JUI 1.0
 
@@ -93,11 +93,17 @@ namespace eval ::JUI:: {
     }
     
     # Configurations:
+    # http adresses to home and bug tracker.
     set ::config(url,home) "http://thecoccinella.org"
     set ::config(url,bugs) "https://bugs.launchpad.net/coccinella/+filebug"
         
+    # Type of status menu button.
     set ::config(ui,status,menu)        dynamic   ;# plain|dynamic
-    set ::config(ui,main,infoType)     server    ;# mejid|mejidres|status|server
+    
+    # This just sets the initial prefs value.
+    set ::config(ui,main,infoType)      server    ;# mejid|mejidres|status|server
+
+    # Experimental...
     set ::config(ui,main,slots)         0
     set ::config(ui,main,combi-status)  1
     set ::config(ui,main,toy-status)    0
@@ -281,7 +287,6 @@ proc ::JUI::Build {w} {
     variable menuDefs
     variable jwapp
     variable inited
-    variable locals
 
     ::Debug 2 "::JUI::Build w=$w"
     
@@ -405,7 +410,7 @@ proc ::JUI::Build {w} {
 	    ::Status::ExMainButton $wfstat.bst ::Jabber::jstate(show+status)
 	}
 	
-	set infoType $config(ui,main,infoType)
+	set infoType $jprefs(ui,main,InfoType)
 	ttk::frame $wfstat.cont
 	if {0} {
 	    ttk::label $wfstat.me -textvariable ::Jabber::jstate($infoType) -anchor w
@@ -502,29 +507,27 @@ proc ::JUI::Build {w} {
 }
 
 proc ::JUI::BuildStatusMB {win} {
-    global  config
-    variable locals
-	    
-    set infoType $config(ui,main,infoType)
+    upvar ::Jabber::jprefs jprefs
+    
+    set infoType $jprefs(ui,main,InfoType)
    
     ttk::menubutton $win -style SunkenMenubutton \
       -textvariable ::Jabber::jstate($infoType)
     set m $win.m
-    set locals(infoType) $infoType
     
     menu $m -tearoff 0
     $m add radiobutton -value mejid    -label [mc "My JID"]      \
       -command ::JUI::StatusMBCmd \
-      -variable [namespace current]::locals(infoType)
+      -variable ::Jabber::jprefs(ui,main,InfoType)
     $m add radiobutton -value mejidres -label [mc "My Full JID"] \
       -command ::JUI::StatusMBCmd \
-      -variable [namespace current]::locals(infoType)
+      -variable ::Jabber::jprefs(ui,main,InfoType)
     $m add radiobutton -value server   -label [mc "Host Name"]   \
       -command ::JUI::StatusMBCmd \
-      -variable [namespace current]::locals(infoType)
+      -variable ::Jabber::jprefs(ui,main,InfoType)
     $m add radiobutton -value status   -label [mc "My Status"]   \
       -command ::JUI::StatusMBCmd \
-      -variable [namespace current]::locals(infoType)
+      -variable ::Jabber::jprefs(ui,main,InfoType)
     
     $win configure -menu $m
     return $win
@@ -532,10 +535,9 @@ proc ::JUI::BuildStatusMB {win} {
 
 proc ::JUI::StatusMBCmd {} {
     variable jwapp
-    variable locals
+    upvar ::Jabber::jprefs jprefs
     
-#     puts "::JUI::StatusMBCmd locals(infoType)=$locals(infoType)"
-    set infoType $locals(infoType)  
+    set infoType $jprefs(ui,main,InfoType)
     $jwapp(myjid) configure -textvariable ::Jabber::jstate($infoType)
 }
 
@@ -1629,6 +1631,7 @@ proc ::JUI::FixUIWhen {what} {
 }
 
 proc ::JUI::InitPrefsHook {} {
+    global  config
     upvar ::Jabber::jprefs jprefs
 
     set jprefs(ui,main,show,toolbar)  1
@@ -1641,6 +1644,11 @@ proc ::JUI::InitPrefsHook {} {
 	set val  [set $name]
 	lappend plist [list $name $rsrc $val]
     }
+    set name ::Jabber::jprefs(ui,main,InfoType)
+    set rsrc jprefs_ui_main_infoType
+    set val  $config(ui,main,infoType)
+    lappend plist [list $name $rsrc $val]
+    
     ::PrefUtils::Add $plist
 }
 
