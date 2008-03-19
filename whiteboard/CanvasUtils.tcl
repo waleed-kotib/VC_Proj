@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasUtils.tcl,v 1.45 2008-02-06 13:57:25 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.46 2008-03-19 10:48:18 matben Exp $
 
 package require sha1
 package require can2svg
@@ -1422,9 +1422,7 @@ proc ::CanvasUtils::DoItemPopup {wcan x y} {
     }
     if {[regexp {line|polygon} $type]} {
 	set smooth [$wcan itemcget $id -smooth]
-	if {[string equal $smooth "bezier"]} {
-	    set smooth 1
-	}
+	set smooth [string map {false 0 true 1 bezier 1} $smooth]
 	set popupVars(-smooth) $smooth
     }
     if {[regexp {text} $type]} {
@@ -1552,12 +1550,10 @@ proc ::CanvasUtils::PostGeneralMenu {win x y m mDef} {
 proc ::CanvasUtils::ItemSmooth {wcan id} {
     
     set smooth [$wcan itemcget $id -smooth]
-    if {[string equal $smooth "bezier"]} {
-	set smooth 1
-    }
+    set smooth [string map {false 0 true 1 bezier 1} $smooth]
     
     # Just toggle smooth state.
-    ItemConfigure $wcan $id -smooth [expr 1 - $smooth]
+    ItemConfigure $wcan $id -smooth [expr {1 - $smooth}]
 }
 
 proc ::CanvasUtils::ItemStraighten {wcan id} {
