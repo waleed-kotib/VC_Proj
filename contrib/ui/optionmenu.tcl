@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.23 2008-03-19 14:20:25 matben Exp $
+# $Id: optionmenu.tcl,v 1.24 2008-03-20 08:49:01 matben Exp $
 
 package require snit 1.0
 
@@ -39,7 +39,7 @@ snit::widgetadaptor ui::optionmenu::widget {
     
     option -command  -default {}
     option -menulist -default {} -configuremethod OnConfigMenulist
-    option -variable -default {} -configuremethod OnConfigVariable
+    option -variable -default {} ;# -configuremethod OnConfigVariable
     
     constructor {args} {
 	from args -textvariable
