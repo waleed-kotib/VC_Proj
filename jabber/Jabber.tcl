@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.262 2008-02-27 13:55:34 matben Exp $
+# $Id: Jabber.tcl,v 1.263 2008-03-23 09:00:40 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -375,7 +375,7 @@ proc ::Jabber::FactoryDefaults {} {
       [lindex $jserver(profile) 0]
     
     #
-    set jprefs(urlServersList) "http://www.jabber.org/servers.xml"
+    set jprefs(urlServersList) "http://www.jabber.org/basicservers.xml"
         
     # Menu definitions for the Roster/services window. Collects minimal Jabber
     # stuff.
