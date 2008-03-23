@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.35 2008-03-18 09:01:41 matben Exp $
+# $Id: connect.tcl,v 1.36 2008-03-23 11:54:04 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -1017,10 +1017,12 @@ proc jlib::connect::feature {jlibname name} {
 }
 
 proc jlib::connect::free {jlibname} {
-    upvar ${jlibname}::connect::state state
-
+    
     debug  "jlib::connect::free"
-    unset -nocomplain state
+    if {[namespace exists ${jlibname}::connect]} {
+	upvar ${jlibname}::connect::state state
+	unset -nocomplain state
+    }
 }
 
 proc jlib::connect::stream_reset {jlibname} {
