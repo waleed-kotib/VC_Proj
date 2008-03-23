@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.136 2008-03-17 08:51:10 matben Exp $
+# $Id: MailBox.tcl,v 1.137 2008-03-23 08:42:19 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -459,9 +459,14 @@ proc ::MailBox::Build {args} {
     }
     
     # Toplevel of class MailBox.
-    ::UI::Toplevel $w -class MailBox \
-      -macclass {document {toolbarButton standardDocument}} \
-      -usemacmainmenu 1 -closecommand ::MailBox::CloseHook
+    if {$this(8.5)} {
+	::UI::Toplevel $w -class MailBox \
+	  -macclass {document {toolbarButton standardDocument}} \
+	  -usemacmainmenu 1 -closecommand ::MailBox::CloseHook
+    } else {
+	::UI::Toplevel $w -class MailBox \
+	  -usemacmainmenu 1 -closecommand ::MailBox::CloseHook
+    }
     wm title $w [mc Inbox]
 
     set locals(w) $w
