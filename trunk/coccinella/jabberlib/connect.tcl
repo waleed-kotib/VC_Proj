@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.36 2008-03-23 11:54:04 matben Exp $
+# $Id: connect.tcl,v 1.37 2008-03-23 11:59:20 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -277,7 +277,7 @@ proc jlib::connect::get_state {jlibname {name ""}} {
 #           3) -defaultport
 #       
 # Results:
-#       Callback initiated.
+#       jlibname
 
 proc jlib::connect::connect {jlibname jid password args} {    
     variable have
@@ -431,7 +431,7 @@ proc jlib::connect::connect {jlibname jid password args} {
     }
     jlib::set_async_error_handler $jlibname [namespace code async_error]
     
-    return
+    return $jlibname
 }
 
 proc jlib::connect::verify {jlibname} {    
