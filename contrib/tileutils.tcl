@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.79 2008-03-19 09:19:32 matben Exp $
+# $Id: tileutils.tcl,v 1.80 2008-03-23 08:43:08 matben Exp $
 #
 
 package require treeutil
@@ -230,7 +230,7 @@ proc tileutils::ThemeChanged {} {
     } else {
 	set priority startupFile
     }
-    if {[GetCurrentTheme] eq "aqua"} {
+    if {([GetCurrentTheme] eq "aqua") && $this(8.5)} {
 	set style(-background) systemDialogBackgroundActive
     }
     if {[info exists style(-background)]} {
