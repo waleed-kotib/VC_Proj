@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.148 2007-12-24 08:34:55 matben Exp $
+# $Id: Disco.tcl,v 1.149 2008-03-23 11:44:17 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1731,30 +1731,47 @@ proc ::Disco::AddHttpCommand {token} {
 	return
     }
     if {[::httpex::status $token] eq "ok"} {
+	set ncode [httpex::ncode $token]	
+	if {$ncode == 200} {
 	
-	# Get and parse xml.
-	set xml [::httpex::data $token]    
-	set xtoken [tinydom::parse $xml -package qdxml]
-	set xmllist [tinydom::documentElement $xtoken]
-	set jidL [list]
-	
-	foreach elem [tinydom::children $xmllist] {
-	    switch -- [tinydom::tagname $elem] {
-		item {
-		    unset -nocomplain attrArr
-		    array set attrArr [tinydom::attrlist $elem]
-		    if {[info exists attrArr(jid)]} {
-			lappend jidL [list $attrArr(jid)]
+	    # Get and parse xml.
+	    set xml [::httpex::data $token]    
+	    set xtoken [tinydom::parse $xml -package qdxml]
+	    set xmllist [tinydom::documentElement $xtoken]
+	    set jidL [list]
+	    
+	    foreach elem [tinydom::children $xmllist] {
+		switch -- [tinydom::tagname $elem] {
+		    item {
+			unset -nocomplain attrArr
+			array set attrArr [tinydom::attrlist $elem]
+			if {[info exists attrArr(jid)]} {
+			    lappend jidL [list $attrArr(jid)]
+			}
 		    }
 		}
 	    }
+	    if {[winfo exists $waddservlist]} {
+		$waddservlist configure -values $jidL
+	    }
+	    tinydom::cleanup $xtoken
+	} elseif {$ncode == 301} {
+	    
+	    # Permanent redirect.
+	    array set metaA [set $token\(meta)]
+	    if {[info exists metaA(Location)]} {
+		set location $metaA(Location)
+	    }
 	}
-	if {[winfo exists $waddservlist]} {
-	    $waddservlist configure -values $jidL
-	}
-	tinydom::cleanup $xtoken
     }
     ::httpex::cleanup $token
+
+    if {[info exists location]} {
+	catch {
+	    ::httpex::get $location \
+	      -command [namespace code AddHttpCommand]
+	} state(httptoken)
+    }
 }
 
 proc ::Disco::AddCloseCmd {w} {

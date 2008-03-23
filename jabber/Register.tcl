@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.96 2008-03-18 09:02:50 matben Exp $
+# $Id: Register.tcl,v 1.97 2008-03-23 11:44:17 matben Exp $
 
 package provide Register 1.0
 
@@ -410,36 +410,53 @@ proc ::RegisterEx::GetTokenFrom {key} {
 proc ::RegisterEx::HttpCommand {token htoken} {
     variable $token
     upvar 0 $token state
-    
+        
     if {[::httpex::state $htoken] ne "final"} {
 	return
     }
     if {[::httpex::status $htoken] eq "ok"} {
+	set ncode [httpex::ncode $htoken]	
+	if {$ncode == 200} {
 	
-	# Get and parse xml.
-	set xml [::httpex::data $htoken]    
-	set xtoken [tinydom::parse $xml -package qdxml]
-	set xmllist [tinydom::documentElement $xtoken]
-	set jidL [list]
-	
-	foreach elem [tinydom::children $xmllist] {
-	    switch -- [tinydom::tagname $elem] {
-		item {
-		    unset -nocomplain attrArr
-		    array set attrArr [tinydom::attrlist $elem]
-		    if {[info exists attrArr(jid)]} {
-			lappend jidL [list $attrArr(jid)]
+	    # Get and parse xml.
+	    set xml [::httpex::data $htoken]    
+	    set xtoken [tinydom::parse $xml -package qdxml]
+	    set xmllist [tinydom::documentElement $xtoken]
+	    set jidL [list]
+	    
+	    foreach elem [tinydom::children $xmllist] {
+		switch -- [tinydom::tagname $elem] {
+		    item {
+			unset -nocomplain attrArr
+			array set attrArr [tinydom::attrlist $elem]
+			if {[info exists attrArr(jid)]} {
+			    lappend jidL [list $attrArr(jid)]
+			}
 		    }
 		}
 	    }
+	    if {[winfo exists $state(wserv)]} {
+		$state(wserv) configure -values $jidL
+	    }
+	    tinydom::cleanup $xtoken
+	} elseif {$ncode == 301} {
+	    
+	    # Permanent redirect.
+	    array set metaA [set $htoken\(meta)]
+	    if {[info exists metaA(Location)]} {
+		set location $metaA(Location)
+	    }
 	}
-	if {[winfo exists $state(wserv)]} {
-	    $state(wserv) configure -values $jidL
-	}
-	tinydom::cleanup $xtoken
     }
     ::httpex::cleanup $htoken
     unset -nocomplain state(httptoken)
+    
+    if {[info exists location]} {
+	catch {
+	    ::httpex::get $location \
+	      -command  [list [namespace current]::HttpCommand $token]
+	} state(httptoken)
+    }
 }
 
 # Not used for the moment due to the grab stuff.
