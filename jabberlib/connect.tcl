@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.37 2008-03-23 11:59:20 matben Exp $
+# $Id: connect.tcl,v 1.38 2008-03-23 13:48:29 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -68,6 +68,14 @@
 #       3.  Resource binding 
 #       4.  IM session establishment 
 #       
+################################################################################
+#
+#       @@@ Note to myself: maybe it would be a good idea to make this more OO
+#           like. jlib::connect returns a 'connector' object that is used as
+#           an instance for invoking the methods. We make sure that each jlib
+#           instance can make at most a single connector object at a time.
+#           Make sure that any connector object gets deleted from the jlib 
+#           instance destructor.
 
 package require jlib
 package require sha1
