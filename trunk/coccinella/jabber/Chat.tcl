@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.282 2008-03-19 10:34:46 matben Exp $
+# $Id: Chat.tcl,v 1.283 2008-03-23 08:42:18 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1246,10 +1246,15 @@ proc ::Chat::Build {threadID jid} {
     set dlgstate(nhiddenmsgs) 0
     
     # Toplevel with class Chat.
-    ::UI::Toplevel $w -class Chat \
-      -macclass {document {toolbarButton standardDocument}} \
-      -usemacmainmenu 1 -closecommand ::Chat::CloseCmd
-
+    if {$this(8.5)} {
+	::UI::Toplevel $w -class Chat \
+	  -macclass {document {toolbarButton standardDocument}} \
+	  -usemacmainmenu 1 -closecommand ::Chat::CloseCmd
+    } else {
+	::UI::Toplevel $w -class Chat \
+	  -usemacmainmenu 1 -closecommand ::Chat::CloseCmd
+    }	
+	
     bind $w <<ToolbarButton>> [list ::Chat::OnToolbarButton $dlgtoken]
 
     # Global frame.

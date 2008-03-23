@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.236 2008-03-19 10:34:46 matben Exp $
+# $Id: GroupChat.tcl,v 1.237 2008-03-23 08:42:19 matben Exp $
 
 package require Create
 package require Enter
@@ -585,7 +585,7 @@ proc ::GroupChat::GotMsg {xmldata} {
 #       shows window, returns token.
 
 proc ::GroupChat::Build {roomjid} {
-    global  prefs wDlgs
+    global  prefs wDlgs this
     
     variable protocol
     variable uiddlg
@@ -610,10 +610,14 @@ proc ::GroupChat::Build {roomjid} {
     set dlgstate(nhiddenmsgs)   0
         
     # Toplevel of class GroupChat.
-    ::UI::Toplevel $w -class GroupChat \
-      -macclass {document {toolbarButton standardDocument}} \
-      -usemacmainmenu 1 -closecommand ::GroupChat::CloseCmd
-    
+    if {$this(8.5)} {
+	::UI::Toplevel $w -class GroupChat \
+	  -macclass {document {toolbarButton standardDocument}} \
+	  -usemacmainmenu 1 -closecommand ::GroupChat::CloseCmd
+    } else {
+	::UI::Toplevel $w -class GroupChat \
+	  -usemacmainmenu 1 -closecommand ::GroupChat::CloseCmd
+    }
     bind $w <<ToolbarButton>> [list ::GroupChat::OnToolbarButton $dlgtoken]
 
     # Global frame.
