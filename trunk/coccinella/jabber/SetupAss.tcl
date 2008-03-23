@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.51 2008-01-02 13:33:57 matben Exp $
+# $Id: SetupAss.tcl,v 1.52 2008-03-23 11:44:17 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -235,31 +235,48 @@ proc ::SetupAss::HttpCommand {htoken} {
 	return
     }
     if {[::httpex::status $htoken] eq "ok"} {
+	set ncode [httpex::ncode $htoken]	
+	if {$ncode == 200} {
 	
-	# Get and parse xml.
-	set xml [::httpex::data $htoken]    
-	set xtoken [tinydom::parse $xml -package qdxml]
-	set xmllist [tinydom::documentElement $xtoken]
-	set jidL [list]
-	
-	foreach elem [tinydom::children $xmllist] {
-	    switch -- [tinydom::tagname $elem] {
-		item {
-		    unset -nocomplain attrArr
-		    array set attrArr [tinydom::attrlist $elem]
-		    if {[info exists attrArr(jid)]} {
-			lappend jidL [list $attrArr(jid)]
+	    # Get and parse xml.
+	    set xml [::httpex::data $htoken]    
+	    set xtoken [tinydom::parse $xml -package qdxml]
+	    set xmllist [tinydom::documentElement $xtoken]
+	    set jidL [list]
+	    
+	    foreach elem [tinydom::children $xmllist] {
+		switch -- [tinydom::tagname $elem] {
+		    item {
+			unset -nocomplain attrArr
+			array set attrArr [tinydom::attrlist $elem]
+			if {[info exists attrArr(jid)]} {
+			    lappend jidL [list $attrArr(jid)]
+			}
 		    }
 		}
 	    }
+	    if {[winfo exists $wserver]} {
+		$wserver configure -values $jidL
+		$wserver set ""
+	    }
+	    tinydom::cleanup $xtoken
+	} elseif {$ncode == 301} {
+	    
+	    # Permanent redirect.
+	    array set metaA [set $htoken\(meta)]
+	    if {[info exists metaA(Location)]} {
+		set location $metaA(Location)
+	    }
 	}
-	if {[winfo exists $wserver]} {
-	    $wserver configure -values $jidL
-	    $wserver set ""
-	}
-	tinydom::cleanup $xtoken
     }
     ::httpex::cleanup $htoken
+
+    if {[info exists location]} {
+	catch {
+	    ::httpex::get $location \
+	      -command [namespace current]::HttpCommand
+	}	    
+    }
 }
 
 proc ::SetupAss::NextPage {w page} {
