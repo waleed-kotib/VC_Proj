@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.90 2008-03-23 14:20:45 matben Exp $
+# $Id: Whiteboard.tcl,v 1.91 2008-03-24 15:10:51 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -446,7 +446,7 @@ proc ::WB::InitMenuDefs {} {
     
     set menuDefs(main,edit) {    
 	{command     mUndo             {::WB::OnMenuUndo}         Z}
-	{command     mRedo             {::WB::OnMenuRedo}         {}}
+	{command     mRedo             {::WB::OnMenuRedo}         {Shift-Z}}
 	{separator}
 	{command     mCut              {::UI::CutEvent}           X}
 	{command     mCopy             {::UI::CopyEvent}          C}

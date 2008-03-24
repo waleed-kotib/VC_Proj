@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasUtils.tcl,v 1.46 2008-03-19 10:48:18 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.47 2008-03-24 15:10:51 matben Exp $
 
 package require sha1
 package require can2svg
@@ -2112,6 +2112,7 @@ proc ::CanvasUtils::BindWhiteboardBindtags { } {
 
     # Item edit key binds.
     bind Whiteboard <${mod}-Key-z>       { ::WB::OnUndo %W }
+    bind Whiteboard <${mod}-Key-Z>       { ::WB::OnRedo %W }
     bind Whiteboard <${mod}-Key-a>       { ::WB::OnAll %W }
     bind Whiteboard <${mod}-Key-r>       { ::WB::OnRaise %W }
     bind Whiteboard <${mod}-Key-l>       { ::WB::OnLower %W }
