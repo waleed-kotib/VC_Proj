@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.184 2008-03-19 13:16:56 matben Exp $
+# $Id: UI.tcl,v 1.185 2008-03-25 14:54:25 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -181,13 +181,14 @@ proc ::UI::InitMac {} {
 proc ::UI::InitCommonBinds {} {
     global  this
     
-    bind Text <$this(modkey)-a> {
+    set mod $this(modkey)
+    bind Text <$mod-a> {
 	%W tag add sel 1.0 end
     }
-    bind Entry <$this(modkey)-a> {
+    bind Entry <$mod-a> {
 	%W selection range 0 end
     }
-    bind TEntry <$this(modkey)-a> {
+    bind TEntry <$mod-a> {
 	%W selection range 0 end
     }
     if {[tk windowingsystem] eq "aqua"} {
@@ -240,6 +241,15 @@ proc ::UI::InitCommonBinds {} {
 	focus [tk_focusPrev %W]
 	break
     }
+    
+    # Undo/redo text bindings. 
+    # <<Undo>> and <<Redo>> already standard for text widget.
+    foreach sep {space Tab Return BackSpace comma period} {
+	bind UndoText <$sep> {
+	    %W edit separator
+	}
+    }
+    
     SetMoseWheelFor Canvas
     SetMoseWheelFor Html
 
@@ -700,6 +710,10 @@ proc ::UI::Toplevel {w args} {
     bind $w <FocusIn>  +[list ::UI::OnFocusIn %W $w]
     bind $w <FocusOut> +[list ::UI::OnFocusOut %W $w]
     bind $w <Destroy>  +[list ::UI::OnDestroy %W $w]
+
+    # These get duplicated since Text widget binds them directly.
+    bind $w <$this(modkey)-Key-z> {}
+    bind $w <$this(modkey)-Key-Z> {}
 
     ::hooks::run newToplevelWindowHook $w
     
@@ -1735,6 +1749,18 @@ proc ::UI::FindPreviousEvent {} {
     if {[winfo exists [focus]]} {
 	event generate [focus] <<FindPrevious>>
     }	
+}
+
+proc ::UI::UndoEvent {} {
+    if {[winfo exists [focus]]} {
+	event generate [focus] <<Undo>>
+    }	    
+}
+
+proc ::UI::RedoEvent {} {
+    if {[winfo exists [focus]]} {
+	event generate [focus] <<Redo>>
+    }	    
 }
 
 # For menu commands.

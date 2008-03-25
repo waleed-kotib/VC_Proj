@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.98 2008-03-25 08:52:31 matben Exp $
+# $Id: NewMsg.tcl,v 1.99 2008-03-25 14:54:25 matben Exp $
 
 package require ui::entryex
 
@@ -226,10 +226,20 @@ proc ::NewMsg::Build {args} {
     }
     
     # Toplevel of class NewMsg.
-    ::UI::Toplevel $w -class NewMsg \
-      -usemacmainmenu 1 -macstyle documentProc -closecommand ::NewMsg::CloseHook
+    if {$this(8.5)} {
+	::UI::Toplevel $w -class NewMsg \
+	  -macclass {document {toolbarButton standardDocument}} \
+	  -usemacmainmenu 1 \
+	  -closecommand ::NewMsg::CloseHook
+    } else {
+	::UI::Toplevel $w -class NewMsg \
+	  -usemacmainmenu 1 -macstyle documentProc \
+	  -closecommand ::NewMsg::CloseHook
+    }
     wm title $w [mc Message]
     
+    bind $w <<ToolbarButton>> { ::NewMsg::OnToolbarButton %W }
+
     # Global frame.
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
@@ -261,6 +271,7 @@ proc ::NewMsg::Build {args} {
 	}
     }
 
+    # Not sure this shall be kept.
     set wtop $w.frall.top
     set wbot $w.frall.bot
     ttk::frame $wtop
@@ -318,7 +329,7 @@ proc ::NewMsg::Build {args} {
     # D =
     set wbox $w.frall.box
     ttk::frame $wbox
-    pack $wbox -side top -fill both -expand 1
+    pack $wbox -side bottom -fill both -expand 1
     
     # Address list. D =
     set   fradd $wbox.fradd
@@ -388,16 +399,17 @@ proc ::NewMsg::Build {args} {
 	if {$config(ui,aqua-text)} {
 	    frame $wtxt
 	    set wcont [::UI::Text $wtext -height 8 -width 48 -wrap word \
-	      -undo 1 -autoseparators 1 \
+	      -undo 1 \
 	      -yscrollcommand [list ::UI::ScrollSet $wysc \
 	      [list grid $wysc -column 1 -row 0 -sticky ns]]]
 	} else {
 	    frame $wtxt -bd 1 -relief sunken
-	    text $wtext -height 8 -width 48 -wrap word -undo 1 -autoseparators 1 \
+	    text $wtext -height 8 -width 48 -wrap word -undo 1 \
 	      -yscrollcommand [list ::UI::ScrollSet $wysc \
 	      [list grid $wysc -column 1 -row 0 -sticky ns]]
 	    set wcont $wtext
 	}
+	bindtags $wtext [linsert [bindtags $wtext] 0 UndoText]
 	ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
 
 	pack  $wtxt -side top -fill both -expand 1
@@ -406,18 +418,7 @@ proc ::NewMsg::Build {args} {
 	grid  $wysc   -column 1 -row 0 -sticky ns
 	grid columnconfigure $wtxt 0 -weight 1
 	grid rowconfigure $wtxt 0 -weight 1
-	
-	bind $wtext <$this(modkey)-Key-z> {
-	    puts "modified=[%W edit modified]"
-	    if {[%W edit modified]} {
-		%W edit undo 
-	    }
-	}
-	bind $wtext <$this(modkey)-Key-Z> { 
-	    puts "modified=[%W edit modified]"
-	    catch {%W edit redo}
-	}
-	
+		
 	hooks::run textSpellableNewHook $wtext
     }
     
@@ -429,7 +430,9 @@ proc ::NewMsg::Build {args} {
     set locals($w,wspacer)  $wspacer
     set locals($w,wsubject) $wsubject
     set locals($w,finished) 0
+    set locals($w,wtop)     $wtop
     set locals($w,wtray)    $wtray
+    set locals($w,tsep)     $w.frall.divt
     
     if {$opts(-forwardmessage) ne ""} {
 	set from [jlib::barejid $opts(-from)]
@@ -496,6 +499,39 @@ proc ::NewMsg::Build {args} {
     if {[llength $jidL]} {
 	after 200 [list ::NewMsg::FillInAddresses $w $jidL]
     }
+    
+    return $w
+}
+
+
+proc ::NewMsg::OnToolbarButton {w} {
+    variable locals
+        
+    if {[llength [grab current]]} { return }
+    if {[winfo ismapped $locals($w,wtop)]} {
+	HideToolbar $w
+	set show 0
+    } else {
+	ShowToolbar $w
+	set show 1
+    }
+    ::hooks::run uiNewMsgToggleToolbar $show
+}
+
+proc ::NewMsg::HideToolbar {w} {
+    variable locals
+    variable state
+    
+    pack forget $locals($w,wtop)
+    pack forget $locals($w,tsep)
+}
+
+proc ::NewMsg::ShowToolbar {w} {
+    variable locals
+    variable state
+    
+    pack $locals($w,wtop) -side top -fill x
+    pack $locals($w,tsep) -side top -fill x
 }
 
 proc ::NewMsg::FillInAddresses {w jidL} {

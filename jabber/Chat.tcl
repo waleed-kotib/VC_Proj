@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.283 2008-03-23 08:42:18 matben Exp $
+# $Id: Chat.tcl,v 1.284 2008-03-25 14:54:25 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1677,6 +1677,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
 	  [list grid $wyscsnd -column 1 -row 0 -sticky ns]]
 	set wcont2 $wtextsnd
     }
+    bindtags $wtextsnd [linsert [bindtags $wtextsnd] 0 UndoText]
     ttk::scrollbar $wyscsnd -orient vertical -command [list $wtextsnd yview]
     
     grid  $wcont2    -column 0 -row 0 -sticky news

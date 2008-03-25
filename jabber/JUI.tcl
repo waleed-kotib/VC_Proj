@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.239 2008-03-23 08:42:19 matben Exp $
+# $Id: JUI.tcl,v 1.240 2008-03-25 14:54:25 matben Exp $
 
 package provide JUI 1.0
 
@@ -224,6 +224,9 @@ proc ::JUI::Init {} {
     }
 
     set menuDefs(rost,edit) {    
+	{command   mUndo             {::UI::UndoEvent}          Z}
+	{command   mRedo             {::UI::RedoEvent}          Shift-Z}
+	{separator}
 	{command   mCut              {::UI::CutEvent}           X}
 	{command   mCopy             {::UI::CopyEvent}          C}
 	{command   mPaste            {::UI::PasteEvent}         V}
@@ -1417,9 +1420,20 @@ proc ::JUI::EditPostCommand {wmenu} {
 	::UI::MenuMethod $wmenu entryconfigure $mkey -state $mstate
     }	
     ::UI::MenuMethod $wmenu entryconfigure mAll -state disabled
-    if {[winfo exists [focus]]} {
-	switch -- [winfo class [focus]] {
-	    Text - Entry - TEntry {
+    ::UI::MenuMethod $wmenu entryconfigure mUndo -state disabled
+    ::UI::MenuMethod $wmenu entryconfigure mRedo -state disabled
+
+    set wfocus [focus]
+    if {[winfo exists $wfocus]} {
+	switch -- [winfo class $wfocus] {
+	    Text {
+		::UI::MenuMethod $wmenu entryconfigure mAll -state normal
+		if {[$wfocus edit modified]} {
+		    ::UI::MenuMethod $wmenu entryconfigure mUndo -state normal
+		}
+		::UI::MenuMethod $wmenu entryconfigure mRedo -state normal
+	    }
+	    Entry - TEntry {
 		::UI::MenuMethod $wmenu entryconfigure mAll -state normal
 	    }
 	}
