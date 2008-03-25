@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.237 2008-03-23 08:42:19 matben Exp $
+# $Id: GroupChat.tcl,v 1.238 2008-03-25 14:54:25 matben Exp $
 
 package require Create
 package require Enter
@@ -955,6 +955,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
 	  [list grid $wyscsend -column 1 -row 0 -sticky ns]]
 	set wscont $wtextsend
     }
+    bindtags $wtextsend [linsert [bindtags $wtextsend] 0 UndoText]
     ttk::scrollbar $wyscsend -orient vertical -command [list $wtextsend yview]
 
     grid  $wscont     -column 0 -row 0 -sticky news

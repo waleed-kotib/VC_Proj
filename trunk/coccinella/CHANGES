@@ -9,7 +9,8 @@ Coccinella-0.96.8 (200804??)
 
  o all toolbars collapsable on mac
  o menu option to select what to display in status line (JID, status, host)
-
+ o handles multiple DNS TXT records
+ o undo/redo of text
 
 Coccinella-0.96.6 (20080312)
 
