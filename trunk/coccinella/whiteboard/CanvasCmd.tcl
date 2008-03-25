@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasCmd.tcl,v 1.16 2007-09-14 13:17:09 matben Exp $
+# $Id: CanvasCmd.tcl,v 1.17 2008-03-25 08:52:31 matben Exp $
 
 package provide CanvasCmd 1.0
 
@@ -117,6 +117,8 @@ proc ::CanvasCmd::MoveSelected {wcan detail} {
     set undo [list ::CanvasUtils::CommandList $w $cmdUndoList]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo   
+
+    ::CanvasFile::SetUnsaved $wcan
     
     DeselectAll $wcan
     foreach id $selected {
@@ -161,6 +163,8 @@ proc ::CanvasCmd::RaiseOrLowerItems {wcan {what raise}} {
     set undo [list ::CanvasUtils::CommandList $w $undoList]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+
+    ::CanvasFile::SetUnsaved $wcan
 }
 
 # CanvasCmd::SetCanvasBgColor --
@@ -289,7 +293,9 @@ proc ::CanvasCmd::ResizeItem {wcan factor} {
     set undo [list ::CanvasUtils::CommandList $w $undoList]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
-    
+
+    ::CanvasFile::SetUnsaved $wcan
+
     # New markers.
     foreach id $ids {
 	::CanvasDraw::DeleteSelection $wcan $id
@@ -334,7 +340,9 @@ proc ::CanvasCmd::FlipItem {wcan direction} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
-	
+
+    ::CanvasFile::SetUnsaved $wcan
+
     # New markers.
     ::CanvasDraw::DeleteSelection $wcan $id
     ::CanvasDraw::MarkBbox $wcan 1 $id
@@ -348,6 +356,7 @@ proc ::CanvasCmd::Undo {wcan} {
     # The actual undo command.
     undo::undo [::WB::GetUndoToken $wcan]
     
+    ::CanvasFile::SetUnsaved $wcan
     ::CanvasDraw::SyncMarks $wcan
 }
 
@@ -357,6 +366,7 @@ proc ::CanvasCmd::Undo {wcan} {
 
 proc ::CanvasCmd::Redo {wcan} {
     undo::redo [::WB::GetUndoToken $wcan]
+    ::CanvasFile::SetUnsaved $wcan
 }
 
 # CanvasCmd::DoEraseAll --

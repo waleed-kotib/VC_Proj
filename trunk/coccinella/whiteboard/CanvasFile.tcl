@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasFile.tcl,v 1.32 2007-09-16 07:39:14 matben Exp $
+# $Id: CanvasFile.tcl,v 1.33 2008-03-25 08:52:31 matben Exp $
  
 package require can2svg
 package require svg2can
@@ -621,10 +621,31 @@ proc ::CanvasFile::SaveAsDlg {wcan} {
     set fileName [SaveCanvasFileDlg $wcan]
     if {$fileName ne ""} {
 	set state(fileName) $fileName
+	set state(unsaved) 0
+	if {([info tclversion] >= 8.5) && ([tk windowingsystem] eq "aqua")} {
+	    wm attributes $w -modified 0
+	}
+	set title [wm title $w]
+	if {[string first " : " $title] < 0} {
+	    wm title $w "$title : [file tail $fileName]"
+	}
     }
-    set title [wm title $w]
-    if {[string first " : " $title] < 0} {
-	wm title $w "$title : [file tail $fileName]"
+}
+
+proc ::CanvasFile::IsUnsaved {wcan} {
+    set w [winfo toplevel $wcan]
+    upvar ::WB::${w}::state state
+    
+    return $state(unsaved)
+}
+
+proc ::CanvasFile::SetUnsaved {wcan} {
+    set w [winfo toplevel $wcan]
+    upvar ::WB::${w}::state state
+    
+    set state(unsaved) 1
+    if {([info tclversion] >= 8.5) && ([tk windowingsystem] eq "aqua")} {
+	wm attributes $w -modified 1
     }
 }
 

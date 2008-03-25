@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.91 2008-03-24 15:10:51 matben Exp $
+# $Id: Whiteboard.tcl,v 1.92 2008-03-25 08:52:31 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -743,7 +743,13 @@ proc ::WB::BuildWhiteboard {w args} {
     # Init some of the state variables.
     # Inherit from the factory + preferences state.
     array set state [array get gstate]
+    
+    # This is the file we either opened from or last saved.
     set state(fileName) ""
+    
+    # Keep track if any unsaved edits.
+    set state(unsaved) 0
+    
     if {$opts(-state) eq "disabled"} {
 	set state(tool) "point"
     }
