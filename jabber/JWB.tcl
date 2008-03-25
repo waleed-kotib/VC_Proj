@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.93 2008-02-06 13:57:25 matben Exp $
+# $Id: JWB.tcl,v 1.94 2008-03-25 08:52:31 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -630,7 +630,7 @@ proc ::JWB::CloseHook {w} {
         
     switch -- $jwbstate($w,type) {
 	chat {
-	    set ans [::UI::MessageBox -icon info -parent $w -type yesno \
+	    set ans [::UI::MessageBox -icon question -parent $w -type yesno \
 	      -message [mc jamesswbchatlost2]]
 	    if {$ans ne "yes"} {
 		return stop
@@ -645,9 +645,26 @@ proc ::JWB::CloseHook {w} {
 		    return stop
 		}
 	    }
+	    set ans [::UI::MessageBox -icon question -parent $w -type yesno \
+	      -message [mc jamesswbchatlost2]]
+	    if {$ans ne "yes"} {
+		return stop
+	    }
 	}
 	default {
-	    # empty
+	    set wcan [::WB::GetCanvasFromWtop $w]
+	    if {[::CanvasFile::IsUnsaved $wcan]} {
+		set str [mc "Do you want to save edits in a file?"]
+		set dtl [mc "Edits will be lost unless you save them."]
+		set ans [::UI::MessageBox -parent $w -icon question \
+		  -type yesnocancel \
+		  -message [mc messunsavedmsgQ] -detail [mc messunsaveddtl]]
+		if {$ans eq "yes"} {
+		    ::CanvasFile::Save $wcan
+		} elseif {$ans eq "cancel"} {
+		    return stop
+		}
+	    }
 	}
     }
 }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasDraw.tcl,v 1.23 2007-07-19 06:28:18 matben Exp $
+# $Id: CanvasDraw.tcl,v 1.24 2008-03-25 08:52:31 matben Exp $
 
 #-- TAGS -----------------------------------------------------------------------
 #  
@@ -150,7 +150,9 @@ proc ::CanvasDraw::FinalMoveSelected {wcan x y} {
     set undo [list ::CanvasUtils::CommandList $w $cmdUndoList]
     eval $redo remote
     undo::add [::WB::GetUndoToken $wcan] $undo $redo    
-    
+
+    ::CanvasFile::SetUnsaved $wcan
+
     $wcan dtag _move
     unset -nocomplain moveArr
 }
@@ -241,7 +243,9 @@ proc ::CanvasDraw::FinalMoveCurrent {wcan x y} {
     set undo [list ::CanvasUtils::CommandList $w $cmdUndoList]
     eval $redo remote
     undo::add [::WB::GetUndoToken $wcan] $undo $redo    
-    
+
+    ::CanvasFile::SetUnsaved $wcan
+
     unset -nocomplain moveArr
 }
 
@@ -368,6 +372,8 @@ proc ::CanvasDraw::FinalMoveRectPoint {wcan x y} {
     set undo [list ::CanvasUtils::Command $w $moveArr(undocmd)]
     eval $redo remote
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+
+    ::CanvasFile::SetUnsaved $wcan
 
     unset -nocomplain moveArr
 }
@@ -543,7 +549,9 @@ proc ::CanvasDraw::FinalMoveArcPoint {wcan x y} {
 
     eval $redo remote
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
-    
+
+    ::CanvasFile::SetUnsaved $wcan
+
     unset -nocomplain moveArr
 }
 
@@ -671,7 +679,9 @@ proc ::CanvasDraw::FinalMovePolyLinePoint {wcan x y} {
 
     eval $redo remote
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
-   
+
+    ::CanvasFile::SetUnsaved $wcan
+
     unset -nocomplain moveArr
 }
 
@@ -779,6 +789,7 @@ proc ::CanvasDraw::FinMoveFrame {wcan wframe  x y} {
     eval $redo remote
     if {[info exists undo]} {
 	undo::add [::WB::GetUndoToken $wcan] $undo $redo
+	::CanvasFile::SetUnsaved $wcan
     }    
     unset -nocomplain xDragFrame
 }
@@ -879,6 +890,7 @@ proc ::CanvasDraw::FinMoveWindow {wcan win x y} {
     eval $redo remote
     if {[info exists undo]} {
 	undo::add [::WB::GetUndoToken $wcan] $undo $redo
+	::CanvasFile::SetUnsaved $wcan
     }    
     unset -nocomplain xDragWin
 }
@@ -985,6 +997,8 @@ proc ::CanvasDraw::FinalMoveCurrentGrid {wcan x y grid args} {
     set undo [list ::CanvasUtils::Command $w $undoCmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo    
+
+    ::CanvasFile::SetUnsaved $wcan
 
     unset -nocomplain moveArr
 }
@@ -1233,6 +1247,8 @@ proc ::CanvasDraw::FinalizeBox {wcan x y shift type {mark 0}} {
 	set undo [list ::CanvasUtils::Command $w $undocmd]
 	eval $redo
 	undo::add [::WB::GetUndoToken $wcan] $undo $redo
+
+        ::CanvasFile::SetUnsaved $wcan
     }
     array unset theBox $wcan,*
 }
@@ -1477,6 +1493,7 @@ proc ::CanvasDraw::FinalizeArc {wcan x y} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
     unset -nocomplain arcBox
 }
 
@@ -1688,6 +1705,7 @@ proc ::CanvasDraw::FinalizePoly {wcan x y} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
     unset -nocomplain thePoly
 }
 
@@ -1834,6 +1852,7 @@ proc ::CanvasDraw::FinalizeLine {wcan x y shift {opt 0}} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
     unset -nocomplain theLine
 }
 
@@ -1970,6 +1989,7 @@ proc ::CanvasDraw::FinalizeStroke {wcan x y {brush 0}} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
     unset -nocomplain stroke
 }
 
@@ -2143,6 +2163,7 @@ proc ::CanvasDraw::DoPaint {wcan x y {shift 0}} {
 		set undo [list ::CanvasUtils::Command $w $undocmd]
 		eval $redo
 		undo::add [::WB::GetUndoToken $wcan] $undo $redo	    
+		::CanvasFile::SetUnsaved $wcan
 	    }
 	}
     }
@@ -2339,6 +2360,7 @@ proc ::CanvasDraw::FinalizeRotate {wcan x y} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     ::CanvasUtils::Command $w $cmd remote
     undo::add [::WB::GetUndoToken $wcan] $undo $redo	    
+    ::CanvasFile::SetUnsaved $wcan
     unset -nocomplain rotDrag
 }
 
@@ -2459,6 +2481,7 @@ proc ::CanvasDraw::DeleteIds {wcan ids where args} {
     
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
 
     # Garbage collect unused images with 'std' tag.
     GarbageUnusedImages
@@ -2535,6 +2558,7 @@ proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
     set undo [::CanvasUtils::GetUndoCommand $w [list delete $utag]]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
 }
 
 # CanvasDraw::DeleteWindow --
@@ -2581,6 +2605,7 @@ proc ::CanvasDraw::DeleteWindow {wcan win x y {where all}} {
     set undo [::CanvasUtils::GetUndoCommand $w [list delete $utag]]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
 }
 
 proc ::CanvasDraw::PointButton {wcan x y {modifier {}}} {
@@ -2946,6 +2971,7 @@ proc ::CanvasDraw::MakeSpeechBubble {wcan id} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
 }
 
 proc ::CanvasDraw::SpeechBubbleCmd {wcan bbox args} {

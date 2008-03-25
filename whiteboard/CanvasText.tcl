@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasText.tcl,v 1.14 2007-07-19 06:28:19 matben Exp $
+# $Id: CanvasText.tcl,v 1.15 2008-03-25 08:52:31 matben Exp $
 
 package require sha1
 
@@ -268,6 +268,7 @@ proc ::CanvasText::SetFocus {wcan x y {forceNew 0}} {
 	set undo [list ::CanvasUtils::Command $w $undocmd]
 	eval $redo
 	undo::add [::WB::GetUndoToken $wcan] $undo $redo
+	::CanvasFile::SetUnsaved $wcan
 
 	$wcan focus $utag
 	$wcan select clear
@@ -339,8 +340,8 @@ proc ::CanvasText::Insert {wcan char} {
     set undo [list ::CanvasUtils::Command $w $undocmd]    
     eval {$wcan} $cmd
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
-        
-    Debug 9 "\t utag = $utag, ind = $ind, char: $char"
+
+    ::CanvasFile::SetUnsaved $wcan
     
     # Need to treat the case with actual newlines in char string.
     # Write to all other clients; need to make a one liner first.
@@ -751,6 +752,7 @@ proc ::CanvasText::NewLine {wcan} {
 
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
 
     if {$prefs(wb,nlNewText)} {
 	$wcan focus $utagNew
@@ -808,6 +810,7 @@ proc ::CanvasText::Delete {wcan {offset 0}} {
 	set undo [list ::CanvasUtils::Command $w $undocmd]    
 	eval $redo
 	undo::add [::WB::GetUndoToken $wcan] $undo $redo
+	::CanvasFile::SetUnsaved $wcan
     }
 }
 

@@ -5,6 +5,12 @@
 
 Not to mention all bugfixes and rewrites.
 
+Coccinella-0.96.8 (200804??)
+
+ o all toolbars collapsable on mac
+ o menu option to select what to display in status line (JID, status, host)
+
+
 Coccinella-0.96.6 (20080312)
 
  o all universal builds on macosx

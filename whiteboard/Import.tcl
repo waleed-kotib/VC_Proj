@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Import.tcl,v 1.35 2008-02-06 13:57:25 matben Exp $
+# $Id: Import.tcl,v 1.36 2008-03-25 08:52:31 matben Exp $
 
 package require http
 package require httpex
@@ -361,6 +361,7 @@ proc ::Import::DoImport {wcan opts args} {
 	set redo [concat [list ::Import::DoImport $wcan $opts -addundo 0] $args]
 	set undo [list ::CanvasUtils::Command $w [list delete $useTag]]
 	undo::add [::WB::GetUndoToken $wcan] $undo $redo
+	::CanvasFile::SetUnsaved $wcan
     }
     return $errMsg
 }
@@ -1738,6 +1739,7 @@ proc ::Import::ResizeImage {wcan zoomFactor which newTag {where all}} {
 	set undo [list ::CanvasUtils::GenCommandExList $w $undocmdExList]
 	eval $redo
 	undo::add [::WB::GetUndoToken $wcan] $undo $redo
+	::CanvasFile::SetUnsaved $wcan
     }
     ::CanvasCmd::DeselectAll $wcan
     

@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.37 2007-12-22 14:52:22 matben Exp $
+# $Id: dialog.tcl,v 1.38 2008-03-25 08:52:31 matben Exp $
 
 # Public commands:
 # 
@@ -239,13 +239,13 @@ snit::widget ui::dialog::widget {
 
 	# Built-in button types:
 	#
-	StockButton ok 	   -text [::msgcat::mc OK]
-	StockButton cancel -text [::msgcat::mc Cancel]
-	StockButton yes	   -text [::msgcat::mc Yes]
-	StockButton no	   -text [::msgcat::mc No]
-	StockButton retry  -text [::msgcat::mc Retry]
-	StockButton abort  -text [::msgcat::mc Abort]
-	StockButton ignore -text [::msgcat::mc Ignore]
+	StockButton ok 	    -text [::msgcat::mc OK]
+	StockButton cancel  -text [::msgcat::mc Cancel]
+	StockButton yes	    -text [::msgcat::mc Yes]
+	StockButton no	    -text [::msgcat::mc No]
+	StockButton retry   -text [::msgcat::mc Retry]
+	StockButton abort   -text [::msgcat::mc Abort]
+	StockButton ignore  -text [::msgcat::mc Ignore]
 
 	# Built-in dialog types:
 	#
@@ -262,8 +262,8 @@ snit::widget ui::dialog::widget {
 	StockDialog abortretryignore  \
 	  -icon question -buttons {abort retry ignore} -cancel cancel
 	
-	array set wmArr [wm attributes .]
-	if {[info exists wmArr(-alpha)]} {
+	array set wmA [wm attributes .]
+	if {[info exists wmA(-alpha)]} {
 	    set wmalpha 1
 	} else {
 	    set wmalpha 0

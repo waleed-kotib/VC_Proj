@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.97 2007-12-05 08:40:25 matben Exp $
+# $Id: NewMsg.tcl,v 1.98 2008-03-25 08:52:31 matben Exp $
 
 package require ui::entryex
 
@@ -388,11 +388,12 @@ proc ::NewMsg::Build {args} {
 	if {$config(ui,aqua-text)} {
 	    frame $wtxt
 	    set wcont [::UI::Text $wtext -height 8 -width 48 -wrap word \
+	      -undo 1 -autoseparators 1 \
 	      -yscrollcommand [list ::UI::ScrollSet $wysc \
 	      [list grid $wysc -column 1 -row 0 -sticky ns]]]
 	} else {
 	    frame $wtxt -bd 1 -relief sunken
-	    text $wtext -height 8 -width 48 -wrap word \
+	    text $wtext -height 8 -width 48 -wrap word -undo 1 -autoseparators 1 \
 	      -yscrollcommand [list ::UI::ScrollSet $wysc \
 	      [list grid $wysc -column 1 -row 0 -sticky ns]]
 	    set wcont $wtext
@@ -405,6 +406,17 @@ proc ::NewMsg::Build {args} {
 	grid  $wysc   -column 1 -row 0 -sticky ns
 	grid columnconfigure $wtxt 0 -weight 1
 	grid rowconfigure $wtxt 0 -weight 1
+	
+	bind $wtext <$this(modkey)-Key-z> {
+	    puts "modified=[%W edit modified]"
+	    if {[%W edit modified]} {
+		%W edit undo 
+	    }
+	}
+	bind $wtext <$this(modkey)-Key-Z> { 
+	    puts "modified=[%W edit modified]"
+	    catch {%W edit redo}
+	}
 	
 	hooks::run textSpellableNewHook $wtext
     }

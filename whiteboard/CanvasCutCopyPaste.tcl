@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasCutCopyPaste.tcl,v 1.10 2007-07-19 06:28:18 matben Exp $
+# $Id: CanvasCutCopyPaste.tcl,v 1.11 2008-03-25 08:52:31 matben Exp $
 
 package provide CanvasCutCopyPaste 1.0
 
@@ -316,6 +316,8 @@ proc ::CanvasCCP::PasteSingleOnCanvas {wcan cmd} {
 	    set undo [list ::CanvasUtils::Command $w $undocmd]
 	    eval $redo
 	    undo::add [::WB::GetUndoToken $wcan] $undo $redo
+
+	    ::CanvasFile::SetUnsaved $wcan
 	}
     }
     

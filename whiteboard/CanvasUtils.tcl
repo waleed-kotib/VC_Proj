@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasUtils.tcl,v 1.47 2008-03-24 15:10:51 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.48 2008-03-25 08:52:31 matben Exp $
 
 package require sha1
 package require can2svg
@@ -1144,6 +1144,7 @@ proc ::CanvasUtils::CreateItem {w args} {
     
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
 }
 
 # CanvasUtils::ItemConfigure --
@@ -1181,6 +1182,7 @@ proc ::CanvasUtils::ItemConfigure {wcan id args} {
       [list [list $undocmd local] [list $undocmdremote remote]]]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
     
     # If selected, redo the selection to fit.
     if {[::CanvasDraw::IsSelected $wcan $id]} {
@@ -1217,6 +1219,7 @@ proc ::CanvasUtils::ItemCoords {wcan id coords} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
     
     # If selected, redo the selection to fit.
     set idsMarker [$wcan find withtag id$id]
@@ -1237,6 +1240,7 @@ proc ::CanvasUtils::AddTag {wcan id tag} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
 }
 
 proc ::CanvasUtils::DeleteTag {wcan id tag} {
@@ -1250,6 +1254,7 @@ proc ::CanvasUtils::DeleteTag {wcan id tag} {
     set undo [list ::CanvasUtils::Command $w $undocmd]
     eval $redo
     undo::add [::WB::GetUndoToken $wcan] $undo $redo
+    ::CanvasFile::SetUnsaved $wcan
 }
 
 # CanvasUtils::DuplicateItem --
@@ -2021,6 +2026,7 @@ proc ::CanvasUtils::HandleCanvasDraw {w instr args} {
 	set redo [list ::CanvasUtils::Command $w $instr]
 	set undo [GetUndoCommand $w $instr]
 	undo::add [::WB::GetUndoToken $wServCan] $undo $redo
+	::CanvasFile::SetUnsaved $wcan
     }
     
     eval {::hooks::run whiteboardPreCanvasDraw $w $bsinstr} $args
