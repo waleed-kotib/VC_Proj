@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.238 2008-03-25 14:54:25 matben Exp $
+# $Id: GroupChat.tcl,v 1.239 2008-03-25 16:12:35 matben Exp $
 
 package require Create
 package require Enter
@@ -945,12 +945,12 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     # Text send.
     if {$config(ui,aqua-text)} {
 	frame $wfrsend -height 40 -width 300
-	set wscont [::UI::Text $wtextsend -height 2 -width 1 -wrap word \
+	set wscont [::UI::Text $wtextsend -height 2 -width 1 -undo 1 -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wyscsend \
 	  [list grid $wyscsend -column 1 -row 0 -sticky ns]]]
     } else {
 	frame $wfrsend -height 40 -width 300 -bd 1 -relief sunken
-	text  $wtextsend -height 2 -width 1 -wrap word \
+	text  $wtextsend -height 2 -width 1 -undo 1 -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wyscsend \
 	  [list grid $wyscsend -column 1 -row 0 -sticky ns]]
 	set wscont $wtextsend

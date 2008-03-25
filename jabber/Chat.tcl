@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.284 2008-03-25 14:54:25 matben Exp $
+# $Id: Chat.tcl,v 1.285 2008-03-25 16:12:35 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1667,12 +1667,12 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     # Text send.
     if {$config(ui,aqua-text)} {
 	frame $wtxtsnd
-	set wcont2 [::UI::Text  $wtextsnd -height 2 -width 1 -wrap word \
+	set wcont2 [::UI::Text  $wtextsnd -height 2 -width 1 -undo 1 -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wyscsnd \
 	  [list grid $wyscsnd -column 1 -row 0 -sticky ns]]]
     } else {
 	frame $wtxtsnd -bd 1 -relief sunken
-	text  $wtextsnd -height 2 -width 1 -wrap word \
+	text  $wtextsnd -height 2 -width 1 -undo 1 -wrap word \
 	  -yscrollcommand [list ::UI::ScrollSet $wyscsnd \
 	  [list grid $wyscsnd -column 1 -row 0 -sticky ns]]
 	set wcont2 $wtextsnd
