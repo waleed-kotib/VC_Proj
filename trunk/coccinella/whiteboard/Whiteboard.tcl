@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.92 2008-03-25 08:52:31 matben Exp $
+# $Id: Whiteboard.tcl,v 1.93 2008-03-26 07:32:59 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -837,7 +837,7 @@ proc ::WB::BuildWhiteboard {w args} {
     }
     
     # Make the tool buttons and invoke the one from the prefs file.
-    CreateAllButtons $w
+    BuildAllButtons $w
     
     # ...and the drawing canvas.
     NewCanvas $wapp(frcan) -background $state(bgColCan)
@@ -2395,7 +2395,7 @@ proc ::WB::DisableShortcutButtonPad {w} {
     }
 }
 
-# WB::CreateAllButtons --
+# WB::BuildAllButtons --
 #
 #       Makes the toolbar button pad for the drawing tools.
 #       
@@ -2405,7 +2405,7 @@ proc ::WB::DisableShortcutButtonPad {w} {
 # Results:
 #       tool buttons created and mapped
 
-proc ::WB::CreateAllButtons {w} {
+proc ::WB::BuildAllButtons {w} {
     global  prefs this
     
     variable btNo2Name 
@@ -2454,10 +2454,10 @@ proc ::WB::CreateAllButtons {w} {
     BuildToolPopupFontMenu $w $prefs(canvasFonts)
     
     # Color selector.
-    CreateColorSelector $w 
+    BuildColorSelector $w 
 }
 
-proc ::WB::CreateColorSelector {w} {
+proc ::WB::BuildColorSelector {w} {
     variable wbicons
     upvar ::WB::${w}::state state
     upvar ::WB::${w}::wapp wapp
@@ -2494,9 +2494,9 @@ proc ::WB::CreateColorSelector {w} {
     place $wswap -x 46 -y  3
 
     if {![string equal $opts(-state) "disabled"]} {
-	bind $wfg   <Button-1> [list [namespace current]::ColorSelector $w $fg]
-	bind $wbw   <Button-1> [list [namespace current]::ResetColorSelector $w]
-	bind $wswap <Button-1> [list [namespace current]::SwitchBgAndFgCol $w]
+	bind $wfg   <Button-1> [list [namespace current]::OnColorSelector $w]
+	bind $wbw   <Button-1> [list [namespace current]::OnColorSelectorReset $w]
+	bind $wswap <Button-1> [list [namespace current]::OnColorSelectorSwitch $w]
     }
     set wapp(colSel)    $wfg
     set wapp(colSelBg1) $wbg1
@@ -2572,7 +2572,7 @@ proc ::WB::DoToolPopup {w wbutton name} {
     }
 }
 
-proc ::WB::SwitchBgAndFgCol {w} {
+proc ::WB::OnColorSelectorSwitch {w} {
     
     upvar ::WB::${w}::state state
     upvar ::WB::${w}::wapp wapp
@@ -2585,29 +2585,28 @@ proc ::WB::SwitchBgAndFgCol {w} {
     set state(bgCol) $tmp
 }
 
-# WB::ColorSelector --
+# WB::OnColorSelector --
 #
 #       Callback procedure for the color selector in the tools frame.
 #       
 # Arguments:
-#       col      initial color value.
 #       
 # Results:
 #       color dialog shown.
 
-proc ::WB::ColorSelector {w col} {
+proc ::WB::OnColorSelector {w} {
     
     upvar ::WB::${w}::state state
     upvar ::WB::${w}::wapp wapp
 
-    set col [tk_chooseColor -initialcolor $col]
+    set col [tk_chooseColor -initialcolor $state(fgCol)]
     if {$col ne ""} {
 	set state(fgCol) $col
 	$wapp(colSel) configure -bg $state(fgCol)
     }
 }
 
-proc ::WB::ResetColorSelector {w} {
+proc ::WB::OnColorSelectorReset {w} {
 
     upvar ::WB::${w}::state state
     upvar ::WB::${w}::wapp wapp
