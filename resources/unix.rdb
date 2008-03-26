@@ -32,6 +32,7 @@
 *Menu.background:                    #dcdad5
 *Menu.borderWidth:                   1
 *Menu.activeBorderWidth:             1
+*JMain.Menu.borderWidth:             0
 *Scrollbar.borderWidth:              1
 *Scrollbar.width:                    12
 *Scrollbar.troughColor:              #bdbdbd
