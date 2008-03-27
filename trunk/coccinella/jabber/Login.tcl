@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.137 2008-01-04 15:37:29 matben Exp $
+# $Id: Login.tcl,v 1.138 2008-03-27 15:15:26 matben Exp $
 
 package provide Login 1.0
 
@@ -39,14 +39,25 @@ namespace eval ::Login:: {
     ::hooks::register launchFinalHook ::Login::LaunchHook
     
     # Config settings.
+    # Controls which fields in login dialog to use.
     set ::config(login,style) "jid"  ;# jid | username | parts | jidpure
+    
+    # Shall we allow 'more' options?
     set ::config(login,more)         1
     set ::config(login,profiles)     0 ;# this leads to an inconsistent state!
+    
+    # Shall dialog options be saved to profile automatically?
     set ::config(login,autosave)     0
     set ::config(login,autoregister) 0
+    
+    # Shall we use DNS SRV/TXT lookups?
     set ::config(login,dnssrv)       1
     set ::config(login,dnstxthttp)   1
     set ::config(login,show-head)    1
+
+    # Shall we ask the user to save the current options as default for this
+    # profile if different?
+    set ::config(login,ask-save-profile) 0
 }
 
 # Login::Dlg --
@@ -505,6 +516,32 @@ proc ::Login::DoLogin {} {
     # Should login settings be automatically saved to profile.
     if {$config(login,autosave)} {
 	eval {::Profiles::Set $profile $server $username $password} $opts
+    }
+    
+    # Shall we ask the user to save the current options as default for this
+    # profile if different?
+    if {0 && $config(login,ask-save-profile)} {
+	set diffs 0
+	set prof [::Profiles::GetProfile $profile]
+	puts "prof=$prof"
+	lassign [lrange $prof 0 2] h u p
+	if {$u$h ne $server$username} {
+	    set diffs 1
+	} else {
+	    array set tmp1A $opts
+	    array set tmp2A [lrange $prof 3 end]
+	    if {![arraysequal tmp1A tmp2A]} {
+		set diffs 1
+	    }
+	}
+	if {$diffs} {
+	    set msg "Your current login settings differ from your profile settings. Do you want to save them to your profile?"
+	    set ans [tk_messageBox -title "" -type yesno -icon ask \
+	      -message $msg]
+	    if {$ans eq "yes"} {
+		eval {::Profiles::Set $profile $server $username $password} $opts
+	    }	
+	}
     }
     
     set finished 1

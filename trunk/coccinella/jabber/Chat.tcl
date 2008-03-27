@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements chat type of UI for jabber.
 #      
-#  Copyright (c) 2001-2007  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.285 2008-03-25 16:12:35 matben Exp $
+# $Id: Chat.tcl,v 1.286 2008-03-27 15:15:26 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -263,6 +263,16 @@ proc ::Chat::OnMenu {} {
 	    }
 	} else {
 	    StartThreadDlg
+	}
+    }
+}
+
+proc ::Chat::StartThreadJIDList {jidL} {
+
+    foreach jid $jidL {
+	if {[::Jabber::RosterCmd isavailable $jid]} {
+	    set jid2 [jlib::barejid $jid]
+	    StartThread $jid2
 	}
     }
 }
@@ -3800,10 +3810,15 @@ proc ::Chat::BuildHistory {dlgtoken} {
 }
 
 proc ::Chat::BuildHistoryForJid {jid} {
-    
-    jlib::splitjid $jid jid2 res
+    set jid2 [jlib::barejid $jid]
     ::History::BuildHistory $jid2 chat -class Chat \
       -tagscommand ::Chat::ConfigureTextTags
+}
+
+proc ::Chat::HistoryForJIDList {jidL} {
+    foreach jid $jidL {
+	BuildHistoryForJid $jid
+    }
 }
 
 # Support for XEP-0085 ChatState ...............................................

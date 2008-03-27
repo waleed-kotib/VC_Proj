@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.27 2007-11-17 07:40:52 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.28 2008-03-27 15:15:26 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -45,7 +45,7 @@ proc ::BuddyPounce::Init {} {
     
     # Register popmenu entry.
     set menuDef {
-	command mContactActions... {::BuddyPounce::Build $clicked $jid $group}
+	command mContactActions... {::BuddyPounce::Build $clicked $jidL $group}
     }
     set menuType {
 	mContactActions... {group user}
@@ -124,7 +124,7 @@ proc ::BuddyPounce::GetGroupPrefsArr { } {
 #       
 #       typeselected:   user, wb, group, ""
 
-proc ::BuddyPounce::Build {typeselected item group} {    
+proc ::BuddyPounce::Build {typeselected item groupL} {    
     global  this prefs
     
     variable uid
@@ -132,7 +132,7 @@ proc ::BuddyPounce::Build {typeselected item group} {
     variable events
     variable audioSuffixes
     
-    ::Debug 2 "::BuddyPounce::Build typeselected=$typeselected, item=$item"
+    ::Debug 2 "::BuddyPounce::Build typeselected=$typeselected, item=$item, groupL=$groupL"
 
     # Initialize the state variable, an array, that keeps is the storage.
     
@@ -143,7 +143,9 @@ proc ::BuddyPounce::Build {typeselected item group} {
     set w $wdlg$uid
     set state(w) $w
     
-    if {[lsearch $typeselected user] >= 0} {
+    if {[lsearch $typeselected group] >= 0} {
+	set clicked group
+    } elseif {[lsearch $typeselected user] >= 0} {
 	set clicked user
     } else {
 	set clicked $typeselected
@@ -160,6 +162,7 @@ proc ::BuddyPounce::Build {typeselected item group} {
 	    set title "[mc {Contact Actions}]: $jid"
 	}
 	group {
+	    set group [lindex $groupL 0]
 	    set state(group) $group
 	    set state(type)  group
 	    set msg [mc budpounce-group $group]

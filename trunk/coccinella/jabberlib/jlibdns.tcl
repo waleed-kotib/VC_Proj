@@ -9,7 +9,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: jlibdns.tcl,v 1.8 2008-03-18 09:01:41 matben Exp $
+# $Id: jlibdns.tcl,v 1.9 2008-03-27 15:15:26 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -179,6 +179,7 @@ if {0} {
     jlib::dns::get_addr_port jabber.ru cb
     jlib::dns::get_addr_port jabber.com cb
     jlib::dns::get_addr_port jabber.cz cb
+    jlib::dns::get_addr_port tigase.org cb
     # Missing 
     jlib::dns::get_http_poll_url gmail.com cb    
     jlib::dns::get_http_poll_url jabber.ru cb    

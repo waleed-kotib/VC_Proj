@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: MeBeam.tcl,v 1.5 2007-11-17 07:40:52 matben Exp $
+# $Id: MeBeam.tcl,v 1.6 2008-03-27 15:15:26 matben Exp $
 
 namespace eval ::MeBeam {
     
@@ -49,9 +49,7 @@ proc ::MeBeam::Init {} {
     component::register MeBeam
 }
 
-proc ::MeBeam::RosterCmd {jid} {
-    puts "::MeBeam::RosterCmd jid=$jid"
-    
+proc ::MeBeam::RosterCmd {jid} {    
     Start $jid
 }
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JingleIax.tcl,v 1.40 2007-12-24 09:31:14 matben Exp $
+# $Id: JingleIax.tcl,v 1.41 2008-03-27 15:15:26 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -167,19 +167,22 @@ proc ::JingleIAX::LogoutHook { } {
 # 
 #       Active/Disable the menu entry depending on JID.
 
-proc ::JingleIAX::RosterPostCommandHook {m jidlist clicked status} {
+proc ::JingleIAX::RosterPostCommandHook {m jidL clicked presL} {
     variable xmlns
 
-    Debug "RosterPostCommandHook jidlist=$jidlist, clicked=$clicked, status=$status"
+    Debug "RosterPostCommandHook jidL=$jidL, clicked=$clicked, presL=$presL"
 
-    set jid [lindex $jidlist 0]
+    if {[llength $jidL] != 1} {
+	return
+    }
+    set jid [lindex $jidL 0]
     set midx [::AMenu::GetMenuIndex $m mCall]
     if {$midx eq ""} {
 	# Probably a submenu.
 	return
     }
     $m entryconfigure $midx -state disabled
-    if {$status ne "available"} {
+    if {$presL ne "available"} {
 	return
     }
     
