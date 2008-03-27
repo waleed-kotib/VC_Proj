@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.240 2008-03-25 14:54:25 matben Exp $
+# $Id: JUI.tcl,v 1.241 2008-03-27 15:24:49 matben Exp $
 
 package provide JUI 1.0
 
@@ -1208,7 +1208,9 @@ proc ::JUI::RosterSelectionHook {} {
 	lassign [lindex $tags 0] mtag jid
 	if {$mtag eq "jid"} {
 	    if {[::Jabber::RosterCmd isavailable $jid]} {
-		set state normal
+		if {![::Roster::IsTransportEx $jid]} {	
+		    set state normal
+		}
 	    }
 	}
     }
