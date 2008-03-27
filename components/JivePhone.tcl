@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.33 2008-02-13 10:06:05 matben Exp $
+# $Id: JivePhone.tcl,v 1.34 2008-03-27 15:15:26 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -374,19 +374,22 @@ proc ::JivePhone::MessageHook {xmldata uuid} {
     return
 }
 
-proc ::JivePhone::RosterPostCommandHook {m jidlist clicked status} {
+proc ::JivePhone::RosterPostCommandHook {m jidL clicked presL} {
     variable state
     
-    set jid3 [lindex $jidlist 0]
+    set jid3 [lindex $jidL 0]
     jlib::splitjid $jid3 jid2 -
     set jid $jid2
     
-    Debug "RosterPostCommandHook $jidlist $clicked $status"
+    Debug "RosterPostCommandHook $jidL $clicked $presL"
 
     if {$clicked ne "user"} {
 	return
     }
-    if {$status ne "available"} {
+    if {[llength $jidL] != 1} {
+	return
+    }
+    if {[lsearch $presL "available"] < 0} {
 	return
     }
     if {[info exists state(phone,$jid]} {	

@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: connect.tcl,v 1.38 2008-03-23 13:48:29 matben Exp $
+# $Id: connect.tcl,v 1.39 2008-03-27 15:15:26 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -561,7 +561,7 @@ proc jlib::connect::http_init {jlibname} {
 proc jlib::connect::tcp_connect {jlibname} {    
     upvar ${jlibname}::connect::state state
     
-    debug "jlib::connect::tcp_connect"
+    debug "jlib::connect::tcp_connect $state(host) $state(port)"
 
     set state(state) initnetwork
     if {$state(-command) ne {}} {

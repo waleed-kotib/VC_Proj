@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.102 2008-03-03 14:39:18 matben Exp $
+# $Id: RosterTree.tcl,v 1.103 2008-03-27 15:15:26 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1098,66 +1098,48 @@ proc ::RosterTree::OnPopup {x y} {
 
     ::balloonhelp::cancel
     
-    set tags    [list]
-    set clicked [list]
-    set status  [list]
     set jidL    [list]
-    set group   [list]
-
-    set id [$T identify $x $y]
+    set itemL   [list]
+    set groupL  [list]
+    
+    # 1: Assemble itemL
+    set id [$T identify $x $y]    
     if {[lindex $id 0] eq "item"} {
+	set selected [$T selection get]
 	set item [lindex $id 1]
-	set tags [GetTagOfItem $item]
-	set mtag [lindex $tags 0]
 
+	# If clicked an unselected item, pick this.
+	# If clicked any selected, pick the complete selection.
+	if {[lsearch $selected $item] >= 0} {
+	    set itemL $selected
+	} else {
+	    set itemL [list $item]
+	}
+    }
+    
+    # 2: From itemL, collect jidL    
+    foreach item $itemL {
+     	set tags [GetTagOfItem $item]
+	set mtag [lindex $tags 0]
+	
 	switch -- $mtag {
 	    jid {
 		set jid [lindex $tags 1]
-		if {[$jstate(jlib) roster isavailable $jid]} {
-		    set status available
-		} else {
-		    set status unavailable
+		lappend jidL $jid
+	    }
+	    group {
+		lappend groupL [lindex $tags 1]
+		set jidL [concat $jidL [FindAllJIDInItem $item]]
+	    }
+	    head {
+		if {[regexp {(available|unavailable)} [lindex $tags 1]]} {
+		    lappend groupL [lindex $tags 1]
+		    set jidL [concat $jidL [FindAllJIDInItem $item]]
 		}
 	    }
 	}
     }
-    
-    # The commands require a number of variables to be defined:
-    #       jid, jid3, group, clicked...
-    # 
-    # These may be lists of jid's if not an individual user was clicked.
-    # We use jid3 for the actual content even if only jid2, 
-    # and strip off any resource parts for jid (jid2).
-    set mtag [lindex $tags 0]
-    
-    switch -- $mtag {
-	jid {
-	    set jid3 [lindex $tags 1]
-	    set jidL [list $jid3]
-	    set istrpt [::Roster::IsTransportEx $jid3]
-	    if {$istrpt} {
-		lappend clicked trpt
-	    } else {
-		lappend clicked user
-	    }
-	    if {[::Roster::IsCoccinella $jid3]} {
-		lappend clicked wb
-	    }
-	}
-	group {
-	    lappend clicked group
-	    set group [lindex $tags 1]
-	    set jidL [FindAllJIDInItem $item]
-	}
-	head {
-	    if {[regexp {(available|unavailable)} [lindex $tags 1]]} {
-		lappend clicked head
-		set jidL [FindAllJIDInItem $item]
-	    }
-	}
-    }
-    
-    ::Roster::DoPopup $jidL $clicked $status $group $x $y
+    ::Roster::DoPopup $jidL $groupL $x $y
 }
 
 proc ::RosterTree::FindAllJIDInItem {item} {

@@ -7,7 +7,7 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: notify.tcl,v 1.2 2008-03-24 13:55:50 matben Exp $
+#  $Id: notify.tcl,v 1.3 2008-03-27 15:15:26 matben Exp $
 
 package require Tk 8.5
 package require tkpath 0.2.8 ;# switch to 0.3 later on
@@ -17,7 +17,10 @@ package require ui::util
 
 package provide ui::notify 0.1
 
-namespace eval ui::notify {}
+namespace eval ui::notify {
+
+    option add *Growl*takeFocus 0
+}
 
 interp alias {} ui::notify {} ui::notify::widget
 
@@ -49,6 +52,7 @@ snit::widget ui::notify::widget {
     variable ttlID
     variable canvas
     variable position
+    variable prevFocus
     
     typeconstructor {
 	
@@ -95,6 +99,9 @@ snit::widget ui::notify::widget {
 	array set fontA [font actual TkTooltipFont]
 	set family2 $fontA(-family)
 	set fsize2 $fontA(-size)
+	
+	set prevFocus [focus]
+	puts "prevFocus=$prevFocus"
 	
  	set opts [list]
  	switch -- [tk windowingsystem] {
@@ -145,7 +152,7 @@ snit::widget ui::notify::widget {
 # 	wm geometry $win +800+400
 	
 	$self Position
-        bind $win <Map> [list $self Map]
+        bind $win <FocusIn> [list $self FocusIn]
 	
 	$self FadeIn {0.1 0.2 0.3 0.4 0.5 0.6 0.8 0.9 1.0}
     }
@@ -162,9 +169,12 @@ snit::widget ui::notify::widget {
 	}
     }
     
-    method Map {} {
+    method FocusIn {} {
 	
-	puts "Map focus=[focus]"
+	puts "FocusIn focus=[focus]"
+	if {[winfo exists $prevFocus]} {
+	    focus $prevFocus
+	}
     }
     
     method Position {} {

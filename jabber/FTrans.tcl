@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the UI for file-transfer.
 #      
-#  Copyright (c) 2005-2007  Mats Bengtsson
+#  Copyright (c) 2005-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.32 2008-02-06 13:57:25 matben Exp $
+# $Id: FTrans.tcl,v 1.33 2008-03-27 15:15:26 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -351,7 +351,17 @@ snit::widget ::FTrans::SendDialog {
     }
 }
 
-proc ::FTrans::Nop {args} { }
+proc ::FTrans::Nop {args} {}
+
+proc ::FTrans::SendJIDList {jidL} {
+    upvar ::Jabber::jstate jstate
+    
+    foreach jid $jidL {
+	if {[$jstate(jlib) roster isavailable $jid]} {
+	    Send $jid
+	}
+    }
+}
 
 # FTrans::Send --
 # 

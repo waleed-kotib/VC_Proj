@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the user info dialog with help of VCard etc.
 #      
-#  Copyright (c) 2005-2007  Mats Bengtsson
+#  Copyright (c) 2005-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.34 2007-12-20 14:01:26 matben Exp $
+# $Id: UserInfo.tcl,v 1.35 2008-03-27 15:15:26 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -33,6 +33,12 @@ namespace eval ::UserInfo::  {
     variable uid 0
     
     set ::config(userinfo,disco) 0
+}
+
+proc ::UserInfo::GetJIDList {jidL} {
+    foreach jid $jidL {
+	Get $jid
+    }
 }
 
 # UserInfo::Get --
@@ -58,7 +64,7 @@ proc ::UserInfo::Get {jid {node ""}} {
     }
     upvar ${token}::priv  priv
     
-    jlib::splitjid $jid jid2 res
+    set jid2 [jlib::barejid $jid]
 
     set avail [::Jabber::RosterCmd isavailable $jid]
     set room  [::Jabber::Jlib service isroom $jid2]

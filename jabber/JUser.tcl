@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the UI for adding and editing users.
 #      
-#  Copyright (c) 2004-2007  Mats Bengtsson
+#  Copyright (c) 2004-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.51 2008-03-07 10:29:29 matben Exp $
+# $Id: JUser.tcl,v 1.52 2008-03-27 15:15:26 matben Exp $
 
 package provide JUser 1.0
 
@@ -419,6 +419,12 @@ proc ::JUser::CloseCmd {wclose} {
 
 #--- The Edit section ----------------------------------------------------------
 
+proc ::JUser::EditJIDList {jidL} {
+    foreach jid $jidL {
+	EditDlg $jid
+    }
+}
+
 # JUser::EditDlg --
 # 
 #       Dispatcher for edit dialog.
@@ -455,6 +461,25 @@ proc ::JUser::EditTransportDlg {jid} {
     ::ui::dialog -title [mc Info] -type ok -message $msg -icon info
 }
 
+proc ::JUser::EditGetAllTokens {} {    
+    return [info vars [namespace current]::dlg*]
+}
+
+proc ::JUser::EditHaveDlgForJID {jid} {
+    return [llength [EditGetTokenForJID $jid]]
+}
+
+proc ::JUser::EditGetTokenForJID {jid} {
+    foreach token [EditGetAllTokens] {
+	variable $token
+	upvar 0 $token state	
+	if {[info exists state(jid)] && [jlib::jidequal $jid $state(jid)]} {
+	    return $token
+	}
+    }
+    return
+}
+
 # JUser::EditUserDlg --
 # 
 #       Edit user dialog.
@@ -464,6 +489,14 @@ proc ::JUser::EditUserDlg {jid} {
 
     variable uid
     upvar ::Jabber::jstate jstate
+    
+    # Guarantee only single dialog per JID.
+    if {[llength [set token [EditGetTokenForJID $jid]]]} {
+	variable $token
+	upvar 0 $token state	
+	raise $state(w)
+	return
+    }
     
     # Initialize the state variable, an array.    
     set token [namespace current]::dlg[incr uid]
@@ -655,13 +688,10 @@ proc ::JUser::EditUserDlg {jid} {
     } $wbox.msg $w]    
     after idle $script
 
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-
-    set ans [expr {($state(finished) <= 0) ? "cancel" : "edit"}]
-    ::JUser::Free $token
+    bind $w <Destroy> \
+      +[subst { if {"%W" eq "$w"} { [namespace code [list Free $token]] } }]
     
-    return $ans
+    return $token
 }
 
 proc ::JUser::CancelEdit {token} {

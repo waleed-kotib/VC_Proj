@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.236 2008-03-07 10:29:29 matben Exp $
+# $Id: Roster.tcl,v 1.237 2008-03-27 15:15:26 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -118,15 +118,15 @@ proc ::Roster::InitMenus {} {
       
     # Standard popup menu.
     set mDefs {
-	{command     mMessage...      {::NewMsg::Build -to $jid -tolist $jidlist} }
-	{command     mChat...         {::Chat::StartThread $jid} }
-	{command     mSendFile...     {::FTrans::Send $jid3} }
+	{command     mMessage...      {::NewMsg::Build -to $jid -tolist $jid2L} }
+	{command     mChat...         {::Chat::StartThreadJIDList $jidL} }
+	{command     mSendFile...     {::FTrans::SendJIDList $jidL} }
 	{separator}
 	{command     mAddContact...   {::JUser::NewDlg} }
-	{command     mEditContact...  {::JUser::EditDlg $jid} }
-	{command     mBusinessCard... {::UserInfo::Get $jid3} }
-	{command     mHistory...      {::Chat::BuildHistoryForJid $jid} }
-	{command     mRemoveContact   {::Roster::SendRemove $jid} }
+	{command     mEditContact...  {::JUser::EditJIDList $jid2L} }
+	{command     mBusinessCard... {::UserInfo::GetJIDList $jid2L} }
+	{command     mHistory...      {::Chat::HistoryForJIDList $jidL} }
+	{command     mRemoveContact   {::Roster::RemoveJIDList $jidL} }
 	{separator}
 	{cascade     mShow            {
 	    {check     mOffline       {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)} }
@@ -144,26 +144,29 @@ proc ::Roster::InitMenus {} {
 	{command     mRefresh         {::Roster::Refresh} }
     }
     set mTypes {
-	{mMessage...    {head group user}     }
-	{mChat...       {user available}      }
-	{mWhiteboard    {wb available}        }
-	{mSendFile...   {user available}      }
-	{mAddContact... {}                    }
-	{mEditContact...  {user}              }
-	{mBusinessCard... {user}              }
-	{mHistory...    {user always}         }
-	{mRemoveContact {user}                }
-	{mShow          {normal}           {
-	    {mOffline     {normal}            }
-	    {mTransports  {normal}            }
-	    {mBackgroundImage... {normal}     }
+	{mMessage...      {user}                }
+	{mChat...         {user available}      }
+	{mWhiteboard      {wb available}        }
+	{mSendFile...     {user available}      }
+	{mAddContact...   {}                    }
+	{mEditContact...  {user}                }
+	{mBusinessCard... {user}                }
+	{mHistory...      {user always}         }
+	{mRemoveContact   {user}                }
+	{mShow            {normal}              {
+	    {mOffline             {normal}          }
+	    {mDoNotDisturb        {normal}          }
+	    {mAway                {normal}          }
+	    {mExtendedAway        {normal}          }
+	    {mTransports          {normal}          }
+	    {mBackgroundImage...  {normal}      }
 	}}
-	{mSort          {}                 {
-	    {mIncreasing  {}                  }
-	    {mDecreasing  {}                  }
+	{mSort            {}                    {
+	    {mIncreasing      {}                    }
+	    {mDecreasing      {}                    }
 	}}
-	{mStyle         {normal}              }
-	{mRefresh       {}                    }
+	{mStyle           {normal}              }
+	{mRefresh         {}                    }
     }
     if {[::Jabber::HaveWhiteboard]} {
 	set mWBDef  {command   mWhiteboard   {::JWB::NewWhiteboardTo $jid3}}
@@ -192,11 +195,11 @@ proc ::Roster::InitMenus {} {
 	{command     mRefresh             {::Roster::Refresh} }
     }  
     set mTypes {
-	{mLastLogin/Activity  {user}                }
-	{mBusinessCard...     {user}                }
+	{mLastLogin/Activity  {trpt}                }
+	{mBusinessCard...     {trpt}                }
 	{mAddContact...       {trpt}                }
-	{mEditContact...      {user}                }
-	{mVersion             {user}                }
+	{mEditContact...      {trpt}                }
+	{mVersion             {trpt}                }
 	{mLoginTrpt           {trpt unavailable}    }
 	{mLogoutTrpt          {trpt available}      }
 	{mUnregister          {trpt}                }
@@ -393,17 +396,28 @@ proc ::Roster::Sort {{item root}} {
 #
 #       Method to remove another user from my roster.
 
-proc ::Roster::SendRemove {jidrm} {    
+proc ::Roster::SendRemove {jid} {    
     upvar ::Jabber::jstate jstate
 
-    ::Debug 2 "::Roster::SendRemove jidrm=$jidrm"
-
-    set jid $jidrm
-
-    set ans [::UI::MessageBox -title [mc {Remove Contact}] \
+    set ans [::UI::MessageBox -title [mc "Remove Contact"] \
       -message [mc jamesswarnremove2] -icon warning -type yesno -default no]
     if {[string equal $ans "yes"]} {
+	set jid [$jstate(jlib) roster getrosterjid $jid]
 	$jstate(jlib) roster send_remove $jid
+    }
+}
+
+proc ::Roster::RemoveJIDList {jidL} {
+    upvar ::Jabber::jstate jstate
+    
+    # @@@ We could use a plural text here.
+    set ans [::UI::MessageBox -title [mc "Remove Contact"] \
+      -message [mc jamesswarnremove2] -icon warning -type yesno -default no]
+    if {[string equal $ans "yes"]} {
+	foreach jid $jidL {
+	    set jid [$jstate(jlib) roster getrosterjid $jid]
+	    $jstate(jlib) roster send_remove $jid
+	}
     }
 }
 
@@ -445,33 +459,36 @@ proc ::Roster::DeRegisterPopupEntry {mLabel} {
 #       
 # Arguments:
 #       jidL        this is a list of actual jid's, can be any form
-#       clicked
-#       status      'available', 'unavailable'
-#       group       name of group if any
-#       
+#
 # Results:
 #       popup menu displayed
 
-proc ::Roster::DoPopup {jidL clicked status group x y} {
+proc ::Roster::DoPopup {jidL groupL x y} {
     global  wDlgs
     variable popMenuDefs
     variable regPopMenuDef
     variable regPopMenuType
     variable wtree
         
-    ::Debug 2 "::Roster::DoPopup jidL=$jidL, clicked=$clicked, status=$status, group=$group"
+    ::Debug 2 "::Roster::DoPopup jidL=$jidL, groupL=$groupL"
 
-    # We always get a list of jids, typically with only one element.
+    # We always get a list of jids, often with only one element.
     set jid3 [lindex $jidL 0]
     set jid2 [jlib::barejid $jid3]
     set jid $jid2
 
-    # The jidlist is expected to be with no resource part.
-    set jidlist [list]
-    foreach u $jidL {
-	lappend jidlist [jlib::barejid $u]
+    # The jid2L is expected to be with no resource part.
+    # @@@ ???
+    set jid2L [list]
+    foreach j $jidL {
+	lappend jid2L [jlib::barejid $j]
     }
-
+    set clicked [FindClickTypesFromJIDList $jidL]
+    if {[llength $groupL]} {
+	lappend clicked group
+    }
+    set presL [FindPresenceFromJIDList $jidL]
+    
     set specialMenu 0
     foreach click $clicked {
 	if {[info exists popMenuDefs(roster,$click,def)]} {
@@ -525,10 +542,11 @@ proc ::Roster::DoPopup {jidL clicked status group x y} {
     set i 0
     destroy $m
     menu $m -tearoff 0 \
-      -postcommand [list ::Roster::PostMenuCmd $m $mType $clicked $jidL $status]
+      -postcommand [list ::Roster::PostMenuCmd $m $mType $clicked $jidL $presL]
         
     ::AMenu::Build $m $mDef \
-      -varlist [list jid $jid jid3 $jid3 jidlist $jidlist clicked $clicked group $group]
+      -varlist [list jid $jid jidL $jidL jid3 $jid3 jid2L $jid2L \
+      clicked $clicked group $groupL]
 
     # This one is needed on the mac so the menu is built before it is posted.
     update idletasks
@@ -539,8 +557,43 @@ proc ::Roster::DoPopup {jidL clicked status group x y} {
     tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
 }
 
-proc ::Roster::PostMenuCmd {m mType clicked jidL status} {
+proc ::Roster::FindClickTypesFromJIDList {jidL} {
+    
+    set clicked [list]
+    foreach jid $jidL {
+	if {[::Roster::IsTransportEx $jid]} {
+	    lappend clicked trpt
+	} else {
+	    lappend clicked user
+	}
+	if {[::Roster::IsCoccinella $jid]} {
+	    lappend clicked wb
+	}
+    }
+    return [lsort -unique $clicked]
+}
 
+proc ::Roster::FindPresenceFromJIDList {jidL} {
+    upvar ::Jabber::jstate jstate
+ 
+    set anyAvail 0
+    set anyUnavail 0
+    set presenceL [list]
+    foreach jid $jidL {
+	if {[$jstate(jlib) roster isavailable $jid]} {
+	    lappend presenceL available
+	    set anyAvail 1
+	} else {
+	    lappend presenceL unavailable
+	    set anyUnavail 1
+	}
+	if {$anyAvail && $anyUnavail} { break }
+    }
+    return [lsort -unique $presenceL]
+}
+
+proc ::Roster::PostMenuCmd {m mType clicked jidL presL} {
+    
     # Special handling of transport login/logout. Hack!
     if {([llength $jidL] == 1) && ([lsearch $clicked trpt] >= 0)} {
 	set midx [::AMenu::GetMenuIndex $m mLoginTrpt]
@@ -560,7 +613,7 @@ proc ::Roster::PostMenuCmd {m mType clicked jidL status} {
     }
     
     foreach mspec $mType {
-	lassign $mspec name type subType
+	lassign $mspec name type subType	    
 	
 	# State of menu entry. 
 	# We use the 'type' and 'clicked' lists to set the state.
@@ -577,16 +630,16 @@ proc ::Roster::PostMenuCmd {m mType clicked jidL status} {
 	    set state normal
 	}
 
-	# If any available/unavailable these must also be fulfilled.
-	if {[lsearch $type available] >= 0} {
-	    if {$status ne "available"} {
-		set state disabled
-	    }
-	} elseif {[lsearch $type unavailable] >= 0} {
-	    if {$status ne "unavailable"} {
-		set state disabled
-	    }
-	}
+	# If any available/unavailable these must also be fulfilled.	
+ 	if {[lsearch $type available] >= 0} {
+ 	    if {[lsearch $presL "available"] < 0} {
+ 		set state disabled
+ 	    }
+ 	} elseif {[lsearch $type unavailable] >= 0} {
+ 	    if {[lsearch $presL "unavailable"] < 0} {
+ 		set state disabled
+ 	    }
+ 	}
 
 	set midx [::AMenu::GetMenuIndex $m $name]
 	if {[string equal $state "disabled"]} {
@@ -594,10 +647,10 @@ proc ::Roster::PostMenuCmd {m mType clicked jidL status} {
 	}
 	if {[llength $subType]} {
 	    set mt [$m entrycget $midx -menu]
-	    PostMenuCmd $mt $subType $clicked $jidL $status
+	    PostMenuCmd $mt $subType $clicked $jidL $presL
 	}
     }
-    ::hooks::run rosterPostCommandHook $m $jidL $clicked $status  
+    ::hooks::run rosterPostCommandHook $m $jidL $clicked $presL  
 }
 
 proc ::Roster::StyleMenu {m} {
@@ -1400,10 +1453,10 @@ proc ::Roster::GetUsersWithSameHost {jid} {
     return $jidL
 }
 
-proc ::Roster::RemoveUsers {jidlist} {
+proc ::Roster::RemoveUsers {jidL} {
     upvar ::Jabber::jstate jstate
 
-    foreach jid $jidlist {
+    foreach jid $jidL {
 	$jstate(jlib) roster send_remove $jid
     }
 }
