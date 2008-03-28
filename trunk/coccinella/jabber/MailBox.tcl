@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.137 2008-03-23 08:42:19 matben Exp $
+# $Id: MailBox.tcl,v 1.138 2008-03-28 10:28:30 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -721,10 +721,12 @@ proc ::MailBox::TreeCtrl {T wysc} {
     $T style layout $S eImageWb -padx 4 -squeeze x -expand ns
 
     set S [$T style create stySubject]
-    $T style elements $S {eBorder eImageEye eText}
+    #$T style elements $S {eBorder eImageEye eText}
+    $T style elements $S {eBorder eImageEye eText eImageWb}
     $T style layout $S eBorder -detach yes -iexpand xy
-    $T style layout $S eImageEye -padx 4 -squeeze x -expand ns
-    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
+    $T style layout $S eImageEye -padx {8 4} -expand ns
+    $T style layout $S eText -padx 4 -sticky w -squeeze x -expand ns -iexpand xy -ipady 2
+    $T style layout $S eImageWb -padx 4 -expand ns -sticky e
 
     set S [$T style create styTag]
     $T style elements $S {eText}
@@ -812,6 +814,8 @@ proc ::MailBox::InsertRow {wtbl row i} {
     if {$haswb} {
 	$T item element configure $item cWhiteboard eImageWb  \
 	  -image $locals(iconWB12)
+	$T item element configure $item cSubject eImageWb  \
+	  -image $locals(iconWB12)    
     }
     if {$isread} {
 	$T item state set $item read
@@ -2014,6 +2018,8 @@ proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
     if {$iswb} {
 	$T item element configure $item cWhiteboard eImageWb  \
 	  -image $locals(iconWB12)
+	$T item element configure $item cSubject eImageWb  \
+	  -image $locals(iconWB12)    
     }
     if {$isread} {
 	$T item state set $item read
