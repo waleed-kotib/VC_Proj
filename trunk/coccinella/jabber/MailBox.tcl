@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.138 2008-03-28 10:28:30 matben Exp $
+# $Id: MailBox.tcl,v 1.139 2008-03-28 15:27:17 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -684,9 +684,9 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set bg [option get $T columnBackground {}]
     set fg [option get $T textColor {}]
 
-    $T column create -tags cWhiteboard -image $locals(iconWB16)  \
-      -itembackground $itemBg -resize 0 -borderwidth $bd -background $bg \
-      -textcolor $fg
+#     $T column create -tags cWhiteboard -image $locals(iconWB16)  \
+#       -itembackground $itemBg -resize 0 -borderwidth $bd -background $bg \
+#       -textcolor $fg
     $T column create -tags cSubject -expand 1 -text [mc Subject] \
       -itembackground $itemBg -button 1 -borderwidth $bd -background $bg \
       -textcolor $fg
@@ -731,7 +731,7 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set S [$T style create styTag]
     $T style elements $S {eText}
     
-    $T column configure cWhiteboard -itemstyle styImage
+#    $T column configure cWhiteboard -itemstyle styImage
     $T column configure cSubject -itemstyle stySubject
     $T column configure cFrom -itemstyle styText
     $T column configure cDate -itemstyle styText
@@ -812,8 +812,8 @@ proc ::MailBox::InsertRow {wtbl row i} {
     $T item lastchild root $item
     
     if {$haswb} {
-	$T item element configure $item cWhiteboard eImageWb  \
-	  -image $locals(iconWB12)
+# 	$T item element configure $item cWhiteboard eImageWb  \
+# 	  -image $locals(iconWB12)
 	$T item element configure $item cSubject eImageWb  \
 	  -image $locals(iconWB12)    
     }
@@ -2016,8 +2016,8 @@ proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
     $T item lastchild root $item
     
     if {$iswb} {
-	$T item element configure $item cWhiteboard eImageWb  \
-	  -image $locals(iconWB12)
+# 	$T item element configure $item cWhiteboard eImageWb  \
+# 	  -image $locals(iconWB12)
 	$T item element configure $item cSubject eImageWb  \
 	  -image $locals(iconWB12)    
     }
