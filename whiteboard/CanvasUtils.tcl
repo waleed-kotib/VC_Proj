@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: CanvasUtils.tcl,v 1.48 2008-03-25 08:52:31 matben Exp $
+# $Id: CanvasUtils.tcl,v 1.49 2008-03-28 08:35:06 matben Exp $
 
 package require sha1
 package require can2svg
@@ -2026,7 +2026,7 @@ proc ::CanvasUtils::HandleCanvasDraw {w instr args} {
 	set redo [list ::CanvasUtils::Command $w $instr]
 	set undo [GetUndoCommand $w $instr]
 	undo::add [::WB::GetUndoToken $wServCan] $undo $redo
-	::CanvasFile::SetUnsaved $wcan
+	::CanvasFile::SetUnsaved $wServCan
     }
     
     eval {::hooks::run whiteboardPreCanvasDraw $w $bsinstr} $args
