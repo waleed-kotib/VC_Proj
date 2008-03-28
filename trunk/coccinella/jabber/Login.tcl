@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.138 2008-03-27 15:15:26 matben Exp $
+# $Id: Login.tcl,v 1.139 2008-03-28 14:30:58 matben Exp $
 
 package provide Login 1.0
 
@@ -525,15 +525,15 @@ proc ::Login::DoLogin {} {
 	set prof [::Profiles::GetProfile $profile]
 	puts "prof=$prof"
 	lassign [lrange $prof 0 2] h u p
-	if {$u$h ne $server$username} {
-	    set diffs 1
-	} else {
-	    array set tmp1A $opts
-	    array set tmp2A [lrange $prof 3 end]
-	    if {![arraysequal tmp1A tmp2A]} {
-		set diffs 1
-	    }
-	}
+# 	if {$u$h ne $server$username} {
+# 	    set diffs 1
+# 	} else {
+# 	    array set tmp1A $opts
+# 	    array set tmp2A [lrange $prof 3 end]
+# 	    if {![arraysequal tmp1A tmp2A]} {
+# 		set diffs 1
+# 	    }
+# 	}
 	if {$diffs} {
 	    set msg "Your current login settings differ from your profile settings. Do you want to save them to your profile?"
 	    set ans [tk_messageBox -title "" -type yesno -icon ask \
