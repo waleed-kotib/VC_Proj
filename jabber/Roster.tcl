@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.237 2008-03-27 15:15:26 matben Exp $
+# $Id: Roster.tcl,v 1.238 2008-03-29 11:55:06 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1253,6 +1253,7 @@ namespace eval ::Roster:: {
 	gadu-gadu   "Gadu-Gadu"
 	tlen        "Tlen"
 	x-tlen      "Tlen"
+	qq          "QQ"
     }
     variable trptToName {
 	jabber      "Jabber"
@@ -1267,6 +1268,7 @@ namespace eval ::Roster:: {
 	x-gadugadu  "Gadu-Gadu"
 	tlen        "Tlen"
 	x-tlen      "Tlen"
+	qq          "QQ"
     }
     variable nameToTrpt {
 	"Jabber"           xmpp
@@ -1278,6 +1280,7 @@ namespace eval ::Roster:: {
 	"Gadu-Gadu"        x-gadugadu
 	"Gadu-Gadu"        gadu-gadu
 	"Tlen"             tlen
+	"QQ"               qq
     }
     
     variable  trptToNameArr
@@ -1336,11 +1339,11 @@ proc ::Roster::GetAllTransportJids {} {
     return [lsearch -all -inline -not $alltrpts $jstate(server)]
 }
 
-# Roster::GetTransportNames --
+# Roster::GetTransportSpec --
 # 
 #       Utility to get a flat array of 'jid type name' for each transports.
 
-proc ::Roster::GetTransportNames {} {
+proc ::Roster::GetTransportSpec {} {
     variable trptToName
     variable allTransports
     upvar ::Jabber::jstate jstate
@@ -1351,8 +1354,16 @@ proc ::Roster::GetTransportNames {} {
 	    continue
 	}
 	set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
-	foreach jid $jidL {
-	    lappend trpts [list $jid $type [GetNameFromTrpt $type]]
+	set count [llength $jidL]
+	if {$count} {
+	    set name [GetNameFromTrpt $type]
+	    foreach jid $jidL {
+		set xname $name
+		if {$count > 1} {
+		    set xname "$name - $jid"
+		}
+		lappend trpts [list $jid $type $xname]
+	    }
 	}
     }    
 
