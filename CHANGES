@@ -13,6 +13,7 @@ Coccinella-0.96.8 (200804??)
  o undo/redo of text
  o better support for processing multiple selected contacts in roster
  o native chasing arrows on platforms where this is supported (Macosx)
+ o improved support for transports
 
 
 Coccinella-0.96.6 (20080312)

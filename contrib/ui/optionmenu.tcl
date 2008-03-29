@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.24 2008-03-20 08:49:01 matben Exp $
+# $Id: optionmenu.tcl,v 1.25 2008-03-29 16:27:47 matben Exp $
 
 package require snit 1.0
 
@@ -15,6 +15,14 @@ package provide ui::optionmenu 0.1
 namespace eval ui::optionmenu {}
 
 interp alias {} ui::optionmenu {} ui::optionmenu::widget
+
+proc ui::optionmenu::makeMenuList {valueL} {
+    set menuList [list]
+    foreach value $valueL {
+	lappend menuList [list $value]
+    }
+    return $menuList
+}
 
 # ui::optionmenu --
 # 
@@ -103,9 +111,13 @@ snit::widgetadaptor ui::optionmenu::widget {
     
     method Trace {varName index op} {
 	if {[info exists $options(-variable)]} {
+
+	    # Play it failsafe in case the value doesn't match.
 	    set value [set $options(-variable)]
-	    set menuValue $value
-	    set nameVar $val2name($value)
+	    if {[info exists val2name($value)]} {
+		set menuValue $value
+		set nameVar $val2name($value)
+	    }
 	}
     }
     

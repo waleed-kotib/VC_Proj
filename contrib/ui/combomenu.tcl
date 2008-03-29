@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: combomenu.tcl,v 1.1 2008-03-20 08:49:01 matben Exp $
+# $Id: combomenu.tcl,v 1.2 2008-03-29 16:27:47 matben Exp $
 
 package require snit 1.0
 
@@ -93,8 +93,12 @@ snit::widgetadaptor ui::combomenu::widget {
     
     method Trace {varName index op} {
 	if {[info exists $options(-variable)]} {
+
+	    # Play it failsafe in case the value doesn't match.
 	    set value [set $options(-variable)]
-	    set textVar $val2name($value)
+	    if {[info exists val2name($value)]} {
+		set textVar $val2name($value)
+	    }
 	}
     }
     
