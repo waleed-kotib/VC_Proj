@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.52 2008-03-27 15:15:26 matben Exp $
+# $Id: JUser.tcl,v 1.53 2008-03-29 11:55:06 matben Exp $
 
 package provide JUser 1.0
 
@@ -92,7 +92,7 @@ proc ::JUser::NewDlg {args} {
 
     # Find all our groups for any jid.
     set allGroups [$jstate(jlib) roster getgroups]
-    set trpts [::Roster::GetTransportNames]
+    set trpts [::Roster::GetTransportSpec]
     set groupValues [concat [list [mc None]] $allGroups]
     
     set menuDef [list]
@@ -384,7 +384,7 @@ proc ::JUser::TrptCmd {token gjid} {
 	
     set wjid $state(wjid)
     set type $state(servicetype,$gjid)
-
+    
     # Seems to be necessary to achive any selection.
     focus $wjid
     #set state(jid) [format [::Gateway::GetTemplateJID $type] $gjid]
@@ -395,13 +395,21 @@ proc ::JUser::TrptCmd {token gjid} {
     }
     $wjid selection range 0 end
     
+    # @@@ NB: While the service JID is a bare JID any roster item may
+    #         have a resource part: icq.jabber.cz/registered
+    #         Must find any matches!
+    
+    set rjid [::Jabber::Jlib roster getrosterjid $gjid]
+    set isitem [string length $rjid]
+    
     # If this requires a transport component we must be registered.
     if {$config(adduser,warn-non-xmpp-onselect)} {
-	if {($type ne "xmpp") && ![::Jabber::Jlib roster isitem $gjid]} {
-	    tk_messageBox -icon warning -parent $state(w) -message "You are currently not registered with this transport and if you proceed you will be asked to register with your own account on this system."
+	if {($type ne "xmpp") && !$isitem} {
+	    set str "You are currently not registered with this transport and if you proceed you will be asked to register with your own account on this system."
+	    tk_messageBox -icon warning -parent $state(w) -message $str
 	}
     } elseif {$config(adduser,add-non-xmpp-onselect)} {
-	if {($type ne "xmpp") && ![::Jabber::Jlib roster isitem $gjid]} {
+	if {($type ne "xmpp") && !$isitem} {
 	    set ans [::UI::MessageBox -type yesno -icon warning \
 	      -parent $state(w) -message [mc jamessaddforeign2 $gjid]]
 	    if {$ans eq "yes"} {

@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: roster.tcl,v 1.67 2008-03-14 13:19:35 matben Exp $
+# $Id: roster.tcl,v 1.68 2008-03-29 11:55:06 matben Exp $
 # 
 # Note that every jid in the rostA is usually (always) without any resource,
 # but the jid's in the presA are identical to the 'from' attribute, except
@@ -762,9 +762,12 @@ proc jlib::roster::isitem {jlibname jid} {
 # 
 #       Returns the matching jid as reported by a roster item.
 #       If given a full JID try match this, else bare JID.
-#       If given a bare JID try match this.
-#       It cannot find a full JID from a bare JID.
+#       If given a bare JID try match this, else find any matching full JID.
 #       For ordinary users this is a jid2.
+#
+# @@@ NB: For the new xmpp lib we shall have a mapping from the roster JID
+#         to a set of online JID's if any, which shall be completely indpendent
+#         of bare vs. full JID forms!
 #
 # Arguments:
 #       jlibname:   the instance of this jlib.
@@ -785,9 +788,14 @@ proc jlib::roster::getrosterjid {jlibname jid} {
 	if {[info exists rostA($mjid2,item)]} {
 	    return [jlib::barejid $jid]
 	} else {
-	    return ""
+	    set name [array names rostA [jlib::ESC $mjid2]*,item]
+	    if {[llength $name] == 1} {
+		# There should only be one.
+		return [string map {",item" ""} $name]
+	    }
 	}
     }
+    return
 }
 
 # jlib::roster::getusers --
