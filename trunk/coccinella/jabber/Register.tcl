@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.97 2008-03-23 11:44:17 matben Exp $
+# $Id: Register.tcl,v 1.98 2008-03-29 07:08:41 matben Exp $
 
 package provide Register 1.0
 
@@ -301,7 +301,7 @@ proc ::RegisterEx::New {args} {
 	  -text "  [mc More]..." \
 	  -command [list [namespace current]::MoreOpts $token]
     }
-    ::chasearrows::chasearrows $wmore.arr -size 16
+    ::UI::ChaseArrows $wmore.arr
     ttk::label $wmore.ls -style Small.TLabel \
       -textvariable $token\(status)
     ttk::frame $wmore.fmore
@@ -1075,7 +1075,7 @@ proc ::GenRegister::NewDlg {args} {
     set wstat $wbox.fs
     ttk::frame $wstat
     set wsearrows $wstat.arr
-    ::chasearrows::chasearrows $wsearrows -size 16
+    ::UI::ChaseArrows $wsearrows
     ttk::label $wstat.lstat -style Small.TLabel \
       -textvariable $token\(stattxt)
     

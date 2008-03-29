@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPubServers.tcl,v 1.6 2007-09-13 08:25:39 matben Exp $
+# $Id: JPubServers.tcl,v 1.7 2008-03-29 07:08:41 matben Exp $
 
 package require chasearrows
 package require httpex
@@ -106,7 +106,7 @@ proc ::JPubServers::Build {w {command ""}} {
     ttk::frame $wbox.frarr
     pack $wbox.frarr -side top -anchor w
     set warrows $wbox.frarr.arr
-    ::chasearrows::chasearrows $warrows -size 16
+    ::UI::ChaseArrows $warrows
     pack $warrows -side left -padx 5 -pady 5
     ttk::label $wbox.frarr.msg -textvariable $w\(statusmsg)
     pack $wbox.frarr.msg -side left

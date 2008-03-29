@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.20 2007-12-27 09:12:24 matben Exp $
+# $Id: Enter.tcl,v 1.21 2008-03-29 07:08:41 matben Exp $
 
 package provide Enter 1.0
 
@@ -160,7 +160,7 @@ proc ::Enter::Build {protocol args} {
    
     # Busy arrows and status message.
     ttk::frame $frmid.st
-    ::chasearrows::chasearrows $warrows -size 16
+    ::UI::ChaseArrows $warrows
     ttk::label $wstatus -textvariable $token\(status)
     pack $warrows -side left -padx 5 -pady 0
     pack $wstatus -side left -padx 5

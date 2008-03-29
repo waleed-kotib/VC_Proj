@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.41 2007-12-20 14:01:26 matben Exp $
+# $Id: Search.tcl,v 1.42 2008-03-29 07:08:41 matben Exp $
 
 package provide Search 1.0
 
@@ -187,7 +187,7 @@ proc ::Search::Build {args} {
     set wfrstatus $wleft.stat
     set wsearrows $wfrstatus.arr
     ttk::frame $wleft.stat
-    ::chasearrows::chasearrows $wfrstatus.arr -size 16
+    ::UI::ChaseArrows $wfrstatus.arr
     ttk::label $wfrstatus.la -style Small.TLabel \
       -textvariable $token\(status)
 

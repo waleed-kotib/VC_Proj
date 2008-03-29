@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.35 2008-03-27 15:15:26 matben Exp $
+# $Id: UserInfo.tcl,v 1.36 2008-03-29 07:08:41 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -375,7 +375,7 @@ proc ::UserInfo::Build {token} {
     pack $frbot.export -side left
 
     set warrow $frbot.arr
-    pack [::chasearrows::chasearrows $warrow -size 16] -side left -padx 6
+    pack [::UI::ChaseArrows $warrow] -side left -padx 6
 
     pack $frbot -side bottom -fill x
 

@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.96 2007-10-17 13:18:24 matben Exp $
+# $Id: MUC.tcl,v 1.97 2008-03-29 07:08:41 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -1009,7 +1009,7 @@ proc ::MUC::EditListBuild {roomjid type} {
       -default active -command [list [namespace current]::EditListOK $token]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::EditListCancel $token]
-    ::chasearrows::chasearrows $frbot.arr -size 16
+    ::UI::ChaseArrows $frbot.arr
     ttk::button $frbot.btres -text [mc Reset]  \
       -command [list [namespace current]::EditListReset $token]
     set padx [option get . buttonPadX {}]
@@ -1443,7 +1443,7 @@ proc ::MUC::RoomConfig {roomjid} {
       -command [list [namespace current]::DoRoomConfig $roomjid $w]
     ttk::button $frbot.btcancel -text [mc Cancel]  \
       -command [list [namespace current]::CancelConfig $roomjid $w]
-    ::chasearrows::chasearrows $warrows -size 16
+    ::UI::ChaseArrows $warrows
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btok -side right

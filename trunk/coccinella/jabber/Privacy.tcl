@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Privacy.tcl,v 1.20 2007-09-15 14:27:24 matben Exp $
+# $Id: Privacy.tcl,v 1.21 2008-03-29 07:08:41 matben Exp $
 
 package provide Privacy 1.0
 
@@ -101,7 +101,7 @@ proc ::Privacy::BuildPrefsPage {page} {
     ttk::frame  $wfi.bottom
     pack $wfi.bottom -side bottom -pady 1 -fill x
     ttk::label $wfi.bottom.lhead -textvariable [namespace current]::statmsg
-    ::chasearrows::chasearrows $warrows -size 16
+    ::UI::ChaseArrows $warrows
     pack $wfi.bottom.lhead -side left -anchor w -pady 1
     pack $warrows -side left -padx 5 -pady 5
     
@@ -709,7 +709,7 @@ proc ::Privacy::List::Build { } {
       -command [list [namespace current]::Cancel $token]
     ttk::button $frbot.btprof -text [mc {New Rule}]  \
       -command [list [namespace current]::New $token]
-    ::chasearrows::chasearrows $warrows -size 16
+    ::UI::ChaseArrows $warrows
     ttk::label $frbot.stat -textvariable $token\(statmsg)
 
     set padx [option get . buttonPadX {}]
