@@ -9,7 +9,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: chasearrows.tcl,v 1.9 2007-07-19 06:28:11 matben Exp $
+# $Id: chasearrows.tcl,v 1.10 2008-03-29 07:08:41 matben Exp $
 #
 # ########################### USAGE ############################################
 #
@@ -35,9 +35,9 @@
 #
 #       1.0      first release
 
-package provide chasearrows 1.0
+package provide chasearrows 1.0    
 
-namespace eval ::chasearrows:: {
+namespace eval ::chasearrows {
 
     # The public interface.
     namespace export chasearrows
@@ -61,7 +61,7 @@ namespace eval ::chasearrows:: {
 # Results:
 #       Defines option arrays.
 
-proc ::chasearrows::Init { } {
+proc ::chasearrows::Init {} {
     
     variable widgetGlobals
     variable widgetOptions

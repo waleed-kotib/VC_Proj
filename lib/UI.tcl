@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.185 2008-03-25 14:54:25 matben Exp $
+# $Id: UI.tcl,v 1.186 2008-03-29 07:08:41 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -146,6 +146,21 @@ proc ::UI::Init {} {
     if {[tk windowingsystem] eq "aqua"} {
 	InitMac
     }
+}
+
+# @@@ This is only temporary until We've got the chasingarrowselem.
+
+proc ::UI::ChaseArrows {w} {
+    
+    # Use ttk::progressbar win -style TChasingArrows if possible.
+    
+    if {([tk windowingsystem] eq "aqua") && \
+      ![catch {package require chasingarrowselem 0.2}]} {
+	ttk::progressbar $w -style TChasingArrows -length 16 -maximum 10000
+    } else {
+	::chasearrows::chasearrows $w -size 16
+    }
+    return $w
 }
 
 proc ::UI::InitDialogs {} {

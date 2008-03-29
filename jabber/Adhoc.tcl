@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Adhoc.tcl,v 1.13 2007-12-20 14:01:25 matben Exp $
+# $Id: Adhoc.tcl,v 1.14 2008-03-29 07:08:41 matben Exp $
 
 # @@@ Maybe all this should be a component?
 
@@ -213,7 +213,7 @@ proc ::Adhoc::BuildDlg {jid node subiq} {
 	pack $bot.next -side right
 	pack $bot.prev -side right -padx $padx
     }
-    ::chasearrows::chasearrows $bot.arr -size 16
+    ::UI::ChaseArrows $bot.arr
     pack $bot.arr -side left -padx 5 -pady 5
     
     pack $bot -side bottom -fill x

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.16 2007-12-20 14:01:25 matben Exp $
+# $Id: Create.tcl,v 1.17 2008-03-29 07:08:41 matben Exp $
 
 package provide Create 1.0
 
@@ -188,7 +188,7 @@ proc ::Create::Build {args} {
     set wsearrows $wbox.st.arr
     set wstatus   $wbox.st.stat
     ttk::frame $wbox.st
-    ::chasearrows::chasearrows $wsearrows -size 16
+    ::UI::ChaseArrows $wsearrows
     ttk::label $wstatus -style Small.TLabel -textvariable $token\(status)
     pack  $wbox.st  -side bottom -fill x
     pack  $wsearrows  $wstatus  -side left

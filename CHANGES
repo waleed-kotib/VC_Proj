@@ -11,7 +11,9 @@ Coccinella-0.96.8 (200804??)
  o menu option to select what to display in status line (JID, status, host)
  o handles multiple DNS TXT records
  o undo/redo of text
- o better support for processing multiple contacts from roster
+ o better support for processing multiple selected contacts in roster
+ o native chasing arrows on platforms where this is supported (Macosx)
+
 
 Coccinella-0.96.6 (20080312)
 
