@@ -17,10 +17,9 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.36 2007-12-20 14:01:25 matben Exp $
+#  $Id: Mood.tcl,v 1.37 2008-03-29 16:27:47 matben Exp $
 
 package require jlib::pep
-package require ui::optionmenu
 
 namespace eval ::Mood {
 

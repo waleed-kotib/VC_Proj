@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.139 2008-03-28 14:30:58 matben Exp $
+# $Id: Login.tcl,v 1.140 2008-03-29 16:27:17 matben Exp $
 
 package provide Login 1.0
 
@@ -84,7 +84,7 @@ proc ::Login::Dlg {} {
     variable wtrilab
     variable wfrmore
     variable wtabnb
-    variable wpopupMenu
+    variable wpopup
     variable tmpProfArr
     variable morevar
     upvar ::Jabber::jprefs jprefs
@@ -153,7 +153,9 @@ proc ::Login::Dlg {} {
     set wpopup $frmid.popup
 
     set menuVar [::Profiles::GetSelectedName]
-    set wpopupMenu [ttk::optionmenu $wpopup [namespace current]::menuVar {}]
+    set profile $menuVar
+     ui::combobutton $wpopup -variable [namespace current]::menuVar \
+       -command [namespace code ProfileCmd]
     
     # Depending on 'config(login,style)' not all get mapped.
     ttk::label $frmid.ljid -text "[mc {Contact ID}]:" -anchor e
@@ -270,12 +272,8 @@ proc ::Login::Dlg {} {
     pack $frbot -side bottom -fill x
     
     LoadProfiles
-    
-    # Necessary to trace the popup menu variable.
-    trace variable [namespace current]::menuVar w  \
-      [namespace current]::TraceMenuVar
-    set menuVar $profile
-	
+    ProfileCmd $profile
+    	
     wm resizable $w 0 0
     
     bind $w <<ReturnEnter>> [list $frbot.btok invoke]
@@ -295,17 +293,13 @@ proc ::Login::LoadProfiles {} {
     variable username
     variable password
     variable resource
-    variable wpopupMenu
+    variable wpopup
     
     if {![winfo exists $wDlgs(jlogin)]} {
 	return
     }
-    $wpopupMenu delete 0 end
-    set profileList [::Profiles::GetAllNames]
-    foreach name $profileList {
-	$wpopupMenu add command -label $name \
-	  -command [list set [namespace current]::menuVar $name]
-    }
+    $wpopup configure \
+      -menulist [ui::optionmenu::makeMenuList [::Profiles::GetAllNames]]
     set profile [::Profiles::GetSelectedName]
     
     # Make temp array for servers. Handy for filling in the entries.
@@ -322,8 +316,8 @@ proc ::Login::LoadProfiles {} {
     set menuVar $profile
 }
 
-proc ::Login::TraceMenuVar {name key op} {
-    global  prefs this config
+proc ::Login::ProfileCmd {value} {
+    global  config
     
     variable profile
     variable server
@@ -331,12 +325,11 @@ proc ::Login::TraceMenuVar {name key op} {
     variable password
     variable resource
     variable jid
-    variable menuVar
     variable tmpProfArr
     variable moreOpts
     variable wtabnb
     
-    set profile  [set $name]
+    set profile  $value
     set server   $tmpProfArr($profile,server)
     set username $tmpProfArr($profile,username)
     set password $tmpProfArr($profile,password)
@@ -357,7 +350,7 @@ proc ::Login::TraceMenuVar {name key op} {
 	::Profiles::NotebookVerifyValid [namespace current]::moreOpts
 	::Profiles::NotebookSetAnyConfigState $wtabnb $profile
 	::Profiles::NotebookDefaultWidgetStates $wtabnb
-    }
+    }    
 }
 
 proc ::Login::GetNormalSize {w} {
@@ -411,14 +404,12 @@ proc ::Login::Profiles {} {
 }
 
 proc ::Login::Close {w} {
-    variable menuVar
     variable tmpProfArr
+    variable profile
     
     # Clean up.
     ::UI::SaveWinGeom $w
-    ::Profiles::SetSelectedName $menuVar
-    trace vdelete [namespace current]::menuVar w  \
-      [namespace current]::TraceMenuVar
+    ::Profiles::SetSelectedName $profile
     array unset tmpProfArr
     destroy $w
 }
@@ -525,15 +516,15 @@ proc ::Login::DoLogin {} {
 	set prof [::Profiles::GetProfile $profile]
 	puts "prof=$prof"
 	lassign [lrange $prof 0 2] h u p
-# 	if {$u$h ne $server$username} {
-# 	    set diffs 1
-# 	} else {
-# 	    array set tmp1A $opts
-# 	    array set tmp2A [lrange $prof 3 end]
-# 	    if {![arraysequal tmp1A tmp2A]} {
-# 		set diffs 1
-# 	    }
-# 	}
+	if {"$u$h" ne "$server$username"} {
+	    set diffs 1
+	} else {
+	    array set tmp1A $opts
+	    array set tmp2A [lrange $prof 3 end]
+	    if {![arraysequal tmp1A tmp2A]} {
+		set diffs 1
+	    }
+	}
 	if {$diffs} {
 	    set msg "Your current login settings differ from your profile settings. Do you want to save them to your profile?"
 	    set ans [tk_messageBox -title "" -type yesno -icon ask \

@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.180 2008-02-25 15:20:05 matben Exp $	
+# $Id: Coccinella.tcl,v 1.181 2008-03-29 16:27:47 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -230,7 +230,9 @@ set packages(uibase) {
     Tablelist_tile
     ttoolbar
     ui::util
+    ui::combomenu
     ui::dialog
+    ui::optionmenu
 }
 set packages(application) {
     AMenu
