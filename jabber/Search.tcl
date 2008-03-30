@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.42 2008-03-29 07:08:41 matben Exp $
+# $Id: Search.tcl,v 1.43 2008-03-30 12:34:17 matben Exp $
 
 package provide Search 1.0
 
@@ -433,8 +433,7 @@ proc ::Search::ResultCallback {w server type subiq} {
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jprefs jprefs
     
-    ::Debug 2 "::Search::ResultCallback server=$server, type=$type, \
-      subiq='$subiq'"
+    ::Debug 2 "::Search::ResultCallback server=$server, type=$type, subiq='$subiq'"
     
     if {![info exists $state(w)]} {
 	return
@@ -460,13 +459,13 @@ proc ::Search::ResultCallback {w server type subiq} {
 	set wtb $state(wtb)
 	set formtoken $state(formtoken)
 	set resultList [::JForms::ResultList $formtoken $subiq]
-	foreach {var label} [::JForms::GetReported $formtoken] {
-	    lappend columnSpec 0 $label	    
-	}
-	$wtb configure -columns $columnSpec
-	if {[llength $resultList] == 0} {
+	if {![llength $resultList]} {
 	    $wtb insert end {{No matches found}}
 	} else {
+	    foreach {var label} [::JForms::GetReported $formtoken] {
+		lappend columnSpec 0 $label	    
+	    }
+	    $wtb configure -columns $columnSpec
 	    foreach row $resultList {
 		$wtb insert end $row
 	    }
