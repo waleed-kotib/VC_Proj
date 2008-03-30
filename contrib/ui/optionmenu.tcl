@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.25 2008-03-29 16:27:47 matben Exp $
+# $Id: optionmenu.tcl,v 1.26 2008-03-30 10:00:41 matben Exp $
 
 package require snit 1.0
 
@@ -16,7 +16,7 @@ namespace eval ui::optionmenu {}
 
 interp alias {} ui::optionmenu {} ui::optionmenu::widget
 
-proc ui::optionmenu::makeMenuList {valueL} {
+proc ui::optionmenu::menuList {valueL} {
     set menuList [list]
     foreach value $valueL {
 	lappend menuList [list $value]
@@ -36,7 +36,7 @@ proc ui::optionmenu::makeMenuList {valueL} {
 snit::widgetadaptor ui::optionmenu::widget {
     
     variable nameVar
-    variable menuValue
+    variable menuVar
     variable name2val
     variable val2name
     variable val2im
@@ -52,13 +52,13 @@ snit::widgetadaptor ui::optionmenu::widget {
     constructor {args} {
 	from args -textvariable
 	installhull using ttk::menubutton
-	set menuValue ""
+	set menuVar ""
 	set m $win.menu
 	menu $m -tearoff 0
 
 	$self configurelist $args
 	
-	# Be sure to set nameVar and menuValue to first entry by default.
+	# Be sure to set nameVar and menuVar to first entry by default.
 	if {[llength $options(-menulist)]} {
 	    set nameVar [lindex $options(-menulist) 0 0]
 	    set value $nameVar
@@ -66,14 +66,14 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    if {[info exists opts(-value)]} {
 		set value $opts(-value)
 	    }
-	    set menuValue $value
+	    set menuVar $value
 	}
 		
 	# If the variable exists must set our own nameVar.
 	if {[info exists $options(-variable)]} {
 	    set value [set $options(-variable)]
 	    if {[info exists val2name($value)]} {
-		set menuValue $value
+		set menuVar $value
 		set nameVar $val2name($value)
 	    }
 	}
@@ -84,8 +84,8 @@ snit::widgetadaptor ui::optionmenu::widget {
 	}
 
 	$win configure -textvariable [myvar nameVar] -menu $m -compound left
-	if {[info exists val2im($menuValue)]} {
-	    $win configure -image $val2im($menuValue)
+	if {[info exists val2im($menuVar)]} {
+	    $win configure -image $val2im($menuVar)
 	}
 	return
     }
@@ -97,15 +97,15 @@ snit::widgetadaptor ui::optionmenu::widget {
     }
     
     method Command {} {
-	set nameVar $val2name($menuValue)
-	if {[info exists val2im($menuValue)]} {
-	    $win configure -image $val2im($menuValue)
+	set nameVar $val2name($menuVar)
+	if {[info exists val2im($menuVar)]} {
+	    $win configure -image $val2im($menuVar)
 	}
 	if {$options(-variable) ne ""} {
-	    uplevel #0 [list set $options(-variable) $menuValue]
+	    uplevel #0 [list set $options(-variable) $menuVar]
 	}
 	if {$options(-command) ne ""} {
-	    uplevel #0 $options(-command) [list $menuValue]
+	    uplevel #0 $options(-command) [list $menuVar]
 	}
     }
     
@@ -115,7 +115,7 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    # Play it failsafe in case the value doesn't match.
 	    set value [set $options(-variable)]
 	    if {[info exists val2name($value)]} {
-		set menuValue $value
+		set menuVar $value
 		set nameVar $val2name($value)
 	    }
 	}
@@ -139,7 +139,7 @@ snit::widgetadaptor ui::optionmenu::widget {
 	if {[info exists $options(-variable)]} {
 	    set value [set $options(-variable)]
 	    if {[info exists val2name($value)]} {
-		set menuValue $value
+		set menuVar $value
 		set nameVar $val2name($value)
 	    }
 	}
@@ -181,7 +181,7 @@ snit::widgetadaptor ui::optionmenu::widget {
 		    set longest $name
 		}
 		# @@@ TODO: keep a -value since labels can be identical!
-		eval {$m add radiobutton -label $name -variable [myvar menuValue] \
+		eval {$m add radiobutton -label $name -variable [myvar menuVar] \
 		  -command [list $self Command] -compound left} [array get opts]
 	    }
 	}
@@ -189,7 +189,7 @@ snit::widgetadaptor ui::optionmenu::widget {
     
     method set {value} {
 	if {[info exists val2name($value)]} {
-	    set menuValue $value
+	    set menuVar $value
 	    set nameVar $val2name($value)
 	} else {
 	    return -code error "value \"$value\" is outside the given range"
@@ -197,9 +197,42 @@ snit::widgetadaptor ui::optionmenu::widget {
     }
 
     method get {} {
-	return $menuValue
+	return $menuVar
     }
     
+    method add {name args} {	
+	lappend options(-menulist) [concat [list $name] $args]
+	$self BuildMenuList
+    }
+
+    method remove {value} {
+	if {[info exists val2name($value)]} {
+	    set name $val2name($value)	
+	    # @@@ Cleanup this when we skip 8.4 support!
+	    if {[info tclversion] < 8.5} { 
+		if {[lsearch -exact $options(-menulist) $name] >= 0} {
+		    set options(-menulist) [lsearch -exact -all -not -inline \
+		      $options(-menulist) $name]				    
+		} else {
+		    set options(-menulist) [lsearch -all -not -inline \
+		      $options(-menulist) "$name *"]		
+		}
+	    } else {
+		set options(-menulist) \
+		  [lsearch -all -exact -not -inline -index 0 \
+		  $options(-menulist) $name]
+	    }
+
+	    # If removing selected one then pick first.
+	    if {$name eq $nameVar} {
+		set nameVar [lindex $options(-menulist) 0 0]
+		set menuVar $name2val($nameVar)
+		$self Command
+	    }
+	    $self BuildMenuList
+	}
+    }
+
     method maxwidth {} {
 	
 	# Ugly! 
@@ -240,6 +273,8 @@ if {0} {
       -variable ::var -command Cmd
     pack .t.mb
     .t.mb maxwidth
+    .t.mb add "My New" -value 99
+    .t.mb remove 60    
     
     set mlist [.t.mb cget -menulist]
     lappend mlist {"Extra" -value extra}

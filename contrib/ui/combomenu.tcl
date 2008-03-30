@@ -8,7 +8,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: combomenu.tcl,v 1.2 2008-03-29 16:27:47 matben Exp $
+# $Id: combomenu.tcl,v 1.3 2008-03-30 10:00:41 matben Exp $
 
 package require snit 1.0
 
@@ -19,10 +19,10 @@ namespace eval ui::combomenu {}
 interp alias {} ui::combomenu {} ui::combomenu::widget
 
 # Compatibility layer.
-if {[tk windowingsystem] eq "aqua"} {
-    interp alias {} ui::combobutton {} ui::optionmenu
-} else {
+if {[tk windowingsystem] eq "win32"} {
     interp alias {} ui::combobutton {} ui::combomenu    
+} else {
+    interp alias {} ui::combobutton {} ui::optionmenu
 }
 
 # ui::combomenu --
@@ -154,6 +154,38 @@ snit::widgetadaptor ui::combomenu::widget {
 	return $name2val($textVar)
     }
     
+    method add {name args} {	
+	lappend options(-menulist) [concat [list $name] $args]
+	$self BuildMenuList
+    }
+    
+    method remove {value} {
+	if {[info exists val2name($value)]} {
+	    set name $val2name($value)	    
+	    # @@@ Cleanup this when we skip 8.4 support!
+	    if {[info tclversion] < 8.5} { 
+		if {[lsearch -exact $options(-menulist) $name] >= 0} {
+		    set options(-menulist) [lsearch -exact -all -not -inline \
+		      $options(-menulist) $name]				    
+		} else {
+		    set options(-menulist) [lsearch -all -not -inline \
+		      $options(-menulist) "$name *"]		
+		}
+	    } else {
+		set options(-menulist) \
+		  [lsearch -all -exact -not -inline -index 0 \
+		  $options(-menulist) $name]
+	    }
+
+	    # If removing selected one then pick first.
+	    if {$name eq $textVar} {
+		set textVar [lindex $options(-menulist) 0 0]
+		$self OnSelected
+	    }
+	    $self BuildMenuList
+	}
+    }
+    
     method maxwidth {} {
 	return [winfo reqwidth $win]
     }
@@ -176,6 +208,8 @@ if {0} {
       -variable ::var -command Cmd
     pack .t.mb -pady 12
     puts "maxwidth=[.t.mb maxwidth]"
+    .t.mb add "My New" -value 99
+    .t.mb remove 60
 }
 
 #-------------------------------------------------------------------------------

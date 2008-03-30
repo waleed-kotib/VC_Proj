@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.105 2008-02-22 11:15:50 matben Exp $
+# $Id: Profiles.tcl,v 1.106 2008-03-30 10:00:42 matben Exp $
 
 package require ui::megaentry
 
@@ -1067,12 +1067,17 @@ proc ::Profiles::FrameWidget {w moreless args} {
     
     ttk::label $wui.lpop -text "[mc Profile]:" -anchor e
     
-    set wmenu [eval {
-	ttk::optionmenu $wui.pop $token\(profile)
-    } [GetAllNames]]
-    trace add variable $token\(profile) write  \
-      [list [namespace current]::FrameTraceProfile $w]
-
+    if {0} {
+	set wmenu [eval {
+	    ttk::optionmenu $wui.pop $token\(profile)
+	} [GetAllNames]]
+	trace add variable $token\(profile) write  \
+	  [list [namespace current]::FrameTraceProfile $w]
+    } else {
+	ui::combobutton $wui.pop -variable $token\(profile) \
+	-menulist [ui::optionmenu::menuList [GetAllNames]] \
+	-command [namespace code [list ProfileCmd $w]]
+    }
     if {$config(profiles,style) eq "jid"} {
 	set width 26
     } else {
@@ -1186,7 +1191,8 @@ proc ::Profiles::FrameWidget {w moreless args} {
     set state(wtri)   $wtri
     set state(wtabnb) $wtabnb
     set state(wmore)  $wfrmore
-    set state(wmenu)  $wmenu
+    set state(wpop)   $wui.pop
+    #set state(wmenu)  $wmenu
     set state(wfocus) $wuserinfofocus
     
     # We use an array for "more" options.
@@ -1288,6 +1294,10 @@ proc ::Profiles::FrameMakeTmpProfiles {w} {
 	set key "init,[string range $name 5 end]"
 	set state($key) $value
     }
+}
+
+proc ::Profiles::ProfileCmd {w profile} {
+    FrameSetCmd $w $profile
 }
 
 proc ::Profiles::FrameTraceProfile {w name key op} {
@@ -1527,10 +1537,11 @@ proc ::Profiles::FrameNewCmd {w} {
 	return
     }
     set newName [ui::megaentrytext $ans]
-    set wmenu $state(wmenu)
+    #set wmenu $state(wmenu)
     
     set uname [MakeUniqueProfileName $newName]
-    $wmenu add radiobutton -label $uname -variable $token\(profile)
+    #$wmenu add radiobutton -label $uname -variable $token\(profile)
+    $state(wpop) add $uname
 
     set state(selected) $uname
     set state(profile)  $uname
@@ -1608,11 +1619,12 @@ proc ::Profiles::FrameDeleteCmd {w} {
 	set delete 1
     }
     if {$delete} {
-	set wmenu $state(wmenu)
-	set idx [$wmenu index $profile]
-	if {$idx >= 0} {
-	    $wmenu delete $idx
-	}
+# 	set wmenu $state(wmenu)
+# 	set idx [$wmenu index $profile]
+# 	if {$idx >= 0} {
+# 	    $wmenu delete $idx
+# 	}
+	$state(wpop) remove $profile
 	array unset state prof,$profile,*
 	
 	# Set selection to first.

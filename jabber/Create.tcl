@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.17 2008-03-29 07:08:41 matben Exp $
+# $Id: Create.tcl,v 1.18 2008-03-30 10:00:41 matben Exp $
 
 package provide Create 1.0
 
@@ -105,7 +105,8 @@ proc ::Create::Build {args} {
     pack $frtop -side top -fill x
         
     ttk::label $frtop.lserv -text "[mc Service]:"
-    eval {ttk::optionmenu $frtop.eserv $token\(server)} $serviceList
+    ui::combobutton $frtop.eserv -variable $token\(server) \
+      -menulist [ui::optionmenu::menuList $serviceList]
     ttk::label $frtop.lroom -text "[mc Chatroom]:"    
     ttk::entry $frtop.eroom -textvariable $token\(roomname)  \
       -validate key -validatecommand {::Jabber::ValidateUsernameStrEsc %S}

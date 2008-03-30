@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Speech.tcl,v 1.18 2007-12-19 07:52:55 matben Exp $
+# $Id: Speech.tcl,v 1.19 2008-03-30 10:00:41 matben Exp $
 
 namespace eval ::Speech {
     variable sprefs
@@ -374,10 +374,12 @@ proc ::Speech::BuildPrefsPage {page} {
     
     ttk::label $wfvo.in  -text "[mc prefsounvoin2]:"
     ttk::label $wfvo.out -text "[mc prefsounvoou2]:" 
-    eval {ttk::optionmenu $wfvo.pin \
-      [namespace current]::tmpPrefs(voiceOther-$plat)} $voicelist
-    eval {ttk::optionmenu $wfvo.pout   \
-      [namespace current]::tmpPrefs(voiceUs-$plat)} $voicelist
+    ui::combobutton $wfvo.pin \
+       -variable [namespace current]::tmpPrefs(voiceOther-$plat) \
+       -menulist [ui::optionmenu::menuList $voicelist]
+    ui::combobutton $wfvo.pout \
+       -variable [namespace current]::tmpPrefs(voiceUs-$plat) \
+       -menulist [ui::optionmenu::menuList $voicelist]
     
     grid  $wfvo.in   $wfvo.pin   -sticky e -padx 2 -pady 1
     grid  $wfvo.out  $wfvo.pout  -sticky e -padx 2 -pady 1

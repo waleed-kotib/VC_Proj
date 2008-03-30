@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.43 2008-03-29 16:27:47 matben Exp $
+# $Id: Sounds.tcl,v 1.44 2008-03-30 10:00:41 matben Exp $
 
 namespace eval ::Sounds {
 	
@@ -497,7 +497,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     ttk::frame $fss
     ttk::label $fss.l -text "[mc {Sound set}]:"
     ui::combobutton $fss.p -variable [namespace current]::tmpPrefs(soundSet) \
-      -menulist [ui::optionmenu::makeMenuList $soundSets]
+      -menulist [ui::optionmenu::menuList $soundSets]
         
     grid  $fss.l  $fss.p  -sticky w -padx 2
     grid  $fss.p  -sticky ew
