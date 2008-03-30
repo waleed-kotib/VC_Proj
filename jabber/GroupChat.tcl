@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.239 2008-03-25 16:12:35 matben Exp $
+# $Id: GroupChat.tcl,v 1.240 2008-03-30 13:18:19 matben Exp $
 
 package require Create
 package require Enter
@@ -144,7 +144,7 @@ namespace eval ::GroupChat:: {
     option add *GroupChatRoom*Text.borderWidth     0               50
     option add *GroupChatRoom*Text.relief          flat            50
     option add *GroupChatRoom.padding              {12  0 12  0}   50
-    # option add *GroupChatRoom.padding              { 0  0  0  0}   50
+    #option add *GroupChatRoom.padding              { 0  0  0  0}   50
     option add *GroupChatRoom*active.padding       {1}             50
     option add *GroupChatRoom*TMenubutton.padding  {1}             50
     option add *GroupChatRoom*top.padding          {12  8 12  8}   50

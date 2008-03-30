@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.286 2008-03-27 15:15:26 matben Exp $
+# $Id: Chat.tcl,v 1.287 2008-03-30 13:18:19 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -374,7 +374,7 @@ proc ::Chat::StartThreadDlg {args} {
 
     # Grab and focus.
     set oldFocus [focus]
-    focus $frmid.euser
+    bind $frmid.euser <Map> { focus %W }
     
     # Wait here for a button press and window to be destroyed.
     tkwait window $w
@@ -1755,7 +1755,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     bind $wthread <Destroy> +[list ::Chat::OnDestroyThread $chattoken]
 
     set wkey $config(chat,default-focus)
-    focus $chatstate($wkey)
+    bind $chatstate($wkey) <Map> { focus %W }
 
     ::UI::SetSashPos $wDlgs(jchat) $wpane
 
