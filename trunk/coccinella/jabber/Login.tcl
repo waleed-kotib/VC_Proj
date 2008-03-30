@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.141 2008-03-30 10:00:42 matben Exp $
+# $Id: Login.tcl,v 1.142 2008-03-30 13:18:19 matben Exp $
 
 package provide Login 1.0
 
@@ -279,7 +279,7 @@ proc ::Login::Dlg {} {
     bind $w <<ReturnEnter>> [list $frbot.btok invoke]
     
     if {$password eq ""} {
-	focus $frmid.epass
+	bind $frmid.epass <Map> { focus %W }
     }
     after 100 [list [namespace current]::GetNormalSize $w]
 }

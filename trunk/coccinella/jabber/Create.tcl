@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.18 2008-03-30 10:00:41 matben Exp $
+# $Id: Create.tcl,v 1.19 2008-03-30 13:18:19 matben Exp $
 
 package provide Create 1.0
 
@@ -220,7 +220,7 @@ proc ::Create::Build {args} {
     # Grab and focus.
     set oldFocus [focus]
     if {[$frtop.eroom instate !disabled]} {
-	focus $frtop.eroom
+	bind $frtop.eroom <Map> { focus %W }
     }
     set minWidth [expr {$state(wraplength) + \
       [::UI::GetPaddingWidth [option get . dialogPadding {}]] - 2}]

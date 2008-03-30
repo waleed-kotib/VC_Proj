@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.98 2008-03-29 07:08:41 matben Exp $
+# $Id: Register.tcl,v 1.99 2008-03-30 13:18:19 matben Exp $
 
 package provide Register 1.0
 
@@ -349,7 +349,7 @@ proc ::RegisterEx::New {args} {
     set state(wtabnb)  $wtabnb
     
     # Grab and focus.
-    focus $frmid.eserv
+    bind $frmid.eserv <Map> { focus %W }
     ::UI::Grab $w
     
     if {$state(-server) ne ""} {
@@ -785,8 +785,7 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
     }
     
     grid columnconfigure $wfr 1 -weight 1
-    
-    catch {focus $wfr.eusername}
+    bind $wfr.eusername <Map> { catch {focus %W} }
 }
 
 proc ::RegisterEx::DestroyForm {token} {

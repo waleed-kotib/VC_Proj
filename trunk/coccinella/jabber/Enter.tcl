@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.22 2008-03-29 07:12:01 matben Exp $
+# $Id: Enter.tcl,v 1.23 2008-03-30 13:18:19 matben Exp $
 
 package provide Enter 1.0
 
@@ -253,11 +253,11 @@ proc ::Enter::Build {protocol args} {
 
     set oldFocus [focus]
     if {[info exists argsA(-roomjid)]} {
-    	focus $frmid.enick
+	bind $frmid.enick <Map> { focus %W }
     } elseif {[info exists argsA(-server)]} {
-    	focus $frmid.eroom
+	bind $frmid.eroom <Map> { focus %W }
     } else {
-    	focus $frmid.eserv
+	bind $frmid.eserv <Map> { focus %W }
     }
 
     # Trick to resize the labels wraplength.
