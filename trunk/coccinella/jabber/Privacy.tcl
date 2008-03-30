@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Privacy.tcl,v 1.21 2008-03-29 07:08:41 matben Exp $
+# $Id: Privacy.tcl,v 1.22 2008-03-30 10:00:42 matben Exp $
 
 package provide Privacy 1.0
 
@@ -814,10 +814,13 @@ proc ::Privacy::List::BuildItem {token} {
     set i $state(i)
     foreach {wtype wval wblk wact wdel}  \
       [list $wit.t$i $wit.v$i $wit.bl$i $wit.a$i $wit.bt$i] break
-    eval {ttk::optionmenu $wtype $token\(type$i)} $labels(type)
+    ui::combobutton $wtype -variable $token\(type$i) \
+      -menulist [ui::optionmenu::menuList $labels(type)]
     ttk::entry $wval -width 12 -textvariable $token\(value$i)
-    eval {ttk::optionmenu $wblk $token\(block$i)} $labels(block)
-    eval {ttk::optionmenu $wact $token\(action$i)} $labels(action)
+    ui::combobutton $wblk -variable $token\(block$i) \
+      -menulist [ui::optionmenu::menuList $labels(block)]
+    ui::combobutton $wact -variable $token\(action$i) \
+      -menulist [ui::optionmenu::menuList $labels(action)]
     ttk::button $wdel -text [mc Delete]  \
       -command [list [namespace current]::Delete $token $i]
     

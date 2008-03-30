@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.62 2008-02-20 15:14:37 matben Exp $
+# $Id: JPrefs.tcl,v 1.63 2008-03-30 10:00:42 matben Exp $
 
 package require ui::fontselector
 
@@ -204,8 +204,9 @@ proc ::JPrefs::BuildAppearancePage {page} {
       -command [namespace current]::PickFont
     
     ttk::label $wap.lthe -text "[mc Theme]:"
-    eval {ttk::optionmenu $wap.pthe [namespace current]::tmpPrefs(themeName)} \
-      $allrsrc
+    ui::combobutton $wap.pthe \
+      -variable [namespace current]::tmpPrefs(themeName) \
+      -menulist [ui::optionmenu::menuList $allrsrc]
     
     ::balloonhelp::balloonforwindow $wap.pthe \
       [mc "Requires a restart of" $prefs(appName)]

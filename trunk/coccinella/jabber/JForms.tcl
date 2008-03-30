@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: JForms.tcl,v 1.34 2007-10-22 13:46:02 matben Exp $
+# $Id: JForms.tcl,v 1.35 2008-03-30 10:00:41 matben Exp $
 # 
 #      Updated to version 2.5 of XEP-0004
 #  
@@ -751,8 +751,9 @@ proc ::JForms::NewListSingle {token elem} {
     
     # Note that we have the labels and not the values in the menubutton.
     ttk::label $wlab -text $str -justify left -padding $topPadding
-    eval {ttk::optionmenu $wpop $token\(label,$var)} $labelList
-
+    ui::combobutton $wpop -variable $token\(label,$var) \
+      -menulist [ui::optionmenu::menuList $labelList]
+    
     grid  $wlab  -sticky w
     grid  $wpop  -sticky w			
 

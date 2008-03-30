@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.28 2008-03-27 15:15:26 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.29 2008-03-30 10:00:41 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -246,10 +246,9 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	
 	ttk::checkbutton $wact.lsound -text "[mc {Play sound}]:" \
 	  -variable $token\($ekey,sound)
-	eval {
-	    ttk::optionmenu $wact.msound $token\($ekey,soundfile)
-	} $allSounds
-
+	ui::combobutton $wact.msound -variable $token\($ekey,soundfile) \
+	  -menulist [ui::optionmenu::menuList $allSounds]
+	
 	set wpad $wact.pad[incr i]
 	ttk::frame $wpad -width [expr {$soundMaxWidth + 40}] -height 1
 

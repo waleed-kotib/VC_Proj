@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.140 2008-03-29 16:27:17 matben Exp $
+# $Id: Login.tcl,v 1.141 2008-03-30 10:00:42 matben Exp $
 
 package provide Login 1.0
 
@@ -299,7 +299,7 @@ proc ::Login::LoadProfiles {} {
 	return
     }
     $wpopup configure \
-      -menulist [ui::optionmenu::makeMenuList [::Profiles::GetAllNames]]
+      -menulist [ui::optionmenu::menuList [::Profiles::GetAllNames]]
     set profile [::Profiles::GetSelectedName]
     
     # Make temp array for servers. Handy for filling in the entries.
