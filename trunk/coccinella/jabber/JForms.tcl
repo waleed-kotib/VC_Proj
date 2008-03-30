@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: JForms.tcl,v 1.35 2008-03-30 10:00:41 matben Exp $
+# $Id: JForms.tcl,v 1.36 2008-03-30 12:34:17 matben Exp $
 # 
 #      Updated to version 2.5 of XEP-0004
 #  
@@ -1236,7 +1236,7 @@ proc ::JForms::ResultPlainList {token queryE} {
     variable $token
     upvar 0 $token state
         
-    set res {}
+    set res [list]
     
     # Loop through the items. Make sure we get them in the order specified 
     # in 'reported'.
@@ -1285,10 +1285,10 @@ proc ::JForms::ResultXDataList {token queryE} {
     variable $token
     upvar 0 $token state
     
-    set res {}
+    set res [list]
     set xElem [wrapper::getfirstchild $queryE x "jabber:x:data"]
     if {$xElem == {}} {
-	return -code error "Did not identify the <x> element in search result"
+	return
     }
         
     # Loop through the items. The first one must be a <reported> element.
@@ -1369,7 +1369,11 @@ proc ::JForms::GetReported {token} {
     variable $token
     upvar 0 $token state
 
-    return $state(reported)
+    if {[info exists state(reported)]} {
+	return $state(reported)
+    } else {
+	return
+    }
 }
 
 proc ::JForms::GetStateValue {token key} {
