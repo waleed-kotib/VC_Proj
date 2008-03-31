@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.47 2007-10-26 06:39:22 matben Exp $
+# $Id: Theme.tcl,v 1.48 2008-03-31 14:40:04 matben Exp $
 
 package provide Theme 1.0
 
@@ -497,6 +497,64 @@ proc ::Theme::FindImageFileWithSuffixes {name suffL {subPath ""}} {
 	}
     }    
     return
+}
+
+#--- Icon theme directory structure ------------ 8.5 ONLY!
+
+# Theme::FindIcon --
+#
+#       Searches for image using complex dir specifier.
+#       spec is typically icons/32x32/send which is a sub path to an image file
+#       but without any file suffix.
+
+proc ::Theme::FindIcon {spec} {
+    global  this prefs
+    
+    set image ""
+    set nsname ::_img::$spec
+    if {$nsname ni [image names]} {
+	set theme $prefs(themeName)    
+
+	#---
+	# Build up a list of search paths.
+	# @@@ This should be cached for each theme.
+	set paths [list]
+	if {$theme ne ""} {
+	    set dir [file join $this(themesPath) $theme]
+	    if {[file isdirectory $dir]} {
+		lappend paths [file join $dir $spec]
+	    } else {
+		set dir [file join $this(altThemesPath) $theme]
+		if {[file isdirectory $dir]} {
+		    lappend paths [file join $dir $spec]
+		}
+	    }
+	}
+	
+	# This MUST always be searched for last since it is our fallback.
+	# @@@ Put themes/default/ in this array.
+	lappend paths [file join $this(path) themes/default/]
+	#---
+	
+	foreach p $paths {puts "path=$p"}
+	
+	set found 0
+	foreach path $paths {
+	    foreach fmt {png gif} {
+		set f $path.$fmt
+		if {[file exists $f]} {
+		    image create photo $nsname -file $f -format $fmt
+		    set image $nsname
+		    set found 1
+		    break
+		}
+	    }
+	    if {$found} { break }
+	}
+    } else {
+	set image $nsname
+    }
+    return $image
 }
 
 #-------------------------------------------------------------------------------
