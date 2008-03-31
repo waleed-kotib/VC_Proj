@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.80 2008-03-23 08:43:08 matben Exp $
+# $Id: tileutils.tcl,v 1.81 2008-03-31 07:00:55 matben Exp $
 #
 
 package require treeutil
@@ -106,7 +106,7 @@ namespace eval tile {
 		      -background {active SystemHighlight} \
 		      -foreground {active SystemHighlightText disabled SystemGrayText}
 		    $styleCmd configure TreeCtrl \
-		      -itembackground {"#dedeff" {}}
+		      -itembackground {"#dedeff" {}} -usetheme 1
 		}
 		winxpblue {
 		    $styleCmd configure TreeCtrl \
@@ -117,7 +117,7 @@ namespace eval tile {
 		      -background {active SystemHighlight} \
 		      -foreground {active SystemHighlightText disabled SystemGrayText}
 		    $styleCmd configure TreeCtrl \
-		      -itembackground {"#dedeff" {}}
+		      -itembackground {"#dedeff" {}} -usetheme 1
 		}
 	    }
 	}
