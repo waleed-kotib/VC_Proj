@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: util.tcl,v 1.23 2008-02-29 15:30:11 matben Exp $
+# $Id: util.tcl,v 1.24 2008-04-01 07:02:17 matben Exp $
 
 # TODO:
 #   new: wizard, ttoolbar, mnotebook?
@@ -52,8 +52,14 @@ namespace eval ui {
 	x11 {
 	    if {![catch {tk::pkgconfig get fontsystem} fs] && $fs eq "xft"} {
 		variable family "sans-serif"
+		variable size -12
+		variable smallsize -12
+		variable largesize -22
 	    } else {
 		variable family "Helvetica"
+		variable size -12
+		variable smallsize -10
+		variable largesize -18
 	    }
 	    set size -12
 	    set small -10

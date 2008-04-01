@@ -2,7 +2,7 @@
 #
 #       Some utitilty procedures useful when theming widgets and UI.
 #       
-#  Copyright (c) 2003-2007  Mats Bengtsson
+#  Copyright (c) 2003-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.49 2008-04-01 06:44:34 matben Exp $
+# $Id: Theme.tcl,v 1.50 2008-04-01 07:02:17 matben Exp $
 
 package provide Theme 1.0
 
@@ -177,12 +177,15 @@ proc ::Theme::Fonts { } {
 	x11 {
 	    if {![catch {tk::pkgconfig get fontsystem} fs] && $fs eq "xft"} {
 		variable family "sans-serif"
+		variable size -12
+		variable smallsize -12
+		variable largesize -22
 	    } else {
 		variable family "Helvetica"
+		variable size -12
+		variable smallsize -10
+		variable largesize -18
 	    }
-	    variable size -12
-	    variable smallsize -10
-	    variable largesize -18
 
 	    font configure CociDefaultFont   -family $family -size $size
 	    font configure CociSmallFont     -family $family -size $smallsize
