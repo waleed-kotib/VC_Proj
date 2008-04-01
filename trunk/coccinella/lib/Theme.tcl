@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.48 2008-03-31 14:40:04 matben Exp $
+# $Id: Theme.tcl,v 1.49 2008-04-01 06:44:34 matben Exp $
 
 package provide Theme 1.0
 
@@ -304,21 +304,8 @@ proc ::Theme::GetAllAvailable { } {
     set allThemes [list]
     foreach dir [list $this(themesPath) $this(altThemesPath)] {
 	foreach name [glob -nocomplain -tails -types d -directory $dir *] {
-	    switch -- $name {
-		CVS {
-		    # empty
-		}
-		KDE {
-		    
-		    # We can't get those fonts without 'xft'.
-		    if {![catch {tk::pkgconfig get fontsystem} fs] && $fs eq "xft"} {
-			lappend allThemes $name
-		    }
-		}
-		default {
-		    lappend allThemes $name
-		}
-	    }
+	    if {$name eq "CVS"} { continue }
+	    lappend allThemes $name
 	}
     }
     return $allThemes
