@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.170 2007-12-14 07:42:32 matben Exp $
+#   $Id: nl.msg,v 1.171 2008-04-02 20:40:18 sdevrieze Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}
@@ -286,11 +286,13 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset nl mAboutCoccinella      {&Over Coccinella}
+::msgcat::mcset nl mAboutQuickTimeTcl      {Over QuickTimeTcl}
 ::msgcat::mcset nl mAction               {&Actie}
 ::msgcat::mcset nl mAddToDictionary      {Toevoegen aan woordenboek}
 ::msgcat::mcset nl mAdHocCommands        {C&ommando's}
 ::msgcat::mcset nl mAddContact...        {&Contactpersoon toevoegen...}
 ::msgcat::mcset nl mAddSpeechBubble      {Tekstballon toevoegen}
+::msgcat::mcset nl mAll                  {Alles}
 ::msgcat::mcset nl mArc                  {Boog}
 ::msgcat::mcset nl mArcs                 {Bogen}
 ::msgcat::mcset nl mAttachMessage        {Bericht toevoegen...}
@@ -502,6 +504,7 @@
 ::msgcat::mcset nl {Edit Profiles}       {Profielen bewerken}
 ::msgcat::mcset nl {Email addresses}     {E-mailadressen}
 ::msgcat::mcset nl {Email client}        {E-mailprogramma}
+::msgcat::mcset nl {Enable nickname coloring} {Bijnamen verschillende kleuren geven}
 ::msgcat::mcset nl {Enter Chatroom}      {Chatruimte betreden}
 ::msgcat::mcset nl {Enter/Create Chatroom} {Chatruimte betreden/aanmaken}
 ::msgcat::mcset nl {Exit room}           {Chatruimte verlaten}
@@ -601,6 +604,7 @@
 ::msgcat::mcset nl {Setup Assistant}     {Installatieassistent}
 ::msgcat::mcset nl {Show Icon}           {Pictogram tonen}
 ::msgcat::mcset nl {Show navigation buttons} {Navigatieknoppen tonen}
+::msgcat::mcset nl {Show notifier window} {Notificatievenster tonen}
 ::msgcat::mcset nl {Show popup}          {Popup tonen}
 ::msgcat::mcset nl {Show offline users}  {Offline contactpersonen tonen}
 ::msgcat::mcset nl {Show Text}           {Tekst tonen}
@@ -727,6 +731,8 @@
 ::msgcat::mcset nl messsuassclose        {Wilt u de installatieassistent afsluiten? U kunt hem later altijd starten vanuit het menu.}
 ::msgcat::mcset nl messsuassfillin       {Vul eerst alle velden in.}
 ::msgcat::mcset nl messtimeout           {Tijdslimiet overschreden bij proberen te verbinden.}
+::msgcat::mcset nl messunsavedmsgQ       {Dit whiteboard-document is gewijzigd.}
+::msgcat::mcset nl messunsaveddtl        {Wilt u de wijzigingen opslaan?}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset nl jamessaddforeign2     {Voor een contactpersoon op een chatsysteem zonder open federatie hebt u een account nodig op dit gesloten systeem. Daarnaast moet u deze account registreren op het transport %s. Wilt u dit nu doen?}
