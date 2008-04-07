@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.186 2008-03-29 07:08:41 matben Exp $
+# $Id: UI.tcl,v 1.187 2008-04-07 13:11:02 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -143,9 +143,29 @@ proc ::UI::Init {} {
     
     InitDialogs
 
-    if {[tk windowingsystem] eq "aqua"} {
-	InitMac
+    switch -- [tk windowingsystem] {
+	aqua {
+	    InitMac
+	}
+	x11 {
+	    InitX11
+	}
     }
+}
+
+proc ::UI::InitX11 {} {
+    
+    # button icons for ok and cancel buttons
+    #
+    option add *btok.image                         buttonok
+    option add *btok.compound:                     left
+    option add *btcancel.image                     buttoncancel
+    option add *btcancel.compound                  left
+    
+    option add *Dialog*ok.image                    buttonok
+    option add *Dialog*ok.compound                 left
+    option add *Dialog*cancel.image                buttoncancel
+    option add *Dialog*cancel.compound             left
 }
 
 # @@@ This is only temporary until We've got the chasingarrowselem.
