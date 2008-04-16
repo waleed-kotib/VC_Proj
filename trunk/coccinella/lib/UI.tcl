@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.187 2008-04-07 13:11:02 matben Exp $
+# $Id: UI.tcl,v 1.188 2008-04-16 12:28:20 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -157,14 +157,14 @@ proc ::UI::InitX11 {} {
     
     # button icons for ok and cancel buttons
     #
-    option add *btok.image                         buttonok
-    option add *btok.compound:                     left
-    option add *btcancel.image                     buttoncancel
+    option add *btok.image                         dialog-ok
+    option add *btok.compound                      left
+    option add *btcancel.image                     dialog-cancel
     option add *btcancel.compound                  left
     
-    option add *Dialog*ok.image                    buttonok
+    option add *Dialog*ok.image                    dialog-ok
     option add *Dialog*ok.compound                 left
-    option add *Dialog*cancel.image                buttoncancel
+    option add *Dialog*cancel.image                dialog-cancel
     option add *Dialog*cancel.compound             left
 }
 
