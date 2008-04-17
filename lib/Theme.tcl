@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.50 2008-04-01 07:02:17 matben Exp $
+# $Id: Theme.tcl,v 1.51 2008-04-17 13:33:18 matben Exp $
 
 package provide Theme 1.0
 
@@ -491,23 +491,18 @@ proc ::Theme::FindImageFileWithSuffixes {name suffL {subPath ""}} {
 
 #--- Icon theme directory structure ------------ 8.5 ONLY!
 
-# Theme::FindIcon --
-#
-#       Searches for image using complex dir specifier.
-#       spec is typically icons/32x32/send which is a sub path to an image file
-#       but without any file suffix.
+namespace eval ::Theme {
+    variable themePaths
+}
 
-proc ::Theme::FindIcon {spec} {
-    global  this prefs
+proc ::Theme::GetPathsForTheme {theme} {
+    variable themePaths
     
-    set image ""
-    set nsname ::_img::$spec
-    if {$nsname ni [image names]} {
-	set theme $prefs(themeName)    
+    if {[info exists themePaths($theme)]} {
+	set paths $themePaths($theme)
+    } else {
 
-	#---
 	# Build up a list of search paths.
-	# @@@ This should be cached for each theme.
 	set paths [list]
 	if {$theme ne ""} {
 	    set dir [file join $this(themesPath) $theme]
@@ -523,8 +518,28 @@ proc ::Theme::FindIcon {spec} {
 	
 	# This MUST always be searched for last since it is our fallback.
 	# @@@ Put themes/default/ in this array.
-	lappend paths [file join $this(path) themes/default/]
-	#---
+	lappend paths [file join $this(path) themes/Crystal/]
+	set themePaths($theme) $paths
+    }
+    return $paths
+}
+
+# Theme::FindIcon --
+#
+#       Searches for image using complex dir specifier.
+#       spec is typically icons/32x32/send which is a sub path to an image file
+#       but without any file suffix.
+
+proc ::Theme::FindIcon {spec} {
+    global  this prefs
+    
+    set image ""
+    set tail [file tail $spec]
+    set parts [split $spec /]
+    set nsname ::_img::$spec
+    
+    if {$nsname ni [image names]} {
+	set paths [GetPathsForTheme $prefs(themeName)]
 	
 	foreach p $paths {puts "path=$p"}
 	
