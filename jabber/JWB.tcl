@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.94 2008-03-25 08:52:31 matben Exp $
+# $Id: JWB.tcl,v 1.95 2008-04-17 15:00:29 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -429,10 +429,9 @@ proc ::JWB::BuildEntryHook {w wcomm} {
     
     ::Debug 2 "::JWB::BuildEntryHook wcomm=$wcomm"
 	
-    set subPath [file join images 16]    
-    set imOff [::Theme::GetImage [option get $w connect16Image {}] $subPath]
-    set imOn  [::Theme::GetImage [option get $w connected16Image {}] $subPath]
-    set iconResize [::Theme::GetImage [option get $w resizeHandleImage {}]]
+    set imOff [::Theme::Find16Icon $w connect16Image]
+    set imOn  [::Theme::Find16Icon $w connected16Image]
+    set iconResize [::Theme::FindIcon elements/sizegrip]
     
     # @@@ We should also require that users are coccinella...
     set jidlist [$jstate(jlib) roster getusers -type available]
@@ -544,16 +543,14 @@ proc ::JWB::SetNetworkState {w what} {
 		    }
 		}
 	    }
-	    set subPath [file join images 16]    
-	    set im [::Theme::GetImage [option get $w connected16Image {}] $subPath]
+	    set im [::Theme::Find16Icon $w connected16Image]
 	    after 400 [list $wcontact configure -image $im]
 	}
 	logout {
 	    set wtray [::WB::GetButtonTray $w]
 	    $wtray buttonconfigure send -state disabled
 	    $jwbstate($w,wsend) state {disabled}
-	    set subPath [file join images 16]    
-	    set im [::Theme::GetImage [option get $w connect16Image {}] $subPath]
+	    set im [::Theme::Find16Icon $w connect16Image]
 	    after 400 [list $wcontact configure -image $im]
 	}
     }

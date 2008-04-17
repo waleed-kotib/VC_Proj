@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: Geolocation.tcl,v 1.14 2007-12-20 14:01:24 matben Exp $
+#  $Id: Geolocation.tcl,v 1.15 2008-04-17 15:00:28 matben Exp $
 
 package require jlib::pep
 
@@ -154,7 +154,7 @@ proc ::Geolocation::Dlg {} {
     variable taglabel
     
     set w [ui::dialog -message [mc locationPickMsg] \
-      -detail [mc locationPickDtl] -icon internet \
+      -detail [mc locationPickDtl] -icon worldmap \
       -buttons {ok cancel remove} -modal 1 \
       -geovariable ::prefs(winGeom,geoloc) \
       -title [mc Location] -command [namespace code DlgCmd]]

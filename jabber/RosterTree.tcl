@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.103 2008-03-27 15:15:26 matben Exp $
+# $Id: RosterTree.tcl,v 1.104 2008-04-17 15:00:31 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -52,7 +52,8 @@ namespace eval ::RosterTree {
     #option add *Roster*TreeCtrl.indent          18              widgetDefault
 
     # Fake:
-    option add *Roster*TreeCtrl.rosterImage     cociexec    widgetDefault
+#     option add *Roster*TreeCtrl.rosterImage     cociexec    widgetDefault
+    option add *Roster*TreeCtrl.rosterImage    roster-default   widgetDefault
 
     # @@@ Should get this from a global reaource.
     variable buttonPressMillis 1000
@@ -850,7 +851,7 @@ proc ::RosterTree::BackgroundImageGetThemedFile {suffL} {
     variable T
     
     set name [option get $T rosterImage {}]
-    set fileName [::Theme::FindImageFileWithSuffixes $name $suffL]
+    set fileName [::Theme::FindIconFileWithSuffixes backgrounds/$name $suffL]
     return [file normalize $fileName]
 }
 

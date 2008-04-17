@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: AddressBook.tcl,v 1.12 2007-11-17 07:40:52 matben Exp $
+# $Id: AddressBook.tcl,v 1.13 2008-04-17 15:00:28 matben Exp $
 
 namespace eval ::AddressBook { 
 
@@ -47,7 +47,7 @@ proc ::AddressBook::Init {} {
     option add *AddressBook.padding               2               50
 
     option add *AddressBook.addressBook16Image      history       widgetDefault
-    option add *AddressBook.addressBook16DisImage   historyDis    widgetDefault
+    option add *AddressBook.addressBook16DisImage   history-Dis   widgetDefault
 }
 
 
@@ -98,9 +98,8 @@ proc ::AddressBook::NewPage {} {
     set wtab $wnb.ab
     if {![winfo exists $wtab]} {
         Build $wtab
-	set subPath [file join images 16]
-	set im  [::Theme::GetImage [option get $wtab addressBook16Image {}] $subPath]
-	set imd [::Theme::GetImage [option get $wtab addressBook16DisImage {}] $subPath]
+	set im  [::Theme::Find16Icon $wtab addressBook16Image]
+	set imd [::Theme::Find16Icon $wtab addressBook16DisImage]
 	set imSpec [list $im disabled $imd background $imd]
         $wnb add $wtab -text [mc AddressBook] -image $imSpec -compound image
     }
@@ -132,7 +131,6 @@ proc ::AddressBook::Build {w args} {
     ::Debug 2 "::AddressBook::Build w=$w"
     set jstate(wpopup,addressbook)    .jpopupab
     set waddressbook $w
-    set wwave   $w.fs
     set wbox    $w.box
     set wtree   $wbox.tree
     set wxsc    $wbox.xsc
@@ -145,14 +143,12 @@ proc ::AddressBook::Build {w args} {
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
 
-    set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
     ttk::scrollbar $wxsc -orient horizontal -command [list $wtree xview]
     ttk::scrollbar $wysc -orient vertical -command [list $wtree yview]
 
     ::ITree::New $wtree $wxsc $wysc   \
       -buttonpress ::AddressBook::Popup         \
-      -buttonpopup ::AddressBook::Popup         \
-      -backgroundimage $bgimage
+      -buttonpopup ::AddressBook::Popup
 
     grid  $wtree  -row 0 -column 0 -sticky news
     grid  $wysc   -row 0 -column 1 -sticky ns
@@ -160,9 +156,7 @@ proc ::AddressBook::Build {w args} {
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1
 
-    set subPath    [file join components Phone images addressbook]
-
-    set iconImage  [::Theme::GetImage addressbook $subPath]
+    set iconImage  [::Theme::Find16Icon icons/16x16/history]
     set opts {-text AddressBook -button 1 -image $iconImage -open 1}
     eval {::ITree::Item $wtree "AddressBook"} $opts
 
@@ -181,15 +175,15 @@ proc ::AddressBook::Build {w args} {
     }
 
     #--------- Include Logs Categories ---------
-    set iconImage  [::Theme::GetImage received $subPath]
+    set iconImage  [::Theme::FindIconSize 16 phone-received]
     set opts {-text Received -button 1 -image $iconImage -open 1}
     eval {::ITree::Item $wtree "Received"} $opts
 
-    set iconImage  [::Theme::GetImage called $subPath]
+    set iconImage  [::Theme::FindIconSize 16 phone-called]
     set opts {-text Called -button 1 -image $iconImage -open 1}
     eval {::ITree::Item $wtree "Called"} $opts
 
-    set iconImage  [::Theme::GetImage missed $subPath]
+    set iconImage  [::Theme::FindIconSize 16 phone-missed]
     set opts {-text Missed -button 1 -image $iconImage -open 1}
     eval {::ITree::Item $wtree "Missed"} $opts
     

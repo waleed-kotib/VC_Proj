@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.50 2008-03-28 08:36:14 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.51 2008-04-17 15:00:31 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -159,9 +159,6 @@ proc ::RosterAvatar::InitDB { } {
     set fillB [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     
     # Get default avatar.
-    #set f [file join $this(avatarPath) $avatarSize $avatarDefault.png]
-    #set avimage [image create photo -file $f]
-    #set avatar(default) $avimage
     set avimage [MakeDefaultAvatar]
     
     # Element options:
@@ -252,7 +249,6 @@ proc ::RosterAvatar::InitDBStyle {} {
 }
 
 proc ::RosterAvatar::MakeDefaultAvatar {} {
-    global  this
     variable avatar
     variable avatarSize
     variable avatarDefault 
@@ -261,11 +257,10 @@ proc ::RosterAvatar::MakeDefaultAvatar {} {
 	image delete $avatar(default)
     }
     
-    # Get default avatar.
-    set f [file join $this(avatarPath) $avatarSize $avatarDefault.png]
-    set avimage [image create photo -file $f]
-    set avatar(default) $avimage
-    return $avimage
+    # Get default avatar. This will get any themed default avatar.
+    set spec avatars/${avatarSize}x${avatarSize}/$avatarDefault
+    set avatar(default) [::Theme::FindIcon $spec]
+    return $avatar(default)
 }
 
 proc ::RosterAvatar::InitDefaultAvatars {} {
@@ -279,8 +274,8 @@ proc ::RosterAvatar::InitDefaultAvatars {} {
 	return
     }
     foreach size $avatarSizes {
-	set f [file join $this(avatarPath) $size $avatarDefault.png]
-	set avatar(default,$size) [image create photo -file $f]
+	set spec avatars/${size}x${size}/$avatarDefault
+	set avatar(default,$size) [::Theme::FindIcon $spec]
     }
     set initedDefaultAvatars 1
 }

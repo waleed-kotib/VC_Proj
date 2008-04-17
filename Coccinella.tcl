@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.181 2008-03-29 16:27:47 matben Exp $	
+# $Id: Coccinella.tcl,v 1.182 2008-04-17 15:00:28 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -144,6 +144,7 @@ source [file join $thisPath lib Init.tcl]
 ::Init::SetThisVersion
 ::Init::SetThisEmbedded
 ::Init::SetAutoPath
+::Init::LoadTkPng
 
 set prefs(appName)    "Coccinella"
 set prefs(theAppName) "Coccinella"
@@ -157,15 +158,12 @@ package require Theme
 # Find our language and load message catalog.
 ::Init::Msgcat
 
-switch [tk windowingsystem] {
-    windows - win32 {
-	wm iconbitmap . -default [file join $this(imagePath) coccinella.ico]
-    }
-    x11 {
-	if {[package vcompare [info patchlevel] 8.4.8] >= 0} {
-	    wm iconphoto . -default [::Theme::GetImage coccinella22]
-	}
-    }
+# Cleanup 'if' later...
+if {[info tclversion] >= 8.5} {
+    set im16 [::Theme::FindIconSize 16 coccinella]
+    set im32 [::Theme::FindIconSize 32 coccinella]
+    set im64 [::Theme::FindIconSize 64 coccinella]
+    wm iconphoto . -default $im16 $im32 $im64
 }
 
 # Splash! Need a full update here, at least on Windows.

@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the group chat GUI part.
 #      
-#  Copyright (c) 2001-2007  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.240 2008-03-30 13:18:19 matben Exp $
+# $Id: GroupChat.tcl,v 1.241 2008-04-17 15:00:29 matben Exp $
 
 package require Create
 package require Enter
@@ -55,23 +55,24 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*TreeCtrl.background "#e6edf7"         50
     
     # Icons
-    option add *GroupChat*sendImage            send             widgetDefault
-    option add *GroupChat*sendDisImage         sendDis          widgetDefault
-    option add *GroupChat*saveImage            save             widgetDefault
-    option add *GroupChat*saveDisImage         saveDis          widgetDefault
+    option add *GroupChat*sendImage            mail-send             widgetDefault
+    option add *GroupChat*sendDisImage         mail-send-Dis          widgetDefault
+    option add *GroupChat*saveImage            document-save             widgetDefault
+    option add *GroupChat*saveDisImage         document-save-Dis          widgetDefault
     option add *GroupChat*historyImage         history          widgetDefault
-    option add *GroupChat*historyDisImage      historyDis       widgetDefault
+    option add *GroupChat*historyDisImage      history-Dis       widgetDefault
     option add *GroupChat*inviteImage          invite           widgetDefault
-    option add *GroupChat*inviteDisImage       inviteDis        widgetDefault
-    option add *GroupChat*infoImage            info             widgetDefault
-    option add *GroupChat*infoDisImage         infoDis          widgetDefault
-    option add *GroupChat*printImage           print            widgetDefault
-    option add *GroupChat*printDisImage        printDis         widgetDefault
+    option add *GroupChat*inviteDisImage       invite-Dis        widgetDefault
+    option add *GroupChat*infoImage            dialog-information             widgetDefault
+    option add *GroupChat*infoDisImage         dialog-information-Dis          widgetDefault
+    option add *GroupChat*printImage           document-print            widgetDefault
+    option add *GroupChat*printDisImage        document-print-Dis         widgetDefault
     option add *GroupChat*whiteboardImage      whiteboard       widgetDefault
-    option add *GroupChat*whiteboardDisImage   whiteboardDis    widgetDefault
+    option add *GroupChat*whiteboardDisImage   whiteboard-Dis    widgetDefault
 
-    option add *GroupChat*tabAlertImage        ktip               widgetDefault    
+    option add *GroupChat*tabAlertImage        notify-message               widgetDefault    
 
+    # Pre 8.5, cleanup!
     if {[tk windowingsystem] eq "aqua"} {
 	option add *GroupChat*tabClose16Image        closeAqua         widgetDefault    
 	option add *GroupChat*tabCloseActive16Image  closeAquaActive   widgetDefault    
@@ -79,8 +80,6 @@ namespace eval ::GroupChat:: {
 	option add *GroupChat*tabClose16Image        close             widgetDefault    
 	option add *GroupChat*tabCloseActive16Image  close             widgetDefault    
     }
-    option add *GroupChat*tabCloseImage        closebutton        widgetDefault    
-    option add *GroupChat*tabCloseActiveImage  closebuttonActive  widgetDefault    
 
     # Text displays.
     option add *GroupChat*mePreForeground      red              widgetDefault
@@ -640,20 +639,20 @@ proc ::GroupChat::Build {roomjid} {
     pack $wtop -side top -fill x
         
     # Shortcut button part.
-    set iconSend        [::Theme::GetImage [option get $w sendImage {}]]
-    set iconSendDis     [::Theme::GetImage [option get $w sendDisImage {}]]
-    set iconSave        [::Theme::GetImage [option get $w saveImage {}]]
-    set iconSaveDis     [::Theme::GetImage [option get $w saveDisImage {}]]
-    set iconHistory     [::Theme::GetImage [option get $w historyImage {}]]
-    set iconHistoryDis  [::Theme::GetImage [option get $w historyDisImage {}]]
-    set iconInvite      [::Theme::GetImage [option get $w inviteImage {}]]
-    set iconInviteDis   [::Theme::GetImage [option get $w inviteDisImage {}]]
-    set iconInfo        [::Theme::GetImage [option get $w infoImage {}]]
-    set iconInfoDis     [::Theme::GetImage [option get $w infoDisImage {}]]
-    set iconPrint       [::Theme::GetImage [option get $w printImage {}]]
-    set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
-    set iconWB          [::Theme::GetImage [option get $w whiteboardImage {}]]
-    set iconWBDis       [::Theme::GetImage [option get $w whiteboardDisImage {}]]
+    set iconSend        [::Theme::Find32Icon $w sendImage]
+    set iconSendDis     [::Theme::Find32Icon $w sendDisImage]
+    set iconSave        [::Theme::Find32Icon $w saveImage]
+    set iconSaveDis     [::Theme::Find32Icon $w saveDisImage]
+    set iconHistory     [::Theme::Find32Icon $w historyImage]
+    set iconHistoryDis  [::Theme::Find32Icon $w historyDisImage]
+    set iconInvite      [::Theme::Find32Icon $w inviteImage]
+    set iconInviteDis   [::Theme::Find32Icon $w inviteDisImage]
+    set iconInfo        [::Theme::Find32Icon $w infoImage]
+    set iconInfoDis     [::Theme::Find32Icon $w infoDisImage]
+    set iconPrint       [::Theme::Find32Icon $w printImage]
+    set iconPrintDis    [::Theme::Find32Icon $w printDisImage]
+    set iconWB          [::Theme::Find32Icon $w whiteboardImage]
+    set iconWBDis       [::Theme::Find32Icon $w whiteboardDisImage]
 
     ::ttoolbar::ttoolbar $wtray
     pack $wtray -side top -fill x
@@ -871,11 +870,11 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
 
     ttk::frame $wgroup
     ttk::checkbutton $wgroup.active -style Toolbutton \
-      -image [::Theme::GetImage return]               \
+      -image [::Theme::FindIconSize 16 return]   \
       -command [list [namespace current]::ActiveCmd $chattoken] \
       -variable $chattoken\(active)
-    ttk::button $wgroup.bmark -style Toolbutton  \
-      -image [::Theme::GetImage bookmarkAdd]     \
+    ttk::button $wgroup.bmark -style Toolbutton \
+      -image [::Theme::FindIconSize 16 bookmark-new] \
       -command [list [namespace current]::BookmarkRoom $chattoken]
 
     if {$config(ui,status,menu) eq "plain"} {
@@ -1211,6 +1210,8 @@ proc ::GroupChat::NewPage {dlgtoken roomjid args} {
     return $chattoken
 }
 
+# Pre 8.5, cleanup!
+
 proc ::GroupChat::DrawCloseButton {dlgtoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
@@ -1218,9 +1219,8 @@ proc ::GroupChat::DrawCloseButton {dlgtoken} {
     # Close button (exp). 
     set w $dlgstate(w)
     
-    set subPath [file join images 16]    
-    set im  [::Theme::GetImage [option get $w tabClose16Image {}] $subPath]
-    set ima [::Theme::GetImage [option get $w tabCloseActive16Image {}] $subPath]
+    set im  [::Theme::FindIcon elements/[option get $w tabClose16Image {}]]
+    set ima [::Theme::FindIcon elements/[option get $w tabCloseActive16Image {}]]
     set wclose $dlgstate(wnb).close
 
     ttk::button $wclose -style Plain  \
@@ -1574,7 +1574,7 @@ proc ::GroupChat::TabAlert {chattoken xmldata} {
 	    incr chatstate(nhiddenmsgs)
 	    set name $chatstate(roomNode)
 	    append name " " "($chatstate(nhiddenmsgs))"
-	    set icon [::Theme::GetImage [option get $w tabAlertImage {}]]
+	    set icon [::Theme::Find16Icon $w tabAlertImage]
 	    $wnb tab $chatstate(wpage) -image $icon -text $name
 	}
     }

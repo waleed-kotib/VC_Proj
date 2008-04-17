@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.52 2008-03-23 11:44:17 matben Exp $
+# $Id: SetupAss.tcl,v 1.53 2008-04-17 15:00:32 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -37,7 +37,7 @@ namespace eval ::SetupAss::  {
 
     # Icons
     option add *SetupAss*assistantImage       assistant        widgetDefault
-    option add *SetupAss*assistantDisImage    assistantDis     widgetDefault
+    option add *SetupAss*assistantDisImage    assistant-Dis    widgetDefault
     
     # Event hooks:
     ::hooks::register  connectState  ::SetupAss::ConnectStateHook
@@ -79,8 +79,8 @@ proc ::SetupAss::SetupAss {} {
       -macclass {document closeBox} -class SetupAss
     wm title $w [::msgcat::mc {Setup Assistant}]
     
-    set im  [::Theme::GetImage [option get $w assistantImage {}]]
-    set imd [::Theme::GetImage [option get $w assistantDisImage {}]]
+    set im  [::Theme::Find32Icon $w assistantImage]
+    set imd [::Theme::Find32Icon $w assistantDisImage]
 
     set su $w.su
     wizard::wizard $su  \
@@ -204,7 +204,7 @@ proc ::SetupAss::SetupAss {} {
     ttk::frame $p5.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p5.fr.msg1 -style Small.TLabel \
       -wraplength 260 -justify left -text [mc sufinmsg2]
-    ttk::label $p5.fr.piga -image [::Theme::GetImage bug-128]
+    ttk::label $p5.fr.piga -image [::Theme::FindIconSize 128 coccinella]
     
     grid  $p5.fr.msg1  -sticky n
     grid  $p5.fr.piga  -pady 8

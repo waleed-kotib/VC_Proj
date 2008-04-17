@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements handling and parsing of emoticons (smileys).
 #      
-#  Copyright (c) 2004-2007  Mats Bengtsson
+#  Copyright (c) 2004-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.65 2008-02-29 12:55:36 matben Exp $
+# $Id: Emoticons.tcl,v 1.66 2008-04-17 15:00:28 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -81,7 +81,9 @@ proc ::Emoticons::Init {} {
 	set priv(needtmp)   1
 	set priv(pngformat) {}
     }
-    ::Debug 4 "sets=[GetAllSets]"
+
+    # This also sets the 'state' array.
+    GetAllSets
     
     # Load set.
     # Even if we succeed to get the vfs::zip package, it doesn't check
@@ -151,12 +153,13 @@ proc ::Emoticons::None {} {
 }
 
 proc ::Emoticons::GetAllSets {} {
-    global  this
+    global this
     variable priv
     variable state
     
     set setList [list]
-    foreach path [list $this(emoticonsPath) $this(altEmoticonsPath)] {
+    set paths [::Theme::GetPathsFor $this(emoticons)]
+    foreach path $paths {
 	foreach f [glob -nocomplain -directory $path *] {
 	    set name [file tail $f]
 	    set name [file rootname $name]
@@ -181,22 +184,15 @@ proc ::Emoticons::GetAllSets {} {
 
 proc ::Emoticons::GetPrefSetPathExists {} {
     global  this
+    variable state
     variable priv
     upvar ::Jabber::jprefs jprefs
-
-    # Start with the failsafe set.
-    set path [file join $this(emoticonsPath) $priv(defaultSet)]
     
-    foreach dir [list $this(emoticonsPath) $this(altEmoticonsPath)] {
-	set f [file join $dir $jprefs(emoticonSet)]
-	set fjisp $f.jisp
-	if {[file exists $f]} {
-	    set path $f
-	    break
-	} elseif {[file exists $fjisp] && $priv(havezip)} {
-	    set path $fjisp
-	    break
-	}
+    set name $jprefs(emoticonSet)
+    if {[info exists state($name,path)]} {
+	set path $state($name,path)
+    } else {
+	set path [file join $this(emoticonsPath) $priv(defaultSet)]
     }
     set jprefs(emoticonSet) [file rootname [file tail $path]]
     return $path

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.34 2008-03-19 13:38:02 matben Exp $
+# $Id: AvatarMB.tcl,v 1.35 2008-04-17 15:00:28 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -195,12 +195,7 @@ proc ::AvatarMB::Button {mb args} {
     }
     array set xstate $args
 
-    # Bug in 8.4.1 but ok in 8.4.9
-    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
-	label $mb -relief sunken -bd 1 -bg white
-    } else {
-	ttk::label $mb -style SunkenMenubutton -compound image
-    }
+    ttk::label $mb -style SunkenMenubutton -compound image
     
     set size $widget(buttonsize)
     set myphoto [::Avatar::GetMyPhoto]

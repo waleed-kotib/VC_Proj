@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.19 2007-09-16 14:55:26 matben Exp $
+# $Id: NotifyCall.tcl,v 1.20 2008-04-17 15:00:28 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -204,9 +204,8 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
     grid columnconfigure $win 1 -uniform a
     
     # Level controls.
-    set subPath [file join components Phone timages]
-    set images(microphone) [::Theme::GetImage microphone $subPath]
-    set images(speaker)    [::Theme::GetImage speaker $subPath]    
+    set images(microphone) [::Theme::FindIconSize 16 audio-microphone]
+    set images(speaker)    [::Theme::FindIconSize 16 audio-speaker]
 
     # Microphone:
     set wmic $win.left.mic
@@ -254,12 +253,7 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
 	set state(wavatar) $win.ava.avatar
 	
 	#---- Gets Avatar from Incoming Number -----
-	# Bug in 8.4.1 but ok in 8.4.9
-	if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
-	    label $win.ava.avatar -relief sunken -bd 1 -bg white
-	} else {
-	    ttk::label $win.ava.avatar -style Sunken.TLabel -compound image
-	}	
+	ttk::label $win.ava.avatar -style Sunken.TLabel -compound image
 	::Avatar::GetAsyncIfExists $jid2
 	AvatarNewPhotoHook $jid2
     }
@@ -292,9 +286,8 @@ proc ::NotifyCall::Slot {win} {
     upvar #0 $win state
 	  
     # Level controls.
-    set subPath [file join components Phone timages]
-    set images(microphone) [::Theme::GetImage microphone $subPath]
-    set images(speaker)    [::Theme::GetImage speaker $subPath]    
+    set images(microphone) [::Theme::FindIconSize 16 audio-microphone]
+    set images(speaker)    [::Theme::FindIconSize 16 audio-speaker]
 
     ttk::frame $win -padding {4 2}
     

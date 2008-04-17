@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It sets up the global 'this' array for useful things.
 #      
-#  Copyright (c) 2004-2007  Mats Bengtsson
+#  Copyright (c) 2004-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.96 2008-03-17 14:28:31 matben Exp $
+# $Id: Init.tcl,v 1.97 2008-04-17 15:00:32 matben Exp $
 
 namespace eval ::Init {
     
@@ -40,15 +40,20 @@ proc ::Init::SetThis {mainScript} {
     set this(path)              $path
     set this(script)            $mainScript
     
+    # Sub paths. Use relative source, prefs, or theme dirs. 
+    # Keep generic path separator for theme engine.
+    set this(emoticons)         iconsets/emoticons
     set this(images)            images
     set this(resources)         resources
+    set this(rosticons)         iconsets/roster
+    set this(servicons)         iconsets/service
+    set this(sounds)            sounds
+    set this(themes)            themes
+    
+    # Absolute paths.
     set this(componentPath)     [file join $path components]
     set this(docsPath)          [file join $path docs]
     set this(emoticonsPath)     [file join $path iconsets emoticons]
-    set this(rosticonsPath)     [file join $path iconsets roster]
-    set this(serviconsPath)     [file join $path iconsets service]
-    set this(imagePath)         [file join $path images]
-    set this(avatarPath)        [file join $path images avatar]
     set this(itemPath)          [file join $path items]
     set this(msgcatPath)        [file join $path msgs]
     set this(msgcatCompPath)    [file join $path msgs components]
@@ -58,11 +63,9 @@ proc ::Init::SetThis {mainScript} {
     set this(resourcePath)      [file join $path resources]
     set this(postPrefsPath)     [file join $path resources post]
     set this(postPrefsFile)     [file join $path resources post prefs.rdb]
-    set this(basThemePrefsFile) [file join $path resources post theme.rdb]
     set this(prePrefsPath)      [file join $path resources pre]
     set this(prePrefsFile)      [file join $path resources pre prefs.rdb]
     set this(themesPath)        [file join $path themes]
-    set this(soundsPath)        [file join $path sounds]
     set this(httpdRootPath)     $path
     set this(isAppWrapped)      0
     set this(appPath)           $path
@@ -93,6 +96,10 @@ proc ::Init::SetThis {mainScript} {
 	    }
 	}
     }
+    
+    # Defaults.
+    set this(themeDefault)  "Crystal"
+    set this(soundsDefault) "Standard"
     
     # Path where preferences etc are stored.
     set this(prefsDefPath) [GetDefaultPrefsPath]
@@ -399,19 +406,17 @@ proc ::Init::SetPrefsPaths {} {
     
     set path $this(prefsPath)
     
-    set this(altSoundsPath)     [file join $path sounds]  
-    set this(themePrefsFile)    [file join $path theme]
     set this(altItemPath)       [file join $path items]
-    set this(altEmoticonsPath)  [file join $path iconsets emoticons]
-    set this(altRosticonsPath)  [file join $path iconsets roster]
-    set this(altServiconsPath)  [file join $path iconsets service]
+    set this(altEmoticonsPath)  [file join $path $this(emoticons)]
+    set this(altRosticonsPath)  [file join $path $this(rosticons)]
+    set this(altServiconsPath)  [file join $path $this(servicons)]
+    set this(altThemesPath)     [file join $path themes]
     set this(inboxFile)         [file join $path Inbox.tcl]
     set this(notesFile)         [file join $path Notes.tcl]
     set this(prefsAvatarPath)   [file join $path avatar]
     set this(myAvatarPath)      [file join $path avatar my]
     set this(cacheAvatarPath)   [file join $path avatar cache]
     set this(recentAvatarPath)  [file join $path avatar recent]
-    set this(altThemesPath)     [file join $path themes]
     set this(scriptsPath)       [file join $path scripts]
     set this(backgroundsPath)   [file join $path backgrounds]
 
@@ -731,6 +736,18 @@ proc ::Init::TempDir {} {
     return [file normalize [pwd]]
 }
 
+proc ::Init::LoadTkPng {} {
+    global this
+    
+    # tkpng is required for the gui.
+    if {[catch {package require tkpng 0.7}]} {
+	tk_messageBox -icon error -title [mc Error] \
+	  -message "The tkpng package is required for the GUI"
+	exit
+    }
+    set this(package,tkpng) 1
+}
+
 proc ::Init::LoadPackages {} {
     global  this auto_path
     
@@ -784,17 +801,6 @@ proc ::Init::LoadPackages {} {
 	  -message "This application requires the treectrl widget to work! $::errorInfo"
 	exit
     }
-    
-    #set auto_path $autoPath
-    
-    # tkpng is required for the gui.
-    ::Splash::SetMsg "[mc splashlook] tkpng..."
-    if {[catch {package require tkpng 0.7}]} {
-	tk_messageBox -icon error -title [mc Error] \
-	  -message "The tkpng package is required for the GUI"
-	exit
-    }
-    set this(package,tkpng) 1
     
     # Other utility packages that can be platform specific.
     # The 'Thread' package requires that the Tcl core has been built with support.

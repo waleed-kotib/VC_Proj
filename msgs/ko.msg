@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: ko.msg,v 1.1 2008-01-03 13:49:26 matben Exp $
+#   $Id: ko.msg,v 1.2 2008-04-17 15:00:36 matben Exp $
 
 ::msgcat::mcset ko Abort                 {Abort}
 ::msgcat::mcset ko Action                {활동}
@@ -1026,7 +1026,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset ko jatlsnegot2           {Negotiating TLS security}
 ::msgcat::mcset ko jauserinnote2         {Add your personal notes about this contact.}
 ::msgcat::mcset ko javersinfo            {%s에 대한 버전 정보}
-::msgcat::mcset ko jawaitdisco           {disco 결과 기다리는 중...}
+::msgcat::mcset ko jawaitdisco           {disco 결과 기다리는 중}
 ::msgcat::mcset ko jawaitresp            {%s에 연결됨. 반응 기다리는 중...}
 ::msgcat::mcset ko jawaitserver          {서버의 반응 기다리는 중...}
 ::msgcat::mcset ko jawaitform            {Downloading configuration form}

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.106 2008-03-30 10:00:42 matben Exp $
+# $Id: Profiles.tcl,v 1.107 2008-04-17 15:00:31 matben Exp $
 
 package require ui::megaentry
 
@@ -874,8 +874,8 @@ proc ::Profiles::CancelHook {} {
 
 namespace eval ::Profiles {
     
-    option add *JProfiles*settingsImage        settings         widgetDefault
-    option add *JProfiles*settingsDisImage     settingsDis      widgetDefault
+    option add *JProfiles*settingsImage        preferences        widgetDefault
+    option add *JProfiles*settingsDisImage     preferences-Dis    widgetDefault
 
     bind JProfiles <Destroy> +::Profiles::DialogOnDestroy
 }
@@ -898,7 +898,7 @@ proc ::Profiles::BuildDialog {} {
     ::UI::Toplevel $w -class JProfiles \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::Profiles::CloseDlgHook
-    wm title $w [mc {Edit Profiles}]
+    wm title $w [mc "Edit Profiles"]
     ::UI::SetWindowPosition $w
     
     # Global frame.
@@ -906,8 +906,8 @@ proc ::Profiles::BuildDialog {} {
     pack $w.frall -fill both -expand 1
 
     if {$config(profiles,show-head)} {
-	set im   [::Theme::GetImage [option get $w settingsImage {}]]
-	set imd  [::Theme::GetImage [option get $w settingsDisImage {}]]
+	set im  [::Theme::Find32Icon $w settingsImage]
+	set imd [::Theme::Find32Icon $w settingsDisImage]
 
 	ttk::label $w.frall.head -style Headlabel \
 	  -text [mc "Edit Profiles"] -compound left \

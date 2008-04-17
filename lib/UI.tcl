@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.188 2008-04-16 12:28:20 matben Exp $
+# $Id: UI.tcl,v 1.189 2008-04-17 15:00:32 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -33,8 +33,10 @@ namespace eval ::UI:: {
     ::hooks::register jabberBuildMain         ::UI::JabberBuildMainHook
 
     # Icons
-    option add *buttonOKImage            buttonok       widgetDefault
-    option add *buttonCancelImage        buttoncancel   widgetDefault
+#     option add *buttonOKImage            buttonok       widgetDefault
+#     option add *buttonCancelImage        buttoncancel   widgetDefault
+    option add *buttonOKImage            dialog-ok      widgetDefault
+    option add *buttonCancelImage        dialog-cancel  widgetDefault
     
     option add *info64Image              info64         widgetDefault
     option add *error64Image             error64        widgetDefault
@@ -42,11 +44,14 @@ namespace eval ::UI:: {
     option add *question64Image          question64     widgetDefault
     option add *internet64Image          internet64     widgetDefault
 
-    #option add *badgeImage               Coccinella     widgetDefault
-    #option add *badgeImage               coci-es-shadow-32     widgetDefault
-    option add *badgeImage               bug-32         widgetDefault
-    #option add *applicationImage         coccinella64   widgetDefault
-    option add *applicationImage         bug-64         widgetDefault
+    option add *info64Image              dialog-information  widgetDefault
+    option add *error64Image             dialog-error        widgetDefault
+    option add *warning64Image           dialog-warning      widgetDefault
+    option add *question64Image          dialog-question     widgetDefault
+    option add *worldmap64Image          world-map           widgetDefault
+    
+    option add *badge32Image        coccinella   widgetDefault
+    option add *badge64Image        coccinella   widgetDefault
     
     # components stuff.
     variable menuSpecPublic
@@ -137,9 +142,8 @@ proc ::UI::Init {} {
     
     # Standard button icons. 
     # Special solution to be able to set image via the option database.
-    ::Theme::GetImageWithNameEx [option get . buttonOKImage {}]
-    ::Theme::GetImageWithNameEx [option get . buttonCancelImage {}]
-    ::Theme::GetImageWithNameEx [option get . buttonTrayImage {}]
+    ::Theme::Create16IconWithName . buttonOKImage
+    ::Theme::Create16IconWithName . buttonCancelImage
     
     InitDialogs
 
@@ -176,23 +180,31 @@ proc ::UI::ChaseArrows {w} {
     
     if {([tk windowingsystem] eq "aqua") && \
       ![catch {package require chasingarrowselem 0.2}]} {
-	ttk::progressbar $w -style TChasingArrows -length 16 -maximum 10000
+	ttk::progressbar $w -style TChasingArrows -length 16 -maximum 10000 -takefocus 0
     } else {
 	::chasearrows::chasearrows $w -size 16
     }
     return $w
 }
 
+proc ::UI::FindFirstClassChild {win class} {
+    foreach w [winfo children $win] {
+	if {[winfo class $w] eq $class} {
+	    return $w
+	}
+    }
+    return
+}
+
 proc ::UI::InitDialogs {} {
         
     # Dialog images.
-    foreach name {info error warning question internet} {
-	set im [::Theme::GetImage [option get . ${name}64Image {}]]
+    foreach name {info error warning question worldmap} {
+	set im [::Theme::Find64Icon . ${name}64Image]
 	ui::dialog::setimage $name $im
     }
-    ui::dialog::setbadge [::Theme::GetImage [option get . badgeImage {}]]
-    set im [::Theme::GetImage [option get . applicationImage {}]]
-    ui::dialog::setimage coccinella $im
+    ui::dialog::setbadge [::Theme::Find32Icon . badge32Image]
+    ui::dialog::setimage coccinella [::Theme::Find64Icon . badge64Image]
     ui::dialog layoutpolicy stack
 
     # For ui::openimage

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.287 2008-03-30 13:18:19 matben Exp $
+# $Id: Chat.tcl,v 1.288 2008-04-17 15:00:28 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -59,29 +59,30 @@ namespace eval ::Chat {
     # widgetDefault.
 
     # Icons
-    option add *StartChat.chatImage       newmsg                widgetDefault
-    option add *StartChat.chatDisImage    newmsgDis             widgetDefault
+    option add *StartChat.chatImage       mail-message-new      widgetDefault
+    option add *StartChat.chatDisImage    mail-message-new-Dis  widgetDefault
 
-    option add *Chat*sendImage            send                  widgetDefault
-    option add *Chat*sendDisImage         sendDis               widgetDefault
-    option add *Chat*sendFileImage        sendfile              widgetDefault
-    option add *Chat*sendFileDisImage     sendfileDis           widgetDefault
-    option add *Chat*saveImage            save                  widgetDefault
-    option add *Chat*saveDisImage         saveDis               widgetDefault
+    option add *Chat*sendImage            mail-send             widgetDefault
+    option add *Chat*sendDisImage         mail-send-Dis         widgetDefault
+    option add *Chat*sendFileImage        mail-attach           widgetDefault
+    option add *Chat*sendFileDisImage     mail-attach-Dis       widgetDefault
+    option add *Chat*saveImage            document-save         widgetDefault
+    option add *Chat*saveDisImage         document-save-Dis     widgetDefault
     option add *Chat*historyImage         history               widgetDefault
-    option add *Chat*historyDisImage      historyDis            widgetDefault
-    option add *Chat*settingsImage        settings              widgetDefault
-    option add *Chat*settingsDisImage     settingsDis           widgetDefault
-    option add *Chat*printImage           print                 widgetDefault
-    option add *Chat*printDisImage        printDis              widgetDefault
+    option add *Chat*historyDisImage      history-Dis           widgetDefault
+    option add *Chat*settingsImage        preferences           widgetDefault
+    option add *Chat*settingsDisImage     preferences-Dis       widgetDefault
+    option add *Chat*printImage           document-print        widgetDefault
+    option add *Chat*printDisImage        document-print-Dis    widgetDefault
     option add *Chat*whiteboardImage      whiteboard            widgetDefault
-    option add *Chat*whiteboardDisImage   whiteboardDis         widgetDefault
+    option add *Chat*whiteboardDisImage   whiteboard-Dis        widgetDefault
     option add *Chat*inviteImage          invite                widgetDefault
-    option add *Chat*inviteDisImage       inviteDis             widgetDefault
+    option add *Chat*inviteDisImage       invite-Dis            widgetDefault
 
-    option add *Chat*notifierImage        notifier              widgetDefault    
-    option add *Chat*tabAlertImage        ktip                  widgetDefault    
+    option add *Chat*notifierImage        notify-typing         widgetDefault    
+    option add *Chat*tabAlertImage        notify-message        widgetDefault    
 
+    # Pre 8.5, cleanup!
     if {[tk windowingsystem] eq "aqua"} {
 	option add *Chat*tabClose16Image        closeAqua         widgetDefault    
 	option add *Chat*tabCloseActive16Image  closeAquaActive   widgetDefault    
@@ -92,7 +93,7 @@ namespace eval ::Chat {
     
     # These are stored in images/16 so no conflicts.
     option add *Chat*history16Image       history               widgetDefault    
-    option add *Chat*history16DisImage    historyDis            widgetDefault    
+    option add *Chat*history16DisImage    history-Dis           widgetDefault    
     
     option add *Chat*mePreForeground      red                   widgetDefault
     option add *Chat*mePreBackground      ""                    widgetDefault
@@ -316,8 +317,8 @@ proc ::Chat::StartThreadDlg {args} {
     pack $w.frall -fill both -expand 1
     
     if {$config(chat,show-head)} {
-	set im  [::Theme::GetImage [option get $w chatImage {}]]
-	set imd [::Theme::GetImage [option get $w chatDisImage {}]]
+	set im  [::Theme::Find32Icon $w chatImage]
+	set imd [::Theme::Find32Icon $w chatDisImage]
 	
 	ttk::label $w.frall.head -style Headlabel \
 	  -text [mc mChat] -compound left   \
@@ -1289,33 +1290,28 @@ proc ::Chat::Build {threadID jid} {
     pack $wtop -side top -fill x
         
     # Shortcut button part.
-    set iconSend        [::Theme::GetImage [option get $w sendImage {}]]
-    set iconSendDis     [::Theme::GetImage [option get $w sendDisImage {}]]
-    set iconSendFile    [::Theme::GetImage [option get $w sendFileImage {}]]
-    set iconSendFileDis [::Theme::GetImage [option get $w sendFileDisImage {}]]
-    set iconSave        [::Theme::GetImage [option get $w saveImage {}]]
-    set iconSaveDis     [::Theme::GetImage [option get $w saveDisImage {}]]
-    set iconHistory     [::Theme::GetImage [option get $w historyImage {}]]
-    set iconHistoryDis  [::Theme::GetImage [option get $w historyDisImage {}]]
-    set iconSettings    [::Theme::GetImage [option get $w settingsImage {}]]
-    set iconSettingsDis [::Theme::GetImage [option get $w settingsDisImage {}]]
-    set iconPrint       [::Theme::GetImage [option get $w printImage {}]]
-    set iconPrintDis    [::Theme::GetImage [option get $w printDisImage {}]]
-    set iconWB          [::Theme::GetImage [option get $w whiteboardImage {}]]
-    set iconWBDis       [::Theme::GetImage [option get $w whiteboardDisImage {}]]
-    set iconInvite      [::Theme::GetImage [option get $w inviteImage {}]]
-    set iconInviteDis   [::Theme::GetImage [option get $w inviteDisImage {}]]
+    set iconSend        [::Theme::Find32Icon $w sendImage]
+    set iconSendDis     [::Theme::Find32Icon $w sendDisImage]
+    set iconSendFile    [::Theme::Find32Icon $w sendFileImage]
+    set iconSendFileDis [::Theme::Find32Icon $w sendFileDisImage]
+    set iconSave        [::Theme::Find32Icon $w saveImage]
+    set iconSaveDis     [::Theme::Find32Icon $w saveDisImage]
+    set iconHistory     [::Theme::Find32Icon $w historyImage]
+    set iconHistoryDis  [::Theme::Find32Icon $w historyDisImage]
+    set iconSettings    [::Theme::Find32Icon $w settingsImage]
+    set iconSettingsDis [::Theme::Find32Icon $w settingsDisImage]
+    set iconPrint       [::Theme::Find32Icon $w printImage]
+    set iconPrintDis    [::Theme::Find32Icon $w printDisImage]
+    set iconWB          [::Theme::Find32Icon $w whiteboardImage]
+    set iconWBDis       [::Theme::Find32Icon $w whiteboardDisImage]
+    set iconInvite      [::Theme::Find32Icon $w inviteImage]
+    set iconInviteDis   [::Theme::Find32Icon $w inviteDisImage]
 
-    set iconNotifier    [::Theme::GetImage [option get $w notifierImage {}]]
+    set iconNotifier    [::Theme::Find16Icon $w notifierImage]
     set dlgstate(iconNotifier) $iconNotifier
     
-    # Bug in 8.4.1 but ok in 8.4.9
     # We create the avatar widget but map it in SetAnyAvatar.
-    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
-	label $wavatar -relief sunken -bd 1 -bg white
-    } else {
-	ttk::label $wavatar -style Sunken.TLabel -compound image
-    }
+    ttk::label $wavatar -style Sunken.TLabel -compound image
 
     ::ttoolbar::ttoolbar $wtray
     grid  $wtray  x  
@@ -1586,15 +1582,14 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     set chatstate(wnotifier) $wnotifier
         
     # The bottom frame.
-    set subPath [file join images 16]    
-    set im  [::Theme::GetImage [option get $w history16Image {}] $subPath]
-    set imd [::Theme::GetImage [option get $w history16DisImage {}] $subPath]
+    set im  [::Theme::Find16Icon $w history16Image]
+    set imd [::Theme::Find16Icon $w history16DisImage]
     set imH [list $im disabled $imd background $imd]
 
     
     ttk::frame $wbot
     ttk::checkbutton $wbot.active -style Toolbutton \
-      -image [::Theme::GetImage return] \
+      -image [::Theme::FindIconSize 16 return] \
       -command [list [namespace current]::ActiveCmd $chattoken] \
       -variable $chattoken\(active)
     set cmd [list [namespace current]::SmileyCmd $chattoken]
@@ -2182,6 +2177,8 @@ proc ::Chat::NewPage {dlgtoken threadID jid} {
     return $chattoken
 }
 
+# Pre 8.5, cleanup!
+
 proc ::Chat::DrawCloseButton {dlgtoken} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
@@ -2189,9 +2186,8 @@ proc ::Chat::DrawCloseButton {dlgtoken} {
     # Close button (exp). 
     set w $dlgstate(w)
     
-    set subPath [file join images 16]    
-    set im  [::Theme::GetImage [option get $w tabClose16Image {}] $subPath]
-    set ima [::Theme::GetImage [option get $w tabCloseActive16Image {}] $subPath]
+    set im  [::Theme::FindIcon elements/[option get $w tabClose16Image {}]]
+    set ima [::Theme::FindIcon elements/[option get $w tabCloseActive16Image {}]]
     set wclose $dlgstate(wnb).close
 
     ttk::button $wclose -style Plain  \
@@ -2627,7 +2623,7 @@ proc ::Chat::TabAlert {chattoken} {
 	    set postfix " ($chatstate(nhiddenmsgs))"
 	    set name $chatstate(displayname)
 	    append name " " "($chatstate(nhiddenmsgs))"
-	    set icon [::Theme::GetImage [option get $w tabAlertImage {}]]
+	    set icon [::Theme::Find16Icon $w tabAlertImage]
 	    $wnb tab $chatstate(wpage) -image $icon -text $name
 	}
     }

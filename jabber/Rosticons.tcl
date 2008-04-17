@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements handling and parsing of roster icons.
 #      
-#  Copyright (c) 2005-2007  Mats Bengtsson
+#  Copyright (c) 2005-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.41 2008-01-19 14:52:09 matben Exp $
+# $Id: Rosticons.tcl,v 1.42 2008-04-17 15:00:32 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -88,6 +88,13 @@ namespace eval ::Rosticons:: {
 
     variable priv
     set priv(types) [array names defaultSet]
+    
+    # Define which icons we want to use as defaults.
+    foreach type $priv(types) {
+	set ::config(rost,icons,use,$type) 0
+    }
+    set ::config(rost,icons,use,application) 1
+    set ::config(rost,icons,use,status)      1
 }
 
 proc ::Rosticons::Init {} {
@@ -178,7 +185,7 @@ proc ::Rosticons::GetAllTypeSets {} {
     array unset state names,*
     array unset state types
     
-    foreach path [list $this(rosticonsPath) $this(altRosticonsPath)] {
+    foreach path [::Theme::GetPathsFor $this(rosticons)] {
 	foreach tdir [glob -nocomplain -type d -directory $path *] {
 	    set type [file tail $tdir]
 	    if {$type eq "CVS"} {
@@ -399,7 +406,7 @@ proc ::Rosticons::SetFromTmp {type name} {
 # Preference hooks -------------------------------------------------------------
 
 proc ::Rosticons::InitPrefsHook {} {
-    
+    global config
     variable priv
     variable defaultSet
     upvar ::Jabber::jprefs jprefs
@@ -416,13 +423,12 @@ proc ::Rosticons::InitPrefsHook {} {
 	set value [set $name]
 	lappend plist [list $name $rsrc $value]
 
-	set jprefs(rost,icons,use,$type) 1
+	set jprefs(rost,icons,use,$type) $config(rost,icons,use,$type)
 	set name  ::Jabber::jprefs(rost,icons,use,$type)
 	set rsrc  jprefs_rost_icons_use_$type
 	set value [set $name]
 	lappend plist [list $name $rsrc $value]
-    }
-    
+    }    
     ::PrefUtils::Add $plist
 }
 

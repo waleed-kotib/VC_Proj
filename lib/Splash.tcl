@@ -17,17 +17,17 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Splash.tcl,v 1.19 2008-03-18 16:14:21 matben Exp $
+# $Id: Splash.tcl,v 1.20 2008-04-17 15:00:32 matben Exp $
    
 package provide Splash 1.0
 
 namespace eval ::Splash:: {
     
-    set text1 "Written by Mats Bengtsson (C) 1999-2006"
+    set text1 "Written by Mats Bengtsson (C) 1999-2008"
     set text2 "Distributed under the Gnu General Public License"
 	
     # Use option database for customization.
-    option add *Splash.image               splash           widgetDefault
+    option add *Splash.image               splash-default   widgetDefault
     option add *Splash.showMinor           1                widgetDefault
     option add *Splash.showCopyright       0                widgetDefault
     option add *Splash.minorX              362              widgetDefault
@@ -92,7 +92,8 @@ proc ::Splash::SplashScreen {} {
     set copyrightY    [option get $w copyrightY {}]
     
     # If image not already there, get it.
-    set imsplash [::Theme::GetImage [option get $w image {}]]
+    set tail [option get $w image {}]
+    set imsplash [::Theme::FindIcon splash/$tail]
     set imHeight [image height $imsplash]
     set imWidth [image width $imsplash]
     if {$copyrightX eq ""} {

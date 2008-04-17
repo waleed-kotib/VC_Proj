@@ -7,7 +7,7 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: notify.tcl,v 1.3 2008-03-27 15:15:26 matben Exp $
+#  $Id: notify.tcl,v 1.4 2008-04-17 15:00:28 matben Exp $
 
 package require Tk 8.5
 package require tkpath 0.2.8 ;# switch to 0.3 later on
@@ -231,7 +231,7 @@ snit::widget ui::notify::widget {
 if {0} {
     set tkpath::antialias 1
     package require ui::notify
-    set cociFile [file join $this(imagePath) bug-128.png]
+    set cociFile [::Theme::FindExactIconFile icons/128x128/coccinella.png]
     set image [image create photo -file $cociFile]
     destroy .ntfy
     ui::notify .ntfy -title "Kilroy was here" \

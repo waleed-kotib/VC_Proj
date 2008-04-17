@@ -18,14 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.53 2008-03-29 11:55:06 matben Exp $
+# $Id: JUser.tcl,v 1.54 2008-04-17 15:00:29 matben Exp $
 
 package provide JUser 1.0
 
-namespace eval ::JUser:: {
+namespace eval ::JUser {
 	
-    option add *JUser.adduserImage                adduser         widgetDefault
-    option add *JUser.adduserDisImage             adduserDis      widgetDefault
+    option add *JUser.adduserImage              contact-new         widgetDefault
+    option add *JUser.adduserDisImage           contact-new-Dis     widgetDefault
 
     # A unique running identifier.
     variable uid 0
@@ -110,8 +110,8 @@ proc ::JUser::NewDlg {args} {
     pack $wall -fill both -expand 1
 
     if {$config(adduser,show-head)} {
-	set im  [::Theme::GetImage [option get $w adduserImage {}]]
-	set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
+	set im  [::Theme::Find32Icon $w adduserImage]
+	set imd [::Theme::Find32Icon $w adduserDisImage]
 
 	ttk::label $wall.head -style Headlabel \
 	  -text [mc "Add Contact"] -compound left \
@@ -199,6 +199,7 @@ proc ::JUser::NewDlg {args} {
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
+    bind $state(wjid) <Map> { focus %W }
     
     # Trick to resize the labels wraplength.
     set script [format {
@@ -531,8 +532,8 @@ proc ::JUser::EditUserDlg {jid} {
     if {$nwin == 1} {
 	::UI::SetWindowPosition $w $wDlgs(jrostedituser)
     }
-    set im  [::Theme::GetImage [option get $w adduserImage {}]]
-    set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
+    set im  [::Theme::Find32Icon $w adduserImage]
+    set imd [::Theme::Find32Icon $w adduserDisImage]
     
     set jlib $jstate(jlib)
 

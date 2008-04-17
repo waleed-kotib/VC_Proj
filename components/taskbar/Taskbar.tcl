@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.39 2008-01-03 14:24:16 matben Exp $
+# $Id: Taskbar.tcl,v 1.40 2008-04-17 15:00:28 matben Exp $
 
 package require balloonhelp
 
@@ -99,7 +99,7 @@ proc ::Taskbar::WinInit {} {
     
     # The Winico is pretty buggy! Need to cd to avoid path troubles!
     set iconf [option get . taskbarIconWin {}]
-    set iconFile [::Theme::FindExactImageFile $iconf]
+    set iconFile [::Theme::FindExactIconFile icons/others/$iconf]
     set oldDir [pwd]
     set dir [file dirname $iconFile]
 
@@ -137,9 +137,9 @@ proc ::Taskbar::X11Init {} {
     }
     set wmenu $wtray.pop
 
-    option add *taskbarIcon   bug-32   widgetDefault
+    option add *taskbarIcon   coccinella   widgetDefault
 
-    set image [::Theme::GetImage [option get . taskbarIcon {}]]
+    set image [::Theme::Find32Icon . taskbarIcon]
     ::tktray::icon $wtray -image $image
 
     bind $wtray <ButtonRelease-1> { ::Taskbar::X11Cmd %X %Y }
@@ -173,13 +173,12 @@ proc ::Taskbar::InitHook {} {
     menu $m -tearoff 1 -postcommand [list [namespace current]::Post $m] \
       -tearoffcommand [namespace current]::TearOff -title $prefs(theAppName)
     
-    set subPath [file join $this(images) 16]
-    set COCI [::Theme::GetImage bug $subPath]
-    set INFO [::Theme::GetImage info $subPath]
-    set SET  [::Theme::GetImage settings $subPath]
-    set MSG  [::Theme::GetImage newmsg $subPath]
-    set ADD  [::Theme::GetImage adduser $subPath]
-    set EXIT [::Theme::GetImage exit $subPath]
+    set COCI [::Theme::FindIconSize 16 coccinella]
+    set INFO [::Theme::FindIconSize 16 dialog-information]
+    set SET  [::Theme::FindIconSize 16 preferences]
+    set MSG  [::Theme::FindIconSize 16 mail-message-new]
+    set ADD  [::Theme::FindIconSize 16 contact-new]
+    set EXIT [::Theme::FindIconSize 16 application-exit]
     set STAT [::Roster::GetMyPresenceIcon]
     
     set menuDef {
@@ -221,7 +220,7 @@ proc ::Taskbar::X11Configure {width height} {
     variable wtray
         
     if {$width < 32 || $height < 32} {
-	$wtray configure -image [::Theme::GetImage coccinella22]
+	$wtray configure -image [::Theme::FindIconSize 22 coccinella]
     }
 }
 

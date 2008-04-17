@@ -59,6 +59,5 @@ package ifneeded uri::urn 1.0.2 [list source [file join $dir urn-scheme.tcl]]
 package ifneeded uriencode 1.0 [list source [file join $dir uriencode.tcl]]
 package ifneeded utils 1.0 [list source [file join $dir utils.tcl]]
 package ifneeded uuid 1.0 [list source [file join $dir uuid.tcl]]
-package ifneeded wavelabel 1.0 [list source [file join $dir wavelabel.tcl]]
 package ifneeded wizard 1.0 [list source [file join $dir wizard.tcl]]
 

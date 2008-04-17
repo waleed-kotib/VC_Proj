@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements jabber GUI parts.
 #      
-#  Copyright (c) 2001-2007  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.241 2008-03-27 15:24:49 matben Exp $
+# $Id: JUI.tcl,v 1.242 2008-04-17 15:00:29 matben Exp $
 
 package provide JUI 1.0
 
@@ -35,24 +35,22 @@ namespace eval ::JUI:: {
 
     # Use option database for customization.
     # Shortcut buttons.
-    option add *JMain.connectImage                connect         widgetDefault
-    option add *JMain.connectDisImage             connectDis      widgetDefault
-    option add *JMain.connectedImage              connected       widgetDefault
-    option add *JMain.connectedDisImage           connectedDis    widgetDefault
+    option add *JMain.connectImage                network-disconnect         widgetDefault
+    option add *JMain.connectDisImage             network-disconnect-Dis      widgetDefault
+    option add *JMain.connectedImage              network-connect       widgetDefault
+    option add *JMain.connectedDisImage           network-connect-Dis    widgetDefault
     option add *JMain.inboxImage                  inbox           widgetDefault
-    option add *JMain.inboxDisImage               inboxDis        widgetDefault
-    option add *JMain.inboxLetterImage            inboxLetter     widgetDefault
-    option add *JMain.inboxLetterDisImage         inboxLetterDis  widgetDefault
-    option add *JMain.adduserImage                adduser         widgetDefault
-    option add *JMain.adduserDisImage             adduserDis      widgetDefault
-    option add *JMain.stopImage                   stop            widgetDefault
-    option add *JMain.stopDisImage                stopDis         widgetDefault
-    option add *JMain.chatImage                   newmsg          widgetDefault
-    option add *JMain.chatDisImage                newmsgDis       widgetDefault
-    option add *JMain.roster16Image               family16        widgetDefault
-    option add *JMain.roster16DisImage            family16Dis     widgetDefault
-    option add *JMain.browser16Image              run16           widgetDefault
-    option add *JMain.browser16DisImage           run16Dis        widgetDefault
+    option add *JMain.inboxDisImage               inbox-Dis        widgetDefault
+    option add *JMain.inboxLetterImage            inbox-unread     widgetDefault
+    option add *JMain.inboxLetterDisImage         inbox-unread-Dis  widgetDefault
+    option add *JMain.adduserImage                contact-new         widgetDefault
+    option add *JMain.adduserDisImage             contact-new-Dis      widgetDefault
+    option add *JMain.stopImage                   dialog-error            widgetDefault
+    option add *JMain.stopDisImage                dialog-error-Dis         widgetDefault
+    option add *JMain.chatImage                   mail-message-new          widgetDefault
+    option add *JMain.chatDisImage                mail-message-new-Dis       widgetDefault
+    option add *JMain.roster16Image               invite        widgetDefault
+    option add *JMain.roster16DisImage            invite-Dis     widgetDefault
 
     # Top header image if any.
     option add *JMain.headImage                   ""              widgetDefault
@@ -60,37 +58,34 @@ namespace eval ::JUI:: {
     option add *JMain.head.relief                 flat            50
 
     # Other icons.
-    option add *JMain.resizeHandleImage           resizehandle    widgetDefault
-    option add *JMain.secureImage                 locked          widgetDefault
+    option add *JMain.sizeGripImage               sizegrip        widgetDefault
+    option add *JMain.secureImage                 security          widgetDefault
 
-    option add *JMain.cociEs32                    coci-es-32      widgetDefault
-    option add *JMain.cociEsActive32              coci-es-shadow-32 widgetDefault
+    option add *JMain.cociEs32                    coccinella2      widgetDefault
+    option add *JMain.cociEsActive32              coccinella2-shadow widgetDefault
 
     # Standard widgets.
     switch -- [tk windowingsystem] {
 	aqua {
-	    option add *JMain*TNotebook.padding   {8 8 8 4}       50
+	    #option add *JMain*TNotebook.padding   {8 8 8 4}       50
+	    option add *JMain*TNotebook.padding   {0 8 0 4}       50
 	    option add *JMain*bot.f.padding       {8 6 4 4}       50
 	}
 	x11 {
-	    option add *JMain*TNotebook.padding   {2 4 2 2}       50
+	    #option add *JMain*TNotebook.padding   {2 4 2 2}       50
+	    option add *JMain*TNotebook.padding   {0 4 0 2}       50
 	    option add *JMain*bot.f.padding       {2 4 2 2}       50
 	}
 	default {
-	    option add *JMain*TNotebook.padding   {4 4 4 2}       50
+	    #option add *JMain*TNotebook.padding   {4 4 4 2}       50
+	    option add *JMain*TNotebook.padding   {0 4 0 2}       50
 	    option add *JMain*bot.f.padding       {8 6 4 4}       50
 	}
     }
     option add *JMain*TMenubutton.padding         {1}             50
-
-    # Bug in 8.4.1 but ok in 8.4.9
-    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
-	option add *JMain*me.style              Small.TLabel startupFile
-    } else {
-	option add *JMain*me.style              Small.Sunken.TLabel startupFile
-	# Alternative.
-	#option add *JMain*me.style              LSafari startupFile
-    }
+    option add *JMain*me.style              Small.Sunken.TLabel startupFile
+    # Alternative.
+    #option add *JMain*me.style              LSafari startupFile
     
     # Configurations:
     # http adresses to home and bug tracker.
@@ -354,16 +349,16 @@ proc ::JUI::Build {w} {
     }
 
     # Any header image?
-    set headImage [::Theme::GetImage [option get $w headImage {}]]
+    set headImage [::Theme::Find32Icon $w headImage]
     if {$headImage ne ""} {
 	ttk::label $wall.head -image $headImage
 	pack  $wall.head -side top -anchor w
     }
 
     # Other icons.
-    set iconResize     [::Theme::GetImage [option get $w resizeHandleImage {}]]
-    set iconRoster     [::Theme::GetImage [option get $w roster16Image {}]]
-    set iconRosterDis  [::Theme::GetImage [option get $w roster16DisImage {}]]
+    set iconResize    [::Theme::FindIcon elements/[option get $w sizeGripImage {}]]
+    set iconRoster    [::Theme::Find16Icon $w roster16Image]
+    set iconRosterDis [::Theme::Find16Icon $w roster16DisImage]
     
     set wtbar $wall.tbar
     BuildToolbar $w $wtbar
@@ -443,8 +438,8 @@ proc ::JUI::Build {w} {
     
     # Experimental.
     if {$config(ui,main,toy-status)} {
-	set im  [::Theme::GetImage [option get $w cociEs32 {}]]
-	set ima [::Theme::GetImage [option get $w cociEsActive32 {}]]
+	set im  [::Theme::Find32Icon $w cociEs32]
+	set ima [::Theme::Find32Icon $w cociEsActive32]
 	ttk::frame $wall.logo
 	pack $wall.logo -side bottom -fill x
 	ttk::button $wall.logo.b -style Plain \
@@ -822,9 +817,8 @@ proc ::JUI::BuildMessageSlot {w} {
 	pack $w.arrow -side left -anchor n	
 	bind $w.arrow <<ButtonPopup>> [list [namespace current]::MessageSlotPopup $w %x %y]
 
-	set subPath [file join images 16]
-	set im  [::Theme::GetImage closeAqua $subPath]
-	set ima [::Theme::GetImage closeAquaActive $subPath]
+	set im  [::Theme::FindIcon elements/closeAqua]
+	set ima [::Theme::FindIcon elements/closeAquaActive]
 	ttk::button $w.close -style Plain  \
 	  -image [list $im active $ima] -compound image  \
 	  -command [namespace code [list MessageSlotClose $w]]
@@ -922,18 +916,18 @@ proc ::JUI::NotebookGetPage {} {
 proc ::JUI::BuildToolbar {w wtbar} {
     
     # Shortcut button part.
-    set iconConnect       [::Theme::GetImage [option get $w connectImage {}]]
-    set iconConnectDis    [::Theme::GetImage [option get $w connectDisImage {}]]
-    set iconInboxLett     [::Theme::GetImage [option get $w inboxLetterImage {}]]
-    set iconInboxLettDis  [::Theme::GetImage [option get $w inboxLetterDisImage {}]]
-    set iconInbox         [::Theme::GetImage [option get $w inboxImage {}]]
-    set iconInboxDis      [::Theme::GetImage [option get $w inboxDisImage {}]]
-    set iconAddUser       [::Theme::GetImage [option get $w adduserImage {}]]
-    set iconAddUserDis    [::Theme::GetImage [option get $w adduserDisImage {}]]
-    set iconStop          [::Theme::GetImage [option get $w stopImage {}]]
-    set iconStopDis       [::Theme::GetImage [option get $w stopDisImage {}]]
-    set iconChat          [::Theme::GetImage [option get $w chatImage {}]]
-    set iconChatDis       [::Theme::GetImage [option get $w chatDisImage {}]]
+    set iconConnect       [::Theme::Find32Icon $w connectImage]
+    set iconConnectDis    [::Theme::Find32Icon $w connectDisImage]
+    set iconInboxLett     [::Theme::Find32Icon $w inboxLetterImage]
+    set iconInboxLettDis  [::Theme::Find32Icon $w inboxLetterDisImage]
+    set iconInbox         [::Theme::Find32Icon $w inboxImage]
+    set iconInboxDis      [::Theme::Find32Icon $w inboxDisImage]
+    set iconAddUser       [::Theme::Find32Icon $w adduserImage]
+    set iconAddUserDis    [::Theme::Find32Icon $w adduserDisImage]
+    set iconStop          [::Theme::Find32Icon $w stopImage]
+    set iconStopDis       [::Theme::Find32Icon $w stopDisImage]
+    set iconChat          [::Theme::Find32Icon $w chatImage]
+    set iconChatDis       [::Theme::Find32Icon $w chatDisImage]
     
     ::ttoolbar::ttoolbar $wtbar
     
@@ -1224,7 +1218,7 @@ proc ::JUI::LoginHook {} {
     if {[info exists jwapp(secure)] && [winfo exists $jwapp(secure)]} {
 	set sasl [::Jabber::Jlib connect feature sasl]
 	if {$sasl} {
-	    set name [::Theme::GetImage [option get $w secureImage {}]]
+	    set name [::Theme::Find16Icon $w secureImage]
 	    $jwapp(secure) configure -image $name
 	}
     }
@@ -1288,14 +1282,14 @@ proc ::JUI::MailBoxState {mailboxstate} {
         
     switch -- $mailboxstate {
 	empty {
-	    set im  [::Theme::GetImage [option get $w inboxImage {}]]
-	    set imd [::Theme::GetImage [option get $w inboxDisImage {}]]
+	    set im  [::Theme::Find32Icon $w inboxImage]
+	    set imd [::Theme::Find32Icon $w inboxDisImage]
 	    $jwapp(wtbar) buttonconfigure inbox  \
 	      -image $im -disabledimage $imd
 	}
 	nonempty {
-	    set im  [::Theme::GetImage [option get $w inboxLetterImage {}]]
-	    set imd [::Theme::GetImage [option get $w inboxLetterDisImage {}]]
+	    set im  [::Theme::Find32Icon $w inboxLetterImage]
+	    set imd [::Theme::Find32Icon $w inboxLetterDisImage]
 	    $jwapp(wtbar) buttonconfigure inbox  \
 	      -image $im -disabledimage $imd
 	}
@@ -1627,22 +1621,22 @@ proc ::JUI::FixUIWhen {what} {
         
     switch -exact -- $what {
 	connectinit {
-	    set stopImage [::Theme::GetImage [option get $w stopImage {}]]
+	    set stopImage [::Theme::Find32Icon $w stopImage]
 
 	    $wtbar buttonconfigure connect -text [mc Stop] \
 	      -image $stopImage -disabledimage $stopImage
 	}
 	connectfin - connect {
-	    set connectedImage    [::Theme::GetImage [option get $w connectedImage {}]]
-	    set connectedDisImage [::Theme::GetImage [option get $w connectedDisImage {}]]
+	    set connectedImage    [::Theme::Find32Icon $w connectedImage]
+	    set connectedDisImage [::Theme::Find32Icon $w connectedDisImage]
 
 	    $wtbar buttonconfigure connect -text [mc Logout] \
 	      -image $connectedImage -disabledimage $connectedDisImage
 	    $wtbar buttonconfigure newuser -state normal
 	}
 	disconnect {
-	    set iconConnect     [::Theme::GetImage [option get $w connectImage {}]]
-	    set iconConnectDis  [::Theme::GetImage [option get $w connectDisImage {}]]
+	    set iconConnect     [::Theme::Find32Icon $w connectImage]
+	    set iconConnectDis  [::Theme::Find32Icon $w connectDisImage]
 
 	    $wtbar buttonconfigure connect -text [mc Login] \
 	      -image $iconConnect -disabledimage $iconConnectDis

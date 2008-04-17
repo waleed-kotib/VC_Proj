@@ -18,13 +18,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.12 2008-01-17 14:06:17 matben Exp $
+# $Id: Servicons.tcl,v 1.13 2008-04-17 15:00:32 matben Exp $
 
 package require Icondef
 
 package provide Servicons 1.0
 
-namespace eval ::Servicons:: {
+namespace eval ::Servicons {
 
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Servicons::InitPrefsHook
@@ -191,7 +191,7 @@ proc ::Servicons::GetAllSets {} {
     variable state
     
     set setList [list]
-    foreach path [list $this(serviconsPath) $this(altServiconsPath)] {
+    foreach path [::Theme::GetPathsFor $this(servicons)] {
 	foreach f [glob -nocomplain -directory $path *] {
 	    set name [file tail $f]
 	    set name [file rootname $name]

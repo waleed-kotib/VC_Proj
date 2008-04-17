@@ -10,7 +10,7 @@ namespace eval ::Totd {
     }
     component::define Totd "Useful tips"
 
-    option add *Totd.icon       bug-128                 widgetDefault
+    option add *Totd.icon       coccinella       widgetDefault
     option add *Totd*Text.font  CociDefaultFont         50
 }
 
@@ -72,7 +72,7 @@ proc ::Totd::Build {} {
     wm title $w [mc "Useful Tips"]
     
     ::UI::SetWindowPosition $w
-    set icon [::Theme::GetImage [option get $w icon {}]]
+    set icon [::Theme::Find128Icon $w icon]
 
     ttk::frame $w.frall
     pack  $w.frall  -fill x

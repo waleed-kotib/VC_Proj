@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.33 2008-03-27 15:15:26 matben Exp $
+# $Id: FTrans.tcl,v 1.34 2008-04-17 15:00:29 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -38,8 +38,8 @@ namespace eval ::FTrans {
     set title [mc "Send File"]
         
     option add *FTrans.title                 $title           widgetDefault
-    option add *FTrans.sendFileImage         sendfile         widgetDefault
-    option add *FTrans.sendFileDisImage      sendfileDis      widgetDefault
+    option add *FTrans.sendFileImage         mail-attach      widgetDefault
+    option add *FTrans.sendFileDisImage      mail-attach-Dis  widgetDefault
     
     variable uid 0
     
@@ -54,7 +54,7 @@ proc ::FTrans::JabberInitHook {jlib} {
     jlib::disco::registerfeature $xmppxmlns(oob)
 }
 
-proc ::FTrans::InitPrefsHook { } {
+proc ::FTrans::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
 	
     set jprefs(bytestreams,port) 8237
@@ -175,15 +175,16 @@ snit::widget ::FTrans::SendDialog {
 	}
 	wm title $win $options(-title)
 
-	set im   [::Theme::GetImage $options(-image)]
-	set imbg [::Theme::GetImage $options(-imagebg)]
+	parray options
+	set im   [::Theme::Find32Icon $win sendFileImage]
+	set imbg [::Theme::Find32Icon $win sendFileDisImage]
 
 	# Global frame.
 	ttk::frame $win.f
 	pack $win.f -fill both -expand 1
 	    
 	ttk::label $win.f.head -style Headlabel  \
-	  -text [mc {Send File}] -compound left  \
+	  -text [mc "Send File"] -compound left  \
 	  -image [list $im background $imbg]
 	pack $win.f.head -side top -anchor w
 
@@ -652,13 +653,6 @@ proc ::FTrans::TProgress {token jlibname sid total bytes} {
 	ui::progress::toplevel $w -text $str  \
 	  -cancelcommand [list [namespace current]::TCancel $jlibname $sid]
     }
-    
-    # WRONG !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#     if {[string equal $::tcl_platform(platform) "windows"]} {
-# 	update
-#     } else {
-# 	update idletasks
-#     }
 }
 
 proc ::FTrans::TCancel {jlibname sid} {

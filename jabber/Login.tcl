@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements functions for logging in at different application levels.
 #      
-#  Copyright (c) 2001-2007  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,15 +18,15 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.142 2008-03-30 13:18:19 matben Exp $
+# $Id: Login.tcl,v 1.143 2008-04-17 15:00:30 matben Exp $
 
 package provide Login 1.0
 
 namespace eval ::Login:: {
     
     # Use option database for customization.
-    option add *JLogin.connectImage             connect         widgetDefault
-    option add *JLogin.connectDisImage          connectDis      widgetDefault
+    option add *JLogin.connectImage         network-disconnect      widgetDefault
+    option add *JLogin.connectDisImage      network-disconnect-Dis  widgetDefault
 
     variable server
     variable username
@@ -114,8 +114,8 @@ proc ::Login::Dlg {} {
     pack  $w.frall  -fill x
                                  
     if {$config(login,show-head)} {
-	set connectim   [::Theme::GetImage [option get $w connectImage {}]]
-	set connectimd  [::Theme::GetImage [option get $w connectDisImage {}]]
+	set connectim   [::Theme::Find32Icon $w connectImage]
+	set connectimd  [::Theme::Find32Icon $w connectDisImage]
 
 	ttk::label $w.frall.head -style Headlabel \
 	  -text [mc Login] -compound left \

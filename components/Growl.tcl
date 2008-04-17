@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.30 2008-03-14 13:19:35 matben Exp $
+# $Id: Growl.tcl,v 1.31 2008-04-17 15:00:28 matben Exp $
 
 namespace eval ::Growl { 
 
@@ -42,7 +42,7 @@ proc ::Growl::Init {} {
     component::register Growl
     
     # There are some nice 64x64 error & info icons as well.
-    set cociFile [file join $this(imagePath) bug-128.png]
+    set cociFile [::Theme::FindExactIconFile icons/128x128/coccinella.png]
     
     # Use translated strings as keys, else Growls settings wont be translatable.
     set all {"Message" "Status" "File" "Phone" "Mood"}

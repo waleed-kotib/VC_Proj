@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Dialogs.tcl,v 1.73 2007-11-16 14:52:14 matben Exp $
+# $Id: Dialogs.tcl,v 1.74 2008-04-17 15:00:32 matben Exp $
    
 package provide Dialogs 1.0
 
@@ -423,22 +423,24 @@ proc ::PSPageSetup::PushBtSave {  } {
 
 #-- end ::PSPageSetup:: --------------------------------------------------------
 
-namespace eval ::Dialogs:: {
+namespace eval ::Dialogs {
     
     variable initedAboutQuickTimeTcl 0
     variable wAboutQuickTimeTcl .aboutqt
+    variable thisDir [file dirname [info script]]
 }
 
-proc ::Dialogs::InitAboutQuickTimeTcl { } {
+proc ::Dialogs::InitAboutQuickTimeTcl {} {
     global  this
+    variable thisDir
     variable initedAboutQuickTimeTcl
     variable fakeQTSampleFile
     
-    set origMovie [file join $this(imagePath) FakeSample.mov]
+    set origMovie [file join $thisDir FakeSample.mov]
     set fakeQTSampleFile $origMovie
     
     # QuickTime doesn't understand vfs; need to copy out to tmp dir.
-    if {[namespace exists ::vfs]} {
+    if {[info exists ::starkit::topdir]} {
 	set tmp [::tfileutils::tempfile $this(tmpPath) FakeSample]
 	append tmp .mov
 	file copy -force $origMovie $tmp
@@ -447,7 +449,7 @@ proc ::Dialogs::InitAboutQuickTimeTcl { } {
     set initedAboutQuickTimeTcl 1
 }
 
-proc ::Dialogs::AboutQuickTimeTcl { } {
+proc ::Dialogs::AboutQuickTimeTcl {} {
     global  this
     variable initedAboutQuickTimeTcl
     variable fakeQTSampleFile
@@ -461,12 +463,10 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -macclass {floating {closeBox}}
-    if {[string match "mac*" $this(platform)]} {
+    if {[tk windowingsystem] eq "aqua"} {
 	wm transient $w
-    } else {
-
     }
-    wm title $w [mc {About QuickTimeTcl}]
+    wm title $w [mc mAboutQuickTimeTcl]
     
     pack [movie $w.m -file $fakeQTSampleFile]
     set theSize [$w.m size]
@@ -480,14 +480,14 @@ proc ::Dialogs::AboutQuickTimeTcl { } {
 }
 
 
-namespace eval ::Dialogs:: { }
+namespace eval ::Dialogs:: {}
 
 # Dialogs::Free --
 # 
 #       In case we want to cleanup tmp directory we must destroy window
 #       before deleting the movie file!
 
-proc ::Dialogs::Free { } {
+proc ::Dialogs::Free {} {
     variable wAboutQuickTimeTcl
     
     if {[winfo exists $wAboutQuickTimeTcl]} {

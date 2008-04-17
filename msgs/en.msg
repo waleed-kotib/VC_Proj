@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.241 2008-04-08 15:15:31 sdevrieze Exp $
+#   $Id: en.msg,v 1.242 2008-04-17 15:00:35 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -650,6 +650,20 @@
 ::msgcat::mcset en {Edit the admin list}
 ::msgcat::mcset en {Edit the owner list}
 
+# Naming of protocol systems and their identifiers.
+# Low priority.
+::msgcat::mcset en {Email}
+::msgcat::mcset en {Screen Name}
+::msgcat::mcset en {Gadu-Gadu Number}
+::msgcat::mcset en {ICQ Number}
+::msgcat::mcset en {IRC}
+::msgcat::mcset en {MSN Address}
+::msgcat::mcset en {Email Address}
+::msgcat::mcset en {QQ Number}
+::msgcat::mcset en {Tlen Address}
+::msgcat::mcset en {Jabber ID}
+::msgcat::mcset en {Yahoo ID}
+
 # Time intervals.
 ::msgcat::mcset en {Ten seconds}
 ::msgcat::mcset en {One minute}
@@ -725,8 +739,8 @@
 ::msgcat::mcset en messsuassclose        {Are you sure you want to close the setup assistant? You may start it any time later from the menu.}
 ::msgcat::mcset en messsuassfillin       {Be sure to fill in all entries before you continue.}
 ::msgcat::mcset en messtimeout           {Timeout when waiting for connection to open.}
-::msgcat::mcset en messunsavedmsgQ       {This whiteboard document has been modified.}
-::msgcat::mcset en messunsaveddtl        {Do you want to save your changes?}
+::msgcat::mcset en messunsavedmsgQ       {Do you want to save edits in a file?}
+::msgcat::mcset en messunsaveddtl        {Edits will be lost unless you save them.}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset en jamessaddforeign2     {To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?}

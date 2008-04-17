@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements chat themeing using Tkhtml.
 #      
-#  Copyright (c) 2007  Mats Bengtsson
+#  Copyright (c) 2007-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.16 2008-02-10 09:43:21 matben Exp $
+# $Id: ChatTheme.tcl,v 1.17 2008-04-17 15:00:28 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -42,10 +42,8 @@ namespace eval ::ChatTheme {
     ::hooks::register avatarMyNewPhotoHook [namespace code MyAvatarHook]
     ::hooks::register avatarNewPhotoHook   [namespace code OtherAvatarHook]
     
-    # The paths to search for chat themes.
-    variable path
-    set path(default) [file join $::this(resourcePath) themes chat]
-    set path(prefs)   [file join $::this(prefsPath) resources themes chat]
+    # Maps style name to its path.
+    variable style2Path
     
     variable theme
     set theme(current) ""
@@ -104,26 +102,46 @@ namespace eval ::ChatTheme {
 
 proc ::ChatTheme::Init {} {
     variable inited
-    variable path
-    variable theme
     
     if {$inited} {
 	return
     }
     puts "-----------::ChatTheme::Init"
-    foreach which {default prefs} {
-	set theme($which) [list]
-	set dirs [glob -nocomplain -directory $path($which) -types d *]
+    GetAllStylePaths
+    set inited 1
+}
+
+proc ::ChatTheme::GetAllStylePaths {} {
+    variable style2Path
+    
+    set stylePaths [list]
+    set paths [::Theme::GetPathsFor chatstyles]
+    foreach path $paths {
+	set dirs [glob -nocomplain -directory $path -types d *]
 	foreach dir $dirs {
 	    
 	    # Do some rudimentary checking.
 	    set f [file join $dir Contents Resources main.css]
 	    if {[file exists $f]} {
-		lappend theme($which) [file tail $dir]
+		set name [file tail $dir]
+		set style2Path($name) $dir
+		lappend stylePaths $dir
 	    }
 	}
+
     }
-    set inited 1
+    return $stylePaths
+}
+
+proc ::ChatTheme::AllThemes {} {
+    variable theme
+    
+    Init
+    set themes [list]
+    foreach path [GetAllStylePaths] {
+	lappend thems [file tail $path]
+    }
+    return $themes
 }
 
 # ChatTheme::Reload --
@@ -134,12 +152,6 @@ proc ::ChatTheme::Reload {} {
     variable inited
     set inited 0
     Init
-}
-
-proc ::ChatTheme::AllThemes {} {
-    variable theme
-    Init
-    return [concat $theme(default) $theme(prefs)]
 }
 
 proc ::ChatTheme::Variants {name} {
@@ -241,15 +253,8 @@ proc ::ChatTheme::Set {name} {
 }
 
 proc ::ChatTheme::GetResourceDir {name} {
-    variable path
-    variable theme
-   
-    foreach which {default prefs} {
-	if {[lsearch $theme($which) $name] >= 0} {
-	    return [file join $path($which) $name Contents Resources]
-	}
-    }
-    return
+    variable style2Path   
+    return [file join $style2Path($name) $name Contents Resources]
 }
 
 proc ::ChatTheme::Widget {token w args} {

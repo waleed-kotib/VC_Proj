@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Disco application part.
 #      
-#  Copyright (c) 2004-2007  Mats Bengtsson
+#  Copyright (c) 2004-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.149 2008-03-23 11:44:17 matben Exp $
+# $Id: Disco.tcl,v 1.150 2008-04-17 15:00:28 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -27,7 +27,7 @@ package require ITree
 
 package provide Disco 1.0
 
-namespace eval ::Disco:: {
+namespace eval ::Disco {
 
     ::hooks::register initHook               ::Disco::InitHook
     ::hooks::register jabberInitHook         ::Disco::NewJlibHook
@@ -46,8 +46,11 @@ namespace eval ::Disco:: {
     option add *Disco.relief                flat            50
     option add *Disco.padding               0               50
 
+    option add *Disco.tabImage              run             widgetDefault
+    option add *Disco.tabDisImage           run-Dis         widgetDefault
+    
     # Specials.
-    option add *Disco*TreeCtrl.backgroundImage    cociexec        widgetDefault
+    option add *Disco*TreeCtrl.backgroundImage    roster-default  widgetDefault
     option add *Disco.fontStyleMixed              0               widgetDefault    
     
     # Common xml namespaces.
@@ -782,15 +785,14 @@ proc ::Disco::ParseGetItems {from queryE args} {
 
 proc ::Disco::NewPage {} {
     variable wtab
+    variable wdisco
     
     set wnb [::JUI::GetNotebook]
     set wtab $wnb.di
     if {![winfo exists $wtab]} {
 	Build $wtab
-	set im [::Theme::GetImage \
-	  [option get [winfo toplevel $wnb] browser16Image {}]]
-	set imd [::Theme::GetImage \
-	  [option get [winfo toplevel $wnb] browser16DisImage {}]]
+	set im  [::Theme::Find16Icon $wdisco tabImage]
+	set imd [::Theme::Find16Icon $wdisco tabDisImage]
 	set imSpec [list $im disabled $imd background $imd]
 	# This seems to pick up *Disco.padding ?
 	$wnb add $wtab -text [mc Services] -image $imSpec -compound left  \
@@ -840,6 +842,8 @@ proc ::Disco::Build {w} {
     grid  $wxsc   -row 1 -column 0 -sticky ew
     grid columnconfigure $w 0 -weight 1
     grid rowconfigure    $w 0 -weight 1
+    
+    return $w
 }
 
 # BackgroundImage... Try to make as generic as possible! 
@@ -927,7 +931,7 @@ proc ::Disco::BackgroundImageGetThemedFile {suffL} {
     variable wtree
     
     set name [option get $wtree backgroundImage {}]
-    set fileName [::Theme::FindImageFileWithSuffixes $name $suffL]
+    set fileName [::Theme::FindIconFileWithSuffixes backgrounds/$name $suffL]
     return [file normalize $fileName]
 }
 
@@ -1502,8 +1506,8 @@ proc ::Disco::InfoResultCB {type jid queryE args} {
     pack $w.frall -fill both -expand 1
     
     if {$config(disco,show-head-on-result)} {	
-	set im  [::Theme::GetImage info]
-	set imd [::Theme::GetImage infoDis]
+	set im  [::Theme::FindIconSize 32 dialog-information]
+	set imd [::Theme::FindIconSize 32 dialog-information-Dis]
 
 	ttk::label $w.frall.head -style Headlabel \
 	  -text [mc Discover] -compound left \
@@ -1617,8 +1621,8 @@ proc ::Disco::OnMenuAddServer {} {
 
 namespace eval ::Disco {
     
-    option add *DiscoAdd.settingsImage           settings         widgetDefault
-    option add *DiscoAdd.settingsDisImage        settingsDis      widgetDefault
+    option add *DiscoAdd.settingsImage           preferences      widgetDefault
+    option add *DiscoAdd.settingsDisImage        preferences-Dis  widgetDefault
 
 }
 
@@ -1650,8 +1654,8 @@ proc ::Disco::AddServerDlg {} {
     pack $wall -fill both -expand 1
 
     if {$config(disco,add-server-show-head)} {	
-	set im  [::Theme::GetImage [option get $w settingsImage {}]]
-	set imd [::Theme::GetImage [option get $w settingsDisImage {}]]
+	set im  [::Theme::Find32Icon $w settingsImage]
+	set imd [::Theme::Find32Icon $w settingsDisImage]
 
 	ttk::label $wall.head -style Headlabel \
 	  -text [mc "Discover Server"] -compound left \
