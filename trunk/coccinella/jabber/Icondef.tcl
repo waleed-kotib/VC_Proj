@@ -36,11 +36,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Icondef.tcl,v 1.3 2007-09-13 08:25:39 matben Exp $
+# $Id: Icondef.tcl,v 1.4 2008-04-17 15:00:29 matben Exp $
 
 package provide Icondef 1.0
 
-namespace eval ::Icondef:: {
+namespace eval ::Icondef {
 
     variable priv
     
@@ -51,7 +51,7 @@ namespace eval ::Icondef:: {
     set priv(formats) {gif png}
 }
 
-proc ::Icondef::Init { } {
+proc ::Icondef::Init {} {
     variable priv
     
     # We need the 'vfs::zip' package and if not using starkit we also need

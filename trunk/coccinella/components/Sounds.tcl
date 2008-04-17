@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements alert sounds.
 #      
-#  Copyright (c) 2002-2005  Mats Bengtsson
+#  Copyright (c) 2002-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.44 2008-03-30 10:00:41 matben Exp $
+# $Id: Sounds.tcl,v 1.45 2008-04-17 15:00:28 matben Exp $
 
 namespace eval ::Sounds {
 	
@@ -61,6 +61,11 @@ namespace eval ::Sounds {
 
     variable allSounds
     set allSounds [array names soundIndex]
+}
+
+proc ::Sounds::GetTextForName {name} {
+    variable nameToText 
+    return [mc $nameToText($name)]
 }
 
 # Sounds::Load --
@@ -152,6 +157,35 @@ proc ::Sounds::Init {} {
     set priv(inited) 1
 }
 
+proc ::Sounds::GetAllSets {} {
+    
+    set allsets [list]
+    foreach path [GetAllSoundSetPaths] {
+	lappend allsets [file tail $path]
+    }
+    return $allsets
+}
+
+proc ::Sounds::GetAllSoundSetPaths {} {
+    
+    set soundPaths [list]
+    set paths [::Theme::GetPathsFor sounds]
+    foreach path $paths {
+	foreach dir [glob -nocomplain -types d -directory $path *] {
+	    set indFile [file join $dir soundIndex.tcl]
+	    if {[file exists $indFile]} {
+		lappend soundPaths $dir
+	    }
+	}
+    }
+    return $soundPaths
+}
+
+proc ::Sounds::GetAllSoundsPresentSet {} {
+    variable allSounds
+    return $allSounds
+}
+
 proc ::Sounds::LoadSoundSet {soundSet} {
     global  this
     variable allSounds
@@ -162,34 +196,27 @@ proc ::Sounds::LoadSoundSet {soundSet} {
     ::Debug 2 "::Sounds::LoadSoundSet: soundSet=$soundSet"
     
     Free
-	
+    unset -nocomplain nameToPath	
     array set sound [array get soundIndex]
-    
-    # Search for given sound set.
+
+    set found 0
     if {$soundSet eq ""} {
-	set path $this(soundsPath)
-    } else {
-	set path [file join $this(soundsPath) $soundSet]
-	set indFile [file join $path soundIndex.tcl]
-	if {[file exists $indFile]} {
-	    source $indFile
-	} else {
-	    set path [file join $this(altSoundsPath) $soundSet]
-	    set indFile [file join $path soundIndex.tcl]
-	    if {[file exists $indFile]} {
-		source $indFile
-	    } else {
-		
-		# Fallback.
-		set path $this(soundsPath)
-	    }
+	set soundSet $this(soundsDefault)
+    }    
+    foreach path [lreverse [GetAllSoundSetPaths]] {
+	if {[file tail $path] eq $soundSet} {
+	    set dir $path
+	    set found 1
 	}
+    }
+    if {!$found} {
+	return
     }
     if {$priv(QuickTimeTcl)} {
 	frame $wqtframe
     }
     foreach s $allSounds {
-	Create $s [file join $path $sound($s)]
+	Create $s [file join $dir $sound($s)]
     }
 }
 
@@ -223,15 +250,13 @@ proc ::Sounds::Create {name path} {
 	}
     }
     set nameToPath($name) $path
+    return $path
 }
 
 proc ::Sounds::Play {snd} {
     variable sprefs
     variable priv
     variable afterid
-    variable nameToPath
-    variable soundIndex
-    variable wqtframe
 
     if {!$priv(inited)} {
 	Init
@@ -243,6 +268,14 @@ proc ::Sounds::Play {snd} {
     }
     
     unset -nocomplain afterid($snd)
+    DoPlay $snd
+}
+
+proc ::Sounds::DoPlay {snd} {
+    variable priv
+    variable wqtframe
+    variable nameToPath
+    
     if {$priv(QuickTimeTcl)} {
 	if {[catch {$wqtframe.$snd play}]} {
 	    # ?
@@ -263,6 +296,15 @@ proc ::Sounds::PlayWhenIdle {snd} {
     if {![info exists sprefs($snd)] || !$sprefs($snd)} {
 	return
     }
+    if {![info exists afterid($snd)]} {
+	set afterid($snd) 1
+	after idle [list ::Sounds::Play $snd]
+    }    
+}
+
+proc ::Sounds::DoPlayWhenIdle {snd} {
+    variable afterid
+	
     if {![info exists afterid($snd)]} {
 	set afterid($snd) 1
 	after idle [list ::Sounds::Play $snd]
@@ -477,7 +519,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     }
     set tmpPrefs(volume)  $sprefs(volume)
     set tmpPrefs(midiCmd) $sprefs(midiCmd)
-    set soundSets [concat [list [mc Default]] [GetAllSets]]
+    set soundSets [GetAllSets]
     
     set wc $wpage.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
@@ -501,7 +543,8 @@ proc ::Sounds::BuildPrefsPage {wpage} {
         
     grid  $fss.l  $fss.p  -sticky w -padx 2
     grid  $fss.p  -sticky ew
-    
+    grid columnconfigure $fss 1 -minsize [$fss.p maxwidth]
+
     ttk::label $wc.lbl -text "[mc prefsounpick2]:"
 
     set wmid $wc.m
@@ -531,7 +574,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     pack  $fvol.v  -side left -padx 4
     pack  $fvol  -side top -pady 4 -anchor [option get . dialogAnchor {}]
 
-    ttk::button $wc.midi -text [mc {MIDI Player}] -command ::Sounds::MidiPlayer
+    ttk::button $wc.midi -text [mc "MIDI Player"] -command ::Sounds::MidiPlayer
     pack  $wc.midi -pady 2
     
     bind $wpage <Destroy> {+::Sounds::PrefsFree}
@@ -557,25 +600,17 @@ proc ::Sounds::PlayTmpPrefSound {name} {
     
     array set sound [array get soundIndex]
     
-    if {[string equal $tmpPrefs(soundSet) [mc Default]]} {
-	set path $this(soundsPath)
+    if {$tmpPrefs(soundSet) eq [mc Default]} {
+	set soundSet $this(soundsDefault)
     } else {
-	set path [file join $this(soundsPath) $tmpPrefs(soundSet)]
-	set indFile [file join $path soundIndex.tcl]
-	if {[file exists $indFile]} {
-	    source $indFile
-	} else {
-	    set path [file join $this(altSoundsPath) $tmpPrefs(soundSet)]
-	    set indFile [file join $path soundIndex.tcl]
-	    if {[file exists $indFile]} {
-		source $indFile
-	    } else {
-		
-		# Fallback.
-		set path $this(soundsPath)
-	    }
+	set soundSet $tmpPrefs(soundSet)
+    }
+    foreach path [lreverse [GetAllSoundSetPaths]] {
+	if {[file tail $path] eq $soundSet} {
+	    break
 	}
     }
+    source [file join $path soundIndex.tcl]
     set f [file join $path $sound($name)]
 
     if {$priv(QuickTimeTcl)} {
@@ -672,27 +707,6 @@ proc ::Sounds::UserDefaultsHook {} {
     } else {
 	set tmpPrefs(soundSet) $sprefs(soundSet)
     }
-}
-
-proc ::Sounds::GetAllSets {} {
-    global  this
-    
-    set allsets {}
-    foreach f [glob -nocomplain -directory $this(soundsPath) *] {
-	if {[file isdirectory $f]  \
-	  && [file exists [file join $f soundIndex.tcl]]} {
-	    lappend allsets [file tail $f]
-	}
-    }  
-    
-    # Alternative additional sounds directory.
-    foreach f [glob -nocomplain -directory $this(altSoundsPath) *] {
-	if {[file isdirectory $f]  \
-	  && [file exists [file join $f soundIndex.tcl]]} {
-	    lappend allsets [file tail $f]
-	}
-    }  
-    return $allsets
 }
 
 proc ::Sounds::PrefsFree {} {

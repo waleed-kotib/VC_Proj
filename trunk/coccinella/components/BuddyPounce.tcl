@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.29 2008-03-30 10:00:41 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.30 2008-04-17 15:00:28 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -57,14 +57,6 @@ proc ::BuddyPounce::Init {} {
     
     component::register BuddyPounce
         
-    # Audio formats.
-    variable audioSuffixes [list]
-    foreach mime [::Media::GetSupportedMimesForMimeBase audio] {
-	set audioSuffixes [concat $audioSuffixes \
-	  [::Types::GetSuffixListForMime $mime]]
-    }
-    set audioSuffixes [lsort -unique $audioSuffixes]
-    
     # Unique id needed to create instance tokens.
     variable uid 0
     variable wdlg .budpounce
@@ -130,7 +122,6 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     variable uid
     variable wdlg
     variable events
-    variable audioSuffixes
     
     ::Debug 2 "::BuddyPounce::Build typeselected=$typeselected, item=$item, groupL=$groupL"
 
@@ -182,14 +173,9 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     # Get all sounds.
     set allSounds [GetAllSounds]
     set contrastBg [option get . backgroundLightContrast {}]
-    set maxlen 0
-    set maxstr ""
-    foreach f $allSounds {
-	set len [string length $f]
-	if {$len > $maxlen} {
-	    set maxlen $len
-	    set maxstr $f
-	}
+    set menuDef [list]
+    foreach s $allSounds {
+	lappend menuDef [list [::Sounds::GetTextForName $s] -value $s]
     }
     
     # Toplevel with class BuddyPounce.
@@ -207,7 +193,7 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     pack $w.frall -fill both -expand 1
 
     ttk::label $w.frall.head -style Headlabel \
-      -text [mc {Contact Actions}] -compound left
+      -text [mc "Contact Actions"] -compound left
     pack $w.frall.head -side top -fill both -expand 1
 
     ttk::separator $w.frall.s -orient horizontal
@@ -225,12 +211,6 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     ttk::notebook $wnb -padding {4}
     pack $wnb
         
-    # Fake menubutton to compute max width.
-    set wtmp $w.frall._tmp
-    ttk::menubutton $wtmp -text $maxstr
-    set soundMaxWidth [winfo reqwidth $wtmp]
-    destroy $wtmp
-    
     set i 0
     foreach estr $events(str) ekey $events(keys) {
 
@@ -247,12 +227,9 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	ttk::checkbutton $wact.lsound -text "[mc {Play sound}]:" \
 	  -variable $token\($ekey,sound)
 	ui::combobutton $wact.msound -variable $token\($ekey,soundfile) \
-	  -menulist [ui::optionmenu::menuList $allSounds]
+	  -menulist $menuDef
 	
-	set wpad $wact.pad[incr i]
-	ttk::frame $wpad -width [expr {$soundMaxWidth + 40}] -height 1
-
-	ttk::checkbutton $wact.chat -text [mc {Start chat}] \
+	ttk::checkbutton $wact.chat -text [mc "Start chat"] \
 	  -variable $token\($ekey,chat)
 
 	set wmsg $wact.fmsg
@@ -274,11 +251,11 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	
 	set state($ekey,msg,wtext) $wmsg.f2.t
 	
-	grid  x           x             $wpad
 	grid  $wact.alrt  $wact.lsound  $wact.msound  -sticky w  -padx 4 -pady 1
 	grid  $wact.chat  $wact.fmsg    -             -sticky nw -padx 4 -pady 1
-		
-	if {([llength audioSuffixes] == 0) || ![component::exists Sounds]} {
+	grid columnconfigure $wact 2 -minsize 40	
+	
+	if {![component::exists Sounds]} {
 	    $wact.lsound configure -state disabled
 	    $wact.msound configure -state disabled
 	}
@@ -558,9 +535,9 @@ proc ::BuddyPounce::Event {from eventkey args} {
 	    }
 	    sound {
 		set soundfile [lsearch -inline -glob $actions soundfile:*]
-		set tail [string map {soundfile: ""} $soundfile]
-		if {$tail ne ""} {
-		    PlaySound $tail
+		set name [string map {soundfile: ""} $soundfile]
+		if {$name ne ""} {
+		    PlaySound $name
 		}
 	    }
 	    chat {			
@@ -597,14 +574,10 @@ proc ::BuddyPounce::Event {from eventkey args} {
 }
 
 proc ::BuddyPounce::GetAllSounds {} {
-    global  this
-    variable audioSuffixes
     
     set all [list]
-    foreach f [glob -nocomplain -directory $this(soundsPath) *] {
-	if {[lsearch $audioSuffixes [file extension $f]] >= 0} {
-	    lappend all [file tail $f]
-	}
+    if {[component::exists Sounds]} {
+	set all [::Sounds::GetAllSoundsPresentSet]
     }
     if {[llength $all] == 0} {
 	set all [msgcat::mc None]
@@ -612,14 +585,9 @@ proc ::BuddyPounce::GetAllSounds {} {
     return $all
 }
 
-proc ::BuddyPounce::PlaySound {tail} {
-    global  this
-    
+proc ::BuddyPounce::PlaySound {name} {    
     if {[component::exists Sounds]} {
-	
-	# We have no good way of avoiding playing sounds simultaneously!
-	after 1200 [list ::Sounds::PlaySoundTmp \
-	  [file join $this(soundsPath) $tail]]
+	::Sounds::DoPlayWhenIdle $name
     }
 }
 

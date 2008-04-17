@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It is the main arganizer for all jabber application code.
 #      
-#  Copyright (c) 2001-2007  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.263 2008-03-23 09:00:40 matben Exp $
+# $Id: Jabber.tcl,v 1.264 2008-04-17 15:00:29 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -26,8 +26,6 @@ package require http 2.3
 package require sha1
 package require tinyfileutils
 package require uriencode
-package require wavelabel
-
 
 # jlib components shall be declared here, or later.
 package require jlib
@@ -1682,8 +1680,8 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     pack $w.frall -fill both -expand 1
     
     if {$config(version,show-head)} {
-	set im  [::Theme::GetImage info]
-	set imd [::Theme::GetImage infoDis]
+	set im  [::Theme::FindIconSize 32 dialog-information]
+	set imd [::Theme::FindIconSize 32 dialog-information-Dis]
 
 	ttk::label $w.frall.head -style Headlabel \
 	  -text [mc Version] -compound left \
@@ -2047,8 +2045,8 @@ proc ::Jabber::OnMenuLogInOut {} {
 
 namespace eval ::Jabber::Logout:: { 
 
-    option add *JLogout.connectImage             connect         widgetDefault
-    option add *JLogout.connectDisImage          connectDis      widgetDefault
+    option add *JLogout.connectImage      network-disconnect      widgetDefault
+    option add *JLogout.connectDisImage   network-disconnect-Dis  widgetDefault
 }
 
 proc ::Jabber::Logout::OnMenuStatus {} {
@@ -2086,8 +2084,8 @@ proc ::Jabber::Logout::WithStatus {} {
     pack $w.frall -fill both -expand 1
     
     if {$config(logout,show-head)} {
-	set im   [::Theme::GetImage [option get $w connectImage {}]]
-	set imd  [::Theme::GetImage [option get $w connectDisImage {}]]
+	set im   [::Theme::Find32Icon $w connectImage]
+	set imd  [::Theme::Find32Icon $w connectDisImage]
 
 	ttk::label $w.frall.head -style Headlabel \
 	  -text [mc {Logout With Message}] -compound left \

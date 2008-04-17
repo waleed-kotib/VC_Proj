@@ -18,17 +18,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.72 2008-03-06 14:36:19 matben Exp $
+# $Id: Subscribe.tcl,v 1.73 2008-04-17 15:00:32 matben Exp $
 
 package provide Subscribe 1.0
 
 namespace eval ::Subscribe {
 
     # Use option database for customization.
-    option add *JSubscribe.adduserImage           adduser         widgetDefault
-    option add *JSubscribe.adduserDisImage        adduserDis      widgetDefault
-    
-    option add *JSubscribe.vcardImage             vcard           widgetDefault
+    option add *JSubscribe.adduserImage       contact-new         widgetDefault
+    option add *JSubscribe.adduserDisImage    contact-new-Dis     widgetDefault    
+    option add *JSubscribe.vcardImage         vcard               widgetDefault
     
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Subscribe::InitPrefsHook
@@ -232,8 +231,8 @@ proc ::Subscribe::NewDlg {jid args} {
     pack $wall -fill both -expand 1
 
     if {$config(subscribe,show-head)} {
-	set im  [::Theme::GetImage [option get $w adduserImage {}]]
-	set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
+	set im  [::Theme::Find32Icon $w adduserImage]
+	set imd [::Theme::Find32Icon $w adduserDisImage]
 
 	ttk::label $wall.head -style Headlabel \
 	  -text [mc "Presence Subscription"] -compound left \
@@ -261,7 +260,7 @@ proc ::Subscribe::NewDlg {jid args} {
     
     set wrapL $wbox.msg
     
-    set imvcard [::Theme::GetImage [option get $w vcardImage {}]]
+    set imvcard [::Theme::Find32Icon $w vcardImage]
 
     if {$argsA(-auto) eq "accept"} {
 	
@@ -860,16 +859,16 @@ proc ::SubscribeAuto::SendAcceptMsg {jid} {
 namespace eval ::SubscribeMulti {
     
     # Use option database for customization.
-    option add *JSubscribeMulti.adduserImage           adduser         widgetDefault
-    option add *JSubscribeMulti.adduserDisImage        adduserDis      widgetDefault
+    option add *JSubscribeMulti.adduserImage           contact-new         widgetDefault
+    option add *JSubscribeMulti.adduserDisImage        contact-new-Dis      widgetDefault
     option add *JSubscribeMulti.vcardImage             vcard           widgetDefault
 
-    option add *JSubscribeMultiAAccept.adduserImage           adduser         widgetDefault
-    option add *JSubscribeMultiAAccept.adduserDisImage        adduserDis      widgetDefault
+    option add *JSubscribeMultiAAccept.adduserImage           contact-new         widgetDefault
+    option add *JSubscribeMultiAAccept.adduserDisImage        contact-new-Dis      widgetDefault
     option add *JSubscribeMultiAAccept.vcardImage             vcard           widgetDefault
 
-    option add *JSubscribeMultiAReject.adduserImage           adduser         widgetDefault
-    option add *JSubscribeMultiAReject.adduserDisImage        adduserDis      widgetDefault
+    option add *JSubscribeMultiAReject.adduserImage           contact-new         widgetDefault
+    option add *JSubscribeMultiAReject.adduserDisImage        contact-new-Dis      widgetDefault
     option add *JSubscribeMultiAReject.vcardImage             vcard           widgetDefault
 
     variable uid 0
@@ -932,8 +931,8 @@ proc ::SubscribeMulti::NewDlg {args} {
     pack $wall -fill both -expand 1
 
     if {$config(subscribe,show-head)} {
-	set im  [::Theme::GetImage [option get $w adduserImage {}]]
-	set imd [::Theme::GetImage [option get $w adduserDisImage {}]]
+	set im  [::Theme::Find32Icon $w adduserImage]
+	set imd [::Theme::Find32Icon $w adduserDisImage]
 
 	ttk::label $wall.head -style Headlabel \
 	  -text [mc "Presence Subscription"] -compound left \
@@ -1195,7 +1194,7 @@ proc ::SubscribeMulti::More {w row} {
     set jid $state($row,jid)
 
     if {$state($row,more)} {
-	set imvcard [::Theme::GetImage [option get $w vcardImage {}]]
+	set imvcard [::Theme::Find32Icon $w vcardImage]
 
 	# Find all our groups for any jid.
 	set allGroups [::Jabber::Jlib roster getgroups]
@@ -1465,9 +1464,7 @@ proc ::Subscribed::AddJIDFancy {w jid {first 0}} {
 	set jstr [string range $jstr 0 $n]
 	append jstr "..."
     }
-    
-    set subPath [file join images 22]
-    set imvcard [::Theme::GetImage [option get . vcard22Image {}] $subPath]
+    set imvcard [::Theme::FindIconSize 22 [option get . vcard22Image {}]]
 
     set box $fr.f$nrow
     ttk::frame $box

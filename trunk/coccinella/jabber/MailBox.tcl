@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.139 2008-03-28 15:27:17 matben Exp $
+# $Id: MailBox.tcl,v 1.140 2008-04-17 15:00:30 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -47,23 +47,22 @@ namespace eval ::MailBox:: {
     global  wDlgs
 
     # Use option database for customization.
-    option add *MailBox*newmsgImage           newmsg           widgetDefault
-    option add *MailBox*newmsgDisImage        newmsgDis        widgetDefault
-    option add *MailBox*replyImage            reply            widgetDefault
-    option add *MailBox*replyDisImage         replyDis         widgetDefault
-    option add *MailBox*forwardImage          forward          widgetDefault
-    option add *MailBox*forwardDisImage       forwardDis       widgetDefault
-    option add *MailBox*saveImage             save             widgetDefault
-    option add *MailBox*saveDisImage          saveDis          widgetDefault
-    option add *MailBox*printImage            print            widgetDefault
-    option add *MailBox*printDisImage         printDis         widgetDefault
-    option add *MailBox*trashImage            trash            widgetDefault
-    option add *MailBox*trashDisImage         trashDis         widgetDefault
+    option add *MailBox*newmsgImage           mail-message-new           widgetDefault
+    option add *MailBox*newmsgDisImage        mail-message-new-Dis        widgetDefault
+    option add *MailBox*replyImage            mail-reply-sender           widgetDefault
+    option add *MailBox*replyDisImage         mail-reply-sender-Dis         widgetDefault
+    option add *MailBox*forwardImage          mail-forward          widgetDefault
+    option add *MailBox*forwardDisImage       mail-forward-Dis       widgetDefault
+    option add *MailBox*saveImage             document-save             widgetDefault
+    option add *MailBox*saveDisImage          document-save-Dis          widgetDefault
+    option add *MailBox*printImage            document-print            widgetDefault
+    option add *MailBox*printDisImage         document-print-Dis         widgetDefault
+    option add *MailBox*trashImage            user-trash            widgetDefault
+    option add *MailBox*trashDisImage         user-trash-Dis         widgetDefault
 
-    option add *MailBox*readMsgImage          eyeGray16        widgetDefault
-    option add *MailBox*unreadMsgImage        eyeBlue16        widgetDefault
-    option add *MailBox*whiteboard12Image     whiteboard12     widgetDefault
-    option add *MailBox*whiteboard16Image     whiteboard16     widgetDefault
+    option add *MailBox*read16Image           mail-mark-read     widgetDefault
+    option add *MailBox*unread16Image         mail-mark-unread   widgetDefault
+    option add *MailBox*whiteboard12Image     mail-mark-whiteboard widgetDefault
 
     # Standard widgets.
     if {[tk windowingsystem] eq "aqua"} {
@@ -478,24 +477,22 @@ proc ::MailBox::Build {args} {
     pack $w.frall -fill both -expand 1
     
     # Button part.
-    set iconNew        [::Theme::GetImage [option get $w newmsgImage {}]]
-    set iconNewDis     [::Theme::GetImage [option get $w newmsgDisImage {}]]
-    set iconReply      [::Theme::GetImage [option get $w replyImage {}]]
-    set iconReplyDis   [::Theme::GetImage [option get $w replyDisImage {}]]
-    set iconForward    [::Theme::GetImage [option get $w forwardImage {}]]
-    set iconForwardDis [::Theme::GetImage [option get $w forwardDisImage {}]]
-    set iconSave       [::Theme::GetImage [option get $w saveImage {}]]
-    set iconSaveDis    [::Theme::GetImage [option get $w saveDisImage {}]]
-    set iconPrint      [::Theme::GetImage [option get $w printImage {}]]
-    set iconPrintDis   [::Theme::GetImage [option get $w printDisImage {}]]
-    set iconTrash      [::Theme::GetImage [option get $w trashImage {}]]
-    set iconTrashDis   [::Theme::GetImage [option get $w trashDisImage {}]]
+    set iconNew        [::Theme::Find32Icon $w newmsgImage]
+    set iconNewDis     [::Theme::Find32Icon $w newmsgDisImage]
+    set iconReply      [::Theme::Find32Icon $w replyImage]
+    set iconReplyDis   [::Theme::Find32Icon $w replyDisImage]
+    set iconForward    [::Theme::Find32Icon $w forwardImage]
+    set iconForwardDis [::Theme::Find32Icon $w forwardDisImage]
+    set iconSave       [::Theme::Find32Icon $w saveImage]
+    set iconSaveDis    [::Theme::Find32Icon $w saveDisImage]
+    set iconPrint      [::Theme::Find32Icon $w printImage]
+    set iconPrintDis   [::Theme::Find32Icon $w printDisImage]
+    set iconTrash      [::Theme::Find32Icon $w trashImage]
+    set iconTrashDis   [::Theme::Find32Icon $w trashDisImage]
 
-    set locals(iconWB12) [::Theme::GetImage [option get $w whiteboard12Image {}]]
-    set locals(iconWB16) [::Theme::GetImage [option get $w whiteboard16Image {}]]
-    
-    set locals(iconReadMsg)   [::Theme::GetImage [option get $w readMsgImage {}]]
-    set locals(iconUnreadMsg) [::Theme::GetImage [option get $w unreadMsgImage {}]]
+    set locals(iconWB12) [::Theme::FindIconSize 12 [option get $w whiteboard12Image {}]]
+    set locals(iconReadMsg)   [::Theme::Find16Icon $w read16Image]
+    set locals(iconUnreadMsg) [::Theme::Find16Icon $w unread16Image]
 
     set wtbar $w.frall.tbar
     ::ttoolbar::ttoolbar $wtbar
@@ -684,9 +681,6 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set bg [option get $T columnBackground {}]
     set fg [option get $T textColor {}]
 
-#     $T column create -tags cWhiteboard -image $locals(iconWB16)  \
-#       -itembackground $itemBg -resize 0 -borderwidth $bd -background $bg \
-#       -textcolor $fg
     $T column create -tags cSubject -expand 1 -text [mc Subject] \
       -itembackground $itemBg -button 1 -borderwidth $bd -background $bg \
       -textcolor $fg
@@ -721,7 +715,6 @@ proc ::MailBox::TreeCtrl {T wysc} {
     $T style layout $S eImageWb -padx 4 -squeeze x -expand ns
 
     set S [$T style create stySubject]
-    #$T style elements $S {eBorder eImageEye eText}
     $T style elements $S {eBorder eImageEye eText eImageWb}
     $T style layout $S eBorder -detach yes -iexpand xy
     $T style layout $S eImageEye -padx {8 4} -expand ns
@@ -731,7 +724,6 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set S [$T style create styTag]
     $T style elements $S {eText}
     
-#    $T column configure cWhiteboard -itemstyle styImage
     $T column configure cSubject -itemstyle stySubject
     $T column configure cFrom -itemstyle styText
     $T column configure cDate -itemstyle styText
@@ -812,8 +804,6 @@ proc ::MailBox::InsertRow {wtbl row i} {
     $T item lastchild root $item
     
     if {$haswb} {
-# 	$T item element configure $item cWhiteboard eImageWb  \
-# 	  -image $locals(iconWB12)
 	$T item element configure $item cSubject eImageWb  \
 	  -image $locals(iconWB12)    
     }

@@ -1,0 +1,37 @@
+README-sounds
+-------------
+
+To create a sound set.
+
+There are two ways to do this:
+
+1) Take your folder with sound files and put inside the 
+Coccinella-*/sounds/ directory. This requires you run from
+the sources, or that you are using Mac OS X and "open" the
+application by control clicking it.
+
+2) As an alternative you may put a sounds folder inside
+the Coccinella's preference folder.
+Typically you'll have a path .../Coccinella/sounds/MyNoises/
+
+The content for both alternatives are identical:
+In your sounds folder, create a file with name
+'soundIndex.tcl' with a content that maps sound event names
+to your actual file names. A typical content is:
+
+set sound(online)         "Alarm.aif"
+set sound(offline)        "Clunk.aif"
+set sound(newmsg)         "eMate StartUp.aif"
+set sound(newchatmsg)     "Frog.aif"
+set sound(newchatthread)  "Metallic.aif"
+set sound(statchange)     "Extras Close.aif"
+set sound(connected)      "Extras Open.aif"
+set sound(groupchatpres)  "Noise.aif"
+
+This lists the presently available sound sets. Be sure to enclose
+your file names in quotes if they contain spaces. Do use only
+characters from the standard US ASCII set, and not language
+dependent characters.
+
+That's it!
+

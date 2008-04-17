@@ -18,14 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.99 2008-03-30 13:18:19 matben Exp $
+# $Id: Register.tcl,v 1.100 2008-04-17 15:00:31 matben Exp $
 
 package provide Register 1.0
 
-namespace eval ::Register:: {
+namespace eval ::Register {
 
     option add *JRegister.registerImage         register         widgetDefault
-    option add *JRegister.registerDisImage      registerDis      widgetDefault
+    option add *JRegister.registerDisImage      register-Dis     widgetDefault
 }
 
 proc ::Register::ValidatePortNumber {str} {    
@@ -135,7 +135,7 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
 
 #--- Using iq-get --------------------------------------------------------------
 
-namespace eval ::RegisterEx:: {
+namespace eval ::RegisterEx {
 
     variable uid 0
         
@@ -240,8 +240,8 @@ proc ::RegisterEx::New {args} {
     pack  $w.frall  -fill x
     
     if {$config(registerex,show-head)} {
-	set im   [::Theme::GetImage [option get $w registerImage {}]]
-	set imd  [::Theme::GetImage [option get $w registerDisImage {}]]
+	set im   [::Theme::Find32Icon $w registerImage]
+	set imd  [::Theme::Find32Icon $w registerDisImage]
 	    
 	ttk::label $w.frall.head -style Headlabel \
 	  -text [mc "New Account"] -compound left \
@@ -948,7 +948,11 @@ namespace eval ::GenRegister:: {
 
     variable uid 0
     
+    # Show head label.
     set ::config(genregister,show-head) 1
+    
+    # Use simplified dialog layout if server given.
+    set ::config(genregister,server-simple) 1
 }
 
 # GenRegister::NewDlg --
@@ -986,6 +990,13 @@ proc ::GenRegister::NewDlg {args} {
     set state(args)       $args
     set state(server)     ""
     set state(wraplength) 300
+    if {[info exists argsA(-server)]} {
+	set state(server) $argsA(-server)
+    }
+    set state(-autoget) 0
+    if {[info exists argsA(-autoget)] && $argsA(-autoget)} {
+	set state(-autoget) 1
+    }
     
     ::UI::Toplevel $w -class JRegister -macstyle documentProc -usemacmainmenu 1 \
       -closecommand [list [namespace current]::CloseCmd $token] \
@@ -999,17 +1010,51 @@ proc ::GenRegister::NewDlg {args} {
     }
 
     # Global frame.
+    set minwidth [expr {$state(wraplength) + \
+      [::UI::GetPaddingWidth [option get . dialogPadding {}]]}]
     set wall $w.fr
     ttk::frame $wall
-    pack $wall -fill x
+    grid $wall -sticky news
+    grid columnconfigure $w 0 -minsize $minwidth
+    
+    if {$config(genregister,server-simple) && [info exists argsA(-server)]} {
+	set simplified 1
+    } else {
+	set simplified 0
+    }
+    set label [mc Register]
     
     if {$config(genregister,show-head)} {
-	set im   [::Theme::GetImage [option get $w registerImage {}]]
-	set imd  [::Theme::GetImage [option get $w registerDisImage {}]]
-
+	if {$simplified} {
+	    set server $argsA(-server)
+	    set types [::Jabber::Jlib disco types $server]
+	    set gateway [lsearch -glob -inline $types gateway/*]
+	    set conference [lsearch -glob -inline $types conference/*]
+	    set im ""
+	    set imd ""
+	    if {$gateway ne ""} {
+		set type [lindex [split $gateway /] 1]
+		set spec protocol-$type
+		set im   [::Theme::FindIcon icons/32x32/$spec]
+		set imd  [::Theme::FindIcon icons/32x32/$spec-Dis]
+		set label "[mc Register] [::Gateway::GetShort $type]"
+	    } elseif {$conference ne ""} {
+		set type [lindex [split $conference /] 1]
+		set spec protocol-$type
+		set im   [::Theme::FindIcon icons/32x32/$spec]
+		set imd  [::Theme::FindIcon icons/32x32/$spec-Dis]
+	    }
+	    if {$im eq ""} {
+		set im   [::Theme::Find32Icon $w registerImage]
+		set imd  [::Theme::Find32Icon $w registerDisImage]
+	    }
+	    wm title $w $label
+	} else {
+	    set im   [::Theme::Find32Icon $w registerImage]
+	    set imd  [::Theme::Find32Icon $w registerDisImage]
+	}
 	ttk::label $wall.head -style Headlabel \
-	  -text [mc Register] -compound left \
-	  -image [list $im background $imd]
+	  -text $label -compound left -image [list $im background $imd]
 	pack $wall.head -side top -fill both
 	
 	ttk::separator $wall.s -orient horizontal
@@ -1019,56 +1064,73 @@ proc ::GenRegister::NewDlg {args} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
     
-    ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength $state(wraplength) \
-      -text [mc jaregmsg2] -justify left
-    pack $wbox.msg -side top -anchor w
-    
+    if {!$simplified} {
+	ttk::label $wbox.msg -style Small.TLabel \
+	  -padding {0 0 0 6} -wraplength $state(wraplength) \
+	  -text [mc jaregmsg2] -justify left
+	pack $wbox.msg -side top -anchor w
+    }    
     set frserv $wbox.serv
     ttk::frame $frserv
     ttk::label $frserv.lserv -text "[mc Service]:"
-    
-    # Get all (browsed) services that support registration.
-    set regServers [$jstate(jlib) disco getjidsforfeature "jabber:iq:register"]
+
     set wcomboserver $frserv.eserv
-    ttk::combobox $wcomboserver -state $argsA(-serverstate)  \
-      -textvariable $token\(server) -values $regServers
+
+    # Get all (browsed) services that support registration.
+    if {!$simplified} {
+	set regServers [$jstate(jlib) disco getjidsforfeature "jabber:iq:register"]
+	ttk::combobox $wcomboserver -state $argsA(-serverstate)  \
+	  -textvariable $token\(server) -values $regServers
+	bind $wcomboserver <Map> { focus %W }
     
-    # Find the default registration server.
-    if {$regServers != {}} {
-	set state(server) [lindex $regServers 0]
+	# Find the default registration server.
+	if {[llength $regServers]} {
+	    set state(server) [lindex $regServers 0]
+	}
+	if {[info exists argsA(-server)]} {
+	    $wcomboserver state {disabled}
+	}
+	pack $frserv -side top -anchor w -fill x
+	pack $frserv.lserv -side left
+	pack $wcomboserver -fill x -expand 1
     }
-    if {[info exists argsA(-server)]} {
-	set state(server) $argsA(-server)
-	$wcomboserver state {disabled}
-    }
-    pack $frserv -side top -anchor w -fill x
-    pack $frserv.lserv -side left
-    pack $wcomboserver -fill x -expand 1
     
     # Button part.
     set frbot       $wbox.b
-    set wbtregister $frbot.btenter
+    set wbtregister $frbot.btreg
     set wbtget      $frbot.btget
     set wbtcancel   $frbot.btcancel
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $wbtget -text [mc Next] -default active \
+    ttk::button $wbtget -text [mc Next] \
       -command [list [namespace current]::Get $token]
-    ttk::button $wbtregister -text [mc Register] -state disabled \
+    ttk::button $wbtregister -text [mc Register] \
       -command [list [namespace current]::DoRegister $token]
     ttk::button $wbtcancel -text [mc Cancel]  \
       -command [list [namespace current]::Cancel $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
-	pack $wbtget -side right
+	if {!$state(-autoget)} {
+	    pack $wbtget -side right
+	}
 	pack $wbtregister -side right -padx $padx
 	pack $wbtcancel -side right
     } else {
 	pack $wbtcancel -side right
-	pack $wbtget -side right -padx $padx
+	if {!$state(-autoget)} {
+	    pack $wbtget -side right -padx $padx
+	}
 	pack $wbtregister -side right
     }
     pack $frbot -side bottom -fill x
+
+    if {!$state(-autoget)} {
+	bind $w <Return> [list $wbtget invoke]
+	#$wbtget configure -default active
+	$wbtregister state disabled
+    } else {
+	bind $w <Return> [list $wbtregister invoke]
+	#$wbtregister configure -default active
+    }
     
     # Running arrows and status message.
     set wstat $wbox.fs
@@ -1088,7 +1150,11 @@ proc ::GenRegister::NewDlg {args} {
     # Not same wbox as above!!!
     set wform $wbox.form
     
-    set state(stattxt)      [mc jasearchwait]
+    if {$config(genregister,server-simple)} {
+	set state(stattxt) ""
+    } else {
+	set state(stattxt) [mc jasearchwait]
+    }
     set state(wcomboserver) $wcomboserver
     set state(wform)        $wform
     set state(wsearrows)    $wsearrows
@@ -1096,19 +1162,21 @@ proc ::GenRegister::NewDlg {args} {
     set state(wbtget)       $wbtget
 
     # Trick to resize the labels wraplength.
-    set script [format {
-	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 30]
-	wm minsize %s [winfo reqwidth %s] 300
-    } $wbox.msg $w $w $w]    
-    #after idle $script
-
-    if {[info exists argsA(-autoget)] && $argsA(-autoget)} {
+    if {!$simplified} {
+	set script [format {
+	    update idletasks
+	    %s configure -wraplength [expr [winfo reqwidth %s] - 30]
+	    wm minsize %s [winfo reqwidth %s] 300
+	} $wbox.msg $w $w $w]    
+	#after idle $script
+    }
+    
+    if {$state(-autoget)} {
 	after idle [list [namespace current]::Get $token]
     }
     wm resizable $w 0 0
     
-    return
+    return $token
 }
 
 proc ::GenRegister::Get {token} {    
@@ -1122,8 +1190,10 @@ proc ::GenRegister::Get {token} {
 	  -message [mc jamessregnoserver2]
 	return
     }	
-    $state(wcomboserver) state disabled
-    $state(wbtget)       state disabled
+    if {[winfo exists $state(wcomboserver)]} {
+	$state(wcomboserver) state disabled
+    }
+    $state(wbtget) state disabled
     set state(stattxt) "[mc jawaitserver]..."
     
     # Send get register.
@@ -1144,9 +1214,10 @@ proc ::GenRegister::GetCB {token jlibName type subiq} {
     }
     $state(wsearrows) stop
     set state(stattxt) ""
-    $state(wbtget)       state !disabled
-    $state(wcomboserver) state !disabled
-    
+    $state(wbtget) state !disabled
+    if {[winfo exists $state(wcomboserver)]} {
+	$state(wcomboserver) state !disabled
+    }    
     if {[string equal $type "error"]} {
 	set str [mc jamesserrregget2]
 	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
@@ -1165,9 +1236,14 @@ proc ::GenRegister::GetCB {token jlibName type subiq} {
     pack $wform -fill x -expand 1
     set state(formtoken) $formtoken
     
-    $state(wbtregister) configure -default active
-    $state(wbtget)      configure -default disabled    
+    #$state(wbtregister) configure -default active
     $state(wbtregister) state !disabled
+    
+    set wfocus [::UI::FindFirstClassChild $wform TEntry]
+    if {[winfo exists $wfocus]} {
+	bind $wfocus <Map> { focus %W }
+    }
+    bind $state(w) <Return> [list $state(wbtregister) invoke]
 }
 
 proc ::GenRegister::DoRegister {token} {   
@@ -1274,8 +1350,8 @@ proc ::GenRegister::Simple {w args} {
     wm title $w [mc Register]
     set wtop $w
  
-    set im   [::Theme::GetImage [option get $w registerImage {}]]
-    set imd  [::Theme::GetImage [option get $w registerDisImage {}]]
+    set im   [::Theme::Find32Icon $w registerImage]
+    set imd  [::Theme::Find32Icon $w registerDisImage]
 
     # Global frame.
     set wall $w.fr
@@ -1333,7 +1409,7 @@ proc ::GenRegister::Simple {w args} {
 
     # Button part.
     set frbot       $wbox.b
-    set wbtregister $frbot.btenter
+    set wbtregister $frbot.btreg
     set wbtcancel   $frbot.btcancel
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $wbtregister -text [mc Register] \

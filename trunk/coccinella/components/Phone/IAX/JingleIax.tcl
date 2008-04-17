@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JingleIax.tcl,v 1.41 2008-03-27 15:15:26 matben Exp $
+# $Id: JingleIax.tcl,v 1.42 2008-04-17 15:00:28 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -32,10 +32,10 @@ package provide JingleIax 0.1
 
 namespace eval ::JingleIAX:: { }
 
-proc ::JingleIAX::Init { } {
+proc ::JingleIAX::Init {} {
     
-    option add *Chat*callImage           call                 widgetDefault
-    option add *Chat*callDisImage        callDis              widgetDefault
+    option add *Chat*callImage           phone-call           widgetDefault
+    option add *Chat*callDisImage        phone-call-Dis       widgetDefault
     
     variable xmlns
     set xmlns(jingle)     "http://jabber.org/protocol/jingle/"
@@ -568,9 +568,8 @@ proc ::JingleIAX::BuildChatButtonTrayHook {wtray dlgtoken args} {
 
     # @@@ We must have a way to set state of this button when tab changes!!!
     set w [::Chat::GetDlgTokenValue $dlgtoken w]
-    set subPath [file join components Phone images]
-    set iconCall    [::Theme::GetImage [option get $w callImage {}] $subPath]
-    set iconCallDis [::Theme::GetImage [option get $w callDisImage {}] $subPath]
+    set iconCall    [::Theme::Find32Icon $w callImage]
+    set iconCallDis [::Theme::Find32Icon $w callDisImage]
 
     $wtray newbutton call  \
       -text [mc phoneMakeCall] -image $iconCall  \

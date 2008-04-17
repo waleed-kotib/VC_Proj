@@ -3,11 +3,11 @@
 #       Flexible dialog box.
 #       Some code from ttk::dialog.
 #
-# Copyright (c) 2005-2007 Mats Bengtsson
+# Copyright (c) 2005-2008 Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.38 2008-03-25 08:52:31 matben Exp $
+# $Id: dialog.tcl,v 1.39 2008-04-17 15:00:28 matben Exp $
 
 # Public commands:
 # 
@@ -643,11 +643,12 @@ proc ui::dialog::modal {args} {
 
 if {0} {
     # Tests... Run from inside Coccinella.
-    foreach name {info error warning question} {
-	ui::dialog::setimage $name [::Theme::GetImage ${name}64]
+    foreach name {error warning question} {
+	ui::dialog::setimage $name [::Theme::FindIconSize 64 dialog-$name]
     }
-    ui::dialog::setbadge [::Theme::GetImage Coccinella]
-    ui::dialog::setimage coccinella [::Theme::GetImage coccinella64]
+    ui::dialog::setimage info [::Theme::FindIconSize 64 dialog-information]
+    ui::dialog::setbadge [::Theme::FindIconSize 64 coccinella]
+    ui::dialog::setimage coccinella [::Theme::FindIconSize 64 coccinella]
     proc cmd1 {w bt} {destroy $w}
     proc cmd2 {w bt} {puts "cmd: bt=$bt, dlgvar=$::dlgvar"}
 

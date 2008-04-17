@@ -15,6 +15,8 @@ Coccinella-0.96.8 (200804??)
  o native chasing arrows on platforms where this is supported (Mac)
  o improved support for transports
  o chat tab close buttons now on the tabs
+ o cleaner transport registration dialogs
+ o redesigned themeing directory structure
 
 Coccinella-0.96.6 (20080312)
 

@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.43 2007-12-20 14:01:25 matben Exp $
+# $Id: Avatar.tcl,v 1.44 2008-04-17 15:00:28 matben Exp $
 
 # @@@ Issues:
 # 
@@ -1492,12 +1492,8 @@ proc ::Avatar::Widget {w} {
     # @@@ An alternative is to have a blank image as a spacer.
     frame $w
     
-    # Bug in 8.4.1 but ok in 8.4.9
-    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
-	label $w.l -relief sunken -bd 1 -bg white
-    } else {
-	ttk::label $w.l -style Sunken.TLabel -compound image
-    }
+    ttk::label $w.l -style Sunken.TLabel -compound image
+
     grid  $w.l  -sticky news
     grid columnconfigure $w 0 -minsize [expr {2*4 + 2*4 + 64}]
     grid rowconfigure    $w 0 -minsize [expr {2*4 + 2*4 + 64}]

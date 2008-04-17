@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.97 2008-03-29 07:08:41 matben Exp $
+# $Id: MUC.tcl,v 1.98 2008-04-17 15:00:30 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -107,7 +107,7 @@ namespace eval ::MUC:: {
     variable inviteuid 0
 
     option add *JMUCInvite.inviteImage         invite         widgetDefault
-    option add *JMUCInvite.inviteDisImage      inviteDis      widgetDefault
+    option add *JMUCInvite.inviteDisImage      invite-Dis     widgetDefault
 }
 
 # MUC::Invite --
@@ -158,8 +158,8 @@ proc ::MUC::Invite {roomjid args} {
     pack $w.frall -fill both -expand 1
     
     if {$config(muc,show-head-invite)} {
-	set im   [::Theme::GetImage [option get $w inviteImage {}]]
-	set imd  [::Theme::GetImage [option get $w inviteDisImage {}]]
+	set im   [::Theme::Find32Icon $w inviteImage]
+	set imd  [::Theme::Find32Icon $w inviteDisImage]
 
 	ttk::label $w.frall.head -style Headlabel \
 	  -text [mc "Invite Contact"] -compound left \
@@ -383,10 +383,10 @@ proc ::MUC::MUCMessage {jlibname xmlns msgElem args} {
 
 namespace eval ::MUC:: {
     
-    option add *JMUCInfo.infoImage         info         widgetDefault
-    option add *JMUCInfo.infoDisImage      infoDis      widgetDefault
+    option add *JMUCInfo.infoImage      document-information      widgetDefault
+    option add *JMUCInfo.infoDisImage   document-information-Dis  widgetDefault
 
-    option add *JMUCInfo*TButton.style     Small.TButton 50
+    option add *JMUCInfo*TButton.style      Small.TButton     50
     option add *JMUCInfo*TLabelframe.style  Small.TLabelframe 50
 }
 
@@ -433,8 +433,8 @@ proc ::MUC::BuildInfo {roomjid} {
     pack $w.frall -fill both -expand 1
     
     if {$config(muc,show-head-info)} {
-	set im   [::Theme::GetImage [option get $w infoImage {}]]
-	set imd  [::Theme::GetImage [option get $w infoDisImage {}]]
+	set im  [::Theme::Find32Icon $w infoImage]
+	set imd [::Theme::Find32Icon $w infoDisImage]
 
 	ttk::label $w.frall.head -style Headlabel \
 	  -text [mc {Configure Chatroom}] -compound left \

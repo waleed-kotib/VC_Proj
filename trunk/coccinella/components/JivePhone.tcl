@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.34 2008-03-27 15:15:26 matben Exp $
+# $Id: JivePhone.tcl,v 1.35 2008-04-17 15:00:28 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -619,19 +619,14 @@ proc ::JivePhone::DialCB {dnid type subiq args} {
 #------------------- JivePhone Addressbook SpeedDial Tab -------------------
 #---------------------------------------------------------------------------
 
-proc ::JivePhone::NewPage { } {
+proc ::JivePhone::NewPage {} {
     variable wtab
 
     set wnb [::JUI::GetNotebook]
     set wtab $wnb.ab
     if {![winfo exists $wtab]} {
-        set im [::Theme::GetImage \
-          [option get [winfo toplevel $wnb] browser16Image {}]]
-        set imd [::Theme::GetImage \
-          [option get [winfo toplevel $wnb] browser16DisImage {}]]
-        set imSpec [list $im disabled $imd background $imd]
         Build $wtab
-        $wnb add $wtab -text [mc AddressBook] -image $imSpec -compound left
+        $wnb add $wtab -text [mc AddressBook]
     }
 }
 
@@ -669,24 +664,17 @@ proc ::JivePhone::Build {w args} {
 
     # The frame.
     ttk::frame $w -class AddressBook 
-
-#    set waveImage [::Theme::GetImage [option get $w waveImage {}]]
-#    ::wavelabel::wavelabel $wwave -relief groove -bd 2 \
-#      -type image -image $waveImage
-#    pack $wwave -side bottom -fill x -padx 8 -pady 2
    
     # D = -border 1 -relief sunken
     frame $wbox
     pack  $wbox -side top -fill both -expand 1
 
-    set bgimage [::Theme::GetImage [option get $w backgroundImage {}]]
     ttk::scrollbar $wxsc -orient horizontal -command [list $wtree xview]
     ttk::scrollbar $wysc -orient vertical -command [list $wtree yview]
 
     ::ITree::New $wtree $wxsc $wysc   \
       -buttonpress ::JivePhone::Popup         \
-      -buttonpopup ::JivePhone::Popup         \
-      -backgroundimage $bgimage
+      -buttonpopup ::JivePhone::Popup
 
     grid  $wtree  -row 0 -column 0 -sticky news
     grid  $wysc   -row 0 -column 1 -sticky ns
@@ -1107,23 +1095,13 @@ proc ::JivePhone::buildChatButtonTrayHook {wtray dlgtoken args} {
     variable state
 
     if { $state(phoneserver) == 1 } {
-	# @@@ Mats
-	if {0} {
-	    set dlgtokenLength [string length $dlgtoken]
-	    set dlgtokenUid [string first "g" $dlgtoken ]
-	    set dlgtokenFirst [expr $dlgtokenUid+1]
-	    set uiddlg [string range $dlgtoken $dlgtokenFirst $dlgtokenLength]
-	    set w $wDlgs(jchat)${uiddlg}
-	}
 	variable $dlgtoken
 	upvar 0 $dlgtoken dlgstate
 
 	set w $dlgstate(w)
 	
-        option add *Chat*callImage           call                 widgetDefault
-        option add *Chat*callDisImage        callDis              widgetDefault
-        set iconCall       [::Theme::GetImage [option get $w callImage {}]]
-        set iconCallDis    [::Theme::GetImage [option get $w callDisImage {}]]
+        set iconCall    [::Theme::FindIconSize 32 phone-call]
+        set iconCallDis [::Theme::FindIconSize 32 phone-call-Dis]
 
         $wtray newbutton call  \
           -text [mc phoneMakeCall] -image $iconCall  \

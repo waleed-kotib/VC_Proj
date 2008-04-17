@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: es.msg,v 1.103 2007-12-14 07:42:31 matben Exp $
+#   $Id: es.msg,v 1.104 2008-04-17 15:00:35 matben Exp $
 
 ::msgcat::mcset es Abort                 {Cancelar}
 ::msgcat::mcset es Action                {Acción}
@@ -1026,7 +1026,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jatlsnegot2           {Negotiating TLS security}
 ::msgcat::mcset es jauserinnote2         {Add your personal notes about this contact.}
 ::msgcat::mcset es javersinfo            {Información de la versión de %s}
-::msgcat::mcset es jawaitdisco           {Waiting for disco result...}
+::msgcat::mcset es jawaitdisco           {Waiting for disco result}
 ::msgcat::mcset es jawaitresp            {%s contactado, en espera de una respuesta}
 ::msgcat::mcset es jawaitserver          {Esperando de la respuesta del servidor...}
 ::msgcat::mcset es jawaitform            {Downloading configuration form}

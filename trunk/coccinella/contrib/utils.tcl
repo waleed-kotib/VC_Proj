@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: utils.tcl,v 1.13 2008-04-17 13:33:18 matben Exp $
+# $Id: utils.tcl,v 1.14 2008-04-17 15:00:28 matben Exp $
 
 package provide utils 1.0
     
@@ -75,6 +75,10 @@ proc lrevert {args} {
 	lappend tmp [lindex $args $i]
     }
     return $tmp
+}
+
+if {![llength [info commands lreverse]]} {
+    interp alias {} lreverse {} lrevert
 }
 
 # listintersect --

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.238 2008-03-29 11:55:06 matben Exp $
+# $Id: Roster.tcl,v 1.239 2008-04-17 15:00:31 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -57,7 +57,7 @@ namespace eval ::Roster:: {
     option add *Roster.padding              0               50
         
     # Specials.
-    option add *Roster.whiteboard12Image    whiteboard12    widgetDefault
+    option add *Roster.whiteboard12Image    mail-mark-whiteboard    widgetDefault
     
     variable wtree -
     
@@ -315,7 +315,7 @@ proc ::Roster::Build {w} {
     pack $wbox -side top -fill both -expand 1
     
     # Cache any expensive stuff.
-    set icons(whiteboard12) [::Theme::GetImage [option get $w whiteboard12Image {}]]
+    set icons(whiteboard12) [::Theme::FindIconSize 12 [option get $w whiteboard12Image {}]]
 
     return $w
 }
@@ -1350,9 +1350,7 @@ proc ::Roster::GetTransportSpec {} {
     
     set trpts [list]
     foreach type $allTransports {
-	if {$type eq "xmpp"} {
-	    continue
-	}
+	if {$type eq "xmpp"} { continue	}
 	set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
 	set count [llength $jidL]
 	if {$count} {
@@ -1365,10 +1363,26 @@ proc ::Roster::GetTransportSpec {} {
 		lappend trpts [list $jid $type $xname]
 	    }
 	}
-    }    
-
-    # Disco doesn't return jabber. Make sure it's first.
-    return [concat [list [list $jstate(server) xmpp [GetNameFromTrpt jabber]]] $trpts]
+    }
+    
+    # xmpp:
+    set jidL [$jstate(jlib) disco getjidsforcategory "gateway/xmmpp"]
+    set count [llength $jidL]
+    
+    # Disco doesn't return he server. Make sure it's first.
+    set name [GetNameFromTrpt xmpp]
+    set xname "$name - [mc Default]"
+    set serverSpec [list [list $jstate(server) xmpp $xname]]
+    
+    foreach jid $jidL {
+	if {$jid eq $jstate(server)} { continue }
+	set xname $name
+	if {$count > 1} {
+	    set xname "$name - $jid"
+	}
+	lappend serverSpec [list $jid xmpp $xname]
+    }
+    return [concat $serverSpec $trpts]
 }
 
 proc ::Roster::IsTransport {jid} {

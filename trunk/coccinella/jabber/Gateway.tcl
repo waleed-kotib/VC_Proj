@@ -26,7 +26,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Gateway.tcl,v 1.9 2008-01-18 09:17:23 matben Exp $
+# $Id: Gateway.tcl,v 1.10 2008-04-17 15:00:29 matben Exp $
 
 package provide Gateway 1.0
 
@@ -45,6 +45,7 @@ namespace eval ::Gateway {
     
     # Do various mappings from the gateway type attribute.
     # Names for popup etc.
+    # These go into the message catalog.
     variable shortName
     array set shortName {
 	aim         AIM
@@ -53,34 +54,27 @@ namespace eval ::Gateway {
 	irc         IRC
 	jabber      Jabber
 	msn         MSN
+	qq          QQ
 	smtp        Email
 	tlen        Tlen
-	x-gadugadu  Gadu-Gadu
-	x-tlen      Tlen
 	xmpp        Jabber
 	yahoo       Yahoo
     }
     
     # Default prompts and descriptions.
+    # These go into the message catalog.
     variable promptText
-    set promptText(aim)        "AOL Screen Name"
-    set promptText(gadu-gadu)  "Gadu Address"
+    set promptText(aim)        "Screen Name"
+    set promptText(gadu-gadu)  "Gadu-Gadu Number"
     set promptText(icq)        "ICQ Number"
     set promptText(irc)        "IRC"
     set promptText(msn)        "MSN Address"
     set promptText(smtp)       "Email Address"
-    set promptText(x-gadugadu) "Gadu Address"
-    set promptText(x-tlen)     "Tlen Address"
+    set promptText(qq)         "QQ Number"
+    set promptText(tlen)       "Tlen Address"
     set promptText(xmpp)       "Jabber ID"
     set promptText(yahoo)      "Yahoo ID"
     
-    # These doesn't seem very useful since they assume we are sending a message.
-    variable descText
-    set descText(aim)      "Please enter the AOL Screen Name of the person you would like to contact"
-    set descText(icq)      "Please enter the ICQ Number of the person you would like to contact"
-    set descText(msn)      "Please enter the MSN Address of the person you would like to contact"
-    set descText(yahoo)    "Please enter the Yahoo ID of the person you would like to contact"
-
     # Each gateway must transform its "prompt" (user ID) to a JID.
     # These templates provides such a mapping. 
     # Must substitute %s with gateway's JID. Note verbatim "%" as "%%".
@@ -153,8 +147,9 @@ proc ::Gateway::OnGateway {mjid jlibname type queryE args} {
 proc ::Gateway::GetShort {type} {
     variable shortName
     
+    set type [string map {"x-" ""} $type]
     if {[info exists shortName($type)]} {
-	return $shortName($type)
+	return [mc $shortName($type)]
     } else {
 	return [string totitle $type]
     }
@@ -165,6 +160,7 @@ proc ::Gateway::GetShort {type} {
 proc ::Gateway::GetTemplateJID {type} {
     variable template
     
+    set type [string map {"x-" ""} $type]
     if {[info exists template($type)]} {
 	return $template($type)
     } else {
@@ -180,23 +176,11 @@ proc ::Gateway::GetPrompt {type} {
     variable gateway
     variable promptText
     
+    set type [string map {"x-" ""} $type]
     if {[info exists gateway(prompt,$type)]} {
 	return $gateway(prompt,$type)
     } elseif {[info exists promptText($type)]} {
-	return $promptText($type)
-    } else {
-	return [string totitle $type]
-    }
-}
-
-proc ::Gateway::GetDesc {type} {
-    variable gateway
-    variable descText
-
-    if {[info exists gateway(desc,$type)]} {
-	return $gateway(desc,$type)
-    } elseif {[info exists descText($type)]} {
-	return $descText($type)
+	return [mc $promptText($type)]
     } else {
 	return [string totitle $type]
     }

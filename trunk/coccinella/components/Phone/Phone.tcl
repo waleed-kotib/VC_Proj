@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Phone.tcl,v 1.25 2007-11-17 07:40:52 matben Exp $
+# $Id: Phone.tcl,v 1.26 2008-04-17 15:00:28 matben Exp $
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -65,7 +65,7 @@ namespace eval ::Phone {
     variable scriptPath [file dirname [info script]]
 }
 
-proc ::Phone::Init { } {
+proc ::Phone::Init {} {
     variable scriptPath
 
     component::register Phone
@@ -91,8 +91,8 @@ proc ::Phone::Init { } {
     #    ::hooks::register logoutHook            ::Phone::LogoutHook
     ::hooks::register launchFinalHook       ::Phone::LoginHook
 
-    option add *Phone.phone16Image              phone16          widgetDefault
-    option add *Phone.phone16DisImage           phone16Dis       widgetDefault
+    option add *Phone.phone16Image              phone-symbol     widgetDefault
+    option add *Phone.phone16DisImage           phone-symbol-Dis widgetDefault
 
     # Values for onhold -> no, hold, mute
     # Values for status -> returned by ::protocol:: library
@@ -368,17 +368,16 @@ proc ::Phone::UpdateRegister {id reply msgcount} {
 # Build User Interface
 ##################################################
 
-proc ::Phone::NewPage { } {
+proc ::Phone::NewPage {} {
     variable statePhone
     variable wphone
 
     set wnb [::JUI::GetNotebook]
     set wphone $wnb.phone
     if {![winfo exists $wphone]} {
-	set subPath [file join components Phone images]
 	::TPhone::New $wphone ::Phone::Actions -class Phone -padding {8 4}
-	set im  [::Theme::GetImage [option get $wphone phone16Image {}] $subPath]
-	set imd [::Theme::GetImage [option get $wphone phone16DisImage {}] $subPath]
+	set im  [::Theme::Find16Icon $wphone phone16Image]
+	set imd [::Theme::Find16Icon $wphone phone16DisImage]
         set imSpec [list $im disabled $imd background $imd]
         $wnb add $wphone -text [mc Phone] -image $imSpec -compound image \
 	  -sticky nw

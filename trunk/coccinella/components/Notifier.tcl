@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Notifier.tcl,v 1.10 2008-01-06 12:11:00 matben Exp $
+# $Id: Notifier.tcl,v 1.11 2008-04-17 15:00:28 matben Exp $
 
 namespace eval ::Notifier {
     
@@ -47,8 +47,7 @@ proc ::Notifier::Init {} {
     ::hooks::register presenceNewHook       [namespace current]::PresenceHook
     ::hooks::register fileTransferReceiveHook [namespace current]::FileTransferRecvHook
     
-    set subPath [file join images 16]    
-    set im [::Theme::GetImage close $subPath]
+    set im [::Theme::FindIcon elements/close]
 
     option add *Notebox.closeButtonImage  $im     widgetDefault
     option add *Notebox.millisecs         10000   widgetDefault

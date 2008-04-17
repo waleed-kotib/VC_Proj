@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.51 2008-04-17 13:33:18 matben Exp $
+# $Id: Theme.tcl,v 1.52 2008-04-17 15:00:32 matben Exp $
 
 package provide Theme 1.0
 
@@ -34,7 +34,7 @@ namespace eval ::Theme {}
 # Results:
 #       none
 
-proc ::Theme::Init { } {
+proc ::Theme::Init {} {
     global  this prefs
         
     # Handle theme name and locale from prefs file.
@@ -77,21 +77,14 @@ proc ::Theme::ReadResources {} {
     }
     
     # Any theme specific resource files.
-    foreach dir [list $this(themesPath) $this(altThemesPath)] {
-	set rdir [file join $dir $prefs(themeName) $this(resources)]
-	if {[file isdirectory $rdir]} {
-	    option readfile [file join $rdir default.rdb] userDefault
-	    set f [file join $rdir $this(platform).rdb]
-	    if {[file exists $f]} {
-		option readfile $f userDefault
-	    }
-	    break
+    set dir [GetPath $prefs(themeName)]
+    set rdir [file join $dir $prefs(themeName) $this(resources)]
+    if {[file isdirectory $rdir]} {
+	option readfile [file join $rdir default.rdb] userDefault
+	set f [file join $rdir $this(platform).rdb]
+	if {[file exists $f]} {
+	    option readfile $f userDefault
 	}
-    }
-
-    # Bug in 8.4.1 but ok in 8.4.9
-    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
-	option add *TToolbar.styleText  Small.Plain      60
     }
 }
 
@@ -134,7 +127,7 @@ proc ::Theme::TileThemeChanged {} {
 # 
 #       Named fonts are created and configured for each platform.
 
-proc ::Theme::Fonts { } {
+proc ::Theme::Fonts {} {
     global  tcl_platform
     variable fontopts
     
@@ -254,7 +247,7 @@ proc ::Theme::FontConfigSize {increase} {
 #       then the actual font with that name is constructed here.
 #       Note: Must start with LOWER case!
 
-proc ::Theme::PostProcessFontDefs { } {
+proc ::Theme::PostProcessFontDefs {} {
     
     foreach name [option get . fontNames {}] {
 	catch {font create $name}
@@ -265,10 +258,11 @@ proc ::Theme::PostProcessFontDefs { } {
     }
 }
 
-proc ::Theme::NameAndLocalePrefs { } {
+proc ::Theme::NameAndLocalePrefs {} {
     global  this prefs
     
-    set prefs(themeName)     ""
+    set prefs(themeName)     ""    ;# empty means we use this(themeDefault)
+    set prefs(themeParent)   ""
     set prefs(messageLocale) ""
     set prefs(fontSizePlus)  0
     
@@ -301,201 +295,54 @@ proc ::Theme::NameAndLocalePrefs { } {
 # 
 #       Finds all available themes.
 
-proc ::Theme::GetAllAvailable { } {
+proc ::Theme::GetAllAvailable {} {
     global  this
     
-    set allThemes [list]
+    set themes [list]
     foreach dir [list $this(themesPath) $this(altThemesPath)] {
 	foreach name [glob -nocomplain -tails -types d -directory $dir *] {
 	    if {$name eq "CVS"} { continue }
-	    lappend allThemes $name
-	}
-    }
-    return $allThemes
-}
-
-# ::Theme::GetImage --
-# 
-#       Searches for an image file in a number of places in a well defined way:
-#       
-#         if themeName nonempty search any of these two:
-#             coccinella/themes/themeName/subPath/
-#             prefsPath/themes/themeName/subPath/
-#           
-#         but this is always searched and is our fallback:
-#             coccinella/subPath/
-#       
-#       where subPath defaults to 'images'.
-#       Only PNGs and GIFs are searched for, in that order. 
-#       
-# Arguments:
-#       name      name of image file without suffix
-#       subPath   sub path where to search, defaults to images
-#       
-# Results:
-#       empty if not found, else the internal tk image name.
-
-namespace eval ::Theme {
-    
-    variable iuid -1
-    variable subPathMap
-}
-
-proc ::Theme::GetImage {name {subPath ""}} {
-    global  prefs this
-    variable subPathMap
-    variable iuid
-    
-    if {$subPath eq ""} {
-	set subPath $this(images)
-    }
-
-    # We avoid name collisions by creating a unique integer number
-    # for each subPath and use this when designing the image name.
-    # This keeps names much shorter.
-    if {![info exists subPathMap($subPath)]} {
-	set subPathMap($subPath) [incr iuid]
-    }
-    set nsname ::_img::$subPathMap($subPath)_$name
-    set ans ""
-    
-    # Create only if not there already.
-    if {[lsearch [image names] $nsname] == -1} {	
-	set paths [GetSearchPaths $subPath]
-	set found 0
-	foreach path $paths {
-	    foreach fmt {png gif} {
-		set f [file join $path $name.$fmt]
-		if {[file exists $f]} {
-		    image create photo $nsname -file $f -format $fmt
-		    set ans $nsname
-		    set found 1
-		    break
-		}
-	    }
-	    if {$found} break
-	}
-    } else {
-	set ans $nsname
-    }
-    return $ans
-}
-
-# ::Theme::GetSearchPaths --
-# 
-#       Finds the paths where images shall be searched.
-#       Normally the 'subPath' is 'images'.
-#       Adds a themed search path if we have a themed image directory.
-
-proc ::Theme::GetSearchPaths {subPath} {
-    global  this prefs
-    
-    set theme $prefs(themeName)
-    
-    # Build up a list of search paths.
-    set paths [list]
-    if {$theme ne ""} {
-	set dir [file join $this(themesPath) $theme]
-	if {[file isdirectory $dir]} {
-	    lappend paths [file join $dir $subPath]
-	} else {
-	    set dir [file join $this(altThemesPath) $theme]
-	    if {[file isdirectory $dir]} {
-		lappend paths [file join $dir $subPath]
-	    }
+	    lappend themes $name
 	}
     }
     
-    # This MUST always be searched for last since it is our fallback.
-    lappend paths [file join $this(path) $subPath]
-    return $paths
+    # Exclude the default theme.
+    return [lsearch -all -inline -not $themes $this(themeDefault)]
 }
-
-# ::Theme::GetImageWithNameEx--
-# 
-#       As GetImage above but keeps the image name 'name'.
-
-proc ::Theme::GetImageWithNameEx {name {subPath ""}} {
-
-    set imname [GetImage $name $subPath]
-    if {$imname ne ""} {
-	image create photo $name
-	$name copy $imname
-	image delete $imname
-	set imname $name
-    }
-    return $imname
-}
-
-# ::Theme::GetImageFromExisting --
-# 
-#       This is a method to first search for any image file using
-#       the standard theme engine, but use an existing image as fallback.
-#       The arrName($name) must be an existing image.
-
-proc ::Theme::GetImageFromExisting {name arrName} {
-    
-    set imname [GetImage $name]
-    if {$imname eq ""} {
-
-	# Call by name.
-	upvar $arrName arr
-	set imname $arr($name)
-    }
-    return $imname
-}
-
-# ::Theme::FindExactImageFile --
-# 
-#       Searches the exact image name and returns its complete path if found.
-
-proc ::Theme::FindExactImageFile {name {subPath ""}} {
-    global  this
-    
-    if {$subPath eq ""} {
-	set subPath $this(images)
-    }
-    set paths [GetSearchPaths $subPath]
-    foreach path $paths {
-	set f [file join $path $name]
-	if {[file exists $f]} {
-	    return $f
-	}
-    }    
-    return
-}
-
-# ::Theme::FindImageFileWithSuffixes --
-# 
-#       Searches each path for matching image file with any of the suffixes.
-#       Note the search order where the search paths has higher precedence
-#       than the image formats.
-
-proc ::Theme::FindImageFileWithSuffixes {name suffL {subPath ""}} {
-    global  this
-    
-    if {$subPath eq ""} {
-	set subPath $this(images)
-    }
-    set paths [GetSearchPaths $subPath]
-    foreach path $paths {
-	foreach suff $suffL {
-	    set f [file join $path $name$suff]
-	    if {[file exists $f]} {
-		return $f
-	    }
-	}
-    }    
-    return
-}
-
-#--- Icon theme directory structure ------------ 8.5 ONLY!
 
 namespace eval ::Theme {
     variable themePaths
 }
 
-proc ::Theme::GetPathsForTheme {theme} {
+# Theme::GetPath --
+#
+#       Seraches for the given theme name in app bundle or prefs folder.
+#       Returns sempty if not found. 
+#       Internal usage only.
+
+proc ::Theme::GetPath {theme} {
+    global this
+    
+    set path ""
+    set dir [file join $this(themesPath) $theme]
+    if {[file isdirectory $dir]} {
+	set path $dir
+    } else {
+	set dir [file join $this(altThemesPath) $theme]
+	if {[file isdirectory $dir]} {
+	    set path $dir
+	}
+    }
+    return $path
+}
+
+# Theme::GetPathsForTheme --
+#
+#       Returns a list of paths for 'theme' and 'themeParent'.
+#       Caches results.
+
+proc ::Theme::GetPathsForTheme {theme themeParent} {
+    global  this
     variable themePaths
     
     if {[info exists themePaths($theme)]} {
@@ -505,51 +352,92 @@ proc ::Theme::GetPathsForTheme {theme} {
 	# Build up a list of search paths.
 	set paths [list]
 	if {$theme ne ""} {
-	    set dir [file join $this(themesPath) $theme]
-	    if {[file isdirectory $dir]} {
-		lappend paths [file join $dir $spec]
-	    } else {
-		set dir [file join $this(altThemesPath) $theme]
-		if {[file isdirectory $dir]} {
-		    lappend paths [file join $dir $spec]
-		}
+	    set path [GetPath $theme]
+	    if {$path ne ""} {
+		lappend paths $path
+	    }
+	    if {$themeParent ne ""} {
+		set path [GetPath $themeParent]
+		if {$path ne ""} {
+		    lappend paths $path
+		}		
 	    }
 	}
 	
 	# This MUST always be searched for last since it is our fallback.
-	# @@@ Put themes/default/ in this array.
-	lappend paths [file join $this(path) themes/Crystal/]
+	lappend paths [file join $this(themesPath) $this(themeDefault)]
 	set themePaths($theme) $paths
     }
     return $paths
 }
 
-# Theme::FindIcon --
+proc ::Theme::GetPresentSearchPaths {} {
+    global prefs
+    return [GetPathsForTheme $prefs(themeName) $prefs(themeParent)]
+}
+
+# Theme::GetPathsFor --
+#
+#       Make a list of paths where we shall search for things like sounds
+#       and emoticon sets. These are ordered so in some cases they shall
+#       be searched for in reversed order.
+
+proc ::Theme::GetPathsFor {subPath} {
+    global this
+    
+    set paths [list]
+    lappend paths [file join $this(path) $subPath]
+    set path [file join $this(themesPath) $subPath]
+    if {[file isdirectory $path]} {
+	lappend paths $path
+    }
+    lappend paths [file join $this(prefsPath) $subPath]
+    set path [file join $this(altThemesPath) $subPath]
+    if {[file isdirectory $path]} {
+	lappend paths $path
+    }
+    return $paths
+}
+
+# Theme::FindIcon, FindIconWithName --
 #
 #       Searches for image using complex dir specifier.
 #       spec is typically icons/32x32/send which is a sub path to an image file
 #       but without any file suffix.
 
 proc ::Theme::FindIcon {spec} {
-    global  this prefs
+    
+    # The image create a command as well which must be namespaced due
+    # to its design flaw.
+    return [FindIconWithName $spec ::theme::$spec]
+}
+
+proc ::Theme::FindIconWithName {spec name} {
     
     set image ""
-    set tail [file tail $spec]
-    set parts [split $spec /]
-    set nsname ::_img::$spec
-    
-    if {$nsname ni [image names]} {
-	set paths [GetPathsForTheme $prefs(themeName)]
-	
-	foreach p $paths {puts "path=$p"}
-	
+#    if {$image ni [image names]}
+    if {[lsearch -exact [image names] $name] < 0} {
+	set paths [GetPresentSearchPaths]
 	set found 0
+
 	foreach path $paths {
 	    foreach fmt {png gif} {
-		set f $path.$fmt
+		set f [file join $path $spec].$fmt
+		
+		# We provide a single step fallback: 
+		#   contact-new-Dis -> contact-new   etc.
+		if {![file exists $f]} {
+		    set tail [file tail $spec]
+		    set parts [split $tail -]
+		    if {[llength $parts] > 1} {
+			set f [join [lrange [split $spec /] 0 end-1] /]
+			append f / [join [lrange $parts 0 end-1] -]
+			set f [file join $path $f].$fmt
+		    }
+		}
 		if {[file exists $f]} {
-		    image create photo $nsname -file $f -format $fmt
-		    set image $nsname
+		    image create photo $name -file $f -format $fmt
+		    set image $name
 		    set found 1
 		    break
 		}
@@ -557,9 +445,91 @@ proc ::Theme::FindIcon {spec} {
 	    if {$found} { break }
 	}
     } else {
-	set image $nsname
+	set image $name
     }
     return $image
+}
+
+# Theme::FindExactIconFile --
+# 
+#       Searches the exact image name and returns its complete path if found.
+
+proc ::Theme::FindExactIconFile {subPath} {
+    
+    foreach path [GetPresentSearchPaths] {
+	set f [file join $path $subPath]
+	if {[file exists $f]} {
+	    return $f
+	}
+    }
+    return
+}
+
+# Theme::FindIconFileWithSuffixes --
+# 
+#       Searches each path for matching image file with any of the suffixes.
+#       Note the search order where the search paths have higher precedence
+#       than the image formats.
+
+proc ::Theme::FindIconFileWithSuffixes {spec suffL} {
+
+    foreach path [GetPresentSearchPaths] {
+	foreach suff $suffL {
+	    set f [file join $path $spec$suff]
+	    if {[file exists $f]} {
+		return $f
+	    }
+	}
+    }    
+    return
+}
+
+proc ::Theme::FindIconSize {size name} {
+    return [FindIcon icons/${size}x${size}/$name]
+}
+
+# Theme::Find16Icon, Find32Icon, Find64Icon --
+#
+#       Helper functions which look up images using the resource database.
+
+proc ::Theme::Find16Icon {w resource} {    
+    set rsrc [option get $w $resource {}]
+    if {$rsrc ne ""} {
+	return [FindIcon icons/16x16/[option get $w $resource {}]]
+    } 
+    return
+}
+
+proc ::Theme::Find32Icon {w resource} {    
+    set rsrc [option get $w $resource {}]
+    if {$rsrc ne ""} {
+	return [FindIcon icons/32x32/[option get $w $resource {}]]
+    } 
+    return
+}
+
+proc ::Theme::Find64Icon {w resource} {    
+    set rsrc [option get $w $resource {}]
+    if {$rsrc ne ""} {
+	return [FindIcon icons/64x64/[option get $w $resource {}]]
+    } 
+    return
+}
+
+proc ::Theme::Find128Icon {w resource} {    
+    set rsrc [option get $w $resource {}]
+    if {$rsrc ne ""} {
+	return [FindIcon icons/128x128/[option get $w $resource {}]]
+    } 
+    return
+}
+
+proc ::Theme::Create16IconWithName {w resource} {
+    set rsrc [option get $w $resource {}]
+    if {$rsrc ne ""} {
+	return [FindIconWithName icons/16x16/$rsrc $rsrc]
+    } 
+    return
 }
 
 #-------------------------------------------------------------------------------

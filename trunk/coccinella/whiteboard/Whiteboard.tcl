@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the actual whiteboard.
 #      
-#  Copyright (c) 2002-2007  Mats Bengtsson
+#  Copyright (c) 2002-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.93 2008-03-26 07:32:59 matben Exp $
+# $Id: Whiteboard.tcl,v 1.94 2008-04-17 15:00:48 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -74,31 +74,27 @@ namespace eval ::WB {
     option add *TopWhiteboard*TRadiobutton.padding  {0}             50
 
     # Shortcut buttons.
-    option add *TopWhiteboard*connectImage         connect         widgetDefault
-    option add *TopWhiteboard*connectDisImage      connectDis      widgetDefault
-    option add *TopWhiteboard.saveImage            save            widgetDefault
-    option add *TopWhiteboard.saveDisImage         saveDis         widgetDefault
-    option add *TopWhiteboard.openImage            open            widgetDefault
-    option add *TopWhiteboard.openDisImage         openDis         widgetDefault
-    option add *TopWhiteboard.importImage          import          widgetDefault
-    option add *TopWhiteboard.importDisImage       importDis       widgetDefault
-    option add *TopWhiteboard.sendImage            send            widgetDefault
-    option add *TopWhiteboard.sendDisImage         sendDis         widgetDefault
-    option add *TopWhiteboard.printImage           print           widgetDefault
-    option add *TopWhiteboard.printDisImage        printDis        widgetDefault
-    option add *TopWhiteboard.stopImage            stop            widgetDefault
-    option add *TopWhiteboard.stopDisImage         stopDis         widgetDefault
+    option add *TopWhiteboard.saveImage            document-save            widgetDefault
+    option add *TopWhiteboard.saveDisImage         document-save-Dis         widgetDefault
+    option add *TopWhiteboard.openImage            document-open            widgetDefault
+    option add *TopWhiteboard.openDisImage         document-open-Dis         widgetDefault
+    option add *TopWhiteboard.importImage          document-import          widgetDefault
+    option add *TopWhiteboard.importDisImage       document-import-Dis       widgetDefault
+    option add *TopWhiteboard.sendImage            mail-send            widgetDefault
+    option add *TopWhiteboard.sendDisImage         mail-send-Dis         widgetDefault
+    option add *TopWhiteboard.printImage           document-print           widgetDefault
+    option add *TopWhiteboard.printDisImage        document-print-Dis        widgetDefault
+    option add *TopWhiteboard.stopImage            dialog-error            widgetDefault
+    option add *TopWhiteboard.stopDisImage         dialog-error-Dis    widgetDefault
 
     # Other icons.
-    option add *TopWhiteboard.connect16Image       connect         widgetDefault
-    option add *TopWhiteboard.connected16Image     connected       widgetDefault
-    option add *TopWhiteboard.waveImage            wave            widgetDefault
-    option add *TopWhiteboard.resizeHandleImage    resizehandle    widgetDefault
+    option add *TopWhiteboard.connect16Image       network-disconnect     widgetDefault
+    option add *TopWhiteboard.connected16Image     network-connect       widgetDefault
     option add *TopWhiteboard.logoImage            logo            widgetDefault
 
     # Drawing tool buttons.
     foreach tname [array names btName2No] {
-	option add *TopWhiteboard.tool${tname}Image $tname         widgetDefault
+	option add *TopWhiteboard.tool${tname}Image draw-$tname    widgetDefault
     }
 
     # Color selector.
@@ -337,8 +333,6 @@ proc ::WB::Init {} {
 #       preloaded icons as fallback.
 
 proc ::WB::InitIcons {w} {
-    global  this
-    
     variable icons
     variable iconsInitted 1
     variable btNo2Name
@@ -346,42 +340,21 @@ proc ::WB::InitIcons {w} {
     variable wbicons
     	
     # Get icons.
-    set icons(brokenImage) [image create photo -format gif  \
-      -file [file join $this(imagePath) brokenImage.gif]]	
-
-    # Make all standard icons.
-    CreateToolImages
+    set icons(brokenImage) [::Theme::FindIconSize 32 image-missing]
     
     # Drawing tool buttons.
     foreach name [array names btName2No] {
-	set wbicons($name) [::WB::GetThemeImage  \
-	  [option get $w tool${name}Image {}]]
+	set rsrc [option get $w tool${name}Image {}]
+	set wbicons($name) [::Theme::FindIcon elements/$rsrc]
     }
     
     # Color selector.
     foreach name {colorSelector colorSelBW colorSelSwap} {
-	set wbicons($name) [::WB::GetThemeImage  \
-	  [option get $w ${name}Image {}]]
+	set rsrc [option get $w ${name}Image {}]
+	set wbicons($name) [::Theme::FindIcon elements/$rsrc]
     }
-    set wbicons(bwrect)  [::WB::GetThemeImage [option get $w bwrectImage {}]]
-}
-
-proc ::WB::CreateToolImages {} {
-    global  this
-    variable iconsPreloaded
-    variable btName2No
-    
-    set subPath [file join $this(images) tools]
-    
-    # Actual tools.
-    foreach name [array names btName2No] {
-	set iconsPreloaded($name) [::Theme::GetImage $name $subPath]
-    }
-    
-    # Color selector.
-    foreach name {colorSelector colorSelBW colorSelSwap} {
-	set iconsPreloaded($name) [::Theme::GetImage $name $subPath]
-    }
+    set rsrc [option get $w bwrectImage {}]
+    set wbicons(bwrect) [::Theme::FindIcon elements/$rsrc]
 }
 
 # WB::InitMenuDefs --
@@ -768,7 +741,7 @@ proc ::WB::BuildWhiteboard {w args} {
     
     bind $w <<ToolbarButton>> [list ::WB::OnToolbarButton $w]
 
-    set iconResize [::Theme::GetImage [option get $w resizeHandleImage {}]]
+    set iconResize [::Theme::FindIcon elements/sizegrip]
     set wbicons(resizehandle) $iconResize
     if {!$iconsInitted} {
 	InitIcons $w
@@ -828,14 +801,7 @@ proc ::WB::BuildWhiteboard {w args} {
     pack  $w.fmain.frleft.pad -fill both -expand 1
     pack  $w.fmain.frleft.pad.f  -fill both -expand 1
     pack  $w.fmain.cc         -fill both -expand 1 -side right
-    
-    # The 'Coccinella'.
-    if {0} {
-	set wapp(bugImage) [::Theme::GetImage [option get $w logoImage {}]]
-	ttk::label $wapp(buglabel) -borderwidth 0 -image $wapp(bugImage)
-	pack $wapp(buglabel) -side bottom -fill x    
-    }
-    
+        
     # Make the tool buttons and invoke the one from the prefs file.
     BuildAllButtons $w
     
@@ -2310,8 +2276,8 @@ proc ::WB::BuildToolbar {w} {
 
     # We need to substitute $wcan, $w etc specific for this wb instance.
     foreach {name cmd} $btShortDefs {
-	set icon    [::Theme::GetImage [option get $w ${name}Image {}]]
-	set iconDis [::Theme::GetImage [option get $w ${name}DisImage {}]]
+	set icon    [::Theme::Find32Icon $w ${name}Image]
+	set iconDis [::Theme::Find32Icon $w ${name}DisImage]
 	set cmd [subst -nocommands -nobackslashes $cmd]
 	set txt [string totitle $name]
 	$wtbar newbutton $name -text [mc $txt] \
@@ -3197,11 +3163,7 @@ proc ::WB::FontChanged {w what} {
 }
 
 proc ::WB::StartStopAnimatedWave {w start} {
-    upvar ::WB::${w}::wapp wapp
     
-    
-    #set waveImage [::Theme::GetImage [option get $w waveImage {}]]  
-    #::UI::StartStopAnimatedWave $wapp(statmess) $waveImage $start
 }
 
 # WB::CreateBrokenImage --
@@ -3304,16 +3266,6 @@ proc ::WB::DnDEnter {wcan action data type} {
 proc ::WB::DnDLeave {wcan data type} {
     
     focus [winfo toplevel $wcan] 
-}
-
-# ::WB::GetThemeImage --
-# 
-#       This is a method to first search for any image file using
-#       the standard theme engine, but use hardcoded icons as fallback.
-
-proc ::WB::GetThemeImage {name} {
-    
-    return [::Theme::GetImageFromExisting $name ::WB::iconsPreloaded]
 }
 
 #       Some stuff to handle sending messages using hooks.

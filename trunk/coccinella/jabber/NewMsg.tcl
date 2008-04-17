@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.99 2008-03-25 14:54:25 matben Exp $
+# $Id: NewMsg.tcl,v 1.100 2008-04-17 15:00:30 matben Exp $
 
 package require ui::entryex
 
@@ -36,14 +36,14 @@ namespace eval ::NewMsg:: {
     option add *NewMsg.topBannerImage       ""              widgetDefault
     option add *NewMsg.bottomBannerImage    ""              widgetDefault
 
-    option add *NewMsg.sendImage            send            widgetDefault
-    option add *NewMsg.sendDisImage         sendDis         widgetDefault
-    option add *NewMsg.quoteImage           quote           widgetDefault
-    option add *NewMsg.quoteDisImage        quoteDis        widgetDefault
-    option add *NewMsg.saveImage            save            widgetDefault
-    option add *NewMsg.saveDisImage         saveDis         widgetDefault
-    option add *NewMsg.printImage           print           widgetDefault
-    option add *NewMsg.printDisImage        printDis        widgetDefault
+    option add *NewMsg.sendImage            mail-send            widgetDefault
+    option add *NewMsg.sendDisImage         mail-send-Dis         widgetDefault
+    option add *NewMsg.quoteImage           mail-quote           widgetDefault
+    option add *NewMsg.quoteDisImage        mail-quote-Dis        widgetDefault
+    option add *NewMsg.saveImage            document-save            widgetDefault
+    option add *NewMsg.saveDisImage         document-save-Dis         widgetDefault
+    option add *NewMsg.printImage           document-print           widgetDefault
+    option add *NewMsg.printDisImage        document-print-Dis        widgetDefault
 
     # Standard widgets.
     
@@ -142,8 +142,8 @@ proc ::NewMsg::InitMultiAddress {wmulti} {
     variable locals
     
     # Icons.
-    set locals(popupbt)     [::Theme::GetImage [option get $wmulti popupImage {}]]
-    set locals(popupbtpush) [::Theme::GetImage [option get $wmulti popupImageDown {}]]
+    set locals(popupbt)     [::Theme::FindIcon elements/[option get $wmulti popupImage {}]]
+    set locals(popupbtpush) [::Theme::FindIcon elements/[option get $wmulti popupImageDown {}]]
     set locals(minheight) [image height $locals(popupbt)]
     set locals(initedaddr) 1
 }
@@ -245,19 +245,19 @@ proc ::NewMsg::Build {args} {
     pack $w.frall -fill both -expand 1
     
     # Button part.
-    set iconSend      [::Theme::GetImage [option get $w sendImage {}]]
-    set iconSendDis   [::Theme::GetImage [option get $w sendDisImage {}]]
-    set iconQuote     [::Theme::GetImage [option get $w quoteImage {}]]
-    set iconQuoteDis  [::Theme::GetImage [option get $w quoteDisImage {}]]
-    set iconSave      [::Theme::GetImage [option get $w saveImage {}]]
-    set iconSaveDis   [::Theme::GetImage [option get $w saveDisImage {}]]
-    set iconPrint     [::Theme::GetImage [option get $w printImage {}]]
-    set iconPrintDis  [::Theme::GetImage [option get $w printDisImage {}]]
+    set iconSend      [::Theme::Find32Icon $w sendImage]
+    set iconSendDis   [::Theme::Find32Icon $w sendDisImage]
+    set iconQuote     [::Theme::Find32Icon $w quoteImage]
+    set iconQuoteDis  [::Theme::Find32Icon $w quoteDisImage]
+    set iconSave      [::Theme::Find32Icon $w saveImage]
+    set iconSaveDis   [::Theme::Find32Icon $w saveDisImage]
+    set iconPrint     [::Theme::Find32Icon $w printImage]
+    set iconPrintDis  [::Theme::Find32Icon $w printDisImage]
 
     set buttonRowPosition [option get $w buttonRowPosition {}]
     set buttonRowSide     [option get $w buttonRowSide {}]
-    set topBannerImage    [::Theme::GetImage [option get $w topBannerImage {}]]
-    set botBannerImage    [::Theme::GetImage [option get $w bottomBannerImage {}]]
+    set topBannerImage    [::Theme::Find32Icon $w topBannerImage]
+    set botBannerImage    [::Theme::Find32Icon $w bottomBannerImage]
     
     switch -- $buttonRowSide {
 	right {

@@ -2,7 +2,7 @@
 #  
 #      This file implements a megawidget phone key pad.
 #      
-#  Copyright (c) 2006  Mats Bengtsson
+#  Copyright (c) 2006-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: TPhone.tcl,v 1.5 2008-02-20 15:14:37 matben Exp $
+# $Id: TPhone.tcl,v 1.6 2008-04-17 15:00:28 matben Exp $
 
 #-------------------------------------------------------------------------------
 # USAGE:
@@ -34,30 +34,34 @@
 #
 #-------------------------------------------------------------------------------
 
-package require tkpng
-
 package provide TPhone 0.1
 
 namespace eval ::TPhone {
     
     variable inited 0
-    variable imagePath [file join [file dirname [info script]] timages]
 }
 
 proc ::TPhone::Init {} {
     global this
     variable inited
-    variable imagePath
     variable images
     variable buttons {1 2 3 4 5 6 7 8 9 star 0 square}
-
-    # Use the content of the 'timages' folder to define all the images we need.
-    if {![info exists images(0)]} {
-	set subPath [file join components Phone timages]
-	foreach f [glob -nocomplain -directory $imagePath *.png] {
-	    set name [file rootname [file tail $f]]
-	    set images($name) [::Theme::GetImage $name $subPath]
+    
+    set names [list]
+    foreach b $buttons {
+	lappend names b$b b${b}Pressed
+    }
+    foreach b {backspace call clear hangup transfer radio1 radio2 radio3} {
+	lappend names $b ${b}Pressed
+    }
+    lappend names display
+    
+    if {![info exists images(b0)]} {
+	foreach name $names {
+	    set images($name) [::Theme::FindIcon elements/phone/$name]
 	}
+	set images(microphone) [::Theme::FindIconSize 16 audio-microphone]
+	set images(speaker)    [::Theme::FindIconSize 16 audio-speaker]
     }
     if {$::this(ttk)} {
 	set styleCmd ttk::style
@@ -191,20 +195,6 @@ proc ::TPhone::New {w command args} {
     grid  $w.bts  -sticky ew -pady 2
     
     option add *$bts.TButton.takeFocus  0
-    
-#    set wr $bts.radio
-#    ttk::frame $bts.radio
-#    ttk::radiobutton $wr.1 -style Phone.Toolbutton  \
-#      -image [list $images(radio1) selected $images(radio1Pressed)]  \
-#      -variable $w\(line) -value 1 -command [list ::TPhone::Line $w]
-#    ttk::radiobutton $wr.2 -style Phone.Toolbutton  \
-#      -image [list $images(radio2) selected $images(radio2Pressed)]  \
-#      -variable $w\(line) -value 2 -command [list ::TPhone::Line $w]
-#    ttk::radiobutton $wr.3 -style Phone.Toolbutton  \
-#      -image [list $images(radio3) selected $images(radio3Pressed)]  \
-#      -variable $w\(line) -value 3 -command [list ::TPhone::Line $w]
-    
-#    grid  $wr.1  $wr.2  $wr.3
     
     ttk::button $bts.call -style Phone.TButton  \
       -image [list $images(call) pressed $images(callPressed)]  \

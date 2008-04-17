@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: openimage.tcl,v 1.5 2007-12-22 14:52:22 matben Exp $
+# $Id: openimage.tcl,v 1.6 2008-04-17 15:00:28 matben Exp $
 
 # Public commands:
 # 
@@ -82,13 +82,8 @@ proc ui::openimage::widget {w args} {
     
     set fr [$w clientframe]
     ttk::frame $fr.l
+    ttk::label $fr.l.image -compound image
 
-    # Bug in 8.4.1 but ok in 8.4.9
-    if {[regexp {^8\.4\.[0-5]$} [info patchlevel]]} {
-	label $fr.l.image -relief sunken -bd 1 -bg white
-    } else {
-	ttk::label $fr.l.image -compound image
-    }
     grid  $fr.l.image  -sticky news
     grid columnconfigure $fr.l 0 -minsize [expr {2*4 + 2*4 + $size}]
     grid rowconfigure    $fr.l 0 -minsize [expr {2*4 + 2*4 + $size}]

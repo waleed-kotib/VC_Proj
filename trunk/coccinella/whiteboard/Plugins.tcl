@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Plugins.tcl,v 1.32 2008-01-03 14:49:10 matben Exp $
+# $Id: Plugins.tcl,v 1.33 2008-04-17 15:00:48 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -159,7 +159,7 @@ namespace eval ::Plugins {
 #       The initialization function which loads all plugins available.
 #       
 
-proc ::Plugins::Init { } {
+proc ::Plugins::Init {} {
     global this
     variable mimeTypeDoWhat
     variable prefMimeType2Package
@@ -199,7 +199,7 @@ proc ::Plugins::Init { } {
     set inited 1
 }
 
-proc ::Plugins::InitTk { } {
+proc ::Plugins::InitTk {} {
     global this
     variable plugin
     variable supportedMimeTypes
@@ -209,8 +209,7 @@ proc ::Plugins::InitTk { } {
     set plugin(tk,desc) "Supported by the core"
     set plugin(tk,ver) [info tclversion]
     set plugin(tk,importProc) ::Import::DrawImage
-    set plugin(tk,icon,12) [image create photo -format gif \
-      -file [file join $this(imagePath) tklogo12.gif]]
+    set plugin(tk,icon,12) [::Theme::FindIcon mime/12x12/application-x-tcl]
     #set supSuff(tk) {.gif}
     set supportedMimeTypes(tk) {image/gif image/x-portable-pixmap}
     set plugin(tk,mimes) $supportedMimeTypes(tk)
@@ -236,10 +235,10 @@ proc ::Plugins::InitQuickTimeTcl { } {
     set plugin(QuickTimeTcl,trpt,video) http
     
     # Define any 16x16 icon to spice up the UI.
-    set plugin(QuickTimeTcl,icon,16) [image create photo -format png \
-      -file [file join $this(imagePath) quicktime16.png]]
-    set plugin(QuickTimeTcl,icon,12) [image create photo -format gif \
-      -file [file join $this(imagePath) quicktime12.gif]]
+    set plugin(QuickTimeTcl,icon,16) \
+      [::Theme::FindIcon mime/16x16/video-quicktime]
+    set plugin(QuickTimeTcl,icon,12) \
+      [::Theme::FindIcon mime/12x12/video-quicktime]
     
     # We must list supported MIME types for each package.
     # For QuickTime:

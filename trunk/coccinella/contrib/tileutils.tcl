@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.81 2008-03-31 07:00:55 matben Exp $
+# $Id: tileutils.tcl,v 1.82 2008-04-17 15:00:28 matben Exp $
 #
 
 package require treeutil
@@ -167,7 +167,6 @@ namespace eval ::tileutils {
     BindFirst TreeCtrl     <<ThemeChanged>> {tileutils::TreeCtrlThemeChanged %W }
     if {[tk windowingsystem] ne "aqua"} {
 	BindFirst Menu      <<ThemeChanged>> {tileutils::MenuThemeChanged %W }
-	BindFirst WaveLabel <<ThemeChanged>> {tileutils::WaveLabelThemeChanged %W }
     }
     
     variable options
@@ -246,7 +245,6 @@ proc tileutils::ThemeChanged {} {
 	#option add *Text.highlightBackground    $textStyle(-background) $priority
 	option add *Text.highlightBackground    $color $priority
 	option add *TreeCtrl.columnBackground   $color $priority
-	option add *WaveLabel.columnBackground  $color $priority
 	
 	if {[info exists menuMap(-background)]} {
 	    foreach {state col} $menuMap(-background) {
@@ -561,26 +559,6 @@ proc tileutils::TreeCtrlThemeChanged {win} {
     }    
     set stateFill [concat $fillT [list $fill {}]]
     treeutil::configureelementtype $win text -fill $stateFill
-}
-
-proc tileutils::WaveLabelThemeChanged {win} {
-    global this
-    
-    if {$this(ttk)} {
-	set styleCmd ttk::style
-    } else {
-	set styleCmd style
-    }    
-    if {[winfo class $win] eq "WaveLabel"} {
-	array set style [list -foreground black]
-	array set style [$styleCmd configure .]    
-
-	if {[info exists style(-background)]} {
-	    set color $style(-background)
-	    $win configure -background $color
-	    $win configure -columnbackground $color
-	}
-    }
 }
    
 # These should be collected in a separate theme specific file.
