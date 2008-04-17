@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: utils.tcl,v 1.12 2007-10-23 13:48:59 matben Exp $
+# $Id: utils.tcl,v 1.13 2008-04-17 13:33:18 matben Exp $
 
 package provide utils 1.0
     
@@ -176,6 +176,8 @@ proc luniqueo {ls} {
 # 
 #       Search sublists instead. Very incomplete!
 #       Note: returns empty if non found.
+#
+# @@@ OBSOLETE in 8.5!
 
 proc lsearchsublists {args} {
     
@@ -307,3 +309,11 @@ proc getdirname {filePath} {
 	return $filePath
     }
 }
+
+proc dumpwidgethierarchy {{win .} {tabs "\t"}} {
+    foreach w [winfo children $win] {
+	puts "$tabs$w"
+	dumpwidgethierarchy $w "$tabs\t"
+    }
+}
+
