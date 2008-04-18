@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.140 2008-04-17 15:00:30 matben Exp $
+# $Id: MailBox.tcl,v 1.141 2008-04-18 06:15:27 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -682,13 +682,13 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set fg [option get $T textColor {}]
 
     $T column create -tags cSubject -expand 1 -text [mc Subject] \
-      -itembackground $itemBg -button 1 -borderwidth $bd -background $bg \
-      -textcolor $fg
+      -itembackground $itemBg -button 1 -squeeze 1 -borderwidth $bd \
+      -background $bg -textcolor $fg
     $T column create -tags cFrom    -expand 1 -text [mc From]    \
       -itembackground $itemBg -button 1 -squeeze 1 -borderwidth $bd  \
       -background $bg -textcolor $fg
     $T column create -tags cDate    -expand 1 -text [mc Date]    \
-      -itembackground $itemBg -button 1 -arrow up -borderwidth $bd  \
+      -itembackground $itemBg -button 1 -squeeze 1 -arrow up -borderwidth $bd \
       -background $bg  -textcolor $fg
     $T column create -tags cSecs -visible 0
     $T column create -tags cRead -visible 0
