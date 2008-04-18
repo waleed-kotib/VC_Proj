@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.54 2008-04-17 15:00:29 matben Exp $
+# $Id: JUser.tcl,v 1.55 2008-04-18 13:04:14 matben Exp $
 
 package provide JUser 1.0
 
@@ -34,10 +34,14 @@ namespace eval ::JUser {
     ::hooks::register quitAppHook  ::JUser::QuitAppHook 
 
     # Configurations:
+    # Details of how to handle menubutton selection for non-xmpp systems.
     set ::config(adduser,warn-non-xmpp-onselect) 0
     set ::config(adduser,add-non-xmpp-onselect)  1
     set ::config(adduser,dlg-type-ask-register)  yesnocancel
     set ::config(adduser,show-head)              1
+    
+    # Use name and group in dialog?
+    set ::config(adduser,show-nick-group)        0
 }
 
 proc ::JUser::QuitAppHook {} {
@@ -148,14 +152,18 @@ proc ::JUser::NewDlg {args} {
     
     grid  $frmid.ltype   $frmid.type   -sticky e -pady 2
     grid  $frmid.ljid    $frmid.ejid   -sticky e -pady 2
-    grid  $frmid.lnick   $frmid.enick  -sticky e -pady 2
-    grid  $frmid.lgroup  $frmid.egroup -sticky e -pady 2
-
-    grid $frmid.type $frmid.ejid $frmid.enick $frmid.egroup -sticky ew
+    grid $frmid.type $frmid.ejid -sticky ew
 
     ::balloonhelp::balloonforwindow $frmid.ejid [mc tooltip-contactid]
-    ::balloonhelp::balloonforwindow $frmid.enick [mc registration-nick]
-    ::balloonhelp::balloonforwindow $frmid.egroup [mc tooltip-group]
+
+    if {$config(adduser,show-nick-group)} {
+	grid  $frmid.lnick   $frmid.enick  -sticky e -pady 2
+	grid  $frmid.lgroup  $frmid.egroup -sticky e -pady 2
+	grid $frmid.enick $frmid.egroup -sticky ew
+
+	::balloonhelp::balloonforwindow $frmid.enick [mc registration-nick]
+	::balloonhelp::balloonforwindow $frmid.egroup [mc tooltip-group]
+    }
 
     set state(gjid)  [lindex $trpts 0 0]
     set state(jid)   ""
