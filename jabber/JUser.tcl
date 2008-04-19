@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.55 2008-04-18 13:04:14 matben Exp $
+# $Id: JUser.tcl,v 1.56 2008-04-19 13:58:30 matben Exp $
 
 package provide JUser 1.0
 
@@ -153,6 +153,7 @@ proc ::JUser::NewDlg {args} {
     grid  $frmid.ltype   $frmid.type   -sticky e -pady 2
     grid  $frmid.ljid    $frmid.ejid   -sticky e -pady 2
     grid $frmid.type $frmid.ejid -sticky ew
+    grid columnconfigure $frmid 1 -minsize [$frmid.type maxwidth]
 
     ::balloonhelp::balloonforwindow $frmid.ejid [mc tooltip-contactid]
 
