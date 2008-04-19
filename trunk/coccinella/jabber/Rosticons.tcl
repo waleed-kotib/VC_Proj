@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.42 2008-04-17 15:00:32 matben Exp $
+# $Id: Rosticons.tcl,v 1.43 2008-04-19 12:10:55 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -91,10 +91,17 @@ namespace eval ::Rosticons:: {
     
     # Define which icons we want to use as defaults.
     foreach type $priv(types) {
-	set ::config(rost,icons,use,$type) 0
+	set ::config(rost,icons,use,$type)  0
+	set ::config(rost,icons,must,$type) 0
     }
     set ::config(rost,icons,use,application) 1
+    set ::config(rost,icons,use,phone)       1
     set ::config(rost,icons,use,status)      1
+    
+    # Define which icons must always be displayed.
+    set ::config(rost,icons,must,application) 1
+    set ::config(rost,icons,must,phone)       1
+    set ::config(rost,icons,must,status)      1
 }
 
 proc ::Rosticons::Init {} {
@@ -424,10 +431,14 @@ proc ::Rosticons::InitPrefsHook {} {
 	lappend plist [list $name $rsrc $value]
 
 	set jprefs(rost,icons,use,$type) $config(rost,icons,use,$type)
-	set name  ::Jabber::jprefs(rost,icons,use,$type)
-	set rsrc  jprefs_rost_icons_use_$type
-	set value [set $name]
-	lappend plist [list $name $rsrc $value]
+	
+	# Add only the ones that can be optional.
+	if {!$config(rost,icons,must,$type)} {
+	    set name  ::Jabber::jprefs(rost,icons,use,$type)
+	    set rsrc  jprefs_rost_icons_use_$type
+	    set value [set $name]
+	    lappend plist [list $name $rsrc $value]
+	}
     }    
     ::PrefUtils::Add $plist
 }
@@ -561,7 +572,8 @@ proc ::Rosticons::POnSelect {T} {
     }
 }
 
-proc ::Rosticons::PFillTree {T} {    
+proc ::Rosticons::PFillTree {T} {
+    global config
     variable state
     variable ptmp
     upvar ::Jabber::jprefs jprefs
@@ -579,7 +591,7 @@ proc ::Rosticons::PFillTree {T} {
 	set wcheck $T.[incr i]
 	checkbutton $wcheck -bg white -highlightthickness 0 \
 	  -variable [namespace current]::ptmp(use,$type)
-	if {($type eq "status" ) || ($type eq "XXXapplication")} {
+	if {$config(rost,icons,must,$type)} {
 	    $wcheck configure -state disabled
 	}
 	if {$type eq "status"} {
