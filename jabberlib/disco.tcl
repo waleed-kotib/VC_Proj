@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: disco.tcl,v 1.55 2007-12-31 07:52:39 matben Exp $
+# $Id: disco.tcl,v 1.56 2008-04-21 07:51:17 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -522,8 +522,8 @@ proc jlib::disco::parse_get_info {jlibname from queryE} {
 		if {![info exists attr(category)] || ![info exists attr(type)]} {
 		    continue
 		}
-		set category $attr(category)
-		set ctype    $attr(type)
+		set category [string tolower $attr(category)]
+		set ctype    [string tolower $attr(type)]
 		set name     ""
 		if {[info exists attr(name)]} {
 		    set name $attr(name)
