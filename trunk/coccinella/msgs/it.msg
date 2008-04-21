@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: it.msg,v 1.48 2008-04-17 15:00:35 matben Exp $
+#   $Id: it.msg,v 1.49 2008-04-21 07:35:38 matben Exp $
 
 ::msgcat::mcset it Abort                 {Annulla}
 ::msgcat::mcset it Action                {Azione}
@@ -1011,7 +1011,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset it jaregisterexserv2     {Iscriviti al servizio %s. Potrebbe essere necessario premere il bottone di avanzamento per recuperare le istruzioni di registrazione.}
 ::msgcat::mcset it jaregmsg2             {Registrati al servizio. Se ti eri già registrato, puoi aggiornare la tua iscrizione qui.}
 ::msgcat::mcset it jaregnewwith          {Vuoi iscrivere un nuovo account su %s?}
-::msgcat::mcset it jarostadd2            {Seleziona il sistema di chat e l'ID del contatto che vorresti aggiungere. Nickname e gruppo sono opzionali e possono essere impostati o cambiati successivamente.}
+::msgcat::mcset it jarostadd3            {Seleziona il sistema di chat e l'ID del contatto che vorresti aggiungere.}
+::msgcat::mcset it jarostaddopt          {Nickname e gruppo sono opzionali e possono essere impostati o cambiati successivamente.}
 ::msgcat::mcset it jarostset2            {Imposta il ni0ckname ed il gruppo di %s. Puoi anche richiedere o rimuovere la sottoscrizione alla presenza.}
 ::msgcat::mcset it jarostsub2            {Richiedi sottoscrizione alla presenza}
 ::msgcat::mcset it jarostunsub2          {Rimuovi sottoscrizione alla presenza}

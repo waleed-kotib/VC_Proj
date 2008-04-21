@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: cs.msg,v 1.7 2007-12-13 13:23:47 matben Exp $
+#   $Id: cs.msg,v 1.8 2008-04-21 07:35:34 matben Exp $
 
 ::msgcat::mcset cs Abort                 {Storno}
 ::msgcat::mcset cs Action                {Akce}
@@ -1011,7 +1011,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset cs jaregisterexserv2     {Registrovat službu %s. Měl(a) bys stisknout tlačítko Další pro získání registračních instrukcí.}
 ::msgcat::mcset cs jaregmsg2             {Registrace služby. Jestli jsi už zaregistrován(a), můžeš zde změnit svou registraci.}
 ::msgcat::mcset cs jaregnewwith          {Chceš zaregistrovat nový účet na %s.}
-::msgcat::mcset cs jarostadd2            {Vyber si chatovací systém a ID kontaktu, který chceš přidat. Přezdívka a skupina jsou volitelné a mohou být kdykoli později změněny.}
+::msgcat::mcset cs jarostadd3            {Vyber si chatovací systém a ID kontaktu, který chceš přidat.}
+::msgcat::mcset cs jarostaddopt          {Přezdívka a skupina jsou volitelné a mohou být kdykoli později změněny.}
 ::msgcat::mcset cs jarostset2            {Vlož přezdívku a skupinu pro %s. Můžeš si také vyžádat, nebo odstranit zviditelnění stavu.}
 ::msgcat::mcset cs jarostsub2            {Vyžádat zviditelnění stavu}
 ::msgcat::mcset cs jarostunsub2          {Odstranit zviditelnění stavu}

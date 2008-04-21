@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: pl.msg,v 1.78 2008-04-17 15:00:36 matben Exp $
+#   $Id: pl.msg,v 1.79 2008-04-21 07:35:38 matben Exp $
 
 ::msgcat::mcset pl Abort                 {Przerwij}
 ::msgcat::mcset pl Action                {akcja}
@@ -1011,7 +1011,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset pl jaregisterexserv2     {Zarejestruj się w usłudze %s. Może to wymagać kliknięcia Dalej, aby pobrać informacje niezbędne do rejestracji.}
 ::msgcat::mcset pl jaregmsg2             {Zarejestruj się w wybranej usłudze. Jeśli jesteś już jej zarejestrowanym użytkownikiem, możesz zaktualizować tu swoje dane.}
 ::msgcat::mcset pl jaregnewwith          {Czy chcesz założyć nowe konto na %s.}
-::msgcat::mcset pl jarostadd2            {Wybierz system IM oraz identyfikator kontaktu, który dodajesz. Podanie pseudonimu i/lub grupy nie jest konieczne, i może być dokonane później.}
+::msgcat::mcset pl jarostadd3            {Wybierz system IM oraz identyfikator kontaktu, który dodajesz.}
+::msgcat::mcset pl jarostaddopt          {Podanie pseudonimu i/lub grupy nie jest konieczne, i może być dokonane później.}
 ::msgcat::mcset pl jarostset2            {Podaj pseudonim i grupę kontaktu %s. Możesz również poprosić o autoryzację i/lub udzielić własnej.}
 ::msgcat::mcset pl jarostsub2            {Poproś o autoryzację}
 ::msgcat::mcset pl jarostunsub2          {Cofnij autoryzację}

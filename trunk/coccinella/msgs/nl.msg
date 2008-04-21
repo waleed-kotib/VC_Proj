@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.172 2008-04-17 15:00:36 matben Exp $
+#   $Id: nl.msg,v 1.173 2008-04-21 07:35:38 matben Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}
@@ -1011,7 +1011,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jaregisterexserv2     {Registreer op de dienst %s. U moet misschien op Volgende drukken om de instructies op te halen.}
 ::msgcat::mcset nl jaregmsg2             {Registreer op deze dienst. Als u al geregistreerd bent, kunt u hier uw instellingen bijwerken.}
 ::msgcat::mcset nl jaregnewwith          {Wilt u registreren op %s?}
-::msgcat::mcset nl jarostadd2            {Selecteer het chatsysteem en de contact ID van de contactpersoon die u wilt toevoegen. Een bijnaam en een groep zijn optioneel en kunnen later ingesteld of veranderd worden.}
+::msgcat::mcset nl jarostadd3            {Selecteer het chatsysteem en de contact ID van de contactpersoon die u wilt toevoegen.}
+::msgcat::mcset nl jarostaddopt          {Een bijnaam en een groep zijn optioneel en kunnen later ingesteld of veranderd worden.}
 ::msgcat::mcset nl jarostset2            {Bewerk bijnaam en groep van %s. U kunt ook een abonnement aanvragen op de aanwezigheid van deze contactpersoon of dit abonnement verwijderen.}
 ::msgcat::mcset nl jarostsub2            {Abonnement op aanwezigheid aanvragen}
 ::msgcat::mcset nl jarostunsub2          {Abonnement op aanwezigheid verwijderen}
