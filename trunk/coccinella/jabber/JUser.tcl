@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.56 2008-04-19 13:58:30 matben Exp $
+# $Id: JUser.tcl,v 1.57 2008-04-21 07:37:05 matben Exp $
 
 package provide JUser 1.0
 
@@ -129,8 +129,12 @@ proc ::JUser::NewDlg {args} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
+    set str [mc jarostadd3]
+    if {$config(adduser,show-nick-group)} {
+	append str " " [mc jarostaddopt]
+    }
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 280 -justify left -text [mc jarostadd2]
+      -padding {0 0 0 6} -wraplength 280 -justify left -text $str
     pack $wbox.msg -side top -anchor w
 
     set frmid $wbox.frmid
@@ -216,9 +220,6 @@ proc ::JUser::NewDlg {args} {
 	%s configure -wraplength [expr [winfo reqwidth %s] - 30]
     } $wbox.msg $w]    
     after idle $script
-
-    #::balloonhelp::balloonforwindow $wbox.ltype [mc jarostadd2]
-    #::balloonhelp::balloonforwindow $wbox.type [mc jarostadd2]
         
     # Wait here for a button press and window to be destroyed.
     tkwait window $w
