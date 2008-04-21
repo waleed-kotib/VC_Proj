@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.239 2008-04-17 15:00:31 matben Exp $
+# $Id: Roster.tcl,v 1.240 2008-04-21 08:07:18 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1366,7 +1366,7 @@ proc ::Roster::GetTransportSpec {} {
     }
     
     # xmpp:
-    set jidL [$jstate(jlib) disco getjidsforcategory "gateway/xmmpp"]
+    set jidL [$jstate(jlib) disco getjidsforcategory "gateway/xmpp"]
     set count [llength $jidL]
     
     # Disco doesn't return he server. Make sure it's first.
@@ -1377,7 +1377,7 @@ proc ::Roster::GetTransportSpec {} {
     foreach jid $jidL {
 	if {$jid eq $jstate(server)} { continue }
 	set xname $name
-	if {$count > 1} {
+	if {$count} {
 	    set xname "$name - $jid"
 	}
 	lappend serverSpec [list $jid xmpp $xname]
