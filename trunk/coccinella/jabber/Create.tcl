@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.19 2008-03-30 13:18:19 matben Exp $
+# $Id: Create.tcl,v 1.20 2008-04-21 09:38:49 matben Exp $
 
 package provide Create 1.0
 
@@ -216,7 +216,7 @@ proc ::Create::Build {args} {
       [namespace code [list TraceGetState $token]]
     trace add variable $token\(nickname) write \
       [namespace code [list TraceGetState $token]]
-    
+        
     # Grab and focus.
     set oldFocus [focus]
     if {[$frtop.eroom instate !disabled]} {
@@ -685,7 +685,10 @@ proc ::Create::GCBuild {args} {
     
     # Grab and focus.
     set oldFocus [focus]
-    focus $w
+    if {[$frmid.eroom instate !disabled]} {
+	bind $frmid.eroom <Map> { focus %W }
+    }
+
     wm resizable $w 0 0
     ::UI::SetWindowPosition $w $wDlgs(jgcenter)
     bind $w <Return> [list $frbot.btok invoke]
