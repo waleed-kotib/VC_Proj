@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements subscription parts.
 #      
-#  Copyright (c) 2001-2007  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.73 2008-04-17 15:00:32 matben Exp $
+# $Id: Subscribe.tcl,v 1.74 2008-04-21 12:16:05 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -42,9 +42,13 @@ namespace eval ::Subscribe {
     
     # Show head label in subcription dialog.
     set ::config(subscribe,show-head) 1
+
+    # Use name and group in dialog?
+    set ::config(subscribe,show-nick-group) 0
     
     # In the normal subscription dialog, where shall the vcard button be?
-    set ::config(subscribe,ui-vcard-pos) "name"  ;# name | button
+    # If we don't show nickname then "nqme" wont display either.
+    set ::config(subscribe,ui-vcard-pos) "button"  ;# name | button
     
     # Millis to wait for a second subsciption request to show in multi dialog.
     set ::config(subscribe,multi-wait-ms) 2000
@@ -251,7 +255,7 @@ proc ::Subscribe::NewDlg {jid args} {
     set name [::Roster::GetDisplayName $jid]
     
     set str [mc jasubwant2 $name]
-    if {!$havesubsc} {
+    if {!$havesubsc && $config(subscribe,show-nick-group)} {
 	append str " [mc jasubopts2]"
     }
     ttk::label $wbox.msg -style Small.TLabel \
@@ -323,14 +327,16 @@ proc ::Subscribe::NewDlg {jid args} {
 	    ::balloonhelp::balloonforwindow $frmid.bvcard [mc "View business card"]
 	}
 	
-	if {$config(subscribe,ui-vcard-pos) eq "name"} {
-	    grid  $frmid.lnick   $frmid.enick   $frmid.bvcard  -sticky e -pady 0
-	    grid  $frmid.lgroup  $frmid.egroup  -  -sticky e -pady 0
-	} else {
-	    grid  $frmid.lnick   $frmid.enick   -sticky e -pady 2
-	    grid  $frmid.lgroup  $frmid.egroup  -sticky e -pady 2
+	if {$config(subscribe,show-nick-group)} {
+	    if {$config(subscribe,ui-vcard-pos) eq "name"} {
+		grid  $frmid.lnick   $frmid.enick   $frmid.bvcard  -sticky e -pady 0
+		grid  $frmid.lgroup  $frmid.egroup  -  -sticky e -pady 0
+	    } else {
+		grid  $frmid.lnick   $frmid.enick   -sticky e -pady 2
+		grid  $frmid.lgroup  $frmid.egroup  -sticky e -pady 2
+	    }
+	    grid $frmid.enick $frmid.egroup -sticky ew		    
 	}
-	grid $frmid.enick $frmid.egroup -sticky ew	
 	
     }
         
