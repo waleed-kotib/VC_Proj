@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.142 2008-04-17 15:00:43 matben Exp $
+#   $Id: sv.msg,v 1.143 2008-04-21 07:35:39 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -1013,7 +1013,8 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset sv jaregisterexserv2     {Registrera hos tjänsten %s. Det kan vara nödvändigt att trycka Nästa för att få registrerings instruktioner.}
 ::msgcat::mcset sv jaregmsg2             {Registrera hos en tjänst. Om du redan är registrerad kan du uppdatera dina registrerings uppgifter här.}
 ::msgcat::mcset sv jaregnewwith          {Önskar du registrera ett nytt konto hos %s.}
-::msgcat::mcset sv jarostadd2            {Välj ett chatt system och kontakt ID för kontakten du vill lägga till. Kortnamn och grupp är ej nödvändiga och kan sättas senare.}
+::msgcat::mcset sv jarostadd3            {Välj ett chatt system och kontakt ID för kontakten du vill lägga till.}
+::msgcat::mcset sv jarostaddopt          {Kortnamn och grupp är ej nödvändiga och kan sättas senare.}
 ::msgcat::mcset sv jarostset2            {Redigera kortnamn och grupp för kontakt "%s". Du kan också begära eller ta bort en närvaro prenumeration.}
 ::msgcat::mcset sv jarostsub2            {Fråga efter en prenumeration på närvaron}
 ::msgcat::mcset sv jarostunsub2          {Tag bort närvaro prenumerationen}
