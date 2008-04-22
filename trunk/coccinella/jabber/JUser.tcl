@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.57 2008-04-21 07:37:05 matben Exp $
+# $Id: JUser.tcl,v 1.58 2008-04-22 12:56:24 matben Exp $
 
 package provide JUser 1.0
 
@@ -392,6 +392,7 @@ proc ::JUser::TrptCmd {token gjid} {
     global  config
     variable $token
     upvar 0 $token state
+    upvar ::Jabber::jstate jstate
 	
     set wjid $state(wjid)
     set type $state(servicetype,$gjid)
@@ -413,14 +414,23 @@ proc ::JUser::TrptCmd {token gjid} {
     set rjid [::Jabber::Jlib roster getrosterjid $gjid]
     set isitem [string length $rjid]
     
+    set alert 0
+    if {$type eq "xmpp"} {
+	if {![jlib::jidequal $gjid $jstate(server)]} {
+	    set alert 1
+	}
+    } elseif {!$isitem} {
+	set alert 1
+    }
+    
     # If this requires a transport component we must be registered.
     if {$config(adduser,warn-non-xmpp-onselect)} {
-	if {($type ne "xmpp") && !$isitem} {
+	if {$alert} {
 	    set str "You are currently not registered with this transport and if you proceed you will be asked to register with your own account on this system."
 	    tk_messageBox -icon warning -parent $state(w) -message $str
 	}
     } elseif {$config(adduser,add-non-xmpp-onselect)} {
-	if {($type ne "xmpp") && !$isitem} {
+	if {$alert} {
 	    set ans [::UI::MessageBox -type yesno -icon warning \
 	      -parent $state(w) -message [mc jamessaddforeign2 $gjid]]
 	    if {$ans eq "yes"} {
