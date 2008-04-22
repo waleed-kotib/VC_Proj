@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the Roster GUI part.
 #      
-#  Copyright (c) 2001-2007  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.240 2008-04-21 08:07:18 matben Exp $
+# $Id: Roster.tcl,v 1.241 2008-04-22 12:40:30 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1358,7 +1358,7 @@ proc ::Roster::GetTransportSpec {} {
 	    foreach jid $jidL {
 		set xname $name
 		if {$count > 1} {
-		    set xname "$name - $jid"
+		    set xname "$name ($jid)"
 		}
 		lappend trpts [list $jid $type $xname]
 	    }
@@ -1371,14 +1371,14 @@ proc ::Roster::GetTransportSpec {} {
     
     # Disco doesn't return he server. Make sure it's first.
     set name [GetNameFromTrpt xmpp]
-    set xname "$name - [mc Default]"
+    set xname "$name ([mc Default])"
     set serverSpec [list [list $jstate(server) xmpp $xname]]
     
     foreach jid $jidL {
 	if {$jid eq $jstate(server)} { continue }
 	set xname $name
 	if {$count} {
-	    set xname "$name - $jid"
+	    set xname "$name ([mc Transport])"
 	}
 	lappend serverSpec [list $jid xmpp $xname]
     }
