@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.74 2008-04-21 12:16:05 matben Exp $
+# $Id: Subscribe.tcl,v 1.75 2008-04-22 12:40:30 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -621,6 +621,18 @@ namespace eval ::SubscribeAuto {
     variable queue
     set queue(accept) [list]
     set queue(reject) [list]
+    
+    # Queues for the plain auto confirmation dialogs.
+    # This is kept for the lifetime of the dialog.
+    variable queueConfirm
+    set queueConfirm(accept) [list]
+    set queueConfirm(reject) [list]
+
+    # We use a constant name for the plain auto confirmation dialogs.
+    variable wconfirm
+    set wconfirm(accept) [ui::autoname]
+    set wconfirm(reject) [ui::autoname]
+    set confirmDlgJidL(reject) [list]
 }
 
 # SubscribeAuto::HandleAccept --
@@ -644,13 +656,16 @@ proc ::SubscribeAuto::HandleAccept {jid} {
 	::Jabber::Jlib send_presence -to $jid -type "subscribed"
 
 	# Auto subscribe to subscribers to me.
-	::SubscribeAuto::SendSubscribe $jid
-	set name [::Roster::GetDisplayName $jid]
-	set msg [mc jamessautoaccepted2 $name]
-	::ui::dialog -title [mc Info] -icon info -type ok -message $msg
-	
+	SendSubscribe $jid
+	if {$config(subscribe,multi-dlg)} {
+	    QueueConfirm accept $jid
+	} else {
+	    set name [::Roster::GetDisplayName $jid]
+	    set msg [mc jamessautoaccepted2 $name]
+	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	}
 	if {$config(subscribe,auto-accept-send-msg)} {
-	    ::SubscribeAuto::SendAcceptMsg $jid
+	    SendAcceptMsg $jid
 	}
     }
 }
@@ -671,16 +686,20 @@ proc ::SubscribeAuto::HandleReject {jid} {
 	    ::Subscribe::NewDlg $jid -auto reject
 	}
     } elseif {$config(subscribe,auto-reject-plain)} {
-	::SubscribeAuto::RejectAfter $jid
+	RejectAfter $jid
     } else {
 	::Jabber::Jlib send_presence -to $jid -type "unsubscribed"
 	::Jabber::Jlib roster send_remove $jid
-	set name [::Roster::GetDisplayName $jid]
-	set msg [mc jamessautoreject2 $name]
-	::ui::dialog -title [mc Info] -icon info -type ok -message $msg
 	
+	if {$config(subscribe,multi-dlg)} {
+	    QueueConfirm reject $jid
+	} else {
+	    set name [::Roster::GetDisplayName $jid]
+	    set msg [mc jamessautoreject2 $name]
+	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	}
 	if {$config(subscribe,auto-reject-send-msg)} {
-	    ::SubscribeAuto::SendRejectMsg $jid
+	    SendRejectMsg $jid
 	}
     }
 }
@@ -726,6 +745,61 @@ proc ::SubscribeAuto::ExecQueue {type} {
     
     # Empty queue.
     set queue($type) [list]
+}
+
+# SubscribeAuto::QueueConfirm --
+#
+#       Same as above but this time only for the plain confirmation dialog.
+
+proc ::SubscribeAuto::QueueConfirm {type jid} {
+    global  config
+    variable queueConfirm
+    variable wconfirm
+
+    set w $wconfirm($type)
+    if {[lsearch [winfo children .] $w] >= 0} {
+	lappend confirmDlgJidL($type) $jid
+	lappend queueConfirm($type) $jid
+	$w configure -message [QueueConfirmMsg $type]
+    } else {
+	if {![llength $queueConfirm($type)]} {
+	    set ms $config(subscribe,multi-wait-ms)
+	    after $ms [namespace code [list ExecQueueConfirm $type]]
+	}
+	
+	# Add to queue.
+	lappend queueConfirm($type) $jid
+    }
+}
+
+proc ::SubscribeAuto::ExecQueueConfirm {type} {
+    variable wconfirm
+    
+    ui::dialog $wconfirm($type) -title [mc Info] -icon info -type ok \
+      -message [QueueConfirmMsg $type] \
+      -command [namespace code [list ConfirmOnDestroy $type]]
+}
+
+proc ::SubscribeAuto::QueueConfirmMsg {type} {
+    variable queueConfirm
+    
+    set names [list]
+    foreach jid $queueConfirm($type) {
+	lappend names [::Roster::GetDisplayName $jid]
+    }	
+    if {$type eq "accept"} {
+	set key jamessautoaccepted2
+    } else {
+	set key jamessautoreject2
+    }
+    return [mc $key [join $names ", "]]
+}
+
+proc ::SubscribeAuto::ConfirmOnDestroy {type w bt} {
+    variable queueConfirm
+    
+    set queueConfirm($type) [list]
+    destroy $w
 }
 
 # Some simple dialogs for auto accept/reject -----------------------------------
