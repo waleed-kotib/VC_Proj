@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.58 2008-04-22 12:56:24 matben Exp $
+# $Id: JUser.tcl,v 1.59 2008-04-22 13:38:14 matben Exp $
 
 package provide JUser 1.0
 
@@ -26,6 +26,7 @@ namespace eval ::JUser {
 	
     option add *JUser.adduserImage              contact-new         widgetDefault
     option add *JUser.adduserDisImage           contact-new-Dis     widgetDefault
+    option add *JUser.vcardImage                vcard               widgetDefault
 
     # A unique running identifier.
     variable uid 0
@@ -701,9 +702,12 @@ proc ::JUser::EditUserDlg {jid} {
 	pack $frbot.btok -side right -padx $padx
     }
     if {!$istransport} {
-	ttk::button $frbot.bvcard -text "[mc {View Business Card}]..." \
+	set imvcard [::Theme::Find32Icon $w vcardImage]
+	ttk::button $frbot.bvcard -style Plain \
+	  -compound image -image $imvcard \
 	  -command [list ::VCard::Fetch other $jid]
-	pack $frbot.bvcard -side right
+	pack $frbot.bvcard -side left
+	::balloonhelp::balloonforwindow $frbot.bvcard [mc "View business card"]
     }
     pack $frbot -side top -fill x
     
