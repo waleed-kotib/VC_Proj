@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.75 2008-04-22 12:40:30 matben Exp $
+# $Id: Subscribe.tcl,v 1.76 2008-04-23 06:55:35 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -45,6 +45,9 @@ namespace eval ::Subscribe {
 
     # Use name and group in dialog?
     set ::config(subscribe,show-nick-group) 0
+    
+    # Use name and group as drop down fields in multi-dlg?
+    set ::config(subscribe,show-nick-group-multi) 0
     
     # In the normal subscription dialog, where shall the vcard button be?
     # If we don't show nickname then "nqme" wont display either.
@@ -1211,6 +1214,7 @@ proc ::SubscribeMulti::All {w} {
 }
 
 proc ::SubscribeMulti::AddJID {w jid} {
+    global  config
     variable $w
     upvar 0 $w state
     upvar ::Jabber::jstate jstate
@@ -1244,18 +1248,23 @@ proc ::SubscribeMulti::AddJID {w jid} {
 	append jstr "..."
     }
     
+    ttk::checkbutton $f.c$row -variable $token\($row,allow)
     ttk::checkbutton $f.m$row -style ArrowText.TCheckbutton \
       -onvalue 0 -offvalue 1 -variable $token\($row,more) \
       -command [list [namespace current]::More $w $row]
-    ttk::checkbutton $f.c$row -variable $token\($row,allow)
     ttk::label $f.l$row -text $jstr
     ttk::frame $f.f$row
-    
-    grid  $f.c$row  $f.m$row  $f.l$row
-    grid  x         x         $f.f$row
-    grid $f.c$row -sticky e
-    grid $f.l$row $f.f$row -sticky w
-    
+ 
+    if {$config(subscribe,show-nick-group-multi)} {
+	grid  $f.c$row  $f.m$row  $f.l$row
+	grid  x         x         $f.f$row
+	grid $f.c$row -sticky e
+	grid $f.l$row $f.f$row -sticky w
+    } else {
+	grid  $f.c$row  x  $f.l$row
+	grid $f.c$row -sticky e
+	grid $f.l$row -sticky w
+    }
     if {[info exists state(timer-id)]} {
 	$f.m$row state {disabled}
 	$f.c$row state {disabled}
