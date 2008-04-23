@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.59 2008-04-22 13:38:14 matben Exp $
+# $Id: JUser.tcl,v 1.60 2008-04-23 14:15:42 matben Exp $
 
 package provide JUser 1.0
 
@@ -39,6 +39,11 @@ namespace eval ::JUser {
     set ::config(adduser,warn-non-xmpp-onselect) 0
     set ::config(adduser,add-non-xmpp-onselect)  1
     set ::config(adduser,dlg-type-ask-register)  yesnocancel
+    
+    # How transports are listed and handled in menubutton.
+    set ::config(adduser,trpt-spec-type)         multi ;# multi|single
+    
+    # Show head label in dialog.
     set ::config(adduser,show-head)              1
     
     # Use name and group in dialog?
@@ -97,17 +102,30 @@ proc ::JUser::NewDlg {args} {
 
     # Find all our groups for any jid.
     set allGroups [$jstate(jlib) roster getgroups]
-    set trpts [::Roster::GetTransportSpec]
     set groupValues [concat [list [mc None]] $allGroups]
     
+    # Design the menu.
     set menuDef [list]
-    foreach spec $trpts {
-	lassign $spec jid type name
-	set state(servicejid,$type) $jid
-	set state(servicetype,$jid) $type
-	set imtrpt [::Servicons::Get gateway/$type]
-	lappend menuDef [list $name -value $jid -image $imtrpt]
+    if {$config(adduser,trpt-spec-type) eq "multi"} {
+	set trpts [::Roster::GetTransportSpecMulti]
+	foreach spec $trpts {
+	    lassign $spec jid type name
+	    set state(servicejid,$type) $jid
+	    set state(servicetype,$jid) $type
+	    set imtrpt [::Servicons::Get gateway/$type]
+	    lappend menuDef [list $name -value $jid -image $imtrpt]
+	}
+    } else {
+	set trpts [::Roster::GetTransportSpecSingle]
+	foreach spec $trpts {
+	    lassign $spec jid type name
+	    set state(servicejid,$type) $jid
+	    set state(servicetype,$jid) $type
+	    set imtrpt [::Servicons::Get gateway/$type]
+	    lappend menuDef [list $name -value $jid -image $imtrpt]
+	}
     }
+    set defaultJID [lindex $trpts 0 0]
     
     # Global frame.
     set wall $w.fr
@@ -171,7 +189,7 @@ proc ::JUser::NewDlg {args} {
 	::balloonhelp::balloonforwindow $frmid.egroup [mc tooltip-group]
     }
 
-    set state(gjid)  [lindex $trpts 0 0]
+    set state(gjid)  $defaultJID
     set state(jid)   ""
     set state(name)  ""
     set state(group) ""
@@ -390,6 +408,16 @@ proc ::JUser::PresError {jlibname xmldata} {
 }
 
 proc ::JUser::TrptCmd {token gjid} {
+    global  config
+
+    if {$config(adduser,trpt-spec-type) eq "multi"} {
+	TrptMultiCmd $token $gjid
+    } else {
+	
+    }
+}
+
+proc ::JUser::TrptMultiCmd {token gjid} {
     global  config
     variable $token
     upvar 0 $token state

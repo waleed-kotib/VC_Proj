@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.241 2008-04-22 12:40:30 matben Exp $
+# $Id: Roster.tcl,v 1.242 2008-04-23 14:15:42 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1339,12 +1339,13 @@ proc ::Roster::GetAllTransportJids {} {
     return [lsearch -all -inline -not $alltrpts $jstate(server)]
 }
 
-# Roster::GetTransportSpec --
+# Roster::GetTransportSpecMulti --
 # 
-#       Utility to get a flat array of 'jid type name' for each transports.
+#       Utility to get a flat array of 'jid type name' for each transport.
+#       If there are multiple transports for a type they are all listed
+#       but using an additional JID.
 
-proc ::Roster::GetTransportSpec {} {
-    variable trptToName
+proc ::Roster::GetTransportSpecMulti {} {
     variable allTransports
     upvar ::Jabber::jstate jstate
     
@@ -1366,13 +1367,46 @@ proc ::Roster::GetTransportSpec {} {
     }
     
     # xmpp:
+    set xmppSpec [GetTransportSpecXMPP]
+    return [concat $xmppSpec $trpts]
+}
+
+# Roster::GetTransportSpecSingle --
+# 
+#       Utility to get a flat array of 'jid type name' for each transport.
+#       If there are multiple transports for a type it's only listed once.
+
+proc ::Roster::GetTransportSpecSingle {} {
+    variable allTransports
+    upvar ::Jabber::jstate jstate
+    
+    set trpts [list]
+    foreach type $allTransports {
+	if {$type eq "xmpp"} { continue	}
+	set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
+	if {[llength $jidL]} {
+	    set name [GetNameFromTrpt $type]
+	    set jid [lindex $jidL 0]
+	    lappend trpts [list $jid $type $name]
+	}
+    }
+    
+    # xmpp:
+    set xmppSpec [GetTransportSpecXMPP]
+    return [concat $xmppSpec $trpts]
+}
+
+proc ::Roster::GetTransportSpecXMPP {} {
+    upvar ::Jabber::jstate jstate
+    
+    # xmpp:
     set jidL [$jstate(jlib) disco getjidsforcategory "gateway/xmpp"]
     set count [llength $jidL]
     
     # Disco doesn't return he server. Make sure it's first.
     set name [GetNameFromTrpt xmpp]
     set xname "$name ([mc Default])"
-    set serverSpec [list [list $jstate(server) xmpp $xname]]
+    set xmppSpec [list [list $jstate(server) xmpp $xname]]
     
     foreach jid $jidL {
 	if {$jid eq $jstate(server)} { continue }
@@ -1380,9 +1414,9 @@ proc ::Roster::GetTransportSpec {} {
 	if {$count} {
 	    set xname "$name ([mc Transport])"
 	}
-	lappend serverSpec [list $jid xmpp $xname]
+	lappend xmppSpec [list $jid xmpp $xname]
     }
-    return [concat $serverSpec $trpts]
+    return $xmppSpec
 }
 
 proc ::Roster::IsTransport {jid} {
