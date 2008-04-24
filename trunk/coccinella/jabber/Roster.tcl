@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.242 2008-04-23 14:15:42 matben Exp $
+# $Id: Roster.tcl,v 1.243 2008-04-24 07:19:58 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1339,16 +1339,16 @@ proc ::Roster::GetAllTransportJids {} {
     return [lsearch -all -inline -not $alltrpts $jstate(server)]
 }
 
-# Roster::GetTransportSpecMulti --
+# Roster::GetTransportSpec --
 # 
 #       Utility to get a flat array of 'jid type name' for each transport.
 #       If there are multiple transports for a type they are all listed
-#       but using an additional JID.
+#       but using a specified format.
 
-proc ::Roster::GetTransportSpecMulti {} {
+proc ::Roster::GetTransportSpec {{format "%name"}} {
     variable allTransports
     upvar ::Jabber::jstate jstate
-    
+        
     set trpts [list]
     foreach type $allTransports {
 	if {$type eq "xmpp"} { continue	}
@@ -1359,7 +1359,8 @@ proc ::Roster::GetTransportSpecMulti {} {
 	    foreach jid $jidL {
 		set xname $name
 		if {$count > 1} {
-		    set xname "$name ($jid)"
+		    set xname [string map [list %name $name %jid $jid] $format]
+		    #set xname "$name ($jid)"
 		}
 		lappend trpts [list $jid $type $xname]
 	    }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.60 2008-04-23 14:15:42 matben Exp $
+# $Id: JUser.tcl,v 1.61 2008-04-24 07:19:58 matben Exp $
 
 package provide JUser 1.0
 
@@ -107,7 +107,7 @@ proc ::JUser::NewDlg {args} {
     # Design the menu.
     set menuDef [list]
     if {$config(adduser,trpt-spec-type) eq "multi"} {
-	set trpts [::Roster::GetTransportSpecMulti]
+	set trpts [::Roster::GetTransportSpec "%name (%jid)"]
 	foreach spec $trpts {
 	    lassign $spec jid type name
 	    set state(servicejid,$type) $jid
@@ -116,17 +116,24 @@ proc ::JUser::NewDlg {args} {
 	    lappend menuDef [list $name -value $jid -image $imtrpt]
 	}
     } else {
-	set trpts [::Roster::GetTransportSpecSingle]
+	set trpts [::Roster::GetTransportSpec "%name"]
 	foreach spec $trpts {
 	    lassign $spec jid type name
 	    set state(servicejid,$type) $jid
 	    set state(servicetype,$jid) $type
+	    
+	    # We only list one of each.
+	    if {($type ne "xmpp") && [info exists added($type)]} { 
+		continue
+	    }
 	    set imtrpt [::Servicons::Get gateway/$type]
 	    lappend menuDef [list $name -value $jid -image $imtrpt]
+	    set added($type) 1
 	}
+	unset -nocomplain added
     }
     set defaultJID [lindex $trpts 0 0]
-    
+        
     # Global frame.
     set wall $w.fr
     ttk::frame $wall
@@ -413,7 +420,7 @@ proc ::JUser::TrptCmd {token gjid} {
     if {$config(adduser,trpt-spec-type) eq "multi"} {
 	TrptMultiCmd $token $gjid
     } else {
-	
+	TrptSingleCmd $token $gjid
     }
 }
 
@@ -440,7 +447,7 @@ proc ::JUser::TrptMultiCmd {token gjid} {
     #         have a resource part: icq.jabber.cz/registered
     #         Must find any matches!
     
-    set rjid [::Jabber::Jlib roster getrosterjid $gjid]
+    set rjid [$jstate(jlib) roster getrosterjid $gjid]
     set isitem [string length $rjid]
     
     set alert 0
@@ -466,6 +473,51 @@ proc ::JUser::TrptMultiCmd {token gjid} {
 		::GenRegister::NewDlg -server $gjid -autoget 1
 	    }
 	}
+    }
+}
+
+# JUser::TrptSingleCmd --
+#
+#       Since each transport, except xmpp, is listed only once 'gjid' is just
+#       any JID of that type.
+
+proc ::JUser::TrptSingleCmd {token gjid} {
+    global  config
+    variable $token
+    upvar 0 $token state
+    upvar ::Jabber::jstate jstate
+	
+    set wjid $state(wjid)
+    set type $state(servicetype,$gjid)
+
+    puts "::JUser::TrptSingleCmd gjid=$gjid"
+    
+    # Seems to be necessary to achive any selection.
+    focus $wjid
+    set state(jid) [::Gateway::GetPrompt $type]
+    $wjid selection range 0 end
+    
+    if {$type ne "xmpp"} {
+	set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
+	set count [llength $jidL]
+	puts "jidL=$jidL"
+
+	set isregistered 0
+	foreach j $jidL {
+	    set rjid [$jstate(jlib) roster getrosterjid $j]
+	    set isitem [string length $rjid]
+	    if {$isitem} {
+		set isregistered 1
+		set regJID $j
+		break
+	    }
+	}
+	puts "\t isregistered=$isregistered"
+	if {!$isregistered} {
+	
+	}
+    } else {
+    
     }
 }
 
