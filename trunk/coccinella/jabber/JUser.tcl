@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.61 2008-04-24 07:19:58 matben Exp $
+# $Id: JUser.tcl,v 1.62 2008-04-24 13:45:24 matben Exp $
 
 package provide JUser 1.0
 
@@ -41,7 +41,7 @@ namespace eval ::JUser {
     set ::config(adduser,dlg-type-ask-register)  yesnocancel
     
     # How transports are listed and handled in menubutton.
-    set ::config(adduser,trpt-spec-type)         multi ;# multi|single
+    set ::config(adduser,trpt-spec-type)         single ;# multi|single
     
     # Show head label in dialog.
     set ::config(adduser,show-head)              1
@@ -239,6 +239,8 @@ proc ::JUser::NewDlg {args} {
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
     bind $state(wjid) <Map> { focus %W }
+    bind $w <Destroy> \
+      +[subst { if {"%W" eq "$w"} { [namespace code [list Free $token]] } }]
     
     # Trick to resize the labels wraplength.
     set script [format {
@@ -246,14 +248,8 @@ proc ::JUser::NewDlg {args} {
 	%s configure -wraplength [expr [winfo reqwidth %s] - 30]
     } $wbox.msg $w]    
     after idle $script
-        
-    # Wait here for a button press and window to be destroyed.
-    tkwait window $w
-
-    set ans [expr {($state(finished) <= 0) ? "cancel" : "add"}]
-    Free $token
     
-    return $ans
+    return $token
 }
 
 proc ::JUser::CancelAdd {token} {
@@ -414,6 +410,10 @@ proc ::JUser::PresError {jlibname xmldata} {
     }
 }
 
+# JUser::TrptCmd --
+#
+#       Callback from the transports menu button.
+
 proc ::JUser::TrptCmd {token gjid} {
     global  config
 
@@ -460,13 +460,11 @@ proc ::JUser::TrptMultiCmd {token gjid} {
     }
     
     # If this requires a transport component we must be registered.
-    if {$config(adduser,warn-non-xmpp-onselect)} {
-	if {$alert} {
+    if {$alert} {
+	if {$config(adduser,warn-non-xmpp-onselect)} {
 	    set str "You are currently not registered with this transport and if you proceed you will be asked to register with your own account on this system."
 	    tk_messageBox -icon warning -parent $state(w) -message $str
-	}
-    } elseif {$config(adduser,add-non-xmpp-onselect)} {
-	if {$alert} {
+	} elseif {$config(adduser,add-non-xmpp-onselect)} {
 	    set ans [::UI::MessageBox -type yesno -icon warning \
 	      -parent $state(w) -message [mc jamessaddforeign2 $gjid]]
 	    if {$ans eq "yes"} {
@@ -479,7 +477,7 @@ proc ::JUser::TrptMultiCmd {token gjid} {
 # JUser::TrptSingleCmd --
 #
 #       Since each transport, except xmpp, is listed only once 'gjid' is just
-#       any JID of that type.
+#       any JID of that type. For 'xmpp' it is the true JID.
 
 proc ::JUser::TrptSingleCmd {token gjid} {
     global  config
@@ -490,18 +488,20 @@ proc ::JUser::TrptSingleCmd {token gjid} {
     set wjid $state(wjid)
     set type $state(servicetype,$gjid)
 
-    puts "::JUser::TrptSingleCmd gjid=$gjid"
-    
     # Seems to be necessary to achive any selection.
     focus $wjid
     set state(jid) [::Gateway::GetPrompt $type]
     $wjid selection range 0 end
-    
-    if {$type ne "xmpp"} {
-	set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
+ 	
+    set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
+   
+    set alert 0
+    if {$type eq "xmpp"} {
+	if {![jlib::jidequal $gjid $jstate(server)]} {
+	    set alert 1
+	}
+    } else {
 	set count [llength $jidL]
-	puts "jidL=$jidL"
-
 	set isregistered 0
 	foreach j $jidL {
 	    set rjid [$jstate(jlib) roster getrosterjid $j]
@@ -512,12 +512,27 @@ proc ::JUser::TrptSingleCmd {token gjid} {
 		break
 	    }
 	}
-	puts "\t isregistered=$isregistered"
 	if {!$isregistered} {
-	
+	    set alert 1
 	}
-    } else {
+    }
     
+    if {$alert} {
+	if {$config(adduser,warn-non-xmpp-onselect)} {
+	    set str "You are currently not registered with this transport and if you proceed you will be asked to register with your own account on this system."
+	    tk_messageBox -icon warning -parent $state(w) -message $str
+	} elseif {$config(adduser,add-non-xmpp-onselect)} {
+	    set ans [::UI::MessageBox -type yesno -icon warning \
+	      -parent $state(w) -message [mc jamessaddforeign2 $gjid]]
+	    if {$ans eq "yes"} {
+		
+		if {[llength $jidL] > 1} {
+		    ::GenRegister::NewDlg -serverlist $jidL
+		} else {
+		    ::GenRegister::NewDlg -server $gjid -autoget 1
+		}
+	    }
+	}
     }
 }
 
