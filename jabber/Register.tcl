@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.100 2008-04-17 15:00:31 matben Exp $
+# $Id: Register.tcl,v 1.101 2008-04-24 13:45:24 matben Exp $
 
 package provide Register 1.0
 
@@ -962,11 +962,12 @@ namespace eval ::GenRegister:: {
 #       
 # Arguments:
 #       args   -server
+#              -serverlist  list of JIDs of the same gateway type
 #              -autoget 0/1
 #              -serverstate (combobox -state)
 #       
 # Results:
-#       "cancel" or "register".
+#       token that identifies this dialog
      
 proc ::GenRegister::NewDlg {args} {
     global  this wDlgs config
@@ -1016,19 +1017,32 @@ proc ::GenRegister::NewDlg {args} {
     ttk::frame $wall
     grid $wall -sticky news
     grid columnconfigure $w 0 -minsize $minwidth
-    
-    if {$config(genregister,server-simple) && [info exists argsA(-server)]} {
-	set simplified 1
+        
+    # Define the dialog type.
+    set dialogType generic
+    if {$config(genregister,server-simple)} {
+	if {[info exists argsA(-server)]} {
+	    set dialogType server
+	} elseif {[info exists argsA(-serverlist)]} {
+	    set dialogType serverlist
+	}
+    }
+    if {$dialogType eq "server"} {
+	set server $argsA(-server)
+    } elseif {$dialogType eq "serverlist"} {
+	set server [lindex $argsA(-serverlist) 0]
     } else {
-	set simplified 0
+	set server ""
+    }
+    if {$server ne ""} {
+	set types [$jstate(jlib) disco types $server]
+	set gateway [lsearch -glob -inline $types gateway/*]
+	set type [lindex [split $types /] 1]
     }
     set label [mc Register]
     
     if {$config(genregister,show-head)} {
-	if {$simplified} {
-	    set server $argsA(-server)
-	    set types [::Jabber::Jlib disco types $server]
-	    set gateway [lsearch -glob -inline $types gateway/*]
+	if {($dialogType eq "server") || ($dialogType eq "serverlist")} {
 	    set conference [lsearch -glob -inline $types conference/*]
 	    set im ""
 	    set imd ""
@@ -1064,7 +1078,7 @@ proc ::GenRegister::NewDlg {args} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
     
-    if {!$simplified} {
+    if {$dialogType ne "server"} {
 	ttk::label $wbox.msg -style Small.TLabel \
 	  -padding {0 0 0 6} -wraplength $state(wraplength) \
 	  -text [mc jaregmsg2] -justify left
@@ -1077,7 +1091,7 @@ proc ::GenRegister::NewDlg {args} {
     set wcomboserver $frserv.eserv
 
     # Get all (browsed) services that support registration.
-    if {!$simplified} {
+    if {$dialogType eq "generic"} {
 	set regServers [$jstate(jlib) disco getjidsforfeature "jabber:iq:register"]
 	ttk::combobox $wcomboserver -state $argsA(-serverstate)  \
 	  -textvariable $token\(server) -values $regServers
@@ -1090,6 +1104,21 @@ proc ::GenRegister::NewDlg {args} {
 	if {[info exists argsA(-server)]} {
 	    $wcomboserver state {disabled}
 	}
+	pack $frserv -side top -anchor w -fill x
+	pack $frserv.lserv -side left
+	pack $wcomboserver -fill x -expand 1
+    } elseif {$dialogType eq "serverlist"} {
+	set menuDef [list]
+	set imtrpt [::Servicons::Get $gateway]
+	set name [::Gateway::GetShort $type]
+	foreach j $argsA(-serverlist) {
+	    set xname "$name ($j)"
+	    lappend menuDef [list $xname -value $j -image $imtrpt]
+	}
+	set state(server) $server
+	ui::optionmenu $wcomboserver -menulist $menuDef -direction flush  \
+	  -variable $token\(server)
+	bind $wcomboserver <Map> { focus %W }
 	pack $frserv -side top -anchor w -fill x
 	pack $frserv.lserv -side left
 	pack $wcomboserver -fill x -expand 1
@@ -1162,7 +1191,7 @@ proc ::GenRegister::NewDlg {args} {
     set state(wbtget)       $wbtget
 
     # Trick to resize the labels wraplength.
-    if {!$simplified} {
+    if {[winfo exists $wbox.msg]} {
 	set script [format {
 	    update idletasks
 	    %s configure -wraplength [expr [winfo reqwidth %s] - 30]
