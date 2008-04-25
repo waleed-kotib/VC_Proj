@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.102 2008-04-25 06:42:32 matben Exp $
+# $Id: Register.tcl,v 1.103 2008-04-25 07:08:04 matben Exp $
 
 package provide Register 1.0
 
@@ -1081,7 +1081,7 @@ proc ::GenRegister::NewDlg {args} {
     if {$dialogType ne "server"} {
 	ttk::label $wbox.msg -style Small.TLabel \
 	  -padding {0 0 0 6} -wraplength $state(wraplength) \
-	  -text [mc jaregmsg2] -justify left
+	  -text [mc jaregmsg3] -justify left
 	pack $wbox.msg -side top -anchor w
     }    
     set frserv $wbox.serv
@@ -1400,7 +1400,7 @@ proc ::GenRegister::Simple {w args} {
     pack $wbox -fill both -expand 1
 
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc jaregmsg2]
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc jaregmsg3]
     pack $wbox.msg -side top -anchor w
 
     set wmid $wbox.m
