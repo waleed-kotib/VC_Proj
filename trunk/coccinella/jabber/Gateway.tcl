@@ -26,7 +26,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Gateway.tcl,v 1.10 2008-04-17 15:00:29 matben Exp $
+# $Id: Gateway.tcl,v 1.11 2008-04-25 06:42:32 matben Exp $
 
 package provide Gateway 1.0
 
@@ -240,8 +240,22 @@ proc ::Gateway::GetJIDFromPromptHeuristics {prompt type} {
 	}
     }
     
-    # Just pick the first gateway we find.
-    set gjid [lindex $gjidL 0]
+    # If multiple transports of the same type, 'gjid' is just any of them.
+    # If we actually have a transport registered we must use that.
+    set isregistered 0
+    foreach gjid $gjidL {
+	set rjid [$jstate(jlib) roster getrosterjid $gjid]
+	set isitem [string length $rjid]
+	if {$isitem} {
+	    set isregistered 1
+	    break
+	}
+    }
+    
+    # Unless registered, just pick the first gateway we find.
+    if {!$isregistered} {
+	set gjid [lindex $gjidL 0]
+    }
     set haveEsc [$jstate(jlib) disco hasfeature {jid\20escaping} $gjid]
     if {$haveEsc} {
 	set enode [jlib::escapestr $prompt]

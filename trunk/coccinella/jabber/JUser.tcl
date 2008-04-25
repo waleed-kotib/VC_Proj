@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.62 2008-04-24 13:45:24 matben Exp $
+# $Id: JUser.tcl,v 1.63 2008-04-25 06:42:32 matben Exp $
 
 package provide JUser 1.0
 
@@ -274,9 +274,11 @@ proc ::JUser::DoAdd {token} {
     set state(jid) [jlib::barejid $state(jid)]
     set gjid $state(gjid)
     set type $state(servicetype,$gjid)
-
+    
     
     # The user inputs the chat systems native ID typically. Get JID.
+    # If multiple transports of the same type, 'gjid' is just any of them.
+    # If we actually have a transport registered we must use that.
     set jid [::Gateway::GetJIDFromPromptHeuristics $state(jid) $type]        
     set name  $state(name)
     set group $state(group)

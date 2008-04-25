@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.101 2008-04-24 13:45:24 matben Exp $
+# $Id: Register.tcl,v 1.102 2008-04-25 06:42:32 matben Exp $
 
 package provide Register 1.0
 
@@ -942,7 +942,7 @@ proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
     }
 }
 
-# The ::GenRegister:: namespace -----------------------------------------
+# The ::GenRegister:: namespace ------------------------------------------------
 
 namespace eval ::GenRegister:: {
 
