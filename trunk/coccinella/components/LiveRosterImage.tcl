@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: LiveRosterImage.tcl,v 1.4 2007-12-20 14:01:25 matben Exp $
+#  $Id: LiveRosterImage.tcl,v 1.5 2008-04-25 14:51:15 matben Exp $
 
 namespace eval ::LiveRosterImage {
 
@@ -35,7 +35,12 @@ proc ::LiveRosterImage::Init {} {
     component::register LiveRosterImage
 
     # Add event hooks.
-    ::hooks::register setPresenceHook       [namespace code PresenceHook]
+    ::hooks::register setPresenceHook [namespace code PresenceHook]
+    if {0 && [info tclversion] >= 8.5 && [tk windowingsystem] eq "aqua"} {
+	::hooks::register connectInitHook [namespace code ConnectInitHook]
+	::hooks::register connectHook     [namespace code ConnectHook]
+	::hooks::register disconnectHook  [namespace code DisconnectHook]
+    }
 }
 
 proc ::LiveRosterImage::PresenceHook {type args} {
@@ -121,4 +126,43 @@ proc ::LiveRosterImage::Draw {} {
     
     ::RosterTree::BackgroundImageConfig $new
 }
+
+# Experimental!
+
+namespace eval ::LiveRosterImage {
+    
+    variable woverlay -
+}
+
+proc ::LiveRosterImage::ConnectInitHook {} {
+    variable woverlay
+    
+    set win [::JUI::GetRosterFrame]
+    set win [::JUI::GetNotebook]
+    set width [winfo width $win]
+    set height [winfo height $win]
+    
+    set woverlay $win.overlay
+    canvas $woverlay -width $width -height $height \
+      -bg systemTransparent -highlightthickness 0
+    
+    place $woverlay -x 0 -y 0 -relwidth 1.0 -relheight 1.0
+    
+    $woverlay create prect 0 0 $width $height \
+      -fill gray20 -fillopacity 0.3 -stroke ""
+    $woverlay create ptext 20 100 -text "Connecting..." \
+      -fontfamily {Lucida Grande} -fontsize 36 -fill gray50 \
+      -fillopacity 0.5
+}
+
+proc ::LiveRosterImage::ConnectHook {} {
+    variable woverlay
+    destroy $woverlay
+}
+
+proc ::LiveRosterImage::DisconnectHook {} {
+    variable woverlay
+    destroy $woverlay
+}
+
 
