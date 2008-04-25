@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.243 2008-04-21 07:35:37 matben Exp $
+#   $Id: en.msg,v 1.244 2008-04-25 07:06:43 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -1024,7 +1024,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset en jaregalready2         {You are already registered with this service. These are your current registration settings.}
 ::msgcat::mcset en jaregisterex3         {Select a server from the list or manually enter one. Then press Next to retrieve the registration instructions. Follow the instructions and hit Register.}
 ::msgcat::mcset en jaregisterexserv2     {Register with the service %s. You may need to press the Next button to retrieve the registration instructions.}
-::msgcat::mcset en jaregmsg2             {Register to a service. If you are already registered to this service, you can update your registration here.}
+::msgcat::mcset en jaregmsg3             {Select a service and press Next}
 ::msgcat::mcset en jaregnewwith          {Do you want to register a new account with %s.}
 ::msgcat::mcset en jarostadd3            {Select the chat system and contact ID of the contact you would like to add.}
 ::msgcat::mcset en jarostaddopt          {Nickname and group are optional and can be set or changed later.}

@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Thu Dec 13 11:23:38 CET 2007
+# Generated: Fre Apr 25 08:58:07 CEST 2008
 
 # English language version of the Coccinella message catalog.
 #
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: cs.msg,v 1.8 2008-04-21 07:35:34 matben Exp $
+#   $Id: cs.msg,v 1.9 2008-04-25 07:06:41 matben Exp $
 
 ::msgcat::mcset cs Abort                 {Storno}
 ::msgcat::mcset cs Action                {Akce}
@@ -286,11 +286,13 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset cs mAboutCoccinella      {&O programu Coccinella}
+::msgcat::mcset cs mAboutQuickTimeTcl    {About QuickTimeTcl}
 ::msgcat::mcset cs mAction               {&Akce}
 ::msgcat::mcset cs mAddToDictionary      {Přidat do slovníku}
 ::msgcat::mcset cs mAdHocCommands        {Pří&kazy}
 ::msgcat::mcset cs mAddContact...        {&Přidat kontakt...}
 ::msgcat::mcset cs mAddSpeechBubble      {Add Speech Bubble}
+::msgcat::mcset cs mAll                  {All}
 ::msgcat::mcset cs mArc                  {Oblouk}
 ::msgcat::mcset cs mArcs                 {Oblouky}
 ::msgcat::mcset cs mAttachMessage        {Připojit zprávu...}
@@ -502,6 +504,7 @@
 ::msgcat::mcset cs {Edit Profiles}       {Upravit profily}
 ::msgcat::mcset cs {Email addresses}     {Emailové adresy}
 ::msgcat::mcset cs {Email client}        {Poštovní program}
+::msgcat::mcset cs {Enable nickname coloring} {Enable nickname coloring}
 ::msgcat::mcset cs {Enter Chatroom}      {Vstoupit do místnosti}
 ::msgcat::mcset cs {Enter/Create Chatroom} {Vstoupit/vytvořit místnost}
 ::msgcat::mcset cs {Exit room}           {Opustit místnost}
@@ -601,6 +604,7 @@
 ::msgcat::mcset cs {Setup Assistant}     {Asistent nastavení}
 ::msgcat::mcset cs {Show Icon}           {Zobrazit ikonu}
 ::msgcat::mcset cs {Show navigation buttons} {Ukazovat navigační tlačítka}
+::msgcat::mcset cs {Show notifier window} {Show notifier window}
 ::msgcat::mcset cs {Show popup}          {Ukázat vyskakovací okno}
 ::msgcat::mcset cs {Show offline users}  {Zobrazit nepřipojené}
 ::msgcat::mcset cs {Show Text}           {Zobrazit text}
@@ -651,6 +655,20 @@
 ::msgcat::mcset cs {Edit the moderator list} {Upravit seznam moderátorů}
 ::msgcat::mcset cs {Edit the admin list} {Upravit seznam administrátorů}
 ::msgcat::mcset cs {Edit the owner list} {Upravit seznam vlastníků}
+
+# Naming of protocol systems and their identifiers.
+# Low priority.
+::msgcat::mcset cs Email                 {Email}
+::msgcat::mcset cs {Screen Name}         {Screen Name}
+::msgcat::mcset cs {Gadu-Gadu Number}    {Gadu-Gadu Number}
+::msgcat::mcset cs {ICQ Number}          {ICQ Number}
+::msgcat::mcset cs IRC                   {IRC}
+::msgcat::mcset cs {MSN Address}         {MSN Address}
+::msgcat::mcset cs {Email Address}       {Email Address}
+::msgcat::mcset cs {QQ Number}           {QQ Number}
+::msgcat::mcset cs {Tlen Address}        {Tlen Address}
+::msgcat::mcset cs {Jabber ID}           {Jabber ID}
+::msgcat::mcset cs {Yahoo ID}            {Yahoo ID}
 
 # Time intervals.
 ::msgcat::mcset cs {Ten seconds}         {Deset vteřin}
@@ -727,6 +745,8 @@
 ::msgcat::mcset cs messsuassclose        {Opravdu chceš ukončit asistenta nastavení? Můžeš ho pak kdykoli spustit z menu.}
 ::msgcat::mcset cs messsuassfillin       {Přesvědč se, než budeš pokračovat, že jsi vyplnil(a) všechna pole.}
 ::msgcat::mcset cs messtimeout           {Vypršel čas při čekání na otevření spojení.}
+::msgcat::mcset cs messunsavedmsgQ       {Do you want to save edits in a file?}
+::msgcat::mcset cs messunsaveddtl        {Edits will be lost unless you save them.}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset cs jamessaddforeign2     {Jestli chceš přidat kontakt z uzavřeného IM systému, potřebuješ mít účet v tomto systému, dále si musíš zaregistrovat odpovídající transport (%s). Chceš se do toho pustit?}
@@ -742,6 +762,7 @@
 ::msgcat::mcset cs jamesschatclose2      {Chceš uzavřít chatovací okno a ztratit tak celou konverzaci?}
 ::msgcat::mcset cs jamesschatinvite      {Chceš pozvat tento kontakt do nové místnosti?}
 ::msgcat::mcset cs jamesschatoffline2    {Kontakt již není přítomen, a proto zpráva už nemůže být poslána.}
+
 ::msgcat::mcset cs jamessconffailed2     {Nemohu vstoupit/vytvořit místnost %s.}
 ::msgcat::mcset cs jamessconnbroken      {Spojení bylo neočekávaně přerušeno.}
 ::msgcat::mcset cs jamessemoticonexists  {Skupina ikon %s již existuje.}
@@ -1009,7 +1030,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset cs jaregalready2         {V této službě již jsi zaregistrován(a). Zde jsou registrační údaje.}
 ::msgcat::mcset cs jaregisterex3         {Vyber si server ze seznamu, nebo ručně vlož. Pak stiskni Další pro získání registračních instrukcí. Postupuj podle nich a stiskni Registrovat.}
 ::msgcat::mcset cs jaregisterexserv2     {Registrovat službu %s. Měl(a) bys stisknout tlačítko Další pro získání registračních instrukcí.}
-::msgcat::mcset cs jaregmsg2             {Registrace služby. Jestli jsi už zaregistrován(a), můžeš zde změnit svou registraci.}
+::msgcat::mcset cs jaregmsg3             {Select a service and press Next}
 ::msgcat::mcset cs jaregnewwith          {Chceš zaregistrovat nový účet na %s.}
 ::msgcat::mcset cs jarostadd3            {Vyber si chatovací systém a ID kontaktu, který chceš přidat.}
 ::msgcat::mcset cs jarostaddopt          {Přezdívka a skupina jsou volitelné a mohou být kdykoli později změněny.}

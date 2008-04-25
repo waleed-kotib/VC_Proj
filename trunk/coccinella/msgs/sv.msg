@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Thu Dec 13 09:36:55 CET 2007
+# Generated: Fre Apr 25 08:56:56 CEST 2008
 
 # English language version of the Coccinella message catalog.
 #
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.143 2008-04-21 07:35:39 matben Exp $
+#   $Id: sv.msg,v 1.144 2008-04-25 07:06:44 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -286,11 +286,13 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset sv mAboutCoccinella      {Om Coccinella...}
+::msgcat::mcset sv mAboutQuickTimeTcl    {About QuickTimeTcl}
 ::msgcat::mcset sv mAction               {Utför}
 ::msgcat::mcset sv mAddToDictionary      {Lägg till lexikon}
 ::msgcat::mcset sv mAdHocCommands        {Ad-hoc kommando}
 ::msgcat::mcset sv mAddContact...        {Lägg till kontakt...}
 ::msgcat::mcset sv mAddSpeechBubble      {Lägg till pratbubbla}
+::msgcat::mcset sv mAll                  {All}
 ::msgcat::mcset sv mArc                  {Båge}
 ::msgcat::mcset sv mArcs                 {Bågar}
 ::msgcat::mcset sv mAttachMessage        {Bifoga meddelande...}
@@ -502,6 +504,7 @@
 ::msgcat::mcset sv {Edit Profiles}       {Redigera profil}
 ::msgcat::mcset sv {Email addresses}     {E-post adresser}
 ::msgcat::mcset sv {Email client}        {E-post klient}
+::msgcat::mcset sv {Enable nickname coloring} {Enable nickname coloring}
 ::msgcat::mcset sv {Enter Chatroom}      {Gå in i chattrum}
 ::msgcat::mcset sv {Enter/Create Chatroom} {Gå in/skapa chattrum}
 ::msgcat::mcset sv {Exit room}           {Lämna rum}
@@ -601,6 +604,7 @@
 ::msgcat::mcset sv {Setup Assistant}     {Inställningsassistent}
 ::msgcat::mcset sv {Show Icon}           {Visa bild}
 ::msgcat::mcset sv {Show navigation buttons} {Välj navigationsknappar}
+::msgcat::mcset sv {Show notifier window} {Show notifier window}
 ::msgcat::mcset sv {Show popup}          {Visa popup}
 ::msgcat::mcset sv {Show offline users}  {Visa utloggade kontakter}
 ::msgcat::mcset sv {Show Text}           {Visa text}
@@ -651,6 +655,20 @@
 ::msgcat::mcset sv {Edit the moderator list} {Redigera moderatorlistan}
 ::msgcat::mcset sv {Edit the admin list} {Redigera administratörslistan}
 ::msgcat::mcset sv {Edit the owner list} {Redigera ägarlistan}
+
+# Naming of protocol systems and their identifiers.
+# Low priority.
+::msgcat::mcset sv Email                 {E-post}
+::msgcat::mcset sv {Screen Name}         {Screen Name}
+::msgcat::mcset sv {Gadu-Gadu Number}    {Gadu-Gadu Number}
+::msgcat::mcset sv {ICQ Number}          {ICQ Number}
+::msgcat::mcset sv IRC                   {IRC}
+::msgcat::mcset sv {MSN Address}         {MSN Address}
+::msgcat::mcset sv {Email Address}       {Email Address}
+::msgcat::mcset sv {QQ Number}           {QQ Number}
+::msgcat::mcset sv {Tlen Address}        {Tlen Address}
+::msgcat::mcset sv {Jabber ID}           {Jabber ID}
+::msgcat::mcset sv {Yahoo ID}            {Yahoo ID}
 
 # Time intervals.
 ::msgcat::mcset sv {Ten seconds}         {Tio sekunder}
@@ -727,6 +745,8 @@
 ::msgcat::mcset sv messsuassclose        {Är du säker på att du vill stänga inställningsassistenten? Du kan starta den när som helst från menyn.}
 ::msgcat::mcset sv messsuassfillin       {Försäkra dig om att samtliga fält är ifyllda innan du fortsätter}
 ::msgcat::mcset sv messtimeout           {Fick timeout när väntade på att förbindelsen ska öppna.}
+::msgcat::mcset sv messunsavedmsgQ       {Do you want to save edits in a file?}
+::msgcat::mcset sv messunsaveddtl        {Edits will be lost unless you save them.}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset sv jamessaddforeign2     {För att lägga till en kontakt från ett slutet chattsystem så måste du ha ett användarkonto på detta system och sedan registrera detta konto hos motsvarande transport (%s). Vill du göra detta nu?}
@@ -742,6 +762,7 @@
 ::msgcat::mcset sv jamesschatclose2      {Vill du stänga chattfönstret och förlora hela konversationen?}
 ::msgcat::mcset sv jamesschatinvite      {Vill du bjuda in kontakten till ett nytt chattrum?}
 ::msgcat::mcset sv jamesschatoffline2    {Den här kontakten är inte ansluten längre och meddelandet är därför inte skickat.}
+
 ::msgcat::mcset sv jamessconffailed2     {Kan inte gå in/skapa chattrum %s.}
 ::msgcat::mcset sv jamessconnbroken      {Förbindelsen bröts oväntat.}
 ::msgcat::mcset sv jamessemoticonexists  {Ikonsamling "%s" finns redan.}
@@ -1011,7 +1032,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset sv jaregalready2         {Du är redan registrerad för den här tjänsten. Dessa är dina aktuella registrerings uppgifter.}
 ::msgcat::mcset sv jaregisterex3         {Välj en tjänst från listan eller skriv in en manuellt. Tryck sedan Nästa för vidare instruktioner. Följ dessa och tryck sedan Registrera}
 ::msgcat::mcset sv jaregisterexserv2     {Registrera hos tjänsten %s. Det kan vara nödvändigt att trycka Nästa för att få registrerings instruktioner.}
-::msgcat::mcset sv jaregmsg2             {Registrera hos en tjänst. Om du redan är registrerad kan du uppdatera dina registrerings uppgifter här.}
+::msgcat::mcset sv jaregmsg3             {Select a service and press Next}
 ::msgcat::mcset sv jaregnewwith          {Önskar du registrera ett nytt konto hos %s.}
 ::msgcat::mcset sv jarostadd3            {Välj ett chatt system och kontakt ID för kontakten du vill lägga till.}
 ::msgcat::mcset sv jarostaddopt          {Kortnamn och grupp är ej nödvändiga och kan sättas senare.}

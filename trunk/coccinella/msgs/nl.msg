@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Fri Dec 14 08:37:27 CET 2007
+# Generated: Fre Apr 25 09:00:07 CEST 2008
 
 # English language version of the Coccinella message catalog.
 #
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.174 2008-04-22 13:21:05 matben Exp $
+#   $Id: nl.msg,v 1.175 2008-04-25 07:06:44 matben Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}
@@ -656,6 +656,20 @@
 ::msgcat::mcset nl {Edit the admin list} {Beheerderslijst bewerken}
 ::msgcat::mcset nl {Edit the owner list} {Eigenaarslijst bewerken}
 
+# Naming of protocol systems and their identifiers.
+# Low priority.
+::msgcat::mcset nl Email                 {E-mail}
+::msgcat::mcset nl {Screen Name}         {Screen Name}
+::msgcat::mcset nl {Gadu-Gadu Number}    {Gadu-Gadu Number}
+::msgcat::mcset nl {ICQ Number}          {ICQ Number}
+::msgcat::mcset nl IRC                   {IRC}
+::msgcat::mcset nl {MSN Address}         {MSN Address}
+::msgcat::mcset nl {Email Address}       {Email Address}
+::msgcat::mcset nl {QQ Number}           {QQ Number}
+::msgcat::mcset nl {Tlen Address}        {Tlen Address}
+::msgcat::mcset nl {Jabber ID}           {Jabber ID}
+::msgcat::mcset nl {Yahoo ID}            {Yahoo ID}
+
 # Time intervals.
 ::msgcat::mcset nl {Ten seconds}         {Tien seconden}
 ::msgcat::mcset nl {One minute}          {Eén minuut}
@@ -748,6 +762,7 @@
 ::msgcat::mcset nl jamesschatclose2      {Wilt u dit chatvenster sluiten en de volledige conversatie verliezen?}
 ::msgcat::mcset nl jamesschatinvite      {Wilt u deze contactpersoon uitnodigen op een nieuwe chatruimte?}
 ::msgcat::mcset nl jamesschatoffline2    {Deze contactpersoon is niet meer online en het bericht is daarom niet verzonden.}
+
 ::msgcat::mcset nl jamessconffailed2     {Kan de chatruimte %s niet betreden/aanmaken.}
 ::msgcat::mcset nl jamessconnbroken      {De verbinding werd onverwachts verbroken.}
 ::msgcat::mcset nl jamessemoticonexists  {Emoticon-thema %s bestaat al.}
@@ -1015,7 +1030,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jaregalready2         {U hebt al een account op deze dienst. Dit zijn uw huidige instellingen.}
 ::msgcat::mcset nl jaregisterex3         {Selecteer een server of voer er zelf een in. Druk daarna op Volgende om de instructies op te halen. Volg de instructies op en druk op Aanmaken.}
 ::msgcat::mcset nl jaregisterexserv2     {Registreer op de dienst %s. U moet misschien op Volgende drukken om de instructies op te halen.}
-::msgcat::mcset nl jaregmsg2             {Registreer op deze dienst. Als u al geregistreerd bent, kunt u hier uw instellingen bijwerken.}
+::msgcat::mcset nl jaregmsg3             {Select a service and press Next}
 ::msgcat::mcset nl jaregnewwith          {Wilt u registreren op %s?}
 ::msgcat::mcset nl jarostadd3            {Selecteer het chatsysteem en de contact ID van de contactpersoon die u wilt toevoegen.}
 ::msgcat::mcset nl jarostaddopt          {Een bijnaam en een groep zijn optioneel en kunnen later ingesteld of veranderd worden.}
