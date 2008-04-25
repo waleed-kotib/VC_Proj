@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Fri Dec 14 08:38:09 CET 2007
+# Generated: Fre Apr 25 08:58:57 CEST 2008
 
 # English language version of the Coccinella message catalog.
 #
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: es.msg,v 1.105 2008-04-21 07:35:37 matben Exp $
+#   $Id: es.msg,v 1.106 2008-04-25 07:06:43 matben Exp $
 
 ::msgcat::mcset es Abort                 {Cancelar}
 ::msgcat::mcset es Action                {Acción}
@@ -286,11 +286,13 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset es mAboutCoccinella      {Acerca de Coccinella...}
+::msgcat::mcset es mAboutQuickTimeTcl    {About QuickTimeTcl}
 ::msgcat::mcset es mAction               {Acción}
 ::msgcat::mcset es mAddToDictionary      {Add to Dictionary}
 ::msgcat::mcset es mAdHocCommands        {Comandos Ad-Hoc}
 ::msgcat::mcset es mAddContact...        {&Añadir contacto...}
 ::msgcat::mcset es mAddSpeechBubble      {Añadir un bocadillo}
+::msgcat::mcset es mAll                  {All}
 ::msgcat::mcset es mArc                  {Arco}
 ::msgcat::mcset es mArcs                 {Arcos}
 ::msgcat::mcset es mAttachMessage        {Adjuntar mensaje...}
@@ -502,6 +504,7 @@
 ::msgcat::mcset es {Edit Profiles}       {Editar Perfiles}
 ::msgcat::mcset es {Email addresses}     {Direcciones email}
 ::msgcat::mcset es {Email client}        {Programa de Email}
+::msgcat::mcset es {Enable nickname coloring} {Enable nickname coloring}
 ::msgcat::mcset es {Enter Chatroom}      {Entrar en Chatroom}
 ::msgcat::mcset es {Enter/Create Chatroom} {Entrar/Crear Chatroom}
 ::msgcat::mcset es {Exit room}           {Salir de sala}
@@ -601,6 +604,7 @@
 ::msgcat::mcset es {Setup Assistant}     {Asistente de configuración}
 ::msgcat::mcset es {Show Icon}           {Mostrar Icono}
 ::msgcat::mcset es {Show navigation buttons} {Mostrar los botones de navegación}
+::msgcat::mcset es {Show notifier window} {Show notifier window}
 ::msgcat::mcset es {Show popup}          {Show popup}
 ::msgcat::mcset es {Show offline users}  {Mostrar usuarios desconectados}
 ::msgcat::mcset es {Show Text}           {Mostrar texto}
@@ -651,6 +655,20 @@
 ::msgcat::mcset es {Edit the moderator list} {Editar la lista de moderadores}
 ::msgcat::mcset es {Edit the admin list} {Editar la lista de administradores}
 ::msgcat::mcset es {Edit the owner list} {Editar la lista de propietarios}
+
+# Naming of protocol systems and their identifiers.
+# Low priority.
+::msgcat::mcset es Email                 {Correo electronico}
+::msgcat::mcset es {Screen Name}         {Screen Name}
+::msgcat::mcset es {Gadu-Gadu Number}    {Gadu-Gadu Number}
+::msgcat::mcset es {ICQ Number}          {ICQ Number}
+::msgcat::mcset es IRC                   {IRC}
+::msgcat::mcset es {MSN Address}         {MSN Address}
+::msgcat::mcset es {Email Address}       {Email Address}
+::msgcat::mcset es {QQ Number}           {QQ Number}
+::msgcat::mcset es {Tlen Address}        {Tlen Address}
+::msgcat::mcset es {Jabber ID}           {Identificación Jabber}
+::msgcat::mcset es {Yahoo ID}            {Yahoo ID}
 
 # Time intervals.
 ::msgcat::mcset es {Ten seconds}         {Diez segundos}
@@ -727,6 +745,8 @@
 ::msgcat::mcset es messsuassclose        {¿Está seguro de querer cerrar el asistente de configuración? Puede volverlo a ejecutar posteriormente desde el menú}
 ::msgcat::mcset es messsuassfillin       {Verifique que ha completado todos los campos antes de continuar}
 ::msgcat::mcset es messtimeout           {El tiempo para la conexión a caducado}
+::msgcat::mcset es messunsavedmsgQ       {Do you want to save edits in a file?}
+::msgcat::mcset es messunsaveddtl        {Edits will be lost unless you save them.}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset es jamessaddforeign2     {To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?}
@@ -742,6 +762,7 @@
 ::msgcat::mcset es jamesschatclose2      {Do you want to close this chat window and loose the complete conversation?}
 ::msgcat::mcset es jamesschatinvite      {Do you want to invite this contact to a new chatroom?}
 ::msgcat::mcset es jamesschatoffline2    {This contact is not online anymore and the message is therfore not sent.}
+
 ::msgcat::mcset es jamessconffailed2     {Cannot enter/create chatroom %s.}
 ::msgcat::mcset es jamessconnbroken      {La conexión se ha interrumpido inesperadamente}
 ::msgcat::mcset es jamessemoticonexists  {Iconset %s already exists.}
@@ -1009,7 +1030,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset es jaregalready2         {You are already registered with this service. These are your current registration settings.}
 ::msgcat::mcset es jaregisterex3         {Select a server from the list or manually enter one. Then press Next to retrieve the registration instructions. Follow the instructions and hit Register.}
 ::msgcat::mcset es jaregisterexserv2     {Register with the service %s. You may need to press the Next button to retrieve the registration instructions.}
-::msgcat::mcset es jaregmsg2             {Register to a service. If you are already registered to this service, you can update your registration here.}
+::msgcat::mcset es jaregmsg3             {Select a service and press Next}
 ::msgcat::mcset es jaregnewwith          {Desea registrar una cuenta nueva en %s.}
 ::msgcat::mcset es jarostadd3            {Select the chat system and contact ID of the contact you would like to add.}
 ::msgcat::mcset es jarostaddopt          {Nickname and group are optional and can be set or changed later.}

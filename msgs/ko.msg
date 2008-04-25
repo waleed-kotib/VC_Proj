@@ -2,7 +2,7 @@
 # /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
 # from http://sourceforge.net/projects/coccinella/
 #
-# Generated: Fri Dec 14 08:37:43 CET 2007
+# Generated: Fre Apr 25 08:59:48 CEST 2008
 
 # English language version of the Coccinella message catalog.
 #
@@ -17,7 +17,7 @@
 #             Agustin Vericat (agustin at grupoikusnet.com) 2006
 #         fr  Guillaume Ayoub (xovni at wanadoo.fr)
 #         it  Mirko Graziani (contatto@imatica.it)
-#         ko  Dylan Park, Korea NVC Center (hanmaum@krnvc.org) 
+#         kr  Dylan Park, Korea NVC Center (hanmaum@krnvc.org) 
 #         nl  Sander Devrieze (s.devrieze at pandora.be), 2004-2007
 #             Bart Van Hove (bartvanhove at skynet.be), 2004
 #         pl  Zbigniew Baniewski (zb at ispid.com.pl)
@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: ko.msg,v 1.3 2008-04-21 07:35:38 matben Exp $
+#   $Id: ko.msg,v 1.4 2008-04-25 07:06:44 matben Exp $
 
 ::msgcat::mcset ko Abort                 {Abort}
 ::msgcat::mcset ko Action                {활동}
@@ -286,11 +286,13 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset ko mAboutCoccinella      {Coccinella에 대해...}
+::msgcat::mcset ko mAboutQuickTimeTcl    {About QuickTimeTcl}
 ::msgcat::mcset ko mAction               {Action}
 ::msgcat::mcset ko mAddToDictionary      {Add to Dictionary}
 ::msgcat::mcset ko mAdHocCommands        {Ad-Hoc Commands}
 ::msgcat::mcset ko mAddContact...        {&Add Contact...}
 ::msgcat::mcset ko mAddSpeechBubble      {말 풍선 더하기}
+::msgcat::mcset ko mAll                  {All}
 ::msgcat::mcset ko mArc                  {호}
 ::msgcat::mcset ko mArcs                 {아크}
 ::msgcat::mcset ko mAttachMessage        {메세지 첨부하기...}
@@ -502,6 +504,7 @@
 ::msgcat::mcset ko {Edit Profiles}       {Edit Profiles}
 ::msgcat::mcset ko {Email addresses}     {이메일 주소들}
 ::msgcat::mcset ko {Email client}        {Email client}
+::msgcat::mcset ko {Enable nickname coloring} {Enable nickname coloring}
 ::msgcat::mcset ko {Enter Chatroom}      {Enter Chatroom}
 ::msgcat::mcset ko {Enter/Create Chatroom} {Enter/Create Chatroom}
 ::msgcat::mcset ko {Exit room}           {Exit room}
@@ -601,6 +604,7 @@
 ::msgcat::mcset ko {Setup Assistant}     {보조 설정하기}
 ::msgcat::mcset ko {Show Icon}           {Show Icon}
 ::msgcat::mcset ko {Show navigation buttons} {Show navigation buttons}
+::msgcat::mcset ko {Show notifier window} {Show notifier window}
 ::msgcat::mcset ko {Show popup}          {Show popup}
 ::msgcat::mcset ko {Show offline users}  {Show offline users}
 ::msgcat::mcset ko {Show Text}           {Show Text}
@@ -651,6 +655,20 @@
 ::msgcat::mcset ko {Edit the moderator list} {진행자 목록 편집하기}
 ::msgcat::mcset ko {Edit the admin list} {관리자 목록 편집하기}
 ::msgcat::mcset ko {Edit the owner list} {소유자 목록 편집하기}
+
+# Naming of protocol systems and their identifiers.
+# Low priority.
+::msgcat::mcset ko Email                 {메일}
+::msgcat::mcset ko {Screen Name}         {Screen Name}
+::msgcat::mcset ko {Gadu-Gadu Number}    {Gadu-Gadu Number}
+::msgcat::mcset ko {ICQ Number}          {ICQ Number}
+::msgcat::mcset ko IRC                   {IRC}
+::msgcat::mcset ko {MSN Address}         {MSN Address}
+::msgcat::mcset ko {Email Address}       {Email Address}
+::msgcat::mcset ko {QQ Number}           {QQ Number}
+::msgcat::mcset ko {Tlen Address}        {Tlen Address}
+::msgcat::mcset ko {Jabber ID}           {재버 ID}
+::msgcat::mcset ko {Yahoo ID}            {Yahoo ID}
 
 # Time intervals.
 ::msgcat::mcset ko {Ten seconds}         {10 초}
@@ -727,6 +745,8 @@
 ::msgcat::mcset ko messsuassclose        {정말 설정 도우미를 닫기를 원하나요? 나중에 메뉴에서 언제든지 다시 사용할 수 있습니다.}
 ::msgcat::mcset ko messsuassfillin       {계속하기 전에 모든 항목을 채웟는지 확인하세요}
 ::msgcat::mcset ko messtimeout           {열기 시도중 시간초과되었습니다.}
+::msgcat::mcset ko messunsavedmsgQ       {Do you want to save edits in a file?}
+::msgcat::mcset ko messunsaveddtl        {Edits will be lost unless you save them.}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset ko jamessaddforeign2     {To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?}
@@ -742,6 +762,7 @@
 ::msgcat::mcset ko jamesschatclose2      {Do you want to close this chat window and loose the complete conversation?}
 ::msgcat::mcset ko jamesschatinvite      {Do you want to invite this contact to a new chatroom?}
 ::msgcat::mcset ko jamesschatoffline2    {This contact is not online anymore and the message is therfore not sent.}
+
 ::msgcat::mcset ko jamessconffailed2     {Cannot enter/create chatroom %s.}
 ::msgcat::mcset ko jamessconnbroken      {연결이 불연듯 끊어졌습니다.}
 ::msgcat::mcset ko jamessemoticonexists  {Iconset %s already exists.}
@@ -1009,7 +1030,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset ko jaregalready2         {You are already registered with this service. These are your current registration settings.}
 ::msgcat::mcset ko jaregisterex3         {Select a server from the list or manually enter one. Then press Next to retrieve the registration instructions. Follow the instructions and hit Register.}
 ::msgcat::mcset ko jaregisterexserv2     {Register with the service %s. You may need to press the Next button to retrieve the registration instructions.}
-::msgcat::mcset ko jaregmsg2             {Register to a service. If you are already registered to this service, you can update your registration here.}
+::msgcat::mcset ko jaregmsg3             {Select a service and press Next}
 ::msgcat::mcset ko jaregnewwith          {%s에 새 계정으로 등록하기를 원하나요.}
 ::msgcat::mcset ko jarostadd3            {Select the chat system and contact ID of the contact you would like to add.}
 ::msgcat::mcset ko jarostaddopt          {Nickname and group are optional and can be set or changed later.}
