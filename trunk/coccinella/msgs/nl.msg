@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.175 2008-04-25 07:06:44 matben Exp $
+#   $Id: nl.msg,v 1.176 2008-04-25 21:34:18 sdevrieze Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}
@@ -659,14 +659,14 @@
 # Naming of protocol systems and their identifiers.
 # Low priority.
 ::msgcat::mcset nl Email                 {E-mail}
-::msgcat::mcset nl {Screen Name}         {Screen Name}
-::msgcat::mcset nl {Gadu-Gadu Number}    {Gadu-Gadu Number}
-::msgcat::mcset nl {ICQ Number}          {ICQ Number}
+::msgcat::mcset nl {Screen Name}         {Schermnaam}
+::msgcat::mcset nl {Gadu-Gadu Number}    {Gadu-Gadu-nummer}
+::msgcat::mcset nl {ICQ Number}          {ICQ-nummer}
 ::msgcat::mcset nl IRC                   {IRC}
-::msgcat::mcset nl {MSN Address}         {MSN Address}
-::msgcat::mcset nl {Email Address}       {Email Address}
-::msgcat::mcset nl {QQ Number}           {QQ Number}
-::msgcat::mcset nl {Tlen Address}        {Tlen Address}
+::msgcat::mcset nl {MSN Address}         {MSN-adres}
+::msgcat::mcset nl {Email Address}       {E-mailaddres}
+::msgcat::mcset nl {QQ Number}           {QQ-nummer}
+::msgcat::mcset nl {Tlen Address}        {Tlen-adres}
 ::msgcat::mcset nl {Jabber ID}           {Jabber ID}
 ::msgcat::mcset nl {Yahoo ID}            {Yahoo ID}
 
@@ -1030,7 +1030,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset nl jaregalready2         {U hebt al een account op deze dienst. Dit zijn uw huidige instellingen.}
 ::msgcat::mcset nl jaregisterex3         {Selecteer een server of voer er zelf een in. Druk daarna op Volgende om de instructies op te halen. Volg de instructies op en druk op Aanmaken.}
 ::msgcat::mcset nl jaregisterexserv2     {Registreer op de dienst %s. U moet misschien op Volgende drukken om de instructies op te halen.}
-::msgcat::mcset nl jaregmsg3             {Select a service and press Next}
+::msgcat::mcset nl jaregmsg3             {Selecteer een dienst en klik op Volgende}
 ::msgcat::mcset nl jaregnewwith          {Wilt u registreren op %s?}
 ::msgcat::mcset nl jarostadd3            {Selecteer het chatsysteem en de contact ID van de contactpersoon die u wilt toevoegen.}
 ::msgcat::mcset nl jarostaddopt          {Een bijnaam en een groep zijn optioneel en kunnen later ingesteld of veranderd worden.}
