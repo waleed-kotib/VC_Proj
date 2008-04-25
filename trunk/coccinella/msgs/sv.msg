@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.144 2008-04-25 07:06:44 matben Exp $
+#   $Id: sv.msg,v 1.145 2008-04-25 13:25:22 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -861,11 +861,11 @@
 # Do not translate these, just for reference.
 ::msgcat::mcset sv xmpp-stanzas-aborted  {Den mottagande enheten bekräftar avbrottet från den initierande enheten.}
 ::msgcat::mcset sv xmpp-stanzas-incorrect-encoding {Data från den initierande enheten kunde ej behandlas därför att [BASE64] kodningen var felaktig.}
-::msgcat::mcset sv xmpp-stanzas-invalid-authzid {Den authzid från den initierande enheten är oriktig, antingen därför att formatet är felaktigt eller därför att den initierande enheten
+::msgcat::mcset sv xmpp-stanzas-invalid-authzid {Den authzid från den initierande enheten är oriktig, antingen därför att formatet är felaktigt eller därför att den initierande enheten \
 ej har tillstånd att autentisera denna ID.}
 ::msgcat::mcset sv xmpp-stanzas-invalid-mechanism {Den initierande enheten erbjöd ej en mekanism eller krävde en mekanism som ej stöds av den mottagande enheten.}
 ::msgcat::mcset sv xmpp-stanzas-mechanism-too-weak {Mekanismen som efterfrågades av den initerande enheten är svagare än vad servern tillåter för denna enhet.}
-::msgcat::mcset sv xmpp-stanzas-not-authorized {Autentiseringen misslyckades därför att den initierande enheten ej erbjöd tillräckliga kreditiv (detta inkluderar men begränsas ej till fallet
+::msgcat::mcset sv xmpp-stanzas-not-authorized {Autentiseringen misslyckades därför att den initierande enheten ej erbjöd tillräckliga kreditiv (detta inkluderar men begränsas ej till fallet \
 där användarnamnet är okänt).}
 ::msgcat::mcset sv xmpp-stanzas-temporary-auth-failure {Autentiseringen misslyckades på grund av ett tillfälligt fel hos den mottagande enheten.}
 
@@ -1032,7 +1032,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset sv jaregalready2         {Du är redan registrerad för den här tjänsten. Dessa är dina aktuella registrerings uppgifter.}
 ::msgcat::mcset sv jaregisterex3         {Välj en tjänst från listan eller skriv in en manuellt. Tryck sedan Nästa för vidare instruktioner. Följ dessa och tryck sedan Registrera}
 ::msgcat::mcset sv jaregisterexserv2     {Registrera hos tjänsten %s. Det kan vara nödvändigt att trycka Nästa för att få registrerings instruktioner.}
-::msgcat::mcset sv jaregmsg3             {Select a service and press Next}
+::msgcat::mcset sv jaregmsg3             {Välj en tjänst och tryck Nästa}
 ::msgcat::mcset sv jaregnewwith          {Önskar du registrera ett nytt konto hos %s.}
 ::msgcat::mcset sv jarostadd3            {Välj ett chatt system och kontakt ID för kontakten du vill lägga till.}
 ::msgcat::mcset sv jarostaddopt          {Kortnamn och grupp är ej nödvändiga och kan sättas senare.}
