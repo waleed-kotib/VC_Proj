@@ -17,14 +17,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: LiveRosterImage.tcl,v 1.5 2008-04-25 14:51:15 matben Exp $
+#  $Id: LiveRosterImage.tcl,v 1.6 2008-04-26 05:47:30 matben Exp $
 
 namespace eval ::LiveRosterImage {
 
     if {[tk windowingsystem] ne "aqua"} {
 	return
     }
-    if {[catch {package require tkpath 0.2.6}]} {
+    if {[catch {package require tkpath 0.3.0}]} {
 	return
     }
     component::define LiveRosterImage "Draw an overlay to the roster background image"
@@ -99,7 +99,7 @@ proc ::LiveRosterImage::Draw {} {
 	set y2 [expr {$y1 + $descent1 + $linespace2}]
     }
     
-    set S [::tkpath::surface new $width $height]
+    set S [::tkp::surface new $width $height]
     $S create pimage 0 0 -image $orig
     
     if {0} {
@@ -134,25 +134,27 @@ namespace eval ::LiveRosterImage {
     variable woverlay -
 }
 
+# This suffers from a BUG in tkpath!
+# It seems it doesn't redraw background with systemTransparent?
+
 proc ::LiveRosterImage::ConnectInitHook {} {
     variable woverlay
     
     set win [::JUI::GetRosterFrame]
-    set win [::JUI::GetNotebook]
     set width [winfo width $win]
     set height [winfo height $win]
+    set w2 [expr {$width/2}]
+    set h2 [expr {$height/2}]
     
     set woverlay $win.overlay
-    canvas $woverlay -width $width -height $height \
-      -bg systemTransparent -highlightthickness 0
+    tkp::canvas $woverlay -bg systemTransparent -highlightthickness 0 -bd 0
+    place $woverlay -x 0 -y 0 -relwidth 1 -relheight 1
     
-    place $woverlay -x 0 -y 0 -relwidth 1.0 -relheight 1.0
-    
-    $woverlay create prect 0 0 $width $height \
-      -fill gray20 -fillopacity 0.3 -stroke ""
-    $woverlay create ptext 20 100 -text "Connecting..." \
-      -fontfamily {Lucida Grande} -fontsize 36 -fill gray50 \
-      -fillopacity 0.5
+    $woverlay create prect 0 0 2000 2000 \
+      -fill gray20 -fillopacity 0.2 -stroke ""
+    $woverlay create ptext $w2 $h2 -textanchor middle -text "Connecting..." \
+      -fontfamily {Lucida Grande} -fontsize 24 -fill gray50 \
+      -fillopacity 0.6
 }
 
 proc ::LiveRosterImage::ConnectHook {} {
