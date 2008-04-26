@@ -10,7 +10,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: balloonhelp.tcl,v 1.32 2008-02-29 12:55:36 matben Exp $
+# $Id: balloonhelp.tcl,v 1.33 2008-04-26 13:30:49 matben Exp $
 
 package require treeutil
 
@@ -361,8 +361,16 @@ proc ::balloonhelp::Show {win type} {
 		    if {[winfo class $win] eq "TrayIcon"} {
 			set bbox [$win bbox]
 			if {$bbox ne ""} {
+			    
+			    # Assuming tray is at the bottom.
 			    set x [expr {[lindex $bbox 0] - 10}]
 			    set y [expr {[lindex $bbox 1] - 20}]
+			    
+			    # Special test to see if at top or bottom.
+			    set py [winfo pointery $win]
+			    if {$py < [winfo screenheight $win]} {
+				set y [expr {[lindex $bbox 3] + 4}]
+			    }
 			} else {
 			    set exists 0
 			}
