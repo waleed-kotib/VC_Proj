@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoUpdate.tcl,v 1.29 2008-01-17 14:06:17 matben Exp $
+# $Id: AutoUpdate.tcl,v 1.30 2008-04-27 13:33:38 matben Exp $
 
 package require tinydom
 package require http 2.3
@@ -31,7 +31,7 @@ namespace eval ::AutoUpdate {
     # Allow the update url to be set via the option database.
     set urlEN     "http://coccinella.sourceforge.net/updates/update_en.xml"
     set urlFormat "http://coccinella.sourceforge.net/updates/update_%s.xml"
-#     set urlEN     "http://coccinella.sourceforge.net/updates/update_0.96.4.1.xml"
+#     set urlEN     "http://coccinella.sourceforge.net/updates/update_en_0.96.8.xml"
 #     set urlFormat "http://coccinella.sourceforge.net/updates/update_test_%s.xml"
 
     set ::config(autoupdate,do)        1
@@ -195,7 +195,7 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -closecommand [namespace current]::Destroy
-    wm title $w [mc {New Version}]
+    wm title $w [mc "New Version"]
     
     # Global frame.
     ttk::frame $w.frall
@@ -250,11 +250,6 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
     }    
     $wtext configure -state disabled
     
-    # Configure text widget height to fit all.
-    tkwait visibility $wtext
-    foreach {ystart yfrac} [$wtext yview] break
-    $wtext configure -height [expr int([$wtext cget -height]/$yfrac) + 0]
-    
     set autocheck 1
     if {[package vcompare $this(vers,full) $prefs(autoupdate,lastVersion)] <= 0} {
     	set autocheck 0
@@ -270,6 +265,16 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
       -command [list destroy $w]
     pack $frbot.btok -side right
     pack $frbot -side top -fill x
+    
+    # Configure text widget height to fit all.
+    bind $wtext <Map> {
+	set ylines [%W count -displaylines 1.0 end]
+	set spacing [expr {2+2}]
+	set font [%W cget -font]
+	array set fontA [font metrics [%W cget -font]]
+	set add [expr {int($ylines*$spacing/($fontA(-linespace) + 0.0))}]
+	%W configure -height [expr {$ylines + $add + 1}]
+    }
     
     wm resizable $w 0 0
 }
