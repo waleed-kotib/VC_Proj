@@ -10,7 +10,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: balloonhelp.tcl,v 1.33 2008-04-26 13:30:49 matben Exp $
+# $Id: balloonhelp.tcl,v 1.34 2008-04-27 06:50:15 matben Exp $
 
 package require treeutil
 
@@ -368,7 +368,8 @@ proc ::balloonhelp::Show {win type} {
 			    
 			    # Special test to see if at top or bottom.
 			    set py [winfo pointery $win]
-			    if {$py < [winfo screenheight $win]} {
+			    set sw [winfo screenheight $win]
+			    if {$py < [expr {$sw/2}]} {
 				set y [expr {[lindex $bbox 3] + 4}]
 			    }
 			} else {
