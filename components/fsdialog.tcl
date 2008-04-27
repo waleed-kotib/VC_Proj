@@ -1,30 +1,8 @@
 # Copyright (C) Schelte Bron.  Freely redistributable.
 
+# Mats fix:
 proc ttk::messageBox {args} {
-	variable ::ttk::Priv
-	set dataName __ttk_messagebox
-	set parent .
-	foreach {opt val} $args {
-		switch -- $opt {
-			-parent {
-				set parent $val
-			}
-			default {
-				lappend opts $opt $val
-			}
-		}
-	}
-	lappend opts -command {set ::ttk::Priv(button)}
-	if {$parent eq "."} {
-		set win .$dataName
-	} else {
-		set win $parent.$dataName
-	}
-	eval [linsert $opts 0 ttk::dialog $win]
-	::tk::SetFocusGrab $win $win
-	vwait ::ttk::Priv(button)
-	::tk::RestoreFocusGrab $win $win
-	return $Priv(button)
+    return [eval ui::dialog::modal $args]
 }
 
 interp alias {} ttk_messageBox {} ::ttk::messageBox

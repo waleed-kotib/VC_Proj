@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.242 2008-04-17 15:00:29 matben Exp $
+# $Id: JUI.tcl,v 1.243 2008-04-27 06:50:15 matben Exp $
 
 package provide JUI 1.0
 
@@ -1243,26 +1243,27 @@ proc ::JUI::LogoutHook {} {
     
 proc ::JUI::GetRosterWmenu {} {
     variable jwapp
-
     return $jwapp(wmenu)
 }
 
 proc ::JUI::OpenCoccinellaURL {} {
     global  config
-    
     ::Utils::OpenURLInBrowser $config(url,home)
 }
 
 proc ::JUI::OpenBugURL {} {
     global  config
-    
     ::Utils::OpenURLInBrowser $config(url,bugs)
 }
 
 proc ::JUI::GetNotebook {} {
     variable jwapp
-    
     return $jwapp(notebook)
+}
+
+proc ::JUI::GetRosterFrame {} {
+    variable jwapp
+    return $jwapp(roster)
 }
 
 proc ::JUI::SetStatusMessage {msg} {
@@ -1625,6 +1626,8 @@ proc ::JUI::FixUIWhen {what} {
 
 	    $wtbar buttonconfigure connect -text [mc Stop] \
 	      -image $stopImage -disabledimage $stopImage
+    
+	    ::hooks::run connectInitHook
 	}
 	connectfin - connect {
 	    set connectedImage    [::Theme::Find32Icon $w connectedImage]
@@ -1633,6 +1636,8 @@ proc ::JUI::FixUIWhen {what} {
 	    $wtbar buttonconfigure connect -text [mc Logout] \
 	      -image $connectedImage -disabledimage $connectedDisImage
 	    $wtbar buttonconfigure newuser -state normal
+
+	    ::hooks::run connectHook
 	}
 	disconnect {
 	    set iconConnect     [::Theme::Find32Icon $w connectImage]
@@ -1641,6 +1646,8 @@ proc ::JUI::FixUIWhen {what} {
 	    $wtbar buttonconfigure connect -text [mc Login] \
 	      -image $iconConnect -disabledimage $iconConnectDis
 	    $wtbar buttonconfigure newuser -state disabled
+
+	    ::hooks::run disconnectHook
 	}
     }
 }

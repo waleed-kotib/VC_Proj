@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.143 2008-04-17 15:00:30 matben Exp $
+# $Id: Login.tcl,v 1.144 2008-04-27 06:50:15 matben Exp $
 
 package provide Login 1.0
 
@@ -719,7 +719,7 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     ::JUI::SetStatusMessage "[mc jawaitresp $server]..."
     ::JUI::FixUIWhen "connectinit"
     ::JUI::SetConnectState "connectinit"
-    
+        
     set pending 1
     set defResource [::Profiles::MachineResource]
 
