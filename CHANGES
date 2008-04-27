@@ -5,11 +5,11 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.96.8 (200804??)
+Coccinella-0.96.8 (20080430)
 
  o all toolbars collapsable on mac
  o menu option to select what to display in status line (JID, status, host)
- o handles multiple DNS TXT records
+ o handles multiple DNS SRV records
  o undo/redo of text
  o better support for processing multiple selected contacts in roster
  o native chasing arrows on platforms where this is supported (Mac)
