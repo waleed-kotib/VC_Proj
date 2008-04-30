@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.15 2007-11-17 07:40:52 matben Exp $
+# $Id: Carbon.tcl,v 1.16 2008-04-30 06:25:57 matben Exp $
 # 
 # @@@ Move the sleep stuff to something more generic.
 
@@ -120,7 +120,7 @@ proc ::Carbon::Sleep {type} {
 		    # We must give the system (WiFi) some time to setup the
 		    # network before loggin in. Some kind of trying multiple
 		    # times would be better...
-		    after 5000 ::Login::LoginCmd
+		    after 8000 ::Login::LoginCmd
 		}
 	    }
 	}

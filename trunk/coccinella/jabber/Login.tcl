@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.144 2008-04-27 06:50:15 matben Exp $
+# $Id: Login.tcl,v 1.145 2008-04-30 06:25:57 matben Exp $
 
 package provide Login 1.0
 
@@ -569,8 +569,12 @@ proc ::Login::LaunchHook {} {
 
 proc ::Login::LoginCmd {} {
     
-    # Use our selected profile.
-    LoginWithProfile [::Profiles::GetSelectedName]
+    # Do not try to login if we already have a pending login or is in stream.
+    if {![Pending] && ![::Jabber::Jlib isinstream]} {
+	
+	# Use our selected profile.
+	LoginWithProfile [::Profiles::GetSelectedName]
+    }
 }
 
 proc ::Login::LoginWithProfile {profname} {
@@ -793,6 +797,11 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
     # Free all.
     unset highstate
     $jstate(jlib) connect free
+}
+
+proc ::Login::Pending {} {
+    variable pending
+    return $pending
 }
 
 proc ::Login::SetStatus {args} {
