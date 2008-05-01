@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.150 2008-04-17 15:00:28 matben Exp $
+# $Id: Disco.tcl,v 1.151 2008-05-01 13:40:54 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1714,8 +1714,8 @@ proc ::Disco::AddServerDlg {} {
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
 
-    focus $wfr.e
-    
+    bind $wfr.e <Map> { focus %W }
+   
     if {$config(disco,add-server-autolist)} {
 	::httpex::get $jprefs(urlServersList) \
 	  -command [namespace code AddHttpCommand]
