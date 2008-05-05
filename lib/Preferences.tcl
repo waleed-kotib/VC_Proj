@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.108 2008-02-20 15:14:37 matben Exp $
+# $Id: Preferences.tcl,v 1.109 2008-05-05 14:22:29 matben Exp $
  
 package require mnotebook
 
@@ -270,8 +270,7 @@ proc ::Preferences::Build {args} {
     }
     wm deiconify $w
     
-    # Grab and focus.
-    focus $w
+    bind $wtree <Map> { focus %W }
 }
 
 proc ::Preferences::TreeCtrl {T wysc} {

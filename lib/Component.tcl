@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Component.tcl,v 1.4 2008-02-20 15:14:37 matben Exp $
+# $Id: Component.tcl,v 1.5 2008-05-05 14:22:28 matben Exp $
    
 package require component
 
@@ -79,8 +79,10 @@ proc ::Component::Dlg {} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -command [namespace code [list OK $w]]
-    ttk::button $frbot.btcancel -text [mc Cancel] -command [namespace code [list Cancel $w]]
+    ttk::button $frbot.btok -text [mc OK] -default active \
+      -command [namespace code [list OK $w]]
+    ttk::button $frbot.btcancel -text [mc Cancel] \
+      -command [namespace code [list Cancel $w]]
 
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {

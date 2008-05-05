@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.34 2008-04-17 15:00:29 matben Exp $
+# $Id: FTrans.tcl,v 1.35 2008-05-05 14:22:28 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -175,7 +175,6 @@ snit::widget ::FTrans::SendDialog {
 	}
 	wm title $win $options(-title)
 
-	parray options
 	set im   [::Theme::Find32Icon $win sendFileImage]
 	set imbg [::Theme::Find32Icon $win sendFileDisImage]
 
@@ -247,6 +246,7 @@ snit::widget ::FTrans::SendDialog {
 	}
 	set fileName $options(-filename)
 
+	bind $frm.btfile <Map> { focus %W }
 	bind $win <Return> [list $self OK]
 	bind $win <Escape> [list $self Destroy]
 	set afterid [after idle [list $self WrapLength]]

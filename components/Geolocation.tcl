@@ -3,7 +3,7 @@
 #       User location using XEP recommendations over PubSub library code.
 #       XEP-0080: User Location (formerly User Geolocation)
 #
-#  Copyright (c) 2007 Mats Bengtsson
+#  Copyright (c) 2007-2008 Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#  $Id: Geolocation.tcl,v 1.15 2008-04-17 15:00:28 matben Exp $
+#  $Id: Geolocation.tcl,v 1.16 2008-05-05 14:22:28 matben Exp $
 
 package require jlib::pep
 
@@ -213,6 +213,8 @@ proc ::Geolocation::Dlg {} {
     set cb [namespace code [list ItemsCB $w]]
     ::Jabber::Jlib pubsub items $myjid2 $xmlns(geoloc) -command $cb
         
+    bind $fr.ealt <Map> { focus %W }
+    
     set mbar [::UI::GetMainMenu]
     ui::dialog defaultmenu $mbar
     ::UI::MenubarDisableBut $mbar edit

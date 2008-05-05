@@ -2,7 +2,7 @@
 #  
 #      This file is part of The Coccinella application. 
 #      
-#  Copyright (c) 2001-2007  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.81 2008-02-10 09:43:22 matben Exp $
+# $Id: VCard.tcl,v 1.82 2008-05-05 14:22:28 matben Exp $
 
 package provide VCard 1.0
 
@@ -267,7 +267,6 @@ proc ::VCard::Build {token} {
     
     ttk::notebook::enableTraversal $wnb
     wm resizable $w 0 0
-    focus $w
 }
 
 # VCard::Pages --
@@ -299,6 +298,8 @@ proc ::VCard::Pages {nbframe etoken type} {
 
     grid  $pbi.first   $pbi.middle   $pbi.fam   -sticky w
     grid  $pbi.efirst  $pbi.emiddle  $pbi.efam  -sticky ew -padx 1 -pady 2
+    
+    bind $pbi.efirst <Map> { focus %W }
     
     # Other part.
     ttk::label $pbi.nick   -text "[mc Nickname]:"

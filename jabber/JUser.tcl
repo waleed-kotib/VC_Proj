@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.63 2008-04-25 06:42:32 matben Exp $
+# $Id: JUser.tcl,v 1.64 2008-05-05 14:22:28 matben Exp $
 
 package provide JUser 1.0
 
@@ -234,7 +234,7 @@ proc ::JUser::NewDlg {args} {
     }
     pack $frbot -side top -fill x
     
-    focus $frmid.ejid
+    bind $frmid.ejid <Map> { focus %W }
     
     wm resizable $w 0 0
     bind $w <Return> [list $frbot.btok invoke]
@@ -818,6 +818,7 @@ proc ::JUser::EditUserDlg {jid} {
     } $wbox.msg $w]    
     after idle $script
 
+    bind $frmid.enick <Map> { focus %W }
     bind $w <Destroy> \
       +[subst { if {"%W" eq "$w"} { [namespace code [list Free $token]] } }]
     
