@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.107 2008-04-17 15:00:31 matben Exp $
+# $Id: Profiles.tcl,v 1.108 2008-05-05 11:59:58 matben Exp $
 
 package require ui::megaentry
 
@@ -30,8 +30,8 @@ namespace eval ::Profiles:: {
     # Public APIs must cope with this. Both Get and Set functions.
     # If 'do' then there MUST be valid values in config array.
     set ::config(profiles,do)         0
-    set ::config(profiles,profiles)   {}
-    set ::config(profiles,selected)   {}
+    set ::config(profiles,profiles)   [list]
+    set ::config(profiles,selected)   [list]
     set ::config(profiles,prefspanel) 1
     set ::config(profiles,style)      "jid"  ;# jid | parts
     set ::config(profiles,show-head)  1
@@ -351,7 +351,7 @@ proc ::Profiles::FilterConfigProfile {name server username password args} {
     # We must NEVER overwrite any values that exist in the 'config' array.
     array set cprofArr $config(profiles,profiles)
     if {[info exists cprofArr($name)]} {
-	set prof {}
+	set prof [list]
 	set sup [lrange $cprofArr($name) 0 2]	
 	foreach val [list $server $username $password] cval $sup {
 	    if {$cval ne ""} {
@@ -368,7 +368,7 @@ proc ::Profiles::FilterConfigProfile {name server username password args} {
 	}
 	return $prof
     } else {
-	return {}
+	return
     }
 }
 
@@ -649,7 +649,7 @@ proc ::Profiles::GetAllNames {} {
 	set prof $profiles
     }
 
-    set names {}
+    set names [list]
     foreach {name spec} $prof {
 	lappend names $name
     }    
@@ -672,7 +672,7 @@ proc ::Profiles::SortProfileList {} {
     } else {
 	set prof $profiles
     }
-    set tmp {}
+    set tmp [list]
     array set profArr $prof
     foreach name [GetAllNames] {
 	set noopts [lrange $profArr($name) 0 2]
@@ -688,7 +688,7 @@ proc ::Profiles::SortProfileList {} {
 
 proc ::Profiles::SortOptsList {opts} {
     
-    set tmp {}
+    set tmp [list]
     array set arr $opts
     foreach name [lsort [array names arr]] {
 	lappend tmp $name $arr($name)
@@ -719,7 +719,7 @@ proc ::Profiles::ImportFromJserver {} {
     #  jserver(profile,selected)  profile picked in user info
     #  jserver(profile):   {profile1 {server1 username1 password1 resource1}}
     #  
-    set profiles {}
+    set profiles [list]
     foreach {name spec} $jserver(profile) {
 	lassign $spec se us pa re
 	set plist [list $se $us $pa]
@@ -750,8 +750,8 @@ proc ::Profiles::GetDefaultOpts {server} {
 	    -http           0
 	    -httpurl        ""
 	    -minpollsecs    4
-	    -secure         0
-	    -method         sasl
+	    -secure         1
+	    -method         tlssasl
 	    -port           ""
 	    -compress       0
 	}
@@ -761,7 +761,7 @@ proc ::Profiles::GetDefaultOpts {server} {
 
 	#set defaultOpts(-port) $jprefs(port)
 	if {!$this(package,tls)} {
-	    set defaultOpts(-secure) 0
+	    set defaultOpts(-secure) 1
 	    set defaultOpts(-method) sasl
 	}
 	if {[catch {package require jlibsasl}]} {
@@ -2087,7 +2087,7 @@ proc ::Profiles::NotebookSetAnyConfigState {w name} {
     # Disable every option set by any config.
     if {[DoConfig]} {
 	NotebookSetAllState $w normal
-	set sopts {}
+	set sopts [list]
 	foreach {key value} [lrange [GetConfigProfile $name] 3 end] {
 	    lappend sopts $key disabled
 	}
