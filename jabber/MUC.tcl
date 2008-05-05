@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.98 2008-04-17 15:00:30 matben Exp $
+# $Id: MUC.tcl,v 1.99 2008-05-05 06:21:00 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
@@ -383,8 +383,8 @@ proc ::MUC::MUCMessage {jlibname xmlns msgElem args} {
 
 namespace eval ::MUC:: {
     
-    option add *JMUCInfo.infoImage      document-information      widgetDefault
-    option add *JMUCInfo.infoDisImage   document-information-Dis  widgetDefault
+    option add *JMUCInfo.infoImage      dialog-information      widgetDefault
+    option add *JMUCInfo.infoDisImage   dialog-information-Dis  widgetDefault
 
     option add *JMUCInfo*TButton.style      Small.TButton     50
     option add *JMUCInfo*TLabelframe.style  Small.TLabelframe 50
