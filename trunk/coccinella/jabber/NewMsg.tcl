@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.100 2008-04-17 15:00:30 matben Exp $
+# $Id: NewMsg.tcl,v 1.101 2008-05-05 14:22:28 matben Exp $
 
 package require ui::entryex
 
@@ -485,9 +485,7 @@ proc ::NewMsg::Build {args} {
     bind $w <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $w]
     wm protocol $w WM_DELETE_WINDOW [list [namespace current]::CloseDlg $w]
-    
-    focus $waddr.addr1
-    
+        
     # We need to fill in addresses after the geometry handling!
     if {[llength $opts(-tolist)]} {
 	set jidL $opts(-tolist)
@@ -500,6 +498,12 @@ proc ::NewMsg::Build {args} {
 	after 200 [list ::NewMsg::FillInAddresses $w $jidL]
     }
     
+    # Focus.
+    if {[llength $jidL]} {
+	bind $waddr.addr1 <Map> { focus %W }
+    } else {
+	bind $wsubject <Map> { focus %W }
+    }
     return $w
 }
 

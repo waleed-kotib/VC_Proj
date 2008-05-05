@@ -3,7 +3,7 @@
 #       User Activity using PEP recommendations over PubSub library code.
 #       Implements XEP-0108: User Activity
 #
-#  Copyright (c) 2007 Mats Bengtsson
+#  Copyright (c) 2007-2008 Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.12 2007-12-20 14:01:25 matben Exp $
+#  $Id: UserActivity.tcl,v 1.13 2008-05-05 14:22:28 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -204,7 +204,7 @@ proc ::UserActivity::Dlg {} {
     
     set w [ui::dialog -message [mc activityPickMsg] \
       -detail [mc activityPickDtl] -icon info \
-      -buttons {ok cancel remove} -modal 1 \
+      -buttons {ok cancel remove} \
       -geovariable ::prefs(winGeom,activity) \
       -title [mc "User Activity"] -command [namespace code DlgCmd]]
     set fr [$w clientframe]
@@ -246,6 +246,8 @@ proc ::UserActivity::Dlg {} {
 
     trace add variable $token\(activity) write [namespace code [list Trace $w]]
     ConfigSpecificMenu $w $state(activity)
+    
+    bind $fr.activity <Map> { focus %W }
             
     # Get our own published activity and fill in.
     set myjid2 [::Jabber::Jlib  myjid2]

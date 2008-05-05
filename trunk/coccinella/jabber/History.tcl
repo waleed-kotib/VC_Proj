@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: History.tcl,v 1.37 2008-02-10 09:43:22 matben Exp $
+# $Id: History.tcl,v 1.38 2008-05-05 14:22:28 matben Exp $
 
 package require uriencode
 package require UI::WSearch
@@ -1046,6 +1046,7 @@ proc ::History::BuildHistory {jid dlgtype args} {
 	::JUI::CopyEvent %W
 	break
     }
+    bind $frbot.btcancel <Map> { focus %W }
 
     set script [format {
 	update idletasks

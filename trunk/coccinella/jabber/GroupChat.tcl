@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.241 2008-04-17 15:00:29 matben Exp $
+# $Id: GroupChat.tcl,v 1.242 2008-05-05 14:22:28 matben Exp $
 
 package require Create
 package require Enter
@@ -720,7 +720,6 @@ proc ::GroupChat::Build {roomjid} {
     bind $w <<FindPrevious>> [namespace code [list FindAgain $dlgtoken -1]]  
     bind $w <FocusIn>       +[namespace code [list FocusIn $dlgtoken]]
 
-    focus $w
     set tag TopTag$w
     bindtags $w [concat $tag [bindtags $w]]
     bind $tag <Destroy> +[list ::GroupChat::OnDestroyDlg $dlgtoken]
@@ -1048,6 +1047,8 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     bind $wtextsend <$this(modkey)-Return> \
       [list [namespace current]::CommandReturnKeyPress $chattoken]
     bind $wroom <Destroy> +[list ::GroupChat::OnDestroyChat $chattoken]
+    
+    bind $chatstate(wtextsend) <Map> { focus %W }
     
     if {([tk windowingsystem] ne "aqua") && ![catch {package require tkdnd}]} {
 	::JUI::DnDXmppBindTarget $wtext \

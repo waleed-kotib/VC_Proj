@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: WDialogs.tcl,v 1.4 2007-11-25 15:55:32 matben Exp $
+# $Id: WDialogs.tcl,v 1.5 2008-05-05 14:22:29 matben Exp $
    
 package provide WDialogs 1.0
 
@@ -31,7 +31,7 @@ namespace eval ::WDialogs:: {
 #      It implements the dialog for presenting the loaded packages or helper 
 #      applications.
 
-proc ::WDialogs::InfoOnPlugins { } {
+proc ::WDialogs::InfoOnPlugins {} {
     global  prefs this wDlgs
     
     # Check first of there are *any* plugins.
@@ -57,7 +57,8 @@ proc ::WDialogs::InfoOnPlugins { } {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w]
+    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w] \
+      -default active
     pack $frbot.btok -side right
     pack $frbot -side bottom -fill x
 

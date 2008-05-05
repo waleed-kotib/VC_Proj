@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements various UI parts for setting status (presence).
 #      
-#  Copyright (c) 2004-2007  Mats Bengtsson
+#  Copyright (c) 2004-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.50 2008-02-20 15:14:37 matben Exp $
+# $Id: Status.tcl,v 1.51 2008-05-05 14:22:28 matben Exp $
 
 package provide Status 1.0
 
@@ -875,6 +875,7 @@ proc ::Status::ExCustomDlg {varName args} {
     
     ::balloonhelp::balloonforwindow $fr.e [mc Message]
 
+    bind $fr.m <Map> { focus %W }
     bind $w <Destroy> +[subst { if {"%W" eq "$w"} {::Status::ExCustomDlgFree %W} }]
 }
 

@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: openimage.tcl,v 1.6 2008-04-17 15:00:28 matben Exp $
+# $Id: openimage.tcl,v 1.7 2008-05-05 14:22:28 matben Exp $
 
 # Public commands:
 # 
@@ -120,6 +120,7 @@ proc ui::openimage::widget {w args} {
     if {![file exists $state(-defaultfile)]} {
 	$fr.r.def state {disabled}
     }
+    bind $fr.r.new <Map> { focus %W }
     bind $w <Destroy> \
       [subst { if {"%W" eq "$w"} { ui::openimage::destructor "$w" } }]
     return $w

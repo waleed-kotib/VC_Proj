@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.37 2008-03-29 16:27:47 matben Exp $
+#  $Id: Mood.tcl,v 1.38 2008-05-05 14:22:28 matben Exp $
 
 package require jlib::pep
 
@@ -280,7 +280,7 @@ proc ::Mood::CustomMoodDlg {} {
     set w [ui::dialog -message [mc moodPickMsg] -detail [mc moodPickDtl] \
       -icon info \
       -type okcancel -modal 1 -geovariable ::prefs(winGeom,customMood) \
-      -title [mc {Custom Mood}] -command [namespace code CustomCmd]]
+      -title [mc "Custom Mood"] -command [namespace code CustomCmd]]
     set fr [$w clientframe]
 
     set mDef [list]
@@ -301,6 +301,8 @@ proc ::Mood::CustomMoodDlg {} {
     grid $fr.cmood $fr.etext -sticky ew
     grid columnconfigure $fr 1 -weight 1
 
+    bind $fr.cmood <Map> { focus %W }
+    
     set mbar [::UI::GetMainMenu]
     ui::dialog defaultmenu $mbar
     ::UI::MenubarDisableBut $mbar edit
