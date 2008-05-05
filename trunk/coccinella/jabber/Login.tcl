@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.145 2008-04-30 06:25:57 matben Exp $
+# $Id: Login.tcl,v 1.146 2008-05-05 11:57:31 matben Exp $
 
 package provide Login 1.0
 
@@ -154,7 +154,7 @@ proc ::Login::Dlg {} {
 
     set menuVar [::Profiles::GetSelectedName]
     set profile $menuVar
-     ui::combobutton $wpopup -variable [namespace current]::menuVar \
+    ui::combobutton $wpopup -variable [namespace current]::menuVar \
        -command [namespace code ProfileCmd]
     
     # Depending on 'config(login,style)' not all get mapped.
@@ -280,6 +280,8 @@ proc ::Login::Dlg {} {
     
     if {$password eq ""} {
 	bind $frmid.epass <Map> { focus %W }
+    } else {
+	bind $frmid.popup <Map> { focus %W }
     }
     after 100 [list [namespace current]::GetNormalSize $w]
 }
