@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MacintoshUtils.tcl,v 1.14 2007-09-14 08:11:46 matben Exp $
+# $Id: MacintoshUtils.tcl,v 1.15 2008-05-08 12:24:01 matben Exp $
 
 package provide MacintoshUtils 1.0
 
@@ -70,7 +70,7 @@ proc ::Mac::MacCarbonPrint::PrintCanvas {w} {
 	}
 	set ans [eval {maccarbonprint::print} $opts]
 	if {$ans ne ""} {
-	    foreach {type printObject} $ans break
+	    lassign $ans type printObject
 	    eval {maccarbonprint::printcanvas $wcan $printObject}
 	}
     } else {
@@ -92,8 +92,8 @@ proc ::Mac::MacCarbonPrint::PrintText {wtext args} {
 	}
 	set ans [eval {maccarbonprint::print} $opts]
 	if {$ans ne ""} {
-	    foreach {type printObject} $ans break
-	    eval {maccarbonprint::printtext $wtext $printObject} $args
+	    lassign $ans type printObject
+	    eval {maccarbonprint::easytextprint $wtext $printObject} $args
 	}
     } else {
 	::UI::MessageBox -icon error -title [mc Error] \
