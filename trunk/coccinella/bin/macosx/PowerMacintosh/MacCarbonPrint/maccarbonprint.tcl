@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2003, Mats Bengtsson
 # 
-# $Id: maccarbonprint.tcl,v 1.3 2007-01-13 14:25:24 matben Exp $
+# $Id: maccarbonprint.tcl,v 1.4 2008-05-08 12:06:04 matben Exp $
 
 namespace eval ::maccarbonprint:: {
     
@@ -254,7 +254,6 @@ proc ::maccarbonprint::printtext {wtext printObj args} {
 # Contributed by Kevin Walzer, (c) 2007.
 
 proc ::maccarbonprint::easytextprint {wtext printObj args} {
-
 
     set wtmp .__print_text
     canvas $wtmp -width 612
