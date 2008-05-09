@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserActions.tcl,v 1.51 2007-09-14 08:11:47 matben Exp $
+# $Id: UserActions.tcl,v 1.52 2008-05-09 07:30:49 matben Exp $
 
 package provide UserActions 1.0
 
@@ -146,7 +146,7 @@ proc ::UserActions::DoQuit {args} {
     # Here we end the session if any.
     set res [::hooks::run quitAppHook]
     if {$res eq "stop"} {
-	return
+	return 0
     }
     
     # If we used 'Edit/Revert To/Application Defaults' be sure to reset...
