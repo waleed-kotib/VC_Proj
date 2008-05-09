@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: megaentry.tcl,v 1.6 2007-08-09 07:47:03 matben Exp $
+# $Id: megaentry.tcl,v 1.7 2008-05-09 14:29:57 matben Exp $
 
 package require ui::dialog
 
@@ -35,7 +35,7 @@ proc ui::megaentry {args} {
     ttk::label $fr.l -text $state(-label)
     ttk::entry $fr.e -textvariable $token\(-textvariable)
     if {$state(-show) ne ""} {
-	$fr.e configure -show $state(show)
+	$fr.e configure -show $state(-show)
     }
     
     grid  $fr.l  $fr.e  -sticky e
