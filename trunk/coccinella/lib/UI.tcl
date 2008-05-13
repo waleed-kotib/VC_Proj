@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.189 2008-04-17 15:00:32 matben Exp $
+# $Id: UI.tcl,v 1.190 2008-05-13 09:13:00 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -475,7 +475,7 @@ proc ::UI::InitMenuDefs {} {
     global  prefs this
     variable menuDefs
 	
-    if {[string match "mac*" $this(platform)] && $prefs(haveMenus)} {
+    if {([tk windowingsystem] eq "aqua") && $prefs(haveMenus)} {
 	set haveAppleMenu 1
     } else {
 	set haveAppleMenu 0
@@ -493,7 +493,8 @@ proc ::UI::InitMenuDefs {} {
     set menuDefs(main,apple) [list $menuDefs(main,info,aboutwhiteboard)]
     
     # Make platform specific things.
-    if {$haveAppleMenu && [::Media::HavePackage QuickTimeTcl]} {
+    set haveQuickTimeTcl [expr ![catch {package require QuickTimeTcl}]]
+    if {$haveAppleMenu && $haveQuickTimeTcl} {
 	lappend menuDefs(main,apple) $menuDefs(main,info,aboutquicktimetcl)
     }
 }

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.108 2008-05-05 11:59:58 matben Exp $
+# $Id: Profiles.tcl,v 1.109 2008-05-13 09:13:00 matben Exp $
 
 package require ui::megaentry
 
@@ -1788,8 +1788,8 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set wstate(invisible)     $wlog.cinv
 
     ttk::checkbutton $wlog.cdig -style Small.TCheckbutton \
-      -text [mc {Scramble password}]  \
-      -variable $token\(digest)
+      -text [mc "Plain text password"]  \
+      -variable $token\(digest) -offvalue 1 -onvalue 0
     ttk::label $wlog.lp -style Small.TLabel \
       -text "[mc Priority]:"
     spinbox $wlog.sp -font CociSmallFont \

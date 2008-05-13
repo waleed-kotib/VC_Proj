@@ -18,20 +18,57 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.45 2008-04-17 15:00:28 matben Exp $
+# $Id: Sounds.tcl,v 1.46 2008-05-13 09:13:00 matben Exp $
 
 namespace eval ::Sounds {
-	
-    set QuickTimeTcl [::Media::HavePackage QuickTimeTcl]
-    set snack        [::Media::HavePackage snack]
+	    
+    # We undefine ourselves if we have no audio support.
+    component::define Sounds \
+      "Provides alert sounds through QuickTime or the Snack audio package."
+}
 
-    if {!$QuickTimeTcl && !$snack} {
+proc ::Sounds::Init {} {
+
+    # We are doing all inits late since loading audio can be slow.
+    ::hooks::register afterFinalHook ::Sounds::AfterFinalHook
+}
+
+# Sounds::AfterFinalHook --
+# 
+#       Tries to load the sounds component.
+
+proc ::Sounds::AfterFinalHook {} {
+    variable priv
+    
+    ::Debug 2 "::Sounds::AfterFinalHook"
+    
+    set priv(canPlay)      0
+    set priv(inited)       0
+    set priv(QuickTimeTcl) [expr ![catch {package require QuickTimeTcl}]]
+    set priv(snack)        [expr ![catch {package require snack}]]
+
+    # Skip if both 0.
+    if {!$priv(QuickTimeTcl) && !$priv(snack)} {
+	component::undefine Sounds
 	return
     }
+    set priv(canPlay) 1
+    Mappings
     
-    component::define Sounds "Provides alert sounds through QuickTime\
-      or the Snack audio package."
+    # This one is needed since we have missed it during the launch process.
+    InitPrefsHook
+   
+    # We should register ourselves.
+    component::register Sounds
 
+    # Make sure we get called when certain events happen.
+    InitEventHooks
+}
+
+proc ::Sounds::Mappings {} {
+    
+    ::Debug 2 "::Sounds::Mappings"
+    
     variable nameToText 
     array set nameToText {
 	online          "Contact is online"
@@ -68,33 +105,6 @@ proc ::Sounds::GetTextForName {name} {
     return [mc $nameToText($name)]
 }
 
-# Sounds::Load --
-# 
-#       Tries to load the sounds component.
-
-proc ::Sounds::Load {} {
-    variable priv
-    
-    ::Debug 2 "::Sounds::Load"
-
-    set priv(canPlay)      0
-    set priv(inited)       0
-    set priv(QuickTimeTcl) [::Media::HavePackage QuickTimeTcl]
-    set priv(snack)        [::Media::HavePackage snack]
-
-    # Skip if both 0.
-    if {!$priv(QuickTimeTcl) && !$priv(snack)} {
-	return
-    }
-    set priv(canPlay) 1
-   
-    # We should register ourselves.
-    component::register Sounds
-
-    # Make sure we get called when certain events happen.
-    InitEventHooks
-}
-
 proc ::Sounds::InitEventHooks {} {
     
     # Add all event hooks.
@@ -107,24 +117,13 @@ proc ::Sounds::InitEventHooks {} {
     ::hooks::register presenceNewHook         ::Sounds::Presence
 
     # Define all hooks for preference settings.
-    ::hooks::register prefsInitHook          ::Sounds::InitPrefsHook
     ::hooks::register prefsBuildHook         ::Sounds::BuildPrefsHook
     ::hooks::register prefsSaveHook          ::Sounds::SavePrefsHook
     ::hooks::register prefsCancelHook        ::Sounds::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Sounds::UserDefaultsHook
-    ::hooks::register launchFinalHook        ::Sounds::InitHook
 }
 
-proc ::Sounds::InitHook {} {
-    
-    ::Debug 2 "::Sounds::InitHook"
-    
-    # We do this after a delay to avoid locking the UI.
-    # Be sure to force an Init if needed before this.
-    after 200 ::Sounds::Init
-}
-
-# Sounds::Init --
+# Sounds::InitHook --
 #
 #       Make all the necessary initializations, create audio objects.
 #       
@@ -133,13 +132,13 @@ proc ::Sounds::InitHook {} {
 # Results:
 #       none.
 
-proc ::Sounds::Init {} {
+proc ::Sounds::InitHook {} {
     global  this    
     variable allSounds
     variable priv
     variable sprefs
 	
-    ::Debug 2 "::Sounds::Init"
+    ::Debug 2 "::Sounds::InitHook"
 
     if {$priv(inited)} {
 	return

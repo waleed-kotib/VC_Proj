@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.13 2008-04-17 15:00:32 matben Exp $
+# $Id: Servicons.tcl,v 1.14 2008-05-13 09:13:00 matben Exp $
 
 package require Icondef
 
@@ -82,9 +82,9 @@ proc ::Servicons::Init {} {
     }
 
     # Cache stuff we need later.
-    set priv(havepng)      [::Media::HaveImporterForMime image/png]
-    set priv(QuickTimeTcl) [::Media::HavePackage QuickTimeTcl]
-    set priv(Img)          [::Media::HavePackage Img]
+    set priv(havepng) 1
+    set priv(QuickTimeTcl) [expr ![catch {package require QuickTimeTcl}]]
+    set priv(Img)          [expr ![catch {package require Img}]]
     if {$priv(Img)} {
 	set priv(needtmp)   0
 	set priv(pngformat) [list -format png]

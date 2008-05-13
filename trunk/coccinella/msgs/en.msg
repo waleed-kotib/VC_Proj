@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.244 2008-04-25 07:06:43 matben Exp $
+#   $Id: en.msg,v 1.245 2008-05-13 09:13:00 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -563,6 +563,7 @@
 ::msgcat::mcset en {Open Image/Movie}
 ::msgcat::mcset en {Open Stream}
 ::msgcat::mcset en {Open with}
+::msgcat::mcset en {Plain text password}
 ::msgcat::mcset en {Play sound}
 ::msgcat::mcset en {Postal code}
 ::msgcat::mcset en {Presence Error}
@@ -586,7 +587,6 @@
 ::msgcat::mcset en {Save Message}
 ::msgcat::mcset en {Save password}
 ::msgcat::mcset en {Save to disk}
-::msgcat::mcset en {Scramble password}
 ::msgcat::mcset en {Search results}
 ::msgcat::mcset en {Select Avatar}
 ::msgcat::mcset en {Select File}

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.95 2008-04-17 15:00:29 matben Exp $
+# $Id: JWB.tcl,v 1.96 2008-05-13 09:13:00 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -166,7 +166,7 @@ proc ::JWB::InitUI { } {
 	{command   mPageSetup             {::WB::OnMenuPageSetup}       {}}
 	{command   mPrint...              {::WB::OnMenuPrintCanvas}     P}
     }
-    if {[::Media::HavePackage QuickTimeTcl]} {
+    if {[expr ![catch {package require QuickTimeTcl}]]} {
 	package require Multicast
     }
     ::WB::SetMenuDefs file $menuDefsFile

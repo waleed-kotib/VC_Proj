@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.101 2008-05-05 14:22:28 matben Exp $
+# $Id: NewMsg.tcl,v 1.102 2008-05-13 09:13:00 matben Exp $
 
 package require ui::entryex
 
@@ -497,6 +497,7 @@ proc ::NewMsg::Build {args} {
     if {[llength $jidL]} {
 	after 200 [list ::NewMsg::FillInAddresses $w $jidL]
     }
+    puts "jidL='$jidL'"
     
     # Focus.
     if {[llength $jidL]} {

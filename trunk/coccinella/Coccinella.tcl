@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.182 2008-04-17 15:00:28 matben Exp $	
+# $Id: Coccinella.tcl,v 1.183 2008-05-13 09:12:59 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -292,8 +292,6 @@ FactoryDefaults
 ::Debug 2 "--> earlyInitHook"
 ::hooks::run earlyInitHook
 
-#foreach p $auto_path {puts $p}
-
 # Components.
 ::Debug 2 "++> component::load"
 ::Component::Load
@@ -337,8 +335,9 @@ set state(launchStatus) preferences
 # At this point we should be finished with the launch and delete the splash 
 # screen.
 ::Splash::SetMsg ""
-after 500 {catch {destroy $::wDlgs(splash)}}
+after 200 {catch {destroy $::wDlgs(splash)}}
 
+# This builds the main window etc.
 ::Jabber::Init
 
 ::Debug 2 "--> initFinalHook"
@@ -354,5 +353,12 @@ update idletasks
 ::hooks::run launchFinalHook
 unset -nocomplain state(launchStatus)
 set prefs(firstLaunch) 0
+
+# This is for late init hooks that are slow to avoid locking the UI.
+after 200 {
+    ::Debug 2 "--> afterFinalHook"
+    ::hooks::run afterFinalHook
+    ::hooks::run postAfterFinalHook
+}
 
 #-------------------------------------------------------------------------------
