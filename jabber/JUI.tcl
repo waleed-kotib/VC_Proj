@@ -18,11 +18,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.244 2008-05-05 14:22:28 matben Exp $
+# $Id: JUI.tcl,v 1.245 2008-05-13 09:13:00 matben Exp $
 
 package provide JUI 1.0
 
-namespace eval ::JUI:: {
+namespace eval ::JUI {
     
     # Add all event hooks.
     ::hooks::register quitAppHook            ::JUI::QuitHook
@@ -487,7 +487,7 @@ proc ::JUI::Build {w} {
     
     # Add an extra margin for Login/Logout string lengths.
     set trayMinW [expr {[$wtbar minwidth] + 12}]
-    set minW [expr {$trayMinW > 200 ? $trayMinW : 200}]
+    set minW [expr {$trayMinW < 200 ? 200 : $trayMinW}]
     wm geometry $w ${minW}x360
     ::UI::SetWindowGeometry $w
     wm minsize $w $minW 300

@@ -20,7 +20,7 @@ component::attempt NotifyOnline     [file join $dir NotifyOnline.tcl]   ::Notify
 component::attempt ParseStyledText  [file join $dir ParseStyledText.tcl]  ::ParseStyledText::Init
 component::attempt ParseURI         [file join $dir ParseURI.tcl]       ::ParseURI::Init
 component::attempt SlideShow        [file join $dir SlideShow.tcl]      ::SlideShow::Load  
-component::attempt Sounds           [file join $dir Sounds.tcl]         ::Sounds::Load    
+component::attempt Sounds           [file join $dir Sounds.tcl]         ::Sounds::Init    
 component::attempt Spell            [file join $dir Spell.tcl]          ::Spell::Init
 component::attempt Speech           [file join $dir Speech.tcl]         ::Speech::Load    
 component::attempt SpotLight        [file join $dir SpotLight.tcl]      ::SpotLight::Init    

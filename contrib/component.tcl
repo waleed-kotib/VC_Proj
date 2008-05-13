@@ -4,7 +4,7 @@
 #  
 #  This file is distributed under BSD style license.
 #       
-# $Id: component.tcl,v 1.9 2007-11-17 07:40:52 matben Exp $
+# $Id: component.tcl,v 1.10 2008-05-13 09:13:00 matben Exp $
 
 package provide component 1.0
 
@@ -19,7 +19,6 @@ namespace eval component {
 
 proc component::lappend_auto_path {path} {
     variable auto_path
-    
     lappend auto_path $path
 }
 
@@ -28,8 +27,7 @@ proc component::lappend_auto_path {path} {
 #       Set list of component names we shall not attempt to load.
 
 proc component::exclude {offL} {
-    variable priv
-    
+    variable priv    
     set priv(offL) $offL    
 }
 
@@ -59,9 +57,13 @@ proc component::attempt {name fileName initProc} {
 
 proc component::define {name str} {
     variable priv
-    
     set priv($name,name) $name
     set priv($name,str)  $str
+}
+
+proc component::undefine {name} {
+    variable priv
+    array unset priv $name,*
 }
 
 # component::register --
@@ -71,7 +73,6 @@ proc component::define {name str} {
 
 proc component::register {name} {
     variable priv
-    
     set priv($name,reg) 1
 }
 
@@ -101,8 +102,7 @@ proc component::getall {} {
 #       component::attempt MyCool [file join $dir mycool.tcl] MyCoolInitProc
 
 proc component::load {} {
-    variable auto_path
-    
+    variable auto_path    
     foreach dir $auto_path {
 	loaddir $dir
     }
@@ -125,8 +125,7 @@ proc component::loaddir {dir} {
 }
 
 proc component::exists {name} {
-    variable priv
-    
+    variable priv    
     return [info exists priv($name,reg)]
 }
 
