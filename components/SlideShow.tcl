@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-#       $Id: SlideShow.tcl,v 1.27 2007-11-17 07:40:52 matben Exp $
+#       $Id: SlideShow.tcl,v 1.28 2008-05-14 14:05:35 matben Exp $
 
 package require undo
 
@@ -56,7 +56,8 @@ proc ::SlideShow::Load { } {
     ::hooks::register prefsCancelHook                ::SlideShow::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook          ::SlideShow::UserDefaultsHook
     ::hooks::register prefsDestroyHook               ::SlideShow::DestroyPrefsHook
-    ::hooks::register initHook                       ::SlideShow::InitHook
+    #::hooks::register initHook                       ::SlideShow::InitHook
+    ::hooks::register afterFinalHook                 ::SlideShow::InitHook
     ::hooks::register whiteboardBuildButtonTrayHook  ::SlideShow::BuildButtonsHook
     ::hooks::register whiteboardCloseHook            ::SlideShow::CloseHook
     ::hooks::register menuPostCommand                ::SlideShow::MenuPostHook

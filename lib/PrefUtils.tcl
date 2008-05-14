@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: PrefUtils.tcl,v 1.15 2007-11-15 08:56:14 matben Exp $
+# $Id: PrefUtils.tcl,v 1.16 2008-05-14 14:05:35 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -127,7 +127,7 @@ proc ::PrefUtils::AddToMaster {prefsL {key ""}} {
     variable priNameToNum
     
     foreach item $prefsL {
-	foreach {varName resName defaultValue} $item { break }
+	lassign $item varName resName defaultValue
 	
 	# The default priority for hardcoded values are 20 (factoryDefault).
 	if {[llength $item] >= 4} {

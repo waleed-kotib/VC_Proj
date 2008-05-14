@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.104 2008-04-17 15:00:31 matben Exp $
+# $Id: RosterTree.tcl,v 1.105 2008-05-14 14:05:35 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -787,7 +787,7 @@ proc ::RosterTree::BackgroundImageCmd {} {
     variable T
     upvar ::Jabber::jprefs jprefs
     
-    set mimes {image/gif image/png image/jpeg}
+    set mimes [list image/gif image/png image/jpeg]
     set suffL [::Media::GetSupportedSuffixesForMimeList $mimes]
     set typeL [::Media::GetSupportedTypesForMimeList $mimes]
     set types [concat [list [list {Image Files} $suffL]] \
@@ -855,6 +855,10 @@ proc ::RosterTree::BackgroundImageGetThemedFile {suffL} {
     return [file normalize $fileName]
 }
 
+# RosterTree::BackgroundImageGetFile --
+#
+#       Return empty if not configured with background image.
+
 proc ::RosterTree::BackgroundImageGetFile {suffL defaultFile} {
     global  this
     upvar ::Jabber::jprefs jprefs
@@ -877,15 +881,18 @@ proc ::RosterTree::BackgroundImageGetFile {suffL defaultFile} {
 
 proc ::RosterTree::BackgroundImageGet {} {
         
+    # This gets called only during creation and we make a shortcut
+    # to avoid loading slow packages (QuickTimeTcl etc.)
     set image ""
-    set mimes {image/gif image/png image/jpeg}
-    set suffL [::Media::GetSupportedSuffixesForMimeList $mimes]
+    set mimes [list image/gif image/png image/jpeg]
+    set suffL [::Types::GetSuffixListForMimeList $mimes]   
     set fileName [BackgroundImageGetFile $suffL \
       [BackgroundImageGetThemedFile $suffL]]
     if {[file exists $fileName]} {
 	if {[catch {
 	    set image [image create photo -file $fileName]
 	}]} {
+	    # If any custom image has been removed we just ignore it.
 	    set image ""
 	}
     }
