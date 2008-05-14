@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.46 2008-05-13 09:13:00 matben Exp $
+# $Id: Sounds.tcl,v 1.47 2008-05-14 11:50:52 matben Exp $
 
 namespace eval ::Sounds {
 	    
@@ -63,6 +63,7 @@ proc ::Sounds::AfterFinalHook {} {
 
     # Make sure we get called when certain events happen.
     InitEventHooks
+    InitHook
 }
 
 proc ::Sounds::Mappings {} {
