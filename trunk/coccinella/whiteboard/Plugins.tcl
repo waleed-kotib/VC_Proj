@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Plugins.tcl,v 1.33 2008-04-17 15:00:48 matben Exp $
+# $Id: Plugins.tcl,v 1.34 2008-05-14 14:05:35 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -115,24 +115,24 @@ namespace eval ::Plugins {
     # Start with the core Tk supported formats. Mac 'TYPE'.
     set plugin(tk,loaded) 1
     set supSuff(text)  {.txt}
-    set supSuff(image) {}
-    set supSuff(audio) {}
-    set supSuff(video) {}
-    set supSuff(application) {}
+    set supSuff(image) [list]
+    set supSuff(audio) [list]
+    set supSuff(video) [list]
+    set supSuff(application) [list]
 
     set supMacTypes(text)  {TEXT}
-    set supMacTypes(image) {}
-    set supMacTypes(audio) {}
-    set supMacTypes(video) {}
-    set supMacTypes(application) {}
+    set supMacTypes(image) [list]
+    set supMacTypes(audio) [list]
+    set supMacTypes(video) [list]
+    set supMacTypes(application) [list]
 
     # Map keywords and package names to the supported MIME types.
     # Start by initing, MIME types added below.
     set supportedMimeTypes(text)  text/plain
-    set supportedMimeTypes(image) {}
-    set supportedMimeTypes(audio) {}
-    set supportedMimeTypes(video) {}
-    set supportedMimeTypes(application) {}
+    set supportedMimeTypes(image) [list]
+    set supportedMimeTypes(audio) [list]
+    set supportedMimeTypes(video) [list]
+    set supportedMimeTypes(application) [list]
     set supportedMimeTypes(all) $supportedMimeTypes(text)
     
     # Search only for packages on platforms they can live on.
@@ -151,7 +151,7 @@ namespace eval ::Plugins {
     }
     
     # Plugin ban list. Do not load these packages.
-    variable pluginBanList {}
+    variable pluginBanList [list]
 }
 
 # Plugins::Init --
@@ -169,6 +169,7 @@ proc ::Plugins::Init {} {
     variable inited
     
     ::Debug 2 "::Plugins::Init"
+    if {$inited} { return }
     
     foreach mime [::Types::GetAllMime] {
 	set mimeTypeDoWhat($mime) "unavailable"
@@ -215,7 +216,7 @@ proc ::Plugins::InitTk {} {
     set plugin(tk,mimes) $supportedMimeTypes(tk)
 }
 
-proc ::Plugins::InitQuickTimeTcl { } {
+proc ::Plugins::InitQuickTimeTcl {} {
     global this
     variable plugin
     variable supportedMimeTypes
@@ -264,7 +265,7 @@ proc ::Plugins::InitQuickTimeTcl { } {
 # On Unix/Linux and Windows we try to find the Snack Sound extension.
 # Only the "sound" part of the extension is actually needed.
 
-proc ::Plugins::InitSnack { } {
+proc ::Plugins::InitSnack {} {
     variable plugin
     variable supportedMimeTypes
     variable packages2Platform
@@ -286,7 +287,7 @@ proc ::Plugins::InitSnack { } {
 #--- Img -----------------------------------------------------------------------
 # The Img extension for reading more image formats than the standard one (gif).
 
-proc ::Plugins::InitImg { } {
+proc ::Plugins::InitImg {} {
     variable plugin
     variable supportedMimeTypes
     variable packages2Platform
@@ -304,7 +305,7 @@ proc ::Plugins::InitImg { } {
     set plugin(Img,mimes) $supportedMimeTypes(Img)
 }
 
-proc ::Plugins::InitTkPNG { } {
+proc ::Plugins::InitTkPNG {} {
     variable plugin
     variable supportedMimeTypes
     variable packages2Platform
@@ -323,7 +324,7 @@ proc ::Plugins::InitTkPNG { } {
 #--- xanim ---------------------------------------------------------------------
 # Test the 'xanim' app on Unix/Linux for multimedia.
   
-proc ::Plugins::InitXanim { } {
+proc ::Plugins::InitXanim {} {
     variable plugin
     variable supportedMimeTypes
 
@@ -354,20 +355,20 @@ proc ::Plugins::SetBanList {banList} {
 #       Compile information of all packages and helper apps to search for.
 #       Do 'package require' and record any success.
 
-proc ::Plugins::CompileAndLoadPackages { } {
+proc ::Plugins::CompileAndLoadPackages {} {
     global this
     variable plugin
     variable pluginBanList
     
-    set plugin(all) {}
-    set plugin(allPacks) {}
-    set plugin(allHelpers) {}
+    set plugin(all) [list]
+    set plugin(allPacks) [list]
+    set plugin(allHelpers) [list]
 
-    set plugin(all) {}
-    set plugin(allPacks) {}
-    set plugin(allInternalPacks) {}
-    set plugin(allExternalPacks) {}
-    set plugin(allApps) {}
+    set plugin(all) [list]
+    set plugin(allPacks) [list]
+    set plugin(allInternalPacks) [list]
+    set plugin(allExternalPacks) [list]
+    set plugin(allApps) [list]
     
     foreach packAndPlat [array names plugin "*,platform"] {
 	
@@ -446,7 +447,7 @@ proc ::Plugins::CompileAndLoadPackages { } {
 #       Systematically make the 'supSuff', 'supMacTypes', 
 #       'supportedMimeTypes', 'mimeType2Packages'.
 
-proc ::Plugins::PostProcessInfo { } {
+proc ::Plugins::PostProcessInfo {} {
     variable plugin
     variable supportedMimeTypes
     variable supSuff
@@ -458,7 +459,7 @@ proc ::Plugins::PostProcessInfo { } {
     # We add the tk library to the other ones.
     foreach name [concat tk $plugin(all)] {
 	if {$plugin($name,loaded)}  {
-	    set supSuff($name) {}
+	    set supSuff($name) [list]
 
 	    # Loop over all file MIME types supported by this specific package.
 	    foreach mimeType $plugin($name,mimes) {
@@ -552,7 +553,7 @@ proc ::Plugins::GetAllPackages {{which all}} {
 	    return $plugin(allExternalPacks)
 	}
 	platform {
-	    set packList {}
+	    set packList [list]
 	    foreach name $plugin(all) {
 		if {$plugin($name,ishost)} {
 		    lappend packList $name
@@ -561,7 +562,7 @@ proc ::Plugins::GetAllPackages {{which all}} {
 	    return $packList	    
 	}
 	loaded {
-	    set packList {}
+	    set packList [list]
 	    foreach name $plugin(all) {
 		if {$plugin($name,loaded)} {
 		    lappend packList $name
@@ -577,7 +578,7 @@ proc ::Plugins::GetAllPackages {{which all}} {
 #       Create the 'typelist' option for the Open Image/Movie dialog and 
 #       standard text files.
 
-proc ::Plugins::MakeTypeListDialogOption { } {
+proc ::Plugins::MakeTypeListDialogOption {} {
     global this
     variable supSuff
     variable supMacTypes
@@ -655,7 +656,7 @@ proc ::Plugins::MakeTypeListDialogOption { } {
     set typelist(all) [concat $typelist(text) $typelist(binary)]
 }
 
-proc ::Plugins::InitHook { } {
+proc ::Plugins::InitHook {} {
     
     VerifyPackagesForMimeTypes
     if {[HavePackage QuickTimeTcl]} {
@@ -663,7 +664,7 @@ proc ::Plugins::InitHook { } {
     }
 }
 
-proc ::Plugins::QuickTimeTclInitHook { } {
+proc ::Plugins::QuickTimeTclInitHook {} {
     
     ::WB::RegisterHandler QUICKTIME ::Import::QuickTimeHandler    
 }
@@ -682,7 +683,7 @@ proc ::Plugins::QuickTimeTclInitHook { } {
 # Results:
 #       updates the 'mimeTypeDoWhat' and 'prefMimeType2Package' arrays.
 
-proc ::Plugins::VerifyPackagesForMimeTypes { } {
+proc ::Plugins::VerifyPackagesForMimeTypes {} {
     global prefs
     variable plugin
     variable prefMimeType2Package
@@ -769,7 +770,7 @@ proc ::Plugins::GetPackageListForMime {mime} {
     }
 }
 
-proc ::Plugins::GetPreferredPackageArr { } {
+proc ::Plugins::GetPreferredPackageArr {} {
     variable prefMimeType2Package
 
     return [array get prefMimeType2Package]
@@ -860,7 +861,7 @@ proc ::Plugins::SetDoWhatForMime {mime action} {
     set mimeTypeDoWhat($mime) $action
 }
 
-proc ::Plugins::GetDoWhatForMimeArr { } {
+proc ::Plugins::GetDoWhatForMimeArr {} {
     variable mimeTypeDoWhat
 
     return [array get mimeTypeDoWhat]
@@ -1225,7 +1226,7 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	}
 	
 	# Add registered binds.
-	set bindList {}
+	set bindList [list]
 	if {[info exists canvasClassBinds($name,$newTool)]} {
 	    set bindList [concat $bindList $canvasClassBinds($name,$newTool)]
 	}
@@ -1259,7 +1260,7 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 	}
 	
 	# Add registered binds.
-	set bindList {}
+	set bindList [list]
 	if {[info exists canvasInstBinds($wcan,$name,$newTool)]} {
 	    set bindList [concat $bindList  \
 	      $canvasInstBinds($wcan,$name,$newTool)]
@@ -1280,19 +1281,19 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 
 # Preference pages -------------------------------------------------------------
 
-proc ::Plugins::InitPrefsHook { } {
+proc ::Plugins::InitPrefsHook {} {
     global  prefs
     
     # Plugin ban list. Do not load these packages.
-    set prefs(pluginBanList) {}
+    set prefs(pluginBanList) [list]
     ::Debug 2 "::Plugins::InitPrefsHook"
     
     ::PrefUtils::Add [list  \
       [list prefs(pluginBanList)   prefs_pluginBanList   $prefs(pluginBanList)]]
     
     # Load all plugins available.
-    ::Plugins::SetBanList $prefs(pluginBanList)
-    ::Plugins::Init
+    SetBanList $prefs(pluginBanList)
+    Init
 }
 
 proc ::Plugins::BuildPrefsHook {wtree nbframe} {
@@ -1303,7 +1304,7 @@ proc ::Plugins::BuildPrefsHook {wtree nbframe} {
     ::Preferences::NewTableItem {Whiteboard Plugins2} [mc Plugins]
 
     set wpage [$nbframe page Plugins2]
-    ::Plugins::BuildPrefsPage $wpage
+    BuildPrefsPage $wpage
 }
 
 proc ::Plugins::BuildPrefsPage {page} {
@@ -1349,13 +1350,13 @@ proc ::Plugins::BuildPrefsPage {page} {
     }
 }
 
-proc ::Plugins::SaveHook { } {
+proc ::Plugins::SaveHook {} {
     global prefs
     variable prefplugins
     variable tmpPrefPlugins
     
     # To be correct we should also have loaded the pack here. TODO.
-    set banList {}
+    set banList [list]
     foreach name [array names tmpPrefPlugins] {
 	if {$tmpPrefPlugins($name) == 0} {
 	    lappend banList $name
@@ -1367,7 +1368,7 @@ proc ::Plugins::SaveHook { } {
     set prefs(pluginBanList) [lsort -unique $banList]
 }
 
-proc ::Plugins::CancelHook { } {
+proc ::Plugins::CancelHook {} {
     variable prefplugins
     variable tmpPrefPlugins
     
@@ -1380,7 +1381,7 @@ proc ::Plugins::CancelHook { } {
     }    
 }
 
-proc ::Plugins::UserDefaultsHook { } {
+proc ::Plugins::UserDefaultsHook {} {
     variable prefplugins
     variable tmpPrefPlugins
     
@@ -1390,7 +1391,7 @@ proc ::Plugins::UserDefaultsHook { } {
     }    
 }
 
-proc ::Plugins::DestroyPrefsHook { } {
+proc ::Plugins::DestroyPrefsHook {} {
     variable prefplugins
     variable tmpPrefPlugins
     
