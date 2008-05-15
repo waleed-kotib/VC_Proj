@@ -18,15 +18,17 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FilePrefs.tcl,v 1.21 2007-09-14 13:17:09 matben Exp $
+# $Id: FilePrefs.tcl,v 1.22 2008-05-15 07:55:21 matben Exp $
 
 package provide FilePrefs 1.0
 
 
-namespace eval ::FilePrefs:: {
+namespace eval ::FilePrefs {
 
     # Define all hooks for preference settings.
-    ::hooks::register prefsInitHook          ::FilePrefs::InitPrefsHook
+    # We use 'whiteboardPrefsInitHook' since we depend on Plugins.
+    #::hooks::register prefsInitHook          ::FilePrefs::InitPrefsHook
+    ::hooks::register whiteboardPrefsInitHook          ::FilePrefs::InitPrefsHook
     ::hooks::register prefsBuildHook         ::FilePrefs::BuildPrefsHook
     ::hooks::register prefsSaveHook          ::FilePrefs::SavePrefsHook
     ::hooks::register prefsCancelHook        ::FilePrefs::CancelPrefsHook
@@ -52,11 +54,10 @@ namespace eval ::FilePrefs:: {
     variable tmpPrefMimeType2Package
 }
 
-proc ::FilePrefs::InitPrefsHook { } {
+proc ::FilePrefs::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
     
     # Defaults... Set in Types and Plugins.
-
     
     # All MIME type stuff... The problem is that they are all arrays... 
     # Invented the ..._array resource specifier!    
@@ -311,7 +312,7 @@ proc ::FilePrefs::OnInspect {what} {
 # Results:
 #       None.
 
-proc ::FilePrefs::DeleteAssociation { } {
+proc ::FilePrefs::DeleteAssociation {} {
     variable wtable
     variable tmpMime2Description
     variable tmpMimeTypeIsText
@@ -344,7 +345,7 @@ proc ::FilePrefs::DeleteAssociation { } {
 # Results:
 #       None.
 
-proc ::FilePrefs::SaveAssociations { } {
+proc ::FilePrefs::SaveAssociations {} {
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
@@ -556,7 +557,7 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
 # Results:
 #       Modifies the tmp... variables for one MIME type.
 
-proc ::FilePrefs::SaveThisAss { } {
+proc ::FilePrefs::SaveThisAss {} {
     
     variable wtable
     
@@ -631,7 +632,7 @@ proc ::FilePrefs::SaveThisAss { } {
 # 
 #       Returns 1 if any of the mime settings was changed, and 0 else.
 
-proc ::FilePrefs::IsAnythingChangedQ { } {
+proc ::FilePrefs::IsAnythingChangedQ {} {
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
@@ -657,19 +658,19 @@ proc ::FilePrefs::IsAnythingChangedQ { } {
     return 0
 }
 
-proc ::FilePrefs::SavePrefsHook { } {
+proc ::FilePrefs::SavePrefsHook {} {
 
     ::FilePrefs::SaveAssociations
 }
 
-proc ::FilePrefs::CancelPrefsHook { } {
+proc ::FilePrefs::CancelPrefsHook {} {
 
     if {[::FilePrefs::IsAnythingChangedQ]} {
 	::Preferences::HasChanged
     }
 }
 
-proc ::FilePrefs::UserDefaultsHook { } {
+proc ::FilePrefs::UserDefaultsHook {} {
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList
@@ -683,7 +684,7 @@ proc ::FilePrefs::UserDefaultsHook { } {
     array set tmpPrefMimeType2Package [::Plugins::GetPreferredPackageArr]
 }
 
-proc ::FilePrefs::Free { } {
+proc ::FilePrefs::Free {} {
     variable tmpMime2Description
     variable tmpMimeTypeIsText
     variable tmpMime2SuffixList

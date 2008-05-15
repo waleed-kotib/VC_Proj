@@ -8,7 +8,7 @@
 #           
 #       It also contains support functions for adding external plugins.
 #      
-#  Copyright (c) 2003-2005  Mats Bengtsson
+#  Copyright (c) 2003-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Plugins.tcl,v 1.34 2008-05-14 14:05:35 matben Exp $
+# $Id: Plugins.tcl,v 1.35 2008-05-15 07:55:21 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -95,8 +95,9 @@ namespace eval ::Plugins {
     global tcl_platform
     
     # Define all hooks for preference settings. Be early!
-    ::hooks::register initHook               ::Plugins::InitHook
-    ::hooks::register prefsInitHook          ::Plugins::InitPrefsHook     10
+    #::hooks::register initHook               ::Plugins::InitHook
+    #::hooks::register prefsInitHook          ::Plugins::InitPrefsHook     10
+    ::hooks::register afterFinalHook         ::Plugins::InitPrefsHook
     ::hooks::register prefsBuildHook         ::Plugins::BuildPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
     ::hooks::register prefsSaveHook          ::Plugins::SaveHook
@@ -104,6 +105,7 @@ namespace eval ::Plugins {
     ::hooks::register prefsDestroyHook       ::Plugins::DestroyPrefsHook
 
     variable inited 0
+    
     variable packages2Platform
     variable helpers2Platform
     variable supSuff
@@ -154,22 +156,53 @@ namespace eval ::Plugins {
     variable pluginBanList [list]
 }
 
-# Plugins::Init --
+# Plugins::InitPrefsHook --
+#
+#       Handles all initializations.
+
+proc ::Plugins::InitPrefsHook {} {
+    global  prefs
+    variable inited
+
+    if {$inited} { return }
+
+    # Plugin ban list. Do not load these packages.
+    set prefs(pluginBanList) [list]
+    ::Debug 2 "::Plugins::InitPrefsHook"
+    
+    ::PrefUtils::Add [list  \
+      [list prefs(pluginBanList)   prefs_pluginBanList   $prefs(pluginBanList)]]
+    
+    # Load all plugins available.
+    SetBanList $prefs(pluginBanList)
+    InitAndLoad
+    
+    # Make sure the settings are consistent with the available packages.
+    VerifyPackagesForMimeTypes
+    if {[HavePackage QuickTimeTcl]} {
+	QuickTimeTclInitHook
+    }
+    
+    ::Debug 2 "--> whiteboardPrefsInitHook"
+    ::hooks::run whiteboardPrefsInitHook
+    
+    set inited 1
+}
+
+# Plugins::InitAndLoad --
 # 
 #       The initialization function which loads all plugins available.
 #       
 
-proc ::Plugins::Init {} {
+proc ::Plugins::InitAndLoad {} {
     global this
     variable mimeTypeDoWhat
     variable prefMimeType2Package
     variable supSuff
     variable supMacTypes
     variable plugin
-    variable inited
     
-    ::Debug 2 "::Plugins::Init"
-    if {$inited} { return }
+    ::Debug 2 "::Plugins::InitAndLoad"
     
     foreach mime [::Types::GetAllMime] {
 	set mimeTypeDoWhat($mime) "unavailable"
@@ -196,8 +229,6 @@ proc ::Plugins::Init {} {
     
     # This must be done after all plugins identified and loaded.
     MakeTypeListDialogOption
-    
-    set inited 1
 }
 
 proc ::Plugins::InitTk {} {
@@ -656,13 +687,13 @@ proc ::Plugins::MakeTypeListDialogOption {} {
     set typelist(all) [concat $typelist(text) $typelist(binary)]
 }
 
-proc ::Plugins::InitHook {} {
-    
-    VerifyPackagesForMimeTypes
-    if {[HavePackage QuickTimeTcl]} {
-	QuickTimeTclInitHook
-    }
-}
+# proc ::Plugins::InitHook {} {
+#     
+#     VerifyPackagesForMimeTypes
+#     if {[HavePackage QuickTimeTcl]} {
+# 	QuickTimeTclInitHook
+#     }
+# }
 
 proc ::Plugins::QuickTimeTclInitHook {} {
     
@@ -1280,21 +1311,6 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 }
 
 # Preference pages -------------------------------------------------------------
-
-proc ::Plugins::InitPrefsHook {} {
-    global  prefs
-    
-    # Plugin ban list. Do not load these packages.
-    set prefs(pluginBanList) [list]
-    ::Debug 2 "::Plugins::InitPrefsHook"
-    
-    ::PrefUtils::Add [list  \
-      [list prefs(pluginBanList)   prefs_pluginBanList   $prefs(pluginBanList)]]
-    
-    # Load all plugins available.
-    SetBanList $prefs(pluginBanList)
-    Init
-}
 
 proc ::Plugins::BuildPrefsHook {wtree nbframe} {
     

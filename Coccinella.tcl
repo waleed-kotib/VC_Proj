@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.183 2008-05-13 09:12:59 matben Exp $	
+# $Id: Coccinella.tcl,v 1.184 2008-05-15 07:55:21 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -306,6 +306,7 @@ set state(launchStatus) preferences
 ::Init::Config
 
 # Components that need to add their own preferences need to be registered here.
+# @@@ Is this really necessary? Can't they call ::PrefUtils::Add anytime?
 ::Debug 2 "--> prefsInitHook"
 ::hooks::run prefsInitHook
 

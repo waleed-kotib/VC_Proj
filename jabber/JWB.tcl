@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.96 2008-05-13 09:13:00 matben Exp $
+# $Id: JWB.tcl,v 1.97 2008-05-15 07:55:21 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -29,7 +29,7 @@ package provide JWB 1.0
 
 # The ::JWB:: namespace -------------------------------------------------
 
-namespace eval ::JWB:: {
+namespace eval ::JWB {
        
     ::hooks::register jabberInitHook               ::JWB::Init
     
