@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.95 2008-05-15 07:55:21 matben Exp $
+# $Id: Whiteboard.tcl,v 1.96 2008-05-15 14:14:57 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -95,9 +95,13 @@ namespace eval ::WB {
     option add *TopWhiteboard.logoImage            logo            widgetDefault
 
     # Drawing tool buttons.
+    # First define typical names, then redefine special names.
     foreach tname [array names btName2No] {
 	option add *TopWhiteboard.tool${tname}Image draw-$tname    widgetDefault
     }
+    option add *TopWhiteboard.toolmoveImage   transform-move    widgetDefault
+    option add *TopWhiteboard.toolrotImage    transform-rotate  widgetDefault
+    option add *TopWhiteboard.toolpaintImage  fill-color        widgetDefault
 
     # Color selector.
     option add *TopWhiteboard.bwrectImage          bwrect          widgetDefault
@@ -671,6 +675,8 @@ proc ::WB::BuildWhiteboard {w args} {
     
     Debug 2 "::WB::BuildWhiteboard w=$w, args='$args'"
     
+    ::Plugins::InitPrefsHook
+
     namespace eval ::WB::${w}:: {}
     
     upvar ::WB::${w}::wapp wapp

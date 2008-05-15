@@ -74,7 +74,7 @@ theme engine looks up an image or icon, it first looks in the present theme,
 and then in the built in default theme (Crystal). It is using the following
 fallback hierarchy:
 
-  contact-new-Dis -> contact-new
+  list-add-user-Dis -> list-add-user
     PNG -> GIF
 
 where it strips off the last "-" part for each image format.

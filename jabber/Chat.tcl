@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.288 2008-04-17 15:00:28 matben Exp $
+# $Id: Chat.tcl,v 1.289 2008-05-15 14:14:56 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -64,12 +64,12 @@ namespace eval ::Chat {
 
     option add *Chat*sendImage            mail-send             widgetDefault
     option add *Chat*sendDisImage         mail-send-Dis         widgetDefault
-    option add *Chat*sendFileImage        mail-attach           widgetDefault
-    option add *Chat*sendFileDisImage     mail-attach-Dis       widgetDefault
+    option add *Chat*sendFileImage        mail-attachment           widgetDefault
+    option add *Chat*sendFileDisImage     mail-attachment-Dis       widgetDefault
     option add *Chat*saveImage            document-save         widgetDefault
     option add *Chat*saveDisImage         document-save-Dis     widgetDefault
-    option add *Chat*historyImage         history               widgetDefault
-    option add *Chat*historyDisImage      history-Dis           widgetDefault
+    option add *Chat*historyImage         view-history               widgetDefault
+    option add *Chat*historyDisImage      view-history-Dis           widgetDefault
     option add *Chat*settingsImage        preferences           widgetDefault
     option add *Chat*settingsDisImage     preferences-Dis       widgetDefault
     option add *Chat*printImage           document-print        widgetDefault
@@ -92,8 +92,8 @@ namespace eval ::Chat {
     }
     
     # These are stored in images/16 so no conflicts.
-    option add *Chat*history16Image       history               widgetDefault    
-    option add *Chat*history16DisImage    history-Dis           widgetDefault    
+    option add *Chat*history16Image       view-history               widgetDefault    
+    option add *Chat*history16DisImage    view-history-Dis           widgetDefault    
     
     option add *Chat*mePreForeground      red                   widgetDefault
     option add *Chat*mePreBackground      ""                    widgetDefault

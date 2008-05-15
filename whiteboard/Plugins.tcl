@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Plugins.tcl,v 1.35 2008-05-15 07:55:21 matben Exp $
+# $Id: Plugins.tcl,v 1.36 2008-05-15 14:14:57 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -94,10 +94,13 @@ package provide Plugins 1.0
 namespace eval ::Plugins {
     global tcl_platform
     
-    # Define all hooks for preference settings. Be early!
+    # Define all hooks for preference settings.
+    # We init as late as possible.
+    # Make sure we are inited before showing any prefs panels.
     #::hooks::register initHook               ::Plugins::InitHook
     #::hooks::register prefsInitHook          ::Plugins::InitPrefsHook     10
     ::hooks::register afterFinalHook         ::Plugins::InitPrefsHook
+    ::hooks::register prefsBuildHook         ::Plugins::InitPrefsHook 10
     ::hooks::register prefsBuildHook         ::Plugins::BuildPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
     ::hooks::register prefsSaveHook          ::Plugins::SaveHook
@@ -158,7 +161,8 @@ namespace eval ::Plugins {
 
 # Plugins::InitPrefsHook --
 #
-#       Handles all initializations.
+#       Handles all initializations. 
+#       We may call this any time to make sure it is inited.
 
 proc ::Plugins::InitPrefsHook {} {
     global  prefs

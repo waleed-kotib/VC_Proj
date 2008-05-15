@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.242 2008-05-05 14:22:28 matben Exp $
+# $Id: GroupChat.tcl,v 1.243 2008-05-15 14:14:57 matben Exp $
 
 package require Create
 package require Enter
@@ -59,8 +59,8 @@ namespace eval ::GroupChat:: {
     option add *GroupChat*sendDisImage         mail-send-Dis          widgetDefault
     option add *GroupChat*saveImage            document-save             widgetDefault
     option add *GroupChat*saveDisImage         document-save-Dis          widgetDefault
-    option add *GroupChat*historyImage         history          widgetDefault
-    option add *GroupChat*historyDisImage      history-Dis       widgetDefault
+    option add *GroupChat*historyImage         view-history          widgetDefault
+    option add *GroupChat*historyDisImage      view-history-Dis       widgetDefault
     option add *GroupChat*inviteImage          invite           widgetDefault
     option add *GroupChat*inviteDisImage       invite-Dis        widgetDefault
     option add *GroupChat*infoImage            dialog-information             widgetDefault

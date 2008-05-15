@@ -18,14 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.103 2008-04-25 07:08:04 matben Exp $
+# $Id: Register.tcl,v 1.104 2008-05-15 14:14:57 matben Exp $
 
 package provide Register 1.0
 
 namespace eval ::Register {
 
-    option add *JRegister.registerImage         register         widgetDefault
-    option add *JRegister.registerDisImage      register-Dis     widgetDefault
+    option add *JRegister.registerImage         services         widgetDefault
+    option add *JRegister.registerDisImage      services-Dis     widgetDefault
 }
 
 proc ::Register::ValidatePortNumber {str} {    

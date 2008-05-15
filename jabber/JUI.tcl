@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.245 2008-05-13 09:13:00 matben Exp $
+# $Id: JUI.tcl,v 1.246 2008-05-15 14:14:57 matben Exp $
 
 package provide JUI 1.0
 
@@ -43,8 +43,8 @@ namespace eval ::JUI {
     option add *JMain.inboxDisImage           inbox-Dis             widgetDefault
     option add *JMain.inboxLetterImage        inbox-unread          widgetDefault
     option add *JMain.inboxLetterDisImage     inbox-unread-Dis      widgetDefault
-    option add *JMain.adduserImage            contact-new           widgetDefault
-    option add *JMain.adduserDisImage         contact-new-Dis       widgetDefault
+    option add *JMain.adduserImage            list-add-user           widgetDefault
+    option add *JMain.adduserDisImage         list-add-user-Dis       widgetDefault
     option add *JMain.stopImage               dialog-error          widgetDefault
     option add *JMain.stopDisImage            dialog-error-Dis      widgetDefault
     option add *JMain.chatImage               mail-message-new      widgetDefault
@@ -59,7 +59,7 @@ namespace eval ::JUI {
 
     # Other icons.
     option add *JMain.sizeGripImage               sizegrip        widgetDefault
-    option add *JMain.secureImage                 security          widgetDefault
+    option add *JMain.secureImage                 security-high   widgetDefault
 
     option add *JMain.cociEs32                    coccinella2      widgetDefault
     option add *JMain.cociEsActive32              coccinella2-shadow widgetDefault

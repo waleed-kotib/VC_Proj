@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.151 2008-05-01 13:40:54 matben Exp $
+# $Id: Disco.tcl,v 1.152 2008-05-15 14:14:57 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -46,8 +46,8 @@ namespace eval ::Disco {
     option add *Disco.relief                flat            50
     option add *Disco.padding               0               50
 
-    option add *Disco.tabImage              run             widgetDefault
-    option add *Disco.tabDisImage           run-Dis         widgetDefault
+    option add *Disco.tabImage              services        widgetDefault
+    option add *Disco.tabDisImage           services-Dis    widgetDefault
     
     # Specials.
     option add *Disco*TreeCtrl.backgroundImage    roster-default  widgetDefault
