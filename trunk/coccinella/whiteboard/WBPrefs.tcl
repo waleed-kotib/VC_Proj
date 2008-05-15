@@ -18,14 +18,16 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: WBPrefs.tcl,v 1.17 2008-01-18 12:49:31 matben Exp $
+# $Id: WBPrefs.tcl,v 1.18 2008-05-15 07:55:21 matben Exp $
 
 package provide WBPrefs 1.0
 
 namespace eval ::WBPrefs:: {
 
     # Define all hooks for preference settings.
-    ::hooks::register prefsInitHook          ::WBPrefs::InitPrefsHook
+    # We use 'whiteboardPrefsInitHook' since we depend on Plugins.
+    #::hooks::register prefsInitHook          ::WBPrefs::InitPrefsHook
+    ::hooks::register whiteboardPrefsInitHook          ::WBPrefs::InitPrefsHook
     ::hooks::register prefsBuildHook         ::WBPrefs::BuildPrefsHook
     ::hooks::register prefsSaveHook          ::WBPrefs::SavePrefsHook
     ::hooks::register prefsCancelHook        ::WBPrefs::CancelPrefsHook

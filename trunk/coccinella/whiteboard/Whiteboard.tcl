@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.94 2008-04-17 15:00:48 matben Exp $
+# $Id: Whiteboard.tcl,v 1.95 2008-05-15 07:55:21 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -45,9 +45,11 @@ package provide Whiteboard 1.0
 namespace eval ::WB {
         
     # Add all event hooks.
+    # We use 'whiteboardPrefsInitHook' since we depend on Plugins.
     ::hooks::register firstLaunchHook     ::WB::FirstLaunchHook
     ::hooks::register initHook            ::WB::InitHook
-    ::hooks::register prefsInitHook       ::WB::InitPrefsHook
+    #::hooks::register prefsInitHook       ::WB::InitPrefsHook
+    ::hooks::register whiteboardPrefsInitHook       ::WB::InitPrefsHook
     ::hooks::register quitAppHook         ::WB::QuitAppHook
     ::hooks::register quitAppHook         ::WB::SaveAnyState
     ::hooks::register whiteboardCloseHook ::WB::CloseWhiteboard
