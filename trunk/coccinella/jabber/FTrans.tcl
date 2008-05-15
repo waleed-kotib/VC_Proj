@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.35 2008-05-05 14:22:28 matben Exp $
+# $Id: FTrans.tcl,v 1.36 2008-05-15 14:14:57 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -38,8 +38,8 @@ namespace eval ::FTrans {
     set title [mc "Send File"]
         
     option add *FTrans.title                 $title           widgetDefault
-    option add *FTrans.sendFileImage         mail-attach      widgetDefault
-    option add *FTrans.sendFileDisImage      mail-attach-Dis  widgetDefault
+    option add *FTrans.sendFileImage         mail-attachment      widgetDefault
+    option add *FTrans.sendFileDisImage      mail-attachment-Dis  widgetDefault
     
     variable uid 0
     

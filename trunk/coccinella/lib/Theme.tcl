@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.52 2008-04-17 15:00:32 matben Exp $
+# $Id: Theme.tcl,v 1.53 2008-05-15 14:14:57 matben Exp $
 
 package provide Theme 1.0
 
@@ -425,7 +425,7 @@ proc ::Theme::FindIconWithName {spec name} {
 		set f [file join $path $spec].$fmt
 		
 		# We provide a single step fallback: 
-		#   contact-new-Dis -> contact-new   etc.
+		#   list-add-user-Dis -> list-add-user   etc.
 		if {![file exists $f]} {
 		    set tail [file tail $spec]
 		    set parts [split $tail -]

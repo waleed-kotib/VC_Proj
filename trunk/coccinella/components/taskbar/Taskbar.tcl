@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.40 2008-04-17 15:00:28 matben Exp $
+# $Id: Taskbar.tcl,v 1.41 2008-05-15 14:14:56 matben Exp $
 
 package require balloonhelp
 
@@ -177,7 +177,7 @@ proc ::Taskbar::InitHook {} {
     set INFO [::Theme::FindIconSize 16 dialog-information]
     set SET  [::Theme::FindIconSize 16 preferences]
     set MSG  [::Theme::FindIconSize 16 mail-message-new]
-    set ADD  [::Theme::FindIconSize 16 contact-new]
+    set ADD  [::Theme::FindIconSize 16 list-add-user]
     set EXIT [::Theme::FindIconSize 16 application-exit]
     set STAT [::Roster::GetMyPresenceIcon]
     

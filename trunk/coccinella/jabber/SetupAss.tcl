@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.53 2008-04-17 15:00:32 matben Exp $
+# $Id: SetupAss.tcl,v 1.54 2008-05-15 14:14:57 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -36,8 +36,8 @@ namespace eval ::SetupAss::  {
     variable inited 0
 
     # Icons
-    option add *SetupAss*assistantImage       assistant        widgetDefault
-    option add *SetupAss*assistantDisImage    assistant-Dis    widgetDefault
+    option add *SetupAss*assistantImage       tools-wizard        widgetDefault
+    option add *SetupAss*assistantDisImage    tools-wizard-Dis    widgetDefault
     
     # Event hooks:
     ::hooks::register  connectState  ::SetupAss::ConnectStateHook
@@ -77,7 +77,7 @@ proc ::SetupAss::SetupAss {} {
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} -class SetupAss
-    wm title $w [::msgcat::mc {Setup Assistant}]
+    wm title $w [::msgcat::mc "Setup Assistant"]
     
     set im  [::Theme::Find32Icon $w assistantImage]
     set imd [::Theme::Find32Icon $w assistantDisImage]

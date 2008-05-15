@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: AddressBook.tcl,v 1.13 2008-04-17 15:00:28 matben Exp $
+# $Id: AddressBook.tcl,v 1.14 2008-05-15 14:14:56 matben Exp $
 
 namespace eval ::AddressBook { 
 
@@ -46,8 +46,8 @@ proc ::AddressBook::Init {} {
     option add *AddressBook*box.relief            sunken          50
     option add *AddressBook.padding               2               50
 
-    option add *AddressBook.addressBook16Image      history       widgetDefault
-    option add *AddressBook.addressBook16DisImage   history-Dis   widgetDefault
+    option add *AddressBook.addressBook16Image      view-history       widgetDefault
+    option add *AddressBook.addressBook16DisImage   view-history-Dis   widgetDefault
 }
 
 
@@ -156,7 +156,7 @@ proc ::AddressBook::Build {w args} {
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1
 
-    set iconImage  [::Theme::Find16Icon icons/16x16/history]
+    set iconImage  [::Theme::Find16Icon icons/16x16/view-history]
     set opts {-text AddressBook -button 1 -image $iconImage -open 1}
     eval {::ITree::Item $wtree "AddressBook"} $opts
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.20 2008-04-17 15:00:28 matben Exp $
+# $Id: NotifyCall.tcl,v 1.21 2008-05-15 14:14:56 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -204,8 +204,8 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
     grid columnconfigure $win 1 -uniform a
     
     # Level controls.
-    set images(microphone) [::Theme::FindIconSize 16 audio-microphone]
-    set images(speaker)    [::Theme::FindIconSize 16 audio-speaker]
+    set images(microphone) [::Theme::FindIconSize 16 audio-input-microphone]
+    set images(speaker)    [::Theme::FindIconSize 16 audio-output-speaker]
 
     # Microphone:
     set wmic $win.left.mic
@@ -286,8 +286,8 @@ proc ::NotifyCall::Slot {win} {
     upvar #0 $win state
 	  
     # Level controls.
-    set images(microphone) [::Theme::FindIconSize 16 audio-microphone]
-    set images(speaker)    [::Theme::FindIconSize 16 audio-speaker]
+    set images(microphone) [::Theme::FindIconSize 16 audio-input-microphone]
+    set images(speaker)    [::Theme::FindIconSize 16 audio-output-speaker]
 
     ttk::frame $win -padding {4 2}
     

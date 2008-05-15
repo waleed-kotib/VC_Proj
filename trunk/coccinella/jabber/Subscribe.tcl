@@ -18,15 +18,15 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.76 2008-04-23 06:55:35 matben Exp $
+# $Id: Subscribe.tcl,v 1.77 2008-05-15 14:14:57 matben Exp $
 
 package provide Subscribe 1.0
 
 namespace eval ::Subscribe {
 
     # Use option database for customization.
-    option add *JSubscribe.adduserImage       contact-new         widgetDefault
-    option add *JSubscribe.adduserDisImage    contact-new-Dis     widgetDefault    
+    option add *JSubscribe.adduserImage       list-add-user         widgetDefault
+    option add *JSubscribe.adduserDisImage    list-add-user-Dis     widgetDefault    
     option add *JSubscribe.vcardImage         vcard               widgetDefault
     
     # Define all hooks for preference settings.
@@ -942,16 +942,16 @@ proc ::SubscribeAuto::SendAcceptMsg {jid} {
 namespace eval ::SubscribeMulti {
     
     # Use option database for customization.
-    option add *JSubscribeMulti.adduserImage           contact-new         widgetDefault
-    option add *JSubscribeMulti.adduserDisImage        contact-new-Dis      widgetDefault
+    option add *JSubscribeMulti.adduserImage           list-add-user         widgetDefault
+    option add *JSubscribeMulti.adduserDisImage        list-add-user-Dis      widgetDefault
     option add *JSubscribeMulti.vcardImage             vcard           widgetDefault
 
-    option add *JSubscribeMultiAAccept.adduserImage           contact-new         widgetDefault
-    option add *JSubscribeMultiAAccept.adduserDisImage        contact-new-Dis      widgetDefault
+    option add *JSubscribeMultiAAccept.adduserImage           list-add-user         widgetDefault
+    option add *JSubscribeMultiAAccept.adduserDisImage        list-add-user-Dis      widgetDefault
     option add *JSubscribeMultiAAccept.vcardImage             vcard           widgetDefault
 
-    option add *JSubscribeMultiAReject.adduserImage           contact-new         widgetDefault
-    option add *JSubscribeMultiAReject.adduserDisImage        contact-new-Dis      widgetDefault
+    option add *JSubscribeMultiAReject.adduserImage           list-add-user         widgetDefault
+    option add *JSubscribeMultiAReject.adduserDisImage        list-add-user-Dis      widgetDefault
     option add *JSubscribeMultiAReject.vcardImage             vcard           widgetDefault
 
     variable uid 0

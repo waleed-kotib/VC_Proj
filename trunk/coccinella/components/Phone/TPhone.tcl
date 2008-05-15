@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: TPhone.tcl,v 1.6 2008-04-17 15:00:28 matben Exp $
+# $Id: TPhone.tcl,v 1.7 2008-05-15 14:14:56 matben Exp $
 
 #-------------------------------------------------------------------------------
 # USAGE:
@@ -60,8 +60,8 @@ proc ::TPhone::Init {} {
 	foreach name $names {
 	    set images($name) [::Theme::FindIcon elements/phone/$name]
 	}
-	set images(microphone) [::Theme::FindIconSize 16 audio-microphone]
-	set images(speaker)    [::Theme::FindIconSize 16 audio-speaker]
+	set images(microphone) [::Theme::FindIconSize 16 audio-input-microphone]
+	set images(speaker)    [::Theme::FindIconSize 16 audio-output-speaker]
     }
     if {$::this(ttk)} {
 	set styleCmd ttk::style

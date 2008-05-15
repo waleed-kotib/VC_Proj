@@ -18,14 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.64 2008-05-05 14:22:28 matben Exp $
+# $Id: JUser.tcl,v 1.65 2008-05-15 14:14:57 matben Exp $
 
 package provide JUser 1.0
 
 namespace eval ::JUser {
 	
-    option add *JUser.adduserImage              contact-new         widgetDefault
-    option add *JUser.adduserDisImage           contact-new-Dis     widgetDefault
+    option add *JUser.adduserImage              list-add-user         widgetDefault
+    option add *JUser.adduserDisImage           list-add-user-Dis     widgetDefault
     option add *JUser.vcardImage                vcard               widgetDefault
 
     # A unique running identifier.
