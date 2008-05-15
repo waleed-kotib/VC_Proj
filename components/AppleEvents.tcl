@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# $Id: AppleEvents.tcl,v 1.11 2008-02-25 15:20:05 matben Exp $
+# $Id: AppleEvents.tcl,v 1.12 2008-05-15 12:37:36 matben Exp $
 
 namespace eval ::AppleEvents {
     
@@ -51,6 +51,21 @@ proc ::AppleEvents::Init {} {
     component::register AppleEvents
 }
 
+# AppleEvents::WhenLaunched --
+#
+#       This is a method to invoke handlers *after* we have launched.
+
+proc ::AppleEvents::WhenLaunched {cmd event reply} {
+    global  state
+    
+    if {[info exists state(launchStatus)]} {
+	::hooks::register afterFinalHook \
+	  [list ::AppleEvent::LaunchHook $cmd $event $reply]
+    } else {
+	uplevel #0 $cmd [list $event $reply]
+    }
+}
+
 proc ::AppleEvents::HandleOURL {theAppleEvent theReplyAE} {
 
     ::Debug 4 "::AppleEvents::HandleOURL theAppleEvent=$theAppleEvent"
@@ -59,9 +74,13 @@ proc ::AppleEvents::HandleOURL {theAppleEvent theReplyAE} {
 }
 
 proc ::AppleEvents::OpenAppHandler {theAppleEvent theReplyAE} {
+    WhenLaunched ::AppleEvents::OpenApp $theAppleEvent $theReplyAE
+}
+
+proc ::AppleEvents::OpenApp {theAppleEvent theReplyAE} {
 
     # Have no idea of what to do here...
-    ::Debug 4 "::AppleEvents::OpenAppHandler theAppleEvent=$theAppleEvent"
+    ::Debug 4 "::AppleEvents::OpenApp theAppleEvent=$theAppleEvent"
     set eventClass [tclAE::getAttributeData $theAppleEvent evcl]
     set eventID [tclAE::getAttributeData $theAppleEvent evid]
     ::Debug 4 "\t eventClass=$eventClass, eventID=$eventID"
@@ -70,8 +89,12 @@ proc ::AppleEvents::OpenAppHandler {theAppleEvent theReplyAE} {
 }
 
 proc ::AppleEvents::OpenHandler {theAppleEvent theReplyAE} {
+    WhenLaunched ::AppleEvents::Open $theAppleEvent $theReplyAE
+}
 
-    ::Debug 4 "::AppleEvents::OpenHandler theAppleEvent=$theAppleEvent"
+proc ::AppleEvents::Open {theAppleEvent theReplyAE} {
+
+    ::Debug 4 "::AppleEvents::Open theAppleEvent=$theAppleEvent"
     set pathDesc [tclAE::getKeyDesc $theAppleEvent ----]
     set paths [ExtractPaths $pathDesc wasList]
     tclAE::disposeDesc $pathDesc
@@ -87,6 +110,10 @@ proc ::AppleEvents::OpenHandler {theAppleEvent theReplyAE} {
 }
 
 proc ::AppleEvents::PrintHandler {theAppleEvent theReplyAE} {
+    WhenLaunched ::AppleEvents::Print $theAppleEvent $theReplyAE
+}
+
+proc ::AppleEvents::Print {theAppleEvent theReplyAE} {
 
     set pathDesc [tclAE::getKeyDesc $theAppleEvent ----]
     set paths [ExtractPaths $pathDesc wasList]
@@ -118,7 +145,7 @@ proc ::AppleEvents::QuitHandler {theAppleEvent theReplyAE} {
 
 proc ::AppleEvents::ExtractPaths {files {wasList ""}} {
     
-    set paths {}
+    set paths [list]
     upvar 1 $wasList listOfPaths
     
     switch -- [tclAE::getDescType $files] {
