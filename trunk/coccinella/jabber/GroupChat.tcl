@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.243 2008-05-15 14:14:57 matben Exp $
+# $Id: GroupChat.tcl,v 1.244 2008-05-16 09:44:32 matben Exp $
 
 package require Create
 package require Enter
@@ -869,7 +869,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
 
     ttk::frame $wgroup
     ttk::checkbutton $wgroup.active -style Toolbutton \
-      -image [::Theme::FindIconSize 16 return]   \
+      -image [::Theme::FindIconSize 16 keypress-return]   \
       -command [list [namespace current]::ActiveCmd $chattoken] \
       -variable $chattoken\(active)
     ttk::button $wgroup.bmark -style Toolbutton \

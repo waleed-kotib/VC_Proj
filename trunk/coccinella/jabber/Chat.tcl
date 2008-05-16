@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.289 2008-05-15 14:14:56 matben Exp $
+# $Id: Chat.tcl,v 1.290 2008-05-16 09:44:32 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1589,7 +1589,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     
     ttk::frame $wbot
     ttk::checkbutton $wbot.active -style Toolbutton \
-      -image [::Theme::FindIconSize 16 return] \
+      -image [::Theme::FindIconSize 16 keypress-return] \
       -command [list [namespace current]::ActiveCmd $chattoken] \
       -variable $chattoken\(active)
     set cmd [list [namespace current]::SmileyCmd $chattoken]
