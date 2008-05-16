@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.290 2008-05-16 09:44:32 matben Exp $
+# $Id: Chat.tcl,v 1.291 2008-05-16 13:53:13 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -59,17 +59,17 @@ namespace eval ::Chat {
     # widgetDefault.
 
     # Icons
-    option add *StartChat.chatImage       mail-message-new      widgetDefault
-    option add *StartChat.chatDisImage    mail-message-new-Dis  widgetDefault
+    option add *StartChat.chatImage       chat-message-new      widgetDefault
+    option add *StartChat.chatDisImage    chat-message-new-Dis  widgetDefault
 
     option add *Chat*sendImage            mail-send             widgetDefault
     option add *Chat*sendDisImage         mail-send-Dis         widgetDefault
-    option add *Chat*sendFileImage        mail-attachment           widgetDefault
-    option add *Chat*sendFileDisImage     mail-attachment-Dis       widgetDefault
+    option add *Chat*sendFileImage        mail-attachment       widgetDefault
+    option add *Chat*sendFileDisImage     mail-attachment-Dis   widgetDefault
     option add *Chat*saveImage            document-save         widgetDefault
     option add *Chat*saveDisImage         document-save-Dis     widgetDefault
-    option add *Chat*historyImage         view-history               widgetDefault
-    option add *Chat*historyDisImage      view-history-Dis           widgetDefault
+    option add *Chat*historyImage         view-history          widgetDefault
+    option add *Chat*historyDisImage      view-history-Dis      widgetDefault
     option add *Chat*settingsImage        preferences           widgetDefault
     option add *Chat*settingsDisImage     preferences-Dis       widgetDefault
     option add *Chat*printImage           document-print        widgetDefault
