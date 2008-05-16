@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.14 2008-05-13 09:13:00 matben Exp $
+# $Id: Servicons.tcl,v 1.15 2008-05-16 08:04:26 matben Exp $
 
 package require Icondef
 
@@ -137,8 +137,9 @@ proc ::Servicons::Get {key} {
 
     set key [string map [array get alias] $key]
     if {[string match gateway/* $key]} {
-	set gtype [lindex [split $key /] 1]/available
-	return [::Rosticons::Get $gtype]
+	# Special and temporary...
+	set type [lindex [split $key /] 1]
+	return [::Theme::FindIconSize 16 protocol-$type]
     } elseif {[info exists icons($key)]} {
 	return $icons($key)
     } else {
@@ -170,8 +171,9 @@ proc ::Servicons::GetFromTypeList {typelist} {
     
     foreach type $sorted {
 	if {[string match gateway/* $type]} {
-	    set gtype [lindex [split $type /] 1]/available
-	    return [::Rosticons::Get $gtype]
+	    # Special and temporary...
+	    set gtype [lindex [split $type /] 1]
+	    return [::Theme::FindIconSize 16 protocol-$gtype]
 	} elseif {[info exists icons($type)]} {
 	    return $icons($type)
 	}

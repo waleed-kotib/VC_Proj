@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.104 2008-05-15 14:14:57 matben Exp $
+# $Id: Register.tcl,v 1.105 2008-05-16 08:04:26 matben Exp $
 
 package provide Register 1.0
 
@@ -1037,7 +1037,7 @@ proc ::GenRegister::NewDlg {args} {
     if {$server ne ""} {
 	set types [$jstate(jlib) disco types $server]
 	set gateway [lsearch -glob -inline $types gateway/*]
-	set type [lindex [split $types /] 1]
+	set type [lindex [split $gateway /] 1]
     }
     set label [mc Register]
     
@@ -1049,14 +1049,14 @@ proc ::GenRegister::NewDlg {args} {
 	    if {$gateway ne ""} {
 		set type [lindex [split $gateway /] 1]
 		set spec protocol-$type
-		set im   [::Theme::FindIcon icons/32x32/$spec]
-		set imd  [::Theme::FindIcon icons/32x32/$spec-Dis]
+		set im   [::Theme::FindIconSize 32 $spec]
+		set imd  [::Theme::FindIconSize 32 $spec-Dis]
 		set label "[mc Register] [::Gateway::GetShort $type]"
 	    } elseif {$conference ne ""} {
 		set type [lindex [split $conference /] 1]
 		set spec protocol-$type
-		set im   [::Theme::FindIcon icons/32x32/$spec]
-		set imd  [::Theme::FindIcon icons/32x32/$spec-Dis]
+		set im   [::Theme::FindIconSize 32 $spec]
+		set imd  [::Theme::FindIconSize 32 $spec-Dis]
 	    }
 	    if {$im eq ""} {
 		set im   [::Theme::Find32Icon $w registerImage]
@@ -1109,7 +1109,8 @@ proc ::GenRegister::NewDlg {args} {
 	pack $wcomboserver -fill x -expand 1
     } elseif {$dialogType eq "serverlist"} {
 	set menuDef [list]
-	set imtrpt [::Servicons::Get $gateway]
+	#set imtrpt [::Servicons::Get $gateway]
+	set imtrpt [::Theme::FindIconSize 16 protocol-$type]
 	set name [::Gateway::GetShort $type]
 	foreach j $argsA(-serverlist) {
 	    set xname "$name ($j)"
