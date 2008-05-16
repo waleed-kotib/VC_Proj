@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
-# $Id: AppleEvents.tcl,v 1.12 2008-05-15 12:37:36 matben Exp $
+# $Id: AppleEvents.tcl,v 1.13 2008-05-16 12:07:33 matben Exp $
 
 namespace eval ::AppleEvents {
     
@@ -60,7 +60,7 @@ proc ::AppleEvents::WhenLaunched {cmd event reply} {
     
     if {[info exists state(launchStatus)]} {
 	::hooks::register afterFinalHook \
-	  [list ::AppleEvent::LaunchHook $cmd $event $reply]
+	  [list ::AppleEvents::LaunchHook $cmd $event $reply]
     } else {
 	uplevel #0 $cmd [list $event $reply]
     }
