@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.96 2008-05-15 14:14:57 matben Exp $
+# $Id: Whiteboard.tcl,v 1.97 2008-05-16 12:54:49 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -351,7 +351,7 @@ proc ::WB::InitIcons {w} {
     # Drawing tool buttons.
     foreach name [array names btName2No] {
 	set rsrc [option get $w tool${name}Image {}]
-	set wbicons($name) [::Theme::FindIcon elements/$rsrc]
+	set wbicons($name) [::Theme::FindIconSize 22 $rsrc]
     }
     
     # Color selector.
