@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.146 2008-05-05 11:57:31 matben Exp $
+# $Id: Login.tcl,v 1.147 2008-05-16 06:11:51 matben Exp $
 
 package provide Login 1.0
 
@@ -87,6 +87,9 @@ proc ::Login::Dlg {} {
     variable wpopup
     variable tmpProfArr
     variable morevar
+    
+    # @@@ TODO: move widget names to 'widgets' array.
+    variable widgets
     upvar ::Jabber::jprefs jprefs
     
     # Singleton.
@@ -206,6 +209,12 @@ proc ::Login::Dlg {} {
 	grid  $frmid.euser  $frmid.epass  -sticky ew
     }
     grid columnconfigure $frmid 1 -weight 1
+    
+    set widgets(jid)       $frmid.ejid
+    set widgets(server)    $frmid.eserv
+    set widgets(username)  $frmid.euser
+    set widgets(password)  $frmid.epass
+    set widgets(resource)  $frmid.eres
     
     ::balloonhelp::balloonforwindow $frmid.ejid [mc tooltip-contactid]
     ::balloonhelp::balloonforwindow $frmid.epass [mc registration-password]
@@ -449,6 +458,7 @@ proc ::Login::DoLogin {} {
     variable resource
     variable jid
     variable moreOpts
+    variable widgets
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
@@ -469,6 +479,15 @@ proc ::Login::DoLogin {} {
 	    set mcname [mc [string totitle $name]]
 	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
 	      -message [mc jamessnamemissing $mcname]
+	    if {$name eq "password"} {
+		focus $widgets(password)
+	    } else {
+		if {$config(login,style) eq "jid"} {
+		    focus $widgets(jid)
+		} else {
+		    focus $widgets($name)
+		}
+	    }
 	    return
 	}
 	if {$name eq "password"} {
