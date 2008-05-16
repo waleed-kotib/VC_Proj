@@ -36,7 +36,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Icondef.tcl,v 1.4 2008-04-17 15:00:29 matben Exp $
+# $Id: Icondef.tcl,v 1.5 2008-05-16 12:14:24 matben Exp $
 
 package provide Icondef 1.0
 
@@ -195,3 +195,29 @@ proc ::Icondef::ParseIcon {imageArr dir xmllist} {
     }
     set imArr($key) $im
 }
+
+# set path /Users/mats/Tcl/Coccinella/coccinella/iconsets/service/default
+# ::Icondef::DisplayWindow $path
+
+proc ::Icondef::DisplayWindow {path} {
+    variable idata
+    
+    unset -nocomplain idata
+    set name [::Icondef::Load $path  \
+      [namespace current]::idata     \
+      [namespace current]::mdata]
+
+    set i 0
+    set wtop [ui::autoname]
+    set w $wtop.f
+    toplevel $wtop
+    pack [ttk::frame $w -padding 20]
+    foreach {type image} [array get idata] {
+	ttk::label $w.t$i -text $type
+	ttk::label $w.i$i -image $image
+	grid  $w.t$i $w.i$i -sticky e -padx 10 -pady 2
+	incr i
+    }
+}
+
+
