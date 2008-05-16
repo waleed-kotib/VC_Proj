@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.243 2008-04-24 07:19:58 matben Exp $
+# $Id: Roster.tcl,v 1.244 2008-05-16 06:29:25 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -118,16 +118,17 @@ proc ::Roster::InitMenus {} {
       
     # Standard popup menu.
     set mDefs {
-	{command     mMessage...      {::NewMsg::Build -to $jid -tolist $jid2L} }
 	{command     mChat...         {::Chat::StartThreadJIDList $jidL} }
+	{command     mMessage...      {::NewMsg::Build -to $jid -tolist $jid2L} }
 	{command     mSendFile...     {::FTrans::SendJIDList $jidL} }
 	{separator}
+	{command     mHistory...      {::Chat::HistoryForJIDList $jidL} }
+	{command     mBusinessCard... {::UserInfo::GetJIDList $jid2L} }
 	{command     mAddContact...   {::JUser::NewDlg} }
 	{command     mEditContact...  {::JUser::EditJIDList $jid2L} }
-	{command     mBusinessCard... {::UserInfo::GetJIDList $jid2L} }
-	{command     mHistory...      {::Chat::HistoryForJIDList $jidL} }
 	{command     mRemoveContact   {::Roster::RemoveJIDList $jidL} }
 	{separator}
+	{cascade     mStyle           {@::Roster::StyleMenu} }
 	{cascade     mShow            {
 	    {check     mOffline       {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)} }
 	    {check     mDoNotDisturb  {::Roster::ShowDnD}        {-variable ::Jabber::jprefs(rost,show-dnd)} }
@@ -140,7 +141,6 @@ proc ::Roster::InitMenus {} {
 	    {radio     mIncreasing    {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -increasing} }
 	    {radio     mDecreasing    {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -decreasing} }
 	} }
-	{cascade     mStyle           {@::Roster::StyleMenu} }
 	{command     mRefresh         {::Roster::Refresh} }
     }
     set mTypes {
@@ -172,8 +172,8 @@ proc ::Roster::InitMenus {} {
 	set mWBDef  {command   mWhiteboard   {::JWB::NewWhiteboardTo $jid3}}
 	set mWBType {mWhiteboard    {wb available}        }
 	
-	# Insert whiteboard menu *after* Chat.
-	set idx [lsearch -glob $mDefs "* mChat... *"]
+	# Insert whiteboard menu *after* mSendFile.
+	set idx [lsearch -glob $mDefs "* mSendFile... *"]
 	incr idx
 	set mDefs  [linsert $mDefs $idx $mWBDef]
 	set mTypes [linsert $mTypes $idx $mWBType]
