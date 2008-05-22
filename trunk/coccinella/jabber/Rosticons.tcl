@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.43 2008-04-19 12:10:55 matben Exp $
+# $Id: Rosticons.tcl,v 1.44 2008-05-22 14:23:46 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -145,7 +145,11 @@ proc ::Rosticons::Init {} {
 	    set name $defaultSet($type)
 	    set jprefs(rost,icons,$type) $name
 	}
-	LoadTmpIconSet $type $name
+	if {$type eq "application"} {
+	    LoadThemedTmp application $name
+	} else {
+	    LoadTmpIconSet $type $name
+	}
 	SetFromTmp $type $name
     }
 
@@ -258,6 +262,10 @@ proc ::Rosticons::Get {statuskey} {
     
     if {$type eq "application"} {
 	if {$jprefs(rost,icons,use,$type)} {
+	    # These are just temporary...
+# 	    set sub [string map {group-root- ""} $sub]
+# 	    set sub [string map {group-pending pending} $sub]
+# 	    set sub [string map {group-transport transport} $sub]	    
 	    set key $type/$sub
 	    if {[info exists icons($key)]} {
 		return $icons($key)
@@ -355,6 +363,34 @@ proc ::Rosticons::Get {statuskey} {
 	return
     }
 }
+
+# For 'application' only so far!
+
+proc ::Rosticons::LoadThemedTmp {type name} {
+    variable state
+    variable tmpicons
+    variable tmpiconsInv
+    
+    array unset tmpicons    $name,$type/*
+    array unset tmpiconsInv $name,$type/*
+    
+    if {$type ne "application"} { return }
+    
+    # We just list all application icons.
+    set application {
+	group-root-online group-root-offline 
+	group-transport   group-pending 
+	group-online      group-offline 
+	folder-open       folder-closed  folder
+    }
+    foreach app $application {
+	set typesubtype $type/$app
+	set image [::Theme::FindIconSize 16 $app]
+	set tmpicons($name,$typesubtype) $image
+	set tmpiconsInv($name,$image)    $typesubtype
+    }
+    set state(loaded,$type,$name) 1
+}
     
 # Rosticons::LoadTmpIconSet --
 # 
@@ -367,7 +403,7 @@ proc ::Rosticons::LoadTmpIconSet {type name} {
     variable tmpiconsInv
     variable mdata
     variable idata
-    
+        
     set path $state(path,$type,$name)
         
     set name [::Icondef::Load $path  \
