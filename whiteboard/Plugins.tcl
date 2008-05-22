@@ -23,7 +23,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Plugins.tcl,v 1.36 2008-05-15 14:14:57 matben Exp $
+# $Id: Plugins.tcl,v 1.37 2008-05-22 08:11:03 matben Exp $
 #
 # We need to be very systematic here to handle all possible MIME types
 # and extensions supported by each package or helper application.
@@ -97,10 +97,8 @@ namespace eval ::Plugins {
     # Define all hooks for preference settings.
     # We init as late as possible.
     # Make sure we are inited before showing any prefs panels.
-    #::hooks::register initHook               ::Plugins::InitHook
-    #::hooks::register prefsInitHook          ::Plugins::InitPrefsHook     10
     ::hooks::register afterFinalHook         ::Plugins::InitPrefsHook
-    ::hooks::register prefsBuildHook         ::Plugins::InitPrefsHook 10
+    ::hooks::register prefsBuildHook         ::Plugins::BuildInitPrefsHook 10
     ::hooks::register prefsBuildHook         ::Plugins::BuildPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Plugins::UserDefaultsHook
     ::hooks::register prefsSaveHook          ::Plugins::SaveHook
@@ -191,6 +189,10 @@ proc ::Plugins::InitPrefsHook {} {
     ::hooks::run whiteboardPrefsInitHook
     
     set inited 1
+}
+
+proc ::Plugins::BuildInitPrefsHook {wtree nbframe} {
+    InitPrefsHook
 }
 
 # Plugins::InitAndLoad --
