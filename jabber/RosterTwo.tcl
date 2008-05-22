@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTwo.tcl,v 1.26 2007-12-21 08:39:13 matben Exp $
+# $Id: RosterTwo.tcl,v 1.27 2008-05-22 14:23:46 matben Exp $
 
 package require RosterTree
 
@@ -141,7 +141,7 @@ proc ::RosterTwo::CreateHeadItem {type} {
     set tag [list head $type]
     set text [::RosterTree::MCHead $type]
     set text2 "No users"
-    set image [::Rosticons::Get application/$type]
+    set image [::Rosticons::Get application/group-$type]
     set item [CreateWithTag $tag styStd $text $text2 $image root]
     if {[lsearch $jprefs(rost,closedItems) $tag] >= 0} {
 	$T item collapse $item
@@ -238,7 +238,7 @@ proc ::RosterTwo::CreateItem {jid presence args} {
 	    head {
 		set style styStd
 		set text  [::RosterTree::MCHead $tag1]
-		set image [::Rosticons::Get application/$tag1]
+		set image [::Rosticons::Get application/group-$tag1]
 	    }
 	}
 	ConfigureItem $item $style $text $text2 $image
