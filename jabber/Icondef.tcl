@@ -36,7 +36,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Icondef.tcl,v 1.5 2008-05-16 12:14:24 matben Exp $
+# $Id: Icondef.tcl,v 1.6 2008-05-22 13:00:26 matben Exp $
 
 package provide Icondef 1.0
 
@@ -218,6 +218,53 @@ proc ::Icondef::DisplayWindow {path} {
 	grid  $w.t$i $w.i$i -sticky e -padx 10 -pady 2
 	incr i
     }
+}
+
+#  ::Icondef::Decode /Users/mats/Tcl/Coccinella/coccinella/iconsets/roster/aim/default/icondef.xml
+
+proc ::Icondef::Decode {fileName} {
+  
+    set decoded [file join [file dirname $fileName] decoded]
+    file mkdir $decoded
+    
+    set fd [open $fileName]
+    fconfigure $fd -encoding utf-8
+    set xmldata [read $fd]
+    close $fd
+    
+    set token [tinydom::parse $xmldata]
+    set xmllist [tinydom::documentElement $token]
+    
+    foreach iconE [tinydom::children $xmllist] {
+	if {[tinydom::tagname $iconE] eq "icon"} {
+	    unset -nocomplain key data
+	    foreach elem [tinydom::children $iconE] {
+		set tag [tinydom::tagname $elem]
+		switch -- $tag {
+		    x {
+			set key [tinydom::chdata $elem]
+		    }
+		    data {
+			# base64 coded image data
+			set data [tinydom::chdata $elem]
+			array set attr [tinydom::attrlist $elem]
+			set mime $attr(mime)
+		    }
+		}
+	    }
+	    set new [join [split $key /] -]
+	    set ext [lindex [split $mime /] 1]
+	    set dstName [file join $decoded $new.$ext]
+	    
+	    set fd [open $dstName w]
+	    fconfigure $fd -translation binary
+	    puts -nonewline $fd [::base64::decode [string trim $data]]
+	    close $fd
+	    
+	    
+	}
+    }
+    tinydom::cleanup $token
 }
 
 
