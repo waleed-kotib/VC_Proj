@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.245 2008-05-22 14:23:46 matben Exp $
+# $Id: GroupChat.tcl,v 1.246 2008-05-23 14:33:22 matben Exp $
 
 package require Create
 package require Enter
@@ -74,8 +74,8 @@ namespace eval ::GroupChat:: {
 
     # Pre 8.5, cleanup!
     if {[tk windowingsystem] eq "aqua"} {
-	option add *GroupChat*tabClose16Image        closeAqua         widgetDefault    
-	option add *GroupChat*tabCloseActive16Image  closeAquaActive   widgetDefault    
+	option add *GroupChat*tabClose16Image        close-aqua         widgetDefault    
+	option add *GroupChat*tabCloseActive16Image  close-aqua-active  widgetDefault    
     } else {
 	option add *GroupChat*tabClose16Image        close             widgetDefault    
 	option add *GroupChat*tabCloseActive16Image  close             widgetDefault    
@@ -1220,8 +1220,8 @@ proc ::GroupChat::DrawCloseButton {dlgtoken} {
     # Close button (exp). 
     set w $dlgstate(w)
     
-    set im  [::Theme::FindIcon elements/[option get $w tabClose16Image {}]]
-    set ima [::Theme::FindIcon elements/[option get $w tabCloseActive16Image {}]]
+    set im  [::Theme::Find16Icon $w tabClose16Image]
+    set ima [::Theme::Find16Icon $w tabCloseActive16Image]
     set wclose $dlgstate(wnb).close
 
     ttk::button $wclose -style Plain  \

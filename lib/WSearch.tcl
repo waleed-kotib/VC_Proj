@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: WSearch.tcl,v 1.9 2008-04-17 15:00:33 matben Exp $
+# $Id: WSearch.tcl,v 1.10 2008-05-23 14:33:23 matben Exp $
 
 package require snit 1.0
 package require tileutils 0.1
@@ -58,8 +58,8 @@ snit::widgetadaptor UI::WSearch::widget {
 	$self configurelist $args
 
 	set subPath [file join images 16]
-	set im  [::Theme::FindIcon elements/closeAqua]
-	set ima [::Theme::FindIcon elements/closeAquaActive]
+	set im  [::Theme::FindIconSize 16 close-aqua]
+	set ima [::Theme::FindIconSize 16 close-aqua-active]
 
 	ttk::button $win.close -style Plain  \
 	  -image [list $im active $ima] -compound image  \

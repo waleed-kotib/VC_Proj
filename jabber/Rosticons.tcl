@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.44 2008-05-22 14:23:46 matben Exp $
+# $Id: Rosticons.tcl,v 1.45 2008-05-23 14:33:22 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -58,7 +58,7 @@ package require Icondef
 
 package provide Rosticons 1.0
 
-namespace eval ::Rosticons:: {
+namespace eval ::Rosticons {
 
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::Rosticons::InitPrefsHook
@@ -69,6 +69,12 @@ namespace eval ::Rosticons:: {
 
     # Other init hooks depend on us!
     ::hooks::register initHook               ::Rosticons::Init    20
+    
+    # The presence/show states.
+    variable pstates
+    set pstates {online offline invisible away chat dnd xa}
+
+    variable tmpimages
     
     # The sets made default (not the named default) MUST always exist!
     variable defaultSet
@@ -146,7 +152,7 @@ proc ::Rosticons::Init {} {
 	    set jprefs(rost,icons,$type) $name
 	}
 	if {$type eq "application"} {
-	    LoadThemedTmp application $name
+	    LoadApplicationTmp $name
 	} else {
 	    LoadTmpIconSet $type $name
 	}
@@ -366,16 +372,16 @@ proc ::Rosticons::Get {statuskey} {
 
 # For 'application' only so far!
 
-proc ::Rosticons::LoadThemedTmp {type name} {
+proc ::Rosticons::LoadApplicationTmp {name} {
     variable state
     variable tmpicons
     variable tmpiconsInv
     
+    set type "application"
+
     array unset tmpicons    $name,$type/*
     array unset tmpiconsInv $name,$type/*
-    
-    if {$type ne "application"} { return }
-    
+        
     # We just list all application icons.
     set application {
 	group-root-online group-root-offline 
@@ -390,6 +396,82 @@ proc ::Rosticons::LoadThemedTmp {type name} {
 	set tmpiconsInv($name,$image)    $typesubtype
     }
     set state(loaded,$type,$name) 1
+}
+
+# Rosticons::ThemeLoadApplicationTmp --
+#
+#       Loads all 'application' type roster icons from a set.
+#       It uses fallbacks to ordinary themes.
+
+proc ::Rosticons::ThemeLoadApplicationTmp {name} {
+    variable loaded
+    variable tmpimages
+
+    set type "application"
+    if {[info exists tmpimages] && [dict exists $tmpimages $name $type]} {
+	dict unset tmpimages $name $type 
+    }    
+    set application {
+	group-root-online group-root-offline 
+	group-transport   group-pending 
+	group-online      group-offline 
+	folder-open       folder-closed  folder
+    }
+    
+    # Here we start searching the roster theme 'name' and use fallbacks.
+    set path [list [::Theme::GetPath $name]]
+    set paths [concat $path [::Theme::GetPresentSearchPaths]]
+    foreach app $application {
+	set spec icons/16x16/$app
+	set image [::Theme::MakeIconFromPaths $spec "" $paths]
+	if {$image ne ""} {
+	    dict set tmpimages $name $type $app $image 
+	}
+    }
+    dict set loaded $type $name 1
+}
+
+# Rosticons::ThemeLoadTypeTmp --
+#
+#       Creates all relevant images from an iconset.
+
+proc ::Rosticons::ThemeLoadTypeTmp {type name} {
+    variable loaded
+    variable tmpimages
+    variable pstates
+        
+    if {[info exists tmpimages] && [dict exists $tmpimages $name $type]} {
+	dict unset tmpimages $name $type 
+    }
+    
+    # If an iconset is missing an icon for one of the states,
+    # do the fallback within the theme and not to any other theme.
+    set paths [list [::Theme::GetPath $name]]
+    set base icons/16x16/$type
+    foreach pres $pstates {
+	set image [::Theme::MakeIconFromPaths $base-$pres "" $paths]
+	if {$image ne ""} {
+	    dict set tmpimages $name $type $pres $image 
+	}
+    }
+    dict set loaded $type $name 1
+}
+
+proc ::Rosticons::ThemeLoadTypeTmpXXX {type name} {
+    variable loaded
+    variable tmpimages
+    variable pstates
+
+    set path [::Theme::GetPath $name]
+    set path [file join $path icons 16x16]
+    foreach f [glob -nocomplain -dir $path -types f $type-*.{gif,png}] {
+	set fmt [string range [file extension $f] 1 end]
+	set image [image create photo -file $f -format $fmt]
+	set base [file rootname [file tail $f]]
+	set key [join [split $base -] /]
+	dict set tmpimages $name $type $image
+    }
+    dict set loaded $type $name 1
 }
     
 # Rosticons::LoadTmpIconSet --
