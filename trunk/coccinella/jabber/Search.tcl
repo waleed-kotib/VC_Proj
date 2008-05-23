@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.44 2008-04-17 15:00:32 matben Exp $
+# $Id: Search.tcl,v 1.45 2008-05-23 14:33:22 matben Exp $
 
 package provide Search 1.0
 
@@ -502,8 +502,8 @@ proc ::Search::SlotBuild {w} {
 	pack $w.arrow -side left -anchor n	
 	bind $w.arrow <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
 
-	set im  [::Theme::FindIcon elements/closeAqua]
-	set ima [::Theme::FindIcon elements/closeAquaActive]
+	set im  [::Theme::FindIconSize 16 close-aqua]
+	set ima [::Theme::FindIconSize 16 close-aqua-active]
 	ttk::button $w.close -style Plain  \
 	  -image [list $im active $ima] -compound image  \
 	  -command [namespace code [list SlotClose $w]]

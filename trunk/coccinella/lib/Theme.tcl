@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.53 2008-05-15 14:14:57 matben Exp $
+# $Id: Theme.tcl,v 1.54 2008-05-23 14:33:23 matben Exp $
 
 package provide Theme 1.0
 
@@ -291,6 +291,18 @@ proc ::Theme::NameAndLocalePrefs {} {
     }
 }
 
+proc ::Theme::GetThemeInfo {name} {
+    
+    set path [GetPath $name]
+    set infoFile [file join $path info]
+    if {![file exists $infoFile]} {
+	
+    } else {
+    
+	
+    }
+}
+
 # ::Theme::GetAllAvailable --
 # 
 #       Finds all available themes.
@@ -418,34 +430,48 @@ proc ::Theme::FindIconWithName {spec name} {
 #    if {$image ni [image names]}
     if {[lsearch -exact [image names] $name] < 0} {
 	set paths [GetPresentSearchPaths]
-	set found 0
-
-	foreach path $paths {
-	    foreach fmt {png gif} {
-		set f [file join $path $spec].$fmt
-		
-		# We provide a single step fallback: 
-		#   list-add-user-Dis -> list-add-user   etc.
-		if {![file exists $f]} {
-		    set tail [file tail $spec]
-		    set parts [split $tail -]
-		    if {[llength $parts] > 1} {
-			set f [join [lrange [split $spec /] 0 end-1] /]
-			append f / [join [lrange $parts 0 end-1] -]
-			set f [file join $path $f].$fmt
-		    }
-		}
-		if {[file exists $f]} {
-		    image create photo $name -file $f -format $fmt
-		    set image $name
-		    set found 1
-		    break
-		}
-	    }
-	    if {$found} { break }
-	}
+	set image [MakeIconFromPaths $spec $name $paths]
     } else {
 	set image $name
+    }
+    return $image
+}
+
+# Theme::MakeIconFromPaths --
+#
+#       Searches the specified directories for an image in subpath 'spec'.
+#       If 'name' empty we use a default name, else image gets 'name'.
+
+proc ::Theme::MakeIconFromPaths {spec name paths} {
+    
+    set found 0
+    set image ""
+    foreach path $paths {
+	foreach fmt {png gif} {
+	    set f [file join $path $spec].$fmt
+	    
+	    # We provide a single step fallback: 
+	    #   list-add-user-Dis -> list-add-user   etc.
+	    if {![file exists $f]} {
+		set tail [file tail $spec]
+		set parts [split $tail -]
+		if {[llength $parts] > 1} {
+		    set f [join [lrange [split $spec /] 0 end-1] /]
+		    append f / [join [lrange $parts 0 end-1] -]
+		    set f [file join $path $f].$fmt
+		}
+	    }
+	    if {[file exists $f]} {
+		if {$name ne ""} {
+		    set image [image create photo $name -file $f -format $fmt]
+		} else {
+		    set image [image create photo -file $f -format $fmt]
+		}
+		set found 1
+		break
+	    }
+	}
+	if {$found} { break }
     }
     return $image
 }

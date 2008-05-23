@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.291 2008-05-16 13:53:13 matben Exp $
+# $Id: Chat.tcl,v 1.292 2008-05-23 14:33:22 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -84,8 +84,8 @@ namespace eval ::Chat {
 
     # Pre 8.5, cleanup!
     if {[tk windowingsystem] eq "aqua"} {
-	option add *Chat*tabClose16Image        closeAqua         widgetDefault    
-	option add *Chat*tabCloseActive16Image  closeAquaActive   widgetDefault    
+	option add *Chat*tabClose16Image        close-aqua        widgetDefault    
+	option add *Chat*tabCloseActive16Image  close-aqua-active widgetDefault    
     } else {
 	option add *Chat*tabClose16Image        close             widgetDefault    
 	option add *Chat*tabCloseActive16Image  close             widgetDefault    
@@ -2186,8 +2186,8 @@ proc ::Chat::DrawCloseButton {dlgtoken} {
     # Close button (exp). 
     set w $dlgstate(w)
     
-    set im  [::Theme::FindIcon elements/[option get $w tabClose16Image {}]]
-    set ima [::Theme::FindIcon elements/[option get $w tabCloseActive16Image {}]]
+    set im  [::Theme::Find16Icon $w tabClose16Image]
+    set ima [::Theme::Find16Icon $w tabCloseActive16Image]
     set wclose $dlgstate(wnb).close
 
     ttk::button $wclose -style Plain  \

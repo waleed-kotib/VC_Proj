@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.8 2008-04-17 15:00:30 matben Exp $
+# $Id: MegaPresence.tcl,v 1.9 2008-05-23 14:33:22 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -77,8 +77,8 @@ proc ::MegaPresence::Build {w args} {
 	bind $w.arrow <<ButtonPopup>> [namespace code [list Popup %W $w %x %y]]
 
 	set subPath [file join images 16]
-	set im  [::Theme::FindIcon elements/closeAqua]
-	set ima [::Theme::FindIcon elements/closeAquaActive]
+	set im  [::Theme::FindIconSize 16 close-aqua]
+	set ima [::Theme::FindIconSize 16 close-aqua-active]
 	ttk::button $w.close -style Plain  \
 	  -image [list $im active $ima] -compound image  \
 	  -command $argsA(-close)]
