@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.45 2008-05-23 14:33:22 matben Exp $
+# $Id: Rosticons.tcl,v 1.46 2008-05-24 07:34:06 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -74,7 +74,7 @@ namespace eval ::Rosticons {
     variable pstates
     set pstates {online offline invisible away chat dnd xa}
 
-    variable tmpimages
+    variable tmpImagesD
     
     # The sets made default (not the named default) MUST always exist!
     variable defaultSet
@@ -142,10 +142,10 @@ proc ::Rosticons::Init {} {
     
     # Investigates all sets available per 'type' and 'name' but doesn't
     # process anything.
-    GetAllTypeSets
+    set types [GetAllTypeSets]
     
     # Treat each 'type' in turn. Verify that exists. defaultSet as fallback.
-    foreach type $state(types) {
+    foreach type $types {
 	set name $jprefs(rost,icons,$type)
 	if {![info exists state(path,$type,$name)]} {
 	    set name $defaultSet($type)
@@ -158,6 +158,10 @@ proc ::Rosticons::Init {} {
 	}
 	SetFromTmp $type $name
     }
+    
+    # We keep a parallell track for the new themeing engine.
+    
+    
 
 }
 
@@ -243,6 +247,45 @@ proc ::Rosticons::GetAllTypeSets {} {
 	}
     }
     return $state(types)
+}
+
+proc ::Rosticons::ThemeGetAllTypes {} {
+    variable stateD
+    
+    dict set stateD types [list]
+    dict set stateD paths [list]
+    
+    foreach path [::Theme::GetAllThemePaths] {
+	set name [file tail $path]
+	set infoL [::Theme::GetInfo $path]
+	puts "\t name=$name, infoL=$infoL"
+	set anyRoster 0
+	foreach info $infoL {
+	    if {[string match roster-* $info]} {
+		lassign [split $info -] - type
+		dict lappend stateD types $type $name
+		set anyRoster 1
+	    }
+	}
+	if {$anyRoster} {
+	    dict set stateD paths $name $path		
+	}
+    }
+    puts "dict get=[dict get $stateD types]"
+    puts "stateD=$stateD"
+  
+    
+    # Compile info.
+    # 1) get all types:
+    set types [dict keys [dict get $stateD types]]
+    puts "types=$types"
+
+    # 2) get all names for each type:
+    foreach type $types {
+	set names [dict get $stateD types $type]
+	puts "$type : $names"
+    }
+    return $types
 }
 
 # Rosticons::Get --
@@ -370,6 +413,23 @@ proc ::Rosticons::Get {statuskey} {
     }
 }
 
+# Rosticons::ThemeGet --
+# 
+#       Returns the image to use for this key.
+#       
+# Arguments:
+#       statuskey       type/subtype, ex: user/online, icq/xa, 
+#                       application/* and phone/* are special
+#       
+# Results:
+#       a valid image or empty.
+
+proc ::Rosticons::ThemeGet {statuskey} {
+
+    
+    
+}
+
 # For 'application' only so far!
 
 proc ::Rosticons::LoadApplicationTmp {name} {
@@ -404,13 +464,14 @@ proc ::Rosticons::LoadApplicationTmp {name} {
 #       It uses fallbacks to ordinary themes.
 
 proc ::Rosticons::ThemeLoadApplicationTmp {name} {
-    variable loaded
-    variable tmpimages
+    variable stateD
+    variable tmpImagesD
 
     set type "application"
-    if {[info exists tmpimages] && [dict exists $tmpimages $name $type]} {
-	dict unset tmpimages $name $type 
-    }    
+    dict set tmpImagesD $name $type [list]
+#     if {[info exists tmpImagesD] && [dict exists $tmpImagesD $name $type]} {
+# 	dict unset tmpImagesD $name $type 
+#     }    
     set application {
 	group-root-online group-root-offline 
 	group-transport   group-pending 
@@ -425,10 +486,11 @@ proc ::Rosticons::ThemeLoadApplicationTmp {name} {
 	set spec icons/16x16/$app
 	set image [::Theme::MakeIconFromPaths $spec "" $paths]
 	if {$image ne ""} {
-	    dict set tmpimages $name $type $app $image 
+	    dict set tmpImagesD $name $type $app $image 
 	}
     }
-    dict set loaded $type $name 1
+    dict set stateD loaded $type $name 1
+    return
 }
 
 # Rosticons::ThemeLoadTypeTmp --
@@ -436,13 +498,14 @@ proc ::Rosticons::ThemeLoadApplicationTmp {name} {
 #       Creates all relevant images from an iconset.
 
 proc ::Rosticons::ThemeLoadTypeTmp {type name} {
-    variable loaded
-    variable tmpimages
+    variable stateD
+    variable tmpImagesD
     variable pstates
         
-    if {[info exists tmpimages] && [dict exists $tmpimages $name $type]} {
-	dict unset tmpimages $name $type 
-    }
+    dict set tmpImagesD $name $type [list]
+#     if {[info exists tmpImagesD] && [dict exists $tmpImagesD $name $type]} {
+# 	dict unset tmpImagesD $name $type 
+#     }
     
     # If an iconset is missing an icon for one of the states,
     # do the fallback within the theme and not to any other theme.
@@ -451,27 +514,11 @@ proc ::Rosticons::ThemeLoadTypeTmp {type name} {
     foreach pres $pstates {
 	set image [::Theme::MakeIconFromPaths $base-$pres "" $paths]
 	if {$image ne ""} {
-	    dict set tmpimages $name $type $pres $image 
+	    dict set tmpImagesD $name $type $pres $image 
 	}
     }
-    dict set loaded $type $name 1
-}
-
-proc ::Rosticons::ThemeLoadTypeTmpXXX {type name} {
-    variable loaded
-    variable tmpimages
-    variable pstates
-
-    set path [::Theme::GetPath $name]
-    set path [file join $path icons 16x16]
-    foreach f [glob -nocomplain -dir $path -types f $type-*.{gif,png}] {
-	set fmt [string range [file extension $f] 1 end]
-	set image [image create photo -file $f -format $fmt]
-	set base [file rootname [file tail $f]]
-	set key [join [split $base -] /]
-	dict set tmpimages $name $type $image
-    }
-    dict set loaded $type $name 1
+    dict set stateD loaded $type $name 1
+    return
 }
     
 # Rosticons::LoadTmpIconSet --
