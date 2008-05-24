@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.54 2008-05-23 14:33:23 matben Exp $
+# $Id: Theme.tcl,v 1.55 2008-05-24 07:34:07 matben Exp $
 
 package provide Theme 1.0
 
@@ -322,8 +322,63 @@ proc ::Theme::GetAllAvailable {} {
     return [lsearch -all -inline -not $themes $this(themeDefault)]
 }
 
+proc ::Theme::GetAllThemePaths {} {
+    global  this
+    
+    set paths [list]
+    foreach dir [list $this(themesPath) $this(altThemesPath)] {
+	foreach path [glob -nocomplain -types d -directory $dir *] {
+	    if {[file tail $path] eq "CVS"} { continue }
+	    if {[file exists [file join $path themeInfo]]} {
+		lappend paths $path
+	    }
+	}
+    }
+    return $paths
+}
+
+proc ::Theme::GetInfo {path} {
+     variable infoCache
+
+     set name [file tail $path]
+     if {[info exists infoCache($name)]} {
+	 return $infoCache($name)
+     } else {
+	 return [ReadInfo $path]
+     }
+}
+
+proc ::Theme::ReadInfo {path} {
+     variable infoCache
+   
+    set info ""
+    set infoFile [file join $path themeInfo]
+    if {[file exists $infoFile]} {
+	set fd [open $infoFile]
+	set info [lsort -unique [string trim [read $fd]]]
+	close $fd
+	set name [file tail $path]
+	set infoCache($name) $info
+    }
+    return $info
+}
+
 namespace eval ::Theme {
+    
+    # Caches search paths for a certain theme 'name' including any parent theme.
     variable themePaths
+    
+    # Caches the info file content per theme 'name'.
+    variable infoCache
+}
+
+proc ::Theme::CacheAllInfo {} {
+    variable infoCache
+    
+    foreach path [GetAllThemePaths] {
+	set name [file tail $path]
+	set infoCache($name) [ReadInfo $path]
+    }
 }
 
 # Theme::GetPath --
