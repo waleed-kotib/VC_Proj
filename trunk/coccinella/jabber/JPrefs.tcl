@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements miscellaneous preference pages for jabber stuff.
 #      
-#  Copyright (c) 2001-2005  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.63 2008-03-30 10:00:42 matben Exp $
+# $Id: JPrefs.tcl,v 1.64 2008-05-26 07:49:57 matben Exp $
 
 package require ui::fontselector
 
@@ -140,7 +140,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     if {$tmpPrefs(themeName) == ""} {
 	set tmpPrefs(themeName) [mc None]
     }
-    set allrsrc [concat [mc None] [::Theme::GetAllAvailable]]
+    set allrsrc [concat [mc None] [::Theme::GetAllWithFilter {root generic}]]
 
     # Tile:
     # The descriptive names of the builtin themes:
@@ -383,12 +383,14 @@ proc ::JPrefs::SavePrefsHook { } {
     variable tmpJPrefs
     variable tmpPrefs
     
+    set themeChanged 0
     if {$tmpPrefs(themeName) eq [mc None]} {
 	set tmpPrefs(themeName) ""
     }
     foreach key {themeName} {
-	if {$prefs($key) != $tmpPrefs($key)} {
+	if {$prefs($key) ne $tmpPrefs($key)} {
 	    ::Preferences::NeedRestart
+	    set themeChanged 1
 	}
     }
     if {$prefs(opacity) != $tmpPrefs(opacity)} {
@@ -405,6 +407,9 @@ proc ::JPrefs::SavePrefsHook { } {
     if {$newFont} {
 	::Chat::SetFont $jprefs(chatFont)
 	::GroupChat::SetFontAll
+    }
+    if {$themeChanged} {
+	::Theme::ThemeChanged
     }
 }
 

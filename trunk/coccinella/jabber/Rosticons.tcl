@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.47 2008-05-25 08:46:58 matben Exp $
+# $Id: Rosticons.tcl,v 1.48 2008-05-26 07:49:57 matben Exp $
 
 #  Directory structure: Each key that defines an icon is 'type/subtype'.
 #  Each iconset must contain only one type and be placed in the directory
@@ -73,7 +73,7 @@ namespace eval ::Rosticons {
     if {[info tclversion] >= 8.5} {
 
 	# Other init hooks depend on us!
-	::hooks::register initHook               ::Rosticons::TInit    20
+	#::hooks::register initHook               ::Rosticons::TInit    20
 
 	::hooks::register prefsInitHook          ::Rosticons::TInitPrefsHook
 	::hooks::register prefsBuildHook         ::Rosticons::TBuildPrefsHook
@@ -86,8 +86,17 @@ namespace eval ::Rosticons {
     variable pstates
     set pstates {online offline invisible away chat dnd xa}
 
-    variable tmpImagesD
+    variable application
+    set application {
+	group-root-online group-root-offline 
+	group-transport   group-pending 
+	group-online      group-offline 
+	folder-open       folder-closed  folder
+    }
     
+    variable imagesD [dict create]
+    variable tmpImagesD [dict create]
+
     # The sets made default (not the named default) MUST always exist!
     variable defaultSet
     array set defaultSet {
@@ -123,11 +132,7 @@ namespace eval ::Rosticons {
 
 
     
-    # Define which icons we want to use as defaults.
-    foreach type $priv(types) {
-	set ::config(rost,theme,use,$type)  0
-	set ::config(rost,theme,must,$type) 0
-    }
+    # Define which iconsets that shall be active by default.
     set ::config(rost,theme,use,application) 1
     set ::config(rost,theme,use,phone)       1
     set ::config(rost,theme,use,user)        1
@@ -136,7 +141,6 @@ namespace eval ::Rosticons {
     set ::config(rost,theme,must,application) 1
     set ::config(rost,theme,must,phone)       1
     set ::config(rost,theme,must,user)        1
-
 
     variable Tinitted 0
 }
@@ -192,7 +196,6 @@ proc ::Rosticons::Init {} {
 }
 
 proc ::Rosticons::TInit {} {
-    global  this
     variable Tinitted
     
     if {$Tinitted} { return }
@@ -202,13 +205,6 @@ proc ::Rosticons::TInit {} {
     # Investigates all sets available per 'type' and 'name' but doesn't
     # process anything.
     set types [ThemeGetAllTypes]
-    
-    # Treat each 'type' in turn. Verify that exists. defaultSet as fallback.
-    foreach type $types {
-	
-	
-	
-    }
     set Tinitted 1
 }
 
@@ -302,6 +298,7 @@ proc ::Rosticons::ThemeGetAllTypes {} {
     # This should reset these states?
     dict set stateD types [list]
     dict set stateD paths [list]
+    set typeD [dict create]
     
     foreach path [::Theme::GetAllThemePaths] {
 	set name [file tail $path]
@@ -318,9 +315,7 @@ proc ::Rosticons::ThemeGetAllTypes {} {
 	    dict set stateD paths $name $path		
 	}
     }
-    dict for {type nameL} $typeD {
-	dict set stateD types $type $nameL
-    }
+    dict set stateD types $typeD
       
     # Compile info.
     # 1) get all types:
@@ -472,7 +467,6 @@ proc ::Rosticons::Get {statuskey} {
 proc ::Rosticons::ThemeGet {typekey} {
     variable stateD
     variable imagesD
-
     upvar ::Jabber::jprefs jprefs
         
     set typekey [string tolower $typekey]
@@ -481,15 +475,42 @@ proc ::Rosticons::ThemeGet {typekey} {
     set suborig $sub
     
     if {$type eq "application"} {
-
+	if {$jprefs(rost,theme,use,$type)} {
+	    if {[dict exists $imagesD $type $sub]} {
+		return [dict get $imagesD $type $sub]
+	    }
+	    set sub [string map {group-online group} $sub]
+	    set sub [string map {group-offline group} $sub]
+	    set sub [string map {folder-open folder} $sub]
+	    set sub [string map {folder-closed folder} $sub]
+	    set key $type/$sub
+	    if {[dict exists $imagesD $type $sub]} {
+		return [dict get $imagesD $type $sub]
+	    }
+	    return
+	} else {
+	    return
+	}
     } elseif {$type eq "phone"} {
 
     } else {
 	
+	# Check if this type is active. Use 'user' as fallback.
+	if {![info exists jprefs(rost,theme,use,$type)]} {
+	    set type "user"
+	}
+	if {!$jprefs(rost,theme,use,$type)} {
+	    set type "user"
+	}	
+	set key $type/$sub
+	if {[dict exists $imagesD $type $sub]} {
+	    return [dict get $imagesD $type $sub]
+	}
 	
 	
+	
+	return
     }
-    
 }
 
 # For 'application' only so far!
@@ -528,15 +549,10 @@ proc ::Rosticons::LoadApplicationTmp {name} {
 proc ::Rosticons::ThemeLoadApplicationTmp {name} {
     variable stateD
     variable tmpImagesD
+    variable application
 
     set type "application"
     dict set tmpImagesD $name $type [list]
-    set application {
-	group-root-online group-root-offline 
-	group-transport   group-pending 
-	group-online      group-offline 
-	folder-open       folder-closed  folder
-    }
     
     # Here we start searching the roster theme 'name' and use fallbacks.
     set path [list [::Theme::GetPath $name]]
@@ -548,7 +564,6 @@ proc ::Rosticons::ThemeLoadApplicationTmp {name} {
 	    dict set tmpImagesD $name $type $app $image 
 	}
     }
-    dict set stateD loaded $type $name 1
     return
 }
 
@@ -570,7 +585,6 @@ proc ::Rosticons::ThemeLoadPhoneTmp {name} {
 	    dict set tmpImagesD $name $type $key $image 
 	}
     }
-    dict set stateD loaded $type $name 1
     return
 }
 
@@ -631,7 +645,6 @@ proc ::Rosticons::ThemeLoadTypeTmp {type name} {
 	    dict set tmpImagesD $name $type $key $image 
 	}
     }
-    dict set stateD loaded $type $name 1
     return
 }
 
@@ -665,16 +678,18 @@ proc ::Rosticons::SetFromTmp {type name} {
 
 # Rosticons::ThemeSetFromTmp --
 # 
-#       Sets the specified iconset. It just copies the relevant array elements
-#       from 'tmpicons' to 'icons'.
+#       Sets the specified iconset. It just copies the relevant dict elements
+#       from 'tmpImagesD' to 'imagesD'.
+#       The corresponding entries of 'tmpImagesD' are unset since images copied.
 
 proc ::Rosticons::ThemeSetFromTmp {type name} {
-    variable stateD
     variable imagesD
     variable tmpImagesD
 
-    
-    
+    dict for {key image} [dict get $tmpImagesD $name $type] {
+	dict set imagesD $type $key $image
+    }
+    dict unset tmpImagesD $name $type
 }
 
 # Preference hooks -------------------------------------------------------------
@@ -723,22 +738,33 @@ proc ::Rosticons::TInitPrefsHook {} {
     # Find all types dynamically...
     set types [dict keys [dict get $stateD types]]
 
-    # Do NOT store the complete path!
+    # 
     set plist [list]
     foreach type $types {
 	set names [dict get $stateD types $type]
+
 	# @@@ better default... Pick in source dir only!
-	set jprefs(rost,theme,name,$type) [lindex $names 0]
-	# Allow unknown types here!
-	set name  ::Jabber::jprefs(rost,theme,name,$type)
-	set rsrc  jprefs_rost_theme_$type
+	set key "rost,theme,name,$type"
+	set jprefs($key) [lindex $names 0]
+	set name  ::Jabber::jprefs($key)
+	set rsrc  jprefs_rost_theme_name_$type
 	set value [set $name]
 	lappend plist [list $name $rsrc $value]
 
-	set jprefs(rost,theme,use,$type) $config(rost,theme,use,$type)
+	set key "rost,theme,use,$type"
+	if {[info exists config($key)] && $config($key)} {
+	    set jprefs($key) $config($key)
+	} else {
+	    set jprefs($key) 0	    
+	}
 	
 	# Add only the ones that can be optional.
-	if {!$config(rost,theme,must,$type)} {
+	set must 0
+	set key "rost,theme,must,$type"
+	if {[info exists config($key)] && $config($key)} {
+	    set must 1
+	}
+	if {!$must} {
 	    set name  ::Jabber::jprefs(rost,theme,use,$type)
 	    set rsrc  jprefs_rost_theme_use_$type
 	    set value [set $name]
@@ -746,6 +772,29 @@ proc ::Rosticons::TInitPrefsHook {} {
 	}
     }    
     ::PrefUtils::Add $plist
+    
+    VerifyAndLoad
+}
+
+proc ::Rosticons::VerifyAndLoad {} {
+    variable stateD
+    upvar ::Jabber::jprefs jprefs
+    
+    set types [dict keys [dict get $stateD types]]
+
+    # Treat each 'type' in turn. Verify that exists.
+    # This must be done after we have read and set our preferences.
+    foreach type $types {
+ 	set key "rost,theme,name,$type"
+ 	set name $jprefs($key)
+ 	if {[::Theme::GetPath $name] eq ""} {
+ 	    # @@@ better default... Pick in source dir only!
+ 	    set names [dict get $stateD types $type]
+ 	    set jprefs($key) [lindex $names 0]
+ 	}
+	ThemeLoadSetTmp $type $name
+	ThemeSetFromTmp $type $name
+    }
 }
 
 proc ::Rosticons::BuildPrefsHook {wtree nbframe} {
@@ -1072,25 +1121,24 @@ proc ::Rosticons::TPFillTree {T} {
     
     set types [dict keys [dict get $stateD types]]
     puts ::Rosticons::TPFillTree
-    puts "\t types=$types"
 
     foreach type $types {
 	set Tptmp(use,$type)  $jprefs(rost,theme,use,$type)
 	set Tptmp(name,$type) $jprefs(rost,theme,name,$type)
     }
    
-    puts ::Rosticons::TPFillTree
-    
     set i 0
 
     foreach type $types {
-	puts "type=$type"
 	set wcheck $T.[incr i]
 	checkbutton $wcheck -bg white -highlightthickness 0 \
 	  -variable [namespace current]::Tptmp(use,$type)
-	if {$config(rost,theme,must,$type)} {
+
+	set key "rost,theme,must,$type"
+	if {[info exists config($key)] && $config($key)} {
 	    $wcheck configure -state disabled
 	}
+
 	if {$type eq "user"} {
 	    set typeName [mc normal]
 	} elseif {$type eq "application"} {
@@ -1108,7 +1156,6 @@ proc ::Rosticons::TPFillTree {T} {
 	  -font CociSmallBoldFont
 
 	set names [dict get $stateD types $type]
-	puts "\t names=$names"
     
 	foreach name $names {
 	    set wradio $T.[incr i]
@@ -1189,7 +1236,7 @@ proc ::Rosticons::TPFillKeyImageTree {type name} {
     variable tmpImagesD
     variable stateD
     
-    if {![dict exists $stateD loaded $type $name]} {
+    if {![dict exists $tmpImagesD $name $type]} {
 	ThemeLoadSetTmp $type $name
     }
     set T $Twshow
@@ -1227,23 +1274,41 @@ proc ::Rosticons::SavePrefsHook {} {
 }
 
 proc ::Rosticons::TSavePrefsHook {} {
-
+    variable Tptmp
+    variable stateD
+    variable tmpImagesD
+    upvar ::Jabber::jprefs jprefs
     
+    set changed [TPChanged]
+    set types [dict keys [dict get $stateD types]]
+
+    foreach type $types {
+	if {$jprefs(rost,theme,name,$type) ne $Tptmp(name,$type)} {
+	    set name $Tptmp(name,$type)
+	    if {![dict exists $tmpImagesD $name $type]} {
+		ThemeLoadSetTmp $type $name
+	    }
+	    ThemeSetFromTmp $type $name
+	}
+	set jprefs(rost,theme,use,$type)  $Tptmp(use,$type)
+	set jprefs(rost,theme,name,$type) $Tptmp(name,$type)
+    }
+    if {$changed} {
+	::Roster::RepopulateTree
+	::hooks::run rosterIconsChangedHook
+    }
 }
 
 proc ::Rosticons::CancelPrefsHook {} {
-    variable ptmp
-    variable state
-    upvar ::Jabber::jprefs jprefs
-    
     if {[PChanged]} {
 	::Preferences::HasChanged
     }
 }
 
 proc ::Rosticons::TCancelPrefsHook {} {
-
-    
+    if {[TPChanged]} {
+	::Preferences::HasChanged
+    }
 }
 
 proc ::Rosticons::PChanged {} {
@@ -1265,16 +1330,32 @@ proc ::Rosticons::PChanged {} {
     return $changed
 }
 
-proc ::Rosticons::UserDefaultsHook {} {
-    variable ptmp
+proc ::Rosticons::TPChanged {} {
+    variable Tptmp
+    variable stateD
     upvar ::Jabber::jprefs jprefs
+    
+    set changed 0
+    set types [dict keys [dict get $stateD types]]
+    foreach type $types {
+	if {$jprefs(rost,theme,use,$type) != $Tptmp(use,$type)} {
+	    set changed 1
+	    break
+	}
+	if {$jprefs(rost,theme,name,$type) ne $Tptmp(name,$type)} {
+	    set changed 1
+	    break
+	}
+    }
+    return $changed
+}
 
+proc ::Rosticons::UserDefaultsHook {} {
     # @@@ TODO
 }
 
 proc ::Rosticons::TUserDefaultsHook {} {
-
-    
+    # @@@ TODO
 }
 
 proc ::Rosticons::PFree {} {
@@ -1284,7 +1365,19 @@ proc ::Rosticons::PFree {} {
 }
 
 proc ::Rosticons::TPFree {} {
+    variable Tptmp
+    variable tmpImagesD
 
+    dict for {name typeD} $tmpImagesD {
+	dict for {type imagesD} $typeD {
+	    dict for {key image} $imagesD {
+		image delete $image
+	    }
+	}
+    }
+    unset tmpImagesD
+    unset -nocomplain Tptmp
+    set tmpImagesD [dict create]
 }
 
 #-------------------------------------------------------------------------------

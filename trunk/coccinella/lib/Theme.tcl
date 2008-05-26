@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.55 2008-05-24 07:34:07 matben Exp $
+# $Id: Theme.tcl,v 1.56 2008-05-26 07:49:57 matben Exp $
 
 package provide Theme 1.0
 
@@ -291,18 +291,6 @@ proc ::Theme::NameAndLocalePrefs {} {
     }
 }
 
-proc ::Theme::GetThemeInfo {name} {
-    
-    set path [GetPath $name]
-    set infoFile [file join $path info]
-    if {![file exists $infoFile]} {
-	
-    } else {
-    
-	
-    }
-}
-
 # ::Theme::GetAllAvailable --
 # 
 #       Finds all available themes.
@@ -320,6 +308,23 @@ proc ::Theme::GetAllAvailable {} {
     
     # Exclude the default theme.
     return [lsearch -all -inline -not $themes $this(themeDefault)]
+}
+
+proc ::Theme::GetAllWithFilter {filterL} {
+    global  this
+    
+    set themes [list]
+    foreach dir [list $this(themesPath) $this(altThemesPath)] {
+	foreach path [glob -nocomplain -types d -directory $dir *] {
+	    set name [file tail $path]
+	    if {$name eq "CVS"} { continue }
+	    set infoL [GetInfo $path]
+	    if {[llength [lintersect $infoL $filterL]]} {
+		lappend themes $name
+	    }
+	}
+    }
+    return [lsort $themes]
 }
 
 proc ::Theme::GetAllThemePaths {} {
@@ -385,7 +390,7 @@ proc ::Theme::CacheAllInfo {} {
 #
 #       Seraches for the given theme name in app bundle or prefs folder.
 #       Returns sempty if not found. 
-#       Internal usage only.
+#       Internal usage only???  Cache it???
 
 proc ::Theme::GetPath {theme} {
     global this
@@ -611,6 +616,22 @@ proc ::Theme::Create16IconWithName {w resource} {
 	return [FindIconWithName icons/16x16/$rsrc $rsrc]
     } 
     return
+}
+
+# Theme::ThemeChanged --
+#
+#       Mainly refresh all theme images with updated versions.
+
+proc ::Theme::ThemeChanged {} {
+    
+    set paths [GetPresentSearchPaths]
+    set all [lsearch -inline -all [image names] ::theme::*]
+    foreach name $all {
+	set spec [string map {::theme:: ""} $name]
+	set tmp [MakeIconFromPaths $spec "" $paths]
+	$name copy $tmp -compositingrule set
+	image delete $tmp
+    }
 }
 
 #-------------------------------------------------------------------------------
