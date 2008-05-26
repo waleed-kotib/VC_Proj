@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTwo.tcl,v 1.27 2008-05-22 14:23:46 matben Exp $
+# $Id: RosterTwo.tcl,v 1.28 2008-05-26 11:53:33 matben Exp $
 
 package require RosterTree
 
@@ -27,7 +27,7 @@ package provide RosterTwo 1.0
 namespace eval ::RosterTwo {
 	
     # Register this style.
-    ::RosterTree::RegisterStyle two "Two Line"   \
+    ::RosterTree::RegisterStyle two "Two Lines" \
       ::RosterTwo::Configure   \
       ::RosterTwo::Init        \
       ::RosterTwo::Delete      \
