@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.57 2008-05-27 08:03:56 matben Exp $
+# $Id: Theme.tcl,v 1.58 2008-05-27 14:17:23 matben Exp $
 
 package provide Theme 1.0
 
@@ -291,26 +291,7 @@ proc ::Theme::NameAndLocalePrefs {} {
     }
 }
 
-# ::Theme::GetAllAvailable --
-# 
-#       Finds all available themes. OUTDATED!!!
-
-proc ::Theme::GetAllAvailable {} {
-    global  this
-    
-    set themes [list]
-    foreach dir [list $this(themesPath) $this(altThemesPath)] {
-	foreach name [glob -nocomplain -tails -types d -directory $dir *] {
-	    if {$name eq "CVS"} { continue }
-	    lappend themes $name
-	}
-    }
-    
-    # Exclude the default theme.
-    return [lsearch -all -inline -not $themes $this(themeDefault)]
-}
-
-proc ::Theme::GetAllWithFilter {filterL} {
+proc ::Theme::GetAllWithFilter {{filterL {}}} {
     global  this
     
     set themes [list]
@@ -318,14 +299,20 @@ proc ::Theme::GetAllWithFilter {filterL} {
 	foreach path [glob -nocomplain -types d -directory $dir *] {
 	    set name [file tail $path]
 	    if {$name eq "CVS"} { continue }
-	    set infoL [GetInfo $path]
-	    if {[llength [lintersect $infoL $filterL]]} {
+	    if {[llength $filterL]} {
+		set infoL [GetInfo $path]
+		if {[llength [lintersect $infoL $filterL]]} {
+		    lappend themes $name
+		}
+	    } else {
 		lappend themes $name
 	    }
 	}
     }
     return [lsort $themes]
 }
+#     # Exclude the default theme.
+#     return [lsearch -all -inline -not $themes $this(themeDefault)]
 
 proc ::Theme::GetAllThemePaths {} {
     global  this

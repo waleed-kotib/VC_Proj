@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.185 2008-05-27 08:03:55 matben Exp $	
+# $Id: Coccinella.tcl,v 1.186 2008-05-27 14:17:23 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -180,23 +180,15 @@ update
 
 set state(launchStatus) tile
 set prefs(tileTheme) [option get . prefs_tileTheme {}]
-if {$this(ttk)} {
-    if {[lsearch -exact [ttk::themes] $prefs(tileTheme)] >= 0} {
-	ttk::setTheme $prefs(tileTheme)
-    } elseif {[tk windowingsystem] eq "x11"} {
-	
-	# We use the 'clam' theme as a fallback (and default in resources).
-	catch {ttk::setTheme clam}
-    }
-} else {
-    if {[lsearch -exact [tile::availableThemes] $prefs(tileTheme)] >= 0} {
-	tile::setTheme $prefs(tileTheme)
-    } elseif {[tk windowingsystem] eq "x11"} {
-	
-	# We use the 'clam' theme as a fallback (and default in resources).
-	catch {tile::setTheme clam}
-    }
+
+if {[lsearch -exact [ttk::themes] $prefs(tileTheme)] >= 0} {
+    ttk::setTheme $prefs(tileTheme)
+} elseif {[tk windowingsystem] eq "x11"} {
+    
+    # We use the 'clam' theme as a fallback (and default in resources).
+    catch {ttk::setTheme clam}
 }
+
 # To help the transition from tile pre 0.8.0
 proc GetCurrentTheme {} {
     if {[info exists ttk::currentTheme]} {

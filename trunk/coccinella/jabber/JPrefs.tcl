@@ -18,13 +18,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.65 2008-05-27 08:03:56 matben Exp $
+# $Id: JPrefs.tcl,v 1.66 2008-05-27 14:17:23 matben Exp $
 
 package require ui::fontselector
 
 package provide JPrefs 1.0
 
-namespace eval ::JPrefs:: {
+namespace eval ::JPrefs {
     
     # Define all hooks for preference settings.
     ::hooks::register prefsInitHook          ::JPrefs::InitPrefsHook
@@ -137,11 +137,13 @@ proc ::JPrefs::BuildAppearancePage {page} {
     
     # An empty themeName is the default value.
     set tmpPrefs(themeName) $prefs(themeName)
-    if {$tmpPrefs(themeName) == ""} {
-	set tmpPrefs(themeName) [mc None]
+    if {$tmpPrefs(themeName) eq ""} {
+	set tmpPrefs(themeName) $this(themeDefault)
     }
-    set allrsrc [concat [mc None] [::Theme::GetAllWithFilter {root generic}]]
-
+    set genericL [::Theme::GetAllWithFilter {generic}]
+    set themeL [concat [list $this(themeDefault)] $genericL]
+    
+    
     # Tile:
     # The descriptive names of the builtin themes:
     set tileThemeList {
@@ -156,16 +158,9 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	step            "Step"
     }
     array set tileThemeArr $tileThemeList
-    if {$this(ttk)} {
-	set themes [ttk::themes]
-	set tns ttk::theme
-    } else {
-	set themes [tile::availableThemes]
-	set tns tile::theme
-    }
     
     # Add in any available loadable themes:
-    foreach name $themes {
+    foreach name [ttk::themes] {
 	if {![info exists tileThemeArr($name)]} {
 	    lappend tileThemeList \
 	      $name [set tileThemeArr($name) [string totitle $name]]
@@ -173,7 +168,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     }
     set menuDef [list]
     foreach {theme name} $tileThemeList {
-	if {![catch {package require ${tns}::$theme}]} {
+	if {![catch {package require ttk::theme::$theme}]} {
 	    lappend menuDef [list $name -value $theme]
 	}
     }
@@ -206,7 +201,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     ttk::label $wap.lthe -text "[mc Theme]:"
     ui::combobutton $wap.pthe \
       -variable [namespace current]::tmpPrefs(themeName) \
-      -menulist [ui::optionmenu::menuList $allrsrc]
+      -menulist [ui::optionmenu::menuList $themeL]
     
     ::balloonhelp::balloonforwindow $wap.pthe \
       [mc "Requires a restart of" $prefs(appName)]
@@ -217,15 +212,9 @@ proc ::JPrefs::BuildAppearancePage {page} {
     #   ::tile::currentTheme and prefs(tileTheme)
     ttk::label $wap.lskin -text "[mc Skin]:"
     
-    if {$this(ttk)} {
-	ui::optionmenu $wap.bskin -menulist $menuDef \
-	  -variable [namespace current]::tmpPrefs(tileTheme) \
-	  -command ttk::setTheme
-    } else {
-	ui::optionmenu $wap.bskin -menulist $menuDef \
-	  -variable [namespace current]::tmpPrefs(tileTheme) \
-	  -command tile::setTheme
-    }
+    ui::optionmenu $wap.bskin -menulist $menuDef \
+      -variable [namespace current]::tmpPrefs(tileTheme) \
+      -command ttk::setTheme
     
     # This has been disabled since it starts a child interpreter which needs
     # another ::tileqt::library.
@@ -376,15 +365,15 @@ proc ::JPrefs::SetOpacity {opacity} {
     }
 }
 
-proc ::JPrefs::SavePrefsHook { } {
-    global  prefs
+proc ::JPrefs::SavePrefsHook {} {
+    global  prefs this
     upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     variable tmpJPrefs
     variable tmpPrefs
     
     set themeChanged 0
-    if {$tmpPrefs(themeName) eq [mc None]} {
+    if {$tmpPrefs(themeName) eq $this(themeDefault)} {
 	set tmpPrefs(themeName) ""
     }
     foreach key {themeName} {
@@ -409,23 +398,24 @@ proc ::JPrefs::SavePrefsHook { } {
     }
     if {$themeChanged} {
 	::Theme::ThemeChanged
+	::hooks::run themeChangedHook
     }
 }
 
-proc ::JPrefs::CancelPrefsHook { } {
-    global  prefs
+proc ::JPrefs::CancelPrefsHook {} {
+    global  prefs this
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
     variable tmpPrefs
 	
+    if {$tmpPrefs(themeName) eq $this(themeDefault)} {
+	set tmpPrefs(themeName) ""
+    }
     foreach key [array names tmpJPrefs] {
 	if {![string equal $jprefs($key) $tmpJPrefs($key)]} {
 	    ::Preferences::HasChanged
 	    return
 	}
-    }
-    if {$tmpPrefs(themeName) eq [mc None]} {
-	set tmpPrefs(themeName) ""
     }
     
     # We don't store the tileTheme this way.
@@ -439,7 +429,7 @@ proc ::JPrefs::CancelPrefsHook { } {
     }
 }
 
-proc ::JPrefs::UserDefaultsHook { } {
+proc ::JPrefs::UserDefaultsHook {} {
     upvar ::Jabber::jprefs jprefs
     variable tmpJPrefs
 	

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AvatarMB.tcl,v 1.35 2008-04-17 15:00:28 matben Exp $
+# $Id: AvatarMB.tcl,v 1.36 2008-05-27 14:17:23 matben Exp $
 # 
 # @@@ TODO: Get options from option database instead
 
@@ -72,28 +72,18 @@ proc ::AvatarMB::Init {} {
     image create photo $blank -width 4 -height 4
     $blank blank
 
-    if {$this(ttk)} {
-	set styleCmd ttk::style
-	set tns ttk::theme
-	set themes [ttk::themes]
-    } else {
-	set styleCmd style
-	set tns tile::theme
-	set themes [tile::availableThemes]
-    }
-
-    foreach name $themes {
+    foreach name [ttk::themes] {
 	
 	# @@@ We could be more economical here and load theme only when needed.
-	if {[catch {package require ${tns}::$name}]} {
+	if {[catch {package require ttk::theme::$name}]} {
 	    continue
 	}	
 
-	$styleCmd theme settings $name {
+	ttk::style theme settings $name {
 	 	    
 	    set activeDef "#3874d1"
 	    # Can't find the right named color here.
-	    if {0 && $this(ttk) && ([tk windowingsystem] eq "aqua")} {
+	    if {0 && ([tk windowingsystem] eq "aqua")} {
 		lassign [winfo rgb . systemMenuBackgroundSelected] r g b
  		set activeDef [format "#%02x%02x%02x" $r $g $b]
 	    }
@@ -101,8 +91,8 @@ proc ::AvatarMB::Init {} {
 	    array unset style
 	    array unset map
 	    array set style [list -foreground black]
-	    array set style [$styleCmd configure .]    
-	    array set map   [$styleCmd map .]
+	    array set style [ttk::style configure .]    
+	    array set map   [ttk::style map .]
 
 	    if {[info exists map(-background)]} {
 		foreach {mstate mcol} $map(-background) {
@@ -138,18 +128,13 @@ proc ::AvatarMB::Init {} {
 	    $activeim blank
 	    $activeim put [list [list $active $active] [list $active $active]]
 	    
-	    if {$this(ttk)} {
-		$styleCmd element create FMenu.background image \
-		  [list $blank {active !disabled} $activeim] \
-		  -padding {0} -sticky news
-	    } else {
-		$styleCmd element create FMenu.background image $blank  \
-		  -padding {0} -sticky news  \
-		  -map [list {active !disabled} $activeim]
-	    }
+	    ttk::style element create FMenu.background image \
+	      [list $blank {active !disabled} $activeim] \
+	      -padding {0} -sticky news
+
 	    if {0} {
 		# Tile BUG
-		$styleCmd layout FMenu {
+		ttk::style layout FMenu {
 		    FMenu.background -sticky news -border 1 -children {
 			FMenu.padding -sticky news -border 1 -children {
 			    FMenu.label -side left
@@ -157,16 +142,16 @@ proc ::AvatarMB::Init {} {
 		    }
 		}
 	    }
-	    $styleCmd layout FMenu {
+	    ttk::style layout FMenu {
 		FMenu.background -children {
 		    FMenu.padding -children {
 			FMenu.label -side left
 		    }
 		}
 	    }	    
-	    $styleCmd configure FMenu  \
+	    ttk::style configure FMenu  \
 	      -padding {18 2 10 2} -borderwidth 0 -relief flat
-	    $styleCmd map FMenu -foreground [array get foreground]
+	    ttk::style map FMenu -foreground [array get foreground]
 	}
     }
     
@@ -507,16 +492,10 @@ proc ::AvatarMB::Menu {m args} {
     
     #puts "::AvatarMB::Menu"
 
-    if {$this(ttk)} {
-	set styleCmd ttk::style
-    } else {
-	set styleCmd style
-    }
-
     set active "#3874d1"
     array set style [list -foreground black -background gray80]
-    array set style [$styleCmd configure .]    
-    array set map   [$styleCmd map .]
+    array set style [ttk::style configure .]    
+    array set map   [ttk::style map .]
 
     if {[info exists map(-background)]} {
 	foreach {mstate mcol} $map(-background) {
