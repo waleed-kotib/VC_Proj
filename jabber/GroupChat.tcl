@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.247 2008-05-27 08:03:55 matben Exp $
+# $Id: GroupChat.tcl,v 1.248 2008-05-27 14:17:23 matben Exp $
 
 package require Create
 package require Enter
@@ -1201,9 +1201,6 @@ proc ::GroupChat::NewPage {dlgtoken roomjid args} {
 
 	# Repack the GroupChatRoom in notebook page.
 	MoveRoomToPage $dlgtoken $chattoken
-	if {!$this(ttk)} {
-	    DrawCloseButton $dlgtoken
-	}
     } 
 
     # Make fresh page with chat widget.

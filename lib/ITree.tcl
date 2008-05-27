@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ITree.tcl,v 1.25 2008-02-20 15:14:37 matben Exp $
+# $Id: ITree.tcl,v 1.26 2008-05-27 14:17:23 matben Exp $
 #       
 #  Each item is associated with a list reflecting the tree hierarchy:
 #       
@@ -49,11 +49,6 @@ proc ::ITree::New {T wxsc wysc args} {
     foreach {key value} $args {
 	set options($T,$key) $value
     }
-    if {$this(ttk)} {
-	set styleCmd ttk::style
-    } else {
-	set styleCmd style
-    }
 
     treectrl $T -selectmode extended  \
       -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 0  \
@@ -66,8 +61,8 @@ proc ::ITree::New {T wxsc wysc args} {
       -height 0 -width 0
     
     array set style [list -foreground black -itembackground {}]
-    array set style [$styleCmd configure .]
-    array set style [$styleCmd configure TreeCtrl]
+    array set style [ttk::style configure .]
+    array set style [ttk::style configure TreeCtrl]
 
     set itemBackground $style(-itembackground)
     

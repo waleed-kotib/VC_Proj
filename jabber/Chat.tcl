@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.292 2008-05-23 14:33:22 matben Exp $
+# $Id: Chat.tcl,v 1.293 2008-05-27 14:17:23 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2167,9 +2167,6 @@ proc ::Chat::NewPage {dlgtoken threadID jid} {
 
 	# Repack the ChatThread in notebook page.
 	MoveThreadToPage $dlgtoken $chattoken
-	if {!$this(ttk)} {
-	    DrawCloseButton $dlgtoken
-	}
     } 
 
     # Make fresh page with chat widget.
