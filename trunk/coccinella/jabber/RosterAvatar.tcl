@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.52 2008-05-22 14:23:46 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.53 2008-05-27 08:03:56 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -153,8 +153,8 @@ proc ::RosterAvatar::InitDB { } {
     set fillF   [concat $fillT $fillM]
     set fontF   [list $underlineFont {mouseover} CociDefaultFont {}]
     set fontFS  [list $underlineFontS {mouseover} CociSmallFont {}]
-    set imop [::Rosticons::Get application/folder-open]
-    set imcl [::Rosticons::Get application/folder-closed]
+    set imop [::Rosticons::ThemeGet application/folder-open]
+    set imcl [::Rosticons::ThemeGet application/folder-closed]
     set imageF [list $imop {open} $imcl {!open}]
     set fillB [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     
@@ -342,7 +342,7 @@ proc ::RosterAvatar::Configure {_T} {
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
     set fg [option get $T textColor {}]
-    set simage [::Rosticons::Get status/available]
+    set simage [::Rosticons::ThemeGet user/online]
 
     # Define a new item state
     if {[lsearch [$T state names] notify] < 0} {
@@ -970,7 +970,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
     if {($type eq "transport") || ($type eq "pending")} {
 	set ptag [list head $type]
 	set ptext  [::RosterTree::MCHead $type]
-	set pimage [::Rosticons::Get application/group-$type]
+	set pimage [::Rosticons::ThemeGet application/group-$type]
 	set pitem [PutItemInHead $item $ptag $ptext $pimage]
 	set n [llength [$T item children $pitem]]
 	$T item element configure $pitem cTree eNumText -text "($n)"

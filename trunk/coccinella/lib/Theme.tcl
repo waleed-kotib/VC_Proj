@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.56 2008-05-26 07:49:57 matben Exp $
+# $Id: Theme.tcl,v 1.57 2008-05-27 08:03:56 matben Exp $
 
 package provide Theme 1.0
 
@@ -293,7 +293,7 @@ proc ::Theme::NameAndLocalePrefs {} {
 
 # ::Theme::GetAllAvailable --
 # 
-#       Finds all available themes.
+#       Finds all available themes. OUTDATED!!!
 
 proc ::Theme::GetAllAvailable {} {
     global  this
@@ -487,8 +487,7 @@ proc ::Theme::FindIcon {spec} {
 proc ::Theme::FindIconWithName {spec name} {
     
     set image ""
-#    if {$image ni [image names]}
-    if {[lsearch -exact [image names] $name] < 0} {
+    if {$image ni [image names]} {
 	set paths [GetPresentSearchPaths]
 	set image [MakeIconFromPaths $spec $name $paths]
     } else {
@@ -632,6 +631,19 @@ proc ::Theme::ThemeChanged {} {
 	$name copy $tmp -compositingrule set
 	image delete $tmp
     }
+}
+
+# Theme::ReloadIcon --
+#
+#       Call this to get a refreshed image when theme changed.
+
+proc ::Theme::ReloadIcon {spec} {
+
+    set paths [GetPresentSearchPaths] 
+    set name ::theme::$spec
+    set tmp [MakeIconFromPaths $spec "" $paths]
+    $name copy $tmp -compositingrule set
+    image delete $tmp
 }
 
 #-------------------------------------------------------------------------------

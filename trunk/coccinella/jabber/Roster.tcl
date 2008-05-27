@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.244 2008-05-16 06:29:25 matben Exp $
+# $Id: Roster.tcl,v 1.245 2008-05-27 08:03:56 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1104,7 +1104,7 @@ proc ::Roster::IsCoccinella {jid3} {
 }
 
 proc ::Roster::GetPresenceIconFromKey {key} {
-    return [::Rosticons::Get status/$key]
+    return [::Rosticons::ThemeGet user/$key]
 }
 
 # Roster::GetPresenceIconFromJid --
@@ -1141,6 +1141,7 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     
     # Construct the 'type/sub' specifying the icon.
     set itype status
+    set itype "user"
     set isub  $presence
     
     # Then see if any <show/> element
@@ -1164,7 +1165,7 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
 	# If empty we have likely not yet browsed etc.
 	set cattype [lindex [::Disco::AccessTypes $host] 0]
 	set subtype [lindex [split $cattype /] 1]
-	if {[lsearch -exact [::Rosticons::GetTypes] $subtype] >= 0} {
+	if {[lsearch -exact [::Rosticons::ThemeGetTypes] $subtype] >= 0} {
 	    set itype $subtype
 	    set foreign 1
 	}
@@ -1176,12 +1177,12 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
 	set itype "whiteboard"
     }
     
-    return [::Rosticons::Get $itype/$isub]
+    return [::Rosticons::ThemeGet $itype/$isub]
 }
 
 proc ::Roster::GetMyPresenceIcon {} {
     set status [::Jabber::GetMyStatus]
-    return [::Rosticons::Get status/$status]
+    return [::Rosticons::ThemeGet user/$status]
 }
 
 proc ::Roster::GetPresenceAndStatusText {jid} {

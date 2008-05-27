@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.51 2008-05-05 14:22:28 matben Exp $
+# $Id: Status.tcl,v 1.52 2008-05-27 08:03:56 matben Exp $
 
 package provide Status 1.0
 
@@ -181,7 +181,7 @@ proc ::Status::Button {w varName args} {
 
     set wmenu $w.menu
     ttk::menubutton $w -style MiniMenubutton  \
-      -compound image -image [::Rosticons::Get status/$status]
+      -compound image -image [::Rosticons::ThemeGet user/$status]
     menu $wmenu -tearoff 0
     set menuBuildCmd($w) [list BuildGenericMenu $wmenu $varName  \
       -command [list [namespace current]::ButtonCmd $w $varName $argsA(-command)]]
@@ -223,7 +223,7 @@ proc ::Status::ConfigImage {w show} {
     if {($show eq "available") && ![::Jabber::IsConnected]} {
 	# empty
     } else {
-	$w configure -image [::Rosticons::Get status/$show]
+	$w configure -image [::Rosticons::ThemeGet user/$show]
     }    
 }
 
@@ -245,7 +245,7 @@ proc ::Status::BuildGenericMenu {mt varName args} {
 	    set opts [list]
 	    if {$menuImages} {
 		set opts [list -compound left \
-		  -image [::Rosticons::Get status/$name]]
+		  -image [::Rosticons::ThemeGet user/$name]]
 	    }
 	    eval {
 		$mt add radio -label $mapShowElemToText($name)  \
@@ -326,7 +326,7 @@ proc ::Status::BuildMenuDef { } {
 		set opts [list -variable ::Jabber::jstate(show) -value $name]
 	    } else {
 		set opts [list -variable ::Jabber::jstate(show) -value $name \
-		  -compound left -image [::Rosticons::Get status/$name]]
+		  -compound left -image [::Rosticons::ThemeGet user/$name]]
 	    }
 	    lappend statMenuDef [list radio $mName $cmd {} $opts]
 	}
@@ -609,7 +609,7 @@ proc ::Status::ExButton {w varName args} {
         
     set show [lindex $showStatus 0]	
     ttk::menubutton $w -style $style \
-      -compound image -image [::Rosticons::Get status/$show]
+      -compound image -image [::Rosticons::ThemeGet user/$show]
     set wmenu $w.menu
     menu $wmenu -tearoff 0  \
       -postcommand [list ::Status::ExPostCmd $wmenu $varName $args]
@@ -636,7 +636,7 @@ proc ::Status::ExTrace {w varName index op} {
 	    set showStatus $var($index)
 	}
 	set show [lindex $showStatus 0]
-	$w configure -image [::Rosticons::Get status/$show]
+	$w configure -image [::Rosticons::ThemeGet user/$show]
 	ExSetBalloon $w $showStatus
     }
 }
@@ -732,7 +732,7 @@ proc ::Status::ExBuildMenu {m varName args} {
 	set opts [list]
 	if {$menuImages} {
 	    set opts [list -compound left \
-	      -image [::Rosticons::Get status/$show]]
+	      -image [::Rosticons::ThemeGet user/$show]]
 	}
 	if {[lsearch $showManifestL $show] >= 0} {
 	    set value [list $show {}]
@@ -855,7 +855,7 @@ proc ::Status::ExCustomDlg {varName args} {
     
     set menuDef [list]
     foreach show {available away chat dnd xa invisible unavailable} {
-	set im [::Rosticons::Get status/$show]
+	set im [::Rosticons::ThemeGet user/$show]
 	lappend menuDef [list $mapShowElemToText($show) -value $show -image $im]
     }
     ui::dialog $w -type okcancel -message [mc jamessstatuscust2] \

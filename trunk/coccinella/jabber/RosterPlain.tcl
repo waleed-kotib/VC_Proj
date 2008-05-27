@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.49 2008-05-22 14:23:46 matben Exp $
+# $Id: RosterPlain.tcl,v 1.50 2008-05-27 08:03:56 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -375,8 +375,8 @@ proc ::RosterPlain::Init {} {
     # Seems necessary if we switch style while editing; online below offline!
     update idletasks
         
-    set onlineImage  [::Rosticons::Get application/group-root-online]
-    set offlineImage [::Rosticons::Get application/group-root-offline]
+    set onlineImage  [::Rosticons::ThemeGet application/group-root-online]
+    set offlineImage [::Rosticons::ThemeGet application/group-root-offline]
     
     # Available:
     set tag [list head available]
@@ -460,12 +460,12 @@ proc ::RosterPlain::CreateItem {jid presence args} {
 	    group {
 		set style styFolder
 		set text  $tag1
-		set image [::Rosticons::Get application/group-$presence]
+		set image [::Rosticons::ThemeGet application/group-$presence]
 	    }
 	    head {
 		set style styHead
 		set text  [::RosterTree::MCHead $tag1]
-		set image [::Rosticons::Get application/group-$tag1]
+		set image [::Rosticons::ThemeGet application/group-$tag1]
 	    }
 	}
 	ConfigureItem $item $style $text $image
