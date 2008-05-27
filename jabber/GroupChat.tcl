@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.246 2008-05-23 14:33:22 matben Exp $
+# $Id: GroupChat.tcl,v 1.247 2008-05-27 08:03:55 matben Exp $
 
 package require Create
 package require Enter
@@ -1989,7 +1989,7 @@ proc ::GroupChat::TreeCreateUserItem {chattoken jid3} {
 	if {$pitem eq ""} {
 	    set pitem [TreeCreateWithTag $T $ptag root]
 	    set text $userRoleToStr($role)
-	    set image [::Rosticons::Get application/group-online]
+	    set image [::Rosticons::ThemeGet application/group-online]
 	    $T item style set $pitem cTree styRole
 	    $T item element configure $pitem cTree \
 	      eRoleText -text $text + eImage -image $image

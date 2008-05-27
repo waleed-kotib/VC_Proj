@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.248 2008-05-23 14:33:22 matben Exp $
+# $Id: JUI.tcl,v 1.249 2008-05-27 08:03:56 matben Exp $
 
 package provide JUI 1.0
 
@@ -1187,8 +1187,8 @@ proc ::JUI::RosterIconsChangedHook {} {
     upvar ::Jabber::jstate jstate
     
     if {[winfo exists $jwapp(mystatus)]} {
-	set status $jstate(show)
-	$jwapp(mystatus) configure -image [::Rosticons::Get status/$status]
+	set show $jstate(show)
+	$jwapp(mystatus) configure -image [::Rosticons::ThemeGet user/$show]
     }
 }
 

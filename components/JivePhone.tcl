@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.35 2008-04-17 15:00:28 matben Exp $
+# $Id: JivePhone.tcl,v 1.36 2008-05-27 08:03:55 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -222,7 +222,7 @@ proc ::JivePhone::OnDiscoUserNode {jlibname type from subiq args} {
 		
 		set item [::RosterTree::FindWithTag [list jid $jid]]
 		if {$item ne ""} {
-		    set image [::Rosticons::Get [string tolower phone/available]]
+		    set image [::Rosticons::ThemeGet phone/online]
 		    ::RosterTree::StyleSetItemAlternative $jid jivephone  \
 		      image $image
 		}
@@ -244,7 +244,7 @@ proc ::JivePhone::WeHavePhone { } {
     ::Roster::RegisterPopupEntry $popMenuDef(call) $popMenuType(call)
     ::JUI::RegisterMenuEntry  action $menuDef
     
-    set image [::Rosticons::Get [string tolower phone/available]]
+    set image [::Rosticons::ThemeGet [string tolower phone/online]]
     set win [::JUI::SetAlternativeStatusImage jivephone $image]
     bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
     ::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
@@ -306,7 +306,7 @@ proc ::JivePhone::PresenceHook {jid type args} {
 	    # Must check for "normal" presence info.
 	    set state(status,$from) $status
 
-	    set image [::Rosticons::Get [string tolower phone/$status]]
+	    set image [::Rosticons::ThemeGet [string tolower phone/$status]]
 	    ::RosterTree::StyleSetItemAlternative $from jivephone image $image
 	    eval {::hooks::run jivePhonePresence $from $type} $args
 	}
@@ -340,7 +340,7 @@ proc ::JivePhone::MessageHook {xmldata uuid} {
 	} else {
 	    set cid [mc "Unknown"]
 	}
-	set image [::Rosticons::Get [string tolower phone/$status]]
+	set image [::Rosticons::ThemeGet [string tolower phone/$status]]
 	
 	set win [::JUI::SetAlternativeStatusImage jivephone $image]
 	set type [wrapper::getattribute $elem "type"]

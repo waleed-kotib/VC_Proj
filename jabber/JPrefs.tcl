@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.64 2008-05-26 07:49:57 matben Exp $
+# $Id: JPrefs.tcl,v 1.65 2008-05-27 08:03:56 matben Exp $
 
 package require ui::fontselector
 
@@ -389,7 +389,6 @@ proc ::JPrefs::SavePrefsHook { } {
     }
     foreach key {themeName} {
 	if {$prefs($key) ne $tmpPrefs($key)} {
-	    ::Preferences::NeedRestart
 	    set themeChanged 1
 	}
     }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.100 2008-05-22 14:23:46 matben Exp $
+# $Id: Init.tcl,v 1.101 2008-05-27 08:03:56 matben Exp $
 
 namespace eval ::Init {
     
@@ -45,7 +45,6 @@ proc ::Init::SetThis {mainScript} {
     set this(emoticons)         iconsets/emoticons
     set this(images)            images
     set this(resources)         resources
-    set this(rosticons)         iconsets/roster
     set this(servicons)         iconsets/service
     set this(sounds)            sounds
     set this(themes)            themes
@@ -408,7 +407,6 @@ proc ::Init::SetPrefsPaths {} {
     
     set this(altItemPath)       [file join $path items]
     set this(altEmoticonsPath)  [file join $path $this(emoticons)]
-    set this(altRosticonsPath)  [file join $path $this(rosticons)]
     set this(altServiconsPath)  [file join $path $this(servicons)]
     set this(altThemesPath)     [file join $path themes]
     set this(inboxFile)         [file join $path Inbox.tcl]
@@ -551,7 +549,6 @@ proc ::Init::MakePrefsDirs {} {
 	recentAvatarPath
 	altItemPath
 	altEmoticonsPath
-	altRosticonsPath
 	altServiconsPath
 	altThemesPath
 	scriptsPath

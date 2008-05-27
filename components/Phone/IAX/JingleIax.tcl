@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JingleIax.tcl,v 1.42 2008-04-17 15:00:28 matben Exp $
+# $Id: JingleIax.tcl,v 1.43 2008-05-27 08:03:55 matben Exp $
 
 if {[catch {package require stun}]} {
     return
@@ -521,7 +521,7 @@ proc ::JingleIAX::PresenceHook {jid type args} {
     set xelem [::Jabber::RosterCmd getx $from "jingle/media/audio"]
     if {[llength $xelem]} {
 	set status [wrapper::getattribute $xelem type]
-	set image [::Rosticons::Get [string tolower phone/$status]]
+	set image [::Rosticons::ThemeGet [string tolower phone/$status]]
 	::RosterTree::StyleSetItemAlternative $from jivephone image $image
     } 
     

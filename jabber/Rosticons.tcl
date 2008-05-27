@@ -18,26 +18,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.48 2008-05-26 07:49:57 matben Exp $
+# $Id: Rosticons.tcl,v 1.49 2008-05-27 08:03:56 matben Exp $
 
-#  Directory structure: Each key that defines an icon is 'type/subtype'.
-#  Each iconset must contain only one type and be placed in the directory
-#  roster/'type'/. 
-#
-#   roster/        aim/
-#          application/
-#            gadu-gadu/
-#                  icq/
-#                  msn/
-#                 smtp/
-#               status/
-#                yahoo/
-#                
-#  The 'status' type is the usual jabber icons. The 'application' type is 
-#  special since it sets the other icons used in the roster tree.
-#  Each group must have a default dir as a fallback set. 
-#  The actual default set is defined in the 'defaultSet' array.
-#
 #  From disco-categories:
 #
 #  The "gateway" category consists of translators between Jabber/XMPP services 
@@ -60,77 +42,28 @@ package provide Rosticons 1.0
 
 namespace eval ::Rosticons {
 
-    # Define all hooks for preference settings.
+    # Define all hooks for inits and preference settings.
     ::hooks::register prefsInitHook          ::Rosticons::InitPrefsHook
     ::hooks::register prefsBuildHook         ::Rosticons::BuildPrefsHook
     ::hooks::register prefsSaveHook          ::Rosticons::SavePrefsHook
     ::hooks::register prefsCancelHook        ::Rosticons::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Rosticons::UserDefaultsHook
-
-    # Other init hooks depend on us!
-    ::hooks::register initHook               ::Rosticons::Init    20
-
-    if {[info tclversion] >= 8.5} {
-
-	# Other init hooks depend on us!
-	#::hooks::register initHook               ::Rosticons::TInit    20
-
-	::hooks::register prefsInitHook          ::Rosticons::TInitPrefsHook
-	::hooks::register prefsBuildHook         ::Rosticons::TBuildPrefsHook
-	::hooks::register prefsSaveHook          ::Rosticons::TSavePrefsHook
-	::hooks::register prefsCancelHook        ::Rosticons::TCancelPrefsHook
-	::hooks::register prefsUserDefaultsHook  ::Rosticons::TUserDefaultsHook
-    }
     
     # The presence/show states.
     variable pstates
-    set pstates {online offline invisible away chat dnd xa}
+    set pstates(pres) {online offline invisible away chat dnd xa}
 
-    variable application
-    set application {
+    # Application tree icon name.
+    set pstates(app) {
 	group-root-online group-root-offline 
 	group-transport   group-pending 
 	group-online      group-offline 
 	folder-open       folder-closed  folder
     }
+    set pstates(phone) {online ring talk}
     
     variable imagesD [dict create]
     variable tmpImagesD [dict create]
-
-    # The sets made default (not the named default) MUST always exist!
-    variable defaultSet
-    array set defaultSet {
-	aim             "Crystal"
-	application     "Crystal"
-	gadu-gadu       "default"
-	gadugadu        "default"
-	icq             "Crystal"
-	msn             "Crystal"
-	phone           "plain"
-	sms             "Crystal"
-	smtp            "Crystal"
-	status          "Crystal"
-	yahoo           "Crystal"
-    }
-
-    variable priv
-    set priv(types) [array names defaultSet]
-    
-    # Define which icons we want to use as defaults.
-    foreach type $priv(types) {
-	set ::config(rost,icons,use,$type)  0
-	set ::config(rost,icons,must,$type) 0
-    }
-    set ::config(rost,icons,use,application) 1
-    set ::config(rost,icons,use,phone)       1
-    set ::config(rost,icons,use,status)      1
-    
-    # Define which icons must always be displayed.
-    set ::config(rost,icons,must,application) 1
-    set ::config(rost,icons,must,phone)       1
-    set ::config(rost,icons,must,status)      1
-
-
     
     # Define which iconsets that shall be active by default.
     set ::config(rost,theme,use,application) 1
@@ -142,154 +75,29 @@ namespace eval ::Rosticons {
     set ::config(rost,theme,must,phone)       1
     set ::config(rost,theme,must,user)        1
 
-    variable Tinitted 0
+    variable inited 0
 }
 
 proc ::Rosticons::Init {} {
-    global  this
+    variable inited
     
-    variable priv
-    variable state
-    variable defaultSet
-    upvar ::Jabber::jprefs jprefs
-
-    # 'tmpicons(name,key)' map from status/offline (key) and iconset name
-    # to an image name.
-    variable tmpicons
-    
-    # 'tmpiconsInv(name,image)' which is the inverse of the above.
-    variable tmpiconsInv
-
-    ::Debug 2 "::Rosticons::Init"
-    
-    # We need the 'vfs::zip' package and if not using starkit we also need
-    # the 'Memchan' package which is not automatically checked for.
-    # 'rechan' is the tclkits built in version of 'Memchan'.
-    if {[catch {package require vfs::zip}]} {
-	set priv(havezip) 0
-    } elseif {![catch {package require rechan}]} {
-	set priv(havezip) 1
-    } elseif {![catch {package require Memchan}]} {
-	set priv(havezip) 1
-    } else {
-	set priv(havezip) 0
-    }
-    
-    # Investigates all sets available per 'type' and 'name' but doesn't
-    # process anything.
-    set types [GetAllTypeSets]
-    
-    # Treat each 'type' in turn. Verify that exists. defaultSet as fallback.
-    foreach type $types {
-	set name $jprefs(rost,icons,$type)
-	if {![info exists state(path,$type,$name)]} {
-	    set name $defaultSet($type)
-	    set jprefs(rost,icons,$type) $name
-	}
-	if {$type eq "application"} {
-	    LoadApplicationTmp $name
-	} else {
-	    LoadTmpIconSet $type $name
-	}
-	SetFromTmp $type $name
-    }
-}
-
-proc ::Rosticons::TInit {} {
-    variable Tinitted
-    
-    if {$Tinitted} { return }
+    if {$inited} { return }
      
-    # We keep a parallell track for the new themeing engine.
-
     # Investigates all sets available per 'type' and 'name' but doesn't
     # process anything.
     set types [ThemeGetAllTypes]
-    set Tinitted 1
+    set inited 1
 }
 
-proc ::Rosticons::Exists {key} {
-    variable icons
-    
-    if {[info exists icons($key)]} {
-	return 1
-    } else {
-	return 0
-    }
+proc ::Rosticons::ThemeExists {key} {
+    variable imagesD
+    lassign [split $key /] type sub
+    return [dict exists imagesD $type $sub]
 }
 
-proc ::Rosticons::GetTypes {} {
-    variable state
-   
-    return $state(types)
-}
-
-# Rosticons::GetAllTypeSets --
-# 
-#       Info stored in 'state' array as:
-#       
-#       state(name,$type,$name) name
-#       state(type,$type,$name) type
-#       state(path,$type,$name) path
-#       
-#       state(names,$type) listOfNames
-#       state(types)       listOfTypes
-#       
-#       type is typically:
-#       aim application gadu-gadu icq msn status yahoo
-
-proc ::Rosticons::GetAllTypeSets {} {
-    global  this
-    variable priv
-    variable state
-    
-    array unset state name,*
-    array unset state path,*
-    array unset state type,*
-    array unset state names,*
-    array unset state types
-    
-    foreach path [::Theme::GetPathsFor $this(rosticons)] {
-	foreach tdir [glob -nocomplain -type d -directory $path *] {
-	    set type [file tail $tdir]
-	    if {$type eq "CVS"} {
-		continue
-	    }
-	    
-	    # For each type dir find all sets for this type.
-	    foreach f [glob -nocomplain -directory $tdir *] {
-		set name [file tail $f]
-		set name [file rootname $name]
-		if {[string equal [file extension $f] ".jisp"] && $priv(havezip)} {
-		    set state(name,$type,$name) $name
-		    set state(type,$type,$name) $type
-		    set state(path,$type,$name) $f
-		} elseif {[file isdirectory $f]} {
-		    if {[file exists [file join $f icondef.xml]]} {
-			set state(name,$type,$name) $name
-			set state(type,$type,$name) $type
-			set state(path,$type,$name) $f
-		    }
-		}
-	    }
-	}
-    }
-    
-    # Compile info.
-    # 1) get all types:
-    set state(types) {}
-    foreach {key type} [array get state type,*] {
-	lappend state(types) $type
-    }
-    set state(types) [lsort -unique $state(types)]
-
-    # 2) get all names for each type:
-    foreach type $state(types) {
-	foreach {key name} [array get state name,$type,*] {
-	    lappend state(names,$type) $name
-	}
-    }
-    return $state(types)
+proc ::Rosticons::ThemeGetTypes {} {
+    variable stateD   
+    return [dict keys [dict get $stateD types]]
 }
 
 proc ::Rosticons::ThemeGetAllTypes {} {
@@ -328,131 +136,6 @@ proc ::Rosticons::ThemeGetAllTypes {} {
     return $types
 }
 
-# Rosticons::Get --
-# 
-#       Returns the image to use for this key.
-#       
-# Arguments:
-#       statuskey       type/subtype, ex: status/online, icq/xa, 
-#                       application/* and phone/* are special
-#       
-# Results:
-#       a valid image or empty.
-
-proc ::Rosticons::Get {statuskey} {
-    variable icons
-    variable state
-    upvar ::Jabber::jprefs jprefs
-        
-    set statuskey [string tolower $statuskey]
-    lassign [split $statuskey /] type sub
-    set sub [string map {available online unavailable offline} $sub]
-    set suborig $sub
-    
-    if {$type eq "application"} {
-	if {$jprefs(rost,icons,use,$type)} {
-	    # These are just temporary...
-# 	    set sub [string map {group-root- ""} $sub]
-# 	    set sub [string map {group-pending pending} $sub]
-# 	    set sub [string map {group-transport transport} $sub]	    
-	    set key $type/$sub
-	    if {[info exists icons($key)]} {
-		return $icons($key)
-	    } else {
-		set sub [string map {group-online group} $sub]
-		set sub [string map {group-offline group} $sub]
-		set sub [string map {folder-open folder} $sub]
-		set sub [string map {folder-closed folder} $sub]
-		set key $type/$sub
-		if {[info exists icons($key)]} {
-		    return $icons($key)
-		} else {
-		    return ""
-		}
-	    }
-	} else {
-	    return ""
-	}
-    } elseif {$type eq "phone"} {
-	if {$jprefs(rost,icons,use,$type)} {
-	    if {[info exists icons($statuskey)]} {
-		return $icons($statuskey)
-	    } else {
-		return ""
-	    }
-	} else {
-	    return ""
-	}
-    } else {
-
-	# Check if this type is active. Use 'status' as fallback.
-	if {![info exists jprefs(rost,icons,use,$type)]} {
-	    set type status
-	}
-	if {!$jprefs(rost,icons,use,$type)} {
-	    set type status
-	}
-	
-	set key $type/$sub
-	if {[info exists icons($key)]} {
-	    return $icons($key)
-	}
-	
-	# See if we can match the 'type'. Use 'status' as fallback.
-	if {[lsearch -exact $state(types) $type] == -1} {
-	    set type status
-	}
-	
-	# First try to find a fallback for the sub part.
-	set sub [string map {invisible offline} $sub]
-	set sub [string map {ask offline} $sub]
-	set sub [string map {chat online} $sub]
-	set key $type/$sub
-	if {[info exists icons($key)]} {
-	    return $icons($key)
-	}
-	set sub [string map {xa away} $sub]
-	set sub [string map {dnd away} $sub]
-	set key $type/$sub
-	if {[info exists icons($key)]} {
-	    return $icons($key)
-	}
-	set sub [string map {away online} $sub]
-	set key $type/$sub
-	if {[info exists icons($key)]} {
-	    return $icons($key)
-	}
-	#puts "xxxxxxxxxxxxxxxxxxxxxxxxx"
-	
-	# If still not matched select type=status which must be there.
-	set sub $suborig
-	#puts "1 status/$sub"
-	if {[info exists icons(status/$sub)]} {
-	    #puts "1 info exists icons(status/$sub)"
-	    return $icons(status/$sub)
-	}
-	set sub [string map {invisible offline} $sub]
-	set sub [string map {ask offline} $sub]
-	set sub [string map {chat online} $sub]
-	set key status/$sub
-	#puts "2 $key"
-	if {[info exists icons($key)]} {
-	    #puts "2 info exists icons(status/$sub)"
-	    return $icons($key)
-	}
-	set sub [string map {xa away} $sub]
-	set sub [string map {dnd away} $sub]
-	set key status/$sub
-	#puts "3 $key"
-	if {[info exists icons($key)]} {
-	    #puts "3 info exists icons(status/$sub)"
-	    return $icons($key)
-	}
-	
-	return
-    }
-}
-
 # Rosticons::ThemeGet --
 # 
 #       Returns the image to use for this key.
@@ -479,20 +162,16 @@ proc ::Rosticons::ThemeGet {typekey} {
 	    if {[dict exists $imagesD $type $sub]} {
 		return [dict get $imagesD $type $sub]
 	    }
-	    set sub [string map {group-online group} $sub]
-	    set sub [string map {group-offline group} $sub]
-	    set sub [string map {folder-open folder} $sub]
-	    set sub [string map {folder-closed folder} $sub]
-	    set key $type/$sub
+	}
+    } elseif {$type eq "phone"} {
+	if {$jprefs(rost,theme,use,$type)} {
+	    set sub [string map {dialed talk} $sub]
+	    set sub [string map {on_phone talk} $sub]
+	    set sub [string map {hang_up talk} $sub]
 	    if {[dict exists $imagesD $type $sub]} {
 		return [dict get $imagesD $type $sub]
 	    }
-	    return
-	} else {
-	    return
 	}
-    } elseif {$type eq "phone"} {
-
     } else {
 	
 	# Check if this type is active. Use 'user' as fallback.
@@ -507,142 +186,44 @@ proc ::Rosticons::ThemeGet {typekey} {
 	    return [dict get $imagesD $type $sub]
 	}
 	
-	
-	
-	return
-    }
-}
-
-# For 'application' only so far!
-
-proc ::Rosticons::LoadApplicationTmp {name} {
-    variable state
-    variable tmpicons
-    variable tmpiconsInv
-    
-    set type "application"
-
-    array unset tmpicons    $name,$type/*
-    array unset tmpiconsInv $name,$type/*
-        
-    # We just list all application icons.
-    set application {
-	group-root-online group-root-offline 
-	group-transport   group-pending 
-	group-online      group-offline 
-	folder-open       folder-closed  folder
-    }
-    foreach app $application {
-	set typesubtype $type/$app
-	set image [::Theme::FindIconSize 16 $app]
-	set tmpicons($name,$typesubtype) $image
-	set tmpiconsInv($name,$image)    $typesubtype
-    }
-    set state(loaded,$type,$name) 1
-}
-
-# Rosticons::ThemeLoadApplicationTmp --
-#
-#       Loads all 'application' type roster icons from a set.
-#       It uses fallbacks to ordinary themes.
-
-proc ::Rosticons::ThemeLoadApplicationTmp {name} {
-    variable stateD
-    variable tmpImagesD
-    variable application
-
-    set type "application"
-    dict set tmpImagesD $name $type [list]
-    
-    # Here we start searching the roster theme 'name' and use fallbacks.
-    set path [list [::Theme::GetPath $name]]
-    set paths [concat $path [::Theme::GetPresentSearchPaths]]
-    foreach app $application {
-	set spec icons/16x16/$app
-	set image [::Theme::MakeIconFromPaths $spec "" $paths]
-	if {$image ne ""} {
-	    dict set tmpImagesD $name $type $app $image 
+	# See if we can match the 'type'. Use 'user' as fallback.
+	set types [dict keys [dict get $stateD types]]
+	if {$type ni $types} {
+	    set type "user"
 	}
-    }
-    return
-}
-
-proc ::Rosticons::ThemeLoadPhoneTmp {name} {
-    variable stateD
-    variable tmpImagesD
-
-    set type "phone"
-    dict set tmpImagesD $name $type [list]
-    set phoneKeys {
-	online ring talk
-    }
-    
-    set paths [list [::Theme::GetPath $name]]
-    foreach key $phoneKeys {
-	set spec icons/16x16/phone-$key
-	set image [::Theme::MakeIconFromPaths $spec "" $paths]
-	if {$image ne ""} {
-	    dict set tmpImagesD $name $type $key $image 
+	
+	# First try to find a fallback for the sub part.
+	set sub [string map {invisible offline} $sub]
+	set sub [string map {ask offline} $sub]
+	set sub [string map {chat online} $sub]
+	if {[dict exists $imagesD $type $sub]} {
+	    return [dict get $imagesD $type $sub]
 	}
-    }
-    return
-}
-
-# Rosticons::LoadTmpIconSet --
-# 
-#       Loads an iconset with specified 'type' and 'name' and creates all images.
-
-proc ::Rosticons::LoadTmpIconSet {type name} {
-    variable state
-    variable meta
-    variable tmpicons
-    variable tmpiconsInv
-    variable mdata
-    variable idata
-        
-    set path $state(path,$type,$name)
-        
-    set name [::Icondef::Load $path  \
-      [namespace current]::idata     \
-      [namespace current]::mdata]
-    
-    array unset meta $name,*
-    foreach {key value} [array get mdata] {
-	set meta($name,$key) $value
-    }
-    
-    array unset tmpicons    $name,$type/*
-    array unset tmpiconsInv $name,$type/*
-
-    foreach {typesubtype image} [array get idata] {
-	set tmpicons($name,$typesubtype) $image
-	set tmpiconsInv($name,$image)    $typesubtype
-    }
-    set state(loaded,$type,$name) 1
-
-    unset -nocomplain mdata
-    unset -nocomplain idata
-}
-
-# Rosticons::ThemeLoadTypeTmp --
-#
-#       Creates all relevant images from an iconset.
-
-proc ::Rosticons::ThemeLoadTypeTmp {type name} {
-    variable stateD
-    variable tmpImagesD
-    variable pstates
-    
-    dict set tmpImagesD $name $type [list]
-    
-    # If an iconset is missing an icon for one of the states,
-    # do the fallback within the theme and not to any other theme.
-    set base icons/16x16/$type
-    set paths [list [::Theme::GetPath $name]]
-    foreach key $pstates {
-	set image [::Theme::MakeIconFromPaths $base-$key "" $paths]
-	if {$image ne ""} {
-	    dict set tmpImagesD $name $type $key $image 
+	set sub [string map {xa away} $sub]
+	set sub [string map {dnd away} $sub]
+	if {[dict exists $imagesD $type $sub]} {
+	    return [dict get $imagesD $type $sub]
+	}
+	set sub [string map {away online} $sub]
+	if {[dict exists $imagesD $type $sub]} {
+	    return [dict get $imagesD $type $sub]
+	}
+	
+	# If still not matched select type=user which must be there.
+	set sub $suborig
+	if {[dict exists $imagesD user $sub]} {
+	    return [dict get $imagesD user $sub]
+	}
+	set sub [string map {invisible offline} $sub]
+	set sub [string map {ask offline} $sub]
+	set sub [string map {chat online} $sub]
+	if {[dict exists $imagesD user $sub]} {
+	    return [dict get $imagesD user $sub]
+	}
+	set sub [string map {xa away} $sub]
+	set sub [string map {dnd away} $sub]
+	if {[dict exists $imagesD user $sub]} {
+	    return [dict get $imagesD user $sub]
 	}
     }
     return
@@ -658,22 +239,84 @@ proc ::Rosticons::ThemeLoadSetTmp {type name} {
     }
 }
 
-# Rosticons::SetFromTmp --
-# 
-#       Sets the specified iconset. It just copies the relevant array elements
-#       from 'tmpicons' to 'icons'.
+# Rosticons::ThemeLoadApplicationTmp --
+#
+#       Loads all 'application' type roster icons from a set.
+#       It uses fallbacks to ordinary themes.
 
-proc ::Rosticons::SetFromTmp {type name} {
-    variable tmpicons
-    variable icons
-    variable iconsInv
-    variable priv
-        
-    foreach {key image} [array get tmpicons "$name,$type/*"] {
-	set typesubtype [lindex [split $key ,] 1]
-	set icons($typesubtype) $image
-	set iconsInv($image)    $typesubtype
+proc ::Rosticons::ThemeLoadApplicationTmp {name} {
+    variable stateD
+    variable tmpImagesD
+    variable pstates
+
+    set type "application"
+    dict set tmpImagesD $name $type [list]
+    
+    # Here we start searching the roster theme 'name' and use fallbacks.
+    set path [list [::Theme::GetPath $name]]
+    set paths [concat $path [::Theme::GetPresentSearchPaths]]
+    foreach app $pstates(app) {
+	set spec icons/16x16/$app
+	set image [::Theme::MakeIconFromPaths $spec "" $paths]
+	if {$image ne ""} {
+	    dict set tmpImagesD $name $type $app $image 
+	}
     }
+    return
+}
+
+proc ::Rosticons::ThemeLoadPhoneTmp {name} {
+    variable stateD
+    variable tmpImagesD
+    variable pstates
+
+    set type "phone"
+    dict set tmpImagesD $name $type [list]
+     
+    set paths [list [::Theme::GetPath $name]]
+    foreach key $pstates(phone) {
+	set spec icons/16x16/phone-$key
+	set image [::Theme::MakeIconFromPaths $spec "" $paths]
+	if {$image ne ""} {
+	    dict set tmpImagesD $name $type $key $image 
+	}
+    }
+    return
+}
+
+# Rosticons::ThemeLoadTypeTmp --
+#
+#       Creates all relevant images from an iconset.
+
+proc ::Rosticons::ThemeLoadTypeTmp {type name} {
+    variable stateD
+    variable tmpImagesD
+    variable pstates
+    
+    dict set tmpImagesD $name $type [list]
+    if {$type eq "user"} {
+	set isUser 1
+    } else {
+	set isUser 0
+    }
+    
+    # If an iconset is missing an icon for one of the states,
+    # do the fallback within the theme and not to any other theme.
+    set paths [list [::Theme::GetPath $name]]
+    foreach key $pstates(pres) {
+	# We keep an alternative lookup mechanism here.
+	# set spec icons/16x16/$type-$key
+	if {$isUser} {
+	    set spec icons/16x16/user-$key
+	} else {
+	    set spec icons/16x16/user-$key-$type
+	}
+	set image [::Theme::MakeIconFromPaths $spec "" $paths]
+	if {$image ne ""} {
+	    dict set tmpImagesD $name $type $key $image 
+	}
+    }
+    return
 }
 
 # Rosticons::ThemeSetFromTmp --
@@ -695,55 +338,22 @@ proc ::Rosticons::ThemeSetFromTmp {type name} {
 # Preference hooks -------------------------------------------------------------
 
 proc ::Rosticons::InitPrefsHook {} {
-    global config
-    variable priv
-    variable defaultSet
-    upvar ::Jabber::jprefs jprefs
-
-    set jprefs(rost,haveWBicons) 1
-    
-    # @@@ Find all types dynamically...
-    # Do NOT store the complete path!
-    set plist [list]
-    foreach type $priv(types) {
-	set jprefs(rost,icons,$type) $defaultSet($type)
-	set name  ::Jabber::jprefs(rost,icons,$type)
-	set rsrc  jprefs_rost_icons_$type
-	set value [set $name]
-	lappend plist [list $name $rsrc $value]
-
-	set jprefs(rost,icons,use,$type) $config(rost,icons,use,$type)
-	
-	# Add only the ones that can be optional.
-	if {!$config(rost,icons,must,$type)} {
-	    set name  ::Jabber::jprefs(rost,icons,use,$type)
-	    set rsrc  jprefs_rost_icons_use_$type
-	    set value [set $name]
-	    lappend plist [list $name $rsrc $value]
-	}
-    }    
-    ::PrefUtils::Add $plist
-}
-
-proc ::Rosticons::TInitPrefsHook {} {
-    global config
+    global config this
     variable stateD
     upvar ::Jabber::jprefs jprefs
 
     set jprefs(rost,haveWBicons) 1
     
     # We need to do this here since we depend on it.
-    TInit
+    Init
     
     # Find all types dynamically...
     set types [dict keys [dict get $stateD types]]
-
-    # 
+    
+    # Define all our prefs settings.
     set plist [list]
     foreach type $types {
 	set names [dict get $stateD types $type]
-
-	# @@@ better default... Pick in source dir only!
 	set key "rost,theme,name,$type"
 	set jprefs($key) [lindex $names 0]
 	set name  ::Jabber::jprefs($key)
@@ -777,20 +387,21 @@ proc ::Rosticons::TInitPrefsHook {} {
 }
 
 proc ::Rosticons::VerifyAndLoad {} {
+    global this
     variable stateD
     upvar ::Jabber::jprefs jprefs
     
     set types [dict keys [dict get $stateD types]]
-
+    
     # Treat each 'type' in turn. Verify that exists.
     # This must be done after we have read and set our preferences.
     foreach type $types {
  	set key "rost,theme,name,$type"
  	set name $jprefs($key)
  	if {[::Theme::GetPath $name] eq ""} {
- 	    # @@@ better default... Pick in source dir only!
- 	    set names [dict get $stateD types $type]
- 	    set jprefs($key) [lindex $names 0]
+	    set names [dict get $stateD types $type]
+	    set jprefs($key) [lindex $names 0]
+	    set jprefs(rost,theme,use,$type) 0
  	}
 	ThemeLoadSetTmp $type $name
 	ThemeSetFromTmp $type $name
@@ -799,79 +410,15 @@ proc ::Rosticons::VerifyAndLoad {} {
 
 proc ::Rosticons::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Rosticons} [mc "Contact Icons"]
-    
-    set wpage [$nbframe page {Rosticons}]    
-    BuildPrefsPage $wpage
-}
-
-proc ::Rosticons::TBuildPrefsHook {wtree nbframe} {
-    
-    ::Preferences::NewTableItem {Jabber "Theme Rosticons"} [mc "Theme Contact Icons"]
+    ::Preferences::NewTableItem {Jabber "Theme Rosticons"} [mc "Contact Icons"]
     
     set wpage [$nbframe page "Theme Rosticons"]    
     TBuildPrefsPage $wpage
 }
 
-proc ::Rosticons::BuildPrefsPage {wpage} {
+proc ::Rosticons::TBuildPrefsPage {wpage} {
     variable wselect
     variable wshow
-
-    set wc $wpage.c
-    ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
-    pack $wc -side top -fill both -expand 1 \
-      -anchor [option get . dialogAnchor {}]
-    
-    set box $wc.b
-    ttk::frame $wc.b
-    pack $box -side top
-    
-    # Style selection tree:
-    set lbox $box.l
-    set wysc    $lbox.ysc
-    set wselect $lbox.t    
-
-    frame $lbox -relief sunken -bd 1    
-    
-    ttk::scrollbar $wysc -orient vertical -command [list $wselect yview]
-    PTreeSelect $wselect $wysc
-
-    grid  $wselect  -row 0 -column 0 -sticky news
-    grid  $wysc     -row 0 -column 1 -sticky ns
-    grid columnconfigure $lbox 0 -weight 1   
-    
-    PFillTree $wselect
-
-    # Show iconset tree:
-    set rbox $box.r
-    set wysc  $rbox.ysc
-    set wshow $rbox.t    
-
-    frame $rbox -relief sunken -bd 1    
-    
-    ttk::scrollbar $wysc -orient vertical -command [list $wselect yview]
-    PTreeShow $wshow $wysc
-
-    grid  $wshow  -row 0 -column 0 -sticky news
-    grid  $wysc   -row 0 -column 1 -sticky ns
-    grid columnconfigure $rbox 0 -weight 1   
-        
-    set msg $box.msg
-    ttk::label $msg -text [mc jaseliconset2]
-
-    grid  $lbox  x  $rbox  -sticky ew
-    grid  $msg   -  -      -sticky w -pady 4
-    grid columnconfigure $box 1 -minsize 12
-    
-    # @@@ treectrl2.2.3
-    $wselect selection add status
-    
-    bind $wpage <Destroy> [namespace current]::PFree
-}
-
-proc ::Rosticons::TBuildPrefsPage {wpage} {
-    variable Twselect
-    variable Twshow
  
     set wc $wpage.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
@@ -886,7 +433,6 @@ proc ::Rosticons::TBuildPrefsPage {wpage} {
     set lbox $box.l
     set wysc    $lbox.ysc
     set wselect $lbox.t   
-    set Twselect $wselect
 
     frame $lbox -relief sunken -bd 1    
     
@@ -903,7 +449,6 @@ proc ::Rosticons::TBuildPrefsPage {wpage} {
     set rbox $box.r
     set wysc  $rbox.ysc
     set wshow $rbox.t    
-    set Twshow $wshow
 
     frame $rbox -relief sunken -bd 1    
     
@@ -923,52 +468,7 @@ proc ::Rosticons::TBuildPrefsPage {wpage} {
     
     $wselect selection add user
     
-    bind $wpage <Destroy> [namespace current]::TPFree
-}
-
-proc ::Rosticons::PTreeSelect {T wysc} {
-    global  this
-    
-    treectrl $T -selectmode single  \
-      -showroot 0 -showrootbutton 0 -showbuttons 1 -showheader 0  \
-      -borderwidth 0 -highlightthickness 0 -indent 10 \
-      -yscrollcommand [list $wysc set]
-       
-    # This is a dummy option.
-    set itemBackground [option get $T itemBackground {}]
-    set fill [list $this(sysHighlight) {selected focus} gray {selected !focus}]
-    set bd [option get $T columnBorderWidth {}]
-    set bg [option get $T columnBackground {}]
-    set fg [option get $T textColor {}]
-    
-    $T column create -tags cButton -resize 0 -borderwidth $bd  \
-      -background $bg -textcolor $fg -squeeze 1
-    $T column create -tags cTree   -resize 0 -borderwidth $bd  \
-      -background $bg -textcolor $fg -expand 1
-    $T configure -treecolumn cTree
-
-    $T element create eText text -lines 1
-    $T element create eButton window
-    $T element create eBorder rect -open new -outline white -outlinewidth 1 \
-      -fill $fill -showfocus 1
-
-    set S [$T style create styButton]
-    $T style elements $S {eBorder eButton}
-    $T style layout $S eButton
-    $T style layout $S eBorder -detach yes -iexpand xy -indent 0
-
-    set S [$T style create styStd]
-    $T style elements $S {eBorder eText}
-    $T style layout $S eText -padx 4 -squeeze x -expand ns -ipady 2
-    $T style layout $S eBorder -detach yes -iexpand xy -indent 0
-
-    set S [$T style create styTag]
-    $T style elements $S {eText}
-
-    $T column configure cButton -itemstyle styButton
-    $T column configure cTree -itemstyle styStd
-
-    $T notify bind $T <Selection>  { ::Rosticons::POnSelect %T }
+    bind $wpage <Destroy> [namespace current]::PFree
 }
 
 proc ::Rosticons::TPTreeSelect {T wysc} {
@@ -1016,7 +516,7 @@ proc ::Rosticons::TPTreeSelect {T wysc} {
     $T notify bind $T <Selection>  { ::Rosticons::TPOnSelect %T }
 }
 
-proc ::Rosticons::POnSelect {T} {
+proc ::Rosticons::TPOnSelect {T} {
     variable ptmp
     
     set item [$T selection get]
@@ -1025,106 +525,25 @@ proc ::Rosticons::POnSelect {T} {
 	if {[llength $tag] == 1} {
 	    set type $tag
 	    set name $ptmp(name,$type)
-	    PFillKeyImageTree $type $name   
-	} elseif {[llength $tag] == 2} {
-	    lassign $tag type name
-	    PFillKeyImageTree $type $name   
-	}
-    }
-}
-
-proc ::Rosticons::TPOnSelect {T} {
-    variable Tptmp
-    
-    set item [$T selection get]
-    if {[llength $item] == 1} {
-	set tag [lindex [$T item tag names $item] 0]
-	if {[llength $tag] == 1} {
-	    set type $tag
-	    set name $Tptmp(name,$type)
 	    TPFillKeyImageTree $type $name   
 	} elseif {[llength $tag] == 2} {
 	    lassign $tag type name
 	    TPFillKeyImageTree $type $name   
 	}
     }
-}
-
-proc ::Rosticons::PFillTree {T} {
-    global config
-    variable state
-    variable ptmp
-    upvar ::Jabber::jprefs jprefs
-    
-    foreach type $state(types) {
-	set ptmp(use,$type)  $jprefs(rost,icons,use,$type)
-	set ptmp(name,$type) $jprefs(rost,icons,$type)
-    }
-    
-    set i 0
-    set types [lsearch -all -inline -not $state(types) "status"]
-    set types [linsert $types 0 "status"]
-    
-    foreach type $types {
-	set wcheck $T.[incr i]
-	checkbutton $wcheck -bg white -highlightthickness 0 \
-	  -variable [namespace current]::ptmp(use,$type)
-	if {$config(rost,icons,must,$type)} {
-	    $wcheck configure -state disabled
-	}
-	if {$type eq "status"} {
-	    set typeName [mc normal]
-	} elseif {$type eq "application"} {
-	    set typeName [mc program-Application]
-	} elseif {$type eq "phone"} {
-	    set typeName [mc Phone]
-	} elseif {$type eq "smtp"} {
-	    set typeName [mc Email]
-	} else {
-	    set typeName [::Roster::GetNameFromTrpt $type]
-	}
-	set pitem [$T item create -open 1 -button 1 -parent root -tags $type]
-	$T item element configure $pitem cButton eButton -window $wcheck
-	$T item element configure $pitem cTree eText -text $typeName \
-	  -font CociSmallBoldFont
-	
-	set names $state(names,$type)
-	
-	foreach name $names {
-	    set wradio $T.[incr i]
-	    radiobutton $wradio -bg white -highlightthickness 0 \
-	      -variable [namespace current]::ptmp(name,$type)  \
-	      -value $name
-	    
-	    if {$name eq "default"} {
-		set str [mc Default]
-	    } else {
-		set str $name
-	    }
-	    
-	    set tag [list $type $name]
-	    set item [$T item create -parent $pitem -tags [list $tag]]
-	    $T item element configure $item cButton eButton -window $wradio
-	    $T item element configure $item cTree eText -text $str
-	}
-	if {[llength $names] == 1} {
-	    $wradio configure -state disabled
-	}
-    }    
 }
 
 proc ::Rosticons::TPFillTree {T} {
     global config
     variable stateD
-    variable Tptmp
+    variable ptmp
     upvar ::Jabber::jprefs jprefs
     
     set types [dict keys [dict get $stateD types]]
-    puts ::Rosticons::TPFillTree
 
     foreach type $types {
-	set Tptmp(use,$type)  $jprefs(rost,theme,use,$type)
-	set Tptmp(name,$type) $jprefs(rost,theme,name,$type)
+	set ptmp(use,$type)  $jprefs(rost,theme,use,$type)
+	set ptmp(name,$type) $jprefs(rost,theme,name,$type)
     }
    
     set i 0
@@ -1132,7 +551,7 @@ proc ::Rosticons::TPFillTree {T} {
     foreach type $types {
 	set wcheck $T.[incr i]
 	checkbutton $wcheck -bg white -highlightthickness 0 \
-	  -variable [namespace current]::Tptmp(use,$type)
+	  -variable [namespace current]::ptmp(use,$type)
 
 	set key "rost,theme,must,$type"
 	if {[info exists config($key)] && $config($key)} {
@@ -1160,7 +579,7 @@ proc ::Rosticons::TPFillTree {T} {
 	foreach name $names {
 	    set wradio $T.[incr i]
 	    radiobutton $wradio -bg white -highlightthickness 0 \
-	      -variable [namespace current]::Tptmp(name,$type)  \
+	      -variable [namespace current]::ptmp(name,$type)  \
 	      -value $name
 	    
 	    if {$name eq "default"} {
@@ -1210,36 +629,16 @@ proc ::Rosticons::PTreeShow {T wysc} {
     $T column configure cImage -itemstyle styImage
 }
 
-proc ::Rosticons::PFillKeyImageTree {type name} {
+proc ::Rosticons::TPFillKeyImageTree {type name} {
     variable wselect
     variable wshow
-    variable tmpicons
-    variable state
-    
-    if {![info exists state(loaded,$type,$name)]} {
-	LoadTmpIconSet $type $name
-    }
-    set T $wshow
-    $T item delete all
-    
-    foreach {key image} [array get tmpicons $name,$type/*] {
-	set item [$T item create -parent root]
-	set typesubtype [lindex [split $key ,] 1]
-	$T item element configure $item cKey eText -text $typesubtype
-	$T item element configure $item cImage eImage -image $image
-    }
-}
-
-proc ::Rosticons::TPFillKeyImageTree {type name} {
-    variable Twselect
-    variable Twshow
     variable tmpImagesD
     variable stateD
     
     if {![dict exists $tmpImagesD $name $type]} {
 	ThemeLoadSetTmp $type $name
     }
-    set T $Twshow
+    set T $wshow
     $T item delete all
     
     dict for {key image} [dict get $tmpImagesD $name $type] {
@@ -1251,49 +650,26 @@ proc ::Rosticons::TPFillKeyImageTree {type name} {
 
 proc ::Rosticons::SavePrefsHook {} {
     variable ptmp
-    variable state
-    upvar ::Jabber::jprefs jprefs
-    
-    set changed [PChanged]
-
-    foreach type $state(types) {
-	if {$jprefs(rost,icons,$type) ne $ptmp(name,$type)} {
-	    set name $ptmp(name,$type)
-	    if {![info exists state(loaded,$type,$name)]} {
-		LoadTmpIconSet $type $name
-	    }
-	    SetFromTmp $type $name
-	}
-	set jprefs(rost,icons,use,$type) $ptmp(use,$type)
-	set jprefs(rost,icons,$type)     $ptmp(name,$type)
-    }
-    if {$changed} {
-	::Roster::RepopulateTree
-	::hooks::run rosterIconsChangedHook
-    }
-}
-
-proc ::Rosticons::TSavePrefsHook {} {
-    variable Tptmp
     variable stateD
     variable tmpImagesD
     upvar ::Jabber::jprefs jprefs
     
-    set changed [TPChanged]
+    set changed [PChanged]
     set types [dict keys [dict get $stateD types]]
 
     foreach type $types {
-	if {$jprefs(rost,theme,name,$type) ne $Tptmp(name,$type)} {
-	    set name $Tptmp(name,$type)
+	if {$jprefs(rost,theme,name,$type) ne $ptmp(name,$type)} {
+	    set name $ptmp(name,$type)
 	    if {![dict exists $tmpImagesD $name $type]} {
 		ThemeLoadSetTmp $type $name
 	    }
 	    ThemeSetFromTmp $type $name
 	}
-	set jprefs(rost,theme,use,$type)  $Tptmp(use,$type)
-	set jprefs(rost,theme,name,$type) $Tptmp(name,$type)
+	set jprefs(rost,theme,use,$type)  $ptmp(use,$type)
+	set jprefs(rost,theme,name,$type) $ptmp(name,$type)
     }
     if {$changed} {
+	# @@@ Move this to hook.
 	::Roster::RepopulateTree
 	::hooks::run rosterIconsChangedHook
     }
@@ -1305,44 +681,19 @@ proc ::Rosticons::CancelPrefsHook {} {
     }
 }
 
-proc ::Rosticons::TCancelPrefsHook {} {
-    if {[TPChanged]} {
-	::Preferences::HasChanged
-    }
-}
-
 proc ::Rosticons::PChanged {} {
     variable ptmp
-    variable state
-    upvar ::Jabber::jprefs jprefs
-    
-    set changed 0
-    foreach type $state(types) {
-	if {$jprefs(rost,icons,use,$type) != $ptmp(use,$type)} {
-	    set changed 1
-	    break
-	}
-	if {$jprefs(rost,icons,$type) ne $ptmp(name,$type)} {
-	    set changed 1
-	    break
-	}
-    }
-    return $changed
-}
-
-proc ::Rosticons::TPChanged {} {
-    variable Tptmp
     variable stateD
     upvar ::Jabber::jprefs jprefs
     
     set changed 0
     set types [dict keys [dict get $stateD types]]
     foreach type $types {
-	if {$jprefs(rost,theme,use,$type) != $Tptmp(use,$type)} {
+	if {$jprefs(rost,theme,use,$type) ne $ptmp(use,$type)} {
 	    set changed 1
 	    break
 	}
-	if {$jprefs(rost,theme,name,$type) ne $Tptmp(name,$type)} {
+	if {$jprefs(rost,theme,name,$type) ne $ptmp(name,$type)} {
 	    set changed 1
 	    break
 	}
@@ -1354,18 +705,8 @@ proc ::Rosticons::UserDefaultsHook {} {
     # @@@ TODO
 }
 
-proc ::Rosticons::TUserDefaultsHook {} {
-    # @@@ TODO
-}
-
 proc ::Rosticons::PFree {} {
     variable ptmp
-    
-    unset -nocomplain ptmp
-}
-
-proc ::Rosticons::TPFree {} {
-    variable Tptmp
     variable tmpImagesD
 
     dict for {name typeD} $tmpImagesD {
@@ -1376,7 +717,7 @@ proc ::Rosticons::TPFree {} {
 	}
     }
     unset tmpImagesD
-    unset -nocomplain Tptmp
+    unset -nocomplain ptmp
     set tmpImagesD [dict create]
 }
 

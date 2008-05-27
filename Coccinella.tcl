@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.184 2008-05-15 07:55:21 matben Exp $	
+# $Id: Coccinella.tcl,v 1.185 2008-05-27 08:03:55 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -19,8 +19,8 @@ set debugLevel 0
 package provide app-Coccinella 1.0
 
 # We want 8.4 at least.
-if {[catch {package require Tk 8.4}]} {
-    return -code error "We need Tk 8.4 or later here. Run Wish!"
+if {[catch {package require Tk 8.5}]} {
+    return -code error "We need Tk 8.5 or later here. Run Wish or find a tclkit!"
 }
 
 # The main window "." shall never be displayed. Use it for QT sounds etc.
