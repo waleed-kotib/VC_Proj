@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.51 2008-05-28 13:04:39 matben Exp $
+# $Id: Rosticons.tcl,v 1.52 2008-05-28 14:27:44 matben Exp $
 
 #  From disco-categories:
 #
@@ -71,7 +71,9 @@ namespace eval ::Rosticons {
     # 'tmpImagesD' is for temporary storage only (preferences) and maps
     # from 'themeName', 'type', and 'status' to images.
     variable tmpImagesD [dict create]
-    
+
+    variable stateD [dict create]
+
     # Define which iconsets that shall be active by default.
     set ::config(rost,theme,use,application) 1
     set ::config(rost,theme,use,phone)       1
