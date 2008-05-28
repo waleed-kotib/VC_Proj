@@ -2,8 +2,12 @@
 #  
 #      This file is part of The Coccinella application. 
 #      It implements handling and parsing of service (disco) icons.
+#      Icons are specified as in 
+#      http://www.xmpp.org/registrar/disco-categories.html
+#      where elements like <identity category='client' type='web'/>
+#      are mapped to a lookup key client/web and so on.
 #      
-#  Copyright (c) 2005  Mats Bengtsson
+#  Copyright (c) 2005-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +22,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.16 2008-05-28 13:04:39 matben Exp $
+# $Id: Servicons.tcl,v 1.17 2008-05-28 14:27:44 matben Exp $
 
 package require Icondef
 
@@ -27,11 +31,22 @@ package provide Servicons 1.0
 namespace eval ::Servicons {
 
     # Define all hooks for preference settings.
-    ::hooks::register prefsInitHook          ::Servicons::InitPrefsHook
+    ::hooks::register prefsInitHook     ::Servicons::InitPrefsHook
 
     # Other init hooks depend on us!
-    ::hooks::register initHook               ::Servicons::Init    20
+    ::hooks::register initHook          ::Servicons::Init    20
+    ::hooks::register initHook          ::Servicons::ThemeInitHook    20
 
+    # 'imagesD' contains all available mappings from 'category' and 'type'
+    # to images, even if they aren't used.
+    variable imagesD [dict create]
+    
+    # 'tmpImagesD' is for temporary storage only (preferences) and maps
+    # from 'themeName', 'category', and 'type' to images.
+    variable tmpImagesD [dict create]
+
+    variable stateD [dict create]
+    
     variable priv
     set priv(defaultSet) "default"
     set priv(alltypes)   [list]
@@ -50,6 +65,26 @@ proc ::Servicons::InitPrefsHook {} {
     upvar ::Jabber::jprefs jprefs
 
     set jprefs(serv,iconSet)  "default"    
+}
+
+proc ::Servicons::ThemeInitHook {} {
+    
+    
+    CacheThemesInfo
+    
+}
+
+proc ::Servicons::CacheThemesInfo {} {
+    variable stateD
+    
+     foreach path [::Theme::GetAllThemePaths] {
+	set name [file tail $path]
+	set infoL [::Theme::GetInfo $path]
+
+	
+	
+    }
+    
 }
 
 proc ::Servicons::Init {} {
@@ -136,6 +171,33 @@ proc ::Servicons::Get {key} {
     variable alias
 
     set key [string map [array get alias] $key]
+    if {[string match gateway/* $key]} {
+	# Special and temporary...
+	set type [lindex [split $key /] 1]
+	# gadu-gadu shall map to gadugadu but only for image lookup.
+	set mtype [string map {"-" ""} $type]
+	return [::Theme::FindIconSize 16 protocol-$mtype]
+    } elseif {[info exists icons($key)]} {
+	return $icons($key)
+    } else {
+	return ""
+    }
+}
+
+proc ::Servicons::ThemeGet {key} {
+    variable imagesD
+
+    set key [string map [array get alias] $key]
+    lassign [split $key /] category type
+    
+    if {$category eq "gateway"} {
+	
+    }
+    if {[dict exists $imagesD $category $type]} {
+	return [dict get $imagesD $category $type]
+    }
+    return
+
     if {[string match gateway/* $key]} {
 	# Special and temporary...
 	set type [lindex [split $key /] 1]
