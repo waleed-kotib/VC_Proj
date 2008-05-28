@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.44 2008-04-17 15:00:28 matben Exp $
+# $Id: Avatar.tcl,v 1.45 2008-05-28 12:08:07 matben Exp $
 
 # @@@ Issues:
 # 
@@ -1452,7 +1452,7 @@ proc ::Avatar::WriteHashmap {fileName} {
     puts $fd "array set hashmap {"
     foreach {mjid2 hash} [array get hashmap] {
 	if {$hash ne ""} {
-	    puts $fd "\t$mjid2 \t$hash"
+	    puts $fd [list $mjid2 $hash]
 	}
     }
     puts $fd "}"
