@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.102 2008-05-13 09:13:00 matben Exp $
+# $Id: NewMsg.tcl,v 1.103 2008-05-28 09:51:07 matben Exp $
 
 package require ui::entryex
 
@@ -226,16 +226,11 @@ proc ::NewMsg::Build {args} {
     }
     
     # Toplevel of class NewMsg.
-    if {$this(8.5)} {
-	::UI::Toplevel $w -class NewMsg \
-	  -macclass {document {toolbarButton standardDocument}} \
-	  -usemacmainmenu 1 \
-	  -closecommand ::NewMsg::CloseHook
-    } else {
-	::UI::Toplevel $w -class NewMsg \
-	  -usemacmainmenu 1 -macstyle documentProc \
-	  -closecommand ::NewMsg::CloseHook
-    }
+    ::UI::Toplevel $w -class NewMsg \
+      -macclass {document {toolbarButton standardDocument}} \
+      -usemacmainmenu 1 \
+      -closecommand ::NewMsg::CloseHook
+
     wm title $w [mc Message]
     
     bind $w <<ToolbarButton>> { ::NewMsg::OnToolbarButton %W }

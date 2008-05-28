@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Whiteboard.tcl,v 1.97 2008-05-16 12:54:49 matben Exp $
+# $Id: Whiteboard.tcl,v 1.98 2008-05-28 09:51:08 matben Exp $
 
 package require anigif
 package require moviecontroller
@@ -736,14 +736,10 @@ proc ::WB::BuildWhiteboard {w args} {
     }
     set state(msg) ""
     
-    if {$this(8.5)} {
-	::UI::Toplevel $w -class TopWhiteboard \
-	  -macclass {document {toolbarButton standardDocument}} \
-	  -closecommand ::WB::CloseHook
-    } else {
-	::UI::Toplevel $w -class TopWhiteboard \
-	  -closecommand ::WB::CloseHook
-    }
+    ::UI::Toplevel $w -class TopWhiteboard \
+      -macclass {document {toolbarButton standardDocument}} \
+      -closecommand ::WB::CloseHook
+
     wm withdraw $w
     wm title $w $opts(-title)
     

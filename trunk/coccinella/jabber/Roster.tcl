@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.245 2008-05-27 08:03:56 matben Exp $
+# $Id: Roster.tcl,v 1.246 2008-05-28 09:51:08 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -1101,10 +1101,6 @@ proc ::Roster::IsCoccinella {jid3} {
 	}
     }
     return $ans
-}
-
-proc ::Roster::GetPresenceIconFromKey {key} {
-    return [::Rosticons::ThemeGet user/$key]
 }
 
 # Roster::GetPresenceIconFromJid --

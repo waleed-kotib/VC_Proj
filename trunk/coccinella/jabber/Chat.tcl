@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.293 2008-05-27 14:17:23 matben Exp $
+# $Id: Chat.tcl,v 1.294 2008-05-28 09:51:06 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1257,14 +1257,9 @@ proc ::Chat::Build {threadID jid} {
     set dlgstate(nhiddenmsgs) 0
     
     # Toplevel with class Chat.
-    if {$this(8.5)} {
-	::UI::Toplevel $w -class Chat \
-	  -macclass {document {toolbarButton standardDocument}} \
-	  -usemacmainmenu 1 -closecommand ::Chat::CloseCmd
-    } else {
-	::UI::Toplevel $w -class Chat \
-	  -usemacmainmenu 1 -closecommand ::Chat::CloseCmd
-    }	
+    ::UI::Toplevel $w -class Chat \
+      -macclass {document {toolbarButton standardDocument}} \
+      -usemacmainmenu 1 -closecommand ::Chat::CloseCmd
 	
     bind $w <<ToolbarButton>> [list ::Chat::OnToolbarButton $dlgtoken]
 
@@ -2512,7 +2507,7 @@ proc ::Chat::SetState {chattoken state} {
 	$chatstate(wsmile) configure -state $state
     }
     if {$state eq "disabled"} {
-	set icon [::Roster::GetPresenceIconFromKey invisible]
+	set icon [::Rosticons::ThemeGet user/invisible]
 	$chatstate(wpresimage) configure -image $icon
 	set pstr [::Roster::MapShowToText unavailable]
 	append pstr " - " [mc tooltip-chatoffline]

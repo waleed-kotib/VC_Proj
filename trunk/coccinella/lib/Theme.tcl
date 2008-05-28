@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.58 2008-05-27 14:17:23 matben Exp $
+# $Id: Theme.tcl,v 1.59 2008-05-28 09:51:08 matben Exp $
 
 package provide Theme 1.0
 
@@ -101,7 +101,7 @@ proc ::Theme::ReadTileResources {} {
     } else {
 	set priority startupFile
     }
-    set f [file join $this(resourcePath) [GetCurrentTheme].rdb]
+    set f [file join $this(resourcePath) ${ttk::currentTheme}.rdb]
     if {[file exists $f]} {
 	option readfile $f $priority
     }
@@ -261,7 +261,10 @@ proc ::Theme::PostProcessFontDefs {} {
 proc ::Theme::NameAndLocalePrefs {} {
     global  this prefs
     
-    set prefs(themeName)     ""    ;# empty means we use this(themeDefault)
+    set rootTheme [GetRootTheme]
+    
+    set prefs(rootTheme)     $rootTheme
+    set prefs(themeName)     $rootTheme
     set prefs(themeParent)   ""
     set prefs(messageLocale) ""
     set prefs(fontSizePlus)  0
@@ -282,14 +285,12 @@ proc ::Theme::NameAndLocalePrefs {} {
     }
     
     # Check here that the theme folder still exists.
-    set dir [file join $this(themesPath) $prefs(themeName)]
-    if {![file isdirectory $dir]} {
-	set dir [file join $this(altThemesPath) $prefs(themeName)]
-	if {![file isdirectory $dir]} {
-	    set prefs(themeName) ""
-	}
+    if {[GetPath $prefs(themeName)] eq ""} {
+	set prefs(themeName) $prefs(rootTheme)
     }
 }
+
+#--- This is the actual themeing engine ----------------------------------------
 
 proc ::Theme::GetAllWithFilter {{filterL {}}} {
     global  this
@@ -311,8 +312,6 @@ proc ::Theme::GetAllWithFilter {{filterL {}}} {
     }
     return [lsort $themes]
 }
-#     # Exclude the default theme.
-#     return [lsearch -all -inline -not $themes $this(themeDefault)]
 
 proc ::Theme::GetAllThemePaths {} {
     global  this
@@ -327,6 +326,18 @@ proc ::Theme::GetAllThemePaths {} {
 	}
     }
     return $paths
+}
+
+proc ::Theme::GetRootTheme {} {
+    global  this
+    
+    foreach path [glob -nocomplain -types d -directory $this(themesPath) *] {
+	if {[file tail $path] eq "CVS"} { continue }
+	if {"root" in [GetInfo $path]} {
+	    return [file tail $path]
+	}
+    }
+    return
 }
 
 proc ::Theme::GetInfo {path} {
@@ -401,7 +412,7 @@ proc ::Theme::GetPath {theme} {
 #       Caches results.
 
 proc ::Theme::GetPathsForTheme {theme themeParent} {
-    global  this
+    global  this prefs
     variable themePaths
     
     if {[info exists themePaths($theme)]} {
@@ -424,7 +435,9 @@ proc ::Theme::GetPathsForTheme {theme themeParent} {
 	}
 	
 	# This MUST always be searched for last since it is our fallback.
-	lappend paths [file join $this(themesPath) $this(themeDefault)]
+	if {$theme ne $prefs(rootTheme)} {
+	    lappend paths [file join $this(themesPath) $prefs(rootTheme)]
+	}
 	set themePaths($theme) $paths
     }
     return $paths

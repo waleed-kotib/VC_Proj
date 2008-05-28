@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.52 2008-05-27 08:03:56 matben Exp $
+# $Id: Status.tcl,v 1.53 2008-05-28 09:51:08 matben Exp $
 
 package provide Status 1.0
 
@@ -404,7 +404,7 @@ proc ::Status::SetWithMessage {varName args} {
     foreach val {available chat away xa dnd invisible} {
 	ttk::radiobutton $wtop.$val -style Small.TRadiobutton \
 	  -compound left -text [mc jastat${val}]          \
-	  -image [::Roster::GetPresenceIconFromKey $val]  \
+	  -image [::Rosticons::ThemeGet user/$val]  \
 	  -variable $w\(show) -value $val \
 	  -command [list [namespace current]::StatusMsgRadioCmd $w]
 	grid  $wtop.$val  -sticky w

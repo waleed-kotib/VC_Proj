@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.249 2008-05-27 08:03:56 matben Exp $
+# $Id: JUI.tcl,v 1.250 2008-05-28 09:51:07 matben Exp $
 
 package provide JUI 1.0
 
@@ -291,14 +291,10 @@ proc ::JUI::Build {w} {
     if {!$inited} {
 	Init
     }
-    if {$this(8.5)} {
-	::UI::Toplevel $w -class JMain \
-	  -macclass {document {toolbarButton standardDocument}} \
-	  -closecommand ::JUI::CloseHook -allowclose 0
-    } else {
-	::UI::Toplevel $w -class JMain \
-	  -closecommand ::JUI::CloseHook -allowclose 0
-    }
+    ::UI::Toplevel $w -class JMain \
+      -macclass {document {toolbarButton standardDocument}} \
+      -closecommand ::JUI::CloseHook -allowclose 0
+
     wm title $w $prefs(appName)
     ::UI::SetWindowGeometry $w
 
