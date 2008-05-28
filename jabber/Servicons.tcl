@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.15 2008-05-16 08:04:26 matben Exp $
+# $Id: Servicons.tcl,v 1.16 2008-05-28 13:04:39 matben Exp $
 
 package require Icondef
 
@@ -139,7 +139,9 @@ proc ::Servicons::Get {key} {
     if {[string match gateway/* $key]} {
 	# Special and temporary...
 	set type [lindex [split $key /] 1]
-	return [::Theme::FindIconSize 16 protocol-$type]
+	# gadu-gadu shall map to gadugadu but only for image lookup.
+	set mtype [string map {"-" ""} $type]
+	return [::Theme::FindIconSize 16 protocol-$mtype]
     } elseif {[info exists icons($key)]} {
 	return $icons($key)
     } else {

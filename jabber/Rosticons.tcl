@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.50 2008-05-28 09:51:08 matben Exp $
+# $Id: Rosticons.tcl,v 1.51 2008-05-28 13:04:39 matben Exp $
 
 #  From disco-categories:
 #
@@ -121,7 +121,7 @@ proc ::Rosticons::ThemeGetAllTypes {} {
 	set anyRoster 0
 	foreach info $infoL {
 	    if {[string match roster-* $info]} {
-		lassign [split $info -] - type
+		set type [string map {"roster-" ""} $info]
 		dict lappend typeD $type $name
 		set anyRoster 1
 	    }
@@ -310,13 +310,16 @@ proc ::Rosticons::ThemeLoadTypeTmp {type name} {
     # If an iconset is missing an icon for one of the states,
     # do the fallback within the theme and not to any other theme.
     set paths [list [::Theme::GetPath $name]]
+    
+    # gadu-gadu shall map to gadugadu but only for image lookup.
+    set mtype [string map {"-" ""} $type]
     foreach key $pstates(pres) {
 	# We keep an alternative lookup mechanism here.
 	# set spec icons/16x16/$type-$key
 	if {$isUser} {
 	    set spec icons/16x16/user-$key
 	} else {
-	    set spec icons/16x16/user-$key-$type
+	    set spec icons/16x16/user-$key-$mtype
 	}
 	set image [::Theme::MakeIconFromPaths $spec "" $paths]
 	if {$image ne ""} {
