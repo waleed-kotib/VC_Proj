@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.102 2008-05-27 14:17:23 matben Exp $
+# $Id: Init.tcl,v 1.103 2008-05-28 09:51:08 matben Exp $
 
 namespace eval ::Init {
     
@@ -33,7 +33,6 @@ proc ::Init::SetThis {mainScript} {
     # If we store the prefs file on a removable drive, use this folder name:
     #    F:\CoccinellaPrefs  etc.  
     set this(prefsDriverDir) "CoccinellaPrefs"
-    set this(8.5) [expr {[info tclversion] >= 8.5}]
     
     # Collect paths in 'this' array.
     set path                    [file dirname $mainScript]
@@ -97,7 +96,6 @@ proc ::Init::SetThis {mainScript} {
     }
     
     # Defaults.
-    set this(themeDefault)  "Crystal"
     set this(soundsDefault) "Standard"
     
     # Path where preferences etc are stored.

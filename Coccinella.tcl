@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.186 2008-05-27 14:17:23 matben Exp $	
+# $Id: Coccinella.tcl,v 1.187 2008-05-28 09:51:06 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -158,13 +158,11 @@ package require Theme
 # Find our language and load message catalog.
 ::Init::Msgcat
 
-# Cleanup 'if' later...
-if {[info tclversion] >= 8.5} {
-    set im16 [::Theme::FindIconSize 16 coccinella]
-    set im32 [::Theme::FindIconSize 32 coccinella]
-    set im64 [::Theme::FindIconSize 64 coccinella]
-    wm iconphoto . -default $im16 $im32 $im64
-}
+# Sets the window titlebar icon.
+wm iconphoto . -default \
+  [::Theme::FindIconSize 16 coccinella] \
+  [::Theme::FindIconSize 32 coccinella] \
+  [::Theme::FindIconSize 64 coccinella]
 
 # Splash! Need a full update here, at least on Windows.
 package require Splash
@@ -188,16 +186,6 @@ if {[lsearch -exact [ttk::themes] $prefs(tileTheme)] >= 0} {
     # We use the 'clam' theme as a fallback (and default in resources).
     catch {ttk::setTheme clam}
 }
-
-# To help the transition from tile pre 0.8.0
-proc GetCurrentTheme {} {
-    if {[info exists ttk::currentTheme]} {
-	return $ttk::currentTheme
-    } else {
-	return $tile::currentTheme
-    }
-}
-
 ::Theme::ReadTileResources
 
 # The packages are divided into categories depending on their degree

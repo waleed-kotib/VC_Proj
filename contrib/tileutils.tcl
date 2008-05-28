@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.83 2008-05-27 14:17:23 matben Exp $
+# $Id: tileutils.tcl,v 1.84 2008-05-28 09:51:06 matben Exp $
 #
 
 package require treeutil
@@ -213,7 +213,7 @@ proc tileutils::ThemeChanged {} {
     } else {
 	set priority startupFile
     }
-    if {([GetCurrentTheme] eq "aqua") && $this(8.5)} {
+    if {$ttk::currentTheme eq "aqua"} {
 	set style(-background) systemDialogBackgroundActive
     }
     if {[info exists style(-background)]} {
@@ -292,7 +292,7 @@ proc tileutils::ThemeChanged {} {
 proc tileutils::ChaseArrowsThemeChanged {win} {
 
     array set style [ttk::style configure .]
-    if {[GetCurrentTheme] eq "aqua"} {
+    if {$ttk::currentTheme eq "aqua"} {
 	$win configure -background systemDialogBackgroundActive
     } elseif {[info exists style(-background)]} {
 	set color $style(-background)
@@ -303,7 +303,7 @@ proc tileutils::ChaseArrowsThemeChanged {win} {
 proc tileutils::EntryThemeChanged {win} {
 
     array set style [ttk::style configure .]
-    if {[GetCurrentTheme] eq "aqua"} {
+    if {$ttk::currentTheme eq "aqua"} {
 	$win configure -highlightbackground systemDialogBackgroundActive
     } elseif {[info exists style(-background)]} {
 	set color $style(-background)
@@ -325,7 +325,7 @@ proc tileutils::ListboxThemeChanged {win} {
     array set map   [ttk::style map .]
     array set map   [ttk::style map Listbox]
 
-    if {[GetCurrentTheme] eq "aqua"} {
+    if {$ttk::currentTheme eq "aqua"} {
 	$win configure -highlightbackground systemDialogBackgroundActive
     } elseif {[info exists style(-background)]} {
 	# highlightBackground is drawn outside the border and must blend
@@ -407,7 +407,7 @@ proc tileutils::SpinboxThemeChanged {win} {
     array set style [ttk::style configure .]    
     array set style [ttk::style configure Spinbox]    
     
-    if {[GetCurrentTheme] eq "aqua"} {
+    if {$ttk::currentTheme eq "aqua"} {
 	set style(-background) systemDialogBackgroundActive
     }
     if {[info exists style(-background)]} {

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.49 2008-05-27 08:03:56 matben Exp $
+# $Id: Rosticons.tcl,v 1.50 2008-05-28 09:51:08 matben Exp $
 
 #  From disco-categories:
 #
@@ -49,6 +49,8 @@ namespace eval ::Rosticons {
     ::hooks::register prefsCancelHook        ::Rosticons::CancelPrefsHook
     ::hooks::register prefsUserDefaultsHook  ::Rosticons::UserDefaultsHook
     
+    ::hooks::register themeChangedHook       ::Rosticons::ThemeChangedHook
+    
     # The presence/show states.
     variable pstates
     set pstates(pres) {online offline invisible away chat dnd xa}
@@ -62,7 +64,12 @@ namespace eval ::Rosticons {
     }
     set pstates(phone) {online ring talk}
     
+    # 'imagesD' contains all available mappings from 'type' and 'status'
+    # to images, even if they aren't used.
     variable imagesD [dict create]
+    
+    # 'tmpImagesD' is for temporary storage only (preferences) and maps
+    # from 'themeName', 'type', and 'status' to images.
     variable tmpImagesD [dict create]
     
     # Define which iconsets that shall be active by default.
@@ -399,6 +406,8 @@ proc ::Rosticons::VerifyAndLoad {} {
  	set key "rost,theme,name,$type"
  	set name $jprefs($key)
  	if {[::Theme::GetPath $name] eq ""} {
+	    
+	    # Theme doesn't exist. Try to find a fallback theme.
 	    set names [dict get $stateD types $type]
 	    set jprefs($key) [lindex $names 0]
 	    set jprefs(rost,theme,use,$type) 0
@@ -635,6 +644,7 @@ proc ::Rosticons::TPFillKeyImageTree {type name} {
     variable tmpImagesD
     variable stateD
     
+    # All images used here are created new. Never share any imagesD.
     if {![dict exists $tmpImagesD $name $type]} {
 	ThemeLoadSetTmp $type $name
     }
@@ -652,10 +662,13 @@ proc ::Rosticons::SavePrefsHook {} {
     variable ptmp
     variable stateD
     variable tmpImagesD
+    variable imagesD
     upvar ::Jabber::jprefs jprefs
     
     set changed [PChanged]
     set types [dict keys [dict get $stateD types]]
+    
+    set prevImagesD $imagesD
 
     foreach type $types {
 	if {$jprefs(rost,theme,name,$type) ne $ptmp(name,$type)} {
@@ -669,9 +682,30 @@ proc ::Rosticons::SavePrefsHook {} {
 	set jprefs(rost,theme,name,$type) $ptmp(name,$type)
     }
     if {$changed} {
-	# @@@ Move this to hook.
+	# @@@ Move this to hook???
 	::Roster::RepopulateTree
 	::hooks::run rosterIconsChangedHook
+    
+	# Garbage collect old images. Be sure that all users of roster icons
+	# use the 'rosterIconsChangedHook' to refresh new icons.
+	GarbageCollect $prevImagesD $imagesD
+    }
+}
+
+proc ::Rosticons::GarbageCollect {prevImagesD imagesD} {
+       
+    # Garbage collect old images. Be sure that all users of roster icons
+    # use the 'rosterIconsChangedHook' to refresh new icons.
+    dict for {type typeD} $imagesD {
+	dict for {pres image} $typeD {
+	    set prevImage [dict get $prevImagesD $type $pres]
+	    if {$prevImage ne $image} {
+		
+		# There is no danger with this since if inuse
+		# it wont get deleted until widget is.
+		image delete $prevImage
+	    }
+	}
     }
 }
 
@@ -719,6 +753,31 @@ proc ::Rosticons::PFree {} {
     unset tmpImagesD
     unset -nocomplain ptmp
     set tmpImagesD [dict create]
+}
+
+proc ::Rosticons::ThemeChangedHook {} {
+    global prefs
+    variable stateD
+    variable imagesD
+    upvar ::Jabber::jprefs jprefs
+
+    set prevImagesD $imagesD
+
+    # Loop through each type and switch roster icon theme if new theme
+    # supports it.
+    set name $prefs(themeName)
+    set path [::Theme::GetPath $name]
+    set infoL [::Theme::GetInfo $path]
+    dict for {type nameL} [dict get $stateD types] {
+	if {$jprefs(rost,theme,name,$type) eq $name} { 
+	    continue 
+	}
+	if {"roster-$type" in $infoL} {
+	    ThemeLoadSetTmp $type $name
+	    ThemeSetFromTmp $type $name	
+	}
+    }    
+    GarbageCollect $prevImagesD $imagesD
 }
 
 #-------------------------------------------------------------------------------

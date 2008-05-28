@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.66 2008-05-27 14:17:23 matben Exp $
+# $Id: JPrefs.tcl,v 1.67 2008-05-28 09:51:07 matben Exp $
 
 package require ui::fontselector
 
@@ -134,14 +134,10 @@ proc ::JPrefs::BuildAppearancePage {page} {
     foreach key {opacity} {
 	set tmpPrefs($key) $prefs($key)
     }
-    
-    # An empty themeName is the default value.
     set tmpPrefs(themeName) $prefs(themeName)
-    if {$tmpPrefs(themeName) eq ""} {
-	set tmpPrefs(themeName) $this(themeDefault)
-    }
+
     set genericL [::Theme::GetAllWithFilter {generic}]
-    set themeL [concat [list $this(themeDefault)] $genericL]
+    set themeL [concat [list $prefs(rootTheme)] $genericL]
     
     
     # Tile:
@@ -172,7 +168,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
 	    lappend menuDef [list $name -value $theme]
 	}
     }
-    set tmpPrefs(tileTheme) [GetCurrentTheme]
+    set tmpPrefs(tileTheme) $ttk::currentTheme
 
     set wc $page.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
@@ -258,7 +254,7 @@ proc ::JPrefs::OnDestroyAppearancePage {} {
     variable tmpPrefs
     variable tmpJPrefs
 
-    set prefs(tileTheme) [GetCurrentTheme]
+    set prefs(tileTheme) $ttk::currentTheme
     
     unset -nocomplain tmpPrefs
     unset -nocomplain tmpJPrefs
@@ -373,9 +369,6 @@ proc ::JPrefs::SavePrefsHook {} {
     variable tmpPrefs
     
     set themeChanged 0
-    if {$tmpPrefs(themeName) eq $this(themeDefault)} {
-	set tmpPrefs(themeName) ""
-    }
     foreach key {themeName} {
 	if {$prefs($key) ne $tmpPrefs($key)} {
 	    set themeChanged 1
@@ -408,11 +401,14 @@ proc ::JPrefs::CancelPrefsHook {} {
     variable tmpJPrefs
     variable tmpPrefs
 	
-    if {$tmpPrefs(themeName) eq $this(themeDefault)} {
-	set tmpPrefs(themeName) ""
-    }
     foreach key [array names tmpJPrefs] {
 	if {![string equal $jprefs($key) $tmpJPrefs($key)]} {
+	    ::Preferences::HasChanged
+	    return
+	}
+    }
+    foreach key [array names tmpPrefs] {
+	if {![string equal $prefs($key) $tmpPrefs($key)]} {
 	    ::Preferences::HasChanged
 	    return
 	}
@@ -448,7 +444,7 @@ proc ::JPrefs::DestroyPrefsHook { } {
 
 proc ::JPrefs::QuitAppHook {} {
     global  prefs
-    set prefs(tileTheme) [GetCurrentTheme]
+    set prefs(tileTheme) $ttk::currentTheme
 }
 
 #-------------------------------------------------------------------------------
