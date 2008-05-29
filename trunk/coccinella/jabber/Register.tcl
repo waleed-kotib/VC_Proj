@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.105 2008-05-16 08:04:26 matben Exp $
+# $Id: Register.tcl,v 1.106 2008-05-29 08:04:09 matben Exp $
 
 package provide Register 1.0
 
@@ -1109,7 +1109,6 @@ proc ::GenRegister::NewDlg {args} {
 	pack $wcomboserver -fill x -expand 1
     } elseif {$dialogType eq "serverlist"} {
 	set menuDef [list]
-	#set imtrpt [::Servicons::Get $gateway]
 	set imtrpt [::Theme::FindIconSize 16 protocol-$type]
 	set name [::Gateway::GetShort $type]
 	foreach j $argsA(-serverlist) {
