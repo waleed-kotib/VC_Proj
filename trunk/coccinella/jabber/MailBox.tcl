@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.142 2008-05-28 09:51:07 matben Exp $
+# $Id: MailBox.tcl,v 1.143 2008-05-29 12:55:06 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -677,6 +677,9 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set bg [option get $T columnBackground {}]
     set fg [option get $T textColor {}]
 
+    $T column create -tags cRead -resize 0 \
+      -itembackground $itemBg -button 1 -borderwidth $bd \
+      -background $bg -textcolor $fg
     $T column create -tags cSubject -expand 1 -text [mc Subject] \
       -itembackground $itemBg -button 1 -squeeze 1 -borderwidth $bd \
       -background $bg -textcolor $fg
@@ -687,7 +690,7 @@ proc ::MailBox::TreeCtrl {T wysc} {
       -itembackground $itemBg -button 1 -squeeze 1 -arrow up -borderwidth $bd \
       -background $bg  -textcolor $fg
     $T column create -tags cSecs -visible 0
-    $T column create -tags cRead -visible 0
+    $T column create -tags cReadTag -visible 0
 
     set fill    [list $this(sysHighlight) {selected focus} gray {selected !focus}]
     set fillT   {white {selected focus} black {selected !focus}}
@@ -710,21 +713,26 @@ proc ::MailBox::TreeCtrl {T wysc} {
     $T style layout $S eBorder -detach yes -iexpand xy
     $T style layout $S eImageWb -padx 4 -squeeze x -expand ns
 
-    set S [$T style create stySubject]
-    $T style elements $S {eBorder eImageEye eText eImageWb}
+    set S [$T style create styRead]
+    $T style elements $S {eBorder eImageEye}
     $T style layout $S eBorder -detach yes -iexpand xy
-    $T style layout $S eImageEye -padx {8 4} -expand ns
+    $T style layout $S eImageEye -padx 4 -squeeze x -expand ns
+
+    set S [$T style create stySubject]
+    $T style elements $S {eBorder eText eImageWb}
+    $T style layout $S eBorder -detach yes -iexpand xy
     $T style layout $S eText -padx 4 -sticky w -squeeze x -expand ns -iexpand xy -ipady 2
     $T style layout $S eImageWb -padx 4 -expand ns -sticky e
 
     set S [$T style create styTag]
     $T style elements $S {eText}
     
+    $T column configure cRead -itemstyle styRead
     $T column configure cSubject -itemstyle stySubject
     $T column configure cFrom -itemstyle styText
     $T column configure cDate -itemstyle styText
     $T column configure cSecs -itemstyle styTag
-    $T column configure cRead -itemstyle styTag
+    $T column configure cReadTag -itemstyle styTag
     
     $T notify install <Header-invoke>
     $T notify bind $T <Header-invoke> [list [namespace current]::HeaderCmd %T %C]
@@ -796,7 +804,7 @@ proc ::MailBox::InsertRow {wtbl row i} {
     set item [$T item create -tags $uidmsg]
     $T item text $item  \
       cSubject $subject  cFrom $ujid2   cDate $smartdate  \
-      cSecs    $secs     cRead $isread
+      cSecs    $secs     cReadTag $isread
     $T item lastchild root $item
     
     if {$haswb} {
@@ -884,6 +892,10 @@ proc ::MailBox::HeaderCmd {T C} {
 	    set cmd [list [namespace current]::SortDate $T]
 	    $T item sort root $order -column $C -command $cmd
 	}
+	cRead {
+	    $T item sort root $order -column $C \
+	      -command [namespace code [list SortRead $T]]
+	}
 	default {
 	    $T item sort root $order -column $C -dictionary
 	}
@@ -899,6 +911,20 @@ proc ::MailBox::SortDate {T item1 item2} {
     if {$secs1 > $secs2} {
 	return 1
     } elseif {$secs1 == $secs2} {
+	return 0
+    } else {
+	return -1
+    }
+}
+
+proc ::MailBox::SortRead {T item1 item2} {
+
+    set read1 [$T item element cget $item1 cReadTag eText -text]
+    set read2 [$T item element cget $item2 cReadTag eText -text]
+    
+    if {$read1 > $read2} {
+	return 1
+    } elseif {$read1 == $read2} {
 	return 0
     } else {
 	return -1
@@ -1998,7 +2024,7 @@ proc ::MailBox::MKInsertRow {uuid time isread xmldata file} {
     set item [$T item create -tags $uuid]
     $T item text $item  \
       cSubject $subject cFrom $ujid2  cDate $smartdate  \
-      cSecs    $secs    cRead $isread
+      cSecs    $secs    cReadTag $isread
     $T item lastchild root $item
     
     if {$iswb} {
