@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.66 2008-05-16 08:04:26 matben Exp $
+# $Id: JUser.tcl,v 1.67 2008-05-29 08:04:09 matben Exp $
 
 package provide JUser 1.0
 
@@ -112,7 +112,6 @@ proc ::JUser::NewDlg {args} {
 	    lassign $spec jid type name
 	    set state(servicejid,$type) $jid
 	    set state(servicetype,$jid) $type
-	    #set imtrpt [::Servicons::Get gateway/$type]
 	    set imtrpt [::Theme::FindIconSize 16 protocol-$type]
 	    lappend menuDef [list $name -value $jid -image $imtrpt]
 	}
@@ -127,7 +126,6 @@ proc ::JUser::NewDlg {args} {
 	    if {($type ne "xmpp") && [info exists added($type)]} { 
 		continue
 	    }
-	    #set imtrpt [::Servicons::Get gateway/$type]
 	    set imtrpt [::Theme::FindIconSize 16 protocol-$type]
 	    lappend menuDef [list $name -value $jid -image $imtrpt]
 	    set added($type) 1

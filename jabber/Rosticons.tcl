@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.52 2008-05-28 14:27:44 matben Exp $
+# $Id: Rosticons.tcl,v 1.53 2008-05-29 08:04:10 matben Exp $
 
 #  From disco-categories:
 #
@@ -323,6 +323,8 @@ proc ::Rosticons::ThemeLoadTypeTmp {type name} {
 	} else {
 	    set spec icons/16x16/user-$key-$mtype
 	}
+	
+	# Since we create new images we must do garbage collecting ourselfes.
 	set image [::Theme::MakeIconFromPaths $spec "" $paths]
 	if {$image ne ""} {
 	    dict set tmpImagesD $name $type $key $image 

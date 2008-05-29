@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.152 2008-05-15 14:14:57 matben Exp $
+# $Id: Disco.tcl,v 1.153 2008-05-29 08:04:09 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -373,7 +373,7 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 	set acctypes [AccessTypes $from $node]
 
 	foreach vstruct $vlist {
-	    set icon [::Servicons::GetFromTypeList $acctypes]
+	    set icon [::Servicons::ThemeGetFromTypeList $acctypes]
 	    #set name [$jstate(jlib) disco name $from $node]
 	    set name [AccessName $from $node]
 	    set opts [list] 
@@ -1296,16 +1296,16 @@ proc ::Disco::TreeItem {vstruct {level 0}} {
 		    set name $node
 		}
 	    }	
-	    set icon [::Servicons::GetFromTypeList $cattypes]
+	    set icon [::Servicons::ThemeGetFromTypeList $cattypes]
 	    
 	    # Fallbacks:
 	    if {$icon eq ""} {
 		if {$isroom} {
-		    set icon [::Servicons::Get conference/text]
+		    set icon [::Servicons::ThemeGet conference/text]
 		} elseif {$node ne ""} {
 		    #set xtypes [$jstate(jlib) disco types $jid]
 		    set xtypes [AccessTypes $jid]
-		    set icon [::Servicons::GetFromTypeList $xtypes]
+		    set icon [::Servicons::ThemeGetFromTypeList $xtypes]
 		}
 	    }
 	}	    
