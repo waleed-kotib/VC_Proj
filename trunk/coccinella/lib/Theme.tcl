@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Theme.tcl,v 1.59 2008-05-28 09:51:08 matben Exp $
+# $Id: Theme.tcl,v 1.60 2008-05-30 07:25:04 matben Exp $
 
 package provide Theme 1.0
 
@@ -296,6 +296,16 @@ proc ::Theme::GetAllWithFilter {{filterL {}}} {
     global  this
     
     set themes [list]
+    foreach path [GetAllPathsWithFilter $filterL] {
+	lappend themes [file tail $path]
+    }
+    return [lsort $themes]
+}
+
+proc ::Theme::GetAllPathsWithFilter {{filterL {}}} {
+    global  this
+    
+    set paths [list]
     foreach dir [list $this(themesPath) $this(altThemesPath)] {
 	foreach path [glob -nocomplain -types d -directory $dir *] {
 	    set name [file tail $path]
@@ -303,14 +313,14 @@ proc ::Theme::GetAllWithFilter {{filterL {}}} {
 	    if {[llength $filterL]} {
 		set infoL [GetInfo $path]
 		if {[llength [lintersect $infoL $filterL]]} {
-		    lappend themes $name
+		    lappend paths $path
 		}
 	    } else {
-		lappend themes $name
+		lappend paths $path
 	    }
 	}
     }
-    return [lsort $themes]
+    return $paths
 }
 
 proc ::Theme::GetAllThemePaths {} {

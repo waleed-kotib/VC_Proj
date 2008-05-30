@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.104 2008-05-29 08:19:25 matben Exp $
+# $Id: Init.tcl,v 1.105 2008-05-30 07:25:04 matben Exp $
 
 namespace eval ::Init {
     
@@ -93,9 +93,6 @@ proc ::Init::SetThis {mainScript} {
 	    }
 	}
     }
-    
-    # Defaults.
-    set this(soundsDefault) "Standard"
     
     # Path where preferences etc are stored.
     set this(prefsDefPath) [GetDefaultPrefsPath]

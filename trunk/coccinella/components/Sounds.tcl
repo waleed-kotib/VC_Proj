@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Sounds.tcl,v 1.47 2008-05-14 11:50:52 matben Exp $
+# $Id: Sounds.tcl,v 1.48 2008-05-30 07:25:04 matben Exp $
 
 namespace eval ::Sounds {
 	    
@@ -106,6 +106,43 @@ proc ::Sounds::GetTextForName {name} {
     return [mc $nameToText($name)]
 }
 
+proc  ::Sounds::InitPrefsHook {} {
+    global prefs
+    variable sprefs
+    variable allSounds
+    variable priv
+    
+    set names [::Theme::GetAllWithFilter sound]
+    if {$prefs(rootTheme) in $names} {
+	set defaultSet $prefs(rootTheme)
+    } else {
+	set defaultSet [lindex $names 0]
+    }
+    set priv(defaultSet) $defaultSet
+    
+    set sprefs(soundSet) $defaultSet
+    set sprefs(volume)   100
+    set sprefs(midiCmd)  ""
+
+    ::PrefUtils::Add [list  \
+      [list ::Sounds::sprefs(soundSet) sound_set     $sprefs(soundSet)] \
+      [list ::Sounds::sprefs(volume)   sound_volume  $sprefs(volume)]   \
+      [list ::Sounds::sprefs(midiCmd)  sound_midiCmd $sprefs(midiCmd)]  \
+      ]
+    
+    set optL [list]
+    foreach name $allSounds {
+	set sprefs($name) 1
+	lappend optL [list ::Sounds::sprefs($name) sound_${name} $sprefs($name)]
+    }
+    ::PrefUtils::Add $optL
+    
+    # Volume seems to be set globally on snack.
+    if {$priv(snack)} {
+	set sprefs(volume) [snack::audio play_gain]
+    }
+}
+
 proc ::Sounds::InitEventHooks {} {
     
     # Add all event hooks.
@@ -149,8 +186,8 @@ proc ::Sounds::InitHook {} {
     if {$priv(canPlay)} {
 	
 	# Verify that sound set exists.
-	if {[lsearch -exact [GetAllSets] $sprefs(soundSet)] < 0} {
-	    set sprefs(soundSet) ""
+	if {$sprefs(soundSet) in [GetAllSets]} {
+	    set sprefs(soundSet) $priv(defaultSet)
 	}
 	LoadSoundSet $sprefs(soundSet)
     }
@@ -158,18 +195,17 @@ proc ::Sounds::InitHook {} {
 }
 
 proc ::Sounds::GetAllSets {} {
-    
-    set allsets [list]
+    set names [list]
     foreach path [GetAllSoundSetPaths] {
-	lappend allsets [file tail $path]
+	lappend names [lindex [file split $path] end-1]
     }
-    return $allsets
+    return $names
 }
 
 proc ::Sounds::GetAllSoundSetPaths {} {
     
     set soundPaths [list]
-    set paths [::Theme::GetPathsFor sounds]
+    set paths [::Theme::GetAllPathsWithFilter sound]
     foreach path $paths {
 	foreach dir [glob -nocomplain -types d -directory $path *] {
 	    set indFile [file join $dir soundIndex.tcl]
@@ -198,26 +234,21 @@ proc ::Sounds::LoadSoundSet {soundSet} {
     Free
     unset -nocomplain nameToPath	
     array set sound [array get soundIndex]
-
-    set found 0
-    if {$soundSet eq ""} {
-	set soundSet $this(soundsDefault)
-    }    
-    foreach path [lreverse [GetAllSoundSetPaths]] {
-	if {[file tail $path] eq $soundSet} {
-	    set dir $path
-	    set found 1
-	}
-    }
-    if {!$found} {
+    if {$soundSet ni [GetAllSets]} {
 	return
     }
     if {$priv(QuickTimeTcl)} {
 	frame $wqtframe
     }
+    set dir [GetPathForSet $soundSet]
     foreach s $allSounds {
 	Create $s [file join $dir $sound($s)]
     }
+}
+
+proc ::Sounds::GetPathForSet {soundSet} {
+    global this
+    return [file join [::Theme::GetPath $soundSet] $this(sounds)]
 }
 
 proc ::Sounds::Create {name path} {
@@ -320,7 +351,7 @@ proc ::Sounds::PlaySoundTmp {path} {
 	if {[info exists ::starkit::topdir]} {
 	    set path [CopyToTemp $path]
 	}
-	catch {destroy $wqtframe._tmp}
+	destroy $wqtframe._tmp
 	catch {
 	    movie $wqtframe._tmp -file $path -controller 0
 	    $wqtframe._tmp play
@@ -459,34 +490,6 @@ proc ::Sounds::Free {} {
 
 # Preference page --------------------------------------------------------------
 
-proc  ::Sounds::InitPrefsHook {} {
-    variable sprefs
-    variable allSounds
-    variable priv
-    
-    set sprefs(soundSet) ""
-    set sprefs(volume)   100
-    set sprefs(midiCmd)  ""
-
-    ::PrefUtils::Add [list  \
-      [list ::Sounds::sprefs(soundSet) sound_set     $sprefs(soundSet)] \
-      [list ::Sounds::sprefs(volume)   sound_volume  $sprefs(volume)]   \
-      [list ::Sounds::sprefs(midiCmd)  sound_midiCmd $sprefs(midiCmd)]  \
-      ]
-    
-    set optList [list]
-    foreach name $allSounds {
-	set sprefs($name) 1
-	lappend optList [list ::Sounds::sprefs($name) sound_${name} $sprefs($name)]
-    }
-    ::PrefUtils::Add $optList    
-    
-    # Volume seems to be set globally on snack.
-    if {$priv(snack)} {
-	set sprefs(volume) [snack::audio play_gain]
-    }
-}
-
 proc ::Sounds::BuildPrefsHook {wtree nbframe} {
     variable priv
     
@@ -512,13 +515,9 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     foreach name $allSounds {
 	set tmpPrefs($name) $sprefs($name)
     }
-    if {$sprefs(soundSet) eq ""} {
-	set tmpPrefs(soundSet) [mc Default]
-    } else {
-	set tmpPrefs(soundSet) $sprefs(soundSet)
-    }
-    set tmpPrefs(volume)  $sprefs(volume)
-    set tmpPrefs(midiCmd) $sprefs(midiCmd)
+    set tmpPrefs(soundSet) $sprefs(soundSet)
+    set tmpPrefs(volume)   $sprefs(volume)
+    set tmpPrefs(midiCmd)  $sprefs(midiCmd)
     set soundSets [GetAllSets]
     
     set wc $wpage.c
@@ -599,17 +598,7 @@ proc ::Sounds::PlayTmpPrefSound {name} {
     variable wqtframe
     
     array set sound [array get soundIndex]
-    
-    if {$tmpPrefs(soundSet) eq [mc Default]} {
-	set soundSet $this(soundsDefault)
-    } else {
-	set soundSet $tmpPrefs(soundSet)
-    }
-    foreach path [lreverse [GetAllSoundSetPaths]] {
-	if {[file tail $path] eq $soundSet} {
-	    break
-	}
-    }
+    set path [GetPathForSet $tmpPrefs(soundSet)]
     source [file join $path soundIndex.tcl]
     set f [file join $path $sound($name)]
 
@@ -620,7 +609,7 @@ proc ::Sounds::PlayTmpPrefSound {name} {
 	    file copy -force $f $tmp
 	    set f $tmp
 	}
-	catch {destroy $wqtframe._tmp}
+	destroy $wqtframe._tmp
 	catch {
 	    movie $wqtframe._tmp -file $f -controller 0 \
 	      -volume [expr {int($tmpPrefs(volume) * 2.55)}]
