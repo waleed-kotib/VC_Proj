@@ -22,7 +22,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.18 2008-05-29 08:04:10 matben Exp $
+# $Id: Servicons.tcl,v 1.19 2008-05-30 07:25:04 matben Exp $
 
 # @@@ TODO: Make servicon sets configurable. See Rosticons.
 
@@ -49,8 +49,6 @@ namespace eval ::Servicons {
     variable alias
     array set alias {
 	services/jabber       server/im
-	headline/rss          headline/newmail
-	conference/irc        conference/text
 	pubsub/generic        pubsub/service
 	search/text           directory/user
     }
@@ -61,11 +59,21 @@ proc ::Servicons::ThemeInitHook {} {
     variable stateD
     upvar ::Jabber::jprefs jprefs
 
+    # @@@ TODO
     set jprefs(disco,themeName) ""
     set names [::Theme::GetAllWithFilter service]
     
     
 }
+
+# Idea for custom themes different from major theme selection:
+# 1) Must have image auto naming or name them ourself.
+# 2) Search icons as:
+#    set paths [list [::Theme::GetPath $jprefs(disco,themeName)] \
+#       [::Theme::GetPresentSearchPaths]  
+#    set image [::Theme::MakeIconFromPaths $spec $name $paths]
+# 3) Naming can be as: ::service::$pec
+# 4) When switching theme then just delete all ::service::* images.
 
 proc ::Servicons::ThemeGet {key} {
     variable imagesD
@@ -74,6 +82,11 @@ proc ::Servicons::ThemeGet {key} {
     
     set key [string map [array get alias] $key]
     lassign [split $key /] category type
+        
+    # This is a fast lookup mechanism.
+    if {[dict exists $imagesD $category $type]} {
+	return [dict get $imagesD $category $type]
+    }
 
     # gadu-gadu shall map to gadugadu but only for image lookup.
     set mtype [string map {"-" ""} $type]
@@ -82,11 +95,6 @@ proc ::Servicons::ThemeGet {key} {
 	set spec icons/16x16/protocol-$mtype
     } else {
 	set spec icons/16x16/service-$category-$mtype
-    }
-    
-    # This is a fast lookup mechanism.
-    if {[dict exists $imagesD $category $type]} {
-	return [dict get $imagesD $category $type]
     }
     set image [::Theme::FindIcon $spec]
     if {$image ne ""} {
@@ -125,6 +133,7 @@ proc ::Servicons::ThemeChangedHook {} {
     variable imagesD
     
     # We must clear out our cached info since that is outdated.
+    # NB: We never delete any iamges.
     unset imagesD
     set imagesD [dict create]
 }
