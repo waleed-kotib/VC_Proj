@@ -22,7 +22,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.19 2008-05-30 07:25:04 matben Exp $
+# $Id: Servicons.tcl,v 1.20 2008-05-30 07:48:20 matben Exp $
 
 # @@@ TODO: Make servicon sets configurable. See Rosticons.
 
@@ -74,6 +74,9 @@ proc ::Servicons::ThemeInitHook {} {
 #    set image [::Theme::MakeIconFromPaths $spec $name $paths]
 # 3) Naming can be as: ::service::$pec
 # 4) When switching theme then just delete all ::service::* images.
+# 5) As an elternative just let 'imagesD' be a cache for image names
+#    created for a specific theme and then delete them when switched to
+#    a new theme. Or have some image copy mechanism from new to old.
 
 proc ::Servicons::ThemeGet {key} {
     variable imagesD
