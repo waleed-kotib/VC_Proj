@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Growl.tcl,v 1.31 2008-04-17 15:00:28 matben Exp $
+# $Id: Growl.tcl,v 1.32 2008-06-06 13:10:10 matben Exp $
 
 namespace eval ::Growl { 
 
@@ -106,7 +106,7 @@ proc ::Growl::ChatMessageHook {xmldata} {
 
 proc ::Growl::PresenceHook {jid type args} {
     variable cociFile
-
+    
     # Notify only if in background.
     if {![::UI::IsAppInFront]} {
 	array set argsA $args
@@ -152,8 +152,8 @@ proc ::Growl::PresenceHook {jid type args} {
 	    } 
 	}
 
-	set title "$djid $show"
-	set msg "$djid $showMsg"
+	set title $djid
+	set msg $showMsg
 	if {$status ne ""} {
 	    append msg "\n$status"
 	}
