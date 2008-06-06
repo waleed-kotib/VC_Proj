@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.294 2008-05-28 09:51:06 matben Exp $
+# $Id: Chat.tcl,v 1.295 2008-06-06 13:39:42 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1521,10 +1521,15 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     
     # We need to kep track of current presence/status since we may get
     # duplicate presence (delay).
-    array set presArr [$jlib roster getpresence $jid2 -resource $res]
-    set chatstate(presence) $presArr(-type)
-    if {[info exists presArr(-show)]} {
-	set chatstate(presence) $presArr(-show)
+    # @@@ This is soo stupid!!!
+    if {$res eq ""} {
+	array set presA [lindex [$jlib roster getpresence $jid2] 0]
+    } else {
+	array set presA [$jlib roster getpresence $jid2 -resource $res]
+    }
+    set chatstate(presence) $presA(-type)
+    if {[info exists presA(-show)]} {
+	set chatstate(presence) $presA(-show)
     }
     
     # Use an extra frame that contains everything thread specific.
@@ -3309,8 +3314,7 @@ proc ::Chat::DeregisterPresence {chattoken} {
     eval {::Jabber::Jlib presence_deregister_ex} $chatstate(presenceReg)
 }
 
-proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
-    
+proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {  
     variable $chattoken
     upvar 0 $chattoken chatstate
 
@@ -3324,6 +3328,8 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
     if {[llength $showE]} {
 	set show [string tolower [wrapper::getcdata $showE]]
     }
+    
+    puts "::Chat::PresenceEvent show=$show, chatstate(presence)=$chatstate(presence)"
         
     # Skip if duplicate presence. Bug?
     if {[string equal $chatstate(presence) $show]} {
