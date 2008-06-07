@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: megaentry.tcl,v 1.7 2008-05-09 14:29:57 matben Exp $
+# $Id: megaentry.tcl,v 1.8 2008-06-07 06:50:38 matben Exp $
 
 package require ui::dialog
 
@@ -45,7 +45,7 @@ proc ui::megaentry {args} {
     if {$state(-value) ne ""} {
 	$fr.e insert 0 $state(-value)
     }
-    focus $fr.e    
+    bind $fr.e <Map> { focus %W }
     Grab $w
     
     if {$state(dlgbt) eq "ok"} {

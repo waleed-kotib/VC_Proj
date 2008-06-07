@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PublicServices.tcl,v 1.1 2008-06-06 14:36:25 matben Exp $
+# $Id: PublicServices.tcl,v 1.2 2008-06-07 06:50:38 matben Exp $
 
 package provide PublicServices 1.0
 
@@ -31,16 +31,27 @@ namespace eval ::PublicServices {
     set url(gateway/msn)        "http://www.jabberes.org/servers/msn.xml"
     set url(gateway/icq)        "http://www.jabberes.org/servers/icq.xml"
     set url(gateway/irc)        "http://www.jabberes.org/servers/irc.xml"
-    set url(proxy/bytestreams)  "http://www.jabberes.org/servers/irc.xml"
+    set url(proxy/bytestreams)  "http://www.jabberes.org/servers/proxy.xml"
     
+    variable cache
 }
 
-proc ::PublicServices::Exists {key} {
+proc ::PublicServices::CanGet {key} {
     variable url
     return [info exists url($key)]
 }
 
-proc ::PublicServices::Get {key cmd} {    
+proc ::PublicServices::Exists {key} {
+    variable cache
+    return [info exists cache($key)]
+}
+
+proc ::PublicServices::Get {key} {    
+    variable cache
+    return $cache($key)    
+}
+
+proc ::PublicServices::SendGet {key cmd} {    
     variable url
     
     if {![info exists url($key)]} {
@@ -51,12 +62,17 @@ proc ::PublicServices::Get {key cmd} {
 }
 
 proc ::PublicServices::HttpCB {cmd key token} {    
+    variable cache
 
     puts "::PublicServices::HttpCB [::httpex::status $token]"
+    
+    set result "error"
+    
     if {[::httpex::status $token] eq "ok"} {
 	set ncode [httpex::ncode $token]
 	puts "ncode=$ncode"
 	if {$ncode == 200} {
+	    set result "ok"
 	    set xml [::httpex::data $token]    
 	    set xtoken [tinydom::parse $xml]
 	    set xmllist [tinydom::documentElement $xtoken]
@@ -74,12 +90,10 @@ proc ::PublicServices::HttpCB {cmd key token} {
 		    }
 		}
 	    }
+	    set cache($key) $xmllist
 	}
-	
-    } else {
-	
     }
-    uplevel #0 $cmd
+    uplevel #0 $cmd $result
     ::httpex::cleanup $token
 }
 

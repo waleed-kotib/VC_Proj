@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.84 2008-05-28 09:51:06 matben Exp $
+# $Id: tileutils.tcl,v 1.85 2008-06-07 06:50:38 matben Exp $
 #
 
 package require treeutil
@@ -60,7 +60,6 @@ namespace eval tile {
 	    
 	    switch $name {
 		alt {
-		    array set colors [array get ttk::theme::alt::colors]
 		    ttk::style configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
@@ -69,25 +68,21 @@ namespace eval tile {
 		      -itembackground {"#dedeff" {}} -usetheme 1
 		}
 		clam {
-		    array set colors [array get ttk::theme::clam::colors]
 		    ttk::style configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		classic {
-		    array set colors [array get ttk::theme::classic::colors]
 		    ttk::style configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		default {
-		    array set colors [array get ttk::theme::default::colors]
+
 		}
 		keramik {
-		    array set colors [array get ttk::theme::keramik::colors]
 		    ttk::style configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
 		step {
-		    array set colors [array get ttk::theme::step::colors]
 		    ttk::style configure TreeCtrl \
 		      -background gray75 -itembackground {gray92 gray84}
 		}
@@ -148,15 +143,15 @@ namespace eval ::tileutils {
     if {[lsearch [bindtags .] ThemeChanged] < 0} {
 	bindtags . [linsert [bindtags .] 1 ThemeChanged]
     }
-    BindFirst ThemeChanged <<ThemeChanged>> {tileutils::ThemeChanged }
-    BindFirst ChaseArrows  <<ThemeChanged>> {tileutils::ChaseArrowsThemeChanged %W }
-    BindFirst Entry        <<ThemeChanged>> {tileutils::EntryThemeChanged %W }
-    BindFirst Listbox      <<ThemeChanged>> {tileutils::ListboxThemeChanged %W }
-    BindFirst Spinbox      <<ThemeChanged>> {tileutils::SpinboxThemeChanged %W }
-    BindFirst Text         <<ThemeChanged>> {tileutils::TextThemeChanged %W }
-    BindFirst TreeCtrl     <<ThemeChanged>> {tileutils::TreeCtrlThemeChanged %W }
+    BindFirst ThemeChanged <<ThemeChanged>> { tileutils::ThemeChanged }
+    BindFirst ChaseArrows  <<ThemeChanged>> { tileutils::ChaseArrowsThemeChanged %W }
+    BindFirst Entry        <<ThemeChanged>> { tileutils::EntryThemeChanged %W }
+    BindFirst Listbox      <<ThemeChanged>> { tileutils::ListboxThemeChanged %W }
+    BindFirst Spinbox      <<ThemeChanged>> { tileutils::SpinboxThemeChanged %W }
+    BindFirst Text         <<ThemeChanged>> { tileutils::TextThemeChanged %W }
+    BindFirst TreeCtrl     <<ThemeChanged>> { tileutils::TreeCtrlThemeChanged %W }
     if {[tk windowingsystem] ne "aqua"} {
-	BindFirst Menu      <<ThemeChanged>> {tileutils::MenuThemeChanged %W }
+	BindFirst Menu      <<ThemeChanged>> { tileutils::MenuThemeChanged %W }
     }
     
     variable options

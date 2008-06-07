@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GotMsg.tcl,v 1.57 2007-12-20 14:01:25 matben Exp $
+# $Id: GotMsg.tcl,v 1.58 2008-06-07 06:50:38 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -135,7 +135,11 @@ proc ::GotMsg::Show {thisMsgId} {
     if {[jlib::jidequal $jid $jstate(mejidres)]} {
 	set show [::Jabber::GetMyStatus]
     } else {
-	array set presArr [$jlib roster getpresence $jid2 -resource $res]
+	if {$res eq ""} {
+	    array set presArr [lindex [$jlib roster getpresence $jid2] 0]
+	} else {
+	    array set presArr [$jlib roster getpresence $jid2 -resource $res]
+	}
 	set show $presArr(-type)
 	if {[info exists presArr(-show)]} {
 	    set show $presArr(-show)

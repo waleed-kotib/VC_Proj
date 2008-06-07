@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.147 2008-05-16 06:11:51 matben Exp $
+# $Id: Login.tcl,v 1.148 2008-06-07 06:50:38 matben Exp $
 
 package provide Login 1.0
 
@@ -57,7 +57,7 @@ namespace eval ::Login:: {
 
     # Shall we ask the user to save the current options as default for this
     # profile if different?
-    set ::config(login,ask-save-profile) 0
+    set ::config(login,ask-save-profile) 1
 }
 
 # Login::Dlg --
@@ -469,8 +469,11 @@ proc ::Login::DoLogin {} {
 
     if {($config(login,style) eq "jid") || ($config(login,style) eq "jidpure")} {
 	jlib::splitjidex $jid username server resource
-    }
-    set username [jlib::escapestr $username]
+	set username [jlib::escapestr $username]
+    } else {
+	set username [jlib::escapestr $username]
+	set jid [jlib::joinjid $username $server $resource]
+    }	
     
     # Check 'server', 'username' and 'password' if acceptable.
     foreach name {server username password} {
@@ -532,27 +535,65 @@ proc ::Login::DoLogin {} {
     
     # Shall we ask the user to save the current options as default for this
     # profile if different?
-    if {0 && $config(login,ask-save-profile)} {
+    if {$config(login,ask-save-profile)} {
 	set diffs 0
 	set prof [::Profiles::GetProfile $profile]
-	puts "prof=$prof"
+# 	puts "prof=$prof"
 	lassign [lrange $prof 0 2] h u p
-	if {"$u$h" ne "$server$username"} {
-	    set diffs 1
-	} else {
-	    array set tmp1A $opts
-	    array set tmp2A [lrange $prof 3 end]
-	    if {![arraysequal tmp1A tmp2A]} {
-		set diffs 1
-	    }
+	array set tmp1A $opts
+	array set tmp2A [::Profiles::GetDefaultOpts $server]
+	array set tmp2A [lrange $prof 3 end]
+	array unset tmp1A -nickname
+# 	parray tmp1A
+# 	parray tmp2A
+	set r ""
+	if {[info exists tmp2A(-resource)]} {
+	    set r $tmp2A(-resource)
 	}
-	if {$diffs} {
-	    set msg "Your current login settings differ from your profile settings. Do you want to save them to your profile?"
-	    set ans [tk_messageBox -title "" -type yesno -icon ask \
+# 	puts "jid=$jid, barejid=[jlib::barejid $jid]"
+# 	puts "u=$u, h=$h, j=[jlib::joinjid $u $h ""]"
+	
+	if {![jlib::jidequal [jlib::barejid $jid] [jlib::joinjid $u $h ""]]} {
+
+	    # If we have a new bare JID we ask the user to make a new profile.
+	    set msg "The Jabber ID differs from your profile. Do you want to save a new profile?"
+	    set ans [tk_messageBox -title "" -type yesno -icon question \
 	      -message $msg]
 	    if {$ans eq "yes"} {
-		eval {::Profiles::Set $profile $server $username $password} $opts
-	    }	
+		set mbar [::UI::GetMainMenu]
+		::UI::MenubarDisableBut $mbar edit
+		
+		set ans [ui::megaentry -label "[mc {Profile Name}]:" -icon "" \
+		  -geovariable prefs(winGeom,jprofname) \
+		  -title [mc "Add Profile"] -message [mc prefprofname2]]
+		::UI::MenubarEnableAll $mbar
+
+		if {$ans ne ""} {
+		    set newName [ui::megaentrytext $ans]
+		    if {$ans eq "yes"} {
+			set uname [MakeUniqueProfileName $newName]
+			eval {::Profiles::Set $uname $server $username $password} $opts
+		    }	
+		}
+	    }
+	} else {
+	
+	    # Check if other profile options changed.
+	    if {![jlib::jidequal $jid [jlib::joinjid $u $h $r]]} {
+		set diffs 1
+	    } else {
+		if {![arraysequal tmp1A tmp2A]} {
+		    set diffs 1
+		}
+	    }
+	    if {$diffs} {
+		set msg "Your current login settings differ from your profile settings. Do you want to save them to your profile?"
+		set ans [tk_messageBox -title "" -type yesno -icon question \
+		  -message $msg]
+		if {$ans eq "yes"} {
+		    eval {::Profiles::Set $profile $server $username $password} $opts
+		}	
+	    }
 	}
     }
     

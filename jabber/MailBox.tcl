@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.143 2008-05-29 12:55:06 matben Exp $
+# $Id: MailBox.tcl,v 1.144 2008-06-07 06:50:38 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -43,36 +43,41 @@ package require uuid
 
 package provide MailBox 1.0
 
-namespace eval ::MailBox:: {
+namespace eval ::MailBox {
     global  wDlgs
 
     # Use option database for customization.
-    option add *MailBox*newmsgImage           mail-message-new           widgetDefault
-    option add *MailBox*newmsgDisImage        mail-message-new-Dis        widgetDefault
-    option add *MailBox*replyImage            mail-reply-sender           widgetDefault
-    option add *MailBox*replyDisImage         mail-reply-sender-Dis         widgetDefault
-    option add *MailBox*forwardImage          mail-forward          widgetDefault
-    option add *MailBox*forwardDisImage       mail-forward-Dis       widgetDefault
-    option add *MailBox*saveImage             document-save             widgetDefault
-    option add *MailBox*saveDisImage          document-save-Dis          widgetDefault
-    option add *MailBox*printImage            document-print            widgetDefault
-    option add *MailBox*printDisImage         document-print-Dis         widgetDefault
-    option add *MailBox*trashImage            user-trash            widgetDefault
-    option add *MailBox*trashDisImage         user-trash-Dis         widgetDefault
+    option add *MailBox*newmsgImage       mail-message-new        widgetDefault
+    option add *MailBox*newmsgDisImage    mail-message-new-Dis    widgetDefault
+    option add *MailBox*replyImage        mail-reply-sender       widgetDefault
+    option add *MailBox*replyDisImage     mail-reply-sender-Dis   widgetDefault
+    option add *MailBox*forwardImage      mail-forward            widgetDefault
+    option add *MailBox*forwardDisImage   mail-forward-Dis        widgetDefault
+    option add *MailBox*saveImage         document-save           widgetDefault
+    option add *MailBox*saveDisImage      document-save-Dis       widgetDefault
+    option add *MailBox*printImage        document-print          widgetDefault
+    option add *MailBox*printDisImage     document-print-Dis      widgetDefault
+    option add *MailBox*trashImage        user-trash              widgetDefault
+    option add *MailBox*trashDisImage     user-trash-Dis          widgetDefault
 
-    option add *MailBox*read16Image           mail-mark-read     widgetDefault
-    option add *MailBox*unread16Image         mail-mark-unread   widgetDefault
-    option add *MailBox*whiteboard12Image     mail-mark-whiteboard widgetDefault
+    option add *MailBox*read16Image       mail-mark-read          widgetDefault
+    option add *MailBox*unread16Image     mail-mark-unread        widgetDefault
+    option add *MailBox*whiteboard12Image mail-mark-whiteboard    widgetDefault
 
     # Standard widgets.
     if {[tk windowingsystem] eq "aqua"} {
-	option add *MailBox*mid.padding            {12 10 12 18}    50
+	#option add *MailBox*mid.padding            {12 10 12 18}    50
+	option add *MailBox*mid.padding            {0  10  0 18}    50
     } else {
-	option add *MailBox*mid.padding            {10  8 10  8}    50
+	#option add *MailBox*mid.padding            {10  8 10  8}    50
+	option add *MailBox*mid.padding            {0  8  0  8}    50
     }
     option add *MailBox*Text.borderWidth           0                50
     option add *MailBox*Text.relief                flat             50
 
+    option add *MailBox*frmbox.borderWidth           0                50
+    option add *MailBox*frmbox.relief                flat             50
+    
     # Add some hooks...
     ::hooks::register initHook            ::MailBox::Init
     ::hooks::register prefsInitHook       ::MailBox::InitPrefsHook
@@ -538,7 +543,7 @@ proc ::MailBox::Build {args} {
     
     # The actual mailbox list as a treectrl.
     set wfrmbox $wpane.frmbox
-    frame $wfrmbox -bd 1 -relief sunken
+    frame $wfrmbox
     set wtbl    $wfrmbox.tbl
     set wysctbl $wfrmbox.ysc
 	
@@ -676,7 +681,7 @@ proc ::MailBox::TreeCtrl {T wysc} {
     set bd [option get $T columnBorderWidth {}]
     set bg [option get $T columnBackground {}]
     set fg [option get $T textColor {}]
-
+    
     $T column create -tags cRead -resize 0 \
       -itembackground $itemBg -button 1 -borderwidth $bd \
       -background $bg -textcolor $fg
