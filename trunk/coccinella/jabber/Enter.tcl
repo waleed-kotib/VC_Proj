@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements groupchat enter UI independent of protocol used.
 #      
-#  Copyright (c) 2005-2007  Mats Bengtsson
+#  Copyright (c) 2005-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.23 2008-03-30 13:18:19 matben Exp $
+# $Id: Enter.tcl,v 1.24 2008-06-07 06:50:38 matben Exp $
 
 package provide Enter 1.0
 
-namespace eval ::Enter:: {
+namespace eval ::Enter {
 
     variable uid  0
 }

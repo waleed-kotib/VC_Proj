@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.109 2008-05-13 09:13:00 matben Exp $
+# $Id: Profiles.tcl,v 1.110 2008-06-07 06:50:38 matben Exp $
 
 package require ui::megaentry
 
@@ -1530,7 +1530,7 @@ proc ::Profiles::FrameNewCmd {w} {
     
     set ans [ui::megaentry -label "[mc {Profile Name}]:" -icon "" \
       -geovariable prefs(winGeom,jprofname) \
-      -title [mc {Add Profile}] -message [mc prefprofname2]]
+      -title [mc "Add Profile"] -message [mc prefprofname2]]
     ::UI::MenubarEnableAll $mbar
 
     if {$ans eq ""} {

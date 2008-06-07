@@ -4,7 +4,7 @@
 #
 #  Copyright (c) 2007-2008 Mats Bengtsson
 #
-# $Id: black.tcl,v 1.12 2008-02-20 15:14:37 matben Exp $
+# $Id: black.tcl,v 1.13 2008-06-07 06:50:38 matben Exp $
 
 package require Tk 8.5;                 # minimum version for Tile
 
@@ -37,18 +37,13 @@ namespace eval ttk::theme::black {
 	-selectbg	"#4a6984"
 	-selectfg	"#ffffff"
     }
-    if {[info commands ::ttk::style] ne ""} {
-	set styleCmd ttk::style
-    } else {
-	set styleCmd style
-    }
     
-    $styleCmd theme create black -parent clam -settings {
+    ttk::style theme create black -parent clam -settings {
 
         # -----------------------------------------------------------------
         # Theme defaults
         #
-	$styleCmd configure "." \
+	ttk::style configure "." \
 	    -background $colors(-frame) \
 	    -foreground white \
 	    -bordercolor $colors(-darkest) \
@@ -61,7 +56,7 @@ namespace eval ttk::theme::black {
 	    -font TkDefaultFont \
 	    ;
 
-	  $styleCmd map "." \
+	  ttk::style map "." \
 	      -background [list disabled $colors(-frame) \
 			       active $colors(-lighter)] \
 	      -foreground [list disabled $colors(-disabledfg)] \
@@ -70,31 +65,31 @@ namespace eval ttk::theme::black {
 	      ;
                 
 	  # ttk widgets.
-	  $styleCmd configure TButton \
+	  ttk::style configure TButton \
 	    -width -8 -padding {5 1} -relief raised
-	  $styleCmd configure TMenubutton \
+	  ttk::style configure TMenubutton \
 	    -width -11 -padding {5 1} -relief raised
-	  $styleCmd configure TCheckbutton \
+	  ttk::style configure TCheckbutton \
 	    -indicatorbackground "#ffffff" -indicatormargin {1 1 4 1}
-	  $styleCmd configure TRadiobutton \
+	  ttk::style configure TRadiobutton \
 	    -indicatorbackground "#ffffff" -indicatormargin {1 1 4 1}
 	  
-	  $styleCmd configure TEntry \
+	  ttk::style configure TEntry \
 	    -fieldbackground white -foreground black \
 	    -padding {2 0}
-	  $styleCmd configure TCombobox \
+	  ttk::style configure TCombobox \
 	    -fieldbackground white -foreground black \
 	    -padding {2 0}
 	  
-	  $styleCmd configure TNotebook.Tab \
+	  ttk::style configure TNotebook.Tab \
 	    -padding {6 2 6 2}
 	  
 	  # tk widgets.
-	  $styleCmd map Menu \
+	  ttk::style map Menu \
 	    -background [list active $colors(-lighter)] \
 	    -foreground [list disabled $colors(-disabledfg)]
 
-	  $styleCmd configure TreeCtrl \
+	  ttk::style configure TreeCtrl \
 	    -background gray30 -itembackground {gray60 gray50} \
 	    -itemfill white -itemaccentfill yellow
     }
