@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.54 2008-05-15 14:14:57 matben Exp $
+# $Id: SetupAss.tcl,v 1.55 2008-06-07 10:41:29 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -43,8 +43,9 @@ namespace eval ::SetupAss::  {
     ::hooks::register  connectState  ::SetupAss::ConnectStateHook
     
     # We could be much more general here...
-    set ::config(setupass,page,server)    1
-    set ::config(setupass,public-servers) 1
+    set ::config(setupass,page,server)       1
+    set ::config(setupass,password-required) 0
+    set ::config(setupass,public-servers)    1
 }
 
 proc ::SetupAss::SetupAss {} {
@@ -156,7 +157,7 @@ proc ::SetupAss::SetupAss {} {
     }
     
     # Username & Password.
-    set p3 [$su newpage "username" -headtext [mc {Username & Password}]]
+    set p3 [$su newpage "username" -headtext [mc "Username & Password"]]
     set fr3 $p3.fr
     ttk::frame $p3.fr -padding [option get . notebookPagePadding {}]
     ttk::label $fr3.msg1 -style Small.TLabel \
@@ -280,6 +281,7 @@ proc ::SetupAss::HttpCommand {htoken} {
 }
 
 proc ::SetupAss::NextPage {w page} {
+    global  config
     variable server
     variable username
     variable password
@@ -291,7 +293,13 @@ proc ::SetupAss::NextPage {w page} {
     # Verify that it is ok before showing the next page.
     switch -- $page {
 	username {
-	    if {($username eq "") || ($password eq "")} {
+	    set missing 0
+	    if {$username eq ""} {
+		set missing 1
+	    } elseif {$config(setupass,password-required) && ($password eq "")} {
+		set missing 1
+	    }
+	    if {$missing} {
 		::UI::MessageBox -icon error -title [mc Error] \
 		  -message [mc messsuassfillin] -parent $w
 		return -code 3
