@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.250 2008-05-28 09:51:07 matben Exp $
+# $Id: JUI.tcl,v 1.251 2008-06-07 13:55:39 matben Exp $
 
 package provide JUI 1.0
 
@@ -59,7 +59,9 @@ namespace eval ::JUI {
 
     # Other icons.
     option add *JMain.sizeGripImage               sizegrip        widgetDefault
-    option add *JMain.secureImage                 security-high   widgetDefault
+    option add *JMain.secureHighImage             security-high   widgetDefault
+    option add *JMain.secureMedImage              security-medium   widgetDefault
+    option add *JMain.secureLowImage              security-low   widgetDefault
 
     option add *JMain.cociEs32                    coccinella2      widgetDefault
     option add *JMain.cociEsActive32              coccinella2-shadow widgetDefault
@@ -942,7 +944,7 @@ proc ::JUI::BuildToolbar {w wtbar} {
     $wtbar newbutton newuser -text [mc Contact] \
       -image $iconAddUser -disabledimage $iconAddUserDis  \
       -command ::JUser::NewDlg -state disabled \
-      -balloontext [mc {Add Contact}]
+      -balloontext [mc "Add Contact"]
     $wtbar newbutton chat -text [mc mChat] \
       -image $iconChat -disabledimage $iconChatDis  \
       -command ::Chat::OnToolButton -state disabled
@@ -1212,10 +1214,33 @@ proc ::JUI::LoginHook {} {
     
     set w $jwapp(w)
     if {[info exists jwapp(secure)] && [winfo exists $jwapp(secure)]} {
+	set wsecure $jwapp(secure)
+	
+# 	security-high: SASL+TLS with a certificate signed by a trusted source
+# 	security-medium: {SASL+TLS|TLS on separate port} with a certificate
+# 	signed by a source that is not trusted (self-signed certificate)
+# 	security-low: only SASL or no security at all
+	set any 0
 	set sasl [::Jabber::Jlib connect feature sasl]
-	if {$sasl} {
-	    set name [::Theme::Find16Icon $w secureImage]
-	    $jwapp(secure) configure -image $name
+	set ssl  [::Jabber::Jlib connect feature ssl]
+	set tls  [::Jabber::Jlib connect feature tls]
+	set cert 0
+	if {$sasl && $tls && $cert} {
+	    set str [mc "The connection is secure"]
+	    set image [::Theme::Find16Icon $w secureHighImage]
+	    set any 1
+	} elseif {($sasl && $tls) || $ssl} {
+	    set str [mc "The connection is medium secure: ..."]
+	    set image [::Theme::Find16Icon $w secureMedImage]
+	    set any 1
+	} elseif {$sasl} {
+	    set str [mc "The connection is insecure"]
+	    set image [::Theme::Find16Icon $w secureLowImage]
+	    set any 1
+	}
+	if {$any} {
+	    $wsecure configure -image $image
+	    ::balloonhelp::balloonforwindow $wsecure $str	    
 	}
     }
 
@@ -1230,6 +1255,7 @@ proc ::JUI::LogoutHook {} {
     
     if {[info exists jwapp(secure)] && [winfo exists $jwapp(secure)]} {
 	$jwapp(secure) configure -image ""
+	::balloonhelp::balloonforwindow $wsecure ""
     }
     
     SetStatusMessage [mc "Logged out"]
