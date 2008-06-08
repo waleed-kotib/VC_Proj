@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.250 2008-06-06 07:36:32 matben Exp $
+# $Id: GroupChat.tcl,v 1.251 2008-06-08 07:45:32 matben Exp $
 
 package require Create
 package require Enter
@@ -31,7 +31,7 @@ package require mstack
 
 package provide GroupChat 1.0
 
-namespace eval ::GroupChat:: {
+namespace eval ::GroupChat {
 
     # Add all event hooks.
     ::hooks::register initHook                ::GroupChat::InitHook
@@ -200,6 +200,9 @@ namespace eval ::GroupChat:: {
 
     # Shall we automatically rejoin open groupchat on login?
     set ::config(groupchat,login-autojoin) 1
+    
+    # As jprefs???
+    set ::config(groupchat,show-sysmsgs) 1
 }
 
 proc ::GroupChat::InitHook {} {
@@ -844,6 +847,8 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set chatstate(active)       $cprefs(lastActiveRet)
     set chatstate(mstack)       [mstack::init 4]
 	
+    set chatstate(elidesys)     0
+    
     # Use an extra frame that contains everything room specific.
     ttk::frame $wroom -class GroupChatRoom
     
@@ -884,9 +889,13 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     }
     
     ::Emoticons::MenuButton $wgroup.smile -text $wtextsend
+    ttk::checkbutton $wgroup.elsys -style Toolbutton \
+      -text M \
+      -command [list [namespace current]::ElideSysCmd $chattoken] \
+      -variable $chattoken\(elidesys)
     
     grid  $wgroup.active  $wgroup.bmark  $wgroup.stat  $wgroup.smile  \
-      -padx 1 -sticky news
+      $wgroup.elsys  -padx 1 -sticky news
     foreach c {0 1} {
 	grid columnconfigure $wgroup $c -uniform bt -weight 1
     }
@@ -1058,6 +1067,13 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     ::hooks::run textSpellableNewHook $wtextsend
 
     return $chattoken
+}
+
+proc ::GroupChat::ElideSysCmd {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    $chatstate(wtext) tag configure sys -elide $chatstate(elidesys)
 }
 
 proc ::GroupChat::DnDXmppDrop {chattoken win data type} {
@@ -2262,6 +2278,8 @@ proc ::GroupChat::InsertMessage {chattoken xmldata} {
     set w       $chatstate(w)
     set wtext   $chatstate(wtext)
     set roomjid $chatstate(roomjid)
+    
+    puts $wtext
             
     set haveSys 0
     if {$tag eq "presence"} {
@@ -2336,7 +2354,7 @@ proc ::GroupChat::InsertMessage {chattoken xmldata} {
 	$wtext insert end $prefix $syspretags
 	$wtext insert insert "   "   $systxttags
 	::Text::ParseMsg groupchat $from $wtext $sysstr $systxttags
-	$wtext insert end "\n"
+	$wtext insert end "\n" $systxttags
     }
 
     set subjectE [wrapper::getfirstchildwithtag $xmldata "subject"]
@@ -2348,7 +2366,7 @@ proc ::GroupChat::InsertMessage {chattoken xmldata} {
 	$wtext insert end $prefix $pretags
 	$wtext insert insert "   "   $txttags
 	::Text::ParseMsg groupchat $from $wtext $str $txttags
-	$wtext insert end "\n"
+	$wtext insert end "\n" $txttags
     }
 
     if {$tag eq "message"} {
@@ -2361,7 +2379,7 @@ proc ::GroupChat::InsertMessage {chattoken xmldata} {
 	    $wtext insert end $prefix $pretags
 	    $wtext insert insert "   "   $txttags
 	    ::Text::ParseMsg groupchat $from $wtext $body $txttags
-	    $wtext insert end "\n"
+	    $wtext insert end "\n" $txttags
 	}
     }
     $wtext configure -state disabled
@@ -2800,6 +2818,7 @@ proc ::GroupChat::CommandReturnKeyPress {chattoken} {
 # Note that a conference service may also be a gateway!
 
 proc ::GroupChat::PresenceEvent {jlibname xmldata} {
+    global  config
     upvar ::Jabber::xmppxmlns xmppxmlns
         
     set from [wrapper::getattribute $xmldata from]
@@ -2817,9 +2836,11 @@ proc ::GroupChat::PresenceEvent {jlibname xmldata} {
 	    RemoveUser $roomjid $from
 	}
     
-	lappend chatstate(afterids) [after 200 [list  \
-	  ::GroupChat::InsertPresenceChange $chattoken $xmldata]]
-    
+	if {$config(groupchat,show-sysmsgs)} {
+	    lappend chatstate(afterids) [after 200 [list  \
+	      ::GroupChat::InsertPresenceChange $chattoken $xmldata]]
+	}
+	
 	# When kicked etc. from a MUC room...
 	# 
 	#  <x xmlns='http://jabber.org/protocol/muc#user'>

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.295 2008-06-06 13:39:42 matben Exp $
+# $Id: Chat.tcl,v 1.296 2008-06-08 07:45:31 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -218,6 +218,9 @@ namespace eval ::Chat {
     
     # Default focus widget when haven't any cached focus for this pane.
     set ::config(chat,default-focus) "wsubject"
+    
+    # Shall we display presence changes in history?
+    set ::config(chat,hist-presence) 0
 
     # For easier debug.
     if {0} {
@@ -1133,6 +1136,7 @@ proc ::Chat::InsertHistoryOld {chattoken args} {
 # Using the new xml based preprocessed format.
 
 proc ::Chat::InsertHistoryXML {chattoken} {
+    global  config
     variable $chattoken
     upvar 0 $chattoken chatstate
 
@@ -1157,7 +1161,13 @@ proc ::Chat::InsertHistoryXML {chattoken} {
 	set secs [clock scan $time]
 
 	set xmppE [lindex [tinydom::children $itemE] 0]
-	Insert $chattoken $xmppE $secs $inB 1
+	if {$config(chat,hist-presence)} {
+	    Insert $chattoken $xmppE $secs $inB 1
+	} else {
+	    if {[tinydom::tagname $xmppE] eq "message"} {
+		Insert $chattoken $xmppE $secs $inB 1
+	    }
+	}
     }
 }
 
@@ -3328,8 +3338,6 @@ proc ::Chat::PresenceEvent {chattoken jlibname xmldata} {
     if {[llength $showE]} {
 	set show [string tolower [wrapper::getcdata $showE]]
     }
-    
-    puts "::Chat::PresenceEvent show=$show, chatstate(presence)=$chatstate(presence)"
         
     # Skip if duplicate presence. Bug?
     if {[string equal $chatstate(presence) $show]} {
