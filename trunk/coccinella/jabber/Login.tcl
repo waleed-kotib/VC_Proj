@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.148 2008-06-07 06:50:38 matben Exp $
+# $Id: Login.tcl,v 1.149 2008-06-08 14:20:32 matben Exp $
 
 package provide Login 1.0
 
@@ -538,20 +538,21 @@ proc ::Login::DoLogin {} {
     if {$config(login,ask-save-profile)} {
 	set diffs 0
 	set prof [::Profiles::GetProfile $profile]
-# 	puts "prof=$prof"
+#  	puts "prof=$prof"
 	lassign [lrange $prof 0 2] h u p
 	array set tmp1A $opts
 	array set tmp2A [::Profiles::GetDefaultOpts $server]
 	array set tmp2A [lrange $prof 3 end]
 	array unset tmp1A -nickname
-# 	parray tmp1A
-# 	parray tmp2A
+	array unset tmp2A -nickname
+#  	parray tmp1A
+#  	parray tmp2A
 	set r ""
 	if {[info exists tmp2A(-resource)]} {
 	    set r $tmp2A(-resource)
 	}
-# 	puts "jid=$jid, barejid=[jlib::barejid $jid]"
-# 	puts "u=$u, h=$h, j=[jlib::joinjid $u $h ""]"
+#  	puts "jid=$jid, barejid=[jlib::barejid $jid]"
+#  	puts "u=$u, h=$h, j=[jlib::joinjid $u $h ""]"
 	
 	if {![jlib::jidequal [jlib::barejid $jid] [jlib::joinjid $u $h ""]]} {
 
