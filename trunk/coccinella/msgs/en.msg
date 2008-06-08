@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.245 2008-05-13 09:13:00 matben Exp $
+#   $Id: en.msg,v 1.246 2008-06-08 14:09:37 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -1244,6 +1244,7 @@ if {0} {
 ::msgcat::mcset en tooltip-chatoffline      {You need to be logged in to see the presence of this contact}
 #::msgcat::mcset en tooltip-aaonhidden       {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
 ::msgcat::mcset en tooltip-aabusychats      {When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb.}
+::msgcat::mcset en tooltip-togglesysmsg     {Show or hide status changes in chat}
 
 
 # Me knows :-)

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.246 2008-05-28 09:51:08 matben Exp $
+# $Id: Roster.tcl,v 1.247 2008-06-08 14:09:36 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -32,7 +32,7 @@ package require UI::TSearch
 
 package provide Roster 1.0
 
-namespace eval ::Roster:: {
+namespace eval ::Roster {
     global  this prefs
     
     # Add all event hooks we need.
@@ -1026,6 +1026,8 @@ proc ::Roster::Presence {jid presence args} {
 proc ::Roster::NewAvailableItem {jid} {
     global  config
     upvar ::Jabber::jstate jstate
+    
+    ::Debug 4 "::Roster::NewAvailableItem jid=$jid"
     	
     set jlib $jstate(jlib)
 

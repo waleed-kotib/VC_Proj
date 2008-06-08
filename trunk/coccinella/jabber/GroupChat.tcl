@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.251 2008-06-08 07:45:32 matben Exp $
+# $Id: GroupChat.tcl,v 1.252 2008-06-08 14:09:36 matben Exp $
 
 package require Create
 package require Enter
@@ -918,6 +918,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
 
     ::balloonhelp::balloonforwindow $wgroup.active [mc jaactiveret]
     ::balloonhelp::balloonforwindow $wgroup.bmark  [mc "Bookmark this chatroom"]
+    ::balloonhelp::balloonforwindow $wgroup.elsys  [mc tooltip-togglesysmsg]
 
     # Header fields.
     ttk::frame $wtop

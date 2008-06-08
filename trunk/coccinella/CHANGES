@@ -8,6 +8,9 @@ Not to mention all bugfixes and rewrites.
 Coccinella-0.96.10 (200807??)
 
  o optimized program startup to be faster
+ o many icons and icon sets now moved inside the theme hierarchy
+ o sound themes now belongs to a theme
+ o the login dialog can now be used to edit and create profiles
 
 
 Coccinella-0.96.8 (20080430)
