@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.251 2008-06-07 13:55:39 matben Exp $
+# $Id: JUI.tcl,v 1.252 2008-06-08 14:09:36 matben Exp $
 
 package provide JUI 1.0
 
@@ -1255,7 +1255,7 @@ proc ::JUI::LogoutHook {} {
     
     if {[info exists jwapp(secure)] && [winfo exists $jwapp(secure)]} {
 	$jwapp(secure) configure -image ""
-	::balloonhelp::balloonforwindow $wsecure ""
+	::balloonhelp::balloonforwindow $jwapp(secure) ""
     }
     
     SetStatusMessage [mc "Logged out"]

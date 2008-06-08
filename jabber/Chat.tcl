@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.296 2008-06-08 07:45:31 matben Exp $
+# $Id: Chat.tcl,v 1.297 2008-06-08 14:09:36 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1524,6 +1524,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     
     set chatstate(havecs)           first
     set chatstate(chatstate)        active
+    set chatstate(elidesys)         0
     
     if {$jprefs(chatActiveRet)} {
 	set chatstate(active) 1
@@ -1607,6 +1608,10 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
       -image $imH -variable $chattoken\(history)  \
       -command [list [namespace current]::HistoryCmd $chattoken]
     ::Emoticons::MenuButton $wsmile -command $cmd
+    ttk::checkbutton $wbot.elsys -style Toolbutton \
+      -text M \
+      -command [list [namespace current]::ElideSysCmd $chattoken] \
+      -variable $chattoken\(elidesys)
     ttk::label $wnotifier -style Small.TLabel \
       -textvariable $chattoken\(notifier) \
       -padding {10 0} -compound left -anchor w
@@ -1615,11 +1620,13 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     pack  $wbot.active  -side left -fill y -padx 4
     pack  $wbot.hist    -side left -fill y -padx 4
     pack  $wsmile       -side left -fill y -padx 4
+    pack  $wbot.elsys   -side left -fill y -padx 4
     pack  $wnotifier    -side left         -padx 4
     
     ::balloonhelp::balloonforwindow $wbot.hist [mc jachathist]
     ::balloonhelp::balloonforwindow $wbot.active [mc jaactiveret]
     ::balloonhelp::balloonforwindow $wsmile [mc "Insert emoticon"]
+    ::balloonhelp::balloonforwindow $wbot.elsys [mc tooltip-togglesysmsg]
 
     set wmid        $wthread.m
     set wpane       $wthread.m.pane
@@ -1771,6 +1778,13 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     after idle [list raise [winfo toplevel $wthread]]
     
     return $chattoken
+}
+
+proc ::Chat::ElideSysCmd {chattoken} {
+    variable $chattoken
+    upvar 0 $chattoken chatstate
+    
+    $chatstate(wtext) tag configure sys -elide $chatstate(elidesys)
 }
 
 proc ::Chat::NicknameEventHook {xmldata jid nickname} {

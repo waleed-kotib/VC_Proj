@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.105 2008-05-14 14:05:35 matben Exp $
+# $Id: RosterTree.tcl,v 1.106 2008-06-08 14:09:36 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -1794,6 +1794,11 @@ proc ::RosterTree::QuitHook { } {
 
 proc ::RosterTree::NicknameEventHook {xmldata jid nickname} {
     upvar ::Jabber::jstate jstate
+    
+    # Some servers seem to push out my own nickname.
+    if {[jlib::jidequal $jid [$jstate(jlib) myjid2]]} {
+	return
+    }
     
     # Just repopulate item.
     set jid [$jstate(jlib) roster getrosterjid $jid]

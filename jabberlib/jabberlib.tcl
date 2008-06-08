@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.196 2008-01-04 15:29:52 matben Exp $
+# $Id: jabberlib.tcl,v 1.197 2008-06-08 14:09:37 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -3373,16 +3373,12 @@ proc jlib::mypresencestatus {jlibname} {
 #       Returns our 3-tier jid as authorized with the login server.
 
 proc jlib::myjid {jlibname} {
-
     upvar ${jlibname}::locals locals
-    
     return $locals(myjid)
 }
 
 proc jlib::myjid2 {jlibname} {
-
     upvar ${jlibname}::locals locals
-    
     return $locals(myjid2)
 }
 
