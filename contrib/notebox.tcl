@@ -6,11 +6,11 @@
 #  
 #  This source file is distributed under the BSD license.
 #  
-#  $Id: notebox.tcl,v 1.4 2008-01-06 12:11:00 matben Exp $
+#  $Id: notebox.tcl,v 1.5 2008-06-09 14:24:46 matben Exp $
 
 package provide notebox 1.0
 
-namespace eval ::notebox:: {
+namespace eval ::notebox {
     
     array set fontPlat {
 	unix    {Helvetica 10}
@@ -55,8 +55,8 @@ proc ::notebox::Build {} {
     toplevel $w -class Notebox -bd 0 -relief flat
     wm resizable $w 0 0 
     
-    switch -- $::this(platform) {
-	macosx {
+    switch -- [tk windowingsystem] {
+	aquq {
 	    tk::unsupported::MacWindowStyle style $w floating {sideTitlebar closeBox}
 	    frame $w.f -height 32 -width 0
 	    pack  $w.f -side left -fill y
@@ -91,7 +91,7 @@ proc ::notebox::DrawWinxpButton {c r} {
 	set red [option get $this(w) closeButtonBgWinxp {}]
 	
 	# Be sure to offset ovals to put center pixel at (1,1).
-	if {[string match mac* $this(platform)]} {
+	if {[tk windowingsystem] eq "aqua"} {
 	    $c create oval -$rm -$rm  $r $r -tags bt -outline {} -fill $red
 	    set id1 [$c create line -$a -$a $a  $a -tags bt -fill white]
 	    set id2 [$c create line -$a  $a $a -$a -tags bt -fill white]

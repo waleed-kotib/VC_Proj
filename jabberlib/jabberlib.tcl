@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.198 2008-06-09 09:51:00 matben Exp $
+# $Id: jabberlib.tcl,v 1.199 2008-06-09 14:24:46 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -88,6 +88,9 @@
 #      jlibName iq_register type xmlns cmd
 #      jlibName message_register xmlns cmd
 #      jlibName myjid
+#      jlibName myjid2
+#      jlibName myjidmap
+#      jlibName myjid2map
 #      jlibName mypresence
 #      jlibName oob_set to cmd url ?args?
 #      jlibName presence_register type cmd
@@ -413,8 +416,11 @@ proc jlib::init_inst {jlibname} {
     set locals(pres,type)     "unavailable"
     set locals(myjid)         ""
     set locals(myjid2)        ""
+    set locals(myjidmap)      ""
+    set locals(myjid2map)     ""
     set locals(trigAutoAway)  1
     set locals(server)        ""
+    set locals(servermap)     ""
 
     set features(trace) [list]
 }
@@ -902,7 +908,8 @@ proc jlib::openstream {jlibname server args} {
     
     # The server 'to' attribute is only temporary until we have either a 
     # confirmation or a redirection (alias) in received streams 'from' attribute.
-    set locals(server) $server
+    set locals(server)    $server
+    set locals(servermap) [jidmap $server]
     set locals(last) [clock seconds]
     
     # Make sure we start with a clean state.
@@ -1086,6 +1093,11 @@ proc jlib::getserver {jlibname} {
     return $locals(server)
 }
 
+proc jlib::getservermap {jlibname} {
+    upvar ${jlibname}::locals locals 
+    return $locals(servermap)
+}
+
 # jlib::isinstream --
 # 
 #       Utility to help us closing down a stream.
@@ -1191,7 +1203,7 @@ proc jlib::iq_handler {jlibname xmldata} {
     if {[info exists from]} {
 	set afrom $from
     } else {
-	set afrom $locals(server)
+	set afrom $locals(servermap)
     }
     
     # @@@ Section 9.2.3 of RFC 3920 states in part:
@@ -1220,8 +1232,7 @@ proc jlib::iq_handler {jlibname xmldata} {
 	    # Protect us from our own 'set' calls when we are awaiting 
 	    # 'result' or 'error'.
 	    set setus 0
-	    if {[string equal $type "set"]  \
-	      && [string equal $afrom $locals(myjid)]} {
+	    if {($type eq "set") && ($afrom eq $locals(myjidmap))} {
 		set setus 1
 	    }
 
@@ -1681,7 +1692,8 @@ proc jlib::got_stream {jlibname args} {
     
     # The streams 'from' attribute has the "last word" on the servers name.
     if {[info exists locals(streamattr,from)]} {
-	set locals(server) $locals(streamattr,from)
+	set locals(server)    $locals(streamattr,from)
+	set locals(servermap) [jidmap $locals(server)]
     }
     schedule_auto_away $jlibname
     
@@ -2064,9 +2076,11 @@ proc jlib::parse_bind_resource {jlibname cmd type subiq args} {
 	    set sjid [wrapper::getcdata $jidElem]
 	    splitjid $sjid sjid2 sresource
 	    if {![string equal [resourcemap $locals(resource)] $sresource]} {
-		set locals(myjid)    $sjid
-		set locals(myjid2)   $sjid2
-		set locals(resource) $sresource
+		set locals(myjid)     $sjid
+		set locals(myjid2)    $sjid2
+		set locals(resource)  $sresource
+		set locals(myjidmap)  [jidmap $sjid]
+		set locals(myjid2map) [jidmap $sjid2]
 	    }
 	}
     }    
@@ -2815,10 +2829,15 @@ proc jlib::send_auth {jlibname username resource cmd args} {
     }
     
     # Cache our login jid.
-    set locals(username) $username
-    set locals(resource) $resource
-    set locals(myjid2)   ${username}@$locals(server)
-    set locals(myjid)    ${username}@$locals(server)/${resource}
+    set myjid  ${username}@$locals(server)/${resource}
+    set myjid2 ${username}@$locals(server)
+
+    set locals(username)  $username
+    set locals(resource)  $resource
+    set locals(myjid)     $myjid
+    set locals(myjid2)    $myjid2
+    set locals(myjidmap)  [jidmap $myjid]
+    set locals(myjid2map) [jidmap $myjid2]
 
     set xmllist [wrapper::createtag "query" -attrlist {xmlns jabber:iq:auth} \
       -subtags $subelements]
@@ -3047,7 +3066,7 @@ proc jlib::send_message {jlibname to args} {
 	# There exist a weird situation if we send to ourself.
 	# Skip this registered command the 1st time we get this,
 	# and let any handlers take over. Trigger this 2nd time.
-	if {[string equal $to $locals(myjid)]} {
+	if {[string equal $to $locals(myjidmap)]} {
 	    set msgcmd($uid,self) 1
 	}
 	
@@ -3165,7 +3184,7 @@ proc jlib::send_presence {jlibname args} {
 	    }
 	    -to {
 		# Presence to server (undirected) shall not contain a to.
-		if {$value ne $locals(server)} {
+		if {$value ne $locals(servermap)} {
 		    lappend attrlist $par $value
 		    set directed 1
 		}
@@ -3372,6 +3391,16 @@ proc jlib::myjid {jlibname} {
 proc jlib::myjid2 {jlibname} {
     upvar ${jlibname}::locals locals
     return $locals(myjid2)
+}
+
+proc jlib::myjidmap {jlibname} {
+    upvar ${jlibname}::locals locals
+    return $locals(myjidmap)
+}
+
+proc jlib::myjid2map {jlibname} {
+    upvar ${jlibname}::locals locals
+    return $locals(myjid2map)
 }
 
 # jlib::oob_set --

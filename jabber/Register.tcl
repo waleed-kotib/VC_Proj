@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.107 2008-06-09 09:51:00 matben Exp $
+# $Id: Register.tcl,v 1.108 2008-06-09 14:24:46 matben Exp $
 
 package provide Register 1.0
 
@@ -101,8 +101,8 @@ proc ::Register::Remove {{jid {}}} {
 	
 	# Remove also from our profile if our login account.
 	if {$login} {
-	    set myjid [::Jabber::Jlib myjid]
-	    set profile [::Profiles::FindProfileNameFromJID $myjid]
+	    set myjid2 [::Jabber::Jlib myjid2]
+	    set profile [::Profiles::FindProfileNameFromJID $myjid2]
 	    if {$profile ne ""} {
 		::Profiles::Remove $profile
 	    }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.265 2008-06-09 09:50:59 matben Exp $
+# $Id: Jabber.tcl,v 1.266 2008-06-09 14:24:46 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -449,7 +449,7 @@ proc ::Jabber::GetMyJid {{roomjid {}}} {
 
     set jid ""
     if {$roomjid eq ""} {
-	set jid $jstate(mejidres)
+	set jid [::Jabber::Jlib myjid]
     } else {
 	if {[$jstate(jlib) service isroom $roomjid]} {
 	    set nick [$jstate(jlib) service mynick $roomjid]
@@ -1898,8 +1898,10 @@ proc ::Jabber::Passwd::Build {} {
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
+    set myjid2 [::Jabber::Jlib myjid2]
+
     ttk::label $frmid.ll -text [mc janewpass]
-    ttk::label $frmid.le -text $jstate(mejid)
+    ttk::label $frmid.le -text $myjid2
     ttk::label $frmid.lserv -text "[mc {New password}]:" -anchor e
     ttk::entry $frmid.eserv -width 18 -show *  \
       -textvariable [namespace current]::password -validate key  \
@@ -1974,9 +1976,13 @@ proc ::Jabber::Passwd::Doit {w} {
 	return
     }
     set finished 1
-    regexp -- {^([^@]+)@.+$} $jstate(mejid) match username
+    
+    set myjid2 [::Jabber::Jlib myjid2]
+    set server [::Jabber::Jlib getserver]
+    jlib::splitjidex $myjid2 username - -
+    
     ::Jabber::Jlib register_set $username $password \
-      [list [namespace current]::ResponseProc] -to $jstate(server)
+      [list [namespace current]::ResponseProc] -to $server
     destroy $w
 
     # Just wait for a callback to the procedure.
@@ -1997,7 +2003,8 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
     } else {
 		
 	# Make sure the new password is stored in our profiles.
-	set name [::Profiles::FindProfileNameFromJID $jstate(mejid)]
+	set myjid2 [::Jabber::Jlib myjid2]
+	set name [::Profiles::FindProfileNameFromJID $myjid2]
 	if {$name ne ""} {
 	    ::Profiles::SetWithKey $name password $password
 	}

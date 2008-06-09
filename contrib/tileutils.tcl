@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.85 2008-06-07 06:50:38 matben Exp $
+# $Id: tileutils.tcl,v 1.86 2008-06-09 14:24:46 matben Exp $
 #
 
 package require treeutil
@@ -892,6 +892,15 @@ ttk::copyBindings TButton TUrl
 
 bind TUrl <Enter>	   {+%W configure -cursor hand2 }
 bind TUrl <Leave>	   {+%W configure -cursor arrow }
+
+proc tileutils::notebookTraversal {wnb} {
+    ttk::notebook::enableTraversal $wnb
+
+    # Hack!
+    set top [winfo toplevel $wnb]
+    bind $top <Control-Prior>     {+ttk::notebook::TLCycleTab %W  1}
+    bind $top <Control-Next>      {+ttk::notebook::TLCycleTab %W -1}
+}
 
 # ttk::optionmenu --
 # 

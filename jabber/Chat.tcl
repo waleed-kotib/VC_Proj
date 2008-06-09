@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.298 2008-06-09 09:50:59 matben Exp $
+# $Id: Chat.tcl,v 1.299 2008-06-09 14:24:46 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -500,7 +500,8 @@ proc ::Chat::StartThread {jid args} {
 #       chattoken
 
 proc ::Chat::NewChat {threadID jid args} {
-
+    global  jprefs
+    
     array set argsA $args    
     
     if {$jprefs(chat,tabbedui)} {
@@ -1950,7 +1951,6 @@ proc ::Chat::DnDFileInit {chattoken win} {
     dnd bindtarget $win text/uri-list <DragLeave> \
      [list ::Chat::DnDFileLeave $chattoken %W %D %T] 80
    
-   DnDDebugDump $win
 }
 
 proc ::Chat::DnDFileDrop {chattoken win data type} {
@@ -2218,7 +2218,7 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
     ttk::notebook $wnb -style X.TNotebook
     bind $wnb <<NotebookTabChanged>> \
       [list [namespace current]::TabChanged $dlgtoken]
-    ttk::notebook::enableTraversal $wnb
+    tileutils::notebookTraversal $wnb
     bindtags $wnb [linsert [bindtags $wnb] 0 ChatTab]
     pack $wnb -in $wcont -fill both -expand true -side right
 
@@ -2654,7 +2654,7 @@ proc ::Chat::LoginHook {} {
     upvar ::Jabber::jstate jstate
 
     # Must keep track of last own jid.
-    set cprefs(lastmejid) $jstate(mejidmap)
+    set cprefs(lastmejid) [::Jabber::Jlib myjid2map]
     BuildSavedDialogs
     
     return
@@ -2826,7 +2826,7 @@ proc ::Chat::BuildSavedDialogs {} {
     if {![llength $jprefs(chat,dialogs)]} {
 	return
     }
-    set mejidmap $jstate(mejidmap)
+    set mejidmap [::Jabber::Jlib myjid2map]
     array set dlgA $jprefs(chat,dialogs)
     if {![info exists dlgA($mejidmap)]} {
 	return
