@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Preferences.tcl,v 1.110 2008-05-27 14:17:23 matben Exp $
+# $Id: Preferences.tcl,v 1.111 2008-06-09 09:51:01 matben Exp $
  
 package require mnotebook
 
@@ -371,7 +371,7 @@ proc ::Preferences::Selection {T} {
     }
 }
 
-# Preferences::ResetToFactoryDefaults --
+# Preferences::ResetToFactoryDefaults --    OUTDATED!!!
 #
 #       Takes all prefs that is in the master list, and sets all
 #       our tmp variables identical to their default (hardcoded) values.
@@ -404,7 +404,7 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
 	
 	    # Set only tmp variables. Find the corresponding tmp variable.
 	    if {[regsub "^prefs" $varName tmpPrefs tmpVarName]} {
-	    } elseif {[regsub "^::Jabber::jprefs" $varName tmpJPrefs tmpVarName]} {
+	    } elseif {[regsub "^jprefs" $varName tmpJPrefs tmpVarName]} {
 	    } else {
 		continue
 	    }

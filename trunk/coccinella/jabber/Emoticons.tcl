@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Emoticons.tcl,v 1.67 2008-05-13 09:13:00 matben Exp $
+# $Id: Emoticons.tcl,v 1.68 2008-06-09 09:50:59 matben Exp $
 
 package provide Emoticons 1.0
 
@@ -42,10 +42,9 @@ namespace eval ::Emoticons:: {
 }
 
 proc ::Emoticons::Init {} {
-    global  this
+    global  this jprefs
     
     variable priv
-    upvar ::Jabber::jprefs jprefs
 
     # 'tmpicons(name,key)' map from a text string (key) and iconset name
     # to an image name.
@@ -148,7 +147,7 @@ proc ::Emoticons::Make {w word} {
 }
 
 proc ::Emoticons::None {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     return [expr {$jprefs(emoticonSet) eq "-"}]
 }
 
@@ -183,10 +182,9 @@ proc ::Emoticons::GetAllSets {} {
 #       Verifies that it exists and that can be mounted if zip archive.
 
 proc ::Emoticons::GetPrefSetPathExists {} {
-    global  this
+    global  this jprefs
     variable state
     variable priv
-    upvar ::Jabber::jprefs jprefs
     
     set name $jprefs(emoticonSet)
     if {[info exists state($name,path)]} {
@@ -689,14 +687,14 @@ proc ::Emoticons::MacOpenDocument {args} {
 # Preference page --------------------------------------------------------------
 
 proc  ::Emoticons::InitPrefsHook {} {
+    global jprefs
     variable priv
-    upvar ::Jabber::jprefs jprefs
 
     set jprefs(emoticonSet) $priv(defaultSet)
     
     # Do NOT store the complete path!
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(emoticonSet) jprefs_emoticonSet $jprefs(emoticonSet)]]
+      [list jprefs(emoticonSet) jprefs_emoticonSet $jprefs(emoticonSet)]]
 }
 
 proc ::Emoticons::BuildPrefsHook {wtree nbframe} {
@@ -708,12 +706,12 @@ proc ::Emoticons::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::Emoticons::BuildPrefsPage {wpage} {
+    global jprefs
     variable wprefpage $wpage
     variable wpreftext
     variable wprefmb
     variable tmpSet
     variable priv
-    upvar ::Jabber::jprefs jprefs
     
     set allSets [GetAllSets]
 
@@ -782,12 +780,12 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
 }
 
 proc ::Emoticons::PrefsSetCmd {value} {
+    global jprefs
     variable wprefpage
     variable wpreftext 
     variable state
     variable tmpSet
     variable priv
-    upvar ::Jabber::jprefs jprefs
     
     if {$tmpSet eq "-"} {
 	$wpreftext configure -state normal
@@ -902,8 +900,8 @@ proc ::Emoticons::FreePrefsPage {} {
 }
 
 proc ::Emoticons::SavePrefsHook {} {
+    global jprefs
     variable tmpSet
-    upvar ::Jabber::jprefs jprefs
     
     set new 0
     if {![string equal $jprefs(emoticonSet) $tmpSet]} {
@@ -917,8 +915,8 @@ proc ::Emoticons::SavePrefsHook {} {
 }
 
 proc ::Emoticons::CancelPrefsHook {} {
+    global jprefs
     variable tmpSet
-    upvar ::Jabber::jprefs jprefs
 
     # Since the menubutton is used both for viewing and setting,
     # I think we skip this warning.
@@ -930,8 +928,8 @@ proc ::Emoticons::CancelPrefsHook {} {
 }
 
 proc ::Emoticons::UserDefaultsHook {} {
+    global jprefs
     variable tmpSet
-    upvar ::Jabber::jprefs jprefs
     
     set allSets [GetAllSets]
     if {[lsearch $allSets $jprefs(emoticonSet)] < 0} {

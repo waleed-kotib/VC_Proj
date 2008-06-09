@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefNet.tcl,v 1.11 2007-09-14 08:11:46 matben Exp $
+# $Id: PrefNet.tcl,v 1.12 2008-06-09 09:51:01 matben Exp $
  
 package provide PrefNet 1.0
 
@@ -100,10 +100,9 @@ proc ::PrefNet::BuildTabPage {wpage} {
 }
     
 proc ::PrefNet::BuildServersFrame {w} {
-    global  this prefs    
+    global  this prefs jprefs
 
     variable tmpServPrefs
-    upvar ::Jabber::jprefs jprefs
     
     set tmpServPrefs(thisServPort)      $prefs(thisServPort)
     set tmpServPrefs(httpdPort)         $prefs(httpdPort)
@@ -139,9 +138,8 @@ proc ::PrefNet::BuildServersFrame {w} {
 }
 
 proc ::PrefNet::ServersSaveHook {} {
-    global  prefs
+    global  prefs jprefs
     variable tmpServPrefs
-    upvar ::Jabber::jprefs jprefs
 
     set prefs(thisServPort)      $tmpServPrefs(thisServPort)
     set prefs(httpdPort)         $tmpServPrefs(httpdPort)
@@ -149,9 +147,8 @@ proc ::PrefNet::ServersSaveHook {} {
 }
 
 proc ::PrefNet::ServersCancelHook {} {
-    global  prefs
+    global  prefs jprefs
     variable tmpServPrefs
-    upvar ::Jabber::jprefs jprefs
 
     if {![string equal $prefs(thisServPort) $tmpServPrefs(thisServPort)] || \
       ![string equal $prefs(httpdPort) $tmpServPrefs(httpdPort)] || \
@@ -161,9 +158,8 @@ proc ::PrefNet::ServersCancelHook {} {
 }
 
 proc ::PrefNet::ServersUserDefaultsHook {} {
-    global  prefs
+    global  prefs jprefs
     variable tmpServPrefs
-    upvar ::Jabber::jprefs jprefs
 
     set tmpServPrefs(thisServPort)      $prefs(thisServPort)
     set tmpServPrefs(httpdPort)         $prefs(httpdPort)

@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: JForms.tcl,v 1.36 2008-03-30 12:34:17 matben Exp $
+# $Id: JForms.tcl,v 1.37 2008-06-09 09:50:59 matben Exp $
 # 
 #      Updated to version 2.5 of XEP-0004
 #  
@@ -68,8 +68,8 @@ namespace eval ::JForms:: {
 #       token
 
 proc ::JForms::Build {w queryE args} {
+    global jprefs
     variable uid
-    upvar ::Jabber::jprefs jprefs
 
     # State variable to collect instance specific variables.
     set token [namespace current]::[incr uid]

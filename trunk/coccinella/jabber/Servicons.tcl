@@ -22,7 +22,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Servicons.tcl,v 1.20 2008-05-30 07:48:20 matben Exp $
+# $Id: Servicons.tcl,v 1.21 2008-06-09 09:51:00 matben Exp $
 
 # @@@ TODO: Make servicon sets configurable. See Rosticons.
 
@@ -55,9 +55,9 @@ namespace eval ::Servicons {
 }
 
 proc ::Servicons::ThemeInitHook {} {
+    global jprefs
     variable priv
     variable stateD
-    upvar ::Jabber::jprefs jprefs
 
     # @@@ TODO
     set jprefs(disco,themeName) ""

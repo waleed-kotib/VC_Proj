@@ -20,14 +20,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MUC.tcl,v 1.99 2008-05-05 06:21:00 matben Exp $
+# $Id: MUC.tcl,v 1.100 2008-06-09 09:50:59 matben Exp $
 
 package require jlib::muc
 package require ui::comboboxex
 
 package provide MUC 1.0
 
-namespace eval ::MUC:: {
+namespace eval ::MUC {
       
     ::hooks::register jabberInitHook     ::MUC::JabberInitHook
     
@@ -96,10 +96,9 @@ namespace eval ::MUC:: {
 
 
 proc ::MUC::JabberInitHook {jlibName} {
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
    
-    $jstate(jlib) message_register * $xmppxmlns(muc,user) ::MUC::MUCMessage
+    ::Jabber::Jlib message_register * $xmppxmlns(muc,user) ::MUC::MUCMessage
 }
 
 namespace eval ::MUC:: {
@@ -121,7 +120,6 @@ proc ::MUC::Invite {roomjid args} {
     
     variable inviteuid
     variable dlguid
-    upvar ::Jabber::jstate jstate
     
     array set argsA {
 	-continue 0
@@ -224,10 +222,9 @@ proc ::MUC::Invite {roomjid args} {
 proc ::MUC::InviteMakeContactWidgets {w jidL} {
     variable $w
     upvar 0 $w invite
-    upvar ::Jabber::jstate jstate
     
     set token [namespace current]::$w
-    set users [$jstate(jlib) roster getusers -type available]
+    set users [::Jabber::Jlib roster getusers -type available]
     set wmid $invite(wmid)
     set n 0
     
@@ -280,7 +277,6 @@ proc ::MUC::InviteCloseCmd {w wclose} {
 proc ::MUC::DoInvite {w} {
     variable $w
     upvar 0 $w invite
-    upvar ::Jabber::jstate jstate
 
     set reason   $invite(reason)
     set roomjid  $invite(roomjid)
@@ -303,7 +299,7 @@ proc ::MUC::DoInvite {w} {
 	if {$jid ne ""} {
 	    set aopts [concat $opts \
 	      [list -command [namespace code [list InviteCB $roomjid $jid]]]]
-	    eval {$jstate(jlib) muc invite $roomjid $jid} $aopts
+	    eval {::Jabber::Jlib muc invite $roomjid $jid} $aopts
 	}
     }
     unset -nocomplain invite
@@ -398,7 +394,6 @@ proc ::MUC::BuildInfo {roomjid} {
     global this wDlgs config
     
     variable dlguid
-    upvar ::Jabber::jstate jstate
 
     # Instance specific namespace.
     namespace eval [namespace current]::${roomjid} {
@@ -412,14 +407,14 @@ proc ::MUC::BuildInfo {roomjid} {
     }    
     set w $wDlgs(jmucinfo)[incr dlguid]
 
-    set roomName [$jstate(jlib) disco name $roomjid]
+    set roomName [::Jabber::Jlib disco name $roomjid]
     if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }
 
     set locals($roomjid,w) $w
     set locals($w,roomjid) $roomjid
-    set locals($roomjid,mynick) [$jstate(jlib) muc mynick $roomjid]
+    set locals($roomjid,mynick) [::Jabber::Jlib muc mynick $roomjid]
     set locals($roomjid,myrole) none
     set locals($roomjid,myaff) none
 
@@ -589,14 +584,13 @@ proc ::MUC::BuildInfo {roomjid} {
 
 proc ::MUC::FillTable {roomjid} {
     upvar [namespace current]::${roomjid}::locals locals
-    upvar ::Jabber::jstate jstate
     
     set mynick $locals($roomjid,mynick)
     set wtbl $locals(wtbl)
     $wtbl delete 0 end
     
     # Fill in tablelist.
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     set resourceL [$jlib roster getresources $roomjid -type available]
     set irow 0
     
@@ -640,7 +634,6 @@ proc ::MUC::DoubleClickPart {roomjid} {
 }
 
 proc ::MUC::SelectPart {roomjid} {
-    upvar ::Jabber::jstate jstate
     upvar [namespace current]::${roomjid}::locals locals
 
     set wtbl $locals(wtbl)
@@ -694,7 +687,6 @@ proc ::MUC::DisableAll {roomjid} {
 
 proc ::MUC::GrantRevoke {roomjid which type} {
     upvar [namespace current]::${roomjid}::locals locals
-    upvar ::Jabber::jstate jstate
     
     set dlgDefs(grant,voice) {
 	{Grant Voice}  \
@@ -782,7 +774,7 @@ proc ::MUC::GrantRevoke {roomjid which type} {
 	if {$reason ne ""} {
 	    lappend opts -reason $reason
 	}
-	eval {$jstate(jlib) muc $actionDefs($which,$type,cmd) $roomjid  \
+	eval {::Jabber::Jlib muc $actionDefs($which,$type,cmd) $roomjid  \
 	  $nick $actionDefs($which,$type,what)  \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
@@ -790,7 +782,6 @@ proc ::MUC::GrantRevoke {roomjid which type} {
 
 proc ::MUC::Kick {roomjid} {
     upvar [namespace current]::${roomjid}::locals locals
-    upvar ::Jabber::jstate jstate
     
     # Need selected line here. $item = numerical index.
     set wtbl $locals(wtbl)
@@ -814,14 +805,13 @@ proc ::MUC::Kick {roomjid} {
 	if {$reason ne ""} {
 	    lappend opts -reason $reason
 	}
-	eval {$jstate(jlib) muc setrole $roomjid $nick "none" \
+	eval {::Jabber::Jlib muc setrole $roomjid $nick "none" \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
 }
 
 proc ::MUC::Ban {roomjid} {
     upvar [namespace current]::${roomjid}::locals locals
-    upvar ::Jabber::jstate jstate
 
     # Need selected line here. $item = numerical index.
     set wtbl $locals(wtbl)
@@ -844,7 +834,7 @@ proc ::MUC::Ban {roomjid} {
 	if {$reason ne ""} {
 	    lappend opts -reason $reason
 	}
-	eval {$jstate(jlib) muc setaffiliation $roomjid $nick "outcast" \
+	eval {::Jabber::Jlib muc setaffiliation $roomjid $nick "outcast" \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
 }
@@ -868,7 +858,6 @@ namespace eval ::MUC:: {
 proc ::MUC::EditListBuild {roomjid type} {
     global this wDlgs
     
-    upvar ::Jabber::jstate jstate
     variable dlguid
     variable editcalluid
     variable setListDefs
@@ -903,7 +892,7 @@ proc ::MUC::EditListBuild {roomjid type} {
 
     set titleType [string totitle $type]
     set tblwidth [expr 10 + 12 * [llength $setListDefs($type)]]
-    set roomName [$jstate(jlib) disco name $roomjid]
+    set roomName [::Jabber::Jlib disco name $roomjid]
     if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }
@@ -1086,7 +1075,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     # Now, go and get it!
     $warrows start
     set state(callid) [incr editcalluid]
-    $jstate(jlib) muc $getact $roomjid $what \
+    ::Jabber::Jlib muc $getact $roomjid $what \
       [list [namespace current]::EditListGetCB $token $state(callid)]
     
     # Wait here for a button press.
@@ -1131,8 +1120,6 @@ proc ::MUC::EditListGetCB {token callid jlibname type subiq} {
     variable $token
     upvar 0 $token state
 
-    upvar ::Jabber::jstate jstate
-    
     # SInce we get this async we may have been already destroyed.
     if {![info exists state(w)]} {
 	return
@@ -1353,7 +1340,6 @@ proc ::MUC::EditListSet {token} {
     variable $token
     upvar 0 $token state
     variable setListDefs
-    upvar ::Jabber::jstate jstate
     
     tk_messageBox -icon error -title [mc Error] \
       -message [mc matsShouldReplaceThis]
@@ -1397,7 +1383,7 @@ proc ::MUC::EditListSet {token} {
 
     
     
-    eval {$jstate(jlib) muc $setact $roomjid xxx \
+    eval {::Jabber::Jlib muc $setact $roomjid xxx \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
 }
     
@@ -1418,7 +1404,6 @@ proc ::MUC::RoomConfig {roomjid} {
     variable wbtok
     variable dlguid
     upvar [namespace current]::${roomjid}::locals locals
-    upvar ::Jabber::jstate jstate
     
     set w $wDlgs(jmuccfg)[incr dlguid]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
@@ -1464,7 +1449,7 @@ proc ::MUC::RoomConfig {roomjid} {
         
     # Now, go and get it!
     $warrows start
-    $jstate(jlib) muc getroom $roomjid  \
+    ::Jabber::Jlib muc getroom $roomjid  \
       [list [namespace current]::ConfigGetCB $roomjid]
     
     # Grab and focus.
@@ -1493,9 +1478,8 @@ proc ::MUC::RoomConfigCloseHook {wclose} {
 
 proc ::MUC::CancelConfig {roomjid w} {
     upvar [namespace current]::${roomjid}::locals locals
-    upvar ::Jabber::jstate jstate
 
-    $jstate(jlib) muc setroom $roomjid cancel
+    ::Jabber::Jlib muc setroom $roomjid cancel
     destroy $w
 }
 
@@ -1506,7 +1490,6 @@ proc ::MUC::ConfigGetCB {roomjid jlibname type subiq} {
     variable wform
     variable formtoken
     upvar [namespace current]::${roomjid}::locals locals
-    upvar ::Jabber::jstate jstate
     
     if {![winfo exists $warrows]} {
 	return
@@ -1531,11 +1514,10 @@ proc ::MUC::DoRoomConfig {roomjid w} {
     variable wform
     variable formtoken
     upvar [namespace current]::${roomjid}::locals locals
-    upvar ::Jabber::jstate jstate
 
     set subelements [::JForms::GetXML $formtoken]
     
-    $jstate(jlib) muc setroom $roomjid submit -form $subelements \
+    ::Jabber::Jlib muc setroom $roomjid submit -form $subelements \
       -command [list [namespace current]::RoomConfigResult $roomjid]
     destroy $w
 }
@@ -1556,7 +1538,6 @@ proc ::MUC::RoomConfigResult {roomjid jlibname type subiq} {
 
 proc ::MUC::SetNick {roomjid} {
     variable locals
-    upvar ::Jabber::jstate jstate
         
     set title [mc {Set New Nickname}]
     set msg   [mc {Select a new nickname}]
@@ -1566,7 +1547,7 @@ proc ::MUC::SetNick {roomjid} {
     if {$ans ne ""} {
 	set nickname [ui::megaentrytext $ans]
 	if {$nickname ne ""} {
-	    $jstate(jlib) muc setnick $roomjid $nickname \
+	    ::Jabber::Jlib muc setnick $roomjid $nickname \
 	      -command [namespace current]::PresCallback
 	}
     }
@@ -1580,7 +1561,6 @@ namespace eval ::MUC:: {
 proc ::MUC::Destroy {roomjid} {
     global this wDlgs
     
-    upvar ::Jabber::jstate jstate
     variable findestroy -1
     variable destroyAltJID ""
     variable destroyRoomJID $roomjid
@@ -1592,7 +1572,7 @@ proc ::MUC::Destroy {roomjid} {
     ::UI::Toplevel $w \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::MUC::DestroyCloseCmd
-    set roomName [$jstate(jlib) disco name $roomjid]
+    set roomName [::Jabber::Jlib disco name $roomjid]
     if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }
@@ -1675,30 +1655,28 @@ proc ::MUC::Destroy {roomjid} {
     }
 
     if {$findestroy > 0} {
-	eval {$jstate(jlib) muc destroy $roomjid  \
+	eval {::Jabber::Jlib muc destroy $roomjid  \
 	  -command [list [namespace current]::IQCallback $roomjid]} $opts
     }
     return [expr {($findestroy <= 0) ? "cancel" : "ok"}]
 }
 
 proc ::MUC::DestroyBrowse {} {
-    upvar ::Jabber::jstate jstate
     variable destroyRoomJID
     
     jlib::splitjidex $destroyRoomJID - service -
-    $jstate(jlib) disco get_async items $service \
+    ::Jabber::Jlib disco get_async items $service \
       [namespace code DestroyBrowseCB]
 }
 
 proc ::MUC::DestroyBrowseCB {jlibname type jid subiq args} {
-    upvar ::Jabber::jstate jstate
     variable wdestroyjid
     variable destroyRoomJID
     variable destroyAltJID
   
     if {[winfo exists $wdestroyjid] && ($type eq "result")} {
 	jlib::splitjidex $destroyRoomJID - service -
-	set allRooms [$jstate(jlib) disco children $service]
+	set allRooms [::Jabber::Jlib disco children $service]
 	$wdestroyjid configure -values $allRooms
 	set destroyAltJID [lindex $allRooms 0]
     }    

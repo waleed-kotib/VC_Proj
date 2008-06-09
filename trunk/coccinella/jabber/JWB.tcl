@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It provides the glue between jabber and the whiteboard.
 #      
-#  Copyright (c) 2004-2007  Mats Bengtsson
+#  Copyright (c) 2004-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.97 2008-05-15 07:55:21 matben Exp $
+# $Id: JWB.tcl,v 1.98 2008-06-09 09:50:59 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -48,13 +48,12 @@ namespace eval ::JWB {
 proc ::JWB::Init {jlibName} {
     global  this prefs
     variable xmlns
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     upvar ::Jabber::xmppxmlns xmppxmlns
     
     ::Debug 4 "::JWB::Init"
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     ::hooks::register whiteboardPreBuildHook       ::JWB::PreBuildHook
     ::hooks::register whiteboardPostBuildHook      ::JWB::PostBuildHook
@@ -243,7 +242,6 @@ proc ::JWB::NewWhiteboard {args} {
 proc ::JWB::NewWhiteboardTo {jid args} {
     variable initted
     variable delayed
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::JWB::NewWhiteboardTo jid=$jid, args='$args'"
     
@@ -272,12 +270,12 @@ proc ::JWB::NewWhiteboardTo {jid args} {
     set jid [jlib::jidmap $jid]
     jlib::splitjid $jid jid2 res
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     set isRoom 0
     if {[string equal $argsA(-type) "groupchat"]} {
 	set isRoom 1
-    } elseif {[$jstate(jlib) service isroom $jid]} {
+    } elseif {[$jlib service isroom $jid]} {
 	set isRoom 1
     }
     set isUserInRoom 0
@@ -324,7 +322,9 @@ proc ::JWB::NewWhiteboardTo {jid args} {
 	if {[info exists argsA(-thread)]} {
 	    set thread $argsA(-thread)
 	} else {
-	    set thread [::sha1::sha1 "$jstate(mejid)[clock seconds]"]
+	    # Use uuid instead!
+	    set myjid [::Jabber::Jlib myjid]
+	    set thread [::sha1::sha1 "$myjid[clock seconds]"]
 	}
 	set name [$jlib roster getname $jid]
 	if {[string length $name]} {
@@ -425,7 +425,6 @@ proc ::JWB::EnterRoomHook {roomjid protocol} {
 
 proc ::JWB::BuildEntryHook {w wcomm} {
     variable jwbstate
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::JWB::BuildEntryHook wcomm=$wcomm"
 	
@@ -434,7 +433,7 @@ proc ::JWB::BuildEntryHook {w wcomm} {
     set iconResize [::Theme::FindIcon elements/sizegrip]
     
     # @@@ We should also require that users are coccinella...
-    set jidlist [$jstate(jlib) roster getusers -type available]
+    set jidlist [::Jabber::Jlib roster getusers -type available]
     
     set wframe $wcomm.f
     ttk::frame $wframe
@@ -808,11 +807,10 @@ proc ::JWB::SendArgs {w} {
 
 proc ::JWB::CheckIfOnline {w} {
     variable jwbstate
-    upvar ::Jabber::jstate jstate
 
     set isok 1
     if {[string equal $jwbstate($w,type) "chat"]} {
-	set isok [$jstate(jlib) roster isavailable $jwbstate($w,jid)]
+	set isok [::Jabber::Jlib roster isavailable $jwbstate($w,jid)]
 	if {!$isok} {
 	    ::UI::MessageBox -type ok -icon warning -parent $w \
 	      -message [mc jamesschatoffline2]
@@ -834,10 +832,9 @@ proc ::JWB::CheckIfOnline {w} {
 #       none.
 
 proc ::JWB::SendMessage {w jid msg args} {    
-    upvar ::Jabber::jstate jstate
     
     set xlist [CanvasCmdListToMessageXElement $w [list $msg]]
-    eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
+    eval {::Jabber::Jlib send_message $jid -xlist $xlist} $args
 }
 
 # JWB::SendMessageList --
@@ -845,10 +842,9 @@ proc ::JWB::SendMessage {w jid msg args} {
 #       As above but for a list of commands.
 
 proc ::JWB::SendMessageList {w jid msgList args} {
-    upvar ::Jabber::jstate jstate
     
     set xlist [CanvasCmdListToMessageXElement $w $msgList]
-    eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
+    eval {::Jabber::Jlib send_message $jid -xlist $xlist} $args
 }
 
 # JWB::SendRawMessageList --
@@ -856,7 +852,6 @@ proc ::JWB::SendMessageList {w jid msgList args} {
 #       Handles any prefixed canvas command using the "raw" protocol.
 
 proc ::JWB::SendRawMessageList {jid msgList args} {
-    upvar ::Jabber::jstate jstate
  
     # Form an <x xmlns='coccinella:wb'><raw> element in message.
     set subx [list]
@@ -865,7 +860,7 @@ proc ::JWB::SendRawMessageList {jid msgList args} {
     }
     set xlist [list [wrapper::createtag x -attrlist  \
       {xmlns coccinella:wb} -subtags $subx]]
-    eval {$jstate(jlib) send_message $jid -xlist $xlist} $args
+    eval {::Jabber::Jlib send_message $jid -xlist $xlist} $args
 }
 
 # JWB::CanvasCmdListToMessageXElement --
@@ -878,9 +873,9 @@ proc ::JWB::SendRawMessageList {jid msgList args} {
 #                   no CANVAS:
 
 proc ::JWB::CanvasCmdListToMessageXElement {w cmdList} {
+    global jprefs
     variable xmlns
     variable ampElem
-    upvar ::Jabber::jprefs jprefs
     
     if {$jprefs(useSVGT)} {
 	
@@ -972,14 +967,13 @@ proc ::JWB::SVGImageImportElem {w cmd args} {
 proc ::JWB::DoSendCanvas {w} {
     global  prefs
     variable jwbstate
-    upvar ::Jabber::jstate jstate
 
     set jid $jwbstate($w,jid)
 
     if {[jlib::jidvalidate $jid]} {
 		
 	# If user not online no files may be sent off.
-	if {![$jstate(jlib) roster isavailable $jid]} {
+	if {![::Jabber::Jlib roster isavailable $jid]} {
 	    set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
 	      -message [mc jamesswarnsendcanoff2 $jid]]
 	    if {$ans eq "no"} {
@@ -1054,12 +1048,12 @@ proc ::JWB::PutFileHook {w fileName opts} {
     } else {
 	
 	# If 'tojid' is without a resource, it can be a room.
-	if {[$jstate(jlib) service isroom $tojid]} {
+	if {[::Jabber::Jlib service isroom $tojid]} {
 	    set isRoom 1
-	    set allJid3 [$jstate(jlib) service roomparticipants $tojid]
+	    set allJid3 [::Jabber::Jlib service roomparticipants $tojid]
 	    
 	    # Exclude ourselves.
-	    set nick [$jstate(jlib) service mynick $tojid]
+	    set nick [::Jabber::Jlib service mynick $tojid]
 	    set meRoomJid $tojid/$nick
 	    set ind [lsearch $allJid3 $meRoomJid]
 	    if {$ind >= 0} {
@@ -1071,7 +1065,7 @@ proc ::JWB::PutFileHook {w fileName opts} {
 	} else {
 	    
 	    # Else put to resource with highest priority.
-	    set res [$jstate(jlib) roster gethighestresource $tojid]
+	    set res [::Jabber::Jlib roster gethighestresource $tojid]
 	    if {$res eq ""} {
 		
 		# This is someone we haven't got presence from.
@@ -1092,7 +1086,7 @@ proc ::JWB::PutFileHook {w fileName opts} {
 	if {$isRoom} {
 	    set avail 1
 	} else {
-	    set avail [$jstate(jlib) roster isavailable $jid3]
+	    set avail [::Jabber::Jlib roster isavailable $jid3]
 	}
 	set mjid3 [jlib::jidmap $jid3]
 	
@@ -1141,7 +1135,6 @@ proc ::JWB::PutFileHook {w fileName opts} {
 proc ::JWB::PutFile {w fileName mime opts jid} {
     global  prefs
     variable ipCache
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::JWB::PutFile: fileName=$fileName, opts='$opts', jid=$jid"
 
@@ -1415,7 +1408,6 @@ proc ::JWB::GetSVGWBMessageList {w xlist} {
 
 proc ::JWB::SVGImageHandlerEx {w imageE opts} {
     variable jwbstate
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
     
     Debug 4 "::JWB::SVGImageHandlerEx imageE=$imageE, opts=$opts"
@@ -1565,10 +1557,9 @@ proc ::JWB::SVGImageStreamCmd {w jlib sid status {err ""}} {
 
 proc ::JWB::SVGImageStreamFree {w} {
     variable jwbstate
-    upvar ::Jabber::jstate jstate
 
     foreach {key sid} [array get jwbstate $w,sid,*] {
-	$jstate(jlib) filetransfer treset $sid
+	::Jabber::Jlib filetransfer treset $sid
 	::timing::free $sid
 	::Import::ObjectFree $sid
 	unset -nocomplain jwbstate($w,sid,$sid)
@@ -1595,7 +1586,6 @@ proc ::JWB::SVGForeignObjectHandler {w xmllist paropts transformL args} {
 
 proc ::JWB::SVGHttpHandler {w cmd} {
     variable jwbstate
-    upvar ::Jabber::jstate jstate
         
     # Design the import line.
     # import 226.0 104.0 -http ... -below */117748804 -tags */117748801
@@ -1609,8 +1599,9 @@ proc ::JWB::SVGHttpHandler {w cmd} {
     # THIS IS NOT A 3-tier JID!!!!!
     set jid3 $jwbstate($w,jid)
 
-    if {[$jstate(jlib) roster isavailable $jid3] || \
-      [jlib::jidequal $jid3 $jstate(mejidres)]} {
+    set myjid [::Jabber::Jlib myjid]
+    if {[::Jabber::Jlib roster isavailable $jid3] || \
+      [jlib::jidequal $jid3 $myjid]} {
 	set tryimport 1
     }
     
@@ -1715,7 +1706,6 @@ proc ::JWB::RegisterHandlerHook {prefix cmd} {
 #       args        -from, -to, -type, -thread, -x,...
 
 proc ::JWB::ChatMsg {cmdList args} {    
-    upvar ::Jabber::jstate jstate
 
     array set argsA $args
     ::Debug 2 "::JWB::ChatMsg args='$args'"
@@ -1731,7 +1721,6 @@ proc ::JWB::ChatMsg {cmdList args} {
 }
 
 proc ::JWB::GroupchatMsg {cmdList args} {    
-    upvar ::Jabber::jstate jstate
 
     array set argsA $args
     ::Debug 2 "::JWB::GroupchatMsg args='$args'"
@@ -1814,7 +1803,6 @@ proc ::JWB::GetIPnumber {jid {cmd {}}} {
 #       Any registered callback proc is eval'ed.
 
 proc ::JWB::GetIPCallback {jid id ip} {    
-    upvar ::Jabber::jstate jstate
     variable ipCache
 
     ::Debug 2 "::JWB::GetIPCallback: jid=$jid, id=$id, ip=$ip"
@@ -1842,12 +1830,11 @@ proc ::JWB::PutIPnumber {jid id} {
 
 proc ::JWB::GetCoccinellaServers {jid3 {cmd {}}} {
     variable ipCache
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     
     set mjid3 [jlib::jidmap $jid3]
     set ipCache(req,$mjid3) 1
-    $jstate(jlib) iq_get $coccixmlns(servers) -to $jid3  \
+    ::Jabber::Jlib iq_get $coccixmlns(servers) -to $jid3  \
       -command [list ::JWB::GetCoccinellaServersCallback $jid3 $cmd]
 }
 
@@ -1880,7 +1867,6 @@ proc ::JWB::GetCoccinellaServersCallback {jid3 cmd jlibname type subiq} {
 
 proc ::JWB::PresenceHook {jid type args} {
     variable ipCache
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     
     ::Debug 2 "::JWB::PresenceHook jid=$jid, type=$type"
@@ -1901,7 +1887,7 @@ proc ::JWB::PresenceHook {jid type args} {
 	    
 	    # Starting with 0.95.1 we send server info along the initial 
 	    # presence element.
-	    set coccielem [$jstate(jlib) roster getextras $mjid $coccixmlns(servers)]
+	    set coccielem [::Jabber::Jlib roster getextras $mjid $coccixmlns(servers)]
 	    if {$coccielem != {}} {
 		set ipElements [wrapper::getchildswithtag $coccielem ip]
 		set ip [wrapper::getcdata [lindex $ipElements 0]]

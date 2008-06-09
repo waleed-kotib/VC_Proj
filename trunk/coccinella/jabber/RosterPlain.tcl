@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements a plain style roster tree using treectrl.
 #      
-#  Copyright (c) 2005-2007  Mats Bengtsson
+#  Copyright (c) 2005-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterPlain.tcl,v 1.51 2008-05-27 14:17:23 matben Exp $
+# $Id: RosterPlain.tcl,v 1.52 2008-06-09 09:51:00 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -354,8 +354,8 @@ proc ::RosterPlain::SetJIDState {mjid state} {
 #       It starts by removing all content.
 
 proc ::RosterPlain::Init {} {
+    global jprefs
     variable T
-    upvar ::Jabber::jprefs jprefs
     
     $T item delete all
     ::RosterTree::FreeTags
@@ -530,9 +530,8 @@ proc ::RosterPlain::DeleteItem {jid} {
 }
 
 proc ::RosterPlain::CreateItemFromJID {jid} {    
-    upvar ::Jabber::jstate jstate
 
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     jlib::splitjid $jid jid2 res
     set pres [$jlib roster getpresence $jid2 -resource $res]
     set rost [$jlib roster getrosteritem $jid2]
@@ -673,13 +672,12 @@ proc ::RosterPlain::TreeConfigureHook {args} {
 
 proc ::RosterPlain::DiscoInfoHook {type from subiq args} {
     variable rosterStyle
-    upvar ::Jabber::jstate jstate
     
     if {[::RosterTree::GetStyle] ne $rosterStyle} {
 	return
     }
     if {$type ne "error"} {
-	set types [$jstate(jlib) disco types $from]
+	set types [::Jabber::Jlib disco types $from]
 	
 	# Only the gateways have custom icons.
 	if {[lsearch -glob $types gateway/*] >= 0} {

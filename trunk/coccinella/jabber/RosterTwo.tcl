@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTwo.tcl,v 1.29 2008-05-27 08:03:56 matben Exp $
+# $Id: RosterTwo.tcl,v 1.30 2008-06-09 09:51:00 matben Exp $
 
 package require RosterTree
 
@@ -111,8 +111,8 @@ proc ::RosterTwo::Configure {_T} {
 #       It starts by removing all content.
 
 proc ::RosterTwo::Init { } {
+    global jprefs
     variable T
-    upvar ::Jabber::jprefs jprefs
 	
     $T item delete all
     ::RosterTree::FreeTags
@@ -135,8 +135,8 @@ proc ::RosterTwo::Init { } {
 proc ::RosterTwo::Delete { } { }
 
 proc ::RosterTwo::CreateHeadItem {type} {
+    global jprefs
     variable T
-    upvar ::Jabber::jprefs jprefs
     
     set tag [list head $type]
     set text [::RosterTree::MCHead $type]
@@ -168,9 +168,8 @@ proc ::RosterTwo::CreateHeadItem {type} {
 #       treectrl item.
 
 proc ::RosterTwo::CreateItem {jid presence args} {    
+    global jprefs
     variable T
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
 
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
@@ -187,7 +186,7 @@ proc ::RosterTwo::CreateItem {jid presence args} {
     set jid2 [jlib::barejid $jid]
     set mjid [jlib::jidmap $jid]
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     # Defaults:
     set name [$jlib roster getname $jid2]
@@ -320,9 +319,8 @@ proc ::RosterTwo::DeleteItem {jid} {
 }
 
 proc ::RosterTwo::CreateItemFromJID {jid} {    
-    upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     jlib::splitjid $jid jid2 res
     set pres [$jlib roster getpresence $jid2 -resource $res]
     set rost [$jlib roster getrosteritem $jid2]
@@ -394,13 +392,12 @@ proc ::RosterTwo::TreeConfigureHook {args} {
 #
 
 proc ::RosterTwo::DiscoInfoHook {type from subiq args} {
-    upvar ::Jabber::jstate jstate
     
     if {[::RosterTree::GetStyle] ne "two"} {
 	return
     }
     if {$type ne "error"} {
-	set types [$jstate(jlib) disco types $from]
+	set types [::Jabber::Jlib disco types $from]
 	
 	# Only the gateways have custom icons.
 	if {[lsearch -glob $types gateway/*] >= 0} {

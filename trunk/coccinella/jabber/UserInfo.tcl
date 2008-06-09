@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.36 2008-03-29 07:08:41 matben Exp $
+# $Id: UserInfo.tcl,v 1.37 2008-06-09 09:51:00 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -55,7 +55,6 @@ proc ::UserInfo::GetJIDList {jidL} {
 proc ::UserInfo::Get {jid {node ""}} {
     global  wDlgs config
     variable uid
-    upvar ::Jabber::jstate jstate
    
     # Keep a separate instance specific namespace for each request.
     set token [namespace current]::[incr uid]
@@ -76,7 +75,7 @@ proc ::UserInfo::Get {jid {node ""}} {
     set priv(ncount)  0
     set priv(erruid)  0
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     if {[$jlib roster isitem $jid2]} {
 	set priv(type) "user"
     } else {

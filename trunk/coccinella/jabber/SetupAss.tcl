@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.55 2008-06-07 10:41:29 matben Exp $
+# $Id: SetupAss.tcl,v 1.56 2008-06-09 09:51:00 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -49,8 +49,7 @@ namespace eval ::SetupAss::  {
 }
 
 proc ::SetupAss::SetupAss {} {
-    global  this prefs wDlgs config
-    upvar ::Jabber::jprefs jprefs
+    global  this prefs wDlgs config jprefs
     
     variable finished
     variable inited

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.149 2008-06-08 14:20:32 matben Exp $
+# $Id: Login.tcl,v 1.150 2008-06-09 09:50:59 matben Exp $
 
 package provide Login 1.0
 
@@ -70,7 +70,7 @@ namespace eval ::Login:: {
 #       none
 
 proc ::Login::Dlg {} {
-    global  this prefs config wDlgs
+    global  this prefs config wDlgs jprefs
     
     variable wtoplevel
     variable finished -1
@@ -90,7 +90,6 @@ proc ::Login::Dlg {} {
     
     # @@@ TODO: move widget names to 'widgets' array.
     variable widgets
-    upvar ::Jabber::jprefs jprefs
     
     # Singleton.
     set w $wDlgs(jlogin)
@@ -432,10 +431,9 @@ proc ::Login::Close {w} {
 
 proc ::Login::Reset {} {
     variable pending
-    upvar ::Jabber::jstate jstate
 
     set pending 0
-    $jstate(jlib) connect reset
+    ::Jabber::Jlib connect reset
 
     ::JUI::SetStatusMessage ""
     ::JUI::FixUIWhen "disconnect"
@@ -447,7 +445,7 @@ proc ::Login::Reset {} {
 #       Starts the login process.
 
 proc ::Login::DoLogin {} {
-    global  prefs config
+    global  prefs config jprefs
 
     variable wtoplevel
     variable finished
@@ -459,8 +457,6 @@ proc ::Login::DoLogin {} {
     variable jid
     variable moreOpts
     variable widgets
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Login::DoLogin"
     
@@ -617,7 +613,7 @@ proc ::Login::LoginCallback {token {errcode ""} {errmsg ""}} {
 #       Command line options have higher priority than user settings.
 
 proc ::Login::LaunchHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     if {![ParseCommandLine]} {
 	if {$jprefs(autoLogin)} {
@@ -765,11 +761,9 @@ proc ::Login::AutoLoginCB {token {errcode ""} {errmsg ""}} {
 #       token
 
 proc ::Login::HighLogin {server username resource password cmd args} {
-    global  config
+    global  config jprefs
     variable pending
     variable uid
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
         
     ::Debug 2 "::Login::HighLogin args=$args"
         
@@ -799,7 +793,7 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     
     set jid [jlib::joinjid $username $server $resource]
     set cb [list ::Login::HighLoginCB $token]
-    eval {$jstate(jlib) connect connect $jid $password -command $cb} $args
+    eval {::Jabber::Jlib connect connect $jid $password -command $cb} $args
     
     return $token
 }
@@ -830,14 +824,13 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
     
     variable $token
     upvar 0 $token highstate
-    upvar ::Jabber::jstate jstate    
     variable pending
     
     set pending 0
 
     switch -- $status {
 	ok {
-	    set server [$jstate(jlib) getserver]
+	    set server [::Jabber::Jlib getserver]
 	    set msg [mc jaauthok2 $server] 
 	    ::JUI::FixUIWhen "connectfin"
 	    ::JUI::SetConnectState "connectfin"
@@ -859,7 +852,7 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
 
     # Free all.
     unset highstate
-    $jstate(jlib) connect free
+    ::Jabber::Jlib connect free
 }
 
 proc ::Login::Pending {} {
@@ -886,11 +879,10 @@ proc ::Login::SetStatus {args} {
 }
 
 proc ::Login::GetErrorStr {errcode {errmsg ""}} {
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Login::GetErrorStr errcode=$errcode, errmsg=$errmsg"
 
-    array set state [jlib::connect::get_state $jstate(jlib)]
+    array set state [jlib::connect::get_state [::Jabber::GetJlib]]
     set str ""
 	
     switch -glob -- $errcode {
@@ -956,7 +948,6 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 
 proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
     global  config
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Login::HandleErrorCode errcode=$errcode, errmsg=$errmsg"
     
@@ -964,7 +955,7 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
 	return
     }
 
-    array set state [$jstate(jlib) connect get_state]
+    array set state [::Jabber::Jlib connect get_state]
     set str [GetErrorStr $errcode $errmsg]
     set type ok
     set default ok
@@ -988,7 +979,7 @@ proc ::Login::SetLoginStateRunHook {} {
    
     ::Debug 2 "::Login::SetLoginStateRunHook"
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     # @@@ There is a lot of duplicates here. Remove! Keep in jabberlib only!
     set ip [$jlib getip]

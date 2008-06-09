@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Privacy.tcl,v 1.22 2008-03-30 10:00:42 matben Exp $
+# $Id: Privacy.tcl,v 1.23 2008-06-09 09:51:00 matben Exp $
 
 package provide Privacy 1.0
 
@@ -52,7 +52,7 @@ namespace eval ::Privacy:: {
 # Prefs Page ...................................................................
 
 proc ::Privacy::InitPrefsHook { } {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     # Defaults... Server stored!
 
@@ -68,7 +68,7 @@ proc ::Privacy::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::Privacy::BuildPrefsPage {page} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable statmsg
     variable wtable
     variable wbts
@@ -343,11 +343,10 @@ proc ::Privacy::ActiveCmd { } {
 }
     
 proc ::Privacy::GetLists { } {
-    upvar ::Jabber::jstate jstate
     variable warrows
 
     $warrows start
-    $jstate(jlib) iq_get jabber:iq:privacy -command [namespace current]::GetListsCB
+    ::Jabber::Jlib iq_get jabber:iq:privacy -command [namespace current]::GetListsCB
 }
 
 proc ::Privacy::GetListsCB {jlibname type subiq args} {
@@ -452,13 +451,12 @@ proc ::Privacy::Save { } {
 proc ::Privacy::DelList { } {
     variable selected
     variable warrows
-    upvar ::Jabber::jstate jstate
     
     if {$selected != ""} {
 	$warrows start
 	set subtags [list [wrapper::createtag "list" -attrlist [list name $selected]]]
 	
-	$jstate(jlib) iq_set "jabber:iq:privacy" -sublists $subtags \
+	::Jabber::Jlib iq_set "jabber:iq:privacy" -sublists $subtags \
 	  -command [list [namespace current]::DelListCB $selected]
     }
 }
@@ -485,7 +483,6 @@ proc ::Privacy::DelListCB {name jlibname type subiq args} {
 }
 
 proc ::Privacy::SetActiveDefaultList {which name} {
-    upvar ::Jabber::jstate jstate
     
     # name may be empty which means the active list should be unset.
     if {$name == ""} {
@@ -493,7 +490,7 @@ proc ::Privacy::SetActiveDefaultList {which name} {
     } else {
 	set subtags [list [wrapper::createtag $which -attrlist [list name $name]]]
     }
-    $jstate(jlib) iq_set "jabber:iq:privacy" -sublists $subtags \
+    ::Jabber::Jlib iq_set "jabber:iq:privacy" -sublists $subtags \
       -command [namespace current]::SetListCB
 }
 
@@ -558,11 +555,10 @@ namespace eval ::Privacy::List:: {
 
 proc ::Privacy::List::GetList {name} {
     upvar ::Privacy::statmsg statmsg
-    upvar ::Jabber::jstate jstate
         
     set statmsg [mc prefprivgetlist $name]
     set subtags [list [wrapper::createtag "item"  -attrlist [list name $name]]]    
-    $jstate(jlib) iq_get "jabber:iq:privacy" -sublists $subtags \
+    ::Jabber::Jlib iq_get "jabber:iq:privacy" -sublists $subtags \
       -command [list [namespace current]::GetListCB $name]
 }
 
@@ -741,7 +737,6 @@ proc ::Privacy::List::Build { } {
 proc ::Privacy::List::Set {token} {    
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     upvar ::Privacy::warrows warrows
     upvar ::Privacy::statmsg statmsg
     upvar ::Privacy::wtable wtable
@@ -753,7 +748,7 @@ proc ::Privacy::List::Set {token} {
     }
     $warrows start
     set statmsg "Setting filter list \"$state(name)\""
-    $jstate(jlib) iq_set "jabber:iq:privacy" -sublists [list $xmllist] \
+    ::Jabber::Jlib iq_set "jabber:iq:privacy" -sublists [list $xmllist] \
       -command [list [namespace current]::SetListCB $state(name)]
     
     destroy $state(w)

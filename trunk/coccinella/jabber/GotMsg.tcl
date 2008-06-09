@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements a dialog for jabber messages.
 #      
-#  Copyright (c) 2002-2007  Mats Bengtsson
+#  Copyright (c) 2002-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GotMsg.tcl,v 1.58 2008-06-07 06:50:38 matben Exp $
+# $Id: GotMsg.tcl,v 1.59 2008-06-09 09:50:59 matben Exp $
 
 package provide GotMsg 1.0
 
@@ -48,7 +48,7 @@ proc ::GotMsg::QuitAppHook {} {
 
 # @@@ Enable this when solved the uidmsg vs. uuid mixup.
 proc ::GotMsg::MessageHook {xmldata uuid} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 
     set body   [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
     if {$jprefs(showMsgNewWin) && ($body ne "")} {
@@ -90,7 +90,7 @@ proc ::GotMsg::GotMsg {uid} {
 #       Fills in all entries etc in message window.
 
 proc ::GotMsg::Show {thisMsgId} {
-    global  prefs
+    global  prefs jprefs
     
     variable w
     variable msgIdDisplay
@@ -105,8 +105,6 @@ proc ::GotMsg::Show {thisMsgId} {
     variable wpresence
     variable body
     variable date
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::GotMsg::Show thisMsgId=$thisMsgId"
     
@@ -122,7 +120,7 @@ proc ::GotMsg::Show {thisMsgId} {
     # Split jid into jid2 and resource.
     jlib::splitjid $jid jid2 res
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     # Use nick name.
     set rname [$jlib roster getname $jid2]
@@ -132,7 +130,8 @@ proc ::GotMsg::Show {thisMsgId} {
     } else {
 	set username $ujid
     }
-    if {[jlib::jidequal $jid $jstate(mejidres)]} {
+    set myjid [::Jabber::Jlib myjid]
+    if {[jlib::jidequal $jid $myjid]} {
 	set show [::Jabber::GetMyStatus]
     } else {
 	if {$res eq ""} {
@@ -177,7 +176,7 @@ proc ::GotMsg::Show {thisMsgId} {
 #       shows window.
 
 proc ::GotMsg::Build {} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs jprefs
 
     variable w
     variable finished 
@@ -193,8 +192,6 @@ proc ::GotMsg::Build {} {
     variable wbtnext
     variable wpresence
     variable locals
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::GotMsg::Build"
 
@@ -239,7 +236,7 @@ proc ::GotMsg::Build {} {
 
     ttk::checkbutton $wbox.ch -style Small.TCheckbutton \
       -text [mc jainmsgshow] \
-      -variable ::Jabber::jprefs(showMsgNewWin)
+      -variable jprefs(showMsgNewWin)
     pack  $wbox.ch  -side bottom -anchor w -pady 4
     
     # From, subject, and time fields.

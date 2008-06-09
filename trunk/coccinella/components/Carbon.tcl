@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Carbon.tcl,v 1.16 2008-04-30 06:25:57 matben Exp $
+# $Id: Carbon.tcl,v 1.17 2008-06-09 09:50:59 matben Exp $
 # 
 # @@@ Move the sleep stuff to something more generic.
 
@@ -102,7 +102,7 @@ proc ::Carbon::QuitHook {} {
 }
 
 proc ::Carbon::Sleep {type} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable wasSleepLoggedOut
     
     switch -- $type {
@@ -128,16 +128,16 @@ proc ::Carbon::Sleep {type} {
 }
 
 proc ::Carbon::InitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 
     set jprefs(sleeplogout)  0
     set jprefs(sleeplogin)   0
     set jprefs(sleeploutmsg) ""
     
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(sleeplogout)  jprefs_sleeplogout   $jprefs(sleeplogout)]  \
-      [list ::Jabber::jprefs(sleeplogin)   jprefs_sleeplogin    $jprefs(sleeplogin)]  \
-      [list ::Jabber::jprefs(sleeploutmsg) jprefs_sleeploutmsg  $jprefs(sleeploutmsg)]  \
+      [list jprefs(sleeplogout)  jprefs_sleeplogout   $jprefs(sleeplogout)]  \
+      [list jprefs(sleeplogin)   jprefs_sleeplogin    $jprefs(sleeplogin)]  \
+      [list jprefs(sleeploutmsg) jprefs_sleeploutmsg  $jprefs(sleeploutmsg)]  \
       ]
     
     variable allKeys {sleeplogout  sleeplogin  sleeploutmsg}
@@ -153,7 +153,7 @@ proc ::Carbon::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::Carbon::BuildPage {page} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmp
     variable allKeys
     
@@ -215,13 +215,13 @@ proc ::Carbon::SetEntryState {winL varName} {
 }
 
 proc ::Carbon::SavePrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmp	
     array set jprefs [array get tmp]
 }
 
 proc ::Carbon::CancelPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmp
 	
     foreach key [array names tmp] {
@@ -233,7 +233,7 @@ proc ::Carbon::CancelPrefsHook {} {
 }
 
 proc ::Carbon::UserDefaultsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmp
 	
     foreach key [array names tmp] {

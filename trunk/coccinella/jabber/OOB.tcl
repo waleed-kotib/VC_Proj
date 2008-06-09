@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: OOB.tcl,v 1.64 2008-02-06 13:57:25 matben Exp $
+# $Id: OOB.tcl,v 1.65 2008-06-09 09:51:00 matben Exp $
 
 # NOTE: Parts if this code is obsolete (the send part) but the receiving
 #       part is still retained for backwards compatibility.
@@ -27,7 +27,7 @@ package require uriencode
 
 package provide OOB 1.0
 
-namespace eval ::OOB:: {
+namespace eval ::OOB {
 
     ::hooks::register jabberInitHook      ::OOB::InitJabberHook
 
@@ -37,10 +37,9 @@ namespace eval ::OOB:: {
 }
 
 proc ::OOB::InitJabberHook {jlibname} {
-    upvar ::Jabber::jstate jstate
     
     # Be sure to handle incoming requestes (iq set elements).
-    $jstate(jlib) iq_register set jabber:iq:oob     ::OOB::ParseSet
+    ::Jabber::Jlib iq_register set jabber:iq:oob     ::OOB::ParseSet
 }
 
 # OOB::ParseSet --

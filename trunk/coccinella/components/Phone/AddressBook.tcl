@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: AddressBook.tcl,v 1.14 2008-05-15 14:14:56 matben Exp $
+# $Id: AddressBook.tcl,v 1.15 2008-06-09 09:50:59 matben Exp $
 
 namespace eval ::AddressBook { 
 
@@ -118,14 +118,13 @@ proc ::AddressBook::NewPage {} {
 #       w
 
 proc ::AddressBook::Build {w args} {
-    global  prefs this
+    global  prefs this jprefs
 
     variable waddressbook
     variable wtree
     variable wwave
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jprefs jprefs
     variable abline
 
     ::Debug 2 "::AddressBook::Build w=$w"

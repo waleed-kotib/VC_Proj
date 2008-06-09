@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Create.tcl,v 1.20 2008-04-21 09:38:49 matben Exp $
+# $Id: Create.tcl,v 1.21 2008-06-09 09:50:59 matben Exp $
 
 package provide Create 1.0
 
@@ -38,11 +38,9 @@ namespace eval ::Create:: {
 #       "cancel" or "create".
      
 proc ::Create::Build {args} {
-    global  this wDlgs
+    global  this wDlgs jprefs
     
     variable uid
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Create::Build args='$args'"
     array set argsA $args
@@ -78,7 +76,7 @@ proc ::Create::Build {args} {
     set state(w)              $w
     set state(wraplength)     330
         
-    set confServers [$jstate(jlib) disco getconferences]
+    set confServers [::Jabber::Jlib disco getconferences]
     if {$confServers eq {}} {
 	set serviceList [list [mc "not available"]]
     } else {
@@ -245,11 +243,10 @@ proc ::Create::TraceCreateState {token name junk1 junk2} {
 proc ::Create::SetState {token} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
      
     # @@@ This SHALL be checked earlier!!!
-    set muc [$jstate(jlib) disco hasfeature $xmppxmlns(muc) $state(server)]
+    set muc [::Jabber::Jlib disco hasfeature $xmppxmlns(muc) $state(server)]
     set state(usemuc) $muc
     if {$muc} {
 	if {($state(roomname) eq "") || ($state(nickname) eq "")} {
@@ -286,14 +283,13 @@ proc ::Create::Cancel {token} {
     global  wDlgs
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     
     # No jidmap since may not be valid.
     # Is this according to MUC?
     set node [jlib::escapestr $state(roomname)]
     set roomjid [jlib::jidmap $node@$state(server)]
     if {$roomjid ne ""} {
-	catch {$jstate(jlib) muc setroom $roomjid cancel}
+	catch {::Jabber::Jlib muc setroom $roomjid cancel}
     }
     ::UI::SaveWinGeom $wDlgs(jcreateroom) $state(w)
     set state(finished) 0
@@ -307,11 +303,10 @@ proc ::Create::Cancel {token} {
 proc ::Create::Get {token} {    
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
 
     set state(usemuc)  \
-      [$jstate(jlib) disco hasfeature $xmppxmlns(muc) $state(server)]
+      [::Jabber::Jlib disco hasfeature $xmppxmlns(muc) $state(server)]
     
     # Verify:
     if {$state(server) eq ""} {
@@ -351,7 +346,6 @@ proc ::Create::Get {token} {
 proc ::Create::SendGet {token} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
     
     ::Debug 2 "::Create::SendGet usemuc=$state(usemuc)"
@@ -371,7 +365,7 @@ proc ::Create::SendGet {token} {
 	#     
 	# Thus the "Get" operation takes two steps.
 
-	$jstate(jlib) muc create $roomjid $state(nickname)  \
+	::Jabber::Jlib muc create $roomjid $state(nickname)  \
 	  [list [namespace current]::CreateMUCCB $token]
 
 	# Design a simplified xmldata for the history.
@@ -401,7 +395,6 @@ proc ::Create::SendGet {token} {
 proc ::Create::CreateMUCCB {token jlibname xmldata} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Create::CreateMUCCB"
     
@@ -444,7 +437,7 @@ proc ::Create::CreateMUCCB {token jlibname xmldata} {
     if {![info exists argsA(-created)]} {
     
     }
-    $jstate(jlib) muc getroom $state(roomjid)  \
+    ::Jabber::Jlib muc getroom $state(roomjid)  \
       [list [namespace current]::GetFormCB $token]
 }
 
@@ -455,8 +448,6 @@ proc ::Create::CreateMUCCB {token jlibname xmldata} {
 proc ::Create::GetFormCB {token jlibName type subiq} {    
     variable $token
     upvar 0 $token state
-    
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Create::GetFormCB type=$type"
     
@@ -506,8 +497,6 @@ proc ::Create::SetRoom {token} {
     variable $token
     upvar 0 $token state
 
-    upvar ::Jabber::jstate jstate
-    
     ::Debug 2 "::Create::SetRoom"
 
     $state(wsearrows) stop
@@ -530,7 +519,7 @@ proc ::Create::SetRoom {token} {
     }
     
     # Ask jabberlib to create the room for us.
-    $jstate(jlib) muc setroom $roomjid submit -form $subelements \
+    ::Jabber::Jlib muc setroom $roomjid submit -form $subelements \
       -command [list [namespace current]::SetRoomCB $state(usemuc) $roomjid]
     
     # This triggers the tkwait, and destroys the create dialog.
@@ -540,7 +529,6 @@ proc ::Create::SetRoom {token} {
 }
 
 proc ::Create::SetRoomCB {usemuc roomjid jlibName type subiq} { 
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Create::SetRoomCB"
     
@@ -571,13 +559,11 @@ proc ::Create::SetRoomCB {usemuc roomjid jlibName type subiq} {
 #       "cancel" or "enter".
      
 proc ::Create::GCBuild {args} {
-    global  this wDlgs
+    global  this wDlgs jprefs
 
     variable uid
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
 
-    set chatservers [$jstate(jlib) disco getconferences]
+    set chatservers [::Jabber::Jlib disco getconferences]
     ::Debug 2 "::Create::GCBuild chatservers=$chatservers args='$args'"
     
     if {0 && $chatservers == {}} {
@@ -721,8 +707,6 @@ proc ::Create::GCDoEnter {token} {
     variable $token
     upvar 0 $token enter
 
-    upvar ::Jabber::jstate jstate
-    
     # Verify the fields first.
     if {($enter(server) eq "") || ($enter(roomname) eq "") ||  \
       ($enter(nickname) eq "")} {
@@ -734,7 +718,7 @@ proc ::Create::GCDoEnter {token} {
     set node [jlib::escapestr $enter(roomname)]
     set roomjid [jlib::jidmap [jlib::joinjid $node $enter(server) ""]]
     set roomjid [jlib::jidmap $roomjid]
-    $jstate(jlib) groupchat enter $roomjid $enter(nickname) \
+    ::Jabber::Jlib groupchat enter $roomjid $enter(nickname) \
       -command [namespace current]::EnterCallback
 
     set enter(finished) 1

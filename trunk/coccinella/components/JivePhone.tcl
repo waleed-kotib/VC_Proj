@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: JivePhone.tcl,v 1.36 2008-05-27 08:03:55 matben Exp $
+# $Id: JivePhone.tcl,v 1.37 2008-06-09 09:50:59 matben Exp $
 
 # My notes on the present "Phone Integration Proto-JEP" document from
 # Jive Software:
@@ -643,14 +643,13 @@ proc ::JivePhone::NewPage {} {
 #       w
 
 proc ::JivePhone::Build {w args} {
-    global  prefs this
+    global  prefs this jprefs
 
     variable waddressbook
     variable wtree
     variable wwave
     upvar ::Jabber::jstate jstate
     upvar ::Jabber::jserver jserver
-    upvar ::Jabber::jprefs jprefs
     variable abline
 
     ::Debug 2 "::JivePhone::Build w=$w"

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MailBox.tcl,v 1.144 2008-06-07 06:50:38 matben Exp $
+# $Id: MailBox.tcl,v 1.145 2008-06-09 09:50:59 matben Exp $
 
 # There are two versions of the mailbox file, 1 and 2. Only version 2 is 
 # described here.
@@ -135,27 +135,26 @@ proc ::MailBox::Init {} {
 }
 
 proc ::MailBox::InitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
         
     set jprefs(mailbox,dialog) 0
     
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(mailbox,dialog)  jprefs_mailbox_dialog  $jprefs(mailbox,dialog)]  \
+      [list jprefs(mailbox,dialog)  jprefs_mailbox_dialog  $jprefs(mailbox,dialog)]  \
       ]
 }
 
 proc ::MailBox::InitHandler {jlibName} {
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     variable xmlns
     
     # Register for the whiteboard messages we want. Duplicate protocols.
     if {[::Jabber::HaveWhiteboard]} {
-	$jstate(jlib) message_register normal coccinella:wb  \
+	::Jabber::Jlib message_register normal coccinella:wb  \
 	  [namespace current]::HandleRawWBMessage
-	$jstate(jlib) message_register normal $coccixmlns(whiteboard)  \
+	::Jabber::Jlib message_register normal $coccixmlns(whiteboard)  \
 	  [namespace current]::HandleRawWBMessage
-	$jstate(jlib) message_register normal $xmlns(svg) \
+	::Jabber::Jlib message_register normal $xmlns(svg) \
 	  [namespace current]::HandleSVGWBMessage
     }
 }
@@ -173,12 +172,11 @@ proc ::MailBox::InitHandler {jlibName} {
 #       updates UI.
 
 proc ::MailBox::MessageHook {xmldata uuid} {
-    global  prefs
+    global  prefs jprefs
 
     variable locals
     variable mailbox
     variable uidmsg
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 4 "::MailBox::MessageHook"
 
@@ -381,7 +379,7 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns xmldata args} {
 }
 
 proc ::MailBox::LaunchHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     if {$jprefs(rememberDialogs) && $jprefs(mailbox,dialog)} {
 	ShowHide -visible 1
@@ -411,7 +409,6 @@ proc ::MailBox::IsVisible {} {
 
 proc ::MailBox::ShowHide {args} {
     global wDlgs
-    upvar ::Jabber::jstate jstate
     variable locals  
 
     array set argsA $args
@@ -444,12 +441,10 @@ proc ::MailBox::ShowHide {args} {
 #       Creates the inbox window.
 
 proc ::MailBox::Build {args} {
-    global  this prefs wDlgs config
+    global  this prefs wDlgs config jprefs
     
     variable locals  
     variable mailbox
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::MailBox::Build args='$args'"
 
@@ -1274,15 +1269,15 @@ proc ::MailBox::GetAnySVGElements {row} {
 
 proc ::MailBox::DisplayWhiteboardFile {jid3 fileName} {
     global  prefs this wDlgs
-    upvar ::Jabber::jstate jstate
     
     jlib::splitjid $jid3 jid2 res
     set w [MakeWhiteboard $jid2]
     
     # Only if user available shall we try to import.
     set tryimport 0
-    if {[$jstate(jlib) roster isavailable $jid3] || \
-      [jlib::jidequal $jid3 $jstate(mejidres)]} {
+    set myjid [::Jabber::Jlib myjid]
+    if {[::Jabber::Jlib roster isavailable $jid3] || \
+      [jlib::jidequal $jid3 $myjid]} {
 	set tryimport 1
     }
 	    
@@ -1304,7 +1299,6 @@ proc ::MailBox::DisplayXElementSVG {jid3 xlist} {
     global  prefs wDlgs
 
     variable mailbox
-    upvar ::Jabber::jstate jstate
     ::Debug 2 "::MailBox::DisplayXElementSVG jid3=$jid3"
     
     set jid2 [jlib::barejid $jid3]    
@@ -1312,8 +1306,9 @@ proc ::MailBox::DisplayXElementSVG {jid3 xlist} {
     
     # Only if user available shall we try to import.
     set tryimport 0
-    if {[$jstate(jlib) roster isavailable $jid3] || \
-      [jlib::jidequal $jid3 $jstate(mejidres)]} {
+    set myjid [::Jabber::Jlib myjid]
+    if {[::Jabber::Jlib roster isavailable $jid3] || \
+      [jlib::jidequal $jid3 $myjid]} {
 	set tryimport 1
     }
 
@@ -1379,8 +1374,8 @@ proc ::MailBox::OnDestroyWhiteboard {w} {
 }
 
 proc ::MailBox::DoubleClickMsg {T} {
+    global jprefs
     variable locals
-    upvar ::Jabber::jprefs jprefs
         
     if {[$T selection count] != 1} {
 	return
@@ -1512,7 +1507,6 @@ proc ::MailBox::ReplyTo {} {
     variable locals
     variable mailbox
     variable mailboxindex
-    upvar ::Jabber::jstate jstate
     
     set T $locals(wtbl)
     if {[$T selection count] != 1} {
@@ -1889,8 +1883,7 @@ proc ::MailBox::PrefsFilePathHook {} {
 }
 
 proc ::MailBox::QuitHook {} {
-    global wDlgs
-    upvar ::Jabber::jprefs jprefs
+    global wDlgs jprefs
     variable locals
     
     if {[winfo exists $wDlgs(jinbox)] && [winfo ismapped $wDlgs(jinbox)]} {

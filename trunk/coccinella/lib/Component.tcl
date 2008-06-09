@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Component.tcl,v 1.5 2008-05-05 14:22:28 matben Exp $
+# $Id: Component.tcl,v 1.6 2008-06-09 09:51:01 matben Exp $
    
 package require component
 
@@ -31,11 +31,10 @@ namespace eval ::Component {
 }
 
 proc ::Component::Load {} {
-    global  this
-    upvar ::Jabber::jprefs jprefs
+    global  this jprefs
     
     # Since we are so early in the launch process we do it this way.
-    set offL [::PrefUtils::GetValue ::Jabber::jprefs(comp,off)  jprefs_comp_off {}]
+    set offL [::PrefUtils::GetValue jprefs(comp,off)  jprefs_comp_off {}]
     set jprefs(comp,off) $offL
     
     component::exclude $offL
@@ -44,15 +43,14 @@ proc ::Component::Load {} {
 }
 
 proc ::Component::InitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(comp,off)  jprefs_comp_off  $jprefs(comp,off)] ]
+      [list jprefs(comp,off)  jprefs_comp_off  $jprefs(comp,off)] ]
 }
 
 proc ::Component::Dlg {} {
-    global  prefs this wDlgs
-    upvar ::Jabber::jprefs jprefs
+    global  prefs this wDlgs jprefs
     variable state
     
     # Check first of there are *any* components.
@@ -142,8 +140,8 @@ proc ::Component::Dlg {} {
 }
 
 proc ::Component::OK {w} {
+    global jprefs
     variable state
-    upvar ::Jabber::jprefs jprefs
     
     set offL [list]
     foreach {name value} [array get state] {

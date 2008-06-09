@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: PrefUtils.tcl,v 1.16 2008-05-14 14:05:35 matben Exp $
+# $Id: PrefUtils.tcl,v 1.17 2008-06-09 09:51:01 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -326,12 +326,11 @@ proc ::PrefUtils::ResetToUserDefaults {} {
 #       Process command line options for preferences.
 
 proc ::PrefUtils::ParseCommandLineOptions {cargv} {
-    global  prefs argvArr
+    global  prefs argvArr jprefs
     
     if {![llength $cargv]} {
 	return
     }
-    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
     # Skip anything that does not start with "-".

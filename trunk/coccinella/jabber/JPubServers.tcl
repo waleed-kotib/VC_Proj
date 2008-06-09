@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPubServers.tcl,v 1.7 2008-03-29 07:08:41 matben Exp $
+# $Id: JPubServers.tcl,v 1.8 2008-06-09 09:50:59 matben Exp $
 
 package require chasearrows
 package require httpex
@@ -41,7 +41,7 @@ proc ::JPubServers::New {{command ""}} {
 }
 
 proc ::JPubServers::Build {w {command ""}} {
-    global  this prefs
+    global  this prefs jprefs
 
     ::Debug 2 "::JPubServers::Build w=$w"
     
@@ -126,7 +126,7 @@ proc ::JPubServers::Build {w {command ""}} {
     }
 
     # HTTP get xml list of servers.
-    set url $::Jabber::jprefs(urlServersList)
+    set url $jprefs(urlServersList)
     if {[catch {
 	::httpex::get $url  \
 	  -progress [list [namespace current]::HttpProgress $w] \

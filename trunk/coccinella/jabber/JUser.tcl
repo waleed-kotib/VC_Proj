@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.67 2008-05-29 08:04:09 matben Exp $
+# $Id: JUser.tcl,v 1.68 2008-06-09 09:50:59 matben Exp $
 
 package provide JUser 1.0
 
@@ -77,7 +77,6 @@ proc ::JUser::NewDlg {args} {
     global  this prefs wDlgs config
 
     variable uid
-    upvar ::Jabber::jstate jstate
     
     # Initialize the state variable, an array.    
     set token [namespace current]::dlg[incr uid]
@@ -101,7 +100,7 @@ proc ::JUser::NewDlg {args} {
     }
 
     # Find all our groups for any jid.
-    set allGroups [$jstate(jlib) roster getgroups]
+    set allGroups [::Jabber::Jlib roster getgroups]
     set groupValues [concat [list [mc None]] $allGroups]
     
     # Design the menu.
@@ -266,9 +265,8 @@ proc ::JUser::DoAdd {token} {
     global  wDlgs config
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     # We MUST use the bare JID else hell breaks lose.
     set state(jid) [jlib::barejid $state(jid)]
@@ -387,7 +385,6 @@ proc ::JUser::SetCB {jid type queryE} {
 #       Callback when sending presence to user for (un)subscription requests.
 
 proc ::JUser::PresError {jlibname xmldata} {
-    upvar ::Jabber::jstate jstate
     
     set from [wrapper::getattribute $xmldata from]
     set type [wrapper::getattribute $xmldata type]
@@ -406,7 +403,7 @@ proc ::JUser::PresError {jlibname xmldata} {
 	    set ans [::UI::MessageBox -icon error -title [mc Error] -type yesno \
 	      -message $str]
 	    if {$ans eq "yes"} {
-		$jstate(jlib) roster send_remove $from
+		::Jabber::Jlib roster send_remove $from
 	    }
 	}
     }
@@ -430,7 +427,6 @@ proc ::JUser::TrptMultiCmd {token gjid} {
     global  config
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
 	
     set wjid $state(wjid)
     set type $state(servicetype,$gjid)
@@ -449,12 +445,13 @@ proc ::JUser::TrptMultiCmd {token gjid} {
     #         have a resource part: icq.jabber.cz/registered
     #         Must find any matches!
     
-    set rjid [$jstate(jlib) roster getrosterjid $gjid]
+    set rjid [::Jabber::Jlib roster getrosterjid $gjid]
     set isitem [string length $rjid]
     
     set alert 0
     if {$type eq "xmpp"} {
-	if {![jlib::jidequal $gjid $jstate(server)]} {
+	set server [::Jabber::Jlib getserver]
+	if {![jlib::jidequal $gjid $server]} {
 	    set alert 1
 	}
     } elseif {!$isitem} {
@@ -485,7 +482,6 @@ proc ::JUser::TrptSingleCmd {token gjid} {
     global  config
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
 	
     set wjid $state(wjid)
     set type $state(servicetype,$gjid)
@@ -495,18 +491,19 @@ proc ::JUser::TrptSingleCmd {token gjid} {
     set state(jid) [::Gateway::GetPrompt $type]
     $wjid selection range 0 end
  	
-    set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
+    set jidL [::Jabber::Jlib disco getjidsforcategory "gateway/$type"]
    
     set alert 0
     if {$type eq "xmpp"} {
-	if {![jlib::jidequal $gjid $jstate(server)]} {
+	set server [::Jabber::Jlib getserver]
+	if {![jlib::jidequal $gjid $server]} {
 	    set alert 1
 	}
     } else {
 	set count [llength $jidL]
 	set isregistered 0
 	foreach j $jidL {
-	    set rjid [$jstate(jlib) roster getrosterjid $j]
+	    set rjid [::Jabber::Jlib roster getrosterjid $j]
 	    set isitem [string length $rjid]
 	    if {$isitem} {
 		set isregistered 1
@@ -566,9 +563,8 @@ proc ::JUser::EditDlg {jid} {
 }
 
 proc ::JUser::EditTransportDlg {jid} {
-    upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     # We get jid2 here. For transports we need the full jid!
     set res [lindex [$jlib roster getresources $jid] 0]
@@ -615,7 +611,6 @@ proc ::JUser::EditUserDlg {jid} {
     global  this prefs wDlgs
 
     variable uid
-    upvar ::Jabber::jstate jstate
     
     # Guarantee only single dialog per JID.
     if {[llength [set token [EditGetTokenForJID $jid]]]} {
@@ -653,7 +648,7 @@ proc ::JUser::EditUserDlg {jid} {
     set im  [::Theme::Find32Icon $w adduserImage]
     set imd [::Theme::Find32Icon $w adduserDisImage]
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     # Find all our groups for any jid.
     set allGroups [$jlib roster getgroups]
@@ -839,7 +834,6 @@ proc ::JUser::DoEdit {token} {
     global  wDlgs
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
 
     set jid         $state(jid)
     set name        $state(name)
@@ -874,7 +868,7 @@ proc ::JUser::DoEdit {token} {
 	lappend opts -groups $groups
 	set haveGroup 1
     }
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     if {$haveName || $haveGroup} {
 	set cb [list [namespace code SetCB] $jid]

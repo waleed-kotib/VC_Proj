@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FilePrefs.tcl,v 1.22 2008-05-15 07:55:21 matben Exp $
+# $Id: FilePrefs.tcl,v 1.23 2008-06-09 09:51:04 matben Exp $
 
 package provide FilePrefs 1.0
 
@@ -55,7 +55,7 @@ namespace eval ::FilePrefs {
 }
 
 proc ::FilePrefs::InitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     # Defaults... Set in Types and Plugins.
     

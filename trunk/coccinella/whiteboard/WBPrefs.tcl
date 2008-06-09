@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: WBPrefs.tcl,v 1.18 2008-05-15 07:55:21 matben Exp $
+# $Id: WBPrefs.tcl,v 1.19 2008-06-09 09:51:04 matben Exp $
 
 package provide WBPrefs 1.0
 
@@ -36,8 +36,7 @@ namespace eval ::WBPrefs:: {
 }
 
 proc ::WBPrefs::InitPrefsHook {} {
-    global  prefs
-    upvar ::Jabber::jprefs jprefs
+    global  prefs jprefs
     
     # Whiteboard scrollregion.
     set prefs(canScrollWidth)     1800

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Subscribe.tcl,v 1.77 2008-05-15 14:14:57 matben Exp $
+# $Id: Subscribe.tcl,v 1.78 2008-06-09 09:51:00 matben Exp $
 
 package provide Subscribe 1.0
 
@@ -179,11 +179,9 @@ proc ::Subscribe::ExecQueue {} {
 #       widgetPath
 
 proc ::Subscribe::NewDlg {jid args} {
-    global  this prefs wDlgs config
+    global  this prefs wDlgs config jprefs
 
     variable uid
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Subscribe::NewDlg jid=$jid"
     
@@ -216,7 +214,7 @@ proc ::Subscribe::NewDlg {jid args} {
 	::UI::SetWindowPosition $w $wDlgs(jsubsc)
     }
   
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     # Find all our groups for any jid.
     set allGroups [$jlib roster getgroups]
@@ -485,10 +483,9 @@ proc ::Subscribe::Pause {w} {
 }
 
 proc ::Subscribe::GetDisplayName {jid} {
-    upvar ::Jabber::jstate jstate
     
     set name ""
-    set nickE [$jstate(jlib) roster getextras $jid "http://jabber.org/protocol/nick"]
+    set nickE [::Jabber::Jlib roster getextras $jid "http://jabber.org/protocol/nick"]
     if {[llength $nickE]} {
 	set name [wrapper::getcdata $nickE]
     }
@@ -506,17 +503,16 @@ proc ::Subscribe::Deny {w} {
     global  wDlgs
     variable $w
     upvar 0 $w state
-    upvar ::Jabber::jstate jstate
 
     # Deny presence to this user.
-    $jstate(jlib) send_presence -to $state(jid) -type "unsubscribed"
+    ::Jabber::Jlib send_presence -to $state(jid) -type "unsubscribed"
     
     # This doesn't work with ejabberd!
     # http://www.xmpp.org/rfcs/rfc3921.html#int-sub-alt :
     # Note: If the contact's server previously added the user to the contact's
     # roster for tracking purposes, it MUST remove the relevant item at this time.
 
-    $jstate(jlib) roster send_remove $state(jid)
+    ::Jabber::Jlib roster send_remove $state(jid)
     
     ::UI::SaveWinPrefixGeom $wDlgs(jsubsc)
     set state(finished) 0
@@ -546,9 +542,8 @@ proc ::Subscribe::Accept {w} {
 #       Generic way to handle a subscription acception.
 
 proc ::Subscribe::Subscribe {jid name group} {
-    upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     set subscription [$jlib roster getsubscription $jid]
   
     switch -- $subscription none - from {
@@ -643,8 +638,7 @@ namespace eval ::SubscribeAuto {
 #       Dispatches an auto-accept request to the configured dialog if any.
 
 proc ::SubscribeAuto::HandleAccept {jid} {
-    global  config
-    upvar ::Jabber::jprefs jprefs
+    global  config jprefs
 
     # Was: config(subscribe,auto-accept-std-dlg)
     if {$jprefs(subsc,timer)} {
@@ -678,8 +672,7 @@ proc ::SubscribeAuto::HandleAccept {jid} {
 #       Dispatches an auto-reject request to the configured dialog if any.
 
 proc ::SubscribeAuto::HandleReject {jid} {
-    global  config
-    upvar ::Jabber::jprefs jprefs
+    global  config jprefs
 
     # Was: config(subscribe,auto-reject-std-dlg)
     if {$jprefs(subsc,timer)} {
@@ -835,8 +828,7 @@ proc ::SubscribeAuto::AcceptTimer {w jid secs} {
 }
 
 proc ::SubscribeAuto::AcceptCmd {jid w button} {
-    global  config
-    upvar ::Jabber::jprefs jprefs
+    global  config jprefs
     
     if {$button eq "accept" || $button eq ""} {
 	::Jabber::Jlib send_presence -to $jid -type "subscribed"
@@ -857,10 +849,9 @@ proc ::SubscribeAuto::AcceptCmd {jid w button} {
 #       we have no previous subscription to.
 
 proc ::SubscribeAuto::SendSubscribe {jid} {
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     set subscription [$jlib roster getsubscription $jid]
 
     switch -- $subscription none - from {
@@ -970,11 +961,9 @@ namespace eval ::SubscribeMulti {
 #       widgetPath
 
 proc ::SubscribeMulti::NewDlg {args} {
-    global  this prefs wDlgs config
+    global  this prefs wDlgs config jprefs
 
     variable uid
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::SubscribeMulti::NewDlg"
  
@@ -1002,7 +991,7 @@ proc ::SubscribeMulti::NewDlg {args} {
     wm title $w [mc "Presence Subscription"]  
     #wm withdraw $w
   
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     # In order to do the "auto" states we keep a list of widgets that shall
     # not be disabled.
@@ -1217,7 +1206,6 @@ proc ::SubscribeMulti::AddJID {w jid} {
     global  config
     variable $w
     upvar 0 $w state
-    upvar ::Jabber::jstate jstate
 
     set token [namespace current]::$w
 
@@ -1226,8 +1214,8 @@ proc ::SubscribeMulti::AddJID {w jid} {
     incr state(nusers)
     $state(label) configure -text [mc jasubmulti $state(nusers)]
     
-    set name   [$jstate(jlib) roster getname $jid]
-    set groups [$jstate(jlib) roster getgroups $jid]
+    set name   [::Jabber::Jlib roster getname $jid]
+    set groups [::Jabber::Jlib roster getgroups $jid]
     set group [lindex $groups 0]
 
     lassign [grid size $f] columns rows
@@ -1343,9 +1331,8 @@ proc ::SubscribeMulti::GetContent {w} {
 proc ::SubscribeMulti::Accept {w} {
     variable $w
     upvar 0 $w state
-    upvar ::Jabber::jstate jstate
 
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     foreach line [GetContent $w] {
 	set jid [lindex $line 0]
@@ -1582,7 +1569,7 @@ if {0} {
 # Prefs page ...................................................................
 
 proc ::Subscribe::InitPrefsHook { } {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     # Defaults...
     set jprefs(subsc,inrost)        ask
@@ -1593,12 +1580,12 @@ proc ::Subscribe::InitPrefsHook { } {
     set jprefs(subsc,timer-secs)    10
 	
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(subsc,inrost)     jprefs_subsc_inrost      $jprefs(subsc,inrost)]  \
-      [list ::Jabber::jprefs(subsc,notinrost)  jprefs_subsc_notinrost   $jprefs(subsc,notinrost)]  \
-      [list ::Jabber::jprefs(subsc,auto)       jprefs_subsc_auto        $jprefs(subsc,auto)]  \
-      [list ::Jabber::jprefs(subsc,group)      jprefs_subsc_group       $jprefs(subsc,group)]  \
-      [list ::Jabber::jprefs(subsc,timer)      jprefs_subsc_timer       $jprefs(subsc,timer)]  \
-      [list ::Jabber::jprefs(subsc,timer-secs) jprefs_subsc_timer-secs  $jprefs(subsc,timer-secs)]  \
+      [list jprefs(subsc,inrost)     jprefs_subsc_inrost      $jprefs(subsc,inrost)]  \
+      [list jprefs(subsc,notinrost)  jprefs_subsc_notinrost   $jprefs(subsc,notinrost)]  \
+      [list jprefs(subsc,auto)       jprefs_subsc_auto        $jprefs(subsc,auto)]  \
+      [list jprefs(subsc,group)      jprefs_subsc_group       $jprefs(subsc,group)]  \
+      [list jprefs(subsc,timer)      jprefs_subsc_timer       $jprefs(subsc,timer)]  \
+      [list jprefs(subsc,timer-secs) jprefs_subsc_timer-secs  $jprefs(subsc,timer-secs)]  \
       ]
     
 }
@@ -1613,7 +1600,7 @@ proc ::Subscribe::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::Subscribe::BuildPageSubscriptions {page} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpp
     
     foreach key {inrost notinrost auto group timer timer-secs} {
@@ -1739,7 +1726,7 @@ proc ::Subscribe::ValidSecs {s} {
 }
 
 proc ::Subscribe::SavePrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpp
     
     array set jprefs [array get tmpp]
@@ -1747,7 +1734,7 @@ proc ::Subscribe::SavePrefsHook {} {
 }
 
 proc ::Subscribe::CancelPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpp
 	
     foreach key [array names tmpp] {
@@ -1759,7 +1746,7 @@ proc ::Subscribe::CancelPrefsHook {} {
 }
 
 proc ::Subscribe::UserDefaultsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpp
 	
     foreach key [array names tmpp] {

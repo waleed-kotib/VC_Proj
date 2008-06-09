@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.252 2008-06-08 14:09:36 matben Exp $
+# $Id: JUI.tcl,v 1.253 2008-06-09 09:50:59 matben Exp $
 
 package provide JUI 1.0
 
@@ -279,10 +279,9 @@ proc ::JUI::Init {} {
 #       $w
 
 proc ::JUI::Build {w} {
-    global  this prefs config
+    global  this prefs config jprefs
     
     upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     variable menuBarDef
     variable menuDefs
     variable jwapp
@@ -508,7 +507,7 @@ proc ::JUI::Build {w} {
 }
 
 proc ::JUI::BuildStatusMB {win} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     set infoType $jprefs(ui,main,InfoType)
    
@@ -519,24 +518,24 @@ proc ::JUI::BuildStatusMB {win} {
     menu $m -tearoff 0
     $m add radiobutton -value mejid    -label [mc "My JID"]      \
       -command ::JUI::StatusMBCmd \
-      -variable ::Jabber::jprefs(ui,main,InfoType)
+      -variable ::jprefs(ui,main,InfoType)
     $m add radiobutton -value mejidres -label [mc "My Full JID"] \
       -command ::JUI::StatusMBCmd \
-      -variable ::Jabber::jprefs(ui,main,InfoType)
+      -variable ::jprefs(ui,main,InfoType)
     $m add radiobutton -value server   -label [mc "Host Name"]   \
       -command ::JUI::StatusMBCmd \
-      -variable ::Jabber::jprefs(ui,main,InfoType)
+      -variable ::jprefs(ui,main,InfoType)
     $m add radiobutton -value status   -label [mc "My Status"]   \
       -command ::JUI::StatusMBCmd \
-      -variable ::Jabber::jprefs(ui,main,InfoType)
+      -variable ::jprefs(ui,main,InfoType)
     
     $win configure -menu $m
     return $win
 }
 
 proc ::JUI::StatusMBCmd {} {
+    global jprefs
     variable jwapp
-    upvar ::Jabber::jprefs jprefs
     
     set infoType $jprefs(ui,main,InfoType)
     $jwapp(myjid) configure -textvariable ::Jabber::jstate($infoType)
@@ -610,7 +609,7 @@ proc ::JUI::CombiBoxLoginHook {} {
     if {![winfo exists $combiBox(w)]} {
 	return
     }
-    set myjid [$jstate(jlib) myjid]
+    set myjid [::Jabber::Jlib myjid]
     set ujid [jlib::unescapestr [jlib::barejid $myjid]]
     set wnick $combiBox(wnick)
     $wnick configure -text $ujid
@@ -654,7 +653,7 @@ proc ::JUI::CombiBoxNicknameHook {nickname} {
 	return
     }
     if {$nickname eq ""} {
-	set myjid [$jstate(jlib) myjid]
+	set myjid [::Jabber::Jlib myjid]
 	set ujid [jlib::unescapestr [jlib::barejid $myjid]]
 	$combiBox(wnick) configure -text $ujid
     } else {
@@ -981,8 +980,8 @@ proc ::JUI::SetToolbarButtonState {name state} {
 }
 
 proc ::JUI::RosterMoveFromPage {} {
+    global jprefs
     variable jwapp
-    upvar ::Jabber::jprefs jprefs
     
     set wnb     $jwapp(notebook)
     set wroster $jwapp(roster)
@@ -996,8 +995,8 @@ proc ::JUI::RosterMoveFromPage {} {
 }
 
 proc ::JUI::RosterMoveToPage {} {
+    global jprefs
     variable jwapp
-    upvar ::Jabber::jprefs jprefs
     
     set wnb     $jwapp(notebook)
     set wroster $jwapp(roster)
@@ -1031,8 +1030,8 @@ proc ::JUI::OnMenuToggleToolbar {} {
 }
 
 proc ::JUI::HideToolbar {} {
+    global jprefs
     variable jwapp
-    upvar ::Jabber::jprefs jprefs
     
     pack forget $jwapp(wtbar)
     pack forget $jwapp(tsep)
@@ -1040,8 +1039,8 @@ proc ::JUI::HideToolbar {} {
 }
 
 proc ::JUI::ShowToolbar {} {
+    global jprefs
     variable jwapp
-    upvar ::Jabber::jprefs jprefs
     
     pack $jwapp(wtbar) -side top -fill x
     if {[winfo ismapped $jwapp(notebook)]} {
@@ -1675,20 +1674,19 @@ proc ::JUI::FixUIWhen {what} {
 }
 
 proc ::JUI::InitPrefsHook {} {
-    global  config
-    upvar ::Jabber::jprefs jprefs
+    global  config jprefs
 
     set jprefs(ui,main,show,toolbar)  1
     set jprefs(ui,main,show,notebook) 1
     
     set plist [list]
     foreach key {toolbar notebook} {
-	set name ::Jabber::jprefs(ui,main,show,$key)
+ 	set name jprefs(ui,main,show,$key)
 	set rsrc jprefs_ui_main_show_$key
 	set val  [set $name]
 	lappend plist [list $name $rsrc $val]
     }
-    set name ::Jabber::jprefs(ui,main,InfoType)
+    set name jprefs(ui,main,InfoType)
     set rsrc jprefs_ui_main_infoType
     set val  $config(ui,main,infoType)
     lappend plist [list $name $rsrc $val]

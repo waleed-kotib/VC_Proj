@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.36 2008-05-15 14:14:57 matben Exp $
+# $Id: FTrans.tcl,v 1.37 2008-06-09 09:50:59 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -55,19 +55,18 @@ proc ::FTrans::JabberInitHook {jlib} {
 }
 
 proc ::FTrans::InitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 	
     set jprefs(bytestreams,port) 8237
     
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(bytestreams,port) jprefs_bytestreams_port $jprefs(bytestreams,port)]  \
+      [list jprefs(bytestreams,port) jprefs_bytestreams_port $jprefs(bytestreams,port)]  \
       ]    
 }
 
 proc ::FTrans::DiscoHook {type from queryE args} {
-    upvar ::Jabber::jstate jstate
     
-    $jstate(jlib) bytestreams get_proxy $from \
+    ::Jabber::Jlib bytestreams get_proxy $from \
       [namespace code [list GetProxyCB $from]]
 }
 
@@ -88,21 +87,18 @@ proc ::FTrans::GetProxyCB {from jlib type queryE} {
 }
 
 proc ::FTrans::LogoutHook {} {
-    upvar ::Jabber::jstate jstate
     
-    $jstate(jlib) bytestreams configure -proxyhost ""
+    ::Jabber::Jlib bytestreams configure -proxyhost ""
 }
 
 proc ::FTrans::BytestreamsConfigure {} {
-    global  prefs
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
+    global  prefs jprefs
         
     set opts [list -port $jprefs(bytestreams,port)]
     if {$prefs(setNATip) && ($prefs(NATip) ne "")} {
 	lappend opts -address $prefs(NATip)
     }
-    eval {$jstate(jlib) bytestreams configure} $opts
+    eval {::Jabber::Jlib bytestreams configure} $opts
 }
 
 proc ::FTrans::MD5 {fileName} {
@@ -355,10 +351,9 @@ snit::widget ::FTrans::SendDialog {
 proc ::FTrans::Nop {args} {}
 
 proc ::FTrans::SendJIDList {jidL} {
-    upvar ::Jabber::jstate jstate
     
     foreach jid $jidL {
-	if {[$jstate(jlib) roster isavailable $jid]} {
+	if {[::Jabber::Jlib roster isavailable $jid]} {
 	    Send $jid
 	}
     }
@@ -369,9 +364,8 @@ proc ::FTrans::SendJIDList {jidL} {
 #       Initiator function. Must be 3-tier jid.
 
 proc ::FTrans::Send {jid args} {
-    upvar ::Jabber::jstate jstate
     
-    if {[$jstate(jlib) disco isdiscoed info $jid]} {
+    if {[::Jabber::Jlib disco isdiscoed info $jid]} {
 	set feature [DiscoGetFeature $jid]
 	if {$feature eq ""} {
 	    ui::dialog -type ok -icon error -title [mc Error] \
@@ -384,7 +378,7 @@ proc ::FTrans::Send {jid args} {
 	$w state disabled
 	$w status "[mc jawaitdisco]..."
 	set cb [list [namespace current]::DiscoCB $w]
-	$jstate(jlib) disco get_async info $jid $cb
+	::Jabber::Jlib disco get_async info $jid $cb
     }
 }
 
@@ -423,11 +417,10 @@ proc ::FTrans::DiscoCB {w jlibname type jid subiq} {
 
 proc ::FTrans::DiscoGetFeature {jid} {
     upvar ::Jabber::xmppxmlns xmppxmlns
-    upvar ::Jabber::jstate jstate
     
-    if {[$jstate(jlib) disco hasfeature $xmppxmlns(file-transfer) $jid]} {
+    if {[::Jabber::Jlib disco hasfeature $xmppxmlns(file-transfer) $jid]} {
 	return $xmppxmlns(file-transfer)
-    } elseif {[$jstate(jlib) disco hasfeature $xmppxmlns(oob) $jid]} {
+    } elseif {[::Jabber::Jlib disco hasfeature $xmppxmlns(oob) $jid]} {
 	return $xmppxmlns(oob)
     } else {
 	return
@@ -440,7 +433,6 @@ proc ::FTrans::DiscoGetFeature {jid} {
 
 proc ::FTrans::DoSend {win jid fileName desc} {
     upvar ::Jabber::xmppxmlns xmppxmlns
-    upvar ::Jabber::jstate jstate
     
     set fileName [string trim $fileName]
         
@@ -473,7 +465,7 @@ proc ::FTrans::DoSend {win jid fileName desc} {
 	# Do this each time since we may have changed proxy settings.
 	BytestreamsConfigure
 	set sendCB [namespace current]::SendCommand
-	eval {$jstate(jlib) filetransfer send $jid $sendCB -file $fileName} $opts
+	eval {::Jabber::Jlib filetransfer send $jid $sendCB -file $fileName} $opts
     } else {
 	
 	# Different options for oob!
@@ -483,7 +475,7 @@ proc ::FTrans::DoSend {win jid fileName desc} {
 	    lappend opts -desc $desc
 	}
 	set sendCB [list [namespace current]::SendCommandOOB $fileName $jid]
-	eval {$jstate(jlib) oob_set $jid $sendCB $url} $opts
+	eval {::Jabber::Jlib oob_set $jid $sendCB $url} $opts
     }
 }
 

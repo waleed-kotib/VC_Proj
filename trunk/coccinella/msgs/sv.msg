@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.146 2008-06-08 14:09:37 matben Exp $
+#   $Id: sv.msg,v 1.147 2008-06-09 09:51:01 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -352,7 +352,7 @@
 ::msgcat::mcset sv mHistory...           {Historik...}
 ::msgcat::mcset sv mHorizontal           {Horisontellt}
 ::msgcat::mcset sv mHugeFont             {Jättestor}
-::msgcat::mcset sv mIconSet...           {Ikonsammling...}
+::msgcat::mcset sv mIconSet...           {Ikonsamling...}
 ::msgcat::mcset sv mIgnore               {Ignorera}
 ::msgcat::mcset sv mImageLarger          {Förstora bilden}
 ::msgcat::mcset sv mImageSmaller         {Förminska bilden}
@@ -611,7 +611,7 @@
 ::msgcat::mcset sv {Show Text and Icon}  {Visa text och ikon}
 ::msgcat::mcset sv {Show transports}     {Visa transporter}
 ::msgcat::mcset sv {Smooth freehand strokes} {Utjämna pendrag}
-::msgcat::mcset sv {Sound set}           {Ljudsammling}
+::msgcat::mcset sv {Sound set}           {Ljudsamling}
 ::msgcat::mcset sv {Start chat}          {Starta chatt}
 ::msgcat::mcset sv {Start minimized in system tray} {Starta minimerad i aktivitetslistan}
 ::msgcat::mcset sv {Start minimized in taskbar} {Starta minimerad i aktivitetslistan}

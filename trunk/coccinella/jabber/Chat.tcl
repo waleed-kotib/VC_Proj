@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.297 2008-06-08 14:09:36 matben Exp $
+# $Id: Chat.tcl,v 1.298 2008-06-09 09:50:59 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -292,12 +292,10 @@ proc ::Chat::StartThreadJIDList {jidL} {
 #       updates UI.
 
 proc ::Chat::StartThreadDlg {args} {
-    global  prefs this wDlgs config
+    global  prefs this wDlgs config jprefs
 
     variable finished -1
     variable user
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Chat::StartThreadDlg args='$args'"
 
@@ -400,7 +398,6 @@ proc ::Chat::DoCancel {w} {
 proc ::Chat::DoStart {w} {
     variable finished
     variable user
-    upvar ::Jabber::jstate jstate
     
     set ans yes
     
@@ -414,7 +411,7 @@ proc ::Chat::DoStart {w} {
     }    
     
     # If we have got a full JID warn if not available.
-    if {[jlib::isfulljid $jid] && ![$jstate(jlib) roster isavailable $jid]} {
+    if {[jlib::isfulljid $jid] && ![::Jabber::Jlib roster isavailable $jid]} {
 # 	set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
 # 	  -default no -message "The user you intend chatting with,\
 # 	  \"$user\", is not online, and this chat makes no sense.\
@@ -443,11 +440,8 @@ proc ::Chat::DoStart {w} {
 #       chattoken
 
 proc ::Chat::StartThread {jid args} {
-    global  config
+    global  config jprefs
 
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
-    
     ::Debug 2 "::Chat::StartThread jid=$jid, args=$args"
     
     array set argsA $args
@@ -506,7 +500,6 @@ proc ::Chat::StartThread {jid args} {
 #       chattoken
 
 proc ::Chat::NewChat {threadID jid args} {
-    upvar ::Jabber::jprefs jprefs
 
     array set argsA $args    
     
@@ -569,11 +562,8 @@ proc ::Chat::ProcessMessageArgs {chattoken args} {
 #       updates UI.
 
 proc ::Chat::GotMsg {xmldata} {
-    global  prefs config
+    global  prefs config jprefs
 
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-    
     ::Debug 2 "::Chat::GotMsg"
     
     # -from is a 3-tier jid /resource included.
@@ -748,8 +738,7 @@ proc ::Chat::GotMsg {xmldata} {
 #       Treats a 'normal' message as a chat message.
 
 proc ::Chat::GotNormalMsg {xmldata uuid} {
-    global  prefs
-    upvar ::Jabber::jprefs jprefs
+    global  prefs jprefs
         
     set body [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata body]]
 
@@ -910,7 +899,7 @@ proc ::Chat::InsertMessageText {chattoken xmldata secs inB historyB} {
 }
 
 proc ::Chat::MessageGetMyName {chattoken jid} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     set jid2 [jlib::barejid $jid]
     if {[::Jabber::Jlib service isroom $jid2]} {
@@ -988,10 +977,9 @@ proc ::Chat::PresenceGetString {chattoken xmldata} {
 #       If new chat dialog check to see if we have got a thread history to insert.
 
 proc ::Chat::MakeAndInsertHistory {chattoken} {
-    global  this
+    global  this jprefs
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jprefs jprefs
     
     # If chatting with a room member we must use jid3.
     set jid2 $chatstate(jid2)
@@ -1172,9 +1160,9 @@ proc ::Chat::InsertHistoryXML {chattoken} {
 }
 
 proc ::Chat::InsertHistory {chattoken} {
+    global jprefs
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jprefs jprefs
     
     if {$chatstate(historytype) eq "old"} {
 	InsertHistoryOld $chattoken -last $jprefs(chat,histLen)  \
@@ -1187,9 +1175,9 @@ proc ::Chat::InsertHistory {chattoken} {
 }
 
 proc ::Chat::HistoryCmd {chattoken} {
+    global jprefs
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jprefs jprefs
 
     if {$chatstate(history) && $chatstate(havehistory)} {
 	InsertHistory $chattoken
@@ -1238,13 +1226,11 @@ proc ::Chat::BuildInit {} {
 #       dlgtoken; shows window.
 
 proc ::Chat::Build {threadID jid} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs jprefs
     
     variable uiddlg
     variable cprefs
     variable buildInited
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Chat::Build threadID=$threadID"
     
@@ -1447,15 +1433,13 @@ proc ::Chat::ShowToolbar {dlgtoken} {
 #       chattoken
 
 proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
-    global  prefs this wDlgs config
+    global  prefs this wDlgs config jprefs
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
     variable uidchat
     variable cprefs
     variable havednd
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Chat::BuildThread"
 
@@ -1468,13 +1452,13 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     lappend dlgstate(chattokens)    $chattoken
     lappend dlgstate(recentctokens) $chattoken
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     # from is sometimes a 3-tier jid /resource included.
     # Try to keep any /resource part unless not possible.
     
     set mfrom [jlib::jidmap $from]
-    set jid [$jstate(jlib) getrecipientjid $from]
+    set jid [$jlib getrecipientjid $from]
     set mjid [jlib::jidmap $jid]
     jlib::splitjidex $jid node domain res
     set jid2 [jlib::barejid $mjid]
@@ -1821,7 +1805,6 @@ proc ::Chat::RevokeSubject {chattoken} {
 proc ::Chat::SetSubject {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jstate jstate
 
     set dlgtoken $chatstate(dlgtoken)
     variable $dlgtoken
@@ -1832,10 +1815,10 @@ proc ::Chat::SetSubject {chattoken} {
     }
 
     set threadID $chatstate(threadid)
-    set chatstate(fromjid) [$jstate(jlib) getrecipientjid $chatstate(fromjid)]
+    set chatstate(fromjid) [::Jabber::Jlib getrecipientjid $chatstate(fromjid)]
     set jid     [jlib::jidmap $chatstate(fromjid)]  
     set jid2    [jlib::barejid $jid]
-    set myjid   [$jstate(jlib) myjid]
+    set myjid   [::Jabber::Jlib myjid]
     set subject $chatstate(subject)
     
     set chatstate(subjectThread) $subject
@@ -1847,7 +1830,7 @@ proc ::Chat::SetSubject {chattoken} {
     Insert $chattoken $xmldata $secs 0 0
      
     ::History::XPutItem send $jid2 $xmldata
-    $jstate(jlib) send_message $jid -type chat -subject $subject \
+    ::Jabber::Jlib send_message $jid -type chat -subject $subject \
       -thread $threadID
     set chatstate(subjectOld) $chatstate(subject)
     set dlgstate(lastsentsecs) [clock seconds]
@@ -2049,8 +2032,7 @@ proc ::Chat::DnDDebugDump {win} {
 }
 
 proc ::Chat::OnDestroyThread {chattoken} {
-    global  config
-    upvar ::Jabber::jprefs jprefs
+    global  config jprefs
     variable $chattoken
     upvar 0 $chattoken chatstate
     
@@ -2177,10 +2159,9 @@ proc ::Chat::AvatarNewPhotoHook {jid2} {
 #       notebook and pages.
 
 proc ::Chat::NewPage {dlgtoken threadID jid} {
-    global  this
+    global  this 
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
-    upvar ::Jabber::jprefs jprefs
         
     # If no notebook, move chat widget to first notebook page.
     if {[string equal [winfo class [pack slaves $dlgstate(wcont)]] "ChatThread"]} {
@@ -2398,9 +2379,9 @@ proc ::Chat::SelectPage {chattoken} {
 #       Callback command from notebook widget when selecting new tab.
 
 proc ::Chat::TabChanged {dlgtoken} {
+    global jprefs
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
-    upvar ::Jabber::jprefs jprefs
     
     Debug 2 "::Chat::TabChanged"
 
@@ -2469,7 +2450,6 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
 
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jstate jstate
 
     Debug 4 "::Chat::SetThreadState chattoken=$chattoken"
     
@@ -2477,7 +2457,7 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
     set jid2 [jlib::barejid $chatstate(jid)]
     set myjid2 [::Jabber::Jlib myjid2]
     set isme [jlib::jidequal $jid2 $myjid2]
-    if {[$jstate(jlib) roster isavailable $jid2] || $isme} {
+    if {[::Jabber::Jlib roster isavailable $jid2] || $isme} {
 	SetState $chattoken normal
     } else {
 	SetState $chattoken disabled
@@ -2729,7 +2709,6 @@ proc ::Chat::InviteCmd {dlgtoken} {
 proc ::Chat::Invite {chattoken args} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jstate jstate
 
     array set argsA $args
 
@@ -2743,7 +2722,7 @@ proc ::Chat::Invite {chattoken args} {
 	
 	# Third Invite the second user
 	set opts [list -reason [mc mucChat2ConfInv] -continue 1]
-	eval {$jstate(jlib) muc invite $roomjid $chatstate(fromjid)} $opts
+	eval {::Jabber::Jlib muc invite $roomjid $chatstate(fromjid)} $opts
 
 	# Third and Invite the third user
 	eval {::MUC::Invite $roomjid -continue 1} $args
@@ -2752,10 +2731,9 @@ proc ::Chat::Invite {chattoken args} {
 
 proc ::Chat::InviteCreateRoom {roomjidVar} {
     upvar $roomjidVar roomjid
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
 
-    set chatservers [$jstate(jlib) disco getconferences]
+    set chatservers [::Jabber::Jlib disco getconferences]
     if {0 && $chatservers eq {}} {
 	::UI::MessageBox -icon error -title [mc Error] \
 	  -message [mc jamessnogroupchat2]
@@ -2765,12 +2743,12 @@ proc ::Chat::InviteCreateRoom {roomjidVar} {
 
     # @@@ Test: 10.1.4 Requesting a Unique Room Name
     
-    set unique [$jstate(jlib) disco hasfeature $xmppxmlns(muc,unique) $server]
+    set unique [::Jabber::Jlib disco hasfeature $xmppxmlns(muc,unique) $server]
     
     if {$unique} {
 	set uniqueE [wrapper::createtag "unique" \
 	  -attrlist [list xmlns $xmppxmlns(muc,unique)]]
-	$jstate(jlib) send_iq get [list $uniqueE] -to $server
+	::Jabber::Jlib send_iq get [list $uniqueE] -to $server
 	
     }
     
@@ -2789,10 +2767,9 @@ proc ::Chat::InviteCreateRoom {roomjidVar} {
 }
 
 proc ::Chat::InviteSendHistory {chattoken roomjid} {
+    global jprefs
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
     
     set jid2 $chatstate(jid2)
     if {[::Jabber::Jlib service isroom $jid2]} {
@@ -2817,7 +2794,7 @@ proc ::Chat::InviteSendHistory {chattoken roomjid} {
 	    } else {
 		set body ""
 	    }
-	    $jstate(jlib) send_message $roomjid -type groupchat \
+	    ::Jabber::Jlib send_message $roomjid -type groupchat \
 	      -body $body -xlist [list $xelem]
 	}
     }
@@ -2839,8 +2816,8 @@ proc ::Chat::QuitHook {} {
 }
 
 proc ::Chat::BuildSavedDialogs {} {
+    global jprefs
     variable cprefs
-    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
     
     if {!$jprefs(rememberDialogs)} {
@@ -2868,8 +2845,8 @@ proc ::Chat::BuildSavedDialogs {} {
 }
 
 proc ::Chat::SaveDialogs {} {
+    global jprefs
     variable cprefs
-    upvar ::Jabber::jprefs jprefs
     
     if {!$jprefs(rememberDialogs)} {
 	return
@@ -2898,8 +2875,8 @@ proc ::Chat::SaveDialogs {} {
 }
 
 proc ::Chat::ConfigureTextTags {w wtext} {
+    global jprefs
     variable chatOptions
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Chat::ConfigureTextTags jprefs(chatFont)=$jprefs(chatFont)"
     
@@ -2959,7 +2936,7 @@ proc ::Chat::ConfigureTextTags {w wtext} {
 #       Sets the chat font in all text widgets.
 
 proc ::Chat::SetFont {theFont} {    
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 
     ::Debug 2 "::Chat::SetFont theFont=$theFont"
     
@@ -3091,12 +3068,11 @@ proc ::Chat::SendText {chattoken text args} {
     upvar 0 $chattoken chatstate
 
     variable cprefs
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
     
     array set argsA $args
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     set threadID $chatstate(threadid)
 
     # According to XMPP we should send to 3-tier jid if still online,
@@ -3709,7 +3685,6 @@ proc ::Chat::KeyPressEvent {chattoken char} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     variable cprefs
-    upvar ::Jabber::jstate jstate
 
     ::Debug 6 "::Chat::KeyPressEvent chattoken=$chattoken, char=$char"
    
@@ -3721,7 +3696,7 @@ proc ::Chat::KeyPressEvent {chattoken char} {
 	unset chatstate(xevent,afterid)
     }
     jlib::splitjid $chatstate(jid) user res
-    if {[$jstate(jlib) roster isavailable $user] && ($chatstate(state) eq "normal")} {
+    if {[::Jabber::Jlib roster isavailable $user] && ($chatstate(state) eq "normal")} {
 
 	if {[info exists chatstate(xevent,msgid)]  \
 	  && ($chatstate(xevent,status) eq "")} {
@@ -3773,7 +3748,6 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
     global  config
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Chat::XEventSendCancelCompose chattoken=$chattoken"
 
@@ -3788,7 +3762,7 @@ proc ::Chat::XEventSendCancelCompose {chattoken} {
 	return
     }
     jlib::splitjid $chatstate(jid) user res
-    if {![$jstate(jlib) roster isavailable $user]} {
+    if {![::Jabber::Jlib roster isavailable $user]} {
 	return
     }
     if {[info exists chatstate(xevent,afterid)]} {
@@ -3901,7 +3875,7 @@ proc ::Chat::AutoBusyDeleteHook {chattoken} {
 }
 
 proc ::Chat::AutoBusyActivity {chattoken} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     if {!$jprefs(aa,busy-chats)} {
 	return
@@ -3947,8 +3921,7 @@ proc ::Chat::AutoBusyGetNumActive {} {
 #       This gets called whenever we change the activity on an instance.
 
 proc ::Chat::AutoBusyUpdate {} {
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
+    global jprefs
     variable autoBusy
 
     # Check if activated.
@@ -3983,8 +3956,7 @@ proc ::Chat::AutoBusyUpdate {} {
 }
 
 proc ::Chat::AutoBusySet {} {
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
+    global jprefs
     variable autoBusy
     
     AutoBusyCancelPending
@@ -4038,8 +4010,8 @@ proc ::Chat::AutoBusySetNormal {} {
 #       Starts timer to set "normal" status.
 
 proc ::Chat::AutoBusyTimer {} {
+    global jprefs
     variable autoBusy
-    upvar ::Jabber::jprefs jprefs
     
     set deltaN [expr {$jprefs(aa,busy-chats-n) - $autoBusy(nActive)}]
     set deltaN [max $deltaN 1]
@@ -4071,9 +4043,9 @@ proc ::Chat::AutoBusyCancelPending {} {
 #       Some functions to handle auto-away on hidden tabs, if activated.
 
 proc ::Chat::AAStart {chattoken} {
+    global jprefs
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jprefs jprefs
 
     #puts "::Chat::AAStart chattoken=$chattoken"
     
@@ -4118,9 +4090,9 @@ proc ::Chat::AAReset {chattoken} {
 }
 
 proc ::Chat::AACmd {chattoken show} {
+    global jprefs
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
     #puts "::Chat::AACmd chattoken=$chattoken"
@@ -4146,8 +4118,8 @@ proc ::Chat::AACmd {chattoken show} {
 # Preference page --------------------------------------------------------------
 
 proc ::Chat::InitPrefsHook {} {
+    global jprefs
     variable haveTheme
-    upvar ::Jabber::jprefs jprefs
     	
     set jprefs(chatActiveRet) 1
     set jprefs(showMsgNewWin) 1
@@ -4160,15 +4132,15 @@ proc ::Chat::InitPrefsHook {} {
     set jprefs(chat,theme)        "Bubblegum" ;# Should be a fallback theme
     
     ::PrefUtils::Add [list \
-      [list ::Jabber::jprefs(showMsgNewWin) jprefs_showMsgNewWin $jprefs(showMsgNewWin)]  \
-      [list ::Jabber::jprefs(inbox2click)   jprefs_inbox2click   $jprefs(inbox2click)]  \
-      [list ::Jabber::jprefs(chat,normalAsChat)   jprefs_chatnormalAsChat   $jprefs(chat,normalAsChat)]  \
-      [list ::Jabber::jprefs(chat,histLen)  jprefs_chathistLen   $jprefs(chat,histLen)]  \
-      [list ::Jabber::jprefs(chat,histAge)  jprefs_chathistAge   $jprefs(chat,histAge)]  \
-      [list ::Jabber::jprefs(chat,mynick)   jprefs_chatmynick    $jprefs(chat,mynick)]  \
-      [list ::Jabber::jprefs(chat,themed)   jprefs_chatthemed    $jprefs(chat,themed)]  \
-      [list ::Jabber::jprefs(chat,theme)    jprefs_chattheme     $jprefs(chat,theme)]  \
-      [list ::Jabber::jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)] \
+      [list jprefs(showMsgNewWin) jprefs_showMsgNewWin $jprefs(showMsgNewWin)]  \
+      [list jprefs(inbox2click)   jprefs_inbox2click   $jprefs(inbox2click)]  \
+      [list jprefs(chat,normalAsChat)   jprefs_chatnormalAsChat   $jprefs(chat,normalAsChat)]  \
+      [list jprefs(chat,histLen)  jprefs_chathistLen   $jprefs(chat,histLen)]  \
+      [list jprefs(chat,histAge)  jprefs_chathistAge   $jprefs(chat,histAge)]  \
+      [list jprefs(chat,mynick)   jprefs_chatmynick    $jprefs(chat,mynick)]  \
+      [list jprefs(chat,themed)   jprefs_chatthemed    $jprefs(chat,themed)]  \
+      [list jprefs(chat,theme)    jprefs_chattheme     $jprefs(chat,theme)]  \
+      [list jprefs(chatActiveRet) jprefs_chatActiveRet $jprefs(chatActiveRet)] \
       ]    
     if {!$haveTheme} {
 	set jprefs(chat,themed) 0
@@ -4192,7 +4164,7 @@ proc ::Chat::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::Chat::BuildPrefsPage {wpage} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpp
     variable haveTheme
     
@@ -4304,7 +4276,7 @@ proc ::Chat::PrefsThemedCmd {mb} {
 }
 
 proc ::Chat::SavePrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpp
     
     if {$tmpp(chat,themed)} {
@@ -4318,7 +4290,7 @@ proc ::Chat::SavePrefsHook {} {
 }
 
 proc ::Chat::CancelPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpp
         
     foreach key [array names tmpp] {
@@ -4330,7 +4302,7 @@ proc ::Chat::CancelPrefsHook {} {
 }
 
 proc ::Chat::UserDefaultsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpp
     
     foreach key [array names tmpp] {
