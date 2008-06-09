@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.98 2008-06-09 09:50:59 matben Exp $
+# $Id: JWB.tcl,v 1.99 2008-06-09 14:24:46 matben Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -1044,7 +1044,7 @@ proc ::JWB::PutFileHook {w fileName opts} {
 	
 	# The 'tojid' is already complete with resource.
 	set allJid3 $tojid
-	lappend opts -from $jstate(mejidresmap)
+	lappend opts -from [::Jabber::Jlib myjid2map]
     } else {
 	
 	# If 'tojid' is without a resource, it can be a room.
@@ -1073,7 +1073,7 @@ proc ::JWB::PutFileHook {w fileName opts} {
 	    } else {
 		set allJid3 $tojid/$res
 	    }
-	    lappend opts -from $jstate(mejidresmap)
+	    lappend opts -from [::Jabber::Jlib myjid2map]
 	}
     }
     
