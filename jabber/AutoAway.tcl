@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AutoAway.tcl,v 1.16 2007-12-09 15:25:35 matben Exp $
+# $Id: AutoAway.tcl,v 1.17 2008-06-09 09:50:59 matben Exp $
 
 package require idletime
 
@@ -73,7 +73,6 @@ proc ::AutoAway::LoginHook {} {
 }
 
 proc ::AutoAway::LogoutHook {} {    
-    upvar ::Jabber::jprefs jprefs
 
     #::idletime::stop
     ::idletime::remove [namespace code AwayCmd]
@@ -81,8 +80,7 @@ proc ::AutoAway::LogoutHook {} {
 }
 
 proc ::AutoAway::InitPrefsHook {} {
-    global  prefs config
-    upvar ::Jabber::jprefs jprefs
+    global  prefs config jprefs
     
     # Auto away page:
     set jprefs(autoaway)     1
@@ -97,16 +95,16 @@ proc ::AutoAway::InitPrefsHook {} {
     set jprefs(aalogin)      0
 
     ::PrefUtils::Add [list \
-      [list ::Jabber::jprefs(autoaway)    jprefs_autoaway     $jprefs(autoaway)]  \
-      [list ::Jabber::jprefs(xautoaway)   jprefs_xautoaway    $jprefs(xautoaway)]  \
-      [list ::Jabber::jprefs(awaymin)     jprefs_awaymin      $jprefs(awaymin)]  \
-      [list ::Jabber::jprefs(xawaymin)    jprefs_xawaymin     $jprefs(xawaymin)]  \
-      [list ::Jabber::jprefs(awaymsg)     jprefs_awaymsg      $jprefs(awaymsg)]  \
-      [list ::Jabber::jprefs(xawaymsg)    jprefs_xawaymsg     $jprefs(xawaymsg)]  \
-      [list ::Jabber::jprefs(autologout)  jprefs_autologout   $jprefs(autologout)]  \
-      [list ::Jabber::jprefs(logoutmin)   jprefs_logoutmin    $jprefs(logoutmin)]  \
-      [list ::Jabber::jprefs(logoutmsg)   jprefs_logoutmsg    $jprefs(logoutmsg)]  \
-      [list ::Jabber::jprefs(aalogin)     jprefs_aalogin      $jprefs(aalogin)]  \
+      [list jprefs(autoaway)    jprefs_autoaway     $jprefs(autoaway)]  \
+      [list jprefs(xautoaway)   jprefs_xautoaway    $jprefs(xautoaway)]  \
+      [list jprefs(awaymin)     jprefs_awaymin      $jprefs(awaymin)]  \
+      [list jprefs(xawaymin)    jprefs_xawaymin     $jprefs(xawaymin)]  \
+      [list jprefs(awaymsg)     jprefs_awaymsg      $jprefs(awaymsg)]  \
+      [list jprefs(xawaymsg)    jprefs_xawaymsg     $jprefs(xawaymsg)]  \
+      [list jprefs(autologout)  jprefs_autologout   $jprefs(autologout)]  \
+      [list jprefs(logoutmin)   jprefs_logoutmin    $jprefs(logoutmin)]  \
+      [list jprefs(logoutmsg)   jprefs_logoutmsg    $jprefs(logoutmsg)]  \
+      [list jprefs(aalogin)     jprefs_aalogin      $jprefs(aalogin)]  \
       ]
 
     # Set some kind of auto-away on hidden tabs.
@@ -118,10 +116,10 @@ proc ::AutoAway::InitPrefsHook {} {
     set jprefs(aa,busy-chats-msg) ""
 
     ::PrefUtils::Add [list \
-      [list ::Jabber::jprefs(aa,on-hidden-tabs)  jprefs_aa_on-hidden-tabs  $jprefs(aa,on-hidden-tabs)]  \
-      [list ::Jabber::jprefs(aa,busy-chats)      jprefs_aa_busy-chats      $jprefs(aa,busy-chats)]  \
-      [list ::Jabber::jprefs(aa,busy-chats-n)    jprefs_aa_busy-chats-n    $jprefs(aa,busy-chats-n)]  \
-      [list ::Jabber::jprefs(aa,busy-chats-msg)  jprefs_aa_busy-chats-msg  $jprefs(aa,busy-chats-msg)]  \
+      [list jprefs(aa,on-hidden-tabs)  jprefs_aa_on-hidden-tabs  $jprefs(aa,on-hidden-tabs)]  \
+      [list jprefs(aa,busy-chats)      jprefs_aa_busy-chats      $jprefs(aa,busy-chats)]  \
+      [list jprefs(aa,busy-chats-n)    jprefs_aa_busy-chats-n    $jprefs(aa,busy-chats-n)]  \
+      [list jprefs(aa,busy-chats-msg)  jprefs_aa_busy-chats-msg  $jprefs(aa,busy-chats-msg)]  \
       ]
     if {!$config(aa,on-hidden-tabs)} {
 	set jprefs(aa,on-hidden-tabs) 0
@@ -146,7 +144,7 @@ proc ::AutoAway::InitPrefsHook {} {
 #       Setup the auto away callbacks using idletime.
 
 proc ::AutoAway::Setup {} { 
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 	       
     if {$jprefs(autoaway) && [string is integer -strict $jprefs(awaymin)]} {
 	::idletime::add [namespace code AwayCmd] [expr {60*$jprefs(awaymin)}]
@@ -184,7 +182,7 @@ proc ::AutoAway::LogoutCmd {what} {
 }
 
 proc ::AutoAway::Cmd {show what} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     upvar ::Jabber::jstate jstate
     variable statusPriority
     variable savedShowStatus
@@ -257,8 +255,7 @@ proc ::AutoAway::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::AutoAway::BuildPage {page} {
-    global  config
-    upvar ::Jabber::jprefs jprefs
+    global  config jprefs
     variable tmpp
     variable allKeys
     
@@ -395,7 +392,7 @@ proc ::AutoAway::SetEntryState {winL varName} {
 }
 
 proc ::AutoAway::SavePrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpp
         
     array set jprefs [array get tmpp]
@@ -405,8 +402,7 @@ proc ::AutoAway::SavePrefsHook {} {
 }
 
 proc ::AutoAway::CancelPrefsHook {} {
-    global  prefs
-    upvar ::Jabber::jprefs jprefs
+    global  prefs jprefs
     variable tmpp
 	
     foreach key [array names tmpp] {
@@ -418,7 +414,7 @@ proc ::AutoAway::CancelPrefsHook {} {
 }
 
 proc ::AutoAway::UserDefaultsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpp
 	
     foreach key [array names tmpp] {

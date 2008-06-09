@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.106 2008-05-29 08:04:09 matben Exp $
+# $Id: Register.tcl,v 1.107 2008-06-09 09:51:00 matben Exp $
 
 package provide Register 1.0
 
@@ -56,14 +56,12 @@ proc ::Register::OnMenuRemove {} {
 
 proc ::Register::Remove {{jid {}}} {
     
-    upvar ::Jabber::jstate jstate
-
     ::Debug 2 "::Register::Remove jid=$jid"
     
     set ans "yes"
     set login 0
     set remove 0
-    set server [$jstate(jlib) getserver]
+    set server [::Jabber::Jlib getserver]
     
     if {$jid eq ""} {
 	set jid $server
@@ -99,11 +97,12 @@ proc ::Register::Remove {{jid {}}} {
     if {$remove} {
 	
 	# Do we need to obtain a key for this???
-	$jstate(jlib) register_remove $jid [list ::Register::RemoveCallback $jid]
+	::Jabber::Jlib register_remove $jid [list ::Register::RemoveCallback $jid]
 	
 	# Remove also from our profile if our login account.
 	if {$login} {
-	    set profile [::Profiles::FindProfileNameFromJID $jstate(mejid)]
+	    set myjid [::Jabber::Jlib myjid]
+	    set profile [::Profiles::FindProfileNameFromJID $myjid]
 	    if {$profile ne ""} {
 		::Profiles::Remove $profile
 	    }
@@ -113,8 +112,6 @@ proc ::Register::Remove {{jid {}}} {
 
 proc ::Register::RemoveCallback {jid jlibName type theQuery} {
     
-    upvar ::Jabber::jstate jstate
-
     if {[string equal $type "error"]} {
 	lassign $theQuery errcode errmsg
 	set str [mc jamesserrunreg2 [jlib::unescapejid $jid]]
@@ -124,7 +121,8 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
     } else {
 	
 	# If we don't do this the server may shut us down instead.
-	if {[jlib::jidequal $jid $jstate(server)]} {
+	set server [::Jabber::Jlib getserver]
+	if {[jlib::jidequal $jid $server]} {
 	    ::Jabber::DoCloseClientConnection
 	}
 	set name [::Roster::GetDisplayName $jid]
@@ -176,11 +174,10 @@ proc ::RegisterEx::OnMenu {} {
 #       w
 
 proc ::RegisterEx::New {args} {
-    global  this wDlgs config
+    global  this wDlgs config jprefs
     
     variable uid
     variable win
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::RegisterEx::New args=$args"
     
@@ -559,7 +556,6 @@ proc ::RegisterEx::SetState {token theState} {
 proc ::RegisterEx::Get {token} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::RegisterEx::Get"
     
@@ -601,13 +597,12 @@ proc ::RegisterEx::Get {token} {
 
     # Asks for a socket to the server.
     set cb [namespace code [list ConnectCB $token $state(cuid)]]
-    eval {$jstate(jlib) connect connect $state(-server) {} -command $cb} $opts
+    eval {::Jabber::Jlib connect connect $state(-server) {} -command $cb} $opts
 }
 
 proc ::RegisterEx::ConnectCB {token cuid jlibname status {errcode ""} {errmsg ""}} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::RegisterEx::ConnectCB status=$status, errcode=$errcode, errmsg=$errmsg"
     
@@ -615,7 +610,7 @@ proc ::RegisterEx::ConnectCB {token cuid jlibname status {errcode ""} {errmsg ""
 	return
     }
     if {$status eq "ok"} {
-	$jstate(jlib) register_get [namespace code [list GetCB $token $cuid]]
+	::Jabber::Jlib register_get [namespace code [list GetCB $token $cuid]]
     } elseif {$status eq "error"} {
 	SetState $token {!disabled}
 	NotBusy $token
@@ -624,14 +619,13 @@ proc ::RegisterEx::ConnectCB {token cuid jlibname status {errcode ""} {errmsg ""
 	    set str [::Login::GetErrorStr $errcode $errmsg]
 	    ::UI::MessageBox -icon error -type ok -message $str
 	}
-	$jstate(jlib) connect free
+	::Jabber::Jlib connect free
     }
 }
 
 proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {    
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::RegisterEx::GetCB type=$type, iqchild=$iqchild"
 
@@ -799,7 +793,6 @@ proc ::RegisterEx::DestroyForm {token} {
 proc ::RegisterEx::SendRegister {token} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::RegisterEx::SendRegister"
 
@@ -840,18 +833,15 @@ proc ::RegisterEx::SendRegister {token} {
     # We need to do it the crude way.
     set queryElem [wrapper::createtag "query" \
       -attrlist {xmlns jabber:iq:register} -subtags $subL]
-    $jstate(jlib) send_iq "set" [list $queryElem] \
+    ::Jabber::Jlib send_iq "set" [list $queryElem] \
       -command [list [namespace current]::SendRegisterCB $token]
 }
 
 proc ::RegisterEx::SendRegisterCB {token type theQuery} {    
-    global  config
+    global  config jprefs
     variable $token
     upvar 0 $token state
 
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
-    
     ::Debug 2 "::RegisterEx::SendRegisterCB type=$type, theQuery=$theQuery"
     
     if {![info exists state]} {
@@ -892,8 +882,8 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	    
 	    # Go on and authenticate.
 	    set jid [jlib::joinjid $username $server $resource]
-	    $jstate(jlib) connect register $jid $password
-	    $jstate(jlib) connect auth -command [namespace code AuthCB]
+	    ::Jabber::Jlib connect register $jid $password
+	    ::Jabber::Jlib connect auth -command [namespace code AuthCB]
 	} else {
 	    ui::dialog -icon info -type ok \
 	      -message [mc jamessregisterok2 $server]
@@ -901,7 +891,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    # Beware: we are in the middle of a callback from the xml parser,
 	    # and need to be sure to exit from it before resetting!
-	    after idle $jstate(jlib) closestream
+	    after idle ::Jabber::Jlib closestream
 	}
 	
 	# Kill dialog.
@@ -910,7 +900,6 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 }
 
 proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::RegisterEx::AuthCB status=$status, errcode=$errcode, errmsg=$errmsg"
     
@@ -973,7 +962,6 @@ proc ::GenRegister::NewDlg {args} {
     global  this wDlgs config
 
     variable uid
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::GenRegister::NewDlg args=$args"
     
@@ -1035,7 +1023,7 @@ proc ::GenRegister::NewDlg {args} {
 	set server ""
     }
     if {$server ne ""} {
-	set types [$jstate(jlib) disco types $server]
+	set types [::Jabber::Jlib disco types $server]
 	set gateway [lsearch -glob -inline $types gateway/*]
 	set type [lindex [split $gateway /] 1]
     }
@@ -1092,7 +1080,7 @@ proc ::GenRegister::NewDlg {args} {
 
     # Get all (browsed) services that support registration.
     if {$dialogType eq "generic"} {
-	set regServers [$jstate(jlib) disco getjidsforfeature "jabber:iq:register"]
+	set regServers [::Jabber::Jlib disco getjidsforfeature "jabber:iq:register"]
 	ttk::combobox $wcomboserver -state $argsA(-serverstate)  \
 	  -textvariable $token\(server) -values $regServers
 	bind $wcomboserver <Map> { focus %W }
@@ -1211,7 +1199,6 @@ proc ::GenRegister::NewDlg {args} {
 proc ::GenRegister::Get {token} {    
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     
     # Verify.
     if {[string length $state(server)] == 0} {
@@ -1226,7 +1213,7 @@ proc ::GenRegister::Get {token} {
     set state(stattxt) "[mc jawaitserver]..."
     
     # Send get register.
-    $jstate(jlib) register_get [list ::GenRegister::GetCB $token] \
+    ::Jabber::Jlib register_get [list ::GenRegister::GetCB $token] \
       -to $state(server)
     $state(wsearrows) start
 }
@@ -1234,7 +1221,6 @@ proc ::GenRegister::Get {token} {
 proc ::GenRegister::GetCB {token jlibName type subiq} {    
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::GenRegister::GetCB type=$type"
 
@@ -1278,7 +1264,6 @@ proc ::GenRegister::GetCB {token jlibName type subiq} {
 proc ::GenRegister::DoRegister {token} {   
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     
     if {!([info exists state(w)] && [winfo exists $state(w)])} {
 	return
@@ -1288,7 +1273,7 @@ proc ::GenRegister::DoRegister {token} {
     set subelements [::JForms::GetXML $state(formtoken)]
  
     # We need to do it the crude way.
-    $jstate(jlib) send_iq "set"  \
+    ::Jabber::Jlib send_iq "set"  \
       [list [wrapper::createtag "query" \
       -attrlist {xmlns jabber:iq:register} -subtags $subelements]] \
       -to $state(server) -command [list [namespace current]::ResultCallback $token]
@@ -1305,7 +1290,6 @@ proc ::GenRegister::DoRegister {token} {
 proc ::GenRegister::ResultCallback {token type subiq args} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::GenRegister::ResultCallback type=$type, subiq='$subiq'"
 
@@ -1366,7 +1350,6 @@ proc ::GenRegister::Simple {w args} {
     variable wbtregister
     variable server ""
     variable finished -1
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::GenRegister::Simple"
     if {[winfo exists $w]} {
@@ -1482,9 +1465,8 @@ proc ::GenRegister::DoSimple { } {
     variable username
     variable password
     variable finished
-    upvar ::Jabber::jstate jstate
     
-    $jstate(jlib) register_set $username $password  \
+    ::Jabber::Jlib register_set $username $password  \
       [list [namespace current]::SimpleCallback $server] -to $server
     set finished 1
     destroy $wtop

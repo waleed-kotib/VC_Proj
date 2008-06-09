@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.153 2008-05-29 08:04:09 matben Exp $
+# $Id: Disco.tcl,v 1.154 2008-06-09 09:50:59 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -116,7 +116,7 @@ namespace eval ::Disco {
 }
 
 proc ::Disco::InitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     # The disco background image is partly controlled by option database.
     # @@@ The bgImagePath is unused. We should make a more flexible and
@@ -133,13 +133,13 @@ proc ::Disco::InitPrefsHook {} {
     set jprefs(disco,defaultBgImage) 1
 
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(disco,useBgImage)     jprefs_disco_useBgImage     $jprefs(disco,useBgImage)]  \
-      [list ::Jabber::jprefs(disco,defaultBgImage) jprefs_disco_defaultBgImage $jprefs(disco,defaultBgImage)] \
+      [list jprefs(disco,useBgImage)     jprefs_disco_useBgImage     $jprefs(disco,useBgImage)]  \
+      [list jprefs(disco,defaultBgImage) jprefs_disco_defaultBgImage $jprefs(disco,defaultBgImage)] \
       ]
 }
 
 proc ::Disco::InitHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 
     set jprefs(disco,tmpServers) [list]
     InitMenus
@@ -234,11 +234,9 @@ proc ::Disco::NewJlibHook {jlibName} {
 #       This must be before most other login hooks, at least other doing disco.
 
 proc ::Disco::LoginHook {} {
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
     
     # We disco servers jid 'items+info', and disco its childrens 'info'.
-    DiscoServer $jstate(server)
+    DiscoServer [::Jabber::Jlib getserver]
 }
 
 proc ::Disco::LogoutHook {} {
@@ -259,9 +257,9 @@ proc ::Disco::LogoutHook {} {
 }
 
 proc ::Disco::HaveTree {} {    
-    upvar ::Jabber::jstate jstate
     
-    if {[$jstate(jlib) disco isdiscoed items $jstate(server)]} {
+    set server [::Jabber::Jlib getserver]
+    if {[::Jabber::Jlib disco isdiscoed items $server]} {
 	return 1
     } else {
 	return 0
@@ -299,7 +297,6 @@ proc ::Disco::DiscoServer {server args} {
 #       callback scheduled.
 
 proc ::Disco::GetInfo {jid args} {    
-    upvar ::Jabber::jstate jstate
         
     # Discover info for this entity.
     array set arr {
@@ -312,11 +309,10 @@ proc ::Disco::GetInfo {jid args} {
 	lappend opts -node $arr(-node)
     }
     set cmdCB [list [namespace current]::InfoCB $arr(-command)]
-    eval {$jstate(jlib) disco send_get info $jid $cmdCB} $opts
+    eval {::Jabber::Jlib disco send_get info $jid $cmdCB} $opts
 }
 
 proc ::Disco::GetItems {jid args} {    
-    upvar ::Jabber::jstate jstate
     
     # Discover items for this entity.
     array set arr {
@@ -329,14 +325,13 @@ proc ::Disco::GetItems {jid args} {
 	lappend opts -node $arr(-node)
     }
     set cmdCB [list [namespace current]::ItemsCB $arr(-command)]
-    eval {$jstate(jlib) disco send_get items $jid $cmdCB} $opts
+    eval {::Jabber::Jlib disco send_get items $jid $cmdCB} $opts
 }
 
 proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
     global  config
     variable wtree
     variable wtab
-    upvar ::Jabber::jstate jstate
      
     set from [jlib::jidmap $from]
     set node [wrapper::getattribute $queryE node]
@@ -369,12 +364,12 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 	# in more than one place of the disco tree. Find them all.
 	
 	set vlist [::ITree::FindEndItems $wtree [list $from $node]]
-	set cattypes [$jstate(jlib) disco types $from $node]
+	set cattypes [::Jabber::Jlib disco types $from $node]
 	set acctypes [AccessTypes $from $node]
 
 	foreach vstruct $vlist {
 	    set icon [::Servicons::ThemeGetFromTypeList $acctypes]
-	    #set name [$jstate(jlib) disco name $from $node]
+	    #set name [::Jabber::Jlib disco name $from $node]
 	    set name [AccessName $from $node]
 	    set opts [list] 
 	    if {$name ne ""} {
@@ -416,16 +411,15 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 }
 
 proc ::Disco::ItemsCB {cmd jlibname type from queryE args} {
-    global  config
+    global  config jprefs
     variable tstate
     variable wtree
     variable wtab
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Disco::ItemsCB type=$type, from=$from"
     
     set from [jlib::jidmap $from]
+    set server [::Jabber::Jlib getserver]
     
     if {[string equal $type "error"]} {
 	
@@ -461,7 +455,7 @@ proc ::Disco::ItemsCB {cmd jlibname type from queryE args} {
 	# Get info:
 	# We disco servers jid 'items+info', and disco its childrens 'info'.
 	# Perhaps we should discover depending on items category?
-	set centlist [$jstate(jlib) disco childs $from $pnode]
+	set centlist [::Jabber::Jlib disco childs $from $pnode]
 	set clen [llength $centlist]
 	foreach cent $centlist {
 	    set cjid  [lindex $cent 0]
@@ -474,7 +468,7 @@ proc ::Disco::ItemsCB {cmd jlibname type from queryE args} {
 		GetInfo $cjid -node $cnode
 	    }
 	}
-	if {[jlib::jidequal $from $jstate(server)] && ($pnode eq "")} {
+	if {[jlib::jidequal $from $server] && ($pnode eq "")} {
 	    AutoDiscoServers
 	}
     }
@@ -492,7 +486,6 @@ proc ::Disco::ItemsCB {cmd jlibname type from queryE args} {
 #       entities.
 
 proc ::Disco::Handler {jlibname discotype from queryE args} {
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Disco::Handler discotype=$discotype, from=$from"
 
@@ -508,7 +501,6 @@ proc ::Disco::Handler {jlibname discotype from queryE args} {
 
 proc ::Disco::SetDirItemUsingCategory {vstruct} {
     variable wtree
-    upvar ::Jabber::jstate jstate
 	
     set jid  [lindex $vstruct end 0]
     set node [lindex $vstruct end 1]
@@ -535,11 +527,10 @@ proc ::Disco::IsBranchCategory {jid {node ""}} {
 
 proc ::Disco::IsJidBranchCategory {jid} {
     variable branchCategory
-    upvar ::Jabber::jstate jstate
         
     # Ad-hoc way to figure out if dir or not. Use the category attribute.
     set isdir 0
-    #set types [$jstate(jlib) disco types $jid]
+    #set types [::Jabber::Jlib disco types $jid]
     set types [AccessTypes $jid]
     foreach type $types {
 	set category [lindex [split $type /] 0]
@@ -552,22 +543,21 @@ proc ::Disco::IsJidBranchCategory {jid} {
     
     # Don't forget the rooms.
     if {!$isdir} {
-	set isdir [$jstate(jlib) disco isroom $jid]
+	set isdir [::Jabber::Jlib disco isroom $jid]
     }
     return $isdir
 }
 
 proc ::Disco::IsBranchNode {jid node} {
-    upvar ::Jabber::jstate jstate
     
     if {0} {
 	set isdir 0
-	if {[$jstate(jlib) disco iscategorytype hierarchy/branch $jid $node]} {
+	if {[::Jabber::Jlib disco iscategorytype hierarchy/branch $jid $node]} {
 	    set isdir 1
 	}
     } else {
 	set isdir 1
-	#if {[$jstate(jlib) disco iscategorytype hierarchy/leaf $jid $node]} 
+	#if {[::Jabber::Jlib disco iscategorytype hierarchy/leaf $jid $node]} 
 	if {[AccessIsCategoryType "hierarchy/leaf" $jid $node]} {
 	    set isdir 0
 	}
@@ -588,7 +578,6 @@ proc ::Disco::IsBranchNode {jid node} {
 proc ::Disco::ParseGetInfo {from queryE args} {
     global  prefs this config
     variable xmlns
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     upvar ::Jabber::xmppxmlns xmppxmlns
     
@@ -598,7 +587,7 @@ proc ::Disco::ParseGetInfo {from queryE args} {
     set ishandled 1
     set type "result"
     set found 0
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     if {$config(caps,fake)} {
 	set capsNode $config(caps,node)
@@ -694,7 +683,7 @@ proc ::Disco::ParseGetInfo {from queryE args} {
 	lappend elem $xE
     }
     set xmllist [wrapper::createtag "query" -subtags $elem -attrlist $attr]
-    eval {$jstate(jlib) send_iq $type [list $xmllist] -to $from} $opts
+    eval {::Jabber::Jlib send_iq $type [list $xmllist] -to $from} $opts
     
     return $ishandled
 }
@@ -711,7 +700,6 @@ proc ::Disco::ParseGetInfo {from queryE args} {
 proc ::Disco::ParseGetItems {from queryE args} {
     global  prefs this config
     variable xmlns
-    upvar ::Jabber::jstate jstate    
     upvar ::Jabber::coccixmlns coccixmlns
     
     ::Debug 2 "::Disco::ParseGetItems from=$from args='$args'"
@@ -719,7 +707,7 @@ proc ::Disco::ParseGetItems {from queryE args} {
     array set argsA $args
     set ishandled 0
     set found 0
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     if {$config(caps,fake)} {
 	set capsNode $config(caps,node)
@@ -768,7 +756,7 @@ proc ::Disco::ParseGetItems {from queryE args} {
 	set attr [list xmlns $xmlns(items)]
 	set xmllist [wrapper::createtag "query" -attrlist $attr -subtags $subtags]
     }
-    eval {$jstate(jlib) send_iq $type [list $xmllist] -to $from} $opts
+    eval {::Jabber::Jlib send_iq $type [list $xmllist] -to $from} $opts
     
     return $ishandled
 }
@@ -811,10 +799,9 @@ proc ::Disco::NewPage {} {
 #       w
 
 proc ::Disco::Build {w} {
-    global  this prefs    
+    global  this prefs jprefs
     variable wtree
     variable wdisco
-    upvar ::Jabber::jprefs jprefs
     
     # The frame of class Disco.
     ttk::frame $w -class Disco
@@ -856,9 +843,8 @@ proc ::Disco::Build {w} {
 #         2) a user picked one which is cached in this(backgroundsPath)
 
 proc ::Disco::BackgroundImageCmd {} {
-    global  this
+    global  this jprefs
     variable T
-    upvar ::Jabber::jprefs jprefs
     
     set mimes {image/gif image/png image/jpeg}
     set mimeL [list]
@@ -936,8 +922,7 @@ proc ::Disco::BackgroundImageGetThemedFile {suffL} {
 }
 
 proc ::Disco::BackgroundImageGetFile {suffL defaultFile} {
-    global  this
-    upvar ::Jabber::jprefs jprefs
+    global  this jprefs
     
     set fileName ""
     if {$jprefs(disco,useBgImage)} {
@@ -1028,7 +1013,6 @@ proc ::Disco::Popup {w vstruct x y} {
     variable popMenuDefs
     variable regPopMenuDef
     variable regPopMenuType
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Disco::Popup w=$w, vstruct='$vstruct'"
         
@@ -1037,7 +1021,7 @@ proc ::Disco::Popup {w vstruct x y} {
 
     # An item can have more than one type, for instance,
     # msn.domain can have: {gateway/msn conference/text}
-    set categoryList [string tolower [$jstate(jlib) disco types $jid $node]]
+    set categoryList [string tolower [::Jabber::Jlib disco types $jid $node]]
     set categoryType [lindex $categoryList 0]
     
     ::Debug 4 "\t jid=$jid, node=$node, categoryList=$categoryList"
@@ -1065,14 +1049,14 @@ proc ::Disco::Popup {w vstruct x y} {
 	lappend clicked user
     }
     if {$username ne ""} {
-	if {[$jstate(jlib) disco isroom $jid]} {
+	if {[::Jabber::Jlib disco isroom $jid]} {
 	    lappend clicked room
 	} else {
 	    lappend clicked user
 	}
     }
     foreach name {search register} {
-	if {[$jstate(jlib) disco hasfeature "jabber:iq:${name}" $jid]} {
+	if {[::Jabber::Jlib disco hasfeature "jabber:iq:${name}" $jid]} {
 	    lappend clicked $name
 	}
     }
@@ -1105,7 +1089,7 @@ proc ::Disco::Popup {w vstruct x y} {
     set mType [concat $mType $regPopMenuType]
     
     # Special hack to avoid the Register/Unregister of the login server.
-    if {[jlib::jidequal [$jstate(jlib) getserver] $jid]} {
+    if {[jlib::jidequal [::Jabber::Jlib getserver] $jid]} {
 	lprune clicked "register"
     }
     
@@ -1159,12 +1143,11 @@ proc ::Disco::PostMenuCmd {m mType clicked jid node} {
 
 proc ::Disco::Selection {T v} {
     global  config
-    upvar ::Jabber::jstate jstate
 
     if {$config(disco,get-info-onselect)} {
 	set jid  [lindex $v end 0]
 	set node [lindex $v end 1]
-	if {![$jstate(jlib) disco isdiscoed info $jid $node]} {
+	if {![::Jabber::Jlib disco isdiscoed info $jid $node]} {
 	    GetInfo $jid -node $node
 	}
     }
@@ -1186,7 +1169,6 @@ proc ::Disco::Selection {T v} {
 proc ::Disco::OpenTreeCmd {w vstruct} {   
     variable wtree
     variable tstate
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Disco::OpenTreeCmd vstruct=$vstruct"
 
@@ -1196,7 +1178,7 @@ proc ::Disco::OpenTreeCmd {w vstruct} {
 
 	# If we have not yet discoed this jid, do it now!
 	# We should have a method to tell if children have been added to tree!!!
-	if {![$jstate(jlib) disco isdiscoed items $jid $node]} {
+	if {![::Jabber::Jlib disco isdiscoed items $jid $node]} {
 	    set tstate(run,$vstruct) 1
 	    
 	    # Discover services available.
@@ -1204,7 +1186,7 @@ proc ::Disco::OpenTreeCmd {w vstruct} {
 	} elseif {[::ITree::Children $wtree $vstruct] == {}} {
 	    
 	    # An item may have been discoed but not from here.
-	    foreach item [$jstate(jlib) disco childs $jid $node] {
+	    foreach item [::Jabber::Jlib disco childs $jid $node] {
 		TreeItem [concat $vstruct [list $item]]
 	    }
 	}
@@ -1233,11 +1215,10 @@ proc ::Disco::CloseTreeCmd {w vstruct} {
 #
 
 proc ::Disco::TreeItem {vstruct {level 0}} {    
+    global  jprefs
     variable wtree    
     variable wdisco
     variable treeuid
-    upvar ::Jabber::jstate  jstate
-    upvar ::Jabber::jprefs  jprefs
 
     ::Debug 4 "::Disco::TreeItem vstruct='$vstruct'"
         
@@ -1251,18 +1232,19 @@ proc ::Disco::TreeItem {vstruct {level 0}} {
     # If this is a tree root element add only if a discoed server.
     if {($pjid eq "") && ($pnode eq "")} {
 	set all [concat $jprefs(disco,tmpServers) $jprefs(disco,autoServers)]
-	lappend all $jstate(server)
+	set server [::Jabber::Jlib getserver]
+	lappend all $server
 	if {[lsearch -exact $all $jid] < 0} {
 	    return
 	}
     }    
 
-    #set cattypes [$jstate(jlib) disco types $jid $node]
+    #set cattypes [::Jabber::Jlib disco types $jid $node]
     set cattypes [AccessTypes $jid $node]
     set isconference [expr {[lsearch -glob $cattypes conference/*] < 0 ? 0 : 1}]
     
     jlib::splitjid $jid jid2 res
-    set isroom [$jstate(jlib) disco isroom $jid2]
+    set isroom [::Jabber::Jlib disco isroom $jid2]
     
     # Do not create if exists which preserves -open.
     if {![::ITree::IsItem $wtree $vstruct]} {
@@ -1283,11 +1265,11 @@ proc ::Disco::TreeItem {vstruct {level 0}} {
 	# Display text string. Room participants with their nicknames.
 	set icon ""
 	if {$isroom && [string length $res]} {
-	    set name [$jstate(jlib) service nick $jid]
+	    set name [::Jabber::Jlib service nick $jid]
 	    set isdir 0
 	    set icon [::Roster::GetPresenceIconFromJid $jid]
 	} else {
-	    #set name [$jstate(jlib) disco name $jid $node]
+	    #set name [::Jabber::Jlib disco name $jid $node]
 	    set name [AccessName $jid $node]
 	    if {$name eq ""} {
 		if {$node eq ""} {
@@ -1303,7 +1285,7 @@ proc ::Disco::TreeItem {vstruct {level 0}} {
 		if {$isroom} {
 		    set icon [::Servicons::ThemeGet conference/text]
 		} elseif {$node ne ""} {
-		    #set xtypes [$jstate(jlib) disco types $jid]
+		    #set xtypes [::Jabber::Jlib disco types $jid]
 		    set xtypes [AccessTypes $jid]
 		    set icon [::Servicons::ThemeGetFromTypeList $xtypes]
 		}
@@ -1322,7 +1304,7 @@ proc ::Disco::TreeItem {vstruct {level 0}} {
     
     # Add all child or node elements as well.
     # Note: jid and node childs can be mixed!
-    set cstructs [$jstate(jlib) disco childs $jid $node]
+    set cstructs [::Jabber::Jlib disco childs $jid $node]
         
     # In order to avoid circular references in the disco tree we allow only
     # the first level of recursion. Circular reference is when an item has
@@ -1347,7 +1329,6 @@ proc ::Disco::TreeItem {vstruct {level 0}} {
 
 proc ::Disco::MakeBalloonHelp {vstruct} {
     variable wtree    
-    upvar ::Jabber::jstate jstate
     
     set jid  [lindex $vstruct end 0]
     set node [lindex $vstruct end 1]
@@ -1361,7 +1342,7 @@ proc ::Disco::MakeBalloonHelp {vstruct} {
     if {$node ne ""} {
 	append msg "\nnode: $node"
     }
-    #set types [$jstate(jlib) disco types $jid $node]
+    #set types [::Jabber::Jlib disco types $jid $node]
     set types [AccessTypes $jid $node]
     if {$types != {}} {
 	append msg "\ntype: $types"
@@ -1375,7 +1356,6 @@ proc ::Disco::MakeBalloonHelp {vstruct} {
 proc ::Disco::Refresh {vstruct} {    
     variable wtree
     variable tstate
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::Disco::Refresh vstruct=$vstruct"
 	
@@ -1383,7 +1363,7 @@ proc ::Disco::Refresh {vstruct} {
     set node [lindex $vstruct end 1]
 
     # Clear internal state of the disco object for this jid.
-    $jstate(jlib) disco reset $jid
+    ::Jabber::Jlib disco reset $jid
     
     # Remove all children of this 'vstruct' from disco tree.
     ::ITree::DeleteChildren $wtree $vstruct
@@ -1395,9 +1375,8 @@ proc ::Disco::Refresh {vstruct} {
 }
 
 proc ::Disco::Clear {} {    
-    upvar ::Jabber::jstate jstate
     
-    $jstate(jlib) disco reset
+    ::Jabber::Jlib disco reset
 }
 
 # Disco::PresenceHook --
@@ -1407,7 +1386,6 @@ proc ::Disco::Clear {} {
 
 proc ::Disco::PresenceHook {jid presence args} {
     variable wtree    
-    upvar ::Jabber::jstate jstate
          
     jlib::splitjid $jid jid2 res
     array set argsA $args
@@ -1416,7 +1394,7 @@ proc ::Disco::PresenceHook {jid presence args} {
 	set res $argsA(-resource)
     }
     set jid3 $jid2/$res
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     if {![winfo exists $wtree]} {
 	return
@@ -1436,11 +1414,10 @@ proc ::Disco::PresenceHook {jid presence args} {
 # 'coccinella' element sent with presence. Therefore it is placed here.
 
 proc ::Disco::GetCoccinellaIP {jid3} {
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     
     set ip ""
-    set cociElem [$jstate(jlib) roster getextras $jid3 $coccixmlns(servers)]
+    set cociElem [::Jabber::Jlib roster getextras $jid3 $coccixmlns(servers)]
     if {$cociElem != {}} {
 	set ipElements [wrapper::getchildswithtag $cociElem ip]
 	set ip [wrapper::getcdata [lindex $ipElements 0]]
@@ -1449,12 +1426,11 @@ proc ::Disco::GetCoccinellaIP {jid3} {
 }
 
 proc ::Disco::InfoCmd {jid {node ""}} {
-    upvar ::Jabber::jstate jstate
 
     ::Debug 4 "::Disco::InfoCmd jid=$jid"
     
-    if {![$jstate(jlib) disco isdiscoed info $jid $node]} {
-	set xmllist [$jstate(jlib) disco get info xml $jid $node]
+    if {![::Jabber::Jlib disco isdiscoed info $jid $node]} {
+	set xmllist [::Jabber::Jlib disco get info xml $jid $node]
 	InfoResultCB result $jid $xmllist
     } else {
 	set opts {}
@@ -1462,7 +1438,7 @@ proc ::Disco::InfoCmd {jid {node ""}} {
 	    lappend opts -node $node
 	}
 	eval {
-	    $jstate(jlib) disco send_get info $jid [namespace current]::InfoCmdCB
+	    ::Jabber::Jlib disco send_get info $jid [namespace current]::InfoCmdCB
 	} $opts
     }
 }
@@ -1486,7 +1462,6 @@ proc ::Disco::InfoResultCB {type jid queryE args} {
     
     variable dlguid
     upvar ::Jabber::nsToText nsToText
-    upvar ::Jabber::jstate jstate
 
     set ujid [jlib::unescapejid $jid]
     set node [wrapper::getattribute $queryE node]
@@ -1538,7 +1513,6 @@ proc ::Disco::InfoResultCB {type jid queryE args} {
 
 proc ::Disco::BuildInfoPage {win jid {node ""}} {
     upvar ::Jabber::nsToText nsToText
-    upvar ::Jabber::jstate jstate
     
     set ujid [jlib::unescapejid $jid]
     if {$node eq ""} {
@@ -1563,7 +1537,7 @@ proc ::Disco::BuildInfoPage {win jid {node ""}} {
     $wtext tag configure feature -lmargin1 6
     $wtext insert end "Feature\tXML namespace\n" head
     
-    set features [$jstate(jlib) disco features $jid $node]
+    set features [::Jabber::Jlib disco features $jid $node]
     #set features [AccessFeatures $jid $node]
     
     set tfont [$wtext cget -font]
@@ -1597,14 +1571,14 @@ proc ::Disco::BuildInfoPage {win jid {node ""}} {
 }
 
 proc ::Disco::AutoDiscoServers {} {
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
+    global jprefs
     
     # Guard against empty elements. Old bug!
     lprune jprefs(disco,autoServers) {}
 
+    set server [::Jabber::Jlib getserver]
     foreach server $jprefs(disco,autoServers) {
-	if {![jlib::jidequal $server $jstate(server)]} {
+	if {![jlib::jidequal $server $server]} {
 	    DiscoServer $server
 	}
     }
@@ -1627,11 +1601,10 @@ namespace eval ::Disco {
 }
 
 proc ::Disco::AddServerDlg {} {
-    global  wDlgs config
+    global  wDlgs config jprefs
     variable dlgaddjid ""
     variable dlgpermanent 0
     variable waddservlist
-    upvar ::Jabber::jprefs jprefs
     
     set w $wDlgs(jdisaddserv)
 
@@ -1783,7 +1756,7 @@ proc ::Disco::AddCloseCmd {w} {
 }
 
 proc ::Disco::AddServerNone {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     set jprefs(disco,autoServers) [list]
 }
@@ -1794,7 +1767,7 @@ proc ::Disco::AddCancel {w} {
 }
 
 proc ::Disco::AddServerDo {w} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable dlgaddjid
     variable dlgpermanent
     
@@ -1840,13 +1813,13 @@ proc ::Disco::AddServerCB {type from queryE args} {
 #       shall remove it from the list.
 
 proc ::Disco::AddServerErrorCheck {from} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     lprune jprefs(disco,autoServers) $from
 }
 
 proc ::Disco::RemoveListing {jid} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable wtree
     
     set mjid [jlib::jidmap $jid]

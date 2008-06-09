@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.264 2008-04-17 15:00:29 matben Exp $
+# $Id: Jabber.tcl,v 1.265 2008-06-09 09:50:59 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -87,7 +87,7 @@ package require VCard
 
 package provide Jabber 1.0
 
-namespace eval ::Jabber:: {
+namespace eval ::Jabber {
     global  this prefs
     
     # Add all event hooks.
@@ -96,7 +96,6 @@ namespace eval ::Jabber:: {
 
     # Jabber internal storage.
     variable jstate
-    variable jprefs
     variable jserver
     variable jerror
     
@@ -326,10 +325,9 @@ proc ::Jabber::HaveWhiteboard {} {
 #       preferences.
 
 proc ::Jabber::FactoryDefaults {} {
-    global  this env prefs wDlgs sysFont
+    global  this env prefs wDlgs sysFont jprefs
     
     variable jstate
-    variable jprefs
     variable jserver
     
     # Network.
@@ -397,17 +395,16 @@ proc ::Jabber::FactoryDefaults {} {
 #                 {thePriority 20}}.
 
 proc ::Jabber::InitPrefsHook {} {
-    
+    global  jprefs
     variable jstate
-    variable jprefs
     variable jserver
     
     # The profile stuff here is OUTDATED and replaced.
 
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(port)             jprefs_port              $jprefs(port)]  \
-      [list ::Jabber::jprefs(sslport)          jprefs_sslport           $jprefs(sslport)]  \
-      [list ::Jabber::jprefs(agentsServers)    jprefs_agentsServers     $jprefs(agentsServers)]  \
+      [list jprefs(port)             jprefs_port              $jprefs(port)]  \
+      [list jprefs(sslport)          jprefs_sslport           $jprefs(sslport)]  \
+      [list jprefs(agentsServers)    jprefs_agentsServers     $jprefs(agentsServers)]  \
       [list ::Jabber::jserver(profile)         jserver_profile          $jserver(profile)      userDefault] \
       [list ::Jabber::jserver(profile,selected) jserver_profile_selected $jserver(profile,selected) userDefault] \
       ]
@@ -418,38 +415,32 @@ proc ::Jabber::InitPrefsHook {} {
 #       Accesor functions for various preference arrays.
 
 proc ::Jabber::GetjprefsArray {} {
-    variable jprefs
-    
+    global jprefs
     return [array get jprefs]
 }
 
 proc ::Jabber::GetjserverArray {} {
     variable jserver
-    
     return [array get jserver]
 }
 
 proc ::Jabber::SetjprefsArray {jprefsArrList} {
-    variable jprefs
-    
+    global jprefs
     array set jprefs $jprefsArrList
 }
 
 proc ::Jabber::GetIQRegisterElements {} {
-    variable jprefs
-
+    global jprefs
     return $jprefs(iqRegisterElem)
 }
 
 proc ::Jabber::GetServerJid {} {
     variable jstate
-
     return $jstate(server)
 }
 
 proc ::Jabber::GetServerIpNum {} {
     variable jstate
-    
     return $jstate(ipNum)
 }
 
@@ -487,21 +478,23 @@ proc ::Jabber::IsConnected {} {
     }
 }
 
+proc ::Jabber::GetJlib {} {
+    variable jstate
+    return $jstate(jlib)
+}
+
 proc ::Jabber::Jlib {args} {
     variable jstate
-    
     eval {$jstate(jlib)} $args
 }
 
 proc ::Jabber::RosterCmd {args}  {
     variable jstate
-    
     eval {$jstate(jlib) roster} $args
 }
 
 proc ::Jabber::DiscoCmd {args}  {
     variable jstate
-    
     eval {$jstate(jlib) disco} $args
 }
 
@@ -518,10 +511,9 @@ proc ::Jabber::DiscoCmd {args}  {
 #       none.
 
 proc ::Jabber::Init {} {
-    global  wDlgs prefs
+    global  wDlgs prefs jprefs
     
     variable jstate
-    variable jprefs
     variable coccixmlns
     variable xmppxmlns
     variable clientxmlns
@@ -681,11 +673,10 @@ proc ::Jabber::ExtractOptsFromXmldata {xmldata} {
 #       Note that XMPP IM requires all 'from' attributes to be bare JIDs.
 
 proc ::Jabber::SubscribeEvent {jlibname xmldata} {
-    global  config
+    global  config jprefs
     variable jstate
-    variable jprefs
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     set from [wrapper::getattribute $xmldata from]    
     set jid2 [jlib::barejid $from]
@@ -754,10 +745,10 @@ proc ::Jabber::SubscribedEvent {jlibname xmldata} {
 }
 
 proc ::Jabber::UnsubscribeEvent {jlibname xmldata} {
+    global jprefs
     variable jstate
-    variable jprefs
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     set from [wrapper::getattribute $xmldata from]    
     set subscription [$jlib roster getsubscription $from]
@@ -794,10 +785,10 @@ proc ::Jabber::UnsubscribeEvent {jlibname xmldata} {
 #                 previously-granted subscription has been cancelled."
 
 proc ::Jabber::UnsubscribedEvent {jlibname xmldata} {
+    global  jprefs
     variable jstate
-    variable jprefs
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     set from [wrapper::getattribute $xmldata from]    
     set subscription [$jlib roster getsubscription $from]
@@ -885,10 +876,9 @@ proc ::Jabber::PresenceHandler {jlibname xmldata} {
 #       none.
 
 proc ::Jabber::ClientProc {jlibName what args} {
-    global  wDlgs
+    global  wDlgs jprefs
     
     variable jstate
-    variable jprefs
     
     ::Debug 2 "::Jabber::ClientProc: jlibName=$jlibName, what=$what, args='$args'"
     
@@ -1052,29 +1042,28 @@ proc ::Jabber::ErrorLogDlg {} {
 #       none
 
 proc ::Jabber::DoCloseClientConnection {args} {
-    global  prefs
+    global  prefs jprefs
         
     variable jstate
-    variable jprefs
     
     ::Debug 2 "::Jabber::DoCloseClientConnection"
     
     array set argsA $args
     
     # Send unavailable information.
-    if {[$jstate(jlib) isinstream]} {
+    if {[::Jabber::Jlib isinstream]} {
 	set opts [list]
 	if {[info exists argsA(-status)] && [string length $argsA(-status)]} {
 	    lappend opts -status $argsA(-status)
 	}
-	eval {$jstate(jlib) send_presence -type unavailable} $opts
+	eval {::Jabber::Jlib send_presence -type unavailable} $opts
 
 	eval {::hooks::run setPresenceHook unavailable} $opts
 
 	# Do the actual closing.
 	#       There is a potential problem if called from within a xml parser 
 	#       callback which makes the subsequent parsing to fail. (after idle?)
-	after idle $jstate(jlib) closestream
+	after idle ::Jabber::Jlib closestream
     }
     SetClosedState
 }
@@ -1111,20 +1100,19 @@ proc ::Jabber::SetClosedState {} {
 #       This is supposed to be called only when doing Quit.
 #       Things are not cleaned up properly, since we kill ourselves.
 
-proc ::Jabber::EndSession {} {    
-    variable jstate
-    variable jprefs
+proc ::Jabber::EndSession {} {  
+    global  jprefs
     
     # Send unavailable information. Silently in case we got a network error.
-    if {[$jstate(jlib) isinstream]} {
+    if {[::Jabber::Jlib isinstream]} {
 	catch {
-	    $jstate(jlib) send_presence -type unavailable
+	    ::Jabber::Jlib send_presence -type unavailable
 	}
 	
 	# Do the actual closing.
 	#       There is a potential problem if called from within a xml parser 
 	#       callback which makes the subsequent parsing to fail. (after idle?)
-	$jstate(jlib) closestream
+	::Jabber::Jlib closestream
     }
 }
 
@@ -1198,7 +1186,7 @@ proc ::Jabber::IsMyGroupchatJid {jid} {
     variable jstate
     
     set room [jlib::barejid $jid]
-    set nick [$jstate(jlib) service mynick $room]
+    set nick [::Jabber::Jlib service mynick $room]
     set myjid $room/$nick
     return [jlib::jidequal $myjid $jid]
 }
@@ -1222,14 +1210,14 @@ proc ::Jabber::IsMyGroupchatJid {jid} {
 # Results:
 #       None.
 
-proc ::Jabber::SetStatus {type args} {    
+proc ::Jabber::SetStatus {type args} {  
+    global  jprefs
     variable jstate
-    variable jprefs
     
     ::Debug 4 "::Jabber::SetStatus type=$type, args=$args"
     
     # We protect against accidental calls. (logoutHook)
-    if {![$jstate(jlib) isinstream]} {
+    if {![::Jabber::Jlib isinstream]} {
 	return
     }
     array set argsA {
@@ -1280,7 +1268,7 @@ proc ::Jabber::SetStatus {type args} {
     
     # It is somewhat unclear here if we should have a type attribute
     # when sending initial presence, see XMPP 5.1.
-    eval {$jstate(jlib) send_presence} $presA
+    eval {::Jabber::Jlib send_presence} $presA
 	
     eval {::hooks::run setPresenceHook $type} $args
     
@@ -1294,7 +1282,7 @@ proc ::Jabber::SetStatus {type args} {
 	set toServer 1
     }
     if {$toServer && ($type eq "unavailable")} {
-	after idle $jstate(jlib) closestream	    
+	after idle ::Jabber::Jlib closestream	    
 	SetClosedState
     }
 }
@@ -1309,7 +1297,7 @@ proc ::Jabber::SyncStatus {} {
     variable jstate
     
     # We need to add -status to preserve it.
-    SetStatus [$jstate(jlib) mypresence] -status [$jstate(jlib) mypresencestatus]
+    SetStatus [::Jabber::Jlib mypresence] -status [::Jabber::Jlib mypresencestatus]
 }
 
 # Jabber::CreateCoccinellaPresElement --
@@ -1475,7 +1463,7 @@ proc ::Jabber::GetLast {to args} {
 	-silent 0
     }
     array set opts $args    
-    $jstate(jlib) get_last $to [list ::Jabber::GetLastResult $to $opts(-silent)]
+    ::Jabber::Jlib get_last $to [list ::Jabber::GetLastResult $to $opts(-silent)]
 }
 
 # Jabber::GetLastResult --
@@ -1555,7 +1543,7 @@ proc ::Jabber::GetTime {to args} {
 	-silent 0
     }
     array set opts $args    
-    $jstate(jlib) get_time $to [list ::Jabber::GetTimeResult $to $opts(-silent)]
+    ::Jabber::Jlib get_time $to [list ::Jabber::GetTimeResult $to $opts(-silent)]
 }
 
 proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
@@ -1650,7 +1638,7 @@ proc ::Jabber::GetVersion {to args} {
 	-silent 0
     }
     array set opts $args    
-    $jstate(jlib) get_version $to  \
+    ::Jabber::Jlib get_version $to  \
       [list ::Jabber::GetVersionResult $to $opts(-silent)]
 }
 
@@ -1803,7 +1791,7 @@ proc ::Jabber::ParseGetVersion {jlibname from subiq args} {
     }
     set xmllist [wrapper::createtag query -subtags $subtags  \
       -attrlist {xmlns jabber:iq:version}]
-    eval {$jstate(jlib) send_iq "result" [list $xmllist]} $opts
+    eval {::Jabber::Jlib send_iq "result" [list $xmllist]} $opts
 
     # Tell jlib's iq-handler that we handled the event.
     return 1
@@ -1845,7 +1833,7 @@ proc ::Jabber::ParseGetServers  {jlibname from subiq args} {
       [wrapper::createtag ip -chdata $ip -attrlist $attrhttpd]]
     set xmllist [wrapper::createtag query -subtags $subtags  \
       -attrlist [list xmlns $coccixmlns(servers)]]
-    eval {$jstate(jlib) send_iq "result" [list $xmllist]} $opts
+    eval {::Jabber::Jlib send_iq "result" [list $xmllist]} $opts
     
      # Tell jlib's iq-handler that we handled the event.
     return 1
@@ -1987,7 +1975,7 @@ proc ::Jabber::Passwd::Doit {w} {
     }
     set finished 1
     regexp -- {^([^@]+)@.+$} $jstate(mejid) match username
-    $jstate(jlib) register_set $username $password \
+    ::Jabber::Jlib register_set $username $password \
       [list [namespace current]::ResponseProc] -to $jstate(server)
     destroy $w
 
@@ -2057,11 +2045,10 @@ proc ::Jabber::Logout::OnMenuStatus {} {
 }
 
 proc ::Jabber::Logout::WithStatus {} {
-    global  prefs this wDlgs config
+    global  prefs this wDlgs config jprefs
 
     variable finished -1
     variable wtextstatus
-    upvar ::Jabber::jprefs jprefs
     upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Jabber::Logout::WithStatus"

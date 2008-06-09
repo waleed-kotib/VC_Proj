@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.103 2008-05-28 09:51:07 matben Exp $
+# $Id: NewMsg.tcl,v 1.104 2008-06-09 09:50:59 matben Exp $
 
 package require ui::entryex
 
@@ -112,22 +112,22 @@ proc ::NewMsg::Init {} {
 proc ::NewMsg::InitEach { } {
     
     variable locals
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "NewMsg::InitEach"
     
     set trpts [list]
-    set catL [$jstate(jlib) disco getallcategories gateway/*]
+    set catL [::Jabber::Jlib disco getallcategories gateway/*]
     regsub -all -- {gateway/} $catL {} trpts
     foreach type $trpts {
-	set jidL [$jstate(jlib) disco getjidsforcategory gateway/$type]
+	set jidL [::Jabber::Jlib disco getjidsforcategory gateway/$type]
 	set locals(servicejid,$type) [lindex $jidL 0]
     }
 
     # Disco doesn't return xmpp. Make sure it's first.
     set trpts [lsort [lsearch -all -not -inline $trpts xmpp]]
     set trpts [concat xmpp $trpts]
-    set locals(servicejid,xmpp) $jstate(server)
+    set server [::Jabber::Jlib getserver]
+    set locals(servicejid,xmpp) $server
     set locals(ourtransports) $trpts
 
     # Build popup defs.
@@ -168,11 +168,9 @@ proc ::NewMsg::OnMenu {} {
 #       shows window.
 
 proc ::NewMsg::Build {args} {
-    global  this prefs wDlgs config
+    global  this prefs wDlgs config jprefs
     
     variable locals  
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
 
     ::Debug 2 "::NewMsg::Build args='$args'"
 
@@ -536,7 +534,6 @@ proc ::NewMsg::ShowToolbar {w} {
 
 proc ::NewMsg::FillInAddresses {w jidL} {
     variable locals
-    upvar ::Jabber::jstate jstate
     
     # If -tolist option. This can have jid's with and without any resource.
     # Be careful to treat this according to the XMPP spec!
@@ -554,7 +551,7 @@ proc ::NewMsg::FillInAddresses {w jidL} {
 	if {$n > 1} {
 	    FillAddrLine $w $waddr $n
 	}	    
-	set ujid [jlib::unescapejid [$jstate(jlib) getrecipientjid $jid]]
+	set ujid [jlib::unescapejid [::Jabber::Jlib getrecipientjid $jid]]
 	set locals($w,addr$n) $ujid
 	
 	# Set popup if transport.
@@ -571,7 +568,6 @@ proc ::NewMsg::FillInAddresses {w jidL} {
 proc ::NewMsg::NewAddrLine {w wfr n} {
     global  wDlgs
     variable locals
-    upvar ::Jabber::jstate jstate
     
     set bg1   [option get $wfr entry1Background {}]
     set fg1   [option get $wfr entry1Foreground {}]
@@ -583,7 +579,7 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     
     set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
     
-    set jidL [$jstate(jlib) roster getusers]
+    set jidL [::Jabber::Jlib roster getusers]
     set num $locals($w,num)
     frame $wfr.f$n -bd 0
     entry $wfr.f$n.trpt -width 18 -bd 0 -highlightthickness 0 \
@@ -880,7 +876,6 @@ proc ::NewMsg::CommandReturnKeyPress {w} {
 
 proc ::NewMsg::DoSend {w} {
     global  prefs wDlgs
-    upvar ::Jabber::jstate jstate
     
     variable locals
     
@@ -954,7 +949,7 @@ proc ::NewMsg::DoSend {w} {
     if {[string length $locals($w,subject)] > 0} {
 	lappend opts -subject $locals($w,subject)
     }
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     if {!$stop} {
 	foreach jid $jidL {
 	    set jid2 [jlib::barejid $jid]

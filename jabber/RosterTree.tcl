@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the roster tree using treectrl.
 #      
-#  Copyright (c) 2005-2007  Mats Bengtsson
+#  Copyright (c) 2005-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.106 2008-06-08 14:09:36 matben Exp $
+# $Id: RosterTree.tcl,v 1.107 2008-06-09 09:51:00 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -563,9 +563,8 @@ proc ::RosterTree::DnDLeave {win data dndtype} {
 }
 
 proc ::RosterTree::NotifyDragReceive {T dragged target} {
-    upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
         
     # Protect for a situation where items have disapperared.
     if {[$T item id $target] eq ""} {
@@ -748,21 +747,19 @@ proc ::RosterTree::EditButtonRelease {x y} {
 
 proc ::RosterTree::EditOnReturn {jid name} {
     variable T
-    upvar ::Jabber::jstate jstate
         
-    set jid [$jstate(jlib) roster getrosterjid $jid]
-    set groups [$jstate(jlib) roster getgroups $jid]
-    $jstate(jlib) roster send_set $jid -name $name -groups $groups
+    set jid [::Jabber::Jlib roster getrosterjid $jid]
+    set groups [::Jabber::Jlib roster getgroups $jid]
+    ::Jabber::Jlib roster send_set $jid -name $name -groups $groups
     focus $T
 }
 
 proc ::RosterTree::EditEnd {jid} {
     variable T
-    upvar ::Jabber::jstate jstate
     
     # Restore item with its original style.
-    set jid [$jstate(jlib) roster getrosterjid $jid]
-    eval {::Roster::SetItem $jid} [$jstate(jlib) roster getrosteritem $jid]
+    set jid [::Jabber::Jlib roster getrosterjid $jid]
+    eval {::Roster::SetItem $jid} [::Jabber::Jlib roster getrosteritem $jid]
 }
 
 proc ::RosterTree::EditTimerCancel {} {
@@ -783,9 +780,8 @@ proc ::RosterTree::EditTimerCancel {} {
 #         2) a user picked one which is cached in this(backgroundsPath)
 
 proc ::RosterTree::BackgroundImageCmd {} {
-    global  this
+    global  this jprefs
     variable T
-    upvar ::Jabber::jprefs jprefs
     
     set mimes [list image/gif image/png image/jpeg]
     set suffL [::Media::GetSupportedSuffixesForMimeList $mimes]
@@ -860,8 +856,7 @@ proc ::RosterTree::BackgroundImageGetThemedFile {suffL} {
 #       Return empty if not configured with background image.
 
 proc ::RosterTree::BackgroundImageGetFile {suffL defaultFile} {
-    global  this
-    upvar ::Jabber::jprefs jprefs
+    global  this jprefs
     
     set fileName ""
     if {$jprefs(rost,useBgImage)} {
@@ -1003,15 +998,14 @@ proc ::RosterTree::OnDoubleClick {x y} {
 }
 
 proc ::RosterTree::ActionDoubleClick {jid} {
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
+    global jprefs
     
     set jid2 [jlib::barejid $jid]
 	    
     if {[string equal $jprefs(rost,dblClk) "normal"]} {
 	::NewMsg::Build -to $jid2
     } elseif {[string equal $jprefs(rost,dblClk) "chat"]} {
-	if {[$jstate(jlib) roster isavailable $jid]} {
+	if {[::Jabber::Jlib roster isavailable $jid]} {
 	    
 	    # We let Chat handle this internally.
 	    ::Chat::StartThread $jid2
@@ -1100,7 +1094,6 @@ proc ::RosterTree::GetExtSelectedJID {} {
 
 proc ::RosterTree::OnPopup {x y} {
     variable T
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "::RosterTree::OnPopup"
 
@@ -1407,11 +1400,8 @@ if {$rosterTreeTagMethod eq "array"} {
 #       a list {item tag ?item tag? ...}
 
 proc ::RosterTree::CreateItemBase {jid presence args} {    
+    global  jprefs
     variable T
-    upvar ::Jabber::jstate  jstate
-    upvar ::Jabber::jprefs  jprefs
-    
-    #::Debug 4 "::RosterTree::CreateItemBase jid=$jid, presence=$presence, $args"
 
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
@@ -1425,7 +1415,7 @@ proc ::RosterTree::CreateItemBase {jid presence args} {
 	}	
     } else {
 	if {$presence eq "available"} {
-	    set show [$jstate(jlib) roster getshow $jid]
+	    set show [::Jabber::Jlib roster getshow $jid]
 	    if {$show ne ""} {
 		if {[info exists jprefs(rost,show-$show)]} {
 		    if {!$jprefs(rost,show-$show)} {
@@ -1570,12 +1560,13 @@ proc ::RosterTree::DeleteItemBase {jid} {
 
 proc ::RosterTree::BasePostProcessDiscoInfo {from column elem} {
     variable T
-    upvar ::Jabber::jstate jstate
 	
     # Investigate all roster items that are in any way related to the discoe'd
     # item. We'll get the roster JIDs, usually bare JID.
     set jidL [::Roster::GetUsersWithSameHost $from]
     
+    set jlib [::Jabber::GetJlib]
+
     foreach jid $jidL {
 	
 	# Ordinary users and so far unrecognized transports.
@@ -1590,7 +1581,6 @@ proc ::RosterTree::BasePostProcessDiscoInfo {from column elem} {
 	    foreach item [FindWithTag $tag] {
 		#if {[GetItemsHeadClass $item] ne "transport"}
 		if {![HasItemAncestorWithTag $item [list head transport]]} {
-		    set jlib $jstate(jlib)
 		    DeleteWithTag $tag
 		    eval {::Roster::SetItem $jid} [$jlib roster getrosteritem $jid]
 		    break
@@ -1618,7 +1608,6 @@ proc ::RosterTree::MCHead {str} {
 #       Make a standard display text.
 
 proc ::RosterTree::MakeDisplayText {jid presence args} {
-    upvar ::Jabber::jstate jstate
 
     array set argsA $args
     
@@ -1634,7 +1623,7 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
     # Note that some (icq) transports have 3-tier items that are unavailable!
 
     set istrpt [::Roster::IsTransportEx $jid]
-    set server $jstate(server)
+    set server [::Jabber::Jlib getserver]
 
     if {[info exists argsA(-name)] && ($argsA(-name) ne "")} {
 	set str $argsA(-name)
@@ -1642,7 +1631,7 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
 	set str [::Nickname::Get [jlib::barejid $jid]]
 	if {$str eq ""} {	
 	    jlib::splitjidex $jid node domain res
-	    if {$domain eq $jstate(server)} {
+	    if {$domain eq $server} {
 		set str [jlib::unescapestr $node]
 	    } else {
 		set ujid [jlib::unescapejid $jid]
@@ -1676,7 +1665,6 @@ proc ::RosterTree::MakeDisplayText {jid presence args} {
 proc ::RosterTree::Balloon {jid presence item args} {
     variable T    
     variable balloon
-    upvar ::Jabber::jstate jstate
 
     array set argsA $args
     
@@ -1692,7 +1680,7 @@ proc ::RosterTree::Balloon {jid presence item args} {
     append msg "\n" [::Roster::MapShowToText $show]
 
     if {[string equal $presence "available"]} {
-	set delay [$jstate(jlib) roster getx $jid "jabber:x:delay"]
+	set delay [::Jabber::Jlib roster getx $jid "jabber:x:delay"]
 	if {$delay ne ""} {
 	    
 	    # An ISO 8601 point-in-time specification. clock works!
@@ -1728,9 +1716,6 @@ proc ::RosterTree::Balloon {jid presence item args} {
 
 proc ::RosterTree::BalloonRegister {key jid msg} {
     variable balloon
-    upvar ::Jabber::jstate jstate
-    
-    #puts "=========::RosterTree::BalloonRegister $key $jid msg=$msg"
     
     set mjid [jlib::jidmap $jid]
     if {$msg eq ""} {
@@ -1747,11 +1732,10 @@ proc ::RosterTree::BalloonRegister {key jid msg} {
 #       jid:    bare or full JID; if bare set for all full JIDs
 
 proc ::RosterTree::BalloonSetForJID {jid} {
-    upvar ::Jabber::jstate jstate
     
     jlib::splitjid $jid jid2 res
     if {[jlib::isfulljid $jid]} {
-	array set presA [$jstate(jlib) roster getpresence $jid2 -resource $res]
+	array set presA [::Jabber::Jlib roster getpresence $jid2 -resource $res]
 	
 	set tag [list jid $jid]
 	foreach item [FindWithTag $tag] {
@@ -1759,7 +1743,7 @@ proc ::RosterTree::BalloonSetForJID {jid} {
 	    eval {Balloon $jid $presA(-type) $item} [array get presA]
 	}
     } else {
-	set presL [$jstate(jlib) roster getpresence $jid2]
+	set presL [::Jabber::Jlib roster getpresence $jid2]
 	#puts "presL=$presL"
 	foreach p $presL {
 	    array unset presA
@@ -1793,16 +1777,15 @@ proc ::RosterTree::QuitHook { } {
 }
 
 proc ::RosterTree::NicknameEventHook {xmldata jid nickname} {
-    upvar ::Jabber::jstate jstate
     
     # Some servers seem to push out my own nickname.
-    if {[jlib::jidequal $jid [$jstate(jlib) myjid2]]} {
+    if {[jlib::jidequal $jid [::Jabber::Jlib myjid2]]} {
 	return
     }
     
     # Just repopulate item.
-    set jid [$jstate(jlib) roster getrosterjid $jid]
-    eval {::Roster::SetItem $jid} [$jstate(jlib) roster getrosteritem $jid]    
+    set jid [::Jabber::Jlib roster getrosterjid $jid]
+    eval {::Roster::SetItem $jid} [::Jabber::Jlib roster getrosteritem $jid]    
 }
 
 # RosterTree::GetClosed --
@@ -1810,7 +1793,7 @@ proc ::RosterTree::NicknameEventHook {xmldata jid nickname} {
 #       Keep track of all closed tree items. Default is all open.
 
 proc ::RosterTree::GetClosed {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     set jprefs(rost,closedItems) [GetClosedItems root]
 }

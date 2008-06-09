@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: Notifier.tcl,v 1.11 2008-04-17 15:00:28 matben Exp $
+# $Id: Notifier.tcl,v 1.12 2008-06-09 09:50:59 matben Exp $
 
 namespace eval ::Notifier {
     
@@ -54,12 +54,12 @@ proc ::Notifier::Init {} {
 }
 
 proc ::Notifier::InitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 
     set jprefs(notifier,state) 0
     
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(notifier,state)  jprefs_notifier_state  $jprefs(notifier,state)]]   
+      [list jprefs(notifier,state)  jprefs_notifier_state  $jprefs(notifier,state)]]   
 }
 
 proc ::Notifier::MessageHook {xmldata uuid} {
@@ -137,7 +137,7 @@ proc ::Notifier::FileTransferRecvHook {jid name size} {
 }
 
 proc ::Notifier::DisplayMsg {str} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     # @@@ ::UI::IsAppInFront is not reliable...
     if {$jprefs(notifier,state) && ![::UI::IsAppInFront]} {

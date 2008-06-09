@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.67 2008-05-28 09:51:07 matben Exp $
+# $Id: JPrefs.tcl,v 1.68 2008-06-09 09:50:59 matben Exp $
 
 package require ui::fontselector
 
@@ -37,8 +37,7 @@ namespace eval ::JPrefs {
 
 
 proc ::JPrefs::InitPrefsHook { } {
-    global  prefs
-    upvar ::Jabber::jprefs jprefs
+    global  prefs jprefs
     
     # Defaults...
     set prefs(opacity) 100.0
@@ -76,19 +75,19 @@ proc ::JPrefs::InitPrefsHook { } {
     set jprefsRegList {}
     foreach key $jprefs(iqRegisterElem) {
 	lappend jprefsRegList [list  \
-	  ::Jabber::jprefs(iq:register,$key) jprefs_iq_register_$key   \
+	  jprefs(iq:register,$key) jprefs_iq_register_$key   \
 	  $jprefs(iq:register,$key) userDefault]
     }
     ::PrefUtils::Add $jprefsRegList
     
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(chatFont)         jprefs_chatFont          $jprefs(chatFont)]  \
-      [list ::Jabber::jprefs(chat,tabbedui)    jprefs_chat_tabbedui     $jprefs(chat,tabbedui)]  \
-      [list ::Jabber::jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
-      [list ::Jabber::jprefs(autoLogin)        jprefs_autoLogin         $jprefs(autoLogin)]  \
-      [list ::Jabber::jprefs(disco,autoServers)  jprefs_disco_autoServers  $jprefs(disco,autoServers)]  \
-      [list ::Jabber::jprefs(rememberDialogs)  jprefs_rememberDialogs   $jprefs(rememberDialogs)]  \
-      [list ::Jabber::jprefs(chat,dialogs)     jprefs_chat_dialogs      $jprefs(chat,dialogs)]  \
+      [list jprefs(chatFont)         jprefs_chatFont          $jprefs(chatFont)]  \
+      [list jprefs(chat,tabbedui)    jprefs_chat_tabbedui     $jprefs(chat,tabbedui)]  \
+      [list jprefs(inboxSave)        jprefs_inboxSave         $jprefs(inboxSave)]  \
+      [list jprefs(autoLogin)        jprefs_autoLogin         $jprefs(autoLogin)]  \
+      [list jprefs(disco,autoServers)  jprefs_disco_autoServers  $jprefs(disco,autoServers)]  \
+      [list jprefs(rememberDialogs)  jprefs_rememberDialogs   $jprefs(rememberDialogs)]  \
+      [list jprefs(chat,dialogs)     jprefs_chat_dialogs      $jprefs(chat,dialogs)]  \
       ]
     
     if {[llength $jprefs(chatFont)]} {
@@ -122,11 +121,10 @@ proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::JPrefs::BuildAppearancePage {page} {
-    global  this prefs wDlgs
+    global  this prefs wDlgs jprefs
     
     variable tmpJPrefs
     variable tmpPrefs
-    upvar ::Jabber::jprefs jprefs
     
     foreach key {rost,useBgImage chat,tabbedui chatFont} {
 	set tmpJPrefs($key) $jprefs($key)
@@ -268,11 +266,10 @@ proc ::JPrefs::BuildQtSetup {} {
 }
 
 proc ::JPrefs::BuildCustomPage {page} {
-    global  this prefs
+    global  this prefs jprefs
     
     variable tmpJPrefs
     variable tmpPrefs
-    upvar ::Jabber::jprefs jprefs
         
     foreach key {inboxSave autoLogin notifier,state rememberDialogs} {
 	if {[info exists jprefs($key)]} {
@@ -362,8 +359,7 @@ proc ::JPrefs::SetOpacity {opacity} {
 }
 
 proc ::JPrefs::SavePrefsHook {} {
-    global  prefs this
-    upvar ::Jabber::jprefs jprefs
+    global  prefs this jprefs
     upvar ::Jabber::jstate jstate
     variable tmpJPrefs
     variable tmpPrefs
@@ -396,8 +392,7 @@ proc ::JPrefs::SavePrefsHook {} {
 }
 
 proc ::JPrefs::CancelPrefsHook {} {
-    global  prefs this
-    upvar ::Jabber::jprefs jprefs
+    global  prefs this jprefs
     variable tmpJPrefs
     variable tmpPrefs
 	
@@ -426,7 +421,7 @@ proc ::JPrefs::CancelPrefsHook {} {
 }
 
 proc ::JPrefs::UserDefaultsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpJPrefs
 	
     foreach key [array names tmpJPrefs] {

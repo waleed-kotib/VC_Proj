@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.24 2008-06-07 06:50:38 matben Exp $
+# $Id: Enter.tcl,v 1.25 2008-06-09 09:50:59 matben Exp $
 
 package provide Enter 1.0
 
@@ -42,12 +42,10 @@ namespace eval ::Enter {
 #       "cancel" or "enter".
 
 proc ::Enter::Build {protocol args} {
-    global  this wDlgs
+    global  this wDlgs jprefs
 
     variable uid
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
-    upvar ::Jabber::jprefs jprefs
 
     array set argsA {
 	-autobrowse     0
@@ -61,7 +59,7 @@ proc ::Enter::Build {protocol args} {
     } elseif {[info exists argsA(-server)]} {
 	set service $argsA(-server)
     }
-    set services [$jstate(jlib) disco getconferences]
+    set services [::Jabber::Jlib disco getconferences]
 
     ::Debug 2 "::Enter::Build services='$services'"
 
@@ -239,7 +237,7 @@ proc ::Enter::Build {protocol args} {
 	# Get a freash list each time.
 	BusyEnterDlgIncr $token
 	update idletasks
-	$jstate(jlib) disco send_get items $state(server)  \
+	::Jabber::Jlib disco send_get items $state(server)  \
 	  [list [namespace current]::GetRoomsCB $token]
     }
 
@@ -369,10 +367,9 @@ proc ::Enter::BmarkCmd {token name jid opts} {
 proc ::Enter::Browse {token} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
        
     BusyEnterDlgIncr $token
-    $jstate(jlib) disco send_get items $state(server)  \
+    ::Jabber::Jlib disco send_get items $state(server)  \
       [list [namespace current]::GetRoomsCB $token]
 }
 
@@ -409,13 +406,12 @@ proc ::Enter::GetRoomsCB {token browsename type jid subiq args} {
 proc ::Enter::ConfigRoomList {token} {    
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     
     ::Debug 4 "::Enter::ConfigRoomList"
 
     # Fill in room list if exist else get.    
     # @@@ Replace with 'disco get_async'
-    if {[$jstate(jlib) disco isdiscoed items $state(server)]} {
+    if {[::Jabber::Jlib disco isdiscoed items $state(server)]} {
 	FillRoomList $token
     } else {
 	if {$state(-autobrowse)} {
@@ -430,13 +426,12 @@ proc ::Enter::ConfigRoomList {token} {
 proc ::Enter::FillRoomList {token} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     
     ::Debug 4 "::Enter::FillRoomList"
     
     set roomL [list]
     if {[string length $state(server)]} {
-	set allRooms [$jstate(jlib) disco children $state(server)]
+	set allRooms [::Jabber::Jlib disco children $state(server)]
 	foreach roomjid $allRooms {
 	    jlib::splitjidex $roomjid node - -
 	    lappend roomL [jlib::unescapestr $node]
@@ -503,18 +498,17 @@ proc ::Enter::PrepPrepDoEnter {token} {
 proc ::Enter::PrepDoEnter {token} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
     
     set service $state(server)
     
     if {$state(protocol) eq "muc"} {
-	set hasmuc [$jstate(jlib) disco hasfeature $xmppxmlns(muc) $service]
+	set hasmuc [::Jabber::Jlib disco hasfeature $xmppxmlns(muc) $service]
 	if {$hasmuc} {
 	    DoEnter $token
 	} else {
 	    set callback [list [namespace current]::DiscoCallback $token]
-	    $jstate(jlib) disco send_get info $service $callback
+	    ::Jabber::Jlib disco send_get info $service $callback
 	}
     } else {
 	DoEnter $token
@@ -527,7 +521,6 @@ proc ::Enter::PrepDoEnter {token} {
 proc ::Enter::DiscoCallback {token jlibname type from subiq args} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
 
     ::Debug 4 "::Enter::DiscoCallback"
@@ -542,7 +535,7 @@ proc ::Enter::DiscoCallback {token jlibname type from subiq args} {
 	    DoEnter $token
 	}
 	default {
-	    set hasmuc [$jstate(jlib) disco hasfeature $xmppxmlns(muc) $service]
+	    set hasmuc [::Jabber::Jlib disco hasfeature $xmppxmlns(muc) $service]
 	    if {!$hasmuc} {
 		set state(protocol) "gc-1.0"
 	    }	    
@@ -554,7 +547,6 @@ proc ::Enter::DiscoCallback {token jlibname type from subiq args} {
 proc ::Enter::DoEnter {token} {
     variable $token
     upvar 0 $token state
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
     
     ::Debug 4 "::Enter::DoEnter"
@@ -571,12 +563,12 @@ proc ::Enter::DoEnter {token} {
     switch -- $state(protocol) {
 	"muc" {
 	    set callback [list [namespace current]::MUCCallback $token]
-	    eval {$jstate(jlib) muc enter $roomjid $nickname \
+	    eval {::Jabber::Jlib muc enter $roomjid $nickname \
 		  -command $callback} $opts
 	}
 	"gc-1.0" {
 	    set callback [list [namespace current]::GCCallback $token]
-	    $jstate(jlib) groupchat enter $roomjid $nickname \
+	    ::Jabber::Jlib groupchat enter $roomjid $nickname \
 	      -command $callback
 	}
     }

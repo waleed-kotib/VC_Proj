@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.252 2008-06-08 14:09:36 matben Exp $
+# $Id: GroupChat.tcl,v 1.253 2008-06-09 09:50:59 matben Exp $
 
 package require Create
 package require Enter
@@ -258,14 +258,13 @@ proc ::GroupChat::QuitAppHook {} {
 #       jid         is either a service or a room jid
 
 proc ::GroupChat::HaveMUC {{jid ""}} {
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::xmppxmlns xmppxmlns
 
     set ans 0
     if {$jid eq ""} {
-	set allConfServ [$jstate(jlib) disco getconferences]
+	set allConfServ [::Jabber::Jlib disco getconferences]
 	foreach serv $allConfServ {
-	    if {[$jstate(jlib) disco hasfeature $xmppxmlns(muc) $serv]} {
+	    if {[::Jabber::Jlib disco hasfeature $xmppxmlns(muc) $serv]} {
 		set ans 1
 	    }
 	}
@@ -274,7 +273,7 @@ proc ::GroupChat::HaveMUC {{jid ""}} {
 	# We must query the service, not the room, for browse to work.
 	jlib::splitjidex $jid node service -
 	if {$service ne ""} {
-	    if {[$jstate(jlib) disco hasfeature $xmppxmlns(muc) $service]} {
+	    if {[::Jabber::Jlib disco hasfeature $xmppxmlns(muc) $service]} {
 		set ans 1
 	    }
 	}
@@ -319,7 +318,7 @@ proc ::GroupChat::IsInRoom {roomjid} {
 #       "cancel" or "enter".
 
 proc ::GroupChat::EnterOrCreate {what args} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 
     ::Debug 2 "::GroupChat::EnterOrCreate what=$what, args='$args'"
     
@@ -493,7 +492,7 @@ proc ::GroupChat::NormalMsgHook {xmldata uuid} {
 #       chattoken
 
 proc ::GroupChat::NewChat {roomjid} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     if {$jprefs(chat,tabbedui)} {
 	set dlgtoken [GetFirstDlgToken]
@@ -523,11 +522,9 @@ proc ::GroupChat::NewChat {roomjid} {
 #       updates UI.
 
 proc ::GroupChat::GotMsg {xmldata} {
-    global  prefs
+    global  prefs jprefs
     
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
-        
+
     set from [wrapper::getattribute $xmldata from]
     if {$from eq ""} {
 	return
@@ -586,13 +583,11 @@ proc ::GroupChat::GotMsg {xmldata} {
 #       shows window, returns token.
 
 proc ::GroupChat::Build {roomjid} {
-    global  prefs wDlgs this
+    global  prefs wDlgs this jprefs
     
     variable protocol
     variable uiddlg
     variable cprefs
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::GroupChat::Build roomjid=$roomjid"
 
@@ -769,7 +764,7 @@ proc ::GroupChat::ShowToolbar {dlgtoken} {
 #       chattoken
 
 proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
-    global  this config
+    global  this config jprefs
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
 
@@ -777,9 +772,6 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     variable cprefs
     variable protocol
 
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
-    
     ::Debug 2 "::GroupChat::BuildRoomWidget, roomjid=$roomjid"
 
     # Initialize the state variable, an array, that keeps is the storage.
@@ -818,7 +810,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set chatstate(wroom)          $wroom
     set chatstate(roomjid)        $roomjid
     set chatstate(dlgtoken)       $dlgtoken
-    set chatstate(roomName)       [$jstate(jlib) disco name $roomjid]
+    set chatstate(roomName)       [::Jabber::Jlib disco name $roomjid]
     set chatstate(subject)        ""
     set chatstate(show)           "available"
     set chatstate(oldShow)        "available"
@@ -1199,10 +1191,9 @@ proc ::GroupChat::OnDestroyChat {chattoken} {
 #       notebook and pages.
 
 proc ::GroupChat::NewPage {dlgtoken roomjid args} {
-    global  this
+    global  this jprefs
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
-    upvar ::Jabber::jprefs jprefs
 	
     # If no notebook, move chat widget to first notebook page.
     if {[string equal [winfo class [pack slaves $dlgstate(wcont)]] "GroupChatRoom"]} {
@@ -1958,8 +1949,8 @@ proc ::GroupChat::TreePopup {chattoken T x y} {
 }
 
 proc ::GroupChat::DoubleClick {T x y} {
+    global jprefs
     variable editTimer
-    upvar ::Jabber::jprefs jprefs
 
     unset -nocomplain editTimer
 
@@ -1983,7 +1974,6 @@ proc ::GroupChat::TreeCreateUserItem {chattoken jid3} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     variable userRoleToStr
-    upvar ::Jabber::jstate jstate
     
     set T $chatstate(wusers)
     
@@ -2011,7 +2001,7 @@ proc ::GroupChat::TreeCreateUserItem {chattoken jid3} {
 	set item [TreeCreateWithTag $T $tag $pitem]
 	$T item style set $item cTree styUser
     }
-    set text [$jstate(jlib) service nick $jid3]
+    set text [::Jabber::Jlib service nick $jid3]
     set text [jlib::unescapestr $text]
     set image [::Roster::GetPresenceIconFromJid $jid3]
     $T item element configure $item cTree  \
@@ -2237,7 +2227,7 @@ proc ::GroupChat::ExStatusCmd {chattoken} {
 }
 
 proc ::GroupChat::StatusSyncHook {show args} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 
     if {$show eq "unavailable"} {
 	# This is better handled via the logout hook.
@@ -2542,12 +2532,11 @@ proc ::GroupChat::ExitWarn {chattoken} {
 proc ::GroupChat::Exit {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2  "::GroupChat::Exit $chattoken"
 
     set roomjid $chatstate(roomjid)
-    $jstate(jlib) presence_deregister_ex [namespace code PresenceEvent]  \
+    ::Jabber::Jlib presence_deregister_ex [namespace code PresenceEvent]  \
       -from2 $roomjid
     if {[::Jabber::IsConnected]} {
 	set nick [::Jabber::Jlib service mynick $roomjid]
@@ -2556,7 +2545,7 @@ proc ::GroupChat::Exit {chattoken} {
 	set xmldata [wrapper::createtag "presence" -attrlist $attr]
 	::History::XPutItem send $roomjid $xmldata
 
-	$jstate(jlib) service exitroom $roomjid	
+	::Jabber::Jlib service exitroom $roomjid	
 	::hooks::run groupchatExitRoomHook $roomjid
     }
 }
@@ -2577,8 +2566,8 @@ proc ::GroupChat::ExitRoomJID {roomjid} {
 }
 
 proc ::GroupChat::ConfigureTextTags {w wtext} {
+    global jprefs
     variable groupChatOptions
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::GroupChat::ConfigureTextTags wtext=$wtext"
     
@@ -2633,8 +2622,8 @@ proc ::GroupChat::ConfigureTextTags {w wtext} {
 }
 
 proc ::GroupChat::ConfigureSchemeTags {wtext} {
+    global jprefs
     variable schemes
-    upvar ::Jabber::jprefs jprefs
     
     # Color scheme tags.
     set use $jprefs(gchat,useScheme)
@@ -2659,7 +2648,7 @@ proc ::GroupChat::SetSchemeAll {} {
 }
 
 proc ::GroupChat::SetFontAll {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     foreach chattoken [GetTokenList chat] {
 	variable $chattoken
@@ -2861,7 +2850,6 @@ proc ::GroupChat::PresenceEvent {jlibname xmldata} {
 proc ::GroupChat::InsertPresenceChange {chattoken xmldata} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jstate jstate
             
     if {[info exists chatstate(w)] && [winfo exists $chatstate(w)]} {
 	
@@ -2879,7 +2867,6 @@ proc ::GroupChat::InsertPresenceChange {chattoken xmldata} {
 proc ::GroupChat::PresenceGetString {chattoken xmldata} {
     variable $chattoken
     upvar 0 $chattoken chatstate
-    upvar ::Jabber::jstate jstate
     
     set from [wrapper::getattribute $xmldata from]
     jlib::splitjid $from jid2 res
@@ -2890,9 +2877,9 @@ proc ::GroupChat::PresenceGetString {chattoken xmldata} {
 	set name $res
     }
     if {$res eq ""} {
-	array set presA [lindex [$jstate(jlib) roster getpresence $jid2] 0]
+	array set presA [lindex [::Jabber::Jlib roster getpresence $jid2] 0]
     } else {
-	array set presA [$jstate(jlib) roster getpresence $jid2 -resource $res]
+	array set presA [::Jabber::Jlib roster getpresence $jid2 -resource $res]
     }
     set show $presA(-type)
     if {[info exists presA(-show)]} {
@@ -2912,11 +2899,9 @@ proc ::GroupChat::AddUsers {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    upvar ::Jabber::jstate jstate
-    
     set roomjid $chatstate(roomjid)
     
-    set presenceList [$jstate(jlib) roster getpresence $roomjid -type available]
+    set presenceList [::Jabber::Jlib roster getpresence $roomjid -type available]
     foreach pres $presenceList {
 	unset -nocomplain presA
 	array set presA $pres
@@ -2944,7 +2929,6 @@ proc ::GroupChat::SetUser {roomjid jid3} {
     global  this
 
     variable userRoleToStr
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::GroupChat::SetUser roomjid=$roomjid, jid3=$jid3"
 
@@ -2979,10 +2963,9 @@ proc ::GroupChat::SetUser {roomjid jid3} {
 }
 
 proc ::GroupChat::GetRoleFromJid {jid3} {
-    upvar ::Jabber::jstate jstate
    
     set role ""
-    set userElem [$jstate(jlib) roster getx $jid3 "muc#user"]
+    set userElem [::Jabber::Jlib roster getx $jid3 "muc#user"]
     if {$userElem != {}} {
 	set ilist [wrapper::getchildswithtag $userElem "item"]
 	if {$ilist != {}} {
@@ -3388,14 +3371,13 @@ proc ::GroupChat::BookmarkRoom {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     variable bookmarks
-    upvar ::Jabber::jstate jstate
     
     set roomjid $chatstate(roomjid)
-    set name [$jstate(jlib) disco name $roomjid]
+    set name [::Jabber::Jlib disco name $roomjid]
     if {$name eq ""} {
 	set name $roomjid
     }
-    set nick [$jstate(jlib) service mynick $roomjid]
+    set nick [::Jabber::Jlib service mynick $roomjid]
     
     # Add only if name not there already.
     foreach bmark $bookmarks {
@@ -3416,7 +3398,6 @@ proc ::GroupChat::BookmarkRoom {chattoken} {
 
 proc ::GroupChat::BookmarkSendSet {} {
     variable bookmarks
-    upvar ::Jabber::jstate jstate
     
     set confElems [list]
     foreach bmark $bookmarks {
@@ -3449,18 +3430,17 @@ proc ::GroupChat::BookmarkSendSet {} {
     set queryElem [wrapper::createtag "query"  \
       -attrlist [list xmlns "jabber:iq:private"] -subtags [list $storageElem]]
     
-    $jstate(jlib) send_iq set [list $queryElem]
+    ::Jabber::Jlib send_iq set [list $queryElem]
 }
 
 proc ::GroupChat::BookmarkSendGet {callback} {
-    upvar ::Jabber::jstate jstate
     
     set storageElem [wrapper::createtag "storage"  \
       -attrlist [list xmlns storage:bookmarks]]
     set queryElem [wrapper::createtag "query"  \
       -attrlist [list xmlns "jabber:iq:private"] -subtags [list $storageElem]]
 
-    $jstate(jlib) send_iq get [list $queryElem] -command $callback
+    ::Jabber::Jlib send_iq get [list $queryElem] -command $callback
 }
 
 proc ::GroupChat::OnMenuBookmark {} {
@@ -3576,8 +3556,8 @@ proc ::GroupChat::BookmarkFlatToBookmarks {flat} {
 }
 
 proc ::GroupChat::BookmarkBuildMenu {m cmd} {
+    global jprefs
     variable bookmarks
-    upvar ::Jabber::jprefs jprefs
    
     menu $m -tearoff 0
 
@@ -3653,7 +3633,7 @@ namespace eval ::GroupChat {
 }
 
 proc ::GroupChat::InitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable schemes
     
     # Defaults...    
@@ -3667,12 +3647,12 @@ proc ::GroupChat::InitPrefsHook {} {
     set jprefs(gchat,bookmarks) {}
 	
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(defnick)          jprefs_defnick           $jprefs(defnick)]  \
-      [list ::Jabber::jprefs(gchat,syncPres)   jprefs_gchat_syncPres    $jprefs(gchat,syncPres)]  \
-      [list ::Jabber::jprefs(gchat,useScheme)  jprefs_gchat_useScheme   $jprefs(gchat,useScheme)]  \
-      [list ::Jabber::jprefs(gchat,colScheme)  jprefs_gchat_colScheme   $jprefs(gchat,colScheme)]  \
-      [list ::Jabber::jprefs(gchat,cusScheme)  jprefs_gchat_cusScheme   $jprefs(gchat,cusScheme)]  \
-      [list ::Jabber::jprefs(gchat,bookmarks)  jprefs_gchat_bookmarks   $jprefs(gchat,bookmarks)]  \
+      [list jprefs(defnick)          jprefs_defnick           $jprefs(defnick)]  \
+      [list jprefs(gchat,syncPres)   jprefs_gchat_syncPres    $jprefs(gchat,syncPres)]  \
+      [list jprefs(gchat,useScheme)  jprefs_gchat_useScheme   $jprefs(gchat,useScheme)]  \
+      [list jprefs(gchat,colScheme)  jprefs_gchat_colScheme   $jprefs(gchat,colScheme)]  \
+      [list jprefs(gchat,cusScheme)  jprefs_gchat_cusScheme   $jprefs(gchat,cusScheme)]  \
+      [list jprefs(gchat,bookmarks)  jprefs_gchat_bookmarks   $jprefs(gchat,bookmarks)]  \
       ]   
     
     if {![info exists scheme($jprefs(gchat,colScheme))]} {
@@ -3691,7 +3671,7 @@ proc ::GroupChat::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::GroupChat::BuildPageConf {page} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpJPrefs
     variable pimage
     variable schemes
@@ -3811,7 +3791,7 @@ proc ::GroupChat::PrefsColScheme {value} {
 }
 
 proc ::GroupChat::SavePrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpJPrefs
     variable schemes
     
@@ -3821,7 +3801,7 @@ proc ::GroupChat::SavePrefsHook {} {
 }
 
 proc ::GroupChat::CancelPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpJPrefs
 	
     foreach key [array names tmpJPrefs] {
@@ -3833,7 +3813,7 @@ proc ::GroupChat::CancelPrefsHook {} {
 }
 
 proc ::GroupChat::UserDefaultsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpJPrefs
 	
     foreach key [array names tmpJPrefs] {

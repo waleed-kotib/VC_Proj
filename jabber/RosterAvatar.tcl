@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements an avatar style roster tree using treectrl.
 #      
-#  Copyright (c) 2005-2007  Mats Bengtsson
+#  Copyright (c) 2005-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.53 2008-05-27 08:03:56 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.54 2008-06-09 09:51:00 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -113,12 +113,12 @@ namespace eval ::RosterAvatar {
 }
 
 proc ::RosterAvatar::InitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 
     set jprefs(rost,avatar-sortColumn) cTree
     
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(rost,avatar-sortColumn)   jprefs_rost_avatar-sortColumn $jprefs(rost,avatar-sortColumn)]  \
+      [list jprefs(rost,avatar-sortColumn)   jprefs_rost_avatar-sortColumn $jprefs(rost,avatar-sortColumn)]  \
       ]
 }
 
@@ -577,8 +577,8 @@ proc ::RosterAvatar::EditEnd {item} {
 }
 
 proc ::RosterAvatar::Sort {item order} {
+    global jprefs
     variable T
-    upvar ::Jabber::jprefs jprefs
 
     set sortColumn $jprefs(rost,avatar-sortColumn)
 
@@ -594,7 +594,7 @@ proc ::RosterAvatar::Sort {item order} {
 }
 
 proc ::RosterAvatar::HeaderCmd {T C} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     set sortColumn $jprefs(rost,avatar-sortColumn)
     set ctag [$T column cget $C -tags]
@@ -878,11 +878,10 @@ proc ::RosterAvatar::Delete {} {
 #       treectrl item.
 
 proc ::RosterAvatar::CreateItem {jid presence args} {    
+    global jprefs
     variable T
     variable jidStatus
     variable rosterBaseStyle
-    upvar ::Jabber::jstate  jstate
-    upvar ::Jabber::jprefs jprefs
 
     if {($presence ne "available") && ($presence ne "unavailable")} {
 	return
@@ -896,7 +895,7 @@ proc ::RosterAvatar::CreateItem {jid presence args} {
 	}	
     } else {
 	if {$presence eq "available"} {
-	    set show [$jstate(jlib) roster getshow $jid]
+	    set show [::Jabber::Jlib roster getshow $jid]
 	    if {$show ne ""} {
 		if {[info exists jprefs(rost,show-$show)]} {
 		    if {!$jprefs(rost,show-$show)} {
@@ -1094,9 +1093,8 @@ proc ::RosterAvatar::DeleteItem {jid} {
 }
 
 proc ::RosterAvatar::CreateItemFromJID {jid} {    
-    upvar ::Jabber::jstate jstate
 
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     jlib::splitjid $jid jid2 res
     set pres [$jlib roster getpresence $jid2 -resource $res]
     set rost [$jlib roster getrosteritem $jid2]
@@ -1243,14 +1241,13 @@ proc ::RosterAvatar::TreeConfigureHook {args} {
 
 proc ::RosterAvatar::DiscoInfoHook {type from subiq args} {
     variable thisRosterStyles
-    upvar ::Jabber::jstate jstate
     
     # We must verify we are displayed. Better?
     if {[lsearch $thisRosterStyles [::RosterTree::GetStyle]] < 0} {
 	return
     }
     if {$type ne "error"} {
-	set types [$jstate(jlib) disco types $from]
+	set types [::Jabber::Jlib disco types $from]
 	
 	# Only the gateways have custom icons.
 	if {[lsearch -glob $types gateway/*] >= 0} {

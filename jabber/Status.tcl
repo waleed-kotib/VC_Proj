@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.53 2008-05-28 09:51:08 matben Exp $
+# $Id: Status.tcl,v 1.54 2008-06-09 09:51:00 matben Exp $
 
 package provide Status 1.0
 
@@ -307,9 +307,9 @@ proc ::Status::Free {w varName} {
 #       menuDef list.
 
 proc ::Status::BuildMenuDef { } {
+    global jprefs
     variable mapShowElemToText
     variable mapShowTextToMLabel
-    upvar ::Jabber::jprefs jprefs
     
     set entries {available {} away chat dnd xa invisible {} unavailable}
     set statMenuDef {}
@@ -503,11 +503,11 @@ namespace eval ::Status:: {
 }
 
 proc ::Status::ExInitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
    
     set jprefs(status,menu) {}
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(status,menu) jprefs_status_menu $jprefs(status,menu)]]
+      [list jprefs(status,menu) jprefs_status_menu $jprefs(status,menu)]]
 }
 
 # Status::ExMainButton --
@@ -678,8 +678,7 @@ proc ::Status::ExPostCmd {m varName opts} {
 #       menu widget
 
 proc ::Status::ExBuildMenu {m varName args} {
-    global  config this
-    upvar ::Jabber::jprefs jprefs
+    global  config this jprefs
     variable mapShowElemToText
 
     upvar $varName showStatus
@@ -811,8 +810,7 @@ proc ::Status::ExMenuCmd {m varName cmd} {
 }
 
 proc ::Status::ExAddMessage {show status} {
-    global  config
-    upvar ::Jabber::jprefs jprefs
+    global  config jprefs
 
     set statusL $jprefs(status,menu)
     set elem [list $show $status]

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.247 2008-06-08 14:09:36 matben Exp $
+# $Id: Roster.tcl,v 1.248 2008-06-09 09:51:00 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -130,16 +130,16 @@ proc ::Roster::InitMenus {} {
 	{separator}
 	{cascade     mStyle           {@::Roster::StyleMenu} }
 	{cascade     mShow            {
-	    {check     mOffline       {::Roster::ShowOffline}    {-variable ::Jabber::jprefs(rost,showOffline)} }
-	    {check     mDoNotDisturb  {::Roster::ShowDnD}        {-variable ::Jabber::jprefs(rost,show-dnd)} }
-	    {check     mAway          {::Roster::ShowAway}       {-variable ::Jabber::jprefs(rost,show-away)} }
-	    {check     mExtendedAway  {::Roster::ShowXAway}      {-variable ::Jabber::jprefs(rost,show-xa)} }
-	    {check     mTransports    {::Roster::ShowTransports} {-variable ::Jabber::jprefs(rost,showTrpts)} }
+	    {check     mOffline       {::Roster::ShowOffline}    {-variable ::jprefs(rost,showOffline)} }
+	    {check     mDoNotDisturb  {::Roster::ShowDnD}        {-variable ::jprefs(rost,show-dnd)} }
+	    {check     mAway          {::Roster::ShowAway}       {-variable ::jprefs(rost,show-away)} }
+	    {check     mExtendedAway  {::Roster::ShowXAway}      {-variable ::jprefs(rost,show-xa)} }
+	    {check     mTransports    {::Roster::ShowTransports} {-variable ::jprefs(rost,showTrpts)} }
 	    {command   mBackgroundImage...  {::Roster::BackgroundImage} }
 	} }
 	{cascade     mSort            {
-	    {radio     mIncreasing    {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -increasing} }
-	    {radio     mDecreasing    {::Roster::Sort}  {-variable ::Jabber::jprefs(rost,sort) -value -decreasing} }
+	    {radio     mIncreasing    {::Roster::Sort}  {-variable ::jprefs(rost,sort) -value -increasing} }
+	    {radio     mDecreasing    {::Roster::Sort}  {-variable ::jprefs(rost,sort) -value -decreasing} }
 	} }
 	{command     mRefresh         {::Roster::Refresh} }
     }
@@ -225,9 +225,8 @@ proc ::Roster::JabberInitHook {jlibname} {
 #         4) JID
 
 proc ::Roster::GetNameOrJID {jid} {
-    upvar ::Jabber::jstate jstate
        
-    set name [$jstate(jlib) roster getname $jid]
+    set name [::Jabber::Jlib roster getname $jid]
     if {$name eq ""} {
 	set name $jid
     }
@@ -235,9 +234,8 @@ proc ::Roster::GetNameOrJID {jid} {
 }
 
 proc ::Roster::GetShortName {jid} {
-    upvar ::Jabber::jstate jstate
     
-    set name [$jstate(jlib) roster getname $jid]
+    set name [::Jabber::Jlib roster getname $jid]
     if {$name eq ""} {	
 	set name [::Nickname::Get [jlib::barejid $jid]]
 	if {$name eq ""} {	
@@ -245,7 +243,7 @@ proc ::Roster::GetShortName {jid} {
 	    if {$node eq ""} {
 		set name $domain
 	    } else {
-		if {[string equal [$jstate(jlib) getthis server] $domain]} {
+		if {[string equal [::Jabber::Jlib getthis server] $domain]} {
 		    set name $node
 		} else {
 		    set name $jid
@@ -257,9 +255,8 @@ proc ::Roster::GetShortName {jid} {
 }
 
 proc ::Roster::GetDisplayName {jid} {
-    upvar ::Jabber::jstate jstate
     
-    set name [$jstate(jlib) roster getname $jid]
+    set name [::Jabber::Jlib roster getname $jid]
     if {$name eq ""} {
 	set name [::Nickname::Get [jlib::barejid $jid]]
 	if {$name eq ""} {	
@@ -301,7 +298,6 @@ proc ::Roster::Build {w} {
     variable wroster
     variable wbox
     variable icons
-    upvar ::Jabber::jprefs jprefs
 	
     # The frame of class Roster.
     ttk::frame $w -class Roster
@@ -348,21 +344,19 @@ proc ::Roster::BackgroundImage {} {
 #       The login hook command.
 
 proc ::Roster::LoginCmd {} {
-    upvar ::Jabber::jstate jstate
 
-    $jstate(jlib) roster send_get
+    ::Jabber::Jlib roster send_get
 
     set server [::Jabber::GetServerJid]
 }
 
 proc ::Roster::LogoutHook {} {
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
+    global jprefs
         
     ::RosterTree::GetClosed
 
     # Here?
-    $jstate(jlib) roster reset
+    ::Jabber::Jlib roster reset
     
     # Clear roster and browse windows.
     if {$jprefs(rost,clrLogout)} {
@@ -372,22 +366,21 @@ proc ::Roster::LogoutHook {} {
 }
 
 proc ::Roster::Refresh {} {
-    upvar ::Jabber::jstate jstate
 
     ::RosterTree::GetClosed
     
     # Get my roster.
-    $jstate(jlib) roster send_get
+    ::Jabber::Jlib roster send_get
 }
 
 proc ::Roster::SortAtIdle {{item root}} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 
     ::RosterTree::SortAtIdle $item $jprefs(rost,sort)
 }
 
 proc ::Roster::Sort {{item root}} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
 
     ::RosterTree::Sort $item $jprefs(rost,sort)
 }
@@ -397,26 +390,24 @@ proc ::Roster::Sort {{item root}} {
 #       Method to remove another user from my roster.
 
 proc ::Roster::SendRemove {jid} {    
-    upvar ::Jabber::jstate jstate
 
     set ans [::UI::MessageBox -title [mc "Remove Contact"] \
       -message [mc jamesswarnremove2] -icon warning -type yesno -default no]
     if {[string equal $ans "yes"]} {
-	set jid [$jstate(jlib) roster getrosterjid $jid]
-	$jstate(jlib) roster send_remove $jid
+	set jid [::Jabber::Jlib roster getrosterjid $jid]
+	::Jabber::Jlib roster send_remove $jid
     }
 }
 
 proc ::Roster::RemoveJIDList {jidL} {
-    upvar ::Jabber::jstate jstate
     
     # @@@ We could use a plural text here.
     set ans [::UI::MessageBox -title [mc "Remove Contact"] \
       -message [mc jamesswarnremove2] -icon warning -type yesno -default no]
     if {[string equal $ans "yes"]} {
 	foreach jid $jidL {
-	    set jid [$jstate(jlib) roster getrosterjid $jid]
-	    $jstate(jlib) roster send_remove $jid
+	    set jid [::Jabber::Jlib roster getrosterjid $jid]
+	    ::Jabber::Jlib roster send_remove $jid
 	}
     }
 }
@@ -574,13 +565,12 @@ proc ::Roster::FindClickTypesFromJIDList {jidL} {
 }
 
 proc ::Roster::FindPresenceFromJIDList {jidL} {
-    upvar ::Jabber::jstate jstate
  
     set anyAvail 0
     set anyUnavail 0
     set presenceL [list]
     foreach jid $jidL {
-	if {[$jstate(jlib) roster isavailable $jid]} {
+	if {[::Jabber::Jlib roster isavailable $jid]} {
 	    lappend presenceL available
 	    set anyAvail 1
 	} else {
@@ -682,8 +672,7 @@ proc ::Roster::StyleMenu {m} {
 #       updates the roster UI.
 
 proc ::Roster::PushProc {jlibname what {jid {}} args} {    
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
+    global jprefs
     variable inroster
     
     ::Debug 2 "---roster-> what=$what, jid=$jid, args='$args'"
@@ -691,7 +680,7 @@ proc ::Roster::PushProc {jlibname what {jid {}} args} {
     # Extract the args list as an array.
     array set attrArr $args
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
         
     switch -- $what {
 	remove {
@@ -728,7 +717,6 @@ proc ::Roster::PushProc {jlibname what {jid {}} args} {
 #       takes care of calling functions to update roster, run hooks etc.
 
 proc ::Roster::PresenceEvent {jlibname xmldata} {
-    upvar ::Jabber::jstate jstate
     
     ::Debug 2 "---presence->"
         
@@ -742,7 +730,7 @@ proc ::Roster::PresenceEvent {jlibname xmldata} {
     if {$type ne "available" && $type ne "unavailable"} {
 	return
     }
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
         
     set jid3 $from
     jlib::splitjid $from jid2 res
@@ -821,14 +809,12 @@ proc ::Roster::PresenceEvent {jlibname xmldata} {
 }
 
 proc ::Roster::RepopulateTree {} {
-    upvar ::Jabber::jstate jstate
     
     ::RosterTree::GetClosed
     ::RosterTree::StyleInit
-    set jlib $jstate(jlib)
     
     foreach jid [$jlib roster getusers] {
-	eval {SetItem $jid} [$jlib roster getrosteritem $jid]
+	eval {SetItem $jid} [::Jabber::Jlib roster getrosteritem $jid]
     }
     SortAtIdle
     #Sort
@@ -859,8 +845,7 @@ proc ::Roster::ExitRoster {} {
 #       updates tree.
 
 proc ::Roster::SetItem {jid args} {
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
+    global jprefs
     variable inroster
 
     ::Debug 2 "::Roster::SetItem jid=$jid, args='$args'"
@@ -871,7 +856,7 @@ proc ::Roster::SetItem {jid args} {
     # 2) Must remove all resources for this jid first, and then add back.
     #    Remove also jid2.
 
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     if {!$inroster} {
     	set resL [$jlib roster getresources $jid]
@@ -929,10 +914,9 @@ proc ::Roster::SetItem {jid args} {
 #       roster tree updated.
 
 proc ::Roster::Presence {jid presence args} {
+    global jprefs
     variable timer
     variable icons
-    upvar ::Jabber::jprefs jprefs
-    upvar ::Jabber::jstate jstate
 
     ::Debug 2 "::Roster::Presence jid=$jid, presence=$presence"
     array set argsA $args
@@ -954,7 +938,7 @@ proc ::Roster::Presence {jid presence args} {
     # If no available resources then item is unavailable.
     # If any available resource then put 
         
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     set rjid [$jlib roster getrosterjid $jid]
     #set jid2 $rjid
     set jid2 [jlib::barejid $jid]
@@ -1025,11 +1009,10 @@ proc ::Roster::Presence {jid presence args} {
 
 proc ::Roster::NewAvailableItem {jid} {
     global  config
-    upvar ::Jabber::jstate jstate
     
     ::Debug 4 "::Roster::NewAvailableItem jid=$jid"
     	
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     # This gets a list '-name ... -groups ...' etc. from our roster.
     set itemAttr [$jlib roster getrosteritem $jid]
@@ -1086,13 +1069,12 @@ proc ::Roster::InRoster {} {
 #       when sending their presence! Workaround! BAD!!!
 
 proc ::Roster::IsCoccinella {jid3} {
-    upvar ::Jabber::jstate jstate
     upvar ::Jabber::coccixmlns coccixmlns
     upvar ::Jabber::xmppxmlns xmppxmlns
     
     set ans 0
     if {![IsTransportEx $jid3]} {
-	set node [$jstate(jlib) roster getcapsattr $jid3 node]
+	set node [::Jabber::Jlib roster getcapsattr $jid3 node]
 	# NB: We must treat both the 1.3 and 1.4 caps XEP!
 	if {$node eq $coccixmlns(caps)} {
 	    set ans 1
@@ -1110,9 +1092,8 @@ proc ::Roster::IsCoccinella {jid3} {
 #       Returns presence icon from jid, typically a full jid.
 
 proc ::Roster::GetPresenceIconFromJid {jid} {
-    upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     jlib::splitjid $jid jid2 res
     if {$res eq ""} {
 	set pres [lindex [$jlib roster getpresence $jid2] 0]
@@ -1132,8 +1113,7 @@ proc ::Roster::GetPresenceIconFromJid {jid} {
 #       If presence is to make sense, the jid shall be a 3-tier jid?
 
 proc ::Roster::GetPresenceIcon {jid presence args} {    
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     array set argsA $args
     
@@ -1158,7 +1138,8 @@ proc ::Roster::GetPresenceIcon {jid presence args} {
     # Foreign IM systems.
     set foreign 0
     jlib::splitjidex $jid user host res
-    if {![jlib::jidequal $host $jstate(server)]} {
+    set server [::Jabber::Jlib getserver]
+    if {![jlib::jidequal $host $server]} {
 	
 	# If empty we have likely not yet browsed etc.
 	set cattype [lindex [::Disco::AccessTypes $host] 0]
@@ -1184,9 +1165,8 @@ proc ::Roster::GetMyPresenceIcon {} {
 }
 
 proc ::Roster::GetPresenceAndStatusText {jid} {
-    upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     jlib::splitjid $jid jid2 res
     if {$res eq ""} {
 	array set presA [lindex [$jlib roster getpresence $jid2] 0]
@@ -1326,16 +1306,16 @@ proc ::Roster::GetTrptFromName {name} {
 #       Method to get the jids of all services that are not jabber.
 
 proc ::Roster::GetAllTransportJids {} {
-    upvar ::Jabber::jstate jstate
     
-    set alltrpts [$jstate(jlib) disco getjidsforcategory "gateway/*"]
-    set xmppjids [$jstate(jlib) disco getjidsforcategory "gateway/xmpp"]
+    set alltrpts [::Jabber::Jlib disco getjidsforcategory "gateway/*"]
+    set xmppjids [::Jabber::Jlib disco getjidsforcategory "gateway/xmpp"]
     
     # Exclude jabber services and login server.
     foreach jid $xmppjids {
 	set alltrpts [lsearch -all -inline -not $alltrpts $jid]
     }
-    return [lsearch -all -inline -not $alltrpts $jstate(server)]
+    set server [::Jabber::Jlib getserver]
+    return [lsearch -all -inline -not $alltrpts $server]
 }
 
 # Roster::GetTransportSpec --
@@ -1346,12 +1326,11 @@ proc ::Roster::GetAllTransportJids {} {
 
 proc ::Roster::GetTransportSpec {{format "%name"}} {
     variable allTransports
-    upvar ::Jabber::jstate jstate
         
     set trpts [list]
     foreach type $allTransports {
 	if {$type eq "xmpp"} { continue	}
-	set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
+	set jidL [::Jabber::Jlib disco getjidsforcategory "gateway/$type"]
 	set count [llength $jidL]
 	if {$count} {
 	    set name [GetNameFromTrpt $type]
@@ -1378,12 +1357,11 @@ proc ::Roster::GetTransportSpec {{format "%name"}} {
 
 proc ::Roster::GetTransportSpecSingle {} {
     variable allTransports
-    upvar ::Jabber::jstate jstate
     
     set trpts [list]
     foreach type $allTransports {
 	if {$type eq "xmpp"} { continue	}
-	set jidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
+	set jidL [::Jabber::Jlib disco getjidsforcategory "gateway/$type"]
 	if {[llength $jidL]} {
 	    set name [GetNameFromTrpt $type]
 	    set jid [lindex $jidL 0]
@@ -1397,19 +1375,19 @@ proc ::Roster::GetTransportSpecSingle {} {
 }
 
 proc ::Roster::GetTransportSpecXMPP {} {
-    upvar ::Jabber::jstate jstate
     
     # xmpp:
-    set jidL [$jstate(jlib) disco getjidsforcategory "gateway/xmpp"]
+    set jidL [::Jabber::Jlib disco getjidsforcategory "gateway/xmpp"]
     set count [llength $jidL]
     
     # Disco doesn't return he server. Make sure it's first.
     set name [GetNameFromTrpt xmpp]
     set xname "$name ([mc Default])"
-    set xmppSpec [list [list $jstate(server) xmpp $xname]]
+    set server [::Jabber::Jlib getserver]
+    set xmppSpec [list [list $server xmpp $xname]]
     
     foreach jid $jidL {
-	if {$jid eq $jstate(server)} { continue }
+	if {[jlib::jidequal $jid $server]} { continue }
 	set xname $name
 	if {$count} {
 	    set xname "$name ([mc Transport])"
@@ -1420,7 +1398,6 @@ proc ::Roster::GetTransportSpecXMPP {} {
 }
 
 proc ::Roster::IsTransport {jid} {
-    upvar ::Jabber::jstate jstate
     
     # Some transports (icq) have a jid = icq.jabber.se/registered
     # in the roster, but where we get the 2-tier part. Get 3-tier jid.
@@ -1438,23 +1415,24 @@ proc ::Roster::IsTransport {jid} {
 # Use 'IsTransport' to get a true answer.
 
 proc ::Roster::IsTransportHeuristics {jid} {
-    upvar ::Jabber::jstate jstate
     
     # Some transports (icq) have a jid = icq.jabber.se/registered and
     # yahoo.jabber.ru/registered
     # Others, like MSN, have a jid = msn.jabber.ccc.de.
     set transport 0
+    set server [::Jabber::Jlib getserver]
+
     if {![catch {jlib::splitjidex $jid node host res}]} {
 	if {$node eq ""} {
 	    if {$res eq "registered"} {
 		set transport 1
 	    } else {
 		
-		# Search for matching  msn.$jstate(server)  etc.
+		# Search for matching  msn.$server  etc.
 		set idx [string first . $host]
 		if {$idx > 0} {
 		    set phost [string range $host [expr {$idx+1}] end]
-		    if {$phost eq $jstate(server)} {
+		    if {$phost eq $server} {
 			set cname [string range $host 0 [expr {$idx-1}]]
 			switch -- $cname {
 			    aim - gg - gadugadu - icq - msn - smtp - yahoo {			
@@ -1478,12 +1456,12 @@ proc ::Roster::IsTransportHeuristics {jid} {
 #       NB: This should only be used passively, that is, for detection etc.
 
 proc ::Roster::IsTransportEx {jid} {
-    upvar ::Jabber::jstate jstate
     
     set transport 0
     jlib::splitjidex $jid node host res
+    set server [::Jabber::Jlib getserver]
     if {$node eq ""} {
-	if {$host ne $jstate(server)} {
+	if {$host ne $server} {
 	    set types [::Disco::AccessTypes $host]
 	    
 	    # Strip out any "gateway/xmpp".
@@ -1498,12 +1476,11 @@ proc ::Roster::IsTransportEx {jid} {
 #-------------------------------------------------------------------------------
 
 proc ::Roster::GetUsersWithSameHost {jid} {
-    upvar ::Jabber::jstate jstate
 
     set jidL [list]
     jlib::splitjidex $jid - host -
 
-    foreach ujid [$jstate(jlib) roster getusers] {
+    foreach ujid [::Jabber::Jlib roster getusers] {
 	jlib::splitjidex $ujid - uhost -
 	if {$host eq $uhost} {
 	    lappend jidL $ujid
@@ -1513,10 +1490,9 @@ proc ::Roster::GetUsersWithSameHost {jid} {
 }
 
 proc ::Roster::RemoveUsers {jidL} {
-    upvar ::Jabber::jstate jstate
 
     foreach jid $jidL {
-	$jstate(jlib) roster send_remove $jid
+	::Jabber::Jlib roster send_remove $jid
     }
 }
 
@@ -1528,9 +1504,8 @@ proc ::Roster::ExportRoster {} {
 }
 
 proc ::Roster::SaveRosterToFile {fileName} {    
-    upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     set fd [open $fileName w]
     fconfigure $fd -encoding utf-8
 
@@ -1548,7 +1523,7 @@ proc ::Roster::SaveRosterToFile {fileName} {
 # Prefs page ...................................................................
 
 proc ::Roster::InitPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     
     # Defaults...
     set jprefs(rost,rmIfUnsub)      1
@@ -1572,19 +1547,19 @@ proc ::Roster::InitPrefsHook {} {
     set jprefs(rost,closedItems) [list]
 	
     ::PrefUtils::Add [list  \
-      [list ::Jabber::jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $jprefs(rost,clrLogout)]  \
-      [list ::Jabber::jprefs(rost,dblClk)      jprefs_rost_dblClk       $jprefs(rost,dblClk)]  \
-      [list ::Jabber::jprefs(rost,rmIfUnsub)   jprefs_rost_rmIfUnsub    $jprefs(rost,rmIfUnsub)]  \
-      [list ::Jabber::jprefs(rost,showSubNone) jprefs_rost_showSubNone  $jprefs(rost,showSubNone)]  \
-      [list ::Jabber::jprefs(rost,showOffline) jprefs_rost_showOffline  $jprefs(rost,showOffline)]  \
-      [list ::Jabber::jprefs(rost,showTrpts)   jprefs_rost_showTrpts    $jprefs(rost,showTrpts)]  \
-      [list ::Jabber::jprefs(rost,show-dnd)    jprefs_rost_show-dnd     $jprefs(rost,show-dnd)]  \
-      [list ::Jabber::jprefs(rost,show-away)   jprefs_rost_show-away    $jprefs(rost,show-away)]  \
-      [list ::Jabber::jprefs(rost,show-xa)     jprefs_rost_show-xa      $jprefs(rost,show-xa)]  \
-      [list ::Jabber::jprefs(rost,closedItems) jprefs_rost_closedItems  $jprefs(rost,closedItems)]  \
-      [list ::Jabber::jprefs(rost,sort)        jprefs_rost_sort         $jprefs(rost,sort)]  \
-      [list ::Jabber::jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
-      [list ::Jabber::jprefs(rost,defaultBgImage) jprefs_rost_defaultBgImage  $jprefs(rost,defaultBgImage)]  \
+      [list jprefs(rost,clrLogout)   jprefs_rost_clrRostWhenOut $jprefs(rost,clrLogout)]  \
+      [list jprefs(rost,dblClk)      jprefs_rost_dblClk       $jprefs(rost,dblClk)]  \
+      [list jprefs(rost,rmIfUnsub)   jprefs_rost_rmIfUnsub    $jprefs(rost,rmIfUnsub)]  \
+      [list jprefs(rost,showSubNone) jprefs_rost_showSubNone  $jprefs(rost,showSubNone)]  \
+      [list jprefs(rost,showOffline) jprefs_rost_showOffline  $jprefs(rost,showOffline)]  \
+      [list jprefs(rost,showTrpts)   jprefs_rost_showTrpts    $jprefs(rost,showTrpts)]  \
+      [list jprefs(rost,show-dnd)    jprefs_rost_show-dnd     $jprefs(rost,show-dnd)]  \
+      [list jprefs(rost,show-away)   jprefs_rost_show-away    $jprefs(rost,show-away)]  \
+      [list jprefs(rost,show-xa)     jprefs_rost_show-xa      $jprefs(rost,show-xa)]  \
+      [list jprefs(rost,closedItems) jprefs_rost_closedItems  $jprefs(rost,closedItems)]  \
+      [list jprefs(rost,sort)        jprefs_rost_sort         $jprefs(rost,sort)]  \
+      [list jprefs(rost,useBgImage)  jprefs_rost_useBgImage   $jprefs(rost,useBgImage)]  \
+      [list jprefs(rost,defaultBgImage) jprefs_rost_defaultBgImage  $jprefs(rost,defaultBgImage)]  \
       ]
     
 }
@@ -1599,7 +1574,7 @@ proc ::Roster::BuildPrefsHook {wtree nbframe} {
 }
 
 proc ::Roster::BuildPageRoster {page} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpJPrefs
     
     foreach key {
@@ -1638,7 +1613,7 @@ proc ::Roster::BuildPageRoster {page} {
 }
 
 proc ::Roster::SavePrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpJPrefs
     
     #::Avatar::PrefsSave
@@ -1653,7 +1628,7 @@ proc ::Roster::SavePrefsHook {} {
 }
 
 proc ::Roster::CancelPrefsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpJPrefs
 	
     foreach key [array names tmpJPrefs] {
@@ -1667,7 +1642,7 @@ proc ::Roster::CancelPrefsHook {} {
 }
 
 proc ::Roster::UserDefaultsHook {} {
-    upvar ::Jabber::jprefs jprefs
+    global jprefs
     variable tmpJPrefs
 	
     foreach key [array names tmpJPrefs] {

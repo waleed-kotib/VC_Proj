@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.53 2008-05-29 08:04:10 matben Exp $
+# $Id: Rosticons.tcl,v 1.54 2008-06-09 09:51:00 matben Exp $
 
 #  From disco-categories:
 #
@@ -157,9 +157,9 @@ proc ::Rosticons::ThemeGetAllTypes {} {
 #       a valid image or empty.
 
 proc ::Rosticons::ThemeGet {typekey} {
+    global jprefs
     variable stateD
     variable imagesD
-    upvar ::Jabber::jprefs jprefs
         
     set typekey [string tolower $typekey]
     lassign [split $typekey /] type sub
@@ -352,9 +352,8 @@ proc ::Rosticons::ThemeSetFromTmp {type name} {
 # Preference hooks -------------------------------------------------------------
 
 proc ::Rosticons::InitPrefsHook {} {
-    global config this
+    global config this jprefs
     variable stateD
-    upvar ::Jabber::jprefs jprefs
 
     set jprefs(rost,haveWBicons) 1
     
@@ -370,7 +369,7 @@ proc ::Rosticons::InitPrefsHook {} {
 	set names [dict get $stateD types $type]
 	set key "rost,theme,name,$type"
 	set jprefs($key) [lindex $names 0]
-	set name  ::Jabber::jprefs($key)
+	set name  jprefs($key)
 	set rsrc  jprefs_rost_theme_name_$type
 	set value [set $name]
 	lappend plist [list $name $rsrc $value]
@@ -389,7 +388,7 @@ proc ::Rosticons::InitPrefsHook {} {
 	    set must 1
 	}
 	if {!$must} {
-	    set name  ::Jabber::jprefs(rost,theme,use,$type)
+	    set name  jprefs(rost,theme,use,$type)
 	    set rsrc  jprefs_rost_theme_use_$type
 	    set value [set $name]
 	    lappend plist [list $name $rsrc $value]
@@ -401,9 +400,8 @@ proc ::Rosticons::InitPrefsHook {} {
 }
 
 proc ::Rosticons::VerifyAndLoad {} {
-    global this
+    global this jprefs
     variable stateD
-    upvar ::Jabber::jprefs jprefs
     
     set types [dict keys [dict get $stateD types]]
     
@@ -550,10 +548,9 @@ proc ::Rosticons::TPOnSelect {T} {
 }
 
 proc ::Rosticons::TPFillTree {T} {
-    global config
+    global config jprefs
     variable stateD
     variable ptmp
-    upvar ::Jabber::jprefs jprefs
     
     set types [dict keys [dict get $stateD types]]
 
@@ -666,11 +663,11 @@ proc ::Rosticons::TPFillKeyImageTree {type name} {
 }
 
 proc ::Rosticons::SavePrefsHook {} {
+    global jprefs
     variable ptmp
     variable stateD
     variable tmpImagesD
     variable imagesD
-    upvar ::Jabber::jprefs jprefs
     
     set changed [PChanged]
     set types [dict keys [dict get $stateD types]]
@@ -723,9 +720,9 @@ proc ::Rosticons::CancelPrefsHook {} {
 }
 
 proc ::Rosticons::PChanged {} {
+    global jprefs
     variable ptmp
     variable stateD
-    upvar ::Jabber::jprefs jprefs
     
     set changed 0
     set types [dict keys [dict get $stateD types]]
@@ -763,10 +760,9 @@ proc ::Rosticons::PFree {} {
 }
 
 proc ::Rosticons::ThemeChangedHook {} {
-    global prefs
+    global prefs jprefs
     variable stateD
     variable imagesD
-    upvar ::Jabber::jprefs jprefs
 
     set prevImagesD $imagesD
 

@@ -70,7 +70,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: ParseURI.tcl,v 1.49 2008-02-06 13:57:24 matben Exp $
+# $Id: ParseURI.tcl,v 1.50 2008-06-09 09:50:59 matben Exp $
 
 package require uriencode
 
@@ -104,9 +104,8 @@ proc ::ParseURI::TextCmd {uri} {
 #       Uses any -uri in the command line and process it accordingly.
 
 proc ::ParseURI::Parse {args} {
-    global  argv
+    global  argv jprefs
     variable uid
-    upvar ::Jabber::jprefs jprefs
     
     if {$args eq {}} {
 	set args $argv
@@ -359,7 +358,7 @@ proc ::ParseURI::DoJoinBU {token} {
     set state(discocmd)  [list ::ParseURI::DiscoInfoHook $token]
 
     # We should check if we've got info before setting up the hooks.
-    if {[$jstate(jlib) disco isdiscoed info $service]} {
+    if {[set pathA([incr i]) disco isdiscoed info $service]} {
 	DiscoInfoHook $token result $service {}
     } else {    
 	

@@ -26,7 +26,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Gateway.tcl,v 1.11 2008-04-25 06:42:32 matben Exp $
+# $Id: Gateway.tcl,v 1.12 2008-06-09 09:50:59 matben Exp $
 
 package provide Gateway 1.0
 
@@ -219,18 +219,17 @@ proc ::Gateway::EscapePercent {type prompt} {
 # The 'prompt' is a system native ID, typically, but can be a complete JID.
 
 proc ::Gateway::GetJIDFromPromptHeuristics {prompt type} {
-    upvar ::Jabber::jstate jstate
     
     if {$type eq "xmpp"} {
 	return $prompt
     }
 
     # First verify that we don't already have the JID with gateway JID.
-    set gjidL [$jstate(jlib) disco getjidsforcategory "gateway/$type"]
+    set gjidL [::Jabber::Jlib disco getjidsforcategory "gateway/$type"]
     foreach gjid $gjidL {
 	jlib::splitjidex $prompt node domain res
 	if {[jlib::jidequal $domain $gjid]} {
-	    set haveEsc [$jstate(jlib) disco hasfeature {jid\20escaping} $gjid]
+	    set haveEsc [::Jabber::Jlib disco hasfeature {jid\20escaping} $gjid]
 	    if {$haveEsc} {
 		set enode [jlib::escapestr $node]
 	    } else {
@@ -244,7 +243,7 @@ proc ::Gateway::GetJIDFromPromptHeuristics {prompt type} {
     # If we actually have a transport registered we must use that.
     set isregistered 0
     foreach gjid $gjidL {
-	set rjid [$jstate(jlib) roster getrosterjid $gjid]
+	set rjid [::Jabber::Jlib roster getrosterjid $gjid]
 	set isitem [string length $rjid]
 	if {$isitem} {
 	    set isregistered 1
@@ -256,7 +255,7 @@ proc ::Gateway::GetJIDFromPromptHeuristics {prompt type} {
     if {!$isregistered} {
 	set gjid [lindex $gjidL 0]
     }
-    set haveEsc [$jstate(jlib) disco hasfeature {jid\20escaping} $gjid]
+    set haveEsc [::Jabber::Jlib disco hasfeature {jid\20escaping} $gjid]
     if {$haveEsc} {
 	set enode [jlib::escapestr $prompt]
     } else {

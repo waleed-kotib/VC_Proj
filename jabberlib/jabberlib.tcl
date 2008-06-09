@@ -7,7 +7,7 @@
 # 
 # This file is distributed under BSD style license.
 #  
-# $Id: jabberlib.tcl,v 1.197 2008-06-08 14:09:37 matben Exp $
+# $Id: jabberlib.tcl,v 1.198 2008-06-09 09:51:00 matben Exp $
 # 
 # Error checking is minimal, and we assume that all clients are to be trusted.
 # 
@@ -1062,10 +1062,8 @@ proc jlib::kill {jlibname} {
     return
 }
 
-proc jlib::wrapper_reset {jlibname} {
-    
+proc jlib::wrapper_reset {jlibname} {    
     upvar ${jlibname}::lib lib
-
     wrapper::reset $lib(wrap)
 }
 
@@ -1074,9 +1072,7 @@ proc jlib::wrapper_reset {jlibname} {
 #       Transport independent way of getting own ip address.
 
 proc jlib::getip {jlibname} {
-    
     upvar ${jlibname}::lib lib
-
     return [$lib(transport,ip) $jlibname]
 }
 
@@ -1086,9 +1082,7 @@ proc jlib::getip {jlibname} {
 #       This is normally identical to the 'to' attribute but not always.
 
 proc jlib::getserver {jlibname} {
-    
     upvar ${jlibname}::locals locals 
-
     return $locals(server)
 }
 
@@ -1097,9 +1091,7 @@ proc jlib::getserver {jlibname} {
 #       Utility to help us closing down a stream.
 
 proc jlib::isinstream {jlibname} {
-    
     upvar ${jlibname}::lib lib
-
     return $lib(isinstream)
 }
 

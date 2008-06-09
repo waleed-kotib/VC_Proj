@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.110 2008-06-07 06:50:38 matben Exp $
+# $Id: Profiles.tcl,v 1.111 2008-06-09 09:51:00 matben Exp $
 
 package require ui::megaentry
 
@@ -736,8 +736,7 @@ proc ::Profiles::ImportFromJserver {} {
 #       Return a default -key value list of the default options.
 
 proc ::Profiles::GetDefaultOpts {server} {
-    global  prefs this
-    upvar ::Jabber::jprefs jprefs
+    global  prefs this jprefs
     variable defaultOpts
     
     # We MUST list all available options here!

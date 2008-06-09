@@ -20,7 +20,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Avatar.tcl,v 1.45 2008-05-28 12:08:07 matben Exp $
+# $Id: Avatar.tcl,v 1.46 2008-06-09 09:50:59 matben Exp $
 
 # @@@ Issues:
 # 
@@ -110,12 +110,9 @@ namespace eval ::Avatar:: {
 proc ::Avatar::Configure {args} {
     global  this
     variable options
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::Configure $args"
-    
-    set jlib $jstate(jlib)
-    
+        
     if {[llength $args] == 0} {
 	return [array get options]
     } elseif {[llength $args] == 1} {
@@ -137,7 +134,7 @@ proc ::Avatar::Configure {args} {
 	    }
 	    set options($key) $value
 	}
-	eval {$jlib avatar configure} $aopts
+	eval {::Jabber::Jlib avatar configure} $aopts
     }
 }
 
@@ -205,11 +202,10 @@ proc ::Avatar::JabberInitHook {jlibname} {
 
 proc ::Avatar::LoginHook {} {
     variable aprefs
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::LoginHook"
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     # @@@ Do we need to do this each time we login?
     if {$aprefs(share) && [file isfile $aprefs(fileName)]} {
@@ -234,7 +230,6 @@ proc ::Avatar::LogoutHook {} {
 
 proc ::Avatar::QuitHook {} {
     variable aprefs
-    upvar ::Jabber::jstate jstate
     
     WriteHashmap $aprefs(hashmapFile)
 }
@@ -435,7 +430,6 @@ proc ::Avatar::UnsetMyPhotoAndFile {} {
     global  this
     variable myphoto
     variable aprefs
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::UnsetMyPhotoAndFile"
         
@@ -518,7 +512,6 @@ proc ::Avatar::GetMyAvatarFile {} {
 #       It does not handle our application file cache.
 
 proc ::Avatar::ShareImage {fileName} {
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::ShareImage --->"
     
@@ -531,7 +524,7 @@ proc ::Avatar::ShareImage {fileName} {
 
     set mime [::Types::GetMimeTypeForFileName $fileName]
 
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     $jlib avatar set_data $data $mime
     set base64 [$jlib avatar get_my_data base64]
         
@@ -560,11 +553,10 @@ proc ::Avatar::ShareImage {fileName} {
 #       It sends new presence with empty hashes.
 
 proc ::Avatar::UnshareImage {} {
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::UnshareImage --->"
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     $jlib avatar unset_data
     
     if {[$jlib isinstream]} {
@@ -580,7 +572,6 @@ proc ::Avatar::UnshareImage {} {
 }
 
 proc ::Avatar::SetCB {sync jlibname type queryElem} {
-    upvar ::Jabber::jstate jstate
     
     if {$type eq "error"} {
 	::Jabber::AddErrorLog {} $queryElem
@@ -588,8 +579,7 @@ proc ::Avatar::SetCB {sync jlibname type queryElem} {
 	
 	# Now we are sure avatar is stored and can announce it.
 	if {$sync} {
-	    set jlib $jstate(jlib)
-	    $jlib send_presence -keep 1
+	    ::Jabber::Jlib send_presence -keep 1
 	}
     }
 }
@@ -670,12 +660,11 @@ proc ::Avatar::ClearRecent {} {
 proc ::Avatar::OnNewHash {jid} {
     variable photo
     variable options
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::OnNewHash jid=$jid"
     
     set jid2 [jlib::barejid $jid]
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     # For the moment we disable all avatars for room members.
     if {[$jlib service isroom $jid2]} {
@@ -706,11 +695,10 @@ proc ::Avatar::OnNewHash {jid} {
 
 proc ::Avatar::GetPrioAvatar {jid} {
     variable protocolPrio
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::GetPrioAvatar jid=$jid"
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     set jid2 [jlib::barejid $jid]
         
     # We need to know if 'avatar' or 'vcard' style to get.
@@ -737,7 +725,6 @@ proc ::Avatar::GetPrioAvatar {jid} {
 proc ::Avatar::GetAvatarAsyncCB {type jid2} {
     variable options
     variable photo
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::GetAvatarAsyncCB jid2=$jid2, type=$type"
         
@@ -745,7 +732,7 @@ proc ::Avatar::GetAvatarAsyncCB {type jid2} {
 	InvokeAnyFallbackFrom $jid2 "avatar"
     } else {
 	# Data may be empty from xmlns='storage:client:avatar' !
-	set jlib $jstate(jlib)
+	set jlib [::Jabber::GetJlib]
 	set data [$jlib avatar get_data $jid2]
 	if {[string bytelength $data]} {
 	    
@@ -763,7 +750,6 @@ proc ::Avatar::GetAvatarAsyncCB {type jid2} {
 }
     
 proc ::Avatar::GetVCardPhotoCB {type jid2} {
-    upvar ::Jabber::jstate jstate
     variable xmlns
 
     Debug "::Avatar::GetVCardPhotoCB jid2=$jid2, type=$type"
@@ -771,7 +757,7 @@ proc ::Avatar::GetVCardPhotoCB {type jid2} {
     if {$type eq "error"} {
 	InvokeAnyFallbackFrom $jid2 "vcard"
     } else {
-	set jlib $jstate(jlib)
+	set jlib [::Jabber::GetJlib]
 	set data [$jlib avatar get_data $jid2]
 	if {[string bytelength $data]} {
 	    
@@ -794,11 +780,10 @@ proc ::Avatar::GetVCardPhotoCB {type jid2} {
 
 proc ::Avatar::InvokeAnyFallbackFrom {jid2 protocol} {
     variable protocolPrio
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::InvokeAnyFallbackFrom jid2=$jid2, protocol=$protocol"
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     
     # Get next protocol in the priority. If empty we are done.
     set idx [lsearch $protocolPrio $protocol]
@@ -844,11 +829,10 @@ proc ::Avatar::GetAsyncIfExists {jid} {
 #       Requests all avatars in our roster.
 
 proc ::Avatar::GetAll {} {
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::GetAll"
     
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
 
     # @@@ Not sure here...
     foreach jid2 [$jlib roster getusers] {
@@ -1085,9 +1069,8 @@ proc ::Avatar::GetPhotoOfSize {jid2 size} {
 
 proc ::Avatar::HavePhoto {jid2} {
     variable photo
-    upvar ::Jabber::jstate jstate
     
-    set jlib $jstate(jlib)    
+    set jlib [::Jabber::GetJlib]    
     set mjid2 [jlib::jidmap $jid2]
     if {[$jlib avatar have_data $jid2] && [info exists photo($mjid2,orig)]} {
 	return 1
@@ -1402,10 +1385,9 @@ proc ::Avatar::GetSuffForMime {mime} {
 
 proc ::Avatar::GetHash {jid2} {
     variable hashmap
-    upvar ::Jabber::jstate jstate
     
     # Get the most current if it exists.
-    set jlib $jstate(jlib)    
+    set jlib [::Jabber::GetJlib]    
     set mjid2 [jlib::jidmap $jid2]
     set hash [$jlib avatar get_hash $jid2]
 
@@ -1430,17 +1412,11 @@ proc ::Avatar::FreeHashCache {jid2} {
 
 proc ::Avatar::WriteHashmap {fileName} {
     variable hashmap
-    upvar ::Jabber::jstate jstate
     
     Debug "::Avatar::WriteHashmap"
-    
-    # @@@ Bad workaround for p2p.
-    if {![info exists jstate(jlib)]} {
-	return
-    }
-    
+        
     # Start from the hashmap that may have been read earlier and update it.
-    set jlib $jstate(jlib)
+    set jlib [::Jabber::GetJlib]
     foreach jid2 [$jlib avatar get_all_avatar_jids] {
 	set mjid2 [jlib::jidmap $jid2]
 	set hash [$jlib avatar get_hash $jid2]

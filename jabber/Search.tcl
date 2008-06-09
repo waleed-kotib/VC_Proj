@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.45 2008-05-23 14:33:22 matben Exp $
+# $Id: Search.tcl,v 1.46 2008-06-09 09:51:00 matben Exp $
 
 package provide Search 1.0
 
@@ -66,7 +66,6 @@ proc ::Search::OnMenu {} {
      
 proc ::Search::Build {args} {
     global  this prefs wDlgs
-    upvar ::Jabber::jstate jstate
     
     set w $wDlgs(jsearch)
     if {[winfo exists $w]} {
@@ -151,7 +150,7 @@ proc ::Search::Build {args} {
     pack $wleft.foob -side bottom -fill x
     
     # Get all (browsed) services that support search.
-    set searchServ [$jstate(jlib) disco getjidsforfeature "jabber:iq:search"]
+    set searchServ [::Jabber::Jlib disco getjidsforfeature "jabber:iq:search"]
     set wservice $frtop.eserv
     set wbtget       $frtop.btget
     ttk::label    $frtop.lserv -text "[mc Service]:"
@@ -247,7 +246,6 @@ proc ::Search::Build {args} {
 }
 
 proc ::Search::TableCmd {w x y} {
-    upvar ::Jabber::jstate jstate
     
     lassign [tablelist::convEventFields $w $x $y] wtb xtb ytb
     set ind [$wtb containing $ytb]
@@ -257,7 +255,7 @@ proc ::Search::TableCmd {w x y} {
 	set jid [string trim [lindex $row 0]]
 
 	# Warn if already in our roster.
-	if {[$jstate(jlib) roster isitem $jid]} {
+	if {[::Jabber::Jlib roster isitem $jid]} {
 	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost2 $jid] \
 	      -icon error -title [mc Error] -type ok]
 	} else {
@@ -297,9 +295,8 @@ proc ::Search::TablePopup {w x y} {
 }
 
 proc ::Search::PostMenuCmd {m jid} {
-    upvar ::Jabber::jstate jstate
 
-    if {[$jstate(jlib) roster isitem $jid]} {
+    if {[::Jabber::Jlib roster isitem $jid]} {
 	set midx [::AMenu::GetMenuIndex $m mAddContact...]
 	$m entryconfigure $midx -state disabled
     }
@@ -308,7 +305,6 @@ proc ::Search::PostMenuCmd {m jid} {
 proc ::Search::Get {w} {    
     variable $w
     upvar 0 $w state    
-    upvar ::Jabber::jstate jstate
     
     # Verify.
     if {$state(server) eq ""} {
@@ -321,7 +317,7 @@ proc ::Search::Get {w} {
     set state(status) "[mc jawaitserver]..."
     
     # Send get register.
-    $jstate(jlib) search_get $state(server) [namespace code [list GetCB $w]]
+    ::Jabber::Jlib search_get $state(server) [namespace code [list GetCB $w]]
     $state(wsearrows) start
     
     $state(wtb) configure -columns [list 60 [mc {Search results}]]
@@ -335,10 +331,9 @@ proc ::Search::Get {w} {
 #       search, but this is untested.
 
 proc ::Search::GetCB {w jlibName type subiq} {
+    global jprefs
     variable $w
     upvar 0 $w state    
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Search::GetCB type=$type, subiq='$subiq'"
     
@@ -399,10 +394,9 @@ proc ::Search::GetCB {w jlibName type subiq} {
 }
 
 proc ::Search::DoSearch {w} {    
+    global jprefs
     variable $w
     upvar 0 $w state    
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     $state(wsearrows) start
     $state(wtb) delete 0 end
@@ -428,10 +422,9 @@ proc ::Search::DoSearch {w} {
 #       subiq:
 
 proc ::Search::ResultCallback {w server type subiq} {   
+    global jprefs
     variable $w
     upvar 0 $w state    
-    upvar ::Jabber::jstate jstate
-    upvar ::Jabber::jprefs jprefs
     
     ::Debug 2 "::Search::ResultCallback server=$server, type=$type, subiq='$subiq'"
     
