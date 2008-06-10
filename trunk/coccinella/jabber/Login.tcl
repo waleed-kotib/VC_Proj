@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.151 2008-06-10 06:00:11 matben Exp $
+# $Id: Login.tcl,v 1.152 2008-06-10 07:55:25 matben Exp $
 
 package provide Login 1.0
 
@@ -539,9 +539,11 @@ proc ::Login::DoLogin {} {
 	array set tmp1A $opts
 	array set tmp2A [::Profiles::GetDefaultOpts $server]
 	array set tmp2A [lrange $prof 3 end]
-	set tmp1A(-resource) $resource
 	array unset tmp1A -nickname
 	array unset tmp2A -nickname
+	if {$resource ne ""} {
+	    set tmp1A(-resource) $resource
+	}
 #  	parray tmp1A
 #  	parray tmp2A
 	set r ""
