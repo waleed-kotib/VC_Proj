@@ -18,11 +18,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.150 2008-06-09 09:50:59 matben Exp $
+# $Id: Login.tcl,v 1.151 2008-06-10 06:00:11 matben Exp $
 
 package provide Login 1.0
 
-namespace eval ::Login:: {
+namespace eval ::Login {
     
     # Use option database for customization.
     option add *JLogin.connectImage         network-disconnect      widgetDefault
@@ -539,6 +539,7 @@ proc ::Login::DoLogin {} {
 	array set tmp1A $opts
 	array set tmp2A [::Profiles::GetDefaultOpts $server]
 	array set tmp2A [lrange $prof 3 end]
+	set tmp1A(-resource) $resource
 	array unset tmp1A -nickname
 	array unset tmp2A -nickname
 #  	parray tmp1A
