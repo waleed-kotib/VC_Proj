@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.254 2008-06-09 14:24:46 matben Exp $
+# $Id: JUI.tcl,v 1.255 2008-06-10 13:47:54 matben Exp $
 
 package provide JUI 1.0
 
@@ -457,6 +457,7 @@ proc ::JUI::Build {w} {
     # Notebook.
     set wnb $wall.nb
     ttk::notebook $wnb
+    tileutils::nb::Traversal $wnb
     pack $wnb -side bottom -fill both -expand 1
     
     bind $wnb <<NotebookTabChanged>>  {+::JUI::NotebookTabChanged }
