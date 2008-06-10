@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.299 2008-06-09 14:24:46 matben Exp $
+# $Id: Chat.tcl,v 1.300 2008-06-10 13:26:49 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -2218,7 +2218,7 @@ proc ::Chat::MoveThreadToPage {dlgtoken chattoken} {
     ttk::notebook $wnb -style X.TNotebook
     bind $wnb <<NotebookTabChanged>> \
       [list [namespace current]::TabChanged $dlgtoken]
-    tileutils::notebookTraversal $wnb
+    tileutils::nb::Traversal $wnb
     bindtags $wnb [linsert [bindtags $wnb] 0 ChatTab]
     pack $wnb -in $wcont -fill both -expand true -side right
 
