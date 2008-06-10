@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.86 2008-06-09 14:24:46 matben Exp $
+# $Id: tileutils.tcl,v 1.87 2008-06-10 13:26:49 matben Exp $
 #
 
 package require treeutil
@@ -893,13 +893,127 @@ ttk::copyBindings TButton TUrl
 bind TUrl <Enter>	   {+%W configure -cursor hand2 }
 bind TUrl <Leave>	   {+%W configure -cursor arrow }
 
-proc tileutils::notebookTraversal {wnb} {
-    ttk::notebook::enableTraversal $wnb
+# Provides some extra bindings and workarounds for ttk::notebooks.
+# Code from ttk.
 
-    # Hack!
-    set top [winfo toplevel $wnb]
-    bind $top <Control-Prior>     {+ttk::notebook::TLCycleTab %W  1}
-    bind $top <Control-Next>      {+ttk::notebook::TLCycleTab %W -1}
+namespace eval tileutils::nb {
+    variable TLNotebooks
+}
+
+proc tileutils::nb::Traversal {nb} {
+    variable TLNotebooks
+
+    ttk::notebook::enableTraversal $nb
+
+    set top [winfo toplevel $nb]
+    if {![info exists TLNotebooks($top)]} {
+	bind $top <Control-Next>  {+tileutils::nb::TLCycleTab %W  1}
+	bind $top <Control-Prior> {+tileutils::nb::TLCycleTab %W -1}
+	bind $top <Destroy>       {+tileutils::nb::TLCleanup %W}
+    }
+    bind $nb <Destroy> {+tileutils::nb::Cleanup %W}
+    lappend TLNotebooks($top) $nb
+}
+
+# ActivateTab $nb $tab --
+#	Select the specified tab and set focus.
+#
+# 	If $tab was already the current tab, set the focus to the
+#	notebook widget.  Otherwise, set the focus to the first
+#	traversable widget in the pane.  The behavior is that the
+#	notebook takes focus when the user selects the same tab
+#	a second time.  This mirrors Windows tab behavior.
+#
+proc tileutils::nb::ActivateTab {w tab} {
+    if {[$w index $tab] eq [$w index current]} {
+	focus $w
+    } else {
+    	$w select $tab
+	update ;# needed so focus logic sees correct mapped/unmapped states
+	if {[set f [ttk::focusFirst [$w select]]] ne ""} {
+	    tk::TabToWindow $f
+	}
+    }
+}
+
+# CycleTab --
+#	Select the next/previous tab in the list.
+#
+proc tileutils::nb::CycleTab {w dir} {
+    if {[$w index end] != 0} {
+	set current [$w index current]
+	set select [expr {($current + $dir) % [$w index end]}]
+	while {[$w tab $select -state] != "normal" && ($select != $current)} {
+	    set select [expr {($select + $dir) % [$w index end]}]
+	}
+	if {$select != $current} {
+	    ActivateTab $w $select
+	}
+    }
+}
+
+# tileutils::nb::ClosestNotebook --
+#       Finds notebook in toplevel that in some sense is closest to w.
+#
+proc tileutils::nb::ClosestNotebook {w} {    
+    variable TLNotebooks
+    
+    set top [winfo toplevel $w]
+    if {![info exists TLNotebooks($top)]} { return }
+    if {[llength $TLNotebooks($top)] == 1} {
+	return [lindex $TLNotebooks($top) 0] 
+    }
+    
+    # Enclosing notebook.
+    foreach nb $TLNotebooks($top) {
+	if {[regexp ^$nb $w]} {
+	    return $nb
+	}
+    }
+    
+    # Find largest common part.
+    set win $w
+    while {($win ne $top) && ($win ne "")} {
+	foreach nb $TLNotebooks($top) {
+	    if {[regexp ^$nb $win]} {
+		return $nb
+	    }
+	}
+	set win [winfo parent $win]
+    }
+    return
+}
+
+# TLCycleTab --
+#	toplevel binding procedure for Control-Tab / Shift-Control-Tab
+#	Select the next/previous tab in the nearest ancestor notebook. 
+#
+proc tileutils::nb::TLCycleTab {w dir} {
+    set nb [ClosestNotebook $w]
+    if {$nb ne ""} {
+	CycleTab $nb $dir
+	return -code break
+    }
+}
+
+# TLCleanup -- <Destroy> binding for traversal-enabled toplevels
+#
+proc tileutils::nb::TLCleanup {w} {
+    variable TLNotebooks
+    if {$w eq [winfo toplevel $w]} {
+	unset -nocomplain -please TLNotebooks($w)
+    }
+}
+
+# Cleanup -- <Destroy> binding for notebooks
+#
+proc tileutils::nb::Cleanup {nb} {
+    variable TLNotebooks
+    set top [winfo toplevel $nb]
+    if {[info exists TLNotebooks($top)]} {
+	set index [lsearch -exact $TLNotebooks($top) $nb]
+        set TLNotebooks($top) [lreplace $TLNotebooks($top) $index $index]
+    }
 }
 
 # ttk::optionmenu --

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.83 2008-06-09 14:24:46 matben Exp $
+# $Id: VCard.tcl,v 1.84 2008-06-10 13:26:49 matben Exp $
 
 package provide VCard 1.0
 
@@ -265,7 +265,7 @@ proc ::VCard::Build {token} {
     
     pack $frbot -side bottom -fill x
     
-    tileutils::notebookTraversal $wnb
+    tileutils::nb::Traversal $wnb
     wm resizable $w 0 0
 }
 
