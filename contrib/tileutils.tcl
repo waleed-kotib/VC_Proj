@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.87 2008-06-10 13:26:49 matben Exp $
+# $Id: tileutils.tcl,v 1.88 2008-06-11 14:22:17 matben Exp $
 #
 
 package require treeutil
@@ -910,6 +910,10 @@ proc tileutils::nb::Traversal {nb} {
 	bind $top <Control-Next>  {+tileutils::nb::TLCycleTab %W  1}
 	bind $top <Control-Prior> {+tileutils::nb::TLCycleTab %W -1}
 	bind $top <Destroy>       {+tileutils::nb::TLCleanup %W}
+	if {[tk windowingsystem] eq "aqua"} {
+	    bind $top <Command-Alt-KeyPress-Left>  {+tileutils::nb::TLCycleTab %W -1}
+	    bind $top <Command-Alt-KeyPress-Right> {+tileutils::nb::TLCycleTab %W  1}
+	}
     }
     bind $nb <Destroy> {+tileutils::nb::Cleanup %W}
     lappend TLNotebooks($top) $nb
