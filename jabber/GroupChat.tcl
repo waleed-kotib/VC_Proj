@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.256 2008-06-11 08:12:05 matben Exp $
+# $Id: GroupChat.tcl,v 1.257 2008-06-11 13:22:17 matben Exp $
 
 package require Create
 package require Enter
@@ -711,7 +711,8 @@ proc ::GroupChat::Build {roomjid} {
     bind $w <<Find>>         [namespace code [list Find $dlgtoken]]
     bind $w <<FindAgain>>    [namespace code [list FindAgain $dlgtoken]]  
     bind $w <<FindPrevious>> [namespace code [list FindAgain $dlgtoken -1]]  
-    bind $w <FocusIn>       +[namespace code [list FocusIn $dlgtoken]]
+    # Wrong binding to toplevel.
+    #bind $w <FocusIn>       +[namespace code [list FocusIn $dlgtoken]]
 
     set tag TopTag$w
     bindtags $w [concat $tag [bindtags $w]]

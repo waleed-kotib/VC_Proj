@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.108 2008-06-09 14:24:46 matben Exp $
+# $Id: Register.tcl,v 1.109 2008-06-11 13:22:17 matben Exp $
 
 package provide Register 1.0
 
@@ -1135,8 +1135,10 @@ proc ::GenRegister::NewDlg {args} {
 	pack $wbtcancel -side right
 	if {!$state(-autoget)} {
 	    pack $wbtget -side right -padx $padx
+	    pack $wbtregister -side right
+	} else {
+	    pack $wbtregister -side right -padx $padx
 	}
-	pack $wbtregister -side right
     }
     pack $frbot -side bottom -fill x
 
