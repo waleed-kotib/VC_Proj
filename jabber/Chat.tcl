@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.300 2008-06-10 13:26:49 matben Exp $
+# $Id: Chat.tcl,v 1.301 2008-06-11 08:12:05 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1315,7 +1315,7 @@ proc ::Chat::Build {threadID jid} {
       -disabledimage $iconSendDis    \
       -command [list [namespace current]::Send $dlgtoken]
     $wtray newbutton sendfile \
-      -text [mc {Send File}] -image $iconSendFile \
+      -text [mc "Send File"] -image $iconSendFile \
       -disabledimage $iconSendFileDis    \
       -command [list [namespace current]::SendFile $dlgtoken]
     $wtray newbutton save  \
@@ -1379,6 +1379,7 @@ proc ::Chat::Build {threadID jid} {
     bind $w <<FindAgain>>    [namespace code [list FindAgain $dlgtoken]]  
     bind $w <<FindPrevious>> [namespace code [list FindAgain $dlgtoken -1]]  
     bind $w <FocusIn>       +[namespace code [list FocusIn $dlgtoken]]
+    bind $wtray <<TToolbarCollapse>> [namespace code [list TTCollapse $dlgtoken]]
     
     # For toplevel binds.
     if {[lsearch [bindtags $w] ChatToplevel] < 0} {
@@ -1387,6 +1388,17 @@ proc ::Chat::Build {threadID jid} {
     
     focus $w
     return $dlgtoken
+}
+
+proc ::Chat::TTCollapse {dlgtoken} {
+    variable $dlgtoken
+    upvar 0 $dlgtoken dlgstate
+    
+    if {[$dlgstate(wtray) iscollapsed]} {
+	grid forget $dlgstate(wavatar)	
+    } else {
+        SetAnyAvatar [GetActiveChatToken $dlgtoken]
+    }
 }
 
 proc ::Chat::OnToolbarButton {dlgtoken} {

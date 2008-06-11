@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.77 2008-02-18 13:54:38 matben Exp $
+# $Id: Utils.tcl,v 1.78 2008-06-11 08:12:05 matben Exp $
 
 package require uri
 package provide Utils 1.0
@@ -34,7 +34,7 @@ namespace eval ::Utils:: {
 
 proc SecondCoccinella {args} {
     
-    set w [::UI::GetMainWindow]
+    set w [::JUI::GetMainWindow]
     wm deiconify $w
     raise $w
     eval {::hooks::run relaunchHook} $args

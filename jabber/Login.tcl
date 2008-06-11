@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.152 2008-06-10 07:55:25 matben Exp $
+# $Id: Login.tcl,v 1.153 2008-06-11 08:12:05 matben Exp $
 
 package provide Login 1.0
 
@@ -560,7 +560,7 @@ proc ::Login::DoLogin {} {
 	    set ans [tk_messageBox -title "" -type yesno -icon question \
 	      -message $msg]
 	    if {$ans eq "yes"} {
-		set mbar [::UI::GetMainMenu]
+		set mbar [::JUI::GetMainMenu]
 		::UI::MenubarDisableBut $mbar edit
 		
 		set ans [ui::megaentry -label "[mc {Profile Name}]:" -icon "" \

@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.38 2008-05-05 14:22:28 matben Exp $
+#  $Id: Mood.tcl,v 1.39 2008-06-11 08:12:05 matben Exp $
 
 package require jlib::pep
 
@@ -303,7 +303,7 @@ proc ::Mood::CustomMoodDlg {} {
 
     bind $fr.cmood <Map> { focus %W }
     
-    set mbar [::UI::GetMainMenu]
+    set mbar [::JUI::GetMainMenu]
     ui::dialog defaultmenu $mbar
     ::UI::MenubarDisableBut $mbar edit
     $w grab

@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the taskbar on Windows and the tray on X11.
 #      
-#  Copyright (c) 2004-2007  Mats Bengtsson
+#  Copyright (c) 2004-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.41 2008-05-15 14:14:56 matben Exp $
+# $Id: Taskbar.tcl,v 1.42 2008-06-11 08:12:05 matben Exp $
 
 package require balloonhelp
 
@@ -160,7 +160,7 @@ proc ::Taskbar::BuildMainHook {} {
     if {$tprefs(quitMini) || $tprefs(startMini)} {
 	::UI::WithdrawAllToplevels
     }
-    bind [::UI::GetMainWindow] <Map> [list [namespace current]::Update %W]
+    bind [::JUI::GetMainWindow] <Map> [list [namespace current]::Update %W]
 }
 
 proc ::Taskbar::InitHook {} {
@@ -207,6 +207,9 @@ proc ::Taskbar::InitHook {} {
 proc ::Taskbar::WinCmd {event x y} {
     variable wmenu
     
+    # It can happen that during launch we exist before main window does.
+    if {![winfo exists [::JUI::GetMainWindow]]} { return }
+    
     switch -- $event {
 	WM_LBUTTONUP {
 	    ToggleVisibility
@@ -225,12 +228,18 @@ proc ::Taskbar::X11Configure {width height} {
 }
 
 proc ::Taskbar::X11Cmd {x y} {
+
+    # It can happen that during launch we exist before main window does.
+    if {![winfo exists [::JUI::GetMainWindow]]} { return }
     ToggleVisibility
 }
 
 proc ::Taskbar::X11Popup {x y} {
     variable wmenu
     variable wtray
+
+    # It can happen that during launch we exist before main window does.
+    if {![winfo exists [::JUI::GetMainWindow]]} { return }
 
     # Try to figure out if top or bottom.
     set bbox [$wtray bbox]
@@ -245,7 +254,7 @@ proc ::Taskbar::X11Popup {x y} {
 
 proc ::Taskbar::ToggleVisibility {} {
     
-    switch -- [wm state [::UI::GetMainWindow]] {
+    switch -- [wm state [::JUI::GetMainWindow]] {
 	zoomed - normal  {
 	    ::UI::WithdrawAllToplevels
 	}
@@ -259,7 +268,7 @@ proc ::Taskbar::Post {m} {
     global  config
     variable menuIndex
 
-    switch -- [wm state [::UI::GetMainWindow]] {
+    switch -- [wm state [::JUI::GetMainWindow]] {
 	zoomed - normal {
 	    set state1 disabled
 	    set state2 normal
@@ -269,7 +278,7 @@ proc ::Taskbar::Post {m} {
 	    set state2 disabled
 	}
     }
-    Update [::UI::GetMainWindow]
+    Update [::JUI::GetMainWindow]
     
     # {available away chat dnd xa invisible unavailable}
     set status [::Jabber::GetMyStatus]
@@ -301,7 +310,7 @@ proc ::Taskbar::TearOff {wm wt} {
 proc ::Taskbar::HideMain {} {
     
     ::UI::WithdrawAllToplevels
-    Update [::UI::GetMainWindow]
+    Update [::JUI::GetMainWindow]
 }
 
 proc ::Taskbar::ShowMain {} {
@@ -341,7 +350,7 @@ proc ::Taskbar::Update {w} {
     }
     set m $wmenu
 	
-    switch -- [wm state [::UI::GetMainWindow]] {
+    switch -- [wm state [::JUI::GetMainWindow]] {
 	zoomed - normal {
 	    set state1 disabled
 	    set state2 normal
@@ -386,7 +395,7 @@ proc ::Taskbar::SetPresenceHook {type args} {
 proc ::Taskbar::CloseHook {wclose} {
     
     set result ""
-    if {[string equal $wclose [::UI::GetMainWindow]]} {
+    if {[string equal $wclose [::JUI::GetMainWindow]]} {
 	HideMain
 	set result stop
     }
@@ -398,7 +407,7 @@ proc ::Taskbar::QuitAppHook {} {
     variable tprefs
     
     set tprefs(quitMini) 1
-    set wmstate [wm state [::UI::GetMainWindow]]
+    set wmstate [wm state [::JUI::GetMainWindow]]
     if {($wmstate eq "normal") || ($wmstate eq "zoomed")} {
 	set tprefs(quitMini) 0
     }

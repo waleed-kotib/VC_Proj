@@ -18,13 +18,15 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Enter.tcl,v 1.25 2008-06-09 09:50:59 matben Exp $
+# $Id: Enter.tcl,v 1.26 2008-06-11 08:12:05 matben Exp $
 
 package provide Enter 1.0
 
 namespace eval ::Enter {
 
     variable uid  0
+    variable xmlns
+    set xmlns(muc) "http://jabber.org/protocol/muc"
 }
 
 # Enter::Build --
@@ -44,6 +46,7 @@ namespace eval ::Enter {
 proc ::Enter::Build {protocol args} {
     global  this wDlgs jprefs
 
+    variable xmlns
     variable uid
     upvar ::Jabber::xmppxmlns xmppxmlns
 
@@ -58,9 +61,9 @@ proc ::Enter::Build {protocol args} {
 	jlib::splitjidex $roomjid node service -
     } elseif {[info exists argsA(-server)]} {
 	set service $argsA(-server)
-    }
+    }    
     set services [::Jabber::Jlib disco getconferences]
-
+    
     ::Debug 2 "::Enter::Build services='$services'"
 
     # State variable to collect instance specific variables.
@@ -134,7 +137,15 @@ proc ::Enter::Build {protocol args} {
     if {[info exists argsA(-server)]} {
 	set state(server) $argsA(-server)
     } elseif {[llength $services]} {
+
+	# Select any muc conference so it will be the default.
 	set state(server) [lindex $services 0]
+	foreach s $services {
+	    if {[::Jabber::Jlib disco hasfeature $xmlns(muc) $s]} {
+		set state(server) $s
+		break
+	    }
+	}
     }
     set state(state-server)   normal
     set state(state-room)     normal

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.107 2008-06-09 09:51:00 matben Exp $
+# $Id: RosterTree.tcl,v 1.108 2008-06-11 08:12:05 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -801,7 +801,7 @@ proc ::RosterTree::BackgroundImageCmd {} {
     set dtl [mc jasuppimagefmts]
     append dtl " " $typeText
     append dtl "."
-    set mbar [::UI::GetMainMenu]
+    set mbar [::JUI::GetMainMenu]
     ::UI::MenubarDisableBut $mbar edit
     set fileName [ui::openimage::modal -message $str -detail $dtl -menu $mbar \
       -filetypes $types -initialfile $currentFile -defaultfile $defaultFile \

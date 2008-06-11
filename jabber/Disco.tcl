@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.154 2008-06-09 09:50:59 matben Exp $
+# $Id: Disco.tcl,v 1.155 2008-06-11 08:12:05 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -871,7 +871,7 @@ proc ::Disco::BackgroundImageCmd {} {
     set dtl [mc jasuppimagefmts]
     append dtl " " $typeText
     append dtl "."
-    set mbar [::UI::GetMainMenu]
+    set mbar [::JUI::GetMainMenu]
     ::UI::MenubarDisableBut $mbar edit
     set fileName [ui::openimage::modal -message $str -detail $dtl -menu $mbar \
       -filetypes $types -initialfile $currentFile -defaultfile $defaultFile \

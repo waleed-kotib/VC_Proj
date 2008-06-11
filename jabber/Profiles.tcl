@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.111 2008-06-09 09:51:00 matben Exp $
+# $Id: Profiles.tcl,v 1.112 2008-06-11 08:12:05 matben Exp $
 
 package require ui::megaentry
 
@@ -1524,7 +1524,7 @@ proc ::Profiles::FrameNewCmd {w} {
     # @@@ Perhaps make a maga dialog of this, modal plus returns entry,
     #     similar to tk_getOpenFile.
 
-    set mbar [::UI::GetMainMenu]
+    set mbar [::JUI::GetMainMenu]
     ::UI::MenubarDisableBut $mbar edit
     
     set ans [ui::megaentry -label "[mc {Profile Name}]:" -icon "" \

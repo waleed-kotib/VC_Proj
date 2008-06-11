@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.190 2008-05-13 09:13:00 matben Exp $
+# $Id: UI.tcl,v 1.191 2008-06-11 08:12:05 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -212,7 +212,7 @@ proc ::UI::InitDialogs {} {
 }
 
 proc ::UI::JabberBuildMainHook {} {
-    ui::dialog defaultmenu [::UI::GetMainMenu]
+    ui::dialog defaultmenu [::JUI::GetMainMenu]
 }
 
 proc ::UI::InitMac {} {
@@ -514,10 +514,6 @@ proc ::UI::SetupAss {} {
     ::UI::CenterWindow $wDlgs(setupass)
     raise $wDlgs(setupass)
     tkwait window $wDlgs(setupass)
-}
-
-proc ::UI::GetMainWindow {} {
-    return [::JUI::GetMainWindow]
 }
 
 proc ::UI::GetMainMenu {} {
