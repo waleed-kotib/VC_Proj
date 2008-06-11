@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.301 2008-06-11 08:12:05 matben Exp $
+# $Id: Chat.tcl,v 1.302 2008-06-11 13:22:17 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1165,14 +1165,16 @@ proc ::Chat::InsertHistory {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
-    if {$chatstate(historytype) eq "old"} {
-	InsertHistoryOld $chattoken -last $jprefs(chat,histLen)  \
-	  -maxage $jprefs(chat,histAge)
-    } else {
-	
-	# XML based preprocessed format
-	InsertHistoryXML $chattoken
-    }    
+    if {$chatstate(havehistory)} {
+	if {$chatstate(historytype) eq "old"} {
+	    InsertHistoryOld $chattoken -last $jprefs(chat,histLen)  \
+	      -maxage $jprefs(chat,histAge)
+	} else {
+	    
+	    # XML based preprocessed format
+	    InsertHistoryXML $chattoken
+	}    
+    }
 }
 
 proc ::Chat::HistoryCmd {chattoken} {
@@ -1378,15 +1380,16 @@ proc ::Chat::Build {threadID jid} {
     bind $w <<Find>>         [namespace code [list Find $dlgtoken]]
     bind $w <<FindAgain>>    [namespace code [list FindAgain $dlgtoken]]  
     bind $w <<FindPrevious>> [namespace code [list FindAgain $dlgtoken -1]]  
-    bind $w <FocusIn>       +[namespace code [list FocusIn $dlgtoken]]
+    # Wrong binding to toplevel.
+    #bind $w <FocusIn>       +[namespace code [list FocusIn $dlgtoken]]
     bind $wtray <<TToolbarCollapse>> [namespace code [list TTCollapse $dlgtoken]]
-    
+        
     # For toplevel binds.
     if {[lsearch [bindtags $w] ChatToplevel] < 0} {
 	bindtags $w [linsert [bindtags $w] 0 ChatToplevel]
     }
+    bind $w <Map> { focus %W }
     
-    focus $w
     return $dlgtoken
 }
 
@@ -2174,7 +2177,7 @@ proc ::Chat::NewPage {dlgtoken threadID jid} {
     global  this 
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
-        
+    
     # If no notebook, move chat widget to first notebook page.
     if {[string equal [winfo class [pack slaves $dlgstate(wcont)]] "ChatThread"]} {
 	set wthread $dlgstate(wthread)
@@ -2249,7 +2252,7 @@ proc ::Chat::MakeNewPage {dlgtoken threadID jid} {
     upvar 0 $dlgtoken dlgstate
     
     variable uidpage
-        
+    
     # Make fresh page with chat widget.
     set dispname [::Roster::GetDisplayName $jid]
     set wnb $dlgstate(wnb)
