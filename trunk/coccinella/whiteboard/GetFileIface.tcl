@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GetFileIface.tcl,v 1.16 2008-02-06 13:57:25 matben Exp $
+# $Id: GetFileIface.tcl,v 1.17 2008-06-11 08:12:05 matben Exp $
 
 package require getfile
 package require uriencode
@@ -502,7 +502,7 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
 	set str "[mc {Writing file}]: $getstate(filetail)"
 	ui::progress::toplevel $getstate(wprog)  \
 	  -text $str -text2 $msg2 -text3 $msg3   \
-	  -menu [::UI::GetMainMenu]              \
+	  -menu [::JUI::GetMainMenu]              \
 	  -cancelcommand [list [namespace current]::CancelCmd $gettoken]
     }
 }

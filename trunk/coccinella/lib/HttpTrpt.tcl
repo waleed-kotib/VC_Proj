@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: HttpTrpt.tcl,v 1.14 2008-02-06 13:57:25 matben Exp $
+# $Id: HttpTrpt.tcl,v 1.15 2008-06-11 08:12:05 matben Exp $
 
 package require httpex
 package require timing
@@ -157,7 +157,7 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 	if {$state(-dialog) && ![winfo exists $w]} {
 	    set str "[mc {Writing file}]: $state(fileTail)"
 	    ui::progress::toplevel $w -text $str \
-	      -menu [::UI::GetMainMenu]          \
+	      -menu [::JUI::GetMainMenu]          \
 	      -cancelcommand [list [namespace current]::CancelBt $token]
 	}
 	if {$state(-progressmessage) ne ""} {

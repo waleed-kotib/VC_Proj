@@ -7,7 +7,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: dialog.tcl,v 1.39 2008-04-17 15:00:28 matben Exp $
+# $Id: dialog.tcl,v 1.40 2008-06-11 08:12:05 matben Exp $
 
 # Public commands:
 # 
@@ -666,7 +666,7 @@ if {0} {
     set fr [$w clientframe]
     pack [ttk::checkbutton $fr.c -text $str2] -side left
     
-    ui::dialog defaultmenu [::UI::GetMainMenu]
+    ui::dialog defaultmenu [::JUI::GetMainMenu]
     set w [ui::dialog -message $str -detail $str2 -modal 1]
 
     ui::dialog::modal -message "This is a modal dialog" -detail $str2 \

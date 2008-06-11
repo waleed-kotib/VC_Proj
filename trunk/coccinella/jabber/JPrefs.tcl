@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JPrefs.tcl,v 1.68 2008-06-09 09:50:59 matben Exp $
+# $Id: JPrefs.tcl,v 1.69 2008-06-11 08:12:05 matben Exp $
 
 package require ui::fontselector
 
@@ -206,7 +206,10 @@ proc ::JPrefs::BuildAppearancePage {page} {
     #   ::tile::currentTheme and prefs(tileTheme)
     ttk::label $wap.lskin -text "[mc Skin]:"
     
-    ui::optionmenu $wap.bskin -menulist $menuDef \
+#     ui::optionmenu $wap.bskin -menulist $menuDef \
+#       -variable [namespace current]::tmpPrefs(tileTheme) \
+#       -command ttk::setTheme
+    ui::combobutton $wap.bskin -menulist $menuDef \
       -variable [namespace current]::tmpPrefs(tileTheme) \
       -command ttk::setTheme
     
@@ -330,7 +333,7 @@ proc ::JPrefs::PickFont { } {
     } else {
 	set optsA(-selectfont) CociSmallFont
     }
-    set m [::UI::GetMainMenu]
+    set m [::JUI::GetMainMenu]
     set optsA(-menu) $m
     set w [eval ui::fontselector [ui::autoname] [array get optsA]]
     ::UI::SetMenubarAcceleratorBinds $w $m

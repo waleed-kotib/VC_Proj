@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: FTrans.tcl,v 1.37 2008-06-09 09:50:59 matben Exp $
+# $Id: FTrans.tcl,v 1.38 2008-06-11 08:12:05 matben Exp $
 
 package require snit 1.0
 package require uriencode
@@ -388,7 +388,7 @@ proc ::FTrans::Build {jid args} {
     
     set dlg $wDlgs(jftrans)
     set w   $dlg[incr uid]
-    set m   [::UI::GetMainMenu]
+    set m   [::JUI::GetMainMenu]
     eval {SendDialog $w $jid  \
       -command [namespace current]::DoSend  \
       -menu $m -geovariable prefs(winGeom,$dlg)} $args

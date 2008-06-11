@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: disco.tcl,v 1.56 2008-04-21 07:51:17 matben Exp $
+# $Id: disco.tcl,v 1.57 2008-06-11 08:12:05 matben Exp $
 # 
 ############################# USAGE ############################################
 #
@@ -89,6 +89,7 @@ namespace eval jlib::disco {
 	disco   "http://jabber.org/protocol/disco"
 	items   "http://jabber.org/protocol/disco#items"
 	info    "http://jabber.org/protocol/disco#info"
+	muc     "http://jabber.org/protocol/muc"
     }
     
     # Components register their feature elements for disco/info.
@@ -488,6 +489,7 @@ proc jlib::disco::parse_get_items {jlibname from queryE} {
 #       Fills the internal records with this disco info query result.
 
 proc jlib::disco::parse_get_info {jlibname from queryE} {
+    variable xmlns
 
     upvar ${jlibname}::disco::items items
     upvar ${jlibname}::disco::info  info

@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: ttoolbar.tcl,v 1.21 2008-05-27 14:17:23 matben Exp $
+# $Id: ttoolbar.tcl,v 1.22 2008-06-11 08:12:05 matben Exp $
 # 
 # ########################### USAGE ############################################
 #
@@ -83,11 +83,9 @@ proc ::ttoolbar::Init { } {
     }
     
     foreach name [ttk::themes] {
-	
 	if {[catch {package require ttk::theme::$name}]} {
 	    continue
 	}	    
-
 	ttk::style theme settings $name {
 	    
 	    # This produces fairly hard edged borders.
@@ -256,7 +254,7 @@ proc ::ttoolbar::WidgetProc {w command args} {
     upvar ::ttoolbar::${w}::options options
     upvar ::ttoolbar::${w}::locals locals
     
-    set result {}
+    set result ""
     
     # Which command?
     switch -- $command {
@@ -285,6 +283,12 @@ proc ::ttoolbar::WidgetProc {w command args} {
 	exists {
 	    set name [lindex $args 0]
 	    set result [info exists locals($name,-state)]
+	}
+	iscollapsed {
+	    if {[llength $args]} {
+		return -code error "wrong # args: should be $w iscollapsed"
+	    }
+	    set result $locals(collapse)
 	}
 	minwidth {
 	    set result [MinWidth $w]

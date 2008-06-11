@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.255 2008-06-10 13:47:54 matben Exp $
+# $Id: JUI.tcl,v 1.256 2008-06-11 08:12:05 matben Exp $
 
 package provide JUI 1.0
 
@@ -1076,13 +1076,11 @@ proc ::JUI::ShowNotebook {} {
 
 proc ::JUI::GetMainWindow {} {
     global wDlgs
-    
     return $wDlgs(jmain)
 }
 
 proc ::JUI::GetMainMenu {} {
     variable jwapp
-    
     return $jwapp(wmenu)
 }
 

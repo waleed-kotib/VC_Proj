@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.255 2008-06-10 13:26:49 matben Exp $
+# $Id: GroupChat.tcl,v 1.256 2008-06-11 08:12:05 matben Exp $
 
 package require Create
 package require Enter
@@ -3459,7 +3459,7 @@ proc ::GroupChat::EditBookmarks {} {
 	raise $dlg
 	return
     }
-    set m [::UI::GetMainMenu]
+    set m [::JUI::GetMainMenu]
     set columns [list  \
       0 [mc Chatroom] 0 [mc Location] \
       0 [mc Nickname] 0 [mc Password] \
