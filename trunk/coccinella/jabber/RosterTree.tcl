@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.108 2008-06-11 08:12:05 matben Exp $
+# $Id: RosterTree.tcl,v 1.109 2008-06-12 14:23:06 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -927,13 +927,8 @@ proc ::RosterTree::CloseTreeCmd {item} {
 proc ::RosterTree::OnReturn {} {
     variable T
     
-    set item [$T selection get]
-    if {[$T selection count] == 1} {
-	set tags [GetTagOfItem $item]
-	if {[lindex $tags 0] eq "jid"} {
-	    set jid [lindex $tags 1]
-	    ActionDoubleClick $jid
-	}
+    foreach jid [GetSelectedJID] {
+	ActionDoubleClick $jid
     }
 }
 
