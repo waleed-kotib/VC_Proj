@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: GroupChat.tcl,v 1.257 2008-06-11 13:22:17 matben Exp $
+# $Id: GroupChat.tcl,v 1.258 2008-06-12 07:23:36 matben Exp $
 
 package require Create
 package require Enter
@@ -883,7 +883,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     
     ::Emoticons::MenuButton $wgroup.smile -text $wtextsend
     ttk::checkbutton $wgroup.elsys -style Toolbutton \
-      -text M \
+      -image [::Theme::FindIconSize 16 dialog-information] \
       -command [list [namespace current]::ElideSysCmd $chattoken] \
       -variable $chattoken\(elidesys)
     
