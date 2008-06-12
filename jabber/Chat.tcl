@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.302 2008-06-11 13:22:17 matben Exp $
+# $Id: Chat.tcl,v 1.303 2008-06-12 07:23:36 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1609,7 +1609,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
       -command [list [namespace current]::HistoryCmd $chattoken]
     ::Emoticons::MenuButton $wsmile -command $cmd
     ttk::checkbutton $wbot.elsys -style Toolbutton \
-      -text M \
+      -image [::Theme::FindIconSize 16 dialog-information] \
       -command [list [namespace current]::ElideSysCmd $chattoken] \
       -variable $chattoken\(elidesys)
     ttk::label $wnotifier -style Small.TLabel \
