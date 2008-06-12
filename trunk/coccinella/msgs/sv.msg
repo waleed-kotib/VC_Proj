@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.147 2008-06-09 09:51:01 matben Exp $
+#   $Id: sv.msg,v 1.148 2008-06-12 12:27:22 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -1250,6 +1250,7 @@ if {0} {
 
 ::msgcat::mcset sv tooltip-chatsubject   {Skriv in ämnet och avsluta med Retur}
 ::msgcat::mcset sv tooltip-chatoffline   {Du måste vara ansluten för att se närvaron av denna kontakt}
+::msgcat::mcset sv tooltip-chatsendtext  {Enter your message and press Return or Shift-Return}
 ::msgcat::mcset sv tooltip-aaonhidden    {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
 ::msgcat::mcset sv tooltip-aabusychats   {När du har <antal> eller fler aktiva chattar så kommer din närvoro automatiskat att ändras till Stör ej.}
 ::msgcat::mcset sv tooltip-togglesysmsg  {Show or hide status changes in chat}
