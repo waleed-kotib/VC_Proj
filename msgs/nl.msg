@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.176 2008-04-25 21:34:18 sdevrieze Exp $
+#   $Id: nl.msg,v 1.177 2008-06-12 12:27:22 matben Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}
@@ -1248,6 +1248,7 @@ if {0} {
 
 ::msgcat::mcset nl tooltip-chatsubject   {Voer het onderwerp van het gesprek in, stel in met Enter}
 ::msgcat::mcset nl tooltip-chatoffline   {U moet aangemeld zijn om de aanwezigheid van deze contactpersoon te zien}
+::msgcat::mcset nl tooltip-chatsendtext  {Enter your message and press Return or Shift-Return}
 ::msgcat::mcset nl tooltip-aaonhidden    {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
 ::msgcat::mcset nl tooltip-aabusychats   {Bij evenveel of meer actieve chatsessies dan het opgegeven aantal wordt de aanwezigheid automatisch verandert naar Niet storen.}
 
