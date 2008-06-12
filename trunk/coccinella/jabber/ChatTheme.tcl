@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: ChatTheme.tcl,v 1.17 2008-04-17 15:00:28 matben Exp $
+# $Id: ChatTheme.tcl,v 1.18 2008-06-12 12:05:48 matben Exp $
 
 # @@@ Open issues:
 #   o switching theme while open dialogs
@@ -114,10 +114,9 @@ proc ::ChatTheme::Init {} {
 proc ::ChatTheme::GetAllStylePaths {} {
     variable style2Path
     
-    set stylePaths [list]
-    set paths [::Theme::GetPathsFor chatstyles]
-    foreach path $paths {
-	set dirs [glob -nocomplain -directory $path -types d *]
+    set pathL [list]
+    foreach path [::Theme::GetAllPathsWithFilter chatstyles] {
+	set dirs [glob -nocomplain -directory [file join $path chatstyles] -types d *]
 	foreach dir $dirs {
 	    
 	    # Do some rudimentary checking.
@@ -125,12 +124,11 @@ proc ::ChatTheme::GetAllStylePaths {} {
 	    if {[file exists $f]} {
 		set name [file tail $dir]
 		set style2Path($name) $dir
-		lappend stylePaths $dir
+		lappend pathL $dir
 	    }
 	}
-
     }
-    return $stylePaths
+    return $pathL
 }
 
 proc ::ChatTheme::AllThemes {} {
@@ -139,7 +137,7 @@ proc ::ChatTheme::AllThemes {} {
     Init
     set themes [list]
     foreach path [GetAllStylePaths] {
-	lappend thems [file tail $path]
+	lappend themes [file tail $path]
     }
     return $themes
 }
@@ -254,7 +252,7 @@ proc ::ChatTheme::Set {name} {
 
 proc ::ChatTheme::GetResourceDir {name} {
     variable style2Path   
-    return [file join $style2Path($name) $name Contents Resources]
+    return [file join $style2Path($name) Contents Resources]
 }
 
 proc ::ChatTheme::Widget {token w args} {

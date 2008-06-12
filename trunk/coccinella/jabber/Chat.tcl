@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.303 2008-06-12 07:23:36 matben Exp $
+# $Id: Chat.tcl,v 1.304 2008-06-12 12:05:47 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -231,7 +231,7 @@ namespace eval ::Chat {
     }
     
     # Allow themed chats.
-    set ::config(chat,try-themed) 0
+    set ::config(chat,try-themed) 1
         
     # Postpone this to init.
     variable haveTheme 0
@@ -4263,7 +4263,8 @@ proc ::Chat::BuildPrefsPage {wpage} {
 	ttk::separator $wc.sep4 -orient horizontal
 	
 	::ChatTheme::Reload
-	set menuDef [lapply list [::ChatTheme::AllThemes]]
+	set chatThemes [::ChatTheme::AllThemes]
+	set menuDef [lapply list $chatThemes]
 	set wtm $wc.tm
 	ttk::frame $wc.tm
 	ttk::checkbutton $wtm.themed -text "Have themed chats:"  \
@@ -4271,7 +4272,10 @@ proc ::Chat::BuildPrefsPage {wpage} {
 	  -command [namespace code [list PrefsThemedCmd $wtm.theme]]
 	ui::optionmenu $wtm.theme -menulist $menuDef -direction flush \
 	  -variable [namespace current]::tmpp(chat,theme)
-	
+	if {![llength $chatThemes]} {
+	    set tmpp(chat,themed) 0
+	    $wtm.themed state {disabled}
+	}
 	grid  $wtm.themed  $wtm.theme  -sticky w
 
 	grid  $wc.sep4    -sticky ew -pady 6
