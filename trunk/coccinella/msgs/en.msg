@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.247 2008-06-12 12:27:22 matben Exp $
+#   $Id: en.msg,v 1.248 2008-06-13 23:35:50 sdevrieze Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -753,9 +753,9 @@
 ::msgcat::mcset en jamessautosubs2       {You can see %s's presence.}
 ::msgcat::mcset en jamessavaerrsize      {The avatar must be square of size %s.}
 ::msgcat::mcset en jamessbadjid2         {%s is invalid. Do you want to continue anyway?}
-::msgcat::mcset en jamesschatclose2      {Do you want to close this chat window and loose the complete conversation?}
+::msgcat::mcset en jamesschatclose2      {Do you want to close this chat window and lose the complete conversation?}
 ::msgcat::mcset en jamesschatinvite      {Do you want to invite this contact to a new chatroom?}
-::msgcat::mcset en jamesschatoffline2    {This contact is not online anymore and the message is therfore not sent.}
+::msgcat::mcset en jamesschatoffline2    {This contact is not online anymore and the message is therefore not sent.}
 
 ::msgcat::mcset en jamessconffailed2     {Cannot enter/create chatroom %s.}
 ::msgcat::mcset en jamessconnbroken      {The connection was unexpectedly broken.}
@@ -851,7 +851,7 @@
 # This maps Defined Error Conditions to clear text messages.
 # RFC 3929 (XMPP Core): 6.4 SASL Errors
 # 
-# These are much too formal to be used for user display and we therfore instead use the short forms below.
+# These are much too formal to be used for user display and we therefore instead use the short forms below.
 # Do not translate these, just for reference.
 ::msgcat::mcset en xmpp-stanzas-aborted             {The receiving entity acknowledges an abort element sent by the initiating entity.}
 ::msgcat::mcset en xmpp-stanzas-incorrect-encoding  {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
