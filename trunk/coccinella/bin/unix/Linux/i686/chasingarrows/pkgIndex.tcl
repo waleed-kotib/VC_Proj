@@ -2,6 +2,6 @@
 #
 
 package ifneeded chasingarrowselem 0.2 \
-    [list load [file join $dir chasingarrowselem[info sharedlibext]]]
+    [list load [file join $dir libchasingarrowselem0.2[info sharedlibext]]]
 
 #*EOF* 
