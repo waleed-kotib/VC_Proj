@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.248 2008-06-13 23:35:50 sdevrieze Exp $
+#   $Id: en.msg,v 1.249 2008-07-04 14:11:32 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -793,6 +793,8 @@
 ::msgcat::mcset en jamessjidinvalid2     {Invalid Contact ID.}
 ::msgcat::mcset en jamesslocaltime2      {%s's local time is: %s}
 ::msgcat::mcset en jamesslogin409b       {Cannot login because this username is already in use by someone else (%s).}
+::msgcat::mcset en jamessloginnewprof    {The Jabber ID differs from your profile. Do you want to save a new profile?}
+::msgcat::mcset en jamesslogindiff       {Your current login settings differ from your profile settings. Do you want to save them to your profile?}
 ::msgcat::mcset en jamessmsgwarnquit     {There are unsaved messages. Do you still want to quit?}
 ::msgcat::mcset en jamessnamemissing     {The "%s" is missing or is too short!}
 ::msgcat::mcset en jamessnofiletrpt2     {%s does not support file transfer.}

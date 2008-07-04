@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.148 2008-06-12 12:27:22 matben Exp $
+#   $Id: sv.msg,v 1.149 2008-07-04 14:11:32 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -799,6 +799,8 @@
 ::msgcat::mcset sv jamessjidinvalid2     {Ogiltig kontakt ID.}
 ::msgcat::mcset sv jamesslocaltime2      {%s lokala tid är: %s}
 ::msgcat::mcset sv jamesslogin409b       {Kan inte ansluta eftersom detta namn redan används av någon annan (%s).}
+::msgcat::mcset sv jamessloginnewprof    {The Jabber ID differs from your profile. Do you want to save a new profile?}
+::msgcat::mcset sv jamesslogindiff       {Your current login settings differ from your profile settings. Do you want to save them to your profile?}
 ::msgcat::mcset sv jamessmsgwarnquit     {Det finns osparade meddlenaden. Vill du fortfarande avsluta?}
 ::msgcat::mcset sv jamessnamemissing     {Fältet %s fattas eller är för kort!}
 ::msgcat::mcset sv jamessnofiletrpt2     {%s stöder ej filöverföring.}

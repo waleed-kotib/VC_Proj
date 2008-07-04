@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.153 2008-06-11 08:12:05 matben Exp $
+# $Id: Login.tcl,v 1.154 2008-07-04 14:11:32 matben Exp $
 
 package provide Login 1.0
 
@@ -457,6 +457,7 @@ proc ::Login::DoLogin {} {
     variable jid
     variable moreOpts
     variable widgets
+    variable menuVar
     
     ::Debug 2 "::Login::DoLogin"
     
@@ -465,10 +466,12 @@ proc ::Login::DoLogin {} {
 
     if {($config(login,style) eq "jid") || ($config(login,style) eq "jidpure")} {
 	jlib::splitjidex $jid username server resource
+	set jidESC [jlib::escapejid $jid]
 	set username [jlib::escapestr $username]
     } else {
 	set username [jlib::escapestr $username]
 	set jid [jlib::joinjid $username $server $resource]
+	set jidESC $jid
     }	
     
     # Check 'server', 'username' and 'password' if acceptable.
@@ -550,15 +553,14 @@ proc ::Login::DoLogin {} {
 	if {[info exists tmp2A(-resource)]} {
 	    set r $tmp2A(-resource)
 	}
-#  	puts "jid=$jid, barejid=[jlib::barejid $jid]"
-#  	puts "u=$u, h=$h, j=[jlib::joinjid $u $h ""]"
+#   	puts "jidESC=$jidESC, barejid=[jlib::barejid $jidESC]"
+#   	puts "u=$u, h=$h, j=[jlib::joinjid $u $h ""]"
 	
-	if {![jlib::jidequal [jlib::barejid $jid] [jlib::joinjid $u $h ""]]} {
+	if {![jlib::jidequal [jlib::barejid $jidESC] [jlib::joinjid $u $h ""]]} {
 
 	    # If we have a new bare JID we ask the user to make a new profile.
-	    set msg "The Jabber ID differs from your profile. Do you want to save a new profile?"
 	    set ans [tk_messageBox -title "" -type yesno -icon question \
-	      -message $msg]
+	      -message [mc jamessloginnewprof]]
 	    if {$ans eq "yes"} {
 		set mbar [::JUI::GetMainMenu]
 		::UI::MenubarDisableBut $mbar edit
@@ -570,16 +572,16 @@ proc ::Login::DoLogin {} {
 
 		if {$ans ne ""} {
 		    set newName [ui::megaentrytext $ans]
-		    if {$ans eq "yes"} {
-			set uname [MakeUniqueProfileName $newName]
-			eval {::Profiles::Set $uname $server $username $password} $opts
-		    }	
+		    set uname [::Profiles::MakeUniqueProfileName $newName]
+		    eval {::Profiles::Set $uname $server $username $password} $opts
+		    set menuVar [::Profiles::GetSelectedName]
+		    set profile $menuVar
 		}
 	    }
 	} else {
 	
 	    # Check if other profile options changed.
-	    if {![jlib::jidequal $jid [jlib::joinjid $u $h $r]]} {
+	    if {![jlib::jidequal $jidESC [jlib::joinjid $u $h $r]]} {
 		set diffs 1
 	    } else {
 		if {![arraysequal tmp1A tmp2A]} {
@@ -587,9 +589,8 @@ proc ::Login::DoLogin {} {
 		}
 	    }
 	    if {$diffs} {
-		set msg "Your current login settings differ from your profile settings. Do you want to save them to your profile?"
 		set ans [tk_messageBox -title "" -type yesno -icon question \
-		  -message $msg]
+		  -message [mc jamesslogindiff]]
 		if {$ans eq "yes"} {
 		    eval {::Profiles::Set $profile $server $username $password} $opts
 		}	
