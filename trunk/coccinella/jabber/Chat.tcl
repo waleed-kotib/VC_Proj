@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Chat.tcl,v 1.305 2008-06-12 12:28:07 matben Exp $
+# $Id: Chat.tcl,v 1.306 2008-07-04 07:26:57 matben Exp $
 
 package require ui::entryex
 package require ui::optionmenu
@@ -1888,6 +1888,10 @@ proc ::Chat::Find {dlgtoken} {
     }
     variable $chattoken
     upvar 0 $chattoken chatstate
+    
+    if {[winfo class $chatstate(wtext)] ne "Text"} {
+	return
+    }
 
     set wfind $chatstate(wfind)
     if {![winfo exists $wfind]} {
@@ -1919,8 +1923,10 @@ proc ::Chat::FindOnDestroy {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
 
-    # Restore tab order.
-    bind $chatstate(wsubject) <Tab> [list ui::TabTo $chatstate(wtextsnd)]
+    # Restore tab order. Avoid trigger it when closing complete dialog.
+    if {[winfo exists $chatstate(wsubject)]} {
+	bind $chatstate(wsubject) <Tab> [list ui::TabTo $chatstate(wtextsnd)]
+    }
 }
 
 # Chat::DnDXmppDrop --
