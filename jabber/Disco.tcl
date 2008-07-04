@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.155 2008-06-11 08:12:05 matben Exp $
+# $Id: Disco.tcl,v 1.156 2008-07-04 14:31:41 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -1595,8 +1595,8 @@ proc ::Disco::OnMenuAddServer {} {
 
 namespace eval ::Disco {
     
-    option add *DiscoAdd.settingsImage           preferences      widgetDefault
-    option add *DiscoAdd.settingsDisImage        preferences-Dis  widgetDefault
+    option add *DiscoAdd.settingsImage         network-server      widgetDefault
+    option add *DiscoAdd.settingsDisImage      network-server-Dis  widgetDefault
 
 }
 
