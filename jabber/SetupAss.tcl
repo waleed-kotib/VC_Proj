@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: SetupAss.tcl,v 1.56 2008-06-09 09:51:00 matben Exp $
+# $Id: SetupAss.tcl,v 1.57 2008-07-04 14:58:48 matben Exp $
 
 package require wizard
 package require chasearrows
@@ -28,7 +28,7 @@ package require JPubServers
 
 package provide SetupAss 1.0
 
-namespace eval ::SetupAss::  {
+namespace eval ::SetupAss {
 
     variable server
     variable haveRegistered 0
@@ -58,6 +58,7 @@ proc ::SetupAss::SetupAss {} {
     variable username  ""
     variable password  ""
     variable password2 ""
+    variable savepass  0
     variable wserver   ""
     variable wregister ""
     variable wwizard
@@ -172,14 +173,17 @@ proc ::SetupAss::SetupAss {} {
       -validate key -validatecommand {::Jabber::ValidatePasswordStr %S}
     ttk::entry $fr3.pass2 -textvariable [namespace current]::password2 -show {*} \
       -validate key -validatecommand {::Jabber::ValidatePasswordStr %S} 
+    ttk::checkbutton $fr3.cpass -style Small.TCheckbutton  \
+      -text [mc "Save password"] -variable [namespace current]::savepass
      
     grid  $fr3.msg1  -           -pady $pady -sticky w
     grid  $fr3.srv   $fr3.srv2   -pady $pady -sticky e
     grid  $fr3.lan   $fr3.name   -pady $pady -sticky e
     grid  $fr3.lap   $fr3.pass   -pady $pady -sticky e
     grid  $fr3.lap2  $fr3.pass2  -pady $pady -sticky e
+    grid  x          $fr3.cpass  -pady $pady -sticky e
     grid  $fr3.name  $fr3.pass  $fr3.pass2  -sticky ew
-    grid  $fr3.srv2  -sticky w
+    grid  $fr3.srv2  $fr3.cpass  -sticky w
     pack  $p3.fr -side top -fill x
 
     lappend wrapthese $fr3.msg1
@@ -381,6 +385,7 @@ proc ::SetupAss::DoFinish {w} {
     variable server
     variable username
     variable password
+    variable savepass
     variable locale
     variable finished
     variable haveRegistered
@@ -389,7 +394,11 @@ proc ::SetupAss::DoFinish {w} {
 	
 	# Save as a shortcut and default server only if not called 
 	# ::RegisterEx::New which already done this
-	::Profiles::Set {} $server $username $password
+	if {$savepass} {
+	    ::Profiles::Set {} $server $username $password
+	} else {
+	    ::Profiles::Set {} $server $username ""
+	}
     }
     
     # Load any new message catalog.
