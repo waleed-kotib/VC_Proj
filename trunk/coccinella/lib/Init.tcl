@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Init.tcl,v 1.106 2008-07-04 07:04:58 matben Exp $
+# $Id: Init.tcl,v 1.107 2008-07-05 07:31:53 matben Exp $
 
 namespace eval ::Init {
     
@@ -558,7 +558,7 @@ proc ::Init::MakePrefsDirs {} {
     # Make sure other have absolutely no access to our prefs.
     # [Bug 243364] [NEW] umask needs to be set to 077 (?)
     if {$tcl_platform(platform) eq "unix"} {
-	file attributes $this(prefsPath) -permissions 0770
+	file attributes $this(prefsPath) -permissions 0700
     }
 }
 
