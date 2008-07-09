@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.112 2008-06-11 08:12:05 matben Exp $
+# $Id: Profiles.tcl,v 1.113 2008-07-09 07:49:41 matben Exp $
 
 package require ui::megaentry
 
@@ -1774,35 +1774,6 @@ proc ::Profiles::NotebookOptionWidget {w token} {
 
     # Tabbed notebook for more options.
     ttk::notebook $w -style Small.TNotebook -padding {2 4 2 2}
-
-    # Login options.
-    $w add [ttk::frame $w.log] -text [mc "Login"] -sticky news
-
-    set wlog $w.log.f
-    ttk::frame $wlog -padding [option get . notebookPageSmallPadding {}]
-    pack  $wlog  -side top -anchor [option get . dialogAnchor {}]
-
-    set wstate(digest)        $wlog.cdig
-    set wstate(priority)      $wlog.sp
-    set wstate(invisible)     $wlog.cinv
-
-    ttk::checkbutton $wlog.cdig -style Small.TCheckbutton \
-      -text [mc "Plain text password"]  \
-      -variable $token\(digest) -offvalue 1 -onvalue 0
-    ttk::label $wlog.lp -style Small.TLabel \
-      -text "[mc Priority]:"
-    spinbox $wlog.sp -font CociSmallFont \
-      -textvariable $token\(priority) \
-      -width 5 -increment 1 -from -128 -to 127 -validate all  \
-      -validatecommand [list ::Profiles::NotebookValidatePrio $token %V %P]  \
-      -invalidcommand bell
-    ttk::checkbutton $wlog.cinv -style Small.TCheckbutton \
-      -text [mc {Login as invisible}]  \
-      -variable $token\(invisible)
-    
-    grid  $wlog.cdig   -          -sticky w
-    grid  $wlog.cinv   -          -sticky w
-    grid  $wlog.lp     $wlog.sp
     
     # Connection page.
     $w add [ttk::frame $w.con] -text [mc Connection] -sticky news
@@ -1850,6 +1821,35 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     if {![jlib::havecompress]} {
 	$wse.comp state {disabled}
     }
+
+    # Login options.
+    $w add [ttk::frame $w.log] -text [mc "Login"] -sticky news
+
+    set wlog $w.log.f
+    ttk::frame $wlog -padding [option get . notebookPageSmallPadding {}]
+    pack  $wlog  -side top -anchor [option get . dialogAnchor {}]
+
+    set wstate(digest)        $wlog.cdig
+    set wstate(priority)      $wlog.sp
+    set wstate(invisible)     $wlog.cinv
+
+    ttk::checkbutton $wlog.cdig -style Small.TCheckbutton \
+      -text [mc "Plain text password"]  \
+      -variable $token\(digest) -offvalue 1 -onvalue 0
+    ttk::label $wlog.lp -style Small.TLabel \
+      -text "[mc Priority]:"
+    spinbox $wlog.sp -font CociSmallFont \
+      -textvariable $token\(priority) \
+      -width 5 -increment 1 -from -128 -to 127 -validate all  \
+      -validatecommand [list ::Profiles::NotebookValidatePrio $token %V %P]  \
+      -invalidcommand bell
+    ttk::checkbutton $wlog.cinv -style Small.TCheckbutton \
+      -text [mc "Login as invisible"]  \
+      -variable $token\(invisible)
+    
+    grid  $wlog.cdig   -          -sticky w
+    grid  $wlog.cinv   -          -sticky w
+    grid  $wlog.lp     $wlog.sp
 
     # IP page.
     $w add [ttk::frame $w.ip] -text [mc Server] -sticky news
