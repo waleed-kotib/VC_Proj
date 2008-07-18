@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.43 2008-07-18 08:26:41 matben Exp $
+# $Id: Taskbar.tcl,v 1.44 2008-07-18 12:47:24 matben Exp $
 
 package require balloonhelp
 
@@ -260,7 +260,6 @@ proc ::Taskbar::X11Popup {x y} {
 proc ::Taskbar::ToggleVisibility {} {
     variable tprefs
 
-    # @@@ TODO: handle the 'iconic' state as well (XP).
     switch -- [wm state [::JUI::GetMainWindow]] {
 	zoomed - normal  {
 	    if {$tprefs(hideAll)} {
@@ -270,6 +269,7 @@ proc ::Taskbar::ToggleVisibility {} {
 	    }
 	}
 	default {
+	    # This includes the iconic state.
 	    if {$tprefs(hideAll)} {
 		::UI::ShowAllToplevels
 	    } else {

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.191 2008-06-11 08:12:05 matben Exp $
+# $Id: UI.tcl,v 1.192 2008-07-18 12:47:24 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -862,13 +862,13 @@ proc ::UI::DoCloseWindow {{wevent ""} {type "command"}} {
 	    if {[string equal $result "stop"]} {
 		return
 	    }
-	    catch {destroy $w}
+	    destroy $w
 	}
     
 	# Run hooks. Only the one corresponding to the $w needs to act!
 	set result [::hooks::run closeWindowHook $w]    
 	if {![string equal $result "stop"]} {
-	    catch {destroy $w}
+	    destroy $w
 	}
     }
 }
@@ -914,15 +914,14 @@ proc ::UI::WithdrawAllToplevels {} {
 proc ::UI::ShowAllToplevels {} {
     variable topcache
     
-    if {[string equal $topcache(state) "hide"]} {
-	foreach w [GetAllToplevels] {
-	    if {[string equal $topcache($w,prevstate) "normal"]} {
-		set topcache($w,prevstate) [wm state $w]
-		wm deiconify $w
-	    }
+    foreach w [GetAllToplevels] {
+	if {[string equal $topcache($w,prevstate) "normal"] || \
+	  [string equal [wm state $w] "iconic"]} {
+	    set topcache($w,prevstate) [wm state $w]
+	    wm deiconify $w
 	}
-	set topcache(state) show
     }
+    set topcache(state) show
 }
 
 proc ::UI::GetToplevelState {} {
