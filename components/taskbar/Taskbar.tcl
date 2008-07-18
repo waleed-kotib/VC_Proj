@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.42 2008-06-11 08:12:05 matben Exp $
+# $Id: Taskbar.tcl,v 1.43 2008-07-18 08:26:41 matben Exp $
 
 package require balloonhelp
 
@@ -185,7 +185,7 @@ proc ::Taskbar::InitHook {} {
 	{cascade  mStatus           {}                      {-image @STAT -compound left}}
 	{command  mMinimize         ::Taskbar::HideMain                  }
 	{command  mMessage...       ::NewMsg::Build         {-image @MSG -compound left}}
-	{command  mPreferences...   ::Preferences::Build    {-image @SET -compound left}}
+	{command  mPreferences...   ::Taskbar::Prefs        {-image @SET -compound left}}
 	{command  mAddContact...    ::JUser::NewDlg  {-image @ADD -compound left}}
 	{cascade  mInfo  {
 	    {command  mAboutCoccinella    ::Splash::SplashScreen  {-image @COCI -compound left}}
@@ -202,6 +202,11 @@ proc ::Taskbar::InitHook {} {
     
     ::AMenu::Build $m $menuDef
     array set menuIndex [::AMenu::GetMenuIndexArray $m]
+}
+
+proc ::Taskbar::Prefs {} {
+    ::Preferences::Build
+    ::Preferences::Show {Jabber Customization}
 }
 
 proc ::Taskbar::WinCmd {event x y} {
@@ -253,13 +258,23 @@ proc ::Taskbar::X11Popup {x y} {
 }
 
 proc ::Taskbar::ToggleVisibility {} {
-    
+    variable tprefs
+
+    # @@@ TODO: handle the 'iconic' state as well (XP).
     switch -- [wm state [::JUI::GetMainWindow]] {
 	zoomed - normal  {
-	    ::UI::WithdrawAllToplevels
+	    if {$tprefs(hideAll)} {
+		::UI::WithdrawAllToplevels
+	    } else {
+		wm withdraw [::JUI::GetMainWindow]
+	    }
 	}
 	default {
-	    ::UI::ShowAllToplevels
+	    if {$tprefs(hideAll)} {
+		::UI::ShowAllToplevels
+	    } else {
+		wm deiconify [::JUI::GetMainWindow]
+	    }
 	}
     }
 }
@@ -425,9 +440,12 @@ proc ::Taskbar::InitPrefsHook {} {
     
     set tprefs(quitMini)  0
     set tprefs(startMini) 0
+    set tprefs(hideAll)   1    
+    
     ::PrefUtils::Add [list  \
       [list ::Taskbar::tprefs(quitMini)   taskbar_quitMini   $tprefs(quitMini)] \
-      [list ::Taskbar::tprefs(startMini)  taskbar_startMini  $tprefs(startMini)]]
+      [list ::Taskbar::tprefs(startMini)  taskbar_startMini  $tprefs(startMini)] \
+      [list ::Taskbar::tprefs(hideAll)    taskbar_hideAll    $tprefs(hideAll)]]
 }
 
 proc ::Taskbar::BuildCustomPrefsHook {win} {
@@ -435,19 +453,25 @@ proc ::Taskbar::BuildCustomPrefsHook {win} {
     variable tmpPrefs
     
     set tmpPrefs(startMini) $tprefs(startMini)
+    set tmpPrefs(hideAll)   $tprefs(hideAll)
 
     switch -- [tk windowingsystem] {
 	win32 {
 	    set str [mc "Start minimized in taskbar"]
+	    set strHide [mc "Hide all on taskbar click"]
 	}
 	x11 {
 	    set str [mc "Start minimized in system tray"]
+	    set strHide [mc "Hide all on system tray click"]
 	}
     }
     ttk::checkbutton $win.tskbmini -text $str \
       -variable [namespace current]::tmpPrefs(startMini)
+    ttk::checkbutton $win.tskbhide -text $strHide \
+      -variable [namespace current]::tmpPrefs(hideAll)
 
     grid  $win.tskbmini  -sticky w
+    grid  $win.tskbhide  -sticky w
 }
 
 proc ::Taskbar::SavePrefsHook {} {
@@ -455,6 +479,7 @@ proc ::Taskbar::SavePrefsHook {} {
     variable tmpPrefs
     
     set tprefs(startMini) $tmpPrefs(startMini)
+    set tprefs(hideAll)   $tmpPrefs(hideAll)
 }
 
 proc ::Taskbar::CancelPrefsHook {} {
@@ -462,6 +487,9 @@ proc ::Taskbar::CancelPrefsHook {} {
     variable tmpPrefs
     
     if {$tprefs(startMini) ne $tmpPrefs(startMini)} {
+	::Preferences::HasChanged
+    }
+    if {$tprefs(hideAll) ne $tmpPrefs(hideAll)} {
 	::Preferences::HasChanged
     }
 }
