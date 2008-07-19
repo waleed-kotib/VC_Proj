@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.192 2008-07-18 12:47:24 matben Exp $
+# $Id: UI.tcl,v 1.193 2008-07-19 06:45:37 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -659,12 +659,12 @@ proc ::UI::Text {w args} {
 # Administrative code to handle toplevels:
 #       create, close, hide, show
 
-namespace eval ::UI:: {
+namespace eval ::UI {
 
     variable topcache
     set topcache(state)       show
-    set topcache(.,w)         .
-    set topcache(.,prevstate) "normal"
+#     set topcache(.,w)         .
+#     set topcache(.,prevstate) "normal"
 }
 
 # UI::Toplevel --
@@ -891,6 +891,7 @@ proc ::UI::GetCloseWindowType {} {
 proc ::UI::GetAllToplevels {} {
     variable topcache
 
+    set tmp [list]
     foreach {key w} [array get topcache *,w] {
 	if {[winfo exists $w]} {
 	    lappend tmp $w
@@ -915,11 +916,8 @@ proc ::UI::ShowAllToplevels {} {
     variable topcache
     
     foreach w [GetAllToplevels] {
-	if {[string equal $topcache($w,prevstate) "normal"] || \
-	  [string equal [wm state $w] "iconic"]} {
-	    set topcache($w,prevstate) [wm state $w]
-	    wm deiconify $w
-	}
+	set topcache($w,prevstate) [wm state $w]
+	wm deiconify $w
     }
     set topcache(state) show
 }
