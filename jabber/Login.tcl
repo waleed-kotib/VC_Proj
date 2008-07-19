@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.154 2008-07-04 14:11:32 matben Exp $
+# $Id: Login.tcl,v 1.155 2008-07-19 06:45:37 matben Exp $
 
 package provide Login 1.0
 
@@ -95,6 +95,7 @@ proc ::Login::Dlg {} {
     set w $wDlgs(jlogin)
     if {[winfo exists $w]} {
 	raise $w
+	wm deiconify $w
 	return
     }
     
