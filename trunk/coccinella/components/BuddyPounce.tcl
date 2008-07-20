@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.30 2008-04-17 15:00:28 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.31 2008-07-20 15:11:27 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -173,9 +173,13 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     # Get all sounds.
     set allSounds [GetAllSounds]
     set contrastBg [option get . backgroundLightContrast {}]
-    set menuDef [list]
-    foreach s $allSounds {
-	lappend menuDef [list [::Sounds::GetTextForName $s] -value $s]
+    if {[component::exists Sounds]} {
+	set menuDef [list]
+	foreach s $allSounds {
+	    lappend menuDef [list [::Sounds::GetTextForName $s] -value $s]
+	}
+    } else {
+	set menuDef [list [list [mc "Not Available"]]]
     }
     
     # Toplevel with class BuddyPounce.
@@ -239,8 +243,9 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	pack  $wmsg.f1 -side top -anchor w
 	ttk::checkbutton $wmsg.f1.c -text "[mc budpounce-sendmsg]:" \
 	  -variable $token\($ekey,msg)
-	ttk::entry $wmsg.f1.e -width 12 -textvariable $token\($ekey,msg,subject)
-	pack  $wmsg.f1.c $wmsg.f1.e -side left
+	ttk::entry $wmsg.f1.e -textvariable $token\($ekey,msg,subject)
+	pack  $wmsg.f1.c -side left
+	pack  $wmsg.f1.e -side top -fill x
 	
 	ttk::frame $wmsg.f2 -padding {0 2}
 	pack  $wmsg.f2 -side top -anchor w -fill x
@@ -253,11 +258,14 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	
 	grid  $wact.alrt  $wact.lsound  $wact.msound  -sticky w  -padx 4 -pady 1
 	grid  $wact.chat  $wact.fmsg    -             -sticky nw -padx 4 -pady 1
-	grid columnconfigure $wact 2 -minsize 40	
+	
+	set maxw [$wact.msound maxwidth]
+	grid columnconfigure $wact 2 -minsize [expr {$maxw + 2*4}]
+	grid $wact.msound $wact.fmsg -sticky ew
 	
 	if {![component::exists Sounds]} {
-	    $wact.lsound configure -state disabled
-	    $wact.msound configure -state disabled
+	    $wact.lsound state disabled
+	    $wact.msound state disabled
 	}
     }
     
