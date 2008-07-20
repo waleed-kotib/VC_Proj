@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.54 2008-06-09 09:51:00 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.55 2008-07-20 14:06:04 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -626,26 +626,7 @@ proc ::RosterAvatar::HeaderCmd {T C} {
 proc ::RosterAvatar::SortColumn {C order} {
     variable T
 
-    # Keep transports and pending always at the end.
     set opts [list]
-    
-    # Be sure to have transport & pending last.
-    # Shall only test this if not alone.
-    if {[$T item numchildren root] > 1} {
-	foreach type {transport pending} {
-	    set tag [list head $type]
-	    set item [FindWithTag $tag]
-	    if {$item ne ""} {		
-		$T item lastchild root $item
-		set last [list $item above]
-		set ancestors [$T item ancestors [list $item above]]
-		if {[llength $ancestors] > 1} {
-		    set last [lindex $ancestors end-1]
-		}
-		set opts [list -last $last]
-	    }
-	}
-    }
     
     switch -- [$T column cget $C -tags] {
 	cTree {
@@ -655,6 +636,15 @@ proc ::RosterAvatar::SortColumn {C order} {
 	cStatus {
 	    set cmd [namespace current]::SortStatus
 	    eval {$T item sort root $order -column $C -command $cmd} $opts
+	}
+    }
+
+    # Be sure to have transport & pending last.
+    foreach type {transport pending} {
+	set tag [list head $type]
+	set item [FindWithTag $tag]
+	if {$item ne ""} {		
+	    $T item lastchild root $item
 	}
     }
     return
