@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.31 2008-07-20 15:11:27 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.32 2008-07-21 07:28:51 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -171,15 +171,13 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     }
     
     # Get all sounds.
-    set allSounds [GetAllSounds]
-    set contrastBg [option get . backgroundLightContrast {}]
     if {[component::exists Sounds]} {
 	set menuDef [list]
-	foreach s $allSounds {
+	foreach s [GetAllSounds] {
 	    lappend menuDef [list [::Sounds::GetTextForName $s] -value $s]
 	}
     } else {
-	set menuDef [list [list [mc "Not Available"]]]
+	set menuDef [list [list [mc None]]]
     }
     
     # Toplevel with class BuddyPounce.
@@ -317,7 +315,9 @@ proc ::BuddyPounce::PrefsToState {token} {
     variable budprefsgroup
     variable budprefsany
     
-    set eventActions {}
+    #puts "::BuddyPounce::PrefsToState token=$token"
+    
+    set eventActions [list]
     
     switch -- $state(type) {
 	jid {
@@ -337,13 +337,17 @@ proc ::BuddyPounce::PrefsToState {token} {
 	}
     }
     foreach {ekey actlist} $eventActions {
+	#puts "ekey=$ekey"
 	foreach akey $actlist {
+	    #puts "\t akey=$akey"
 	    
 	    switch -glob -- $akey {
 		soundfile:* {
 		    # The sound file is treated specially.
-		    set state($ekey,soundfile)  \
-		      [string map {soundfile: ""} $akey]
+		    if {[component::exists Sounds]} {
+			set state($ekey,soundfile)  \
+			  [string map {soundfile: ""} $akey]
+		    }    
 		}
 		subject:* {
 		    set state($ekey,msg,subject) \
@@ -353,6 +357,13 @@ proc ::BuddyPounce::PrefsToState {token} {
 		    set body [string map {body: ""} $akey]
 		    set body [subst -nocommands -novariables $body]
 		    $state($ekey,msg,wtext) insert end $body
+		}
+		sound {
+		    if {[component::exists Sounds]} {
+			set state($ekey,$akey) 1
+		    } else {
+			set state($ekey,$akey) 0
+		    }
 		}
 		default {
 		    set state($ekey,$akey) 1
@@ -375,11 +386,11 @@ proc ::BuddyPounce::StateToPrefs {token} {
     variable events
     variable actionlist
 
-    set eventActions {}
+    set eventActions [list]
     
     # Build event-action list from state.
     foreach ekey $events(keys) {
-	set actlist {}
+	set actlist [list]
 	foreach akey $actionlist(keys) {
 	    if {$state($ekey,$akey) == 1} {
 		lappend actlist $akey
@@ -387,7 +398,9 @@ proc ::BuddyPounce::StateToPrefs {token} {
 		switch -- $akey {
 		    sound {
 			# If sound we also need the soundfile.
-			lappend actlist soundfile:$state($ekey,soundfile)
+			if {[component::exists Sounds]} {
+			    lappend actlist soundfile:$state($ekey,soundfile)
+			}
 		    }
 		    msg {
 			if {$state($ekey,msg,subject) ne ""} {
