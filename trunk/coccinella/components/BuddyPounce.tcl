@@ -4,7 +4,7 @@
 #       This is just a first sketch.
 #       TODO: all message translations.
 #
-#  Copyright (c) 2007 Mats Bengtsson
+#  Copyright (c) 2007-2008 Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: BuddyPounce.tcl,v 1.32 2008-07-21 07:28:51 matben Exp $
+# $Id: BuddyPounce.tcl,v 1.33 2008-07-22 07:09:49 matben Exp $
 
 # Key phrases are: 
 #     event:    something happens, presence change, incoming message etc.
@@ -173,11 +173,14 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     # Get all sounds.
     if {[component::exists Sounds]} {
 	set menuDef [list]
-	foreach s [GetAllSounds] {
+	set allSounds [GetAllSounds]
+	foreach s $allSounds {
 	    lappend menuDef [list [::Sounds::GetTextForName $s] -value $s]
 	}
+	set soundfileDef [lindex $allSounds 0]
     } else {
 	set menuDef [list [list [mc None]]]
+	set soundfileDef [mc None]
     }
     
     # Toplevel with class BuddyPounce.
@@ -265,6 +268,13 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	    $wact.lsound state disabled
 	    $wact.msound state disabled
 	}
+	
+	# Set defaults.
+	set state($ekey,msgbox) 0
+	set state($ekey,sound)  0
+	set state($ekey,chat)   0
+	set state($ekey,msg)    0
+	set state($ekey,soundfile) $soundfileDef
     }
     
     # Button part.
@@ -315,8 +325,6 @@ proc ::BuddyPounce::PrefsToState {token} {
     variable budprefsgroup
     variable budprefsany
     
-    #puts "::BuddyPounce::PrefsToState token=$token"
-    
     set eventActions [list]
     
     switch -- $state(type) {
@@ -337,9 +345,7 @@ proc ::BuddyPounce::PrefsToState {token} {
 	}
     }
     foreach {ekey actlist} $eventActions {
-	#puts "ekey=$ekey"
 	foreach akey $actlist {
-	    #puts "\t akey=$akey"
 	    
 	    switch -glob -- $akey {
 		soundfile:* {
