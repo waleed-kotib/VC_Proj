@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.26 2008-03-30 10:00:41 matben Exp $
+# $Id: optionmenu.tcl,v 1.27 2008-07-22 07:09:50 matben Exp $
 
 package require snit 1.0
 
@@ -27,6 +27,8 @@ proc ui::optionmenu::menuList {valueL} {
 # ui::optionmenu --
 # 
 #       Menubutton with associated menu.
+#       NB: In consistency with all ttk::... the -variable is not set
+#           by default.
 #       
 #       -menulist   {{name ?-value str -image im ...?} ...}
 #                   We assume that the -value is unique for each entry
