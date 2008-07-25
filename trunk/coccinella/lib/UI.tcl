@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.193 2008-07-19 06:45:37 matben Exp $
+# $Id: UI.tcl,v 1.194 2008-07-25 13:46:54 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -903,13 +903,11 @@ proc ::UI::GetAllToplevels {} {
 proc ::UI::WithdrawAllToplevels {} {
     variable topcache
     
-    if {[string equal $topcache(state) "show"]} {
-	foreach w [GetAllToplevels] {
-	    set topcache($w,prevstate) [wm state $w]
-	    wm withdraw $w
-	}
-	set topcache(state) hide
+    foreach w [GetAllToplevels] {
+	set topcache($w,prevstate) [wm state $w]
+	wm withdraw $w
     }
+    set topcache(state) hide
 }
 
 proc ::UI::ShowAllToplevels {} {
