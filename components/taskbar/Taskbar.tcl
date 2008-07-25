@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Taskbar.tcl,v 1.44 2008-07-18 12:47:24 matben Exp $
+# $Id: Taskbar.tcl,v 1.45 2008-07-25 13:46:54 matben Exp $
 
 package require balloonhelp
 
@@ -274,6 +274,11 @@ proc ::Taskbar::ToggleVisibility {} {
 		::UI::ShowAllToplevels
 	    } else {
 		wm deiconify [::JUI::GetMainWindow]
+		foreach w [::UI::GetAllToplevels] {
+		    if {[wm state $w] eq "withdrawn"} {
+			wm deiconify $w
+		    }
+		}
 	    }
 	}
     }
@@ -317,19 +322,16 @@ proc ::Taskbar::Post {m} {
 }
 
 proc ::Taskbar::TearOff {wm wt} {
-    variable wtearoff
-    
+    variable wtearoff    
     set wtearoff $wt
 }
 
-proc ::Taskbar::HideMain {} {
-    
+proc ::Taskbar::HideMain {} {    
     ::UI::WithdrawAllToplevels
     Update [::JUI::GetMainWindow]
 }
 
 proc ::Taskbar::ShowMain {} {
-    
     ::UI::ShowAllToplevels
 }
 
@@ -408,10 +410,16 @@ proc ::Taskbar::SetPresenceHook {type args} {
 }
 
 proc ::Taskbar::CloseHook {wclose} {
+    variable tprefs
     
     set result ""
     if {[string equal $wclose [::JUI::GetMainWindow]]} {
-	HideMain
+	#HideMain
+	if {$tprefs(hideAll)} {
+	    ::UI::WithdrawAllToplevels
+	} else {
+	    wm withdraw [::JUI::GetMainWindow]
+	}
 	set result stop
     }
     return $result
@@ -431,6 +439,22 @@ proc ::Taskbar::QuitAppHook {} {
 	    winico taskbar delete $icon
 	}
     }
+}
+
+
+# Taskbar::Debug --
+#
+#       Use this to bugtrack windows visibility issues.
+
+proc ::Taskbar::Debug {} {
+    
+    puts "::UI::GetAllToplevels=[::UI::GetAllToplevels]"
+    puts "::UI::topcache: state=$::UI::topcache(state)"
+    parray ::UI::topcache *,prevstate
+    foreach w [::UI::GetAllToplevels] {
+	puts "w=$w, wm state=[wm state $w]"
+    }
+    
 }
 
 # Preference page --------------------------------------------------------------
