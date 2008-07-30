@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements a mega presence widget.
 #      
-#  Copyright (c) 2007  Mats Bengtsson
+#  Copyright (c) 2007-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.10 2008-07-28 12:22:50 matben Exp $
+# $Id: MegaPresence.tcl,v 1.11 2008-07-30 13:23:59 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -32,7 +32,7 @@ namespace eval ::MegaPresence {
     set widgets(all) [list]
     
     # ::hooks::register initHook
-    ::JUI::SlotRegister megapresence ::MegaPresence::Build
+    ::JUI::SlotRegister megapresence [namespace code Build]
 }
 
 proc ::MegaPresence::Register {name label cmd} {
@@ -49,7 +49,7 @@ proc ::MegaPresence::Register {name label cmd} {
 if {1} {
     proc MPmake {name win} {
 	ttk::menubutton $win -style SunkenMenubutton
-	return {}
+	return
     }
     foreach name {mood activity tune} {
 	::MegaPresence::Register $name [string totitle $name] [list MPmake $name]
@@ -59,6 +59,9 @@ if {1} {
 proc ::MegaPresence::Build {w args} {
     global  config
     variable widgets
+    variable slot
+    
+    puts "::MegaPresence::Build"
     
     array set argsA {
 	-collapse 1
@@ -69,10 +72,10 @@ proc ::MegaPresence::Build {w args} {
     ttk::frame $w -class MegaPresence
     
     if {$argsA(-collapse)} {
-	set widgets(collapse) 0
+	set slot(collapse) 0
 	ttk::checkbutton $w.arrow -style Arrow.TCheckbutton \
 	  -command [namespace code [list CollapseCmd $w]] \
-	  -variable [namespace current]::widgets(collapse)
+	  -variable [namespace current]::slot(collapse)
 	pack $w.arrow -side left -anchor n	
 	bind $w.arrow <<ButtonPopup>> [namespace code [list Popup %W $w %x %y]]
 
@@ -83,6 +86,9 @@ proc ::MegaPresence::Build {w args} {
 	  -image [list $im active $ima] -compound image  \
 	  -command $argsA(-close)
 	pack $w.close -side right -anchor n	
+
+        ::balloonhelp::balloonforwindow $w.arrow [mc "Right click to get the selector"]
+        ::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
     }    
     set box $w.box
     set widgets(box) $w.box
@@ -127,13 +133,34 @@ proc ::MegaPresence::Build {w args} {
     grid  $box.pad  -column 99 -sticky ew
     grid columnconfigure $box 99 -weight 1
     
+    # Add menu.
+    set m [::JUI::SlotGetMenu]
+    
+    set slot(w)     $w
+    set slot(wmenu) $m
+    set slot(show)  1
+    
+    # This isn't the right way!
+    $m add checkbutton -label [mc "Mega Presence"] \
+      -variable [namespace current]::slot(show) \
+      -command [namespace code SlotCmd]
+    
     return $w
+}
+
+proc ::MegaPresence::SlotCmd {} {
+    if {[::JUI::SlotShowed megapresence]} {
+	::JUI::SlotClose megapresence
+    } else {
+	::JUI::SlotShow megapresence
+    }
 }
 
 proc ::MegaPresence::CollapseCmd {w} {
     variable widgets
+    variable slot
 
-    if {$widgets(collapse)} {
+    if {$slot(collapse)} {
 	pack forget $widgets(box)
     } else {
 	pack $widgets(box) -fill both -expand 1
@@ -176,6 +203,8 @@ proc ::MegaPresence::MenuCmd {w name} {
 }
 
 proc ::MegaPresence::Close {w} {
+    variable slot
+    set slot(show) 0
     ::JUI::SlotClose megapresence
 }
 
