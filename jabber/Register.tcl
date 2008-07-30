@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.109 2008-06-11 13:22:17 matben Exp $
+# $Id: Register.tcl,v 1.110 2008-07-30 13:23:59 matben Exp $
 
 package provide Register 1.0
 
@@ -758,7 +758,7 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
     }
 
     ttk::checkbutton $wfr.csavepw -style Small.TCheckbutton  \
-      -text [mc {Save password}] -variable $token\(savepassword)
+      -text [mc "Save password"] -variable $token\(savepassword)
     grid  x  $wfr.csavepw  -sticky w
 
     if {$isRegistered} {

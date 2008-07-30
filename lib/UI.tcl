@@ -18,14 +18,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.194 2008-07-25 13:46:54 matben Exp $
+# $Id: UI.tcl,v 1.195 2008-07-30 13:23:59 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
 
 package provide UI 1.0
 
-namespace eval ::UI:: {
+namespace eval ::UI {
     global  this
 
     # Add all event hooks.
@@ -1355,6 +1355,7 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
     foreach line $menuDef {
 	foreach {type name cmd accel mopts subdef} $line {
 	    
+	    # @@@ Who is that idiot that wrote this code!
 	    # Localized menu label. Special for mAboutCoccinella!
 	    if {$name eq "mAboutCoccinella"} {
 		set locname [mc {About %s} $prefs(appName)]

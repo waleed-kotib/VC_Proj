@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.256 2008-06-11 08:12:05 matben Exp $
+# $Id: JUI.tcl,v 1.257 2008-07-30 13:23:59 matben Exp $
 
 package provide JUI 1.0
 
@@ -69,17 +69,14 @@ namespace eval ::JUI {
     # Standard widgets.
     switch -- [tk windowingsystem] {
 	aqua {
-	    #option add *JMain*TNotebook.padding   {8 8 8 4}       50
 	    option add *JMain*TNotebook.padding   {0 8 0 4}       50
 	    option add *JMain*bot.f.padding       {8 6 4 4}       50
 	}
 	x11 {
-	    #option add *JMain*TNotebook.padding   {2 4 2 2}       50
 	    option add *JMain*TNotebook.padding   {0 4 0 2}       50
 	    option add *JMain*bot.f.padding       {2 4 2 2}       50
 	}
 	default {
-	    #option add *JMain*TNotebook.padding   {4 4 4 2}       50
 	    option add *JMain*TNotebook.padding   {0 4 0 2}       50
 	    option add *JMain*bot.f.padding       {8 6 4 4}       50
 	}
@@ -101,10 +98,10 @@ namespace eval ::JUI {
     set ::config(ui,main,infoType)      server    ;# mejid|mejidres|status|server
 
     # Experimental...
-    set ::config(ui,main,slots)         0
-    set ::config(ui,main,combi-status)  1
+    set ::config(ui,main,slots)         1
+    set ::config(ui,main,combi-status)  0
     set ::config(ui,main,toy-status)    0
-    set ::config(ui,main,combibox)      0
+    set ::config(ui,main,combibox)      1
     
     # This is a trick to get the aqua text borders.
     if {[tk windowingsystem] eq "aqua"} {
@@ -204,6 +201,7 @@ proc ::JUI::Init {} {
 	    {check   mTabs          {::JUI::OnMenuToggleNotebook}     {} 
 	    {-variable ::JUI::state(show,notebook)}}
 	} }
+	{cascade     mSlots         {}                                {} {} {}}
 	{separator}
 	{command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
 	{checkbutton mDebug         {::Jabber::DebugCmd}            {} \
@@ -262,7 +260,7 @@ proc ::JUI::Init {} {
 	set menuBarDef [linsert $menuBarDef 2 edit mEdit]
     }
     
-    SlotRegister xmessage ::JUI::BuildMessageSlot
+    #::JUI::SlotRegister xmessage ::JUI::BuildMessageSlot
 
     set inited 1
 }
@@ -585,6 +583,7 @@ proc ::JUI::BuildCombiBox {w} {
     bind $wcombo <<ComboboxSelected>> ::JUI::CombiBoxSetStatus
     bind $wcombo <Return>             ::JUI::CombiBoxSetStatus
     bind $wcombo <KP_Enter>           ::JUI::CombiBoxSetStatus
+    bind $wcombo <FocusIn>            ::JUI::CombiBoxOnFocusIn
     bind $wcombo <FocusOut>           ::JUI::CombiBoxOnFocusOut
     
     grid  $w.ava  $w.bst  $w.nick   -padx 4
@@ -593,12 +592,15 @@ proc ::JUI::BuildCombiBox {w} {
     grid $w.combo -stick ew
     grid columnconfigure $w 2 -weight 1
     
-    ::balloonhelp::balloonforwindow $w.nick "Displays your JID or nickname"
+    ::balloonhelp::balloonforwindow $w.nick  [mc "Displays your JID or nickname"]
+    ::balloonhelp::balloonforwindow $w.combo [mc "Set your presence message"]
     
     set combiBox(w) $w
     set combiBox(wnick)  $w.nick
     set combiBox(wenick) $w.enick
-    set combiBox(wcombo) $w.combo    
+    set combiBox(wcombo) $w.combo  
+    set combiBox(status) [mc "Set your presence message"]
+    set combiBox(statusSet) 0
     
     return $w
 }
@@ -683,6 +685,7 @@ proc ::JUI::CombiBoxPresenceHook {type args} {
 	set combiBox(status) $status
 	set combiBox(statusL) \
 	  [lrange [luniqueo [linsert $combiBox(statusL) 0 $status]] 0 12]
+	set combiBox(statusSet) 1
 	$wcombo configure -values $combiBox(statusL)
     } else {
 	set combiBox(status) ""
@@ -731,10 +734,22 @@ proc ::JUI::CombiBoxSetStatus {} {
     catch {focus [winfo toplevel $combiBox(w)]}
 }
 
+proc ::JUI::CombiBoxOnFocusIn {} {
+    upvar ::Jabber::jstate jstate
+    variable combiBox
+
+    puts "::JUI::CombiBoxOnFocusIn"
+    if {!$combiBox(statusSet)} {
+	set combiBox(status) ""
+    }
+}
+
 proc ::JUI::CombiBoxOnFocusOut {} {
     upvar ::Jabber::jstate jstate
     variable combiBox
 
+    puts "::JUI::CombiBoxOnFocusOut"
+    
     # Reset to actual value.
     set combiBox(status) $jstate(status)
 }
@@ -753,7 +768,13 @@ proc ::JUI::CociCmd {} {
     }
 }
 
+#-------------------------------------------------------------------------------
 # @@@ EXPERIMENTAL!
+
+namespace eval ::JUI {
+    
+    #option add *RosterSlots.padding   {2}     50
+}
 
 # JUI::SlotRegister --
 # 
@@ -762,10 +783,12 @@ proc ::JUI::CociCmd {} {
 
 proc ::JUI::SlotRegister {name cmd} {
     variable slot
+    variable jwapp
     
     lappend slot(all) $name
     set slot($name,name) $name
     set slot($name,cmd)  $cmd
+    
     return $name
 }
 
@@ -773,8 +796,13 @@ proc ::JUI::SlotBuild {w} {
     variable slot
     
     ttk::frame $w -class RosterSlots
-    #frame $w -class RosterSlots -bg red
     set row 0
+    
+    # This is just a trick to fool the grid manager to let go also
+    # the last remaining space, which is empty in this case.
+    grid [ttk::frame $w.0]
+    incr row
+    
     foreach name $slot(all) {
 	uplevel #0 $slot($name,cmd) $w.$row
 	grid  $w.$row  -row $row -sticky ew
@@ -784,15 +812,35 @@ proc ::JUI::SlotBuild {w} {
 	incr row
     }
     grid columnconfigure $w 0 -weight 1
+    set slot(row) $row
     return $w
+}
+
+proc ::JUI::SlotGetMenu {} {
+    set minfo [GetMainMenu].info
+    return [::UI::MenuMethod $minfo entrycget mSlots -menu]
 }
 
 proc ::JUI::SlotClose {name} {
     variable slot
-
     grid forget $slot($name,win)
 }
 
+proc ::JUI::SlotShow {name} {
+    variable slot
+    grid  $slot($name,win)  -row $slot($name,row) -sticky ew
+}
+
+proc ::JUI::SlotShowed {name} {
+    variable slot
+    if {[winfo manager $slot($name,win)] eq ""} {
+	return 0
+    } else {
+	return 1
+    }
+}
+
+#-------------------------------------------------------------------------------
 # A kind of status slot. FIX NAME!
 
 namespace eval ::JUI {
@@ -800,10 +848,19 @@ namespace eval ::JUI {
     option add *MessageSlot.padding       {4 2 2 2}     50
     option add *MessageSlot.box.padding   {8 2 8 2}     50
     option add *MessageSlot*TEntry.font   CociSmallFont widgetDefault
+    
+    variable msgSlotD
+    dict set msgSlotD mejid    [mc "Own JID"]
+    dict set msgSlotD mejidres [mc "Own full JID"]
+    dict set msgSlotD server   [mc Server]
+    dict set msgSlotD status   [mc Status]
+
+    ::JUI::SlotRegister xmessage [namespace code BuildMessageSlot]
 }
 
 proc ::JUI::BuildMessageSlot {w} {
     variable widgets
+    variable msgSlotD
     
     ttk::frame $w -class MessageSlot
     
@@ -821,10 +878,11 @@ proc ::JUI::BuildMessageSlot {w} {
 	  -image [list $im active $ima] -compound image  \
 	  -command [namespace code [list MessageSlotClose $w]]
 	pack $w.close -side right -anchor n	
+
+	::balloonhelp::balloonforwindow $w.arrow [mc "Right click to get the selector"]
+        ::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
     }    
-    set widgets(value) mejid
     set box $w.box
-    set widgets(box) $w.box
     ttk::frame $box
     pack $box -fill x -expand 1
     
@@ -834,7 +892,26 @@ proc ::JUI::BuildMessageSlot {w} {
     grid  $box.e  -sticky ew
     grid columnconfigure $box 0 -weight 1
     
+    set widgets(box)   $w.box
+    set widgets(value) mejid
+    set widgets(show)  1
+
+    ::balloonhelp::balloonforwindow $box.e [dict get $msgSlotD mejid]
+
+    set m [::JUI::SlotGetMenu]
+    $m add checkbutton -label [mc "Status Info"] \
+      -variable [namespace current]::widgets(show) \
+      -command [namespace code MessageSlotCmd]
+
     return $w
+}
+
+proc ::JUI::MessageSlotCmd {} {
+    if {[::JUI::SlotShowed xmessage]} {
+	::JUI::SlotClose xmessage
+    } else {
+	::JUI::SlotShow xmessage
+    }
 }
 
 proc ::JUI::MessageSlotCollapse {w} {
@@ -849,17 +926,18 @@ proc ::JUI::MessageSlotCollapse {w} {
 }
 
 proc ::JUI::MessageSlotPopup {w x y} {
+    variable msgSlotD
     
     set m $w.m
     destroy $m
     menu $m -tearoff 0
     
-    foreach value {mejid mejidres server status} \
-      label [list [mc "Own JID"] [mc "Own full JID"] [mc Server] [mc Status]] {
+    # NB: The value is the array index of the jstate array having this info.
+    dict for {value label} $msgSlotD {
 	$m add radiobutton -label $label \
 	  -variable [namespace current]::widgets(value) -value $value \
 	  -command [namespace code [list MessageSlotMenuCmd $w $value]]
-    }    
+    }
     update idletasks
     
     set X [expr [winfo rootx $w] + $x]
@@ -871,13 +949,19 @@ proc ::JUI::MessageSlotPopup {w x y} {
 
 proc ::JUI::MessageSlotMenuCmd {w value} {
     variable widgets
+    variable msgSlotD
 
     $widgets(box).e configure -textvariable ::Jabber::jstate($value)
+    ::balloonhelp::balloonforwindow $widgets(box).e [dict get $msgSlotD $value]
 }
 
 proc ::JUI::MessageSlotClose {w} {
+    variable widgets
+    set widgets(show) 0
     SlotClose xmessage
 }
+
+#-------------------------------------------------------------------------------
 
 proc ::JUI::NotebookTabChanged {} {
     variable jwapp

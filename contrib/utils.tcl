@@ -7,7 +7,7 @@
 #  
 #  This file is distributed under BSD style license.
 #  
-# $Id: utils.tcl,v 1.14 2008-04-17 15:00:28 matben Exp $
+# $Id: utils.tcl,v 1.15 2008-07-30 13:23:59 matben Exp $
 
 package provide utils 1.0
     
@@ -315,8 +315,20 @@ proc getdirname {filePath} {
 }
 
 proc dumpwidgethierarchy {{win .} {tabs "\t"}} {
+    set tab "\t"
     foreach w [winfo children $win] {
-	puts "$tabs$w"
+	array unset opts
+	set geo ""
+	set manager [winfo manager $w]
+	if {$manager eq "pack"} {
+	    array set opts [pack info $w]
+	    set geo "-side $opts(-side)"
+	} elseif {$manager eq "grid"} {
+	    array set opts [grid info $w]
+	    set geo "-sticky $opts(-sticky)"
+	}
+	#puts "$tabs$w$tab$manager: $geo"
+	puts "$tabs$w$tab[winfo class $w]"
 	dumpwidgethierarchy $w "$tabs\t"
     }
 }

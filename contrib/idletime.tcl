@@ -2,12 +2,13 @@
 #
 #       Set global idle time callbacks.
 #       
-#  Copyright (c) 2007
+#  Copyright (c) 2007-2008
 #  
 #  This file is distributed under BSD style license.
 #  
-#  $Id: idletime.tcl,v 1.10 2008-03-01 10:36:28 matben Exp $
+#  $Id: idletime.tcl,v 1.11 2008-07-30 13:23:59 matben Exp $
 
+package require Tk 8.5
 package provide idletime 1.0
 
 namespace eval ::idletime {

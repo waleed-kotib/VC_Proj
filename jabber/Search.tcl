@@ -18,12 +18,12 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.46 2008-06-09 09:51:00 matben Exp $
+# $Id: Search.tcl,v 1.47 2008-07-30 13:23:59 matben Exp $
 
 package provide Search 1.0
 
 
-namespace eval ::Search:: {
+namespace eval ::Search {
 
     # Wait for this variable to be set.
     variable finished  
@@ -34,17 +34,6 @@ namespace eval ::Search:: {
 	{command    mAddContact...      {::JUser::NewDlg -jid $jid} }
 	{command    mBusinessCard...    {::VCard::Fetch other $jid} }	
     }
-
-    option add *SearchSlot.padding       {4 2 2 2}     50
-    option add *SearchSlot.box.padding   {4 2 8 2}     50
-    option add *SearchSlot*TLabel.style  Small.TLabel  widgetDefault
-    option add *SearchSlot*TEntry.font   CociSmallFont widgetDefault
-    
-    variable widgets
-    set widgets(all) [list]
-
-    # ::hooks::register initHook
-    ::JUI::SlotRegister search ::Search::SlotBuild
 }
 
 proc ::Search::OnMenu {} {
@@ -482,16 +471,32 @@ proc ::Search::Free {w} {
 
 #--- Roster Slot --------------------------------------------------------------
 
+namespace eval ::Search {
+    
+    variable slot
+    set slot(all) [list]
+
+    option add *SearchSlot.padding       {4 2 2 2}     50
+    option add *SearchSlot.box.padding   {4 2 8 2}     50
+    option add *SearchSlot*TLabel.style  Small.TLabel  widgetDefault
+    option add *SearchSlot*TEntry.font   CociSmallFont widgetDefault
+
+    ::JUI::SlotRegister search ::Search::SlotBuild
+
+    ::hooks::register loginHook     ::Search::SlotLoginHook
+    ::hooks::register logoutHook    ::Search::SlotLogoutHook
+}
+
 proc ::Search::SlotBuild {w} {
-    variable widgets
+    variable slot
 
     ttk::frame $w -class SearchSlot
     
     if {1} {
-	set widgets(collapse) 0
+	set slot(collapse) 0
 	ttk::checkbutton $w.arrow -style Arrow.TCheckbutton \
 	  -command [list [namespace current]::SlotCollapse $w] \
-	  -variable [namespace current]::widgets(collapse)
+	  -variable [namespace current]::slot(collapse)
 	pack $w.arrow -side left -anchor n	
 	bind $w.arrow <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
 
@@ -501,44 +506,66 @@ proc ::Search::SlotBuild {w} {
 	  -image [list $im active $ima] -compound image  \
 	  -command [namespace code [list SlotClose $w]]
 	pack $w.close -side right -anchor n	
+
+        ::balloonhelp::balloonforwindow $w.arrow [mc "Right click to get the selector"]
+	::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
     }    
     set box $w.box
-    set widgets(box) $w.box
     ttk::frame $box
     pack $box -fill x -expand 1
-    
-    ttk::label $box.l -text "Search JUD:"
-    ttk::entry $box.e
+
+    ttk::label $box.l -text [mc "Search JUD"]:
+    ttk::entry $box.e -textvariable [namespace current]::slot(text)
     
     grid  $box.l  $box.e
     grid $box.e -sticky ew
     grid columnconfigure $box 1 -weight 1
     
+    $box.e state {disabled}
+
+    bind $box.e <Return>   [namespace code SlotSearch]
+    bind $box.e <KP_Enter> [namespace code SlotSearch]
+
+    ::balloonhelp::balloonforwindow $box  [mc "Enter search phrase and press Return"]
+    
+    set m [::JUI::SlotGetMenu]
+
+    set slot(w)     $w
+    set slot(box)   $w.box
+    set slot(entry) $box.e
+    set slot(wmenu) $m
+    set slot(show)  1
+    set slot(text)  ""
+
+    $m add checkbutton -label [mc "Search JUD"] \
+      -variable [namespace current]::slot(show) \
+      -command [namespace code SlotCmd]
+    
     return $w
 }
 
 proc ::Search::SlotCollapse {w} {
-    variable widgets
+    variable slot
 
-    if {$widgets(collapse)} {
-	pack forget $widgets(box)
+    if {$slot(collapse)} {
+	pack forget $slot(box)
     } else {
-	pack $widgets(box) -fill both -expand 1
+	pack $slot(box) -fill both -expand 1
     }
     event generate $w <<Xxx>>
 }
 
 proc ::Search::SlotPopup {w x y} {
-    variable widgets
+    variable slot
     
     set m $w.m
     destroy $m
     menu $m -tearoff 0
     
-    foreach field {Name JID "First Name"} {
+    foreach field {"Name" "JID" "First Name"} {
 	$m add checkbutton -label $field \
 	  -command [namespace code [list SlotMenuCmd $w $field]] \
-	  -variable [namespace current]::widgets($field,display)
+	  -variable [namespace current]::slot($field,display)
     }
     
     update idletasks
@@ -550,13 +577,50 @@ proc ::Search::SlotPopup {w x y} {
     return -code break
 }
 
+proc ::Search::SlotCmd {} {
+    if {[::JUI::SlotShowed search]} {
+	::JUI::SlotClose search
+    } else {
+	::JUI::SlotShow search
+    }    
+}
+
 proc ::Search::SlotMenuCmd {w field} {
     
     
 }
 
+proc ::Search::SlotLoginHook {} {
+    variable slot
+    $slot(entry) state {!disabled}
+}
+
+proc ::Search::SlotLogoutHook {} {
+    variable slot
+    $slot(entry) state {disabled}
+}
+
+proc ::Search::SlotSearch {} {
+    variable slot
+
+    set servicesL [::Jabber::Jlib disco getjidsforfeature "jabber:iq:search"]
+    
+    # Select service.
+    set search [lindex $servicesL 0]
+    ::Jabber::Jlib search_get $search [namespace code SlotGetCB]
+}
+
+proc ::Search::SlotGetCB {jlibname type subiq} {
+    
+    
+    
+}
+
 proc ::Search::SlotClose {w} {
+    variable slot
+    set slot(show) 0
     ::JUI::SlotClose search
 }
 
 #-------------------------------------------------------------------------------
+
