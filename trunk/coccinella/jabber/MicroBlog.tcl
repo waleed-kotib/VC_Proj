@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MicroBlog.tcl,v 1.1 2008-07-30 13:23:59 matben Exp $
+# $Id: MicroBlog.tcl,v 1.2 2008-07-31 14:42:26 matben Exp $
 
 package provide MicroBlog 1.0
 
@@ -84,7 +84,7 @@ proc ::MicroBlog::SlotBuild {w} {
     set slot(box)   $w.box
     set slot(entry) $box.e
     set slot(wmenu) $m
-    set slot(text)  ""
+    set slot(text)  "Not implemented"
     set slot(show)  1
 
     # Add menu.    
@@ -130,7 +130,7 @@ proc ::MicroBlog::SlotCollapse {w} {
     } else {
 	pack $slot(box) -fill both -expand 1
     }
-    event generate $w <<Xxx>>
+    #event generate $w <<Xxx>>
 }
 
 proc ::MicroBlog::SlotClose {w} {
