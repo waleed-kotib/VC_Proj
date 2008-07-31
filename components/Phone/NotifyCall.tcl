@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.21 2008-05-15 14:14:56 matben Exp $
+# $Id: NotifyCall.tcl,v 1.22 2008-07-31 14:42:26 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -277,50 +277,6 @@ proc ::NotifyCall::SetTalkingState {win} {
     $state(wanswer) state {disabled}
 }
 
-# Slot for roster main window --- @@@ TODO
-
-proc ::NotifyCall::Slot {win} {
-    
-    # Have state array with same name as frame.
-    variable $win
-    upvar #0 $win state
-	  
-    # Level controls.
-    set images(microphone) [::Theme::FindIconSize 16 audio-input-microphone]
-    set images(speaker)    [::Theme::FindIconSize 16 audio-output-speaker]
-
-    ttk::frame $win -padding {4 2}
-    
-    # Microphone.
-    ttk::progressbar $win.pmic -orient horizontal  \
-      -variable $win\(inlevel)
-    ttk::scale $win.smic -orient horizontal -length 60 -from 0 -to 100  \
-      -variable $win\(microphone-100)  \
-      -command [list ::NotifyCall::MicCmd $win]
-    ttk::checkbutton $win.cmic -style Toolbutton  \
-      -variable $win\(cmicrophone) -image $images(microphone)  \
-      -onvalue 0 -offvalue 1 -padding {1}  \
-      -command [list ::NotifyCall::Mute $win microphone]
-
-    # Speakers.
-    ttk::progressbar $win.pspk -orient horizontal  \
-      -variable $win\(outlevel)
-    ttk::scale $win.sspk -orient horizontal -length 60 -from 0 -to 100  \
-      -variable $win\(speaker-100)  \
-      -command [list ::NotifyCall::SpkCmd $win]
-    ttk::checkbutton $win.cspk -style Toolbutton  \
-      -variable $win\(cspeaker) -image $images(speaker)  \
-      -onvalue 0 -offvalue 1 -padding {1}  \
-      -command [list ::NotifyCall::Mute $win speaker]
-
-    grid  $win.pmic  $win.smic  $win.cmic  -padx 2
-    grid  $win.pspk  $win.sspk  $win.cspk  -padx 2
-    grid $win.pmic $win.pspk -sticky ew
-    grid columnconfigure $win 0 -weight 1
-    
-    return $win
-}
-
 #-----------------------------------------------------------------------
 #--------------------------- Notify Call Actions -----------------------
 #-----------------------------------------------------------------------
@@ -504,3 +460,132 @@ proc ::NotifyCall::AvatarNewPhotoHook {jid2} {
 	}
     }
 }
+
+# Experiment using slots.
+
+namespace eval ::NotifyCall {
+    
+    option add *NotifyCallSlot.padding       {4 2 2 2}     50
+    option add *NotifyCallSlot.box.padding   {4 2 8 2}     50
+    option add *NotifyCallSlot*TLabel.style  Small.TLabel  widgetDefault
+    
+    ::JUI::SlotRegister notifycall [namespace code Build]
+}
+
+proc ::NotifyCall::Build {w args} {
+    variable slot
+    
+    ttk::frame $w -class NotifyCallSlot
+
+    if {1} {
+	set slot(collapse) 0
+	ttk::checkbutton $w.arrow -style Arrow.TCheckbutton \
+	  -command [list [namespace current]::SlotCollapse $w] \
+	  -variable [namespace current]::slot(collapse)
+	pack $w.arrow -side left -anchor n	
+	bind $w.arrow <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
+
+	set im  [::Theme::FindIconSize 16 close-aqua]
+	set ima [::Theme::FindIconSize 16 close-aqua-active]
+	ttk::button $w.close -style Plain  \
+	  -image [list $im active $ima] -compound image  \
+	  -command [namespace code [list SlotClose $w]]
+	pack $w.close -side right -anchor n	
+
+	::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
+    }    
+    set box $w.box
+    ttk::frame $box
+    pack $box -fill x -expand 1
+    
+    set win [SlotFrame $box.f]
+    pack $win -fill x -expand 1
+    
+    set m [::JUI::SlotGetMenu]
+
+    set slot(w)     $w
+    set slot(box)   $w.box
+    set slot(wmenu) $m
+    set slot(show)  1
+
+    # Add menu.    
+    # This isn't the right way!
+    $m add checkbutton -label [mc "Notify Call"] \
+      -variable [namespace current]::slot(show) \
+      -command [namespace code SlotCmd]
+    
+    return $w
+}
+
+proc ::NotifyCall::SlotFrame {win} {
+    
+    # Have state array with same name as frame.
+    variable $win
+    upvar #0 $win state
+	  
+    # Level controls.
+    set images(microphone) [::Theme::FindIconSize 16 audio-input-microphone]
+    set images(speaker)    [::Theme::FindIconSize 16 audio-output-speaker]
+
+    ttk::frame $win -class NotifyCallSlotFrame
+    
+    ttk::label $win.call -textvariable $win\(call)
+    
+    # Microphone.
+    ttk::progressbar $win.pmic -orient horizontal  \
+      -variable $win\(inlevel)
+    ttk::scale $win.smic -orient horizontal -length 60 -from 0 -to 100  \
+      -variable $win\(microphone-100)  \
+      -command [list ::NotifyCall::MicCmd $win]
+    ttk::checkbutton $win.cmic -style Plain  \
+      -variable $win\(cmicrophone) -image $images(microphone)  \
+      -onvalue 0 -offvalue 1 -padding {1}  \
+      -command [list ::NotifyCall::Mute $win microphone]
+
+    # Speakers.
+    ttk::progressbar $win.pspk -orient horizontal  \
+      -variable $win\(outlevel)
+    ttk::scale $win.sspk -orient horizontal -length 60 -from 0 -to 100  \
+      -variable $win\(speaker-100)  \
+      -command [list ::NotifyCall::SpkCmd $win]
+    ttk::checkbutton $win.cspk -style Plain  \
+      -variable $win\(cspeaker) -image $images(speaker)  \
+      -onvalue 0 -offvalue 1 -padding {1}  \
+      -command [list ::NotifyCall::Mute $win speaker]
+
+    grid  $win.pmic  $win.smic  $win.cmic
+    grid  $win.pspk  $win.sspk  $win.cspk
+    grid $win.pmic $win.pspk -sticky ew
+    grid $win.smic $win.sspk -padx 16
+    grid columnconfigure $win 0 -weight 1
+    
+    return $win
+}
+
+proc ::NotifyCall::SlotCmd {} {
+    if {[::JUI::SlotShowed notifycall]} {
+	::JUI::SlotClose notifycall
+    } else {
+	::JUI::SlotShow notifycall
+    }
+}
+
+proc ::NotifyCall::SlotCollapse {w} {
+    variable slot
+
+    if {$slot(collapse)} {
+	pack forget $slot(box)
+    } else {
+	pack $slot(box) -fill both -expand 1
+    }
+    #event generate $w <<Xxx>>
+}
+
+proc ::NotifyCall::SlotClose {w} {
+    variable slot
+    set slot(show) 0
+    ::JUI::SlotClose notifycall
+}
+
+
+

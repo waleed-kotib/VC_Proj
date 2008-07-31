@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.257 2008-07-30 13:23:59 matben Exp $
+# $Id: JUI.tcl,v 1.258 2008-07-31 14:42:26 matben Exp $
 
 package provide JUI 1.0
 
@@ -259,9 +259,6 @@ proc ::JUI::Init {} {
     if {[tk windowingsystem] eq "aqua"} {
 	set menuBarDef [linsert $menuBarDef 2 edit mEdit]
     }
-    
-    #::JUI::SlotRegister xmessage ::JUI::BuildMessageSlot
-
     set inited 1
 }
 
@@ -512,23 +509,21 @@ proc ::JUI::BuildStatusMB {win} {
    
     ttk::menubutton $win -style SunkenMenubutton \
       -textvariable ::Jabber::jstate($infoType)
+
+    dict set msgD mejid    [mc "Own JID"]
+    dict set msgD mejidres [mc "Own full JID"]
+    dict set msgD server   [mc Server]
+    dict set msgD status   [mc Status]
+    
     set m $win.m
-    
     menu $m -tearoff 0
-    $m add radiobutton -value mejid    -label [mc "My JID"]      \
-      -command ::JUI::StatusMBCmd \
-      -variable ::jprefs(ui,main,InfoType)
-    $m add radiobutton -value mejidres -label [mc "My Full JID"] \
-      -command ::JUI::StatusMBCmd \
-      -variable ::jprefs(ui,main,InfoType)
-    $m add radiobutton -value server   -label [mc "Host Name"]   \
-      -command ::JUI::StatusMBCmd \
-      -variable ::jprefs(ui,main,InfoType)
-    $m add radiobutton -value status   -label [mc "My Status"]   \
-      -command ::JUI::StatusMBCmd \
-      -variable ::jprefs(ui,main,InfoType)
-    
     $win configure -menu $m
+
+    dict for {value label} $msgD {
+	$m add radiobutton -label $label \
+	  -variable ::jprefs(ui,main,InfoType) -value $value \
+	  -command ::JUI::StatusMBCmd
+    }
     return $win
 }
 
@@ -838,127 +833,6 @@ proc ::JUI::SlotShowed {name} {
     } else {
 	return 1
     }
-}
-
-#-------------------------------------------------------------------------------
-# A kind of status slot. FIX NAME!
-
-namespace eval ::JUI {
-    
-    option add *MessageSlot.padding       {4 2 2 2}     50
-    option add *MessageSlot.box.padding   {8 2 8 2}     50
-    option add *MessageSlot*TEntry.font   CociSmallFont widgetDefault
-    
-    variable msgSlotD
-    dict set msgSlotD mejid    [mc "Own JID"]
-    dict set msgSlotD mejidres [mc "Own full JID"]
-    dict set msgSlotD server   [mc Server]
-    dict set msgSlotD status   [mc Status]
-
-    ::JUI::SlotRegister xmessage [namespace code BuildMessageSlot]
-}
-
-proc ::JUI::BuildMessageSlot {w} {
-    variable widgets
-    variable msgSlotD
-    
-    ttk::frame $w -class MessageSlot
-    
-    if {1} {
-	set widgets(collapse) 0
-	ttk::checkbutton $w.arrow -style Arrow.TCheckbutton \
-	  -command [list [namespace current]::MessageSlotCollapse $w] \
-	  -variable [namespace current]::widgets(collapse)
-	pack $w.arrow -side left -anchor n	
-	bind $w.arrow <<ButtonPopup>> [list [namespace current]::MessageSlotPopup $w %x %y]
-
-	set im  [::Theme::FindIconSize 16 close-aqua]
-	set ima [::Theme::FindIconSize 16 close-aqua-active]
-	ttk::button $w.close -style Plain  \
-	  -image [list $im active $ima] -compound image  \
-	  -command [namespace code [list MessageSlotClose $w]]
-	pack $w.close -side right -anchor n	
-
-	::balloonhelp::balloonforwindow $w.arrow [mc "Right click to get the selector"]
-        ::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
-    }    
-    set box $w.box
-    ttk::frame $box
-    pack $box -fill x -expand 1
-    
-    ttk::label $box.e -style Small.Sunken.TLabel \
-      -textvariable ::Jabber::jstate(mejid) -anchor w
-    
-    grid  $box.e  -sticky ew
-    grid columnconfigure $box 0 -weight 1
-    
-    set widgets(box)   $w.box
-    set widgets(value) mejid
-    set widgets(show)  1
-
-    ::balloonhelp::balloonforwindow $box.e [dict get $msgSlotD mejid]
-
-    set m [::JUI::SlotGetMenu]
-    $m add checkbutton -label [mc "Status Info"] \
-      -variable [namespace current]::widgets(show) \
-      -command [namespace code MessageSlotCmd]
-
-    return $w
-}
-
-proc ::JUI::MessageSlotCmd {} {
-    if {[::JUI::SlotShowed xmessage]} {
-	::JUI::SlotClose xmessage
-    } else {
-	::JUI::SlotShow xmessage
-    }
-}
-
-proc ::JUI::MessageSlotCollapse {w} {
-    variable widgets
-
-    if {$widgets(collapse)} {
-	pack forget $widgets(box)
-    } else {
-	pack $widgets(box) -fill both -expand 1
-    }
-    event generate $w <<Xxx>>
-}
-
-proc ::JUI::MessageSlotPopup {w x y} {
-    variable msgSlotD
-    
-    set m $w.m
-    destroy $m
-    menu $m -tearoff 0
-    
-    # NB: The value is the array index of the jstate array having this info.
-    dict for {value label} $msgSlotD {
-	$m add radiobutton -label $label \
-	  -variable [namespace current]::widgets(value) -value $value \
-	  -command [namespace code [list MessageSlotMenuCmd $w $value]]
-    }
-    update idletasks
-    
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
-    tk_popup $m [expr {int($X) - 0}] [expr {int($Y) - 0}]   
-    
-    return -code break
-}
-
-proc ::JUI::MessageSlotMenuCmd {w value} {
-    variable widgets
-    variable msgSlotD
-
-    $widgets(box).e configure -textvariable ::Jabber::jstate($value)
-    ::balloonhelp::balloonforwindow $widgets(box).e [dict get $msgSlotD $value]
-}
-
-proc ::JUI::MessageSlotClose {w} {
-    variable widgets
-    set widgets(show) 0
-    SlotClose xmessage
 }
 
 #-------------------------------------------------------------------------------

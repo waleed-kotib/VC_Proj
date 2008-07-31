@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.11 2008-07-30 13:23:59 matben Exp $
+# $Id: MegaPresence.tcl,v 1.12 2008-07-31 14:42:26 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -60,9 +60,7 @@ proc ::MegaPresence::Build {w args} {
     global  config
     variable widgets
     variable slot
-    
-    puts "::MegaPresence::Build"
-    
+        
     array set argsA {
 	-collapse 1
     }

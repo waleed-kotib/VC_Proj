@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.267 2008-07-30 13:23:59 matben Exp $
+# $Id: Jabber.tcl,v 1.268 2008-07-31 14:42:26 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -82,6 +82,7 @@ package require Rosticons
 package require Search
 package require Servicons
 package require Status
+package require StatusSlot
 package require Subscribe
 package require UserInfo
 package require VCard
