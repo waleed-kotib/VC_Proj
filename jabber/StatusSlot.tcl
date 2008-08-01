@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: StatusSlot.tcl,v 1.1 2008-07-31 14:42:26 matben Exp $
+# $Id: StatusSlot.tcl,v 1.2 2008-08-01 13:01:25 matben Exp $
 
 package provide StatusSlot 1.0
 
@@ -137,5 +137,5 @@ proc ::StatusSlot::MenuCmd {w value} {
 proc ::StatusSlot::Close {w} {
     variable priv
     set priv(show) 0
-    SlotClose plainstatus
+    ::JUI::SlotClose plainstatus
 }
