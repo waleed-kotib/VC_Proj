@@ -4,6 +4,7 @@
 #       notifications.
 #       
 #  Copyright (c) 2006 Antonio Cano Damas
+#  Copyright (c) 2006-2008 Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,42 +19,59 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.22 2008-07-31 14:42:26 matben Exp $
+# $Id: NotifyCall.tcl,v 1.23 2008-08-01 13:01:25 matben Exp $
 
 package provide NotifyCall 0.1
 
-namespace eval ::NotifyCall { }
+namespace eval ::NotifyCall {}
 
-proc ::NotifyCall::Init { } {
+proc ::NotifyCall::Init {} {
     
     ::hooks::register  avatarNewPhotoHook   ::NotifyCall::AvatarNewPhotoHook
 
     variable wmain .notifycall
+    variable wslot -
+    
+    # How shall the phone be dispayed: slot|dialog
+    set ::config(phone,notify,type) dialog
+    #set ::config(phone,notify,type) slot
 }
 
 #-----------------------------------------------------------------------
 #--------------------------- Notify Call Window ------------------------
 #-----------------------------------------------------------------------
 
-# NotifyCall::InboundCall  --
+# NotifyCall::InboundCall --
 # 
 
 proc ::NotifyCall::InboundCall { {line ""} {phoneNumber ""} } {
+    global config
     variable wmain
+    variable wslot
     
     if { $phoneNumber ne "" } { 
-	Toplevel $wmain $line $phoneNumber "in"
+	if {$config(phone,notify,type) eq "dialog"} {
+	    Toplevel $wmain $line $phoneNumber "in"
+	} elseif {$config(phone,notify,type) eq "slot"} {
+	    set wslot [::NotifyCallSlot::InboundCall $line $phoneNumber]
+	}
     }
 }
 
-# NotifyCall::OutboundCall  --
+# NotifyCall::OutboundCall --
 #
 
 proc ::NotifyCall::OutboundCall { {line ""} {phoneNumber ""} } {
+    global config
     variable wmain
+    variable wslot
 
     if { $phoneNumber ne "" } {
-	Toplevel $wmain $line $phoneNumber "out"
+	if {$config(phone,notify,type) eq "dialog"} {
+	    Toplevel $wmain $line $phoneNumber "out"
+	} elseif {$config(phone,notify,type) eq "slot"} {
+	    set wslot [::NotifyCallSlot::OutboundCall $line $phoneNumber]
+	}
     }
 }
 
@@ -426,7 +444,8 @@ proc ::NotifyCall::TalkingEvent {args} {
 
 proc ::NotifyCall::LevelEvent {in out} {
     variable wmain
-        
+    variable wslot
+    
     if {[winfo exists $wmain]} {
 	set win [GetFrame $wmain]
 	variable $win
@@ -434,6 +453,8 @@ proc ::NotifyCall::LevelEvent {in out} {
     
 	set state(inlevel)  $in
 	set state(outlevel) $out
+    } elseif {[winfo exists $wslot]} {
+	::NotifyCallSlot::LevelEvent $in $out
     }
 }
 
@@ -461,18 +482,44 @@ proc ::NotifyCall::AvatarNewPhotoHook {jid2} {
     }
 }
 
-# Experiment using slots.
+#--- Experiment using slots ----------------------------------------------------
 
-namespace eval ::NotifyCall {
+namespace eval ::NotifyCallSlot {
     
     option add *NotifyCallSlot.padding       {4 2 2 2}     50
     option add *NotifyCallSlot.box.padding   {4 2 8 2}     50
     option add *NotifyCallSlot*TLabel.style  Small.TLabel  widgetDefault
     
-    ::JUI::SlotRegister notifycall [namespace code Build]
+    ::JUI::SlotRegister notifycall [namespace code BuildEmpty]
+
+    variable images
+    set images(microphone) [::Theme::FindIconSize 16 audio-input-microphone]
+    set images(speaker)    [::Theme::FindIconSize 16 audio-output-speaker]
+    set images(online)     [::Theme::FindIconSize 16 phone-online]
+    set images(talk)       [::Theme::FindIconSize 16 phone-talk]
 }
 
-proc ::NotifyCall::Build {w args} {
+proc ::NotifyCallSlot::BuildEmpty {w args} {
+    variable slot
+    
+    ttk::frame $w
+
+    # Add menu.    
+    # This isn't the right way!
+    set m [::JUI::SlotGetMenu]
+    $m add checkbutton -label [mc "Notify Call"] \
+      -variable [namespace current]::slot(show) \
+      -command [namespace code SlotCmd] \
+      -state disabled
+
+    set slot(wmenu)  $m
+    set slot(wempty) $w
+    set slot(show)   0
+    
+    return $w
+}
+
+proc ::NotifyCallSlot::Build {w args} {
     variable slot
     
     ttk::frame $w -class NotifyCallSlot
@@ -480,16 +527,16 @@ proc ::NotifyCall::Build {w args} {
     if {1} {
 	set slot(collapse) 0
 	ttk::checkbutton $w.arrow -style Arrow.TCheckbutton \
-	  -command [list [namespace current]::SlotCollapse $w] \
+	  -command [list [namespace current]::Collapse $w] \
 	  -variable [namespace current]::slot(collapse)
 	pack $w.arrow -side left -anchor n	
-	bind $w.arrow <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
+	bind $w.arrow <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
 
 	set im  [::Theme::FindIconSize 16 close-aqua]
 	set ima [::Theme::FindIconSize 16 close-aqua-active]
 	ttk::button $w.close -style Plain  \
 	  -image [list $im active $ima] -compound image  \
-	  -command [namespace code [list SlotClose $w]]
+	  -command [namespace code [list Close $w]]
 	pack $w.close -side right -anchor n	
 
 	::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
@@ -498,71 +545,205 @@ proc ::NotifyCall::Build {w args} {
     ttk::frame $box
     pack $box -fill x -expand 1
     
-    set win [SlotFrame $box.f]
+    set win [Frame $box.f "in"]
     pack $win -fill x -expand 1
     
-    set m [::JUI::SlotGetMenu]
-
     set slot(w)     $w
     set slot(box)   $w.box
-    set slot(wmenu) $m
-    set slot(show)  1
-
-    # Add menu.    
-    # This isn't the right way!
-    $m add checkbutton -label [mc "Notify Call"] \
-      -variable [namespace current]::slot(show) \
-      -command [namespace code SlotCmd]
+    set slot(win)   $win
     
     return $w
 }
 
-proc ::NotifyCall::SlotFrame {win} {
+proc ::NotifyCallSlot::InboundCall {line number} {
+    variable slot
+    
+    set win $slot(wempty).slot
+    Build $win
+    pack $win -fill x -expand 1
+    
+    set slot(line)   $line
+    set slot(number) $number
+    return $win
+}
+
+proc ::NotifyCallSlot::OutboundCall {line number} {
+    variable slot
+    
+    set win $slot(wempty).slot
+    Build $win
+    pack $win -fill x -expand 1
+    
+    set slot(line)   $line
+    set slot(number) $number
+    return $win
+}
+
+proc ::NotifyCallSlot::Frame {win inout} {
+    variable images
     
     # Have state array with same name as frame.
     variable $win
     upvar #0 $win state
-	  
-    # Level controls.
-    set images(microphone) [::Theme::FindIconSize 16 audio-input-microphone]
-    set images(speaker)    [::Theme::FindIconSize 16 audio-output-speaker]
+    
+    # Just make sure they exist.
+    set state(inlevel)        0
+    set state(outlevel)       0
+    set state(microphone-100) 50
+    set state(speaker-100)    50
+    set state(old:microphone) 50
+    set state(old:speaker)    50
+    set state(cmicrophone)    1
+    set state(cspeaker)       1
+    set state(time)           "(00:00:00)"
+    set state(caller) [mc "%s is calling..." "Mats"]
 
+    # The vertical scales need a 100-level rescale!
+    set state(microphone) [::Phone::GetInputLevel]
+    set state(speaker)    [::Phone::GetOutputLevel]
+    set state(microphone-100) [expr {100 - $state(microphone)}]
+    set state(speaker-100)    [expr {100 - $state(speaker)}]
+	  
     ttk::frame $win -class NotifyCallSlotFrame
     
-    ttk::label $win.call -textvariable $win\(call)
+    # Caller info.
+    set winfo $win.info
+    #ttk::frame $win.info
+    frame $win.info -bg red
+    pack $win.info -side top -fill x
+
+    ttk::button $winfo.answer -style Plain \
+      -image $images(online) \
+      -command [namespace code [list Answer $win]]
+    ttk::label $winfo.name -textvariable $win\(caller)
+    ttk::button $winfo.hangup -style Plain \
+      -image $images(talk) \
+      -command [namespace code [list HangUp $win]]
+    
+    grid  $winfo.answer  $winfo.name  $winfo.hangup  -padx 4
+    grid $winfo.name -sticky ew
+    grid $winfo.hangup -sticky e
+    grid columnconfigure $win 1 -weight 1
+    
+    ::balloonhelp::balloonforwindow $winfo.answer [mc "Answer call"]
+    ::balloonhelp::balloonforwindow $winfo.hangup [mc "Hangup call"]
+    
+    # Level controls.
+    set wctrl $win.ctrl
+    ttk::frame $win.ctrl
+    #pack $win.ctrl -side top -fill x
     
     # Microphone.
-    ttk::progressbar $win.pmic -orient horizontal  \
+    ttk::progressbar $wctrl.pmic -orient horizontal  \
       -variable $win\(inlevel)
-    ttk::scale $win.smic -orient horizontal -length 60 -from 0 -to 100  \
-      -variable $win\(microphone-100)  \
-      -command [list ::NotifyCall::MicCmd $win]
-    ttk::checkbutton $win.cmic -style Plain  \
+    ttk::scale $wctrl.smic -orient horizontal -length 60 -from 0 -to 100  \
+      -variable $win\(microphone)  \
+      -command [namespace code [list MicCmd $win]]
+    ttk::checkbutton $wctrl.cmic -style Plain  \
       -variable $win\(cmicrophone) -image $images(microphone)  \
       -onvalue 0 -offvalue 1 -padding {1}  \
-      -command [list ::NotifyCall::Mute $win microphone]
+      -command [namespace code [list Mute $win microphone]]
 
     # Speakers.
-    ttk::progressbar $win.pspk -orient horizontal  \
+    ttk::progressbar $wctrl.pspk -orient horizontal  \
       -variable $win\(outlevel)
-    ttk::scale $win.sspk -orient horizontal -length 60 -from 0 -to 100  \
-      -variable $win\(speaker-100)  \
-      -command [list ::NotifyCall::SpkCmd $win]
-    ttk::checkbutton $win.cspk -style Plain  \
+    ttk::scale $wctrl.sspk -orient horizontal -length 60 -from 0 -to 100  \
+      -variable $win\(speaker)  \
+      -command [namespace code [list SpkCmd $win]]
+    ttk::checkbutton $wctrl.cspk -style Plain  \
       -variable $win\(cspeaker) -image $images(speaker)  \
       -onvalue 0 -offvalue 1 -padding {1}  \
-      -command [list ::NotifyCall::Mute $win speaker]
+      -command [namespace code [list Mute $win speaker]]
 
-    grid  $win.pmic  $win.smic  $win.cmic
-    grid  $win.pspk  $win.sspk  $win.cspk
-    grid $win.pmic $win.pspk -sticky ew
-    grid $win.smic $win.sspk -padx 16
-    grid columnconfigure $win 0 -weight 1
+    grid  $wctrl.pmic  $wctrl.smic  $wctrl.cmic
+    grid  $wctrl.pspk  $wctrl.sspk  $wctrl.cspk
+    grid $wctrl.pmic $wctrl.pspk -sticky ew
+    grid $wctrl.smic $wctrl.sspk -padx 16
+    grid columnconfigure $wctrl 0 -weight 1
+    
+    set state(winfo) $winfo
+    set state(wctrl) $wctrl
+    set state(wcall) $winfo.name
+    set state(wanswer) $winfo.answer
+    
+    bind $win <Destroy> [namespace code [list FrameFree $win]]
     
     return $win
 }
 
-proc ::NotifyCall::SlotCmd {} {
+proc ::NotifyCallSlot::Answer {win} {
+    variable images
+    variable $win
+    upvar #0 $win state
+    
+    pack $state(wctrl) -side top -fill x
+
+    set state(caller) [mc "%s is on the phone" "Mats"]
+    
+    $state(wanswer) state {disabled}
+    ::Phone::Answer
+
+}
+
+proc ::NotifyCallSlot::HangUp {win} {
+    variable slot
+    variable $win
+    upvar #0 $win state
+    
+    ::Phone::HangupJingle $slot(line)
+
+    set slot(show) 0
+    ::JUI::SlotClose notifycall
+}
+
+proc ::NotifyCallSlot::MicCmd {win level} {
+    variable $win
+    upvar #0 $win state
+    
+    set state(microphone) $level
+    if {$level != $state(old:microphone)} {
+	::Phone::SetInputLevel $level
+    }
+    set state(old:microphone) $level
+}
+
+proc ::NotifyCallSlot::SpkCmd {win level} {
+    variable $win
+    upvar #0 $win state
+
+    set state(speaker) $level
+    if {$level != $state(old:speaker)} {
+	::Phone::SetOutputLevel $level        
+    }
+    set state(old:speaker) $level
+}
+
+proc ::NotifyCallSlot::Mute {win which} {
+    variable $win
+    upvar #0 $win state
+    
+    
+}
+
+proc ::NotifyCallSlot::LevelEvent {in out} {
+    variable slot
+
+    set win $slot(win)
+    variable $win
+    upvar #0 $win state
+    
+    set state(inlevel)  $in
+    set state(outlevel) $out
+}
+
+proc ::NotifyCallSlot::FrameFree {win} {
+    variable $win
+    upvar #0 $win state
+
+    unset -nocomplain state
+}
+
+proc ::NotifyCallSlot::SlotCmd {} {
     if {[::JUI::SlotShowed notifycall]} {
 	::JUI::SlotClose notifycall
     } else {
@@ -570,7 +751,7 @@ proc ::NotifyCall::SlotCmd {} {
     }
 }
 
-proc ::NotifyCall::SlotCollapse {w} {
+proc ::NotifyCallSlot::Collapse {w} {
     variable slot
 
     if {$slot(collapse)} {
@@ -581,10 +762,14 @@ proc ::NotifyCall::SlotCollapse {w} {
     #event generate $w <<Xxx>>
 }
 
-proc ::NotifyCall::SlotClose {w} {
+proc ::NotifyCallSlot::Close {w} {
     variable slot
-    set slot(show) 0
-    ::JUI::SlotClose notifycall
+    
+    set msg [mc "Do you want to hang up?"]
+    set ans [tk_messageBox -icon question -type yesno -message [mc $msg]]
+    if {$ans eq "yes"} {
+	HangUp $slot(win)
+    }
 }
 
 
