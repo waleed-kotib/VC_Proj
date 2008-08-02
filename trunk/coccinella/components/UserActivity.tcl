@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.13 2008-05-05 14:22:28 matben Exp $
+#  $Id: UserActivity.tcl,v 1.14 2008-08-02 14:32:59 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -188,12 +188,18 @@ proc ::UserActivity::HavePEP {jlibname have} {
 
     if {$have} {
 	::JUI::RegisterMenuEntry action $menuDef
+	if {[MPExists]} {
+	    [MPWin] state {!disabled}
+	}
     }
 }
 
 proc ::UserActivity::LogoutHook {} {
     
     ::JUI::DeRegisterMenuEntry action mActivity...
+    if {[MPExists]} {
+	[MPWin] state {disabled}
+    }
 }
 
 proc ::UserActivity::Dlg {} {
@@ -232,7 +238,7 @@ proc ::UserActivity::Dlg {} {
       -variable $token\(specific)
     ttk::label $fr.lt -text "[mc Message]:"
     ttk::entry $fr.text -textvariable $token\(text)
-    ttk::checkbutton $fr.all -text "Show all specific activities" \
+    ttk::checkbutton $fr.all -text [mc "Show all specific activities"] \
       -variable $token\(all) -command [namespace code [list DlgAll $w]]
         
     set maxw [$fr.activity maxwidth]
@@ -311,9 +317,9 @@ proc ::UserActivity::DlgCmd {w bt} {
     variable xmlns
     
     if {$bt eq "ok"} {
-	Publish $w
+	Publish $state(activity) $state(specific) $state(text)
     } elseif {$bt eq "remove"} {
-	Retract $w
+	Retract
     }
     unset -nocomplain state
 }
@@ -360,6 +366,9 @@ proc ::UserActivity::ItemsCB {w type subiq args} {
 			    } else {
 				set state(specific) -
 			    }
+			    if {[MPExists]} {
+				MPSetActivity $activity
+			    }
 			}
 		    }
 		}
@@ -368,19 +377,17 @@ proc ::UserActivity::ItemsCB {w type subiq args} {
     }
 }
 
-proc ::UserActivity::Publish {w} {
-    variable $w
-    upvar 0 $w state
+proc ::UserActivity::Publish {activity specific text} {
     variable xmlns
     
     set specificE [list]
-    if {$state(specific) ne "-"} {
-	set specificE [list [wrapper::createtag $state(specific)]]
+    if {($specific ne "-") && ($specific ne "")} {
+	set specificE [list [wrapper::createtag $specific]]
     }
-    set childL [list [wrapper::createtag $state(activity) -subtags $specificE]]
-    if {[string trim $state(text)] ne ""} {
+    set childL [list [wrapper::createtag $activity -subtags $specificE]]
+    if {[string trim $text] ne ""} {
 	lappend childL [wrapper::createtag "text" \
-	  -attrlist [list xml:lang [jlib::getlang]] -chdata $state(text)]
+	  -attrlist [list xml:lang [jlib::getlang]] -chdata $text]
     }
     set activityE [wrapper::createtag "activity" -subtags $childL]
 
@@ -394,7 +401,7 @@ proc ::UserActivity::Publish {w} {
     ::Jabber::Jlib pep publish $xmlns(activity) $itemE
 }
 
-proc ::UserActivity::Retract {w} {
+proc ::UserActivity::Retract {} {
     variable xmlns
 
     ::Jabber::Jlib pep retract $xmlns(activity) -notify 1
@@ -479,4 +486,79 @@ proc ::UserActivity::Event {jlibname xmldata} {
     }
 }
 
+#--- Mega Presence Hook --------------------------------------------------------
+
+namespace eval ::UserActivity {
+    
+    ::MegaPresence::Register activity [mc "User Activity"] [namespace code MPBuild]
+    
+    variable mpwin "-"
+    variable imblank
+    set imblank [image create photo -height 16 -width 16]
+    $imblank blank
+}
+
+proc ::UserActivity::MPBuild {win} {
+    variable imblank
+    variable mpwin
+    variable allActivities    
+    variable mpActivity
+
+    set mpwin $win
+    ttk::menubutton $win -style SunkenMenubutton \
+      -image $imblank -compound image
+
+    set m $win.m
+    menu $m -tearoff 0
+    $win configure -menu $m
+    $win state {disabled}
+    
+    $m add radiobutton -label [mc None] -value "-" \
+      -variable [namespace current]::mpActivity \
+      -command [namespace code MPCmd]
+    $m add separator
+      
+    foreach activity $allActivities {
+	set dname [string totitle [string map {_ " "} $activity]]
+	$m add radiobutton -label [mc $dname] -value $activity \
+	  -image [::Theme::FindIconSize 16 activity-$activity] \
+	  -variable [namespace current]::mpActivity \
+	  -command [namespace code MPCmd]
+    }    
+    set mpActivity "-"
+    return
+}
+
+proc ::UserActivity::MPCmd {} {
+    variable mpwin
+    variable mpActivity
+    variable imblank
+    
+    if {$mpActivity eq "-"} {
+	$mpwin configure -image $imblank
+	::balloonhelp::balloonforwindow $mpwin "[mc {User Activity}]: [mc None]"
+	Retract
+    } else {
+	set dname [string totitle [string map {_ " "} $mpActivity]]
+	$mpwin configure -image [::Theme::FindIconSize 16 activity-$mpActivity]	
+	::balloonhelp::balloonforwindow $mpwin "[mc {User Activity}]: [mc $dname]"
+	Publish $mpActivity "" ""
+    }
+}
+
+proc ::UserActivity::MPSetActivity {activity} {
+    variable mpActivity
+    set mpActivity $activity
+    MPCmd
+}
+
+proc ::UserActivity::MPExists {} {
+    variable mpwin
+    return [winfo exists $mpwin]
+}
+
+proc ::UserActivity::MPWin {} {
+    variable mpwin
+    return $mpwin
+}
 

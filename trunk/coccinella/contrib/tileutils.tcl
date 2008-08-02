@@ -6,7 +6,7 @@
 #  
 #  This file is BSD style licensed.
 #  
-# $Id: tileutils.tcl,v 1.88 2008-06-11 14:22:17 matben Exp $
+# $Id: tileutils.tcl,v 1.89 2008-08-02 14:33:00 matben Exp $
 #
 
 package require treeutil
@@ -514,6 +514,16 @@ proc tileutils::configstyles {name} {
 	invalidbg   "#ffffb0"
     }
     
+    # We need to add a small padding to this image since can't make -padding 
+    # work here.
+    set aimage $tiles(downArrowContrast)
+    set downArrowContrastPad [image create photo \
+      -width  [expr {[image width $aimage] + 2*2}] \
+      -height [expr {[image height $aimage] + 2*2}]]
+    $downArrowContrastPad blank
+    $downArrowContrastPad copy $aimage -to 2 2
+    
+    
     ttk::style theme settings $name {
 	
 	# Set invalid state maps.
@@ -624,13 +634,13 @@ proc tileutils::configstyles {name} {
 		Sunken.padding -sticky news -children {
 		    Sunken.label -sticky news
 		}
-		SunkenMenubutton.indicator -sticky se
 	    }
+	    SunkenMenubutton.indicator -sticky se
 	}
-	ttk::style element create SunkenMenubutton.indicator image $tiles(downArrowContrast) \
+	ttk::style element create SunkenMenubutton.indicator image $downArrowContrastPad \
 	  -sticky e -padding {0}
 	ttk::style configure SunkenMenubutton \
-	  -padding {0} -foregeound white -font CociSmallFont
+	  -padding {0} -foreground white -font CociSmallFont
 
 	# Search entry (from Michael Kirkham).
 	set pad [ttk::style configure TEntry -padding]
