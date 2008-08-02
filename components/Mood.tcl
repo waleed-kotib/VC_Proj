@@ -2,7 +2,7 @@
 # 
 #       User Mood using PEP recommendations over PubSub library code.
 #
-#  Copyright (c) 2007 Mats Bengtsson
+#  Copyright (c) 2007-2008 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano Damas
 #  
 #   This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.39 2008-06-11 08:12:05 matben Exp $
+#  $Id: Mood.tcl,v 1.40 2008-08-02 14:32:59 matben Exp $
 
 package require jlib::pep
 
@@ -179,6 +179,10 @@ proc ::Mood::HavePEP {jlibname have} {
 	::Jabber::Jlib pubsub items $myjid2 $xmlns(mood) \
 	  -command [namespace code ItemsCB]
 	::JUI::RegisterMenuEntry action $menuDef
+	
+	if {[MPExists]} {
+	    [MPWin] state {!disabled}
+	}
     }
 }
 
@@ -187,6 +191,9 @@ proc ::Mood::LogoutHook {} {
     
     ::JUI::DeRegisterMenuEntry action mMood
     unset -nocomplain state
+    if {[MPExists]} {
+	[MPWin] state {disabled}
+    }
 }
 
 proc ::Mood::ItemsCB {type subiq args} {
@@ -216,6 +223,9 @@ proc ::Mood::ItemsCB {type subiq args} {
 		    }
 		    default {
 			set menuMoodVar $tag
+			if {[MPExists]} {
+			    MPSetMood $tag
+			}
 		    }
 		}
 	    }
@@ -287,9 +297,10 @@ proc ::Mood::CustomMoodDlg {} {
     lappend mDef [list [mc None] -value "-"]
     lappend mDef [list separator]
     foreach mood $myMoods {
-	lappend mDef [list [mc $mood2mLabel($mood)] -value $mood] 
+	lappend mDef [list [mc $mood2mLabel($mood)] -value $mood \
+	  -image [::Theme::FindIconSize 16 mood-$mood]] 
     }
-    ttk::label $fr.lmood -text "[mc {mMood}]:"     
+    ttk::label $fr.lmood -text "[mc mMood]:"     
     ui::optionmenu $fr.cmood -menulist $mDef -direction flush \
       -variable [namespace current]::moodStateDlg
 
@@ -388,6 +399,82 @@ proc ::Mood::Event {jlibname xmldata} {
 	    ::hooks::run moodEvent $xmldata $mood $text
 	}
     }
+}
+
+#--- Mega Presence Hook --------------------------------------------------------
+
+namespace eval ::Mood {
+    
+    ::MegaPresence::Register mood [mc Mood] [namespace code MPBuild]
+    
+    variable mpwin "-"
+    variable imblank
+    set imblank [image create photo -height 16 -width 16]
+    $imblank blank
+}
+
+proc ::Mood::MPBuild {win} {
+    variable imblank
+    variable mpwin
+    variable myMoods
+    variable mood2mLabel
+    variable mpMood
+
+    set mpwin $win
+    ttk::menubutton $win -style SunkenMenubutton \
+      -image $imblank -compound image
+
+    set m $win.m
+    menu $m -tearoff 0
+    $win configure -menu $m
+    $win state {disabled}
+    
+    $m add radiobutton -label [mc None] -value "-" \
+      -variable [namespace current]::mpMood \
+      -command [namespace code MPCmd]
+    $m add separator
+      
+    foreach mood $myMoods {
+	$m add radiobutton -label [mc $mood2mLabel($mood)] -value $mood \
+	  -image [::Theme::FindIconSize 16 mood-$mood] \
+	  -variable [namespace current]::mpMood \
+	  -command [namespace code MPCmd]
+    }    
+    set mpMood "-"
+    return
+}
+
+proc ::Mood::MPCmd {} {
+    variable mpwin
+    variable mpMood
+    variable imblank
+    variable mood2mLabel
+    
+    if {$mpMood eq "-"} {
+	$mpwin configure -image $imblank
+	::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc None]"
+	Retract
+    } else {
+	$mpwin configure -image [::Theme::FindIconSize 16 mood-$mpMood]	
+        ::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc $mood2mLabel($mpMood)]"
+	Publish $mpMood ""
+    }
+}
+
+proc ::Mood::MPSetMood {mood} {
+    variable mpMood
+    set mpMood $mood
+    MPCmd
+}
+
+proc ::Mood::MPExists {} {
+    variable mpwin
+    return [winfo exists $mpwin]
+}
+
+proc ::Mood::MPWin {} {
+    variable mpwin
+    return $mpwin
 }
 
 # Test

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.258 2008-07-31 14:42:26 matben Exp $
+# $Id: JUI.tcl,v 1.259 2008-08-02 14:33:00 matben Exp $
 
 package provide JUI 1.0
 
@@ -98,10 +98,11 @@ namespace eval ::JUI {
     set ::config(ui,main,infoType)      server    ;# mejid|mejidres|status|server
 
     # Experimental...
-    set ::config(ui,main,slots)         1
-    set ::config(ui,main,combi-status)  0
-    set ::config(ui,main,toy-status)    0
-    set ::config(ui,main,combibox)      1
+    set ::config(ui,main,slots)            0
+    set ::config(ui,main,combi-status)     0
+    set ::config(ui,main,toy-status)       1
+    set ::config(ui,main,toy-status-slots) 1
+    set ::config(ui,main,combibox)         0
     
     # This is a trick to get the aqua text borders.
     if {[tk windowingsystem] eq "aqua"} {
@@ -116,6 +117,7 @@ namespace eval ::JUI {
     
     set jwapp(w) -
     set jwapp(mystatus) -
+    set jwapp(securityWinL) [list]
 }
 
 proc ::JUI::Init {} {
@@ -362,8 +364,8 @@ proc ::JUI::Build {w} {
    
     # Experiment!
     if {$config(ui,main,slots)} {
-	::JUI::SlotBuild $wall.slot
-	pack $wall.slot -side bottom -fill x
+ 	::JUI::SlotBuild $wall.slot
+ 	pack $wall.slot -side bottom -fill x
     }
 
     # Status frame. 
@@ -420,6 +422,7 @@ proc ::JUI::Build {w} {
 	set jwapp(myjid)     $wfstat.me
 	set jwapp(statcont)  $wstatcont
 	set jwapp(secure)    $wbot.r.secure
+	lappend jwapp(securityWinL) $wbot.r.secure
     }
     
     # Experimental.
@@ -432,18 +435,31 @@ proc ::JUI::Build {w} {
     if {$config(ui,main,toy-status)} {
 	set im  [::Theme::Find32Icon $w cociEs32]
 	set ima [::Theme::Find32Icon $w cociEsActive32]
+	set y [expr {[image height $im]/2}]
+	
 	ttk::frame $wall.logo
 	pack $wall.logo -side bottom -fill x
+	
 	ttk::button $wall.logo.b -style Plain \
 	  -image [list $im {active !pressed} $ima {active pressed} $im] \
 	  -command [namespace code CociCmd]
-	pack $wall.logo.b -side top -fill x -padx 12 -pady 2
-	
+	ttk::button $wall.logo.secure -style Plainer \
+	  -compound image -padding {2}
+
+	pack $wall.logo.b -side top -padx 12 -pady 2
+	place $wall.logo.secure -relx 1.0 -x -6 -y $y -anchor e
+
+	lappend jwapp(securityWinL) $wall.logo.secure
+
 	set wmp $wall.logo.mp
-	::MegaPresence::Build $wmp -collapse 0
-	bind $wall.logo.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
-	
-	::balloonhelp::balloonforwindow $wall.logo.b "Open presence control panel"
+	if {$config(ui,main,toy-status-slots)} {
+	    SlotBuild $wmp
+	    bind $wall.logo.b <<ButtonPopup>> [namespace code SlotPopup]
+	} else {
+	    ::MegaPresence::Build $wmp -collapse 0
+	    bind $wall.logo.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
+	}
+	::balloonhelp::balloonforwindow $wall.logo.b [mc "Open presence control panel"]
 	
 	set jwapp(wtoy) $wall.logo.b
 	set jwapp(wmp)  $wmp
@@ -811,6 +827,11 @@ proc ::JUI::SlotBuild {w} {
     return $w
 }
 
+proc ::JUI::SlotPopup {} {
+    
+    
+}
+
 proc ::JUI::SlotGetMenu {} {
     set minfo [GetMainMenu].info
     return [::UI::MenuMethod $minfo entrycget mSlots -menu]
@@ -1165,22 +1186,21 @@ proc ::JUI::RosterSelectionHook {} {
     $wtbar buttonconfigure chat -state $state    
 }
 
-proc ::JUI::LoginHook {} {
+proc ::JUI::SetSecurityIcons {} {
     variable jwapp
     
-    set w $jwapp(w)
-    if {[info exists jwapp(secure)] && [winfo exists $jwapp(secure)]} {
-	set wsecure $jwapp(secure)
+    if {[llength $jwapp(securityWinL)]} {
 	
-# 	security-high: SASL+TLS with a certificate signed by a trusted source
-# 	security-medium: {SASL+TLS|TLS on separate port} with a certificate
-# 	signed by a source that is not trusted (self-signed certificate)
-# 	security-low: only SASL or no security at all
+	# security-high: SASL+TLS with a certificate signed by a trusted source
+	# security-medium: {SASL+TLS|TLS on separate port} with a certificate
+	# signed by a source that is not trusted (self-signed certificate)
+	# security-low: only SASL or no security at all
 	set any 0
 	set sasl [::Jabber::Jlib connect feature sasl]
 	set ssl  [::Jabber::Jlib connect feature ssl]
 	set tls  [::Jabber::Jlib connect feature tls]
 	set cert 0
+	set w $jwapp(w)
 	if {$sasl && $tls && $cert} {
 	    set str [mc "The connection is secure"]
 	    set image [::Theme::Find16Icon $w secureHighImage]
@@ -1194,26 +1214,44 @@ proc ::JUI::LoginHook {} {
 	    set image [::Theme::Find16Icon $w secureLowImage]
 	    set any 1
 	}
+	puts "$sasl $tls"
 	if {$any} {
-	    $wsecure configure -image $image
-	    ::balloonhelp::balloonforwindow $wsecure $str	    
+	    foreach win $jwapp(securityWinL) {
+		if {[winfo exists $win]} {
+		    $win configure -image $image
+		    ::balloonhelp::balloonforwindow $win $str	    
+		}
+	    }
 	}
     }
+}
+
+proc ::JUI::UnsetSecurityIcons {} {
+    variable jwapp
+    
+    foreach win $jwapp(securityWinL) {
+	if {[winfo exists $win]} {
+	    $win configure -image ""
+	    ::balloonhelp::balloonforwindow $win ""
+	}
+    }
+}
+
+proc ::JUI::LoginHook {} {
+    variable jwapp
+    
+    SetSecurityIcons
 
     # The Login/Logout button strings may have different widths.
+    set w $jwapp(w)
     set minwidth [$jwapp(wtbar) minwidth]
     set minW [expr $minwidth > 200 ? $minwidth : 200]
     wm minsize $w $minW 300    
 }
 
 proc ::JUI::LogoutHook {} {
-    variable jwapp
     
-    if {[info exists jwapp(secure)] && [winfo exists $jwapp(secure)]} {
-	$jwapp(secure) configure -image ""
-	::balloonhelp::balloonforwindow $jwapp(secure) ""
-    }
-    
+    UnsetSecurityIcons
     SetStatusMessage [mc "Logged out"]
     FixUIWhen "disconnect"
     SetConnectState "disconnect"

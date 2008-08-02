@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.12 2008-07-31 14:42:26 matben Exp $
+# $Id: MegaPresence.tcl,v 1.13 2008-08-02 14:33:00 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -31,7 +31,6 @@ namespace eval ::MegaPresence {
     variable widgets
     set widgets(all) [list]
     
-    # ::hooks::register initHook
     ::JUI::SlotRegister megapresence [namespace code Build]
 }
 
@@ -43,17 +42,6 @@ proc ::MegaPresence::Register {name label cmd} {
     set widgets($name,cmd)   $cmd
     lappend widgets(all) $name
     return $name
-}
-
-# Test:
-if {1} {
-    proc MPmake {name win} {
-	ttk::menubutton $win -style SunkenMenubutton
-	return
-    }
-    foreach name {mood activity tune} {
-	::MegaPresence::Register $name [string totitle $name] [list MPmake $name]
-    }
 }
 
 proc ::MegaPresence::Build {w args} {
@@ -118,6 +106,7 @@ proc ::MegaPresence::Build {w args} {
 	eval {grid  $box.$column  -row 0 -column $column -padx 4} $opts
 	ttk::label $box.l$column -text $widgets($name,label)
 	grid  $box.l$column  -row 1 -column $column -padx 2 -pady 0
+	
 	set widgets($name,column) $column
 	set widgets($name,win) $box.$column
 	set widgets($name,lwin) $box.l$column
