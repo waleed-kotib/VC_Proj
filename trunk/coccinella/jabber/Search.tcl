@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.47 2008-07-30 13:23:59 matben Exp $
+# $Id: Search.tcl,v 1.48 2008-08-03 15:32:56 matben Exp $
 
 package provide Search 1.0
 
@@ -528,19 +528,17 @@ proc ::Search::SlotBuild {w} {
 
     ::balloonhelp::balloonforwindow $box  [mc "Enter search phrase and press Return"]
     
-    set m [::JUI::SlotGetMenu]
-
     set slot(w)     $w
     set slot(box)   $w.box
     set slot(entry) $box.e
-    set slot(wmenu) $m
     set slot(show)  1
     set slot(text)  ""
 
-    $m add checkbutton -label [mc "Search JUD"] \
-      -variable [namespace current]::slot(show) \
-      -command [namespace code SlotCmd]
-    
+    foreach m [::JUI::SlotGetAllMenus] {
+	$m add checkbutton -label [mc "Search JUD"] \
+	  -variable [namespace current]::slot(show) \
+	  -command [namespace code SlotCmd]
+    }    
     return $w
 }
 

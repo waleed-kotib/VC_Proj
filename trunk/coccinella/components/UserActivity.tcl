@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.14 2008-08-02 14:32:59 matben Exp $
+#  $Id: UserActivity.tcl,v 1.15 2008-08-03 15:32:56 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -300,12 +300,14 @@ proc ::UserActivity::ConfigSpecificMenu {w activity} {
     if {$state(all)} {
 	foreach name $allSpecific {
 	    set dname [string totitle [string map {_ " "} $name]]
-	    lappend mDef [list [mc $dname] -value $name]
+	    lappend mDef [list [mc $dname] -value $name \
+	      -image [::Theme::FindIconSize 16 activity-$name]]
 	}
     } else {
 	foreach name $subActivities($activity) {
 	    set dname [string totitle [string map {_ " "} $name]]
-	    lappend mDef [list [mc $dname] -value $name]
+	    lappend mDef [list [mc $dname] -value $name \
+	      -image [::Theme::FindIconSize 16 activity-$name]]
 	}
     }
     $fr.specific configure -menulist $mDef
@@ -490,7 +492,7 @@ proc ::UserActivity::Event {jlibname xmldata} {
 
 namespace eval ::UserActivity {
     
-    ::MegaPresence::Register activity [mc "User Activity"] [namespace code MPBuild]
+    ::MegaPresence::Register activity [mc Activity] [namespace code MPBuild]
     
     variable mpwin "-"
     variable imblank
@@ -525,6 +527,9 @@ proc ::UserActivity::MPBuild {win} {
 	  -variable [namespace current]::mpActivity \
 	  -command [namespace code MPCmd]
     }    
+    $m add separator
+    $m add command -label [mc Dialog] -command ::UserActivity::Dlg
+    
     set mpActivity "-"
     return
 }
@@ -536,12 +541,12 @@ proc ::UserActivity::MPCmd {} {
     
     if {$mpActivity eq "-"} {
 	$mpwin configure -image $imblank
-	::balloonhelp::balloonforwindow $mpwin "[mc {User Activity}]: [mc None]"
+	::balloonhelp::balloonforwindow $mpwin "[mc Activity]: [mc None]"
 	Retract
     } else {
 	set dname [string totitle [string map {_ " "} $mpActivity]]
 	$mpwin configure -image [::Theme::FindIconSize 16 activity-$mpActivity]	
-	::balloonhelp::balloonforwindow $mpwin "[mc {User Activity}]: [mc $dname]"
+	::balloonhelp::balloonforwindow $mpwin "[mc Activity]: [mc $dname]"
 	Publish $mpActivity "" ""
     }
 }

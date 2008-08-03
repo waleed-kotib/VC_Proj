@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.13 2008-08-02 14:33:00 matben Exp $
+# $Id: MegaPresence.tcl,v 1.14 2008-08-03 15:32:56 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -120,17 +120,14 @@ proc ::MegaPresence::Build {w args} {
     grid  $box.pad  -column 99 -sticky ew
     grid columnconfigure $box 99 -weight 1
     
-    # Add menu.
-    set m [::JUI::SlotGetMenu]
-    
     set slot(w)     $w
-    set slot(wmenu) $m
     set slot(show)  1
     
-    # This isn't the right way!
-    $m add checkbutton -label [mc "Mega Presence"] \
-      -variable [namespace current]::slot(show) \
-      -command [namespace code SlotCmd]
+    foreach m [::JUI::SlotGetAllMenus] {
+	$m add checkbutton -label [mc "Mega Presence"] \
+	  -variable [namespace current]::slot(show) \
+	  -command [namespace code SlotCmd]
+    }
     
     return $w
 }
@@ -152,7 +149,7 @@ proc ::MegaPresence::CollapseCmd {w} {
     } else {
 	pack $widgets(box) -fill both -expand 1
     }
-    event generate $w <<Xxx>>
+    #event generate $w <<Xxx>>
 }
 
 proc ::MegaPresence::Popup {W w x y} {
