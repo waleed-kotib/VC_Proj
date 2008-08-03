@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.259 2008-08-02 14:33:00 matben Exp $
+# $Id: JUI.tcl,v 1.260 2008-08-03 15:32:56 matben Exp $
 
 package provide JUI 1.0
 
@@ -453,8 +453,11 @@ proc ::JUI::Build {w} {
 
 	set wmp $wall.logo.mp
 	if {$config(ui,main,toy-status-slots)} {
+	    menu $wall.logo.b.m -tearoff 0
+	    bind $wall.logo.b <<ButtonPopup>> \
+	      [namespace code [list SlotPopup %W %x %y]]
+	    set jwapp(slotmenu) $wall.logo.b.m
 	    SlotBuild $wmp
-	    bind $wall.logo.b <<ButtonPopup>> [namespace code SlotPopup]
 	} else {
 	    ::MegaPresence::Build $wmp -collapse 0
 	    bind $wall.logo.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
@@ -772,15 +775,14 @@ proc ::JUI::CociCmd {} {
     
     if {[winfo ismapped $jwapp(wmp)]} {
 	pack forget $jwapp(wmp)
-	::balloonhelp::balloonforwindow $jwapp(wtoy) "Open presence control panel"
+	::balloonhelp::balloonforwindow $jwapp(wtoy) [mc "Open presence control panel"]
     } else {
 	pack $jwapp(wmp) -side bottom -fill x
-	::balloonhelp::balloonforwindow $jwapp(wtoy) "Hide presence control panel"
+	::balloonhelp::balloonforwindow $jwapp(wtoy) [mc "Hide presence control panel"]
     }
 }
 
 #-------------------------------------------------------------------------------
-# @@@ EXPERIMENTAL!
 
 namespace eval ::JUI {
     
@@ -827,14 +829,33 @@ proc ::JUI::SlotBuild {w} {
     return $w
 }
 
-proc ::JUI::SlotPopup {} {
+proc ::JUI::SlotPopup {W x y} {
+    variable jwapp
     
+    puts "::JUI::SlotPopup $W $x $y"
     
+    set m $jwapp(slotmenu)
+    
+    set X [expr [winfo rootx $W] + $x]
+    set Y [expr [winfo rooty $W] + $y]
+    tk_popup $m [expr {int($X) - 0}] [expr {int($Y) - 0}]   
+    
+    update idletasks
 }
 
-proc ::JUI::SlotGetMenu {} {
+proc ::JUI::SlotGetMainMenu {} {
     set minfo [GetMainMenu].info
     return [::UI::MenuMethod $minfo entrycget mSlots -menu]
+}
+
+proc ::JUI::SlotGetAllMenus {} {
+    variable jwapp
+    
+    set menuL [list]
+    set minfo [GetMainMenu].info
+    lappend menuL [::UI::MenuMethod $minfo entrycget mSlots -menu]
+    lappend menuL $jwapp(slotmenu)
+    return $menuL
 }
 
 proc ::JUI::SlotClose {name} {

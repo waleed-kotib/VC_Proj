@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: StatusSlot.tcl,v 1.2 2008-08-01 13:01:25 matben Exp $
+# $Id: StatusSlot.tcl,v 1.3 2008-08-03 15:32:56 matben Exp $
 
 package provide StatusSlot 1.0
 
@@ -77,11 +77,11 @@ proc ::StatusSlot::BuildMessageSlot {w} {
 
     ::balloonhelp::balloonforwindow $box.e [dict get $msgSlotD mejid]
 
-    set m [::JUI::SlotGetMenu]
-    $m add checkbutton -label [mc "Status Info"] \
-      -variable [namespace current]::priv(show) \
-      -command [namespace code Cmd]
-
+    foreach m [::JUI::SlotGetAllMenus] {
+	$m add checkbutton -label [mc "Status Info"] \
+	  -variable [namespace current]::priv(show) \
+	  -command [namespace code Cmd]
+    }
     return $w
 }
 
