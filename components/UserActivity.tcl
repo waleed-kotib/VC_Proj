@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.16 2008-08-04 08:11:02 matben Exp $
+#  $Id: UserActivity.tcl,v 1.17 2008-08-04 13:30:46 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -528,7 +528,7 @@ proc ::UserActivity::MPBuild {win} {
 	  -command [namespace code MPCmd]
     }    
     $m add separator
-    $m add command -label [mc Dialog] -command ::UserActivity::Dlg
+    $m add command -label [mc Dialog]... -command [namespace code Dlg]
     
     set mpActivity "-"
     return

@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.40 2008-08-02 14:32:59 matben Exp $
+#  $Id: Mood.tcl,v 1.41 2008-08-04 13:30:46 matben Exp $
 
 package require jlib::pep
 
@@ -440,6 +440,9 @@ proc ::Mood::MPBuild {win} {
 	  -variable [namespace current]::mpMood \
 	  -command [namespace code MPCmd]
     }    
+    $m add separator
+    $m add command -label [mc Dialog]... \
+      -command [namespace code CustomMoodDlg]
     set mpMood "-"
     return
 }
