@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.262 2008-08-04 09:46:33 matben Exp $
+# $Id: JUI.tcl,v 1.263 2008-08-04 13:05:28 matben Exp $
 
 package provide JUI 1.0
 
@@ -1283,7 +1283,7 @@ proc ::JUI::LoginHook {} {
 proc ::JUI::LogoutHook {} {
     
     UnsetSecurityIcons
-    SetStatusMessage [mc "Logged out"]
+    SetAppMessage [mc "Logged out"]
     FixUIWhen "disconnect"
     SetConnectState "disconnect"
 }
@@ -1313,10 +1313,16 @@ proc ::JUI::GetRosterFrame {} {
     return $jwapp(roster)
 }
 
-proc ::JUI::SetStatusMessage {msg} {
+# JUI::SetAppMessage --
+#
+#       This is a way for various parts of the code to put some arbitrary
+#       text for UI display.
+
+proc ::JUI::SetAppMessage {msg} {
 
     # @@@ We keep this for future use since we may want a method
     #     to display feedback details.
+    ::hooks::run appStatusMessageHook $msg
 }
 
 # JUI::MailBoxState --

@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: VCard.tcl,v 1.84 2008-06-10 13:26:49 matben Exp $
+# $Id: VCard.tcl,v 1.85 2008-08-04 13:05:29 matben Exp $
 
 package provide VCard 1.0
 
@@ -79,7 +79,7 @@ proc ::VCard::Fetch {type {jid {}}} {
     set priv(w)    $wDlgs(jvcard)$uid
     
     # We should query the server for this and then fill in.
-    ::JUI::SetStatusMessage "[mc vcardget2 $jid]..."
+    ::JUI::SetAppMessage "[mc vcardget2 $jid]..."
     if {$type eq "own"} {
 	::Jabber::Jlib vcard send_get_own  \
 	  [list [namespace current]::FetchCallback $token]
@@ -102,11 +102,11 @@ proc ::VCard::FetchCallback {token jlibName result theQuery} {
 	set str [mc vcarderrget2]
 	append str "\n" "[mc Error]: ([lindex $theQuery 0]) [lindex $theQuery 1]"
 	::UI::MessageBox -title [mc Error] -icon error -type ok -message $str
-        ::JUI::SetStatusMessage ""
+        ::JUI::SetAppMessage ""
 	Free $token
         return
     }
-    ::JUI::SetStatusMessage [mc vcardrec2]
+    ::JUI::SetAppMessage [mc vcardrec2]
     
     # The 'theQuery' now contains all the vCard data in a xml list.
     if {[llength $theQuery]} {
