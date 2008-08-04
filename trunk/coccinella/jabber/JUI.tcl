@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.260 2008-08-03 15:32:56 matben Exp $
+# $Id: JUI.tcl,v 1.261 2008-08-04 08:11:02 matben Exp $
 
 package provide JUI 1.0
 
@@ -433,8 +433,8 @@ proc ::JUI::Build {w} {
     
     # Experimental.
     if {$config(ui,main,toy-status)} {
-	set im  [::Theme::Find32Icon $w cociEs32]
-	set ima [::Theme::Find32Icon $w cociEsActive32]
+	set im  [::Theme::FindIconSize 22 coccinella2]
+	set ima [::Theme::FindIconSize 22 coccinella2-shadow]
 	set y [expr {[image height $im]/2}]
 	
 	ttk::frame $wall.logo
@@ -774,11 +774,9 @@ proc ::JUI::CociCmd {} {
     variable jwapp
     
     if {[winfo ismapped $jwapp(wmp)]} {
-	pack forget $jwapp(wmp)
-	::balloonhelp::balloonforwindow $jwapp(wtoy) [mc "Open presence control panel"]
+	SlotHide
     } else {
-	pack $jwapp(wmp) -side bottom -fill x
-	::balloonhelp::balloonforwindow $jwapp(wtoy) [mc "Hide presence control panel"]
+	SlotDisplay
     }
 }
 
@@ -829,11 +827,21 @@ proc ::JUI::SlotBuild {w} {
     return $w
 }
 
+proc ::JUI::SlotDisplay {} {
+    variable jwapp
+    pack $jwapp(wmp) -side bottom -fill x
+    ::balloonhelp::balloonforwindow $jwapp(wtoy) [mc "Hide presence control panel"]
+}
+
+proc ::JUI::SlotHide {} {
+    variable jwapp
+    pack forget $jwapp(wmp)
+    ::balloonhelp::balloonforwindow $jwapp(wtoy) [mc "Open presence control panel"]
+}
+
 proc ::JUI::SlotPopup {W x y} {
     variable jwapp
-    
-    puts "::JUI::SlotPopup $W $x $y"
-    
+        
     set m $jwapp(slotmenu)
     
     set X [expr [winfo rootx $W] + $x]
