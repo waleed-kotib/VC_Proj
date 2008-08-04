@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MicroBlog.tcl,v 1.3 2008-08-03 15:32:56 matben Exp $
+# $Id: MicroBlog.tcl,v 1.4 2008-08-04 09:46:33 matben Exp $
 
 package provide MicroBlog 1.0
 
@@ -49,6 +49,7 @@ proc ::MicroBlog::SlotBuild {w} {
 	  -command [list [namespace current]::SlotCollapse $w] \
 	  -variable [namespace current]::slot(collapse)
 	pack $w.arrow -side left -anchor n	
+	bind $w       <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
 	bind $w.arrow <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
 
 	set im  [::Theme::FindIconSize 16 close-aqua]
@@ -76,6 +77,9 @@ proc ::MicroBlog::SlotBuild {w} {
     bind $box.e <Return>   [namespace code SlotSend]
     bind $box.e <KP_Enter> [namespace code SlotSend]
     
+    bind $box   <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
+    bind $box.l <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
+    bind $box.e <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
     ::balloonhelp::balloonforwindow $box  [mc "Enter your blog post here and press Return"]
 
     set slot(w)     $w
@@ -118,6 +122,10 @@ proc ::MicroBlog::SlotSend {} {
     variable slot
     
     # ???
+}
+
+proc ::MicroBlog::SlotPopup {w x y} {
+    
 }
 
 proc ::MicroBlog::SlotCollapse {w} {

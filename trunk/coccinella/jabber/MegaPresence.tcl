@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.14 2008-08-03 15:32:56 matben Exp $
+# $Id: MegaPresence.tcl,v 1.15 2008-08-04 09:46:33 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -63,6 +63,7 @@ proc ::MegaPresence::Build {w args} {
 	  -command [namespace code [list CollapseCmd $w]] \
 	  -variable [namespace current]::slot(collapse)
 	pack $w.arrow -side left -anchor n	
+	bind $w       <<ButtonPopup>> [namespace code [list Popup %W $w %x %y]]
 	bind $w.arrow <<ButtonPopup>> [namespace code [list Popup %W $w %x %y]]
 
 	set subPath [file join images 16]
@@ -80,6 +81,8 @@ proc ::MegaPresence::Build {w args} {
     set widgets(box) $w.box
     ttk::frame $box
     pack $box -fill x -expand 1
+
+    bind $box <<ButtonPopup>> [namespace code [list Popup %W $w %x %y]]
 
     if {$config(ui,status,menu) eq "plain"} {
 	::Status::MainButton $box.pres ::Jabber::jstate(show)

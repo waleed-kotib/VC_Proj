@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: StatusSlot.tcl,v 1.3 2008-08-03 15:32:56 matben Exp $
+# $Id: StatusSlot.tcl,v 1.4 2008-08-04 09:46:33 matben Exp $
 
 package provide StatusSlot 1.0
 
@@ -49,6 +49,7 @@ proc ::StatusSlot::BuildMessageSlot {w} {
 	  -command [list [namespace current]::Collapse $w] \
 	  -variable [namespace current]::priv(collapse)
 	pack $w.arrow -side left -anchor n	
+	bind $w       <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
 	bind $w.arrow <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
 
 	set im  [::Theme::FindIconSize 16 close-aqua]
@@ -75,6 +76,8 @@ proc ::StatusSlot::BuildMessageSlot {w} {
     set priv(value) mejid
     set priv(show)  1
 
+    bind $box   <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
+    bind $box.e <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
     ::balloonhelp::balloonforwindow $box.e [dict get $msgSlotD mejid]
 
     foreach m [::JUI::SlotGetAllMenus] {
