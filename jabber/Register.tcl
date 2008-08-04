@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Register.tcl,v 1.110 2008-07-30 13:23:59 matben Exp $
+# $Id: Register.tcl,v 1.111 2008-08-04 13:05:28 matben Exp $
 
 package provide Register 1.0
 
@@ -367,7 +367,7 @@ proc ::RegisterEx::New {args} {
     # Wait here for a button press and window to be destroyed.
     tkwait variable $token\(finished)
     
-    ::JUI::SetStatusMessage ""
+    ::JUI::SetAppMessage ""
 
     ::UI::SaveWinPrefixGeom $wDlgs(jreg)
     ::UI::GrabRelease $w
@@ -539,7 +539,7 @@ proc ::RegisterEx::NotBusy {token} {
     
     $state(wprog) stop
     set state(status) ""
-    ::JUI::SetStatusMessage ""
+    ::JUI::SetAppMessage ""
 }
 
 proc ::RegisterEx::SetState {token theState} {

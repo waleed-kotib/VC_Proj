@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: Jabber.tcl,v 1.268 2008-07-31 14:42:26 matben Exp $
+# $Id: Jabber.tcl,v 1.269 2008-08-04 13:05:28 matben Exp $
 
 package require balloonhelp
 package require chasearrows
@@ -48,9 +48,13 @@ package require jlibs::register
 package require jlibs::unregister
 package require jlibs::message
 
+# Others depend upon this.
+package require JUI
+
 # We should have some component mechanism that lets packages load themselves.
 package require Adhoc
 package require AutoAway
+package require AppStatusSlot
 package require Avatar
 package require AvatarMB
 package require Chat
@@ -64,7 +68,6 @@ package require GroupChat
 package require JForms
 package require JPrefs
 package require JPubServers
-package require JUI
 package require JUser
 package require Login
 package require MailBox

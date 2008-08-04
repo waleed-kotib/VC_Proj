@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.249 2008-06-10 06:04:50 matben Exp $
+# $Id: Roster.tcl,v 1.250 2008-08-04 13:05:28 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -825,7 +825,7 @@ proc ::Roster::ExitRoster {} {
 
     SortAtIdle
     #Sort
-    ::JUI::SetStatusMessage [mc jarostupdate]
+    ::JUI::SetAppMessage [mc jarostupdate]
     set timer(exitroster,secs) [clock seconds]
 }
 

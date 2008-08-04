@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UserInfo.tcl,v 1.37 2008-06-09 09:51:00 matben Exp $
+# $Id: UserInfo.tcl,v 1.38 2008-08-04 13:05:29 matben Exp $
 
 package provide UserInfo 1.0
 
@@ -132,7 +132,7 @@ proc ::UserInfo::Get {jid {node ""}} {
     
     if {[::Jabber::IsConnected]} {
 	set ujid [jlib::unescapejid $jid]
-	::JUI::SetStatusMessage "[mc vcardget2 $ujid]..."
+	::JUI::SetAppMessage "[mc vcardget2 $ujid]..."
 	$priv(warrow) start
     }
     

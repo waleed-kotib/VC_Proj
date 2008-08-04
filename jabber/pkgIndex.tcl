@@ -9,6 +9,7 @@
 # full path name of this file's directory.
 
 package ifneeded Adhoc      1.0 [list source [file join $dir Adhoc.tcl]]
+package ifneeded AppStatusSlot 1.0 [list source [file join $dir AppStatusSlot.tcl]]
 package ifneeded Avatar     1.0 [list source [file join $dir Avatar.tcl]]
 package ifneeded AutoAway   1.0 [list source [file join $dir AutoAway.tcl]]
 package ifneeded AvatarMB   1.0 [list source [file join $dir AvatarMB.tcl]]

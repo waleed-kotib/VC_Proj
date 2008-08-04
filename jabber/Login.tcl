@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Login.tcl,v 1.155 2008-07-19 06:45:37 matben Exp $
+# $Id: Login.tcl,v 1.156 2008-08-04 13:05:28 matben Exp $
 
 package provide Login 1.0
 
@@ -436,7 +436,7 @@ proc ::Login::Reset {} {
     set pending 0
     ::Jabber::Jlib connect reset
 
-    ::JUI::SetStatusMessage ""
+    ::JUI::SetAppMessage ""
     ::JUI::FixUIWhen "disconnect"
     ::JUI::SetConnectState "disconnect"
 }
@@ -782,7 +782,7 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     set highstate(args)    $args
     set highstate(pending) 1
 
-    ::JUI::SetStatusMessage "[mc jawaitresp $server]..."
+    ::JUI::SetAppMessage "[mc jawaitresp $server]..."
     ::JUI::FixUIWhen "connectinit"
     ::JUI::SetConnectState "connectinit"
         
@@ -795,6 +795,8 @@ proc ::Login::HighLogin {server username resource password cmd args} {
       -defaultsslport $jprefs(sslport)    \
       -dnssrv $config(login,dnssrv)       \
       -dnstxthttp $config(login,dnstxthttp)
+    
+    ::hooks::run highLoginStartHook
     
     set jid [jlib::joinjid $username $server $resource]
     set cb [list ::Login::HighLoginCB $token]
@@ -809,6 +811,8 @@ proc ::Login::HighLoginCB {token jlibname status {errcode ""} {errmsg ""}} {
     
     array set state [$jlibname connect get_state]
     
+    ::hooks::run highLoginCBHook $status $errcode $errmsg
+
     switch -- $status {
 	ok - error {
 	    HighFinal $token $jlibname $status $errcode $errmsg
@@ -817,10 +821,10 @@ proc ::Login::HighLoginCB {token jlibname status {errcode ""} {errmsg ""}} {
 	    # empty
 	}
 	initstream {
-	    ::JUI::SetStatusMessage "[mc jawaitxml $state(server)]..."
+	    ::JUI::SetAppMessage "[mc jawaitxml $state(server)]..."
 	}
 	starttls {
-	    ::JUI::SetStatusMessage "[mc jatlsnegot2]..."
+	    ::JUI::SetAppMessage "[mc jatlsnegot2]..."
 	}
     }
 }
@@ -851,7 +855,7 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
 	    HandleErrorCode $errcode $errmsg
 	}
     }        
-    ::JUI::SetStatusMessage $msg
+    ::JUI::SetAppMessage $msg
 
     uplevel #0 $highstate(cmd) [list $token $errcode $errmsg]
 
