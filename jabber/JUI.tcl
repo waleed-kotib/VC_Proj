@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.261 2008-08-04 08:11:02 matben Exp $
+# $Id: JUI.tcl,v 1.262 2008-08-04 09:46:33 matben Exp $
 
 package provide JUI 1.0
 
@@ -454,6 +454,8 @@ proc ::JUI::Build {w} {
 	set wmp $wall.logo.mp
 	if {$config(ui,main,toy-status-slots)} {
 	    menu $wall.logo.b.m -tearoff 0
+	    bind $wall.logo   <<ButtonPopup>> \
+	      [namespace code [list SlotPopup %W %x %y]]
 	    bind $wall.logo.b <<ButtonPopup>> \
 	      [namespace code [list SlotPopup %W %x %y]]
 	    set jwapp(slotmenu) $wall.logo.b.m
