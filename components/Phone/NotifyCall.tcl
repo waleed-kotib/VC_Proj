@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.24 2008-08-03 15:32:56 matben Exp $
+# $Id: NotifyCall.tcl,v 1.25 2008-08-04 08:11:02 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -499,6 +499,11 @@ namespace eval ::NotifyCallSlot {
     set images(talk)       [::Theme::FindIconSize 16 phone-talk]
 }
 
+# NotifyCallSlot::BuildEmpty --
+#
+#       This just reserves room for the slot and add menus.
+#       The actual slot is only built when having a call.
+
 proc ::NotifyCallSlot::BuildEmpty {w args} {
     variable slot
     
@@ -518,7 +523,7 @@ proc ::NotifyCallSlot::BuildEmpty {w args} {
     return $w
 }
 
-proc ::NotifyCallSlot::Build {w args} {
+proc ::NotifyCallSlot::Build {w inout args} {
     variable slot
     
     ttk::frame $w -class NotifyCallSlot
@@ -544,7 +549,7 @@ proc ::NotifyCallSlot::Build {w args} {
     ttk::frame $box
     pack $box -fill x -expand 1
     
-    set win [Frame $box.f "in"]
+    set win [Frame $box.f $inout]
     pack $win -fill x -expand 1
     
     set slot(w)     $w
@@ -557,24 +562,30 @@ proc ::NotifyCallSlot::Build {w args} {
 proc ::NotifyCallSlot::InboundCall {line number} {
     variable slot
     
-    set win $slot(wempty).slot
-    Build $win
-    pack $win -fill x -expand 1
+    ::JUI::SlotDisplay
     
+    set win $slot(wempty).slot
     set slot(line)   $line
     set slot(number) $number
+
+    Build $win in
+    pack $win -fill x -expand 1
+    
     return $win
 }
 
 proc ::NotifyCallSlot::OutboundCall {line number} {
     variable slot
     
-    set win $slot(wempty).slot
-    Build $win
-    pack $win -fill x -expand 1
+    ::JUI::SlotDisplay
     
+    set win $slot(wempty).slot
     set slot(line)   $line
     set slot(number) $number
+
+    Build $win out
+    pack $win -fill x -expand 1
+    
     return $win
 }
 
@@ -588,8 +599,6 @@ proc ::NotifyCallSlot::Frame {win inout} {
     # Just make sure they exist.
     set state(inlevel)        0
     set state(outlevel)       0
-    set state(microphone-100) 50
-    set state(speaker-100)    50
     set state(old:microphone) 50
     set state(old:speaker)    50
     set state(cmicrophone)    1
@@ -600,8 +609,6 @@ proc ::NotifyCallSlot::Frame {win inout} {
     # The vertical scales need a 100-level rescale!
     set state(microphone) [::Phone::GetInputLevel]
     set state(speaker)    [::Phone::GetOutputLevel]
-    set state(microphone-100) [expr {100 - $state(microphone)}]
-    set state(speaker-100)    [expr {100 - $state(speaker)}]
 	  
     ttk::frame $win -class NotifyCallSlotFrame
     
@@ -628,6 +635,7 @@ proc ::NotifyCallSlot::Frame {win inout} {
     ::balloonhelp::balloonforwindow $winfo.hangup [mc "Hangup call"]
     
     # Level controls.
+    # These are only displayed when we have answered the call. Bad?
     set wctrl $win.ctrl
     ttk::frame $win.ctrl
     #pack $win.ctrl -side top -fill x
@@ -690,6 +698,8 @@ proc ::NotifyCallSlot::HangUp {win} {
     upvar #0 $win state
     
     ::Phone::HangupJingle $slot(line)
+    
+    destroy $slot(win)
 
     set slot(show) 0
     ::JUI::SlotClose notifycall

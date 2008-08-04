@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.15 2008-08-03 15:32:56 matben Exp $
+#  $Id: UserActivity.tcl,v 1.16 2008-08-04 08:11:02 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -206,8 +206,7 @@ proc ::UserActivity::Dlg {} {
     variable allActivities    
     variable subActivities
     variable xmlns
-    
-    
+        
     set w [ui::dialog -message [mc activityPickMsg] \
       -detail [mc activityPickDtl] -icon info \
       -buttons {ok cancel remove} \
@@ -228,7 +227,8 @@ proc ::UserActivity::Dlg {} {
     set mDef [list]
     foreach name $allActivities {
 	set dname [string totitle [string map {_ " "} $name]]
-	lappend mDef [list [mc $dname] -value $name]
+	lappend mDef [list [mc $dname] -value $name \
+	  -image [::Theme::FindIconSize 16 activity-$name]]
     }
     ttk::label $fr.la -text "[mc General]:"
     ui::optionmenu $fr.activity -menulist $mDef -direction flush \
@@ -369,7 +369,7 @@ proc ::UserActivity::ItemsCB {w type subiq args} {
 				set state(specific) -
 			    }
 			    if {[MPExists]} {
-				MPSetActivity $activity
+				MPDisplayActivity $activity
 			    }
 			}
 		    }
@@ -540,14 +540,26 @@ proc ::UserActivity::MPCmd {} {
     variable imblank
     
     if {$mpActivity eq "-"} {
-	$mpwin configure -image $imblank
-	::balloonhelp::balloonforwindow $mpwin "[mc Activity]: [mc None]"
 	Retract
     } else {
-	set dname [string totitle [string map {_ " "} $mpActivity]]
-	$mpwin configure -image [::Theme::FindIconSize 16 activity-$mpActivity]	
-	::balloonhelp::balloonforwindow $mpwin "[mc Activity]: [mc $dname]"
 	Publish $mpActivity "" ""
+    }
+    MPDisplayActivity $mpActivity
+}
+
+proc ::UserActivity::MPDisplayActivity {activity} {
+    variable mpwin
+    variable mpActivity
+
+    set mpActivity $activity
+    
+    if {$activity eq "-"} {
+	$mpwin configure -image $imblank
+	::balloonhelp::balloonforwindow $mpwin "[mc Activity]: [mc None]"
+    } else {
+	set dname [string totitle [string map {_ " "} $activity]]
+	$mpwin configure -image [::Theme::FindIconSize 16 activity-$activity]	
+	::balloonhelp::balloonforwindow $mpwin "[mc Activity]: [mc $dname]"
     }
 }
 

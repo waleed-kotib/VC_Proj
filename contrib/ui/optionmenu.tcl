@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.27 2008-07-22 07:09:50 matben Exp $
+# $Id: optionmenu.tcl,v 1.28 2008-08-04 08:11:02 matben Exp $
 
 package require snit 1.0
 
@@ -151,7 +151,7 @@ snit::widgetadaptor ui::optionmenu::widget {
 	set m $win.menu
 	destroy $m
 	menu $m -tearoff 0
-
+	
 	set maxLen 0
 	set longest ""
 
