@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.41 2008-08-04 13:30:46 matben Exp $
+#  $Id: Mood.tcl,v 1.42 2008-08-05 06:28:51 matben Exp $
 
 package require jlib::pep
 
@@ -241,6 +241,9 @@ proc ::Mood::MenuCmd {} {
     } else {
 	Publish $menuMoodVar
     }
+    if {[MPExists]} {
+	MPSetMood $menuMoodVar
+    }
 }
 
 #--------------------------------------------------------------------
@@ -333,6 +336,9 @@ proc ::Mood::CustomCmd {w bt} {
 	    Publish $moodStateDlg $moodMessageDlg
 	}
 	set menuMoodVar $moodStateDlg	
+	if {[MPExists]} {
+	    MPSetMood $moodStateDlg
+	}
     }
 }
 
@@ -452,6 +458,7 @@ proc ::Mood::MPCmd {} {
     variable mpMood
     variable imblank
     variable mood2mLabel
+    variable menuMoodVar
     
     if {$mpMood eq "-"} {
 	$mpwin configure -image $imblank
@@ -462,6 +469,7 @@ proc ::Mood::MPCmd {} {
         ::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc $mood2mLabel($mpMood)]"
 	Publish $mpMood ""
     }
+    set menuMoodVar $mpMood
 }
 
 proc ::Mood::MPSetMood {mood} {
