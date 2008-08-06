@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.50 2008-08-06 10:06:08 matben Exp $
+# $Id: Search.tcl,v 1.51 2008-08-06 12:42:22 matben Exp $
 
 package provide Search 1.0
 
@@ -538,7 +538,7 @@ proc ::Search::SlotBuild {w} {
     set slot(text)  ""
 
     foreach m [::JUI::SlotGetAllMenus] {
-	$m add checkbutton -label [mc "Search JUD"] \
+	$m add checkbutton -label [mc "Directory Search"] \
 	  -variable [namespace current]::slot(show) \
 	  -command [namespace code SlotCmd]
     }    

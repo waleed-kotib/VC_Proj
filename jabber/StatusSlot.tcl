@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: StatusSlot.tcl,v 1.4 2008-08-04 09:46:33 matben Exp $
+# $Id: StatusSlot.tcl,v 1.5 2008-08-06 12:42:22 matben Exp $
 
 package provide StatusSlot 1.0
 
@@ -29,8 +29,8 @@ namespace eval ::StatusSlot {
     option add *StatusSlot*TEntry.font   CociSmallFont widgetDefault
     
     variable msgSlotD
-    dict set msgSlotD mejid    [mc "Own JID"]
-    dict set msgSlotD mejidres [mc "Own full JID"]
+    dict set msgSlotD mejid    [mc "Own Contact ID"]
+    dict set msgSlotD mejidres [mc "Own Full Contact ID"]
     dict set msgSlotD server   [mc Server]
     dict set msgSlotD status   [mc Status]
 

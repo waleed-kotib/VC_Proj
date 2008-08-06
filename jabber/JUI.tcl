@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.264 2008-08-06 10:06:08 matben Exp $
+# $Id: JUI.tcl,v 1.265 2008-08-06 12:42:22 matben Exp $
 
 package provide JUI 1.0
 
@@ -206,7 +206,7 @@ proc ::JUI::Init {} {
 	    {check   mTabs          {::JUI::OnMenuToggleNotebook}     {} 
 	    {-variable ::JUI::state(show,notebook)}}
 	} }
-	{cascade     mSlots         {}                                {} {} {}}
+	{cascade     mControlPanel  {}                                {} {} {}}
 	{separator}
 	{command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
 	{checkbutton mDebug         {::Jabber::DebugCmd}            {} \
@@ -502,8 +502,8 @@ proc ::JUI::BuildStatusMB {win} {
     ttk::menubutton $win -style SunkenMenubutton \
       -textvariable ::Jabber::jstate($infoType)
 
-    dict set msgD mejid    [mc "Own JID"]
-    dict set msgD mejidres [mc "Own full JID"]
+    dict set msgD mejid    [mc "Own Contact ID"]
+    dict set msgD mejidres [mc "Own Full Contact ID"]
     dict set msgD server   [mc Server]
     dict set msgD status   [mc Status]
     
@@ -778,7 +778,7 @@ proc ::JUI::BuildToyStatus {wtoy} {
 	::MegaPresence::Build $wmp -collapse 0
 	bind $wtoy.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
     }
-    ::balloonhelp::balloonforwindow $wtoy.b [mc "Open presence control panel"]
+    ::balloonhelp::balloonforwindow $wtoy.b [mc "Open control panel"]
     set jwapp(wtoy)  $wtoy
     set jwapp(wtoyb) $wtoy.b
     set jwapp(wmp)   $wtoy.mp
@@ -855,13 +855,13 @@ proc ::JUI::SlotBuild {w} {
 proc ::JUI::SlotDisplay {} {
     variable jwapp
     pack $jwapp(wmp) -side bottom -fill x
-    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Hide presence control panel"]
+    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Hide control panel"]
 }
 
 proc ::JUI::SlotHide {} {
     variable jwapp
     pack forget $jwapp(wmp)
-    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Open presence control panel"]
+    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Open control panel"]
 }
 
 proc ::JUI::SlotSlideUp {} {
@@ -926,7 +926,7 @@ proc ::JUI::SlotPopup {W x y} {
 
 proc ::JUI::SlotGetMainMenu {} {
     set minfo [GetMainMenu].info
-    return [::UI::MenuMethod $minfo entrycget mSlots -menu]
+    return [::UI::MenuMethod $minfo entrycget mControlPanel -menu]
 }
 
 proc ::JUI::SlotGetAllMenus {} {
@@ -934,7 +934,7 @@ proc ::JUI::SlotGetAllMenus {} {
     
     set menuL [list]
     set minfo [GetMainMenu].info
-    lappend menuL [::UI::MenuMethod $minfo entrycget mSlots -menu]
+    lappend menuL [::UI::MenuMethod $minfo entrycget mControlPanel -menu]
     lappend menuL $jwapp(slotmenu)
     return $menuL
 }
