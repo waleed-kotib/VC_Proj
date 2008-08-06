@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.249 2008-07-04 14:11:32 matben Exp $
+#   $Id: en.msg,v 1.250 2008-08-06 12:44:59 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -310,6 +310,7 @@
 ::msgcat::mcset en mCoccinellaHome...    {&Home Page...}
 ::msgcat::mcset en mColor...             {Color...}
 ::msgcat::mcset en mContacts...          {&Contacts...}
+::msgcat::mcset en mControlPanel         {Control Panel}
 ::msgcat::mcset en mCopy                 {&Copy}
 ::msgcat::mcset en mCreateRoom...        {&Create Chatroom...}
 ::msgcat::mcset en mCustomStatus...      {Custom Status...}
