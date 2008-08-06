@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.196 2008-08-06 10:06:08 matben Exp $
+# $Id: UI.tcl,v 1.197 2008-08-06 12:43:28 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -661,7 +661,7 @@ proc ::UI::Text {w args} {
 namespace eval ::UI {
     variable slide
     set slide(ms)   40
-    set slide(step) 40
+    set slide(step) 20
 }
 
 proc ::UI::SlideUp {win args} {
