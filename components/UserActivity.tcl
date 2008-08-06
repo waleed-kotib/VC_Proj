@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.17 2008-08-04 13:30:46 matben Exp $
+#  $Id: UserActivity.tcl,v 1.18 2008-08-06 13:05:17 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -525,7 +525,7 @@ proc ::UserActivity::MPBuild {win} {
 	$m add radiobutton -label [mc $dname] -value $activity \
 	  -image [::Theme::FindIconSize 16 activity-$activity] \
 	  -variable [namespace current]::mpActivity \
-	  -command [namespace code MPCmd]
+	  -command [namespace code MPCmd] -compound left
     }    
     $m add separator
     $m add command -label [mc Dialog]... -command [namespace code Dlg]
