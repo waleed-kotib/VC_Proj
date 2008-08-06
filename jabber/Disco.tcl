@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Disco.tcl,v 1.156 2008-07-04 14:31:41 matben Exp $
+# $Id: Disco.tcl,v 1.157 2008-08-06 10:06:08 matben Exp $
 # 
 # @@@ TODO: rewrite the treectrl code to dedicated code instead of using ITree!
 
@@ -369,7 +369,6 @@ proc ::Disco::InfoCB {cmd jlibname type from queryE args} {
 
 	foreach vstruct $vlist {
 	    set icon [::Servicons::ThemeGetFromTypeList $acctypes]
-	    #set name [::Jabber::Jlib disco name $from $node]
 	    set name [AccessName $from $node]
 	    set opts [list] 
 	    if {$name ne ""} {

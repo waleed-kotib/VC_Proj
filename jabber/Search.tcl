@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements search UI parts for jabber.
 #      
-#  Copyright (c) 2001-2003  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.49 2008-08-04 09:46:33 matben Exp $
+# $Id: Search.tcl,v 1.50 2008-08-06 10:06:08 matben Exp $
 
 package provide Search 1.0
 
@@ -483,8 +483,8 @@ namespace eval ::Search {
 
     ::JUI::SlotRegister search ::Search::SlotBuild
 
-    ::hooks::register loginHook     ::Search::SlotLoginHook
     ::hooks::register logoutHook    ::Search::SlotLogoutHook
+    ::hooks::register discoInfoDirectoryUserHook  ::Search::SlotDiscoHook
 }
 
 proc ::Search::SlotBuild {w} {
@@ -553,7 +553,7 @@ proc ::Search::SlotCollapse {w} {
     } else {
 	pack $slot(box) -fill both -expand 1
     }
-    event generate $w <<Xxx>>
+    #event generate $w <<Xxx>>
 }
 
 proc ::Search::SlotPopup {w x y} {
@@ -563,11 +563,12 @@ proc ::Search::SlotPopup {w x y} {
     destroy $m
     menu $m -tearoff 0
     
-    foreach field {"Name" "JID" "First Name"} {
-	$m add checkbutton -label $field \
+    foreach field {"User" "Full Name" "Name" "Email"} {
+	$m add checkbutton -label [mc $field] \
 	  -command [namespace code [list SlotMenuCmd $w $field]] \
 	  -variable [namespace current]::slot($field,display)
     }
+    set slot(User,display) 1
     
     update idletasks
     
@@ -588,12 +589,16 @@ proc ::Search::SlotCmd {} {
 
 proc ::Search::SlotMenuCmd {w field} {
     
+    ::balloonhelp::balloonforwindow $w [mc $field]
     
 }
 
-proc ::Search::SlotLoginHook {} {
+proc ::Search::SlotDiscoHook {type from queryE args} {
     variable slot
-    $slot(entry) state {!disabled}
+    
+    if {$type eq "result"} {
+	$slot(entry) state {!disabled}
+    }
 }
 
 proc ::Search::SlotLogoutHook {} {
@@ -606,7 +611,8 @@ proc ::Search::SlotSearch {} {
 
     set servicesL [::Jabber::Jlib disco getjidsforfeature "jabber:iq:search"]
     
-    # Select service.
+    # Select service. Preferrably on the same domain as the server.
+    
     set search [lindex $servicesL 0]
     ::Jabber::Jlib search_get $search [namespace code SlotGetCB]
 }

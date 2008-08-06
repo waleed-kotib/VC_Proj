@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. It implements user
 #      interface elements.
 #      
-#  Copyright (c) 2002-2007  Mats Bengtsson
+#  Copyright (c) 2002-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.195 2008-07-30 13:23:59 matben Exp $
+# $Id: UI.tcl,v 1.196 2008-08-06 10:06:08 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -653,6 +653,81 @@ proc ::UI::Text {w args} {
     } else {
 	eval $w $args
 	return $w
+    }
+}
+
+# Experiment!
+
+namespace eval ::UI {
+    variable slide
+    set slide(ms)   40
+    set slide(step) 40
+}
+
+proc ::UI::SlideUp {win args} {
+    variable slide
+    
+    set optsD [dict create]
+    dict set optsD -y 0
+    foreach {key value} $args {
+	dict set optsD $key $value
+    }
+    set y [dict get $optsD -y]
+    update idletasks
+    set h [winfo reqheight $win]
+    dict set optsD h $h
+    
+    place $win -x 0 -y $y -rely 1 -relwidth 1
+    after $slide(ms) [list ::UI::SlideUpMove $win $y $optsD]
+}
+
+proc ::UI::SlideUpMove {win y optsD} {
+    variable slide
+    
+    if {![winfo exists $win]} { return }
+    incr y -$slide(step)
+    set h [dict get $optsD h]
+    if {[expr {abs($y) < $h}]} {
+	place $win -x 0 -y $y -rely 1 -relwidth 1
+	after $slide(ms) [list ::UI::SlideUpMove $win $y $optsD]	
+    } else {
+	place $win -x 0 -y -$h -rely 1 -relwidth 1
+	if {[dict exists $optsD -command]} {
+	    uplevel #0 [dict get $optsD -command]
+	}
+    }
+}
+
+# -y is actually the y to stop sliding.
+
+proc ::UI::SlideDown {win args} {
+    variable slide
+    
+    set optsD [dict create]
+    dict set optsD -y 0
+    foreach {key value} $args {
+	dict set optsD $key $value
+    }
+    update idletasks
+    set h [winfo reqheight $win]
+    place $win -x 0 -y -$h -rely 1 -relwidth 1
+    after $slide(ms) [list ::UI::SlideDownMove $win -$h $optsD]
+}
+
+proc ::UI::SlideDownMove {win y optsD} {
+    variable slide
+    
+    if {![winfo exists $win]} { return }
+    set hstop [dict get $optsD -y]
+    incr y $slide(step)
+    if {[expr {abs($y) > $hstop}]} {
+	place $win -x 0 -y $y -rely 1 -relwidth 1
+	after $slide(ms) [list ::UI::SlideDownMove $win $y $optsD]	
+    } else {
+	place $win -x 0 -y -$hstop -rely 1 -relwidth 1
+	if {[dict exists $optsD -command]} {
+	    uplevel #0 [dict get $optsD -command]
+	}
     }
 }
 
