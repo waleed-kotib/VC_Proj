@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.263 2008-08-04 13:05:28 matben Exp $
+# $Id: JUI.tcl,v 1.264 2008-08-06 10:06:08 matben Exp $
 
 package provide JUI 1.0
 
@@ -103,6 +103,9 @@ namespace eval ::JUI {
     set ::config(ui,main,toy-status)       1
     set ::config(ui,main,toy-status-slots) 1
     set ::config(ui,main,combibox)         0
+    
+    # Let the slots slide up/down. Performance issues with this.
+    set ::config(ui,main,slots-slide)      1
     
     # This is a trick to get the aqua text borders.
     if {[tk windowingsystem] eq "aqua"} {
@@ -433,48 +436,16 @@ proc ::JUI::Build {w} {
     
     # Experimental.
     if {$config(ui,main,toy-status)} {
-	set im  [::Theme::FindIconSize 22 coccinella2]
-	set ima [::Theme::FindIconSize 22 coccinella2-shadow]
-	set y [expr {[image height $im]/2}]
-	
-	ttk::frame $wall.logo
-	pack $wall.logo -side bottom -fill x
-	
-	ttk::button $wall.logo.b -style Plain \
-	  -image [list $im {active !pressed} $ima {active pressed} $im] \
-	  -command [namespace code CociCmd]
-	ttk::button $wall.logo.secure -style Plainer \
-	  -compound image -padding {2}
-
-	pack $wall.logo.b -side top -padx 12 -pady 2
-	place $wall.logo.secure -relx 1.0 -x -6 -y $y -anchor e
-
-	lappend jwapp(securityWinL) $wall.logo.secure
-
-	set wmp $wall.logo.mp
-	if {$config(ui,main,toy-status-slots)} {
-	    menu $wall.logo.b.m -tearoff 0
-	    bind $wall.logo   <<ButtonPopup>> \
-	      [namespace code [list SlotPopup %W %x %y]]
-	    bind $wall.logo.b <<ButtonPopup>> \
-	      [namespace code [list SlotPopup %W %x %y]]
-	    set jwapp(slotmenu) $wall.logo.b.m
-	    SlotBuild $wmp
-	} else {
-	    ::MegaPresence::Build $wmp -collapse 0
-	    bind $wall.logo.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
-	}
-	::balloonhelp::balloonforwindow $wall.logo.b [mc "Open presence control panel"]
-	
-	set jwapp(wtoy) $wall.logo.b
-	set jwapp(wmp)  $wmp
+	BuildToyStatus $wall.toy
+	pack $wall.toy -side bottom -fill x
     }
     
     # Notebook.
     set wnb $wall.nb
     ttk::notebook $wnb
     tileutils::nb::Traversal $wnb
-    pack $wnb -side bottom -fill both -expand 1
+    #pack $wnb -side bottom -fill both -expand 1
+    pack $wnb -side top -fill both -expand 1
     
     bind $wnb <<NotebookTabChanged>>  {+::JUI::NotebookTabChanged }
     
@@ -483,8 +454,8 @@ proc ::JUI::Build {w} {
     # Each notebook page must be a direct child of the notebook and we therefore
     # need to have a container frame which the roster is packed -in.
     set wroster $wall.ro
-    set wrostco $wnb.cont
     ::Roster::Build $wroster
+    set wrostco $wnb.cont
     frame $wrostco
 
     set imSpec [list $iconRoster disabled $iconRosterDis background $iconRosterDis]
@@ -772,13 +743,65 @@ proc ::JUI::CombiBoxOnFocusOut {} {
 
 #-------------------------------------------------------------------------------
 
-proc ::JUI::CociCmd {} {
+proc ::JUI::BuildToyStatus {wtoy} {
+    global  config
+    variable jwapp
+	
+    set im  [::Theme::FindIconSize 22 coccinella2]
+    set ima [::Theme::FindIconSize 22 coccinella2-shadow]
+    set y [expr {[image height $im]/2}]
+    
+    ttk::frame $wtoy
+    
+    ttk::button $wtoy.b -style Plain \
+      -image [list $im {active !pressed} $ima {active pressed} $im] \
+      -command [namespace code ToyStatusCmd]
+    ttk::button $wtoy.secure -style Plainer \
+      -compound image -padding {2}
+    
+    pack $wtoy.b -side top -padx 12 -pady 2
+    place $wtoy.secure -relx 1.0 -x -6 -y $y -anchor e
+    
+    lappend jwapp(securityWinL) $wtoy.secure
+    
+    set wmp $wtoy.mp
+    if {$config(ui,main,toy-status-slots)} {
+	menu $wtoy.b.m -tearoff 0
+	bind $wtoy   <<ButtonPopup>> \
+	  [namespace code [list SlotPopup %W %x %y]]
+	bind $wtoy.b <<ButtonPopup>> \
+	  [namespace code [list SlotPopup %W %x %y]]
+	
+	set jwapp(slotmenu) $wtoy.b.m
+	SlotBuild $wmp
+    } else {
+	::MegaPresence::Build $wmp -collapse 0
+	bind $wtoy.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
+    }
+    ::balloonhelp::balloonforwindow $wtoy.b [mc "Open presence control panel"]
+    set jwapp(wtoy)  $wtoy
+    set jwapp(wtoyb) $wtoy.b
+    set jwapp(wmp)   $wtoy.mp
+
+    return $wtoy
+}
+
+proc ::JUI::ToyStatusCmd {} {
+    global  config
     variable jwapp
     
     if {[winfo ismapped $jwapp(wmp)]} {
-	SlotHide
+	if {$config(ui,main,slots-slide)} {
+	    SlotSlideDown
+	} else {
+	    SlotHide
+	}
     } else {
-	SlotDisplay
+	if {$config(ui,main,slots-slide)} {
+	    SlotSlideUp
+	} else {
+	    SlotDisplay
+	}
     }
 }
 
@@ -832,13 +855,61 @@ proc ::JUI::SlotBuild {w} {
 proc ::JUI::SlotDisplay {} {
     variable jwapp
     pack $jwapp(wmp) -side bottom -fill x
-    ::balloonhelp::balloonforwindow $jwapp(wtoy) [mc "Hide presence control panel"]
+    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Hide presence control panel"]
 }
 
 proc ::JUI::SlotHide {} {
     variable jwapp
     pack forget $jwapp(wmp)
-    ::balloonhelp::balloonforwindow $jwapp(wtoy) [mc "Open presence control panel"]
+    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Open presence control panel"]
+}
+
+proc ::JUI::SlotSlideUp {} {
+    variable jwapp
+    
+    set wtoy $jwapp(wtoy)
+    set h [winfo height $wtoy]
+    pack forget $wtoy
+    raise $wtoy
+    place $wtoy -x 0 -y -$h -rely 1 -relwidth 1
+    SlotDisplay
+    ::UI::SlideUp $wtoy -y -$h -command [namespace code SlotSlideUpCmd]    
+}
+
+proc ::JUI::SlotSlideUpCmd {} {
+    variable jwapp
+
+    set wtoy $jwapp(wtoy)
+    place forget $wtoy
+    pack $wtoy -side bottom -fill x
+}
+
+proc ::JUI::SlotSlideDown {} {
+    variable jwapp
+    
+    set wtoy $jwapp(wtoy)
+    
+    # Start height.
+    set h [winfo height $wtoy]
+    
+    # Stop height.
+    array set packA [pack info $jwapp(wtoyb)]
+    set hstop [expr {[winfo height $jwapp(wtoyb)] + 2*$packA(-pady)}]
+    
+    pack forget $wtoy
+    raise $wtoy
+    place $wtoy -x 0 -y -$h -rely 1 -relwidth 1
+    ::UI::SlideDown $wtoy -y $hstop \
+      -command [namespace code SlotSlideDownCmd]    
+}
+
+proc ::JUI::SlotSlideDownCmd {} {
+    variable jwapp
+
+    set wtoy $jwapp(wtoy)
+    SlotHide
+    place forget $wtoy
+    pack $wtoy -side bottom -fill x
 }
 
 proc ::JUI::SlotPopup {W x y} {
@@ -1000,7 +1071,8 @@ proc ::JUI::RosterMoveFromPage {} {
     pack forget $jwapp(tsep)
     pack forget $wroster
     pack forget $wnb
-    pack $wroster -side bottom -fill both -expand 1
+    #pack $wroster -side bottom -fill both -expand 1
+    pack $wroster -side top -fill both -expand 1
     
     set jprefs(ui,main,show,notebook) 0
 }
