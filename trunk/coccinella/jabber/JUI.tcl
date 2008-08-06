@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.265 2008-08-06 12:42:22 matben Exp $
+# $Id: JUI.tcl,v 1.266 2008-08-06 15:03:18 matben Exp $
 
 package provide JUI 1.0
 
@@ -106,6 +106,9 @@ namespace eval ::JUI {
     
     # Let the slots slide up/down. Performance issues with this.
     set ::config(ui,main,slots-slide)      1
+    
+    # Simplified slide widget which just shows an empty frame for the panel.
+    set ::config(ui,main,slots-slide-fake) 1
     
     # This is a trick to get the aqua text borders.
     if {[tk windowingsystem] eq "aqua"} {
@@ -792,17 +795,54 @@ proc ::JUI::ToyStatusCmd {} {
     
     if {[winfo ismapped $jwapp(wmp)]} {
 	if {$config(ui,main,slots-slide)} {
-	    SlotSlideDown
+	    if {$config(ui,main,slots-slide-fake)} {
+		SlotSlideFakeDown
+	    } else {
+		SlotSlideDown
+	    }
 	} else {
 	    SlotHide
 	}
     } else {
 	if {$config(ui,main,slots-slide)} {
-	    SlotSlideUp
+	    if {$config(ui,main,slots-slide-fake)} {
+		SlotSlideFakeUp
+	    } else {
+		SlotSlideUp
+	    }
 	} else {
 	    SlotDisplay
 	}
     }
+}
+
+proc ::JUI::BuildFakeToyStatus {win} {
+    global  config
+    variable jwapp
+	
+    set im  [::Theme::FindIconSize 22 coccinella2]
+    set ima [::Theme::FindIconSize 22 coccinella2-shadow]
+    set y [expr {[image height $im]/2}]
+    
+    ttk::frame $win
+    
+    ttk::button $win.b -style Plain \
+      -image [list $im {active !pressed} $ima {active pressed} $im] \
+      -command [namespace code ToyStatusCmd]
+    ttk::button $win.secure -style Plainer \
+      -compound image -padding {2}
+    
+    pack $win.b -side top -padx 12 -pady 2
+    place $win.secure -relx 1.0 -x -6 -y $y -anchor e
+    
+    if {$config(ui,main,toy-status-slots)} {
+	set h [winfo reqheight $jwapp(wmp)]
+	ttk::frame $win.pad -height $h
+	pack $win.pad -side bottom -fill x
+    } else {
+	# @@@ TODO
+    }    
+    return $win
 }
 
 #-------------------------------------------------------------------------------
@@ -864,6 +904,10 @@ proc ::JUI::SlotHide {} {
     ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Open control panel"]
 }
 
+# JUI::SlotSlideUp, SlotSlide, .. ---
+#
+#       Makes the slot panel slide up and down, way cool!
+
 proc ::JUI::SlotSlideUp {} {
     variable jwapp
     
@@ -884,6 +928,25 @@ proc ::JUI::SlotSlideUpCmd {} {
     pack $wtoy -side bottom -fill x
 }
 
+proc ::JUI::SlotSlideFakeUp {} {
+    variable jwapp
+
+    set win .jmain.f.fake
+    set jwapp(wtoyfake) $win
+    BuildFakeToyStatus $win
+    set h [winfo height $jwapp(wtoy)]
+    place $win -x 0 -y -$h -rely 1 -relwidth 1
+    ::UI::SlideUp $win -y -$h -command [namespace code SlotSlideFakeUpCmd]
+}
+
+proc ::JUI::SlotSlideFakeUpCmd {} {
+    variable jwapp
+
+    SlotDisplay
+    update idletasks
+    destroy $jwapp(wtoyfake)
+}
+
 proc ::JUI::SlotSlideDown {} {
     variable jwapp
     
@@ -899,8 +962,7 @@ proc ::JUI::SlotSlideDown {} {
     pack forget $wtoy
     raise $wtoy
     place $wtoy -x 0 -y -$h -rely 1 -relwidth 1
-    ::UI::SlideDown $wtoy -y $hstop \
-      -command [namespace code SlotSlideDownCmd]    
+    ::UI::SlideDown $wtoy -y $hstop -command [namespace code SlotSlideDownCmd]    
 }
 
 proc ::JUI::SlotSlideDownCmd {} {
@@ -910,6 +972,30 @@ proc ::JUI::SlotSlideDownCmd {} {
     SlotHide
     place forget $wtoy
     pack $wtoy -side bottom -fill x
+}
+
+proc ::JUI::SlotSlideFakeDown {} {
+    variable jwapp
+
+    set win .jmain.f.fake
+    set jwapp(wtoyfake) $win
+
+    # Stop height.
+    array set packA [pack info $jwapp(wtoyb)]
+    set hstop [expr {[winfo height $jwapp(wtoyb)] + 2*$packA(-pady)}]
+    BuildFakeToyStatus $win
+    
+    # Start height
+    set h [winfo height $jwapp(wtoy)]
+    place $win -x 0 -y -$h -rely 1 -relwidth 1
+    update idletasks
+    SlotHide
+    ::UI::SlideDown $win -y $hstop -command [namespace code SlotSlideFakeDownCmd]
+}
+
+proc ::JUI::SlotSlideFakeDownCmd {} {
+    variable jwapp
+    destroy $jwapp(wtoyfake)
 }
 
 proc ::JUI::SlotPopup {W x y} {
