@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.42 2008-08-05 06:28:51 matben Exp $
+#  $Id: Mood.tcl,v 1.43 2008-08-06 13:05:17 matben Exp $
 
 package require jlib::pep
 
@@ -444,7 +444,7 @@ proc ::Mood::MPBuild {win} {
 	$m add radiobutton -label [mc $mood2mLabel($mood)] -value $mood \
 	  -image [::Theme::FindIconSize 16 mood-$mood] \
 	  -variable [namespace current]::mpMood \
-	  -command [namespace code MPCmd]
+	  -command [namespace code MPCmd] -compound left
     }    
     $m add separator
     $m add command -label [mc Dialog]... \

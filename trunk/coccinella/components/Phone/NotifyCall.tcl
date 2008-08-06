@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.25 2008-08-04 08:11:02 matben Exp $
+# $Id: NotifyCall.tcl,v 1.26 2008-08-06 13:05:18 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -512,7 +512,7 @@ proc ::NotifyCallSlot::BuildEmpty {w args} {
     # Add menu.    
     # This isn't the right way!
     foreach m [::JUI::SlotGetAllMenus] {
-	$m add checkbutton -label [mc "Notify Call"] \
+	$m add checkbutton -label [mc "Call Notification"] \
 	  -variable [namespace current]::slot(show) \
 	  -command [namespace code SlotCmd] \
 	  -state disabled
