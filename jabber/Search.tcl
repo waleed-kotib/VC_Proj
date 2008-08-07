@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.51 2008-08-06 12:42:22 matben Exp $
+# $Id: Search.tcl,v 1.52 2008-08-07 14:57:21 matben Exp $
 
 package provide Search 1.0
 
@@ -398,6 +398,20 @@ proc ::Search::DoSearch {w} {
       [namespace code [list ResultCallback $w $server]] -subtags $subelements
 }
 
+proc ::Search::HandleSetError {subiq} {
+    
+    foreach {ecode emsg} [lrange $subiq 0 1] break
+    if {$ecode eq "406"} {
+	set msg [mc jamesssearchinval2]
+	append msg "\n[mc Message]: $emsg"
+    } else {
+	set msg [mc jamesssearcherr]
+	append msg "\n" "[mc {Error code}]: $ecode"
+	append msg "\n" "[mc Message]: $emsg"
+    }
+    ui::dialog -type ok -title [mc Error] -icon error -message $msg
+}
+
 # Search::ResultCallback --
 #
 #       This is the 'result' and 'set' iq callback We may get a number of server
@@ -423,17 +437,7 @@ proc ::Search::ResultCallback {w server type subiq} {
     $state(wsearrows) stop
     set state(status) ""
     if {[string equal $type "error"]} {
-	foreach {ecode emsg} [lrange $subiq 0 1] break
-	if {$ecode eq "406"} {
-	    set msg [mc jamesssearchinval2]
-	    append msg "\n[mc Message]: $emsg"
-	} else {
-	    set msg [mc jamesssearcherr]
-	    append msg "\n" "[mc {Error code}]: $ecode"
-	    append msg "\n" "[mc Message]: $emsg"
-	}
-	::UI::MessageBox -type ok -title [mc Error] -icon error -message $msg
-	return
+	HandleSetError $subiq
     } else {
 	
 	# This returns the search result and sets the reported stuff.
@@ -467,6 +471,20 @@ proc ::Search::CloseCmd {w} {
 proc ::Search::Free {w} {
     variable $w
     unset -nocomplain $w
+}
+
+# Experiment: make a generic megawidget for displaying search results
+# using xdata forms.
+
+proc ::Search::BuildResultWidget {T xdataE} {
+    
+    treectrl $T
+    
+
+    
+    
+    
+    
 }
 
 #--- Roster Slot --------------------------------------------------------------
@@ -511,31 +529,45 @@ proc ::Search::SlotBuild {w} {
         ::balloonhelp::balloonforwindow $w.arrow [mc "Right click to get the selector"]
 	::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
     }    
+    set imsearch [::Theme::FindIconSize 16 service-directory-user]
     set box $w.box
     ttk::frame $box
     pack $box -fill x -expand 1
 
-    ttk::label $box.l -text [mc "Search JUD"]:
-    ttk::entry $box.e -textvariable [namespace current]::slot(text)
+    ttk::label $box.l -compound image -image $imsearch
+    ttk::entry $box.e -style Small.Search.TEntry -font CociSmallFont \
+      -textvariable [namespace current]::slot(text)
     
     grid  $box.l  $box.e
-    grid $box.e -sticky ew
+    grid  $box.e  -sticky ew
     grid columnconfigure $box 1 -weight 1
     
     $box.e state {disabled}
 
     bind $box.e <Return>   [namespace code SlotSearch]
     bind $box.e <KP_Enter> [namespace code SlotSearch]
+    bind $box.e <FocusIn>  [namespace code SlotEntryFocusIn]
 
     bind $box.l <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
     bind $box.e <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
-    ::balloonhelp::balloonforwindow $box  [mc "Enter search phrase and press Return"]
     
     set slot(w)     $w
     set slot(box)   $w.box
     set slot(entry) $box.e
     set slot(show)  1
-    set slot(text)  ""
+    set slot(dtext) "Search People in Directory"
+    set slot(text)  [mc $slot(dtext)]
+    
+    # Hardcoded :-( See comments below. Just to pick some.
+    set slot(fields) [list user fn given email]
+    set slot(label,user)  [mc "User"]
+    set slot(label,fn)    [mc "Full Name"]
+    set slot(label,given) [mc "Name"]
+    set slot(label,email) [mc "Email"]
+    
+    ::balloonhelp::balloonforwindow $box   $slot(text)
+    ::balloonhelp::balloonforwindow $box.l $slot(text)
+    ::balloonhelp::balloonforwindow $box.e $slot(text)
 
     foreach m [::JUI::SlotGetAllMenus] {
 	$m add checkbutton -label [mc "Directory Search"] \
@@ -559,12 +591,14 @@ proc ::Search::SlotCollapse {w} {
 proc ::Search::SlotPopup {w x y} {
     variable slot
     
+    # NB: only <field type='text-single' .../> are considered.
+
     set m $w.m
     destroy $m
     menu $m -tearoff 0
     
-    foreach field {"User" "Full Name" "Name" "Email"} {
-	$m add checkbutton -label [mc $field] \
+    foreach field $slot(fields) {
+	$m add checkbutton -label $slot(label,$field) \
 	  -command [namespace code [list SlotMenuCmd $w $field]] \
 	  -variable [namespace current]::slot($field,display)
     }
@@ -606,21 +640,76 @@ proc ::Search::SlotLogoutHook {} {
     $slot(entry) state {disabled}
 }
 
-proc ::Search::SlotSearch {} {
+proc ::Search::SlotEntryFocusIn {} {
     variable slot
-
-    set servicesL [::Jabber::Jlib disco getjidsforfeature "jabber:iq:search"]
     
-    # Select service. Preferrably on the same domain as the server.
-    
-    set search [lindex $servicesL 0]
-    ::Jabber::Jlib search_get $search [namespace code SlotGetCB]
+    if {[$slot(entry) get] eq [mc $slot(dtext)]} {
+	set slot(text) ""
+    }
 }
 
-proc ::Search::SlotGetCB {jlibname type subiq} {
+proc ::Search::SlotSearch {} {
+    variable slot
+   
+    # Select service. Preferrably on the same domain as the server.
+    set servicesL [::Jabber::Jlib disco getjidsforfeature "jabber:iq:search"]
+    set server [::Jabber::Jlib getserver]
+    set jud [lsearch -inline -glob $servicesL *.$server]
+    if {$jud eq ""} {
+	set jud [lindex $servicesL 0]
+    }
+    set slot(jud) $jud
+    ::Jabber::Jlib search_get $jud [namespace code SlotGetCB]
+}
+
+proc ::Search::SlotGetCB {jlibname type queryE} {
+    variable slot
     
+    # Try match up the search criteria with what the service supports.
+    # MB: It should have been the other way around but I don't want to
+    #     do a search get for every login. Maybe I just cache it here?
+        
+    set xE [wrapper::getfirstchild $queryE x "jabber:x:data"]
+    if {![llength $xE]} {
+	ui::dialog -icon error -message "Search service \"$slot(jud)\" didn't return expected search elements."
+	return
+    }
+    set slot(queryE) $queryE
+
+    set xmllist [list]
+    set text [string trim $slot(text)]
+    set type "text-single"
+
+    foreach E [wrapper::getchildren $xE] {
+	if {[wrapper::gettag $E] eq "field"} {
+	    set var [wrapper::getattribute $E var]
+	    if {$var in $slot(fields)} {
+		if {$slot($var,display)} {
+		    set valueE [wrapper::createtag value -chdata $text]
+		    set fieldE [wrapper::createtag field \
+		      -attrlist [list type $type var $var] \
+		      -subtags [list $valueE]]
+		    lappend xmllist $fieldE
+		}
+	    }	    
+	}
+    }
+    set searchE [wrapper::createtag x  \
+      -attrlist {xmlns jabber:x:data type submit} -subtags $xmllist]
     
-    
+    ::Jabber::Jlib search_set $slot(jud) [namespace code SlotSetCB] \
+      -subtags [list $searchE]
+}
+
+proc ::Search::SlotSetCB {type queryE} {
+    variable slot
+
+    if {$type eq "error"} {
+	HandleSetError $subiq
+    } else {
+	
+	
+    }
 }
 
 proc ::Search::SlotClose {w} {

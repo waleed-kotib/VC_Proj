@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.266 2008-08-06 15:03:18 matben Exp $
+# $Id: JUI.tcl,v 1.267 2008-08-07 14:57:20 matben Exp $
 
 package provide JUI 1.0
 
@@ -447,7 +447,6 @@ proc ::JUI::Build {w} {
     set wnb $wall.nb
     ttk::notebook $wnb
     tileutils::nb::Traversal $wnb
-    #pack $wnb -side bottom -fill both -expand 1
     pack $wnb -side top -fill both -expand 1
     
     bind $wnb <<NotebookTabChanged>>  {+::JUI::NotebookTabChanged }
@@ -763,7 +762,7 @@ proc ::JUI::BuildToyStatus {wtoy} {
       -compound image -padding {2}
     
     pack $wtoy.b -side top -padx 12 -pady 2
-    place $wtoy.secure -relx 1.0 -x -6 -y $y -anchor e
+    place $wtoy.secure -x 4 -y $y -anchor w
     
     lappend jwapp(securityWinL) $wtoy.secure
     
@@ -782,9 +781,11 @@ proc ::JUI::BuildToyStatus {wtoy} {
 	bind $wtoy.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
     }
     ::balloonhelp::balloonforwindow $wtoy.b [mc "Open control panel"]
-    set jwapp(wtoy)  $wtoy
-    set jwapp(wtoyb) $wtoy.b
-    set jwapp(wmp)   $wtoy.mp
+    
+    set jwapp(wtoy)    $wtoy
+    set jwapp(wtoyb)   $wtoy.b
+    set jwapp(wmp)     $wtoy.mp
+    set jwapp(wtoysec) $wtoy.secure
 
     return $wtoy
 }
@@ -824,16 +825,26 @@ proc ::JUI::BuildFakeToyStatus {win} {
     set ima [::Theme::FindIconSize 22 coccinella2-shadow]
     set y [expr {[image height $im]/2}]
     
+    # Try to pick up some data from the real toy status.
+    set imsec ""
+    if {[llength $jwapp(securityWinL)]} {
+	set imsec [[lindex $jwapp(securityWinL) 0] cget -image]
+    }
+    array set painfo [pack info $jwapp(wtoyb)]
+    array unset painfo -in
+    array set plinfo [place info $jwapp(wtoysec)]
+    array unset plinfo -in
+    
     ttk::frame $win
     
     ttk::button $win.b -style Plain \
       -image [list $im {active !pressed} $ima {active pressed} $im] \
       -command [namespace code ToyStatusCmd]
     ttk::button $win.secure -style Plainer \
-      -compound image -padding {2}
+      -compound image -padding {2} -image $imsec
     
-    pack $win.b -side top -padx 12 -pady 2
-    place $win.secure -relx 1.0 -x -6 -y $y -anchor e
+    pack $win.b {*}[array get painfo]
+    place $win.secure {*}[array get plinfo]
     
     if {$config(ui,main,toy-status-slots)} {
 	set h [winfo reqheight $jwapp(wmp)]
@@ -1157,7 +1168,6 @@ proc ::JUI::RosterMoveFromPage {} {
     pack forget $jwapp(tsep)
     pack forget $wroster
     pack forget $wnb
-    #pack $wroster -side bottom -fill both -expand 1
     pack $wroster -side top -fill both -expand 1
     
     set jprefs(ui,main,show,notebook) 0

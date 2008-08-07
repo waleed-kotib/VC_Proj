@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterTree.tcl,v 1.109 2008-06-12 14:23:06 matben Exp $
+# $Id: RosterTree.tcl,v 1.110 2008-08-07 14:57:20 matben Exp $
 
 #-INTERNALS---------------------------------------------------------------------
 #
@@ -54,6 +54,9 @@ namespace eval ::RosterTree {
     # Fake:
 #     option add *Roster*TreeCtrl.rosterImage     cociexec    widgetDefault
     option add *Roster*TreeCtrl.rosterImage    roster-default   widgetDefault
+
+    # This is tuned with the control slots so that the close buttons line up.
+    option add *Roster*TSearch.padding    {6 2 2 2}          50
 
     # @@@ Should get this from a global reaource.
     variable buttonPressMillis 1000
@@ -649,7 +652,7 @@ proc ::RosterTree::Find {} {
     if {![winfo exists $wfind]} {
 	set column [GetStyleFindColumn]
 	if {$column ne ""} {
-	    UI::TSearch $wfind $T $column -padding {6 2} \
+	    UI::TSearch $wfind $T $column \
 	      -closecommand [namespace code FindDestroy]
 	    grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky ew
 	}

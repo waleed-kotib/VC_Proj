@@ -3,7 +3,7 @@
 #       Megawidget for searching a TreeCtrl widget.
 #       Guard against dynamic changes in TreeCtrl. Must be 100% bullet proof!
 #       
-# Copyright (c) 2007 Mats Bengtsson
+# Copyright (c) 2007-2008 Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: TSearch.tcl,v 1.8 2008-05-23 14:33:22 matben Exp $
+# $Id: TSearch.tcl,v 1.9 2008-08-07 14:57:21 matben Exp $
 
 package require snit 1.0
 package require tileutils
@@ -72,9 +72,6 @@ snit::widgetadaptor UI::TSearch::widget {
 	set im  [::Theme::FindIconSize 16 close-aqua]
 	set ima [::Theme::FindIconSize 16 close-aqua-active]
 
-	ttk::button $win.close -style Plain  \
-	  -image [list $im active $ima] -compound image  \
-	  -command [list $self Close]
 	ttk::label $win.find -style Small.TLabel -padding {4 0 0 0}  \
 	  -text "[mc Search]:"
 	ttk::entry $win.entry -style Small.Search.TEntry -font CociSmallFont \
@@ -82,11 +79,14 @@ snit::widgetadaptor UI::TSearch::widget {
 	ttk::button $win.next -style $options(-nextstyle) \
 	  -command [list $self Next] \
 	  -text [mc Next] -takefocus 0
+	ttk::button $win.close -style Plain  \
+	  -image [list $im active $ima] -compound image  \
+	  -command [list $self Close]
 	
-	grid  $win.close  $win.find  $win.entry  $win.next
+	grid  $win.find  $win.entry  $win.next  $win.close
 	grid $win.entry -sticky ew
 	grid $win.next -padx 4
-	grid columnconfigure $win 2 -weight 1
+	grid columnconfigure $win 1 -weight 1
 	
 	$wnext state {disabled}
 	focus $wentry

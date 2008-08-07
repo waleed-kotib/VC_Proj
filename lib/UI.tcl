@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.197 2008-08-06 12:43:28 matben Exp $
+# $Id: UI.tcl,v 1.198 2008-08-07 14:57:21 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -662,6 +662,7 @@ namespace eval ::UI {
     variable slide
     set slide(ms)   40
     set slide(step) 20
+    set slide(mode) linear
 }
 
 proc ::UI::SlideUp {win args} {
@@ -669,6 +670,7 @@ proc ::UI::SlideUp {win args} {
     
     set optsD [dict create]
     dict set optsD -y 0
+    dict set optsD -mode $slide(mode)
     foreach {key value} $args {
 	dict set optsD $key $value
     }
@@ -685,8 +687,20 @@ proc ::UI::SlideUpMove {win y optsD} {
     variable slide
     
     if {![winfo exists $win]} { return }
-    incr y -$slide(step)
     set h [dict get $optsD h]
+    set mode [dict get $optsD -mode]
+    if {$mode eq "linear"} {
+	incr y -$slide(step)
+    } elseif {$mode eq "sinus"} {
+	set pi 3.14159
+	set yabs [expr {abs($y)}]
+	set ystart [expr {abs([dict get $optsD -y])}]
+	set delta [expr {$h - $ystart}]
+	set ypos [expr {$yabs - $ystart}]
+	set dy [expr {max(int(sin( $pi*$ypos/$delta )), 1)}]
+	puts "$yabs, $ystart, $delta, $dy"
+	incr y -$dy
+    }
     if {[expr {abs($y) < $h}]} {
 	place $win -x 0 -y $y -rely 1 -relwidth 1
 	after $slide(ms) [list ::UI::SlideUpMove $win $y $optsD]	
@@ -705,6 +719,7 @@ proc ::UI::SlideDown {win args} {
     
     set optsD [dict create]
     dict set optsD -y 0
+    dict set optsD -mode linear
     foreach {key value} $args {
 	dict set optsD $key $value
     }
