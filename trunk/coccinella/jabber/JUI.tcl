@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.267 2008-08-07 14:57:20 matben Exp $
+# $Id: JUI.tcl,v 1.268 2008-08-08 08:09:37 matben Exp $
 
 package provide JUI 1.0
 
@@ -127,7 +127,7 @@ namespace eval ::JUI {
 }
 
 proc ::JUI::Init {} {
-    global  this
+    global  this config
     
     # Menu definitions for the Roster/services window.
     variable menuDefs
@@ -218,14 +218,20 @@ proc ::JUI::Init {} {
 	{separator}
 	{command     mCoccinellaHome... {::JUI::OpenCoccinellaURL}     {}}
     }
+    if {$config(ui,main,toy-status)} {
+	# NB: this may depend on our initial state if open or closed.
+	set m {command  mShowControlPanel  {::JUI::ToyStatusCmd}  {}}
+	set idx [lsearch -index 1 $mDefsInfo mControlPanel]
+	set mDefsInfo [linsert $mDefsInfo $idx $m]
+    }
     if {[tk windowingsystem] eq "aqua"} {
 	set menuDefs(rost,info) $mDefsInfo
     } else {
 	set mAbout {command  mAboutCoccinella  {::Splash::SplashScreen}  {}}
-	set idx [lsearch $mDefsInfo *mCoccinellaHome...*]
+	set idx [lsearch $mDefsInfo -index 1 mCoccinellaHome...]
 	set menuDefs(rost,info) [linsert $mDefsInfo $idx $mAbout]
     }
-
+    
     set menuDefs(rost,edit) {    
 	{command   mUndo             {::UI::UndoEvent}          Z}
 	{command   mRedo             {::UI::RedoEvent}          Shift-Z}
@@ -815,6 +821,11 @@ proc ::JUI::ToyStatusCmd {} {
 	    SlotDisplay
 	}
     }
+}
+
+proc ::JUI::ToyStatusIsMapped {} {
+    variable jwapp
+    return [winfo ismapped $jwapp(wmp)]
 }
 
 proc ::JUI::BuildFakeToyStatus {win} {
@@ -1796,6 +1807,16 @@ proc ::JUI::InfoPostCommand {wmenu} {
 	    }
 	} else {
 	    ::UI::MenuMethod $wmenu entryconfigure mShow -state disabled
+	}
+    }
+    
+    if {$config(ui,main,toy-status)} {
+	if {[ToyStatusIsMapped]} {
+	    ::UI::MenuMethod $wmenu entryconfigure mShowControlPanel \
+	      -label mHideControlPanel
+	} else {
+	    ::UI::MenuMethod $wmenu entryconfigure mShowControlPanel \
+	      -label mShowControlPanel
 	}
     }
     

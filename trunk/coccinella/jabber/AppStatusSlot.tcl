@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AppStatusSlot.tcl,v 1.1 2008-08-04 13:05:28 matben Exp $
+# $Id: AppStatusSlot.tcl,v 1.2 2008-08-08 08:09:37 matben Exp $
 
 package provide AppStatusSlot 1.0
 
@@ -70,13 +70,18 @@ proc ::AppStatusSlot::Build {w} {
     grid $box.a -sticky e -padx 4
     grid columnconfigure $box 0 -weight 1
     
+    set label [mc "Application Status"]
+    ::balloonhelp::balloonforwindow $box   $label
+    ::balloonhelp::balloonforwindow $box.l $label
+    ::balloonhelp::balloonforwindow $box.a $label
+
     set priv(box)    $w.box
     set priv(arrows) $w.box.a
     set priv(show)   1
     set priv(status) [mc mNotAvailable]
 
     foreach m [::JUI::SlotGetAllMenus] {
-	$m add checkbutton -label [mc "Application Status"] \
+	$m add checkbutton -label $label \
 	  -variable [namespace current]::priv(show) \
 	  -command [namespace code Cmd]
     }

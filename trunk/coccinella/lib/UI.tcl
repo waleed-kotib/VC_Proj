@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.198 2008-08-07 14:57:21 matben Exp $
+# $Id: UI.tcl,v 1.199 2008-08-08 08:09:37 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -660,9 +660,16 @@ proc ::UI::Text {w args} {
 
 namespace eval ::UI {
     variable slide
-    set slide(ms)   40
+    #set slide(mode) linear
+    set slide(mode) sinus
     set slide(step) 20
-    set slide(mode) linear
+    
+    # On slower OS/machines we should decrease this value.
+    if {[tk windowingsystem] eq "aqua"} {
+	set slide(ms) 20
+    } else {
+	set slide(ms) 40
+    }
 }
 
 proc ::UI::SlideUp {win args} {
@@ -692,15 +699,21 @@ proc ::UI::SlideUpMove {win y optsD} {
     if {$mode eq "linear"} {
 	incr y -$slide(step)
     } elseif {$mode eq "sinus"} {
-	set pi 3.14159
 	set yabs [expr {abs($y)}]
 	set ystart [expr {abs([dict get $optsD -y])}]
 	set delta [expr {$h - $ystart}]
-	set ypos [expr {$yabs - $ystart}]
-	set dy [expr {max(int(sin( $pi*$ypos/$delta )), 1)}]
-	puts "$yabs, $ystart, $delta, $dy"
+	if {$delta > 1} {
+	    set ypos [expr {$yabs - $ystart}]
+	    set ysin [expr {sin( 3.14159*$ypos/$delta )}]
+	    
+	    # Extra factor of two here to compensate for sin < 1.
+	    set dy [expr {2*max(int($slide(step)*$ysin), 1)}]
+	} else {
+	    set dy 1
+	}
 	incr y -$dy
-    }
+    }    
+    
     if {[expr {abs($y) < $h}]} {
 	place $win -x 0 -y $y -rely 1 -relwidth 1
 	after $slide(ms) [list ::UI::SlideUpMove $win $y $optsD]	
@@ -719,12 +732,13 @@ proc ::UI::SlideDown {win args} {
     
     set optsD [dict create]
     dict set optsD -y 0
-    dict set optsD -mode linear
+    dict set optsD -mode $slide(mode)
     foreach {key value} $args {
 	dict set optsD $key $value
     }
     update idletasks
     set h [winfo reqheight $win]
+    dict set optsD h $h
     place $win -x 0 -y -$h -rely 1 -relwidth 1
     after $slide(ms) [list ::UI::SlideDownMove $win -$h $optsD]
 }
@@ -733,8 +747,27 @@ proc ::UI::SlideDownMove {win y optsD} {
     variable slide
     
     if {![winfo exists $win]} { return }
+    set h [dict get $optsD h]
     set hstop [dict get $optsD -y]
-    incr y $slide(step)
+    set mode [dict get $optsD -mode]
+    if {$mode eq "linear"} {
+	incr y $slide(step)
+    } elseif {$mode eq "sinus"} {
+	set yabs [expr {abs($y)}]
+	set ystop [expr {abs([dict get $optsD -y])}]
+	set delta [expr {$h - $ystop}]
+	if {$delta > 1} {
+	    set ypos [expr {$yabs - $ystop}]
+	    set ysin [expr {sin( 3.14159*$ypos/$delta )}]
+	    
+	    # Extra factor of two here to compensate for sin < 1.
+	    set dy [expr {2*max(int($slide(step)*$ysin), 1)}]
+	} else {
+	    set dy 1
+	}
+	incr y $dy
+    }    
+	
     if {[expr {abs($y) > $hstop}]} {
 	place $win -x 0 -y $y -rely 1 -relwidth 1
 	after $slide(ms) [list ::UI::SlideDownMove $win $y $optsD]	

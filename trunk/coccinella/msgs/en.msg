@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.250 2008-08-06 12:44:59 matben Exp $
+#   $Id: en.msg,v 1.251 2008-08-08 08:09:37 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -344,6 +344,7 @@
 ::msgcat::mcset en mFont                 {Font}
 ::msgcat::mcset en mFontSize             {Font Size}
 ::msgcat::mcset en mGrid                 {Grid}
+::msgcat::mcset en mHideControlPanel     {Hide Control Panel}
 ::msgcat::mcset en mHistory...           {&History...}
 ::msgcat::mcset en mHorizontal           {Horizontal}
 ::msgcat::mcset en mHugeFont             {Huge}
@@ -416,6 +417,7 @@
 ::msgcat::mcset en mSetupAssistant...    {&Setup Assistant...}
 ::msgcat::mcset en mShiftConstrain       {Shift Constrain}
 ::msgcat::mcset en mShow                 {Show}
+::msgcat::mcset en mShowControlPanel     {Show Control Panel}
 ::msgcat::mcset en mSize                 {Size}
 ::msgcat::mcset en mSlideShow            {Slide Show}
 ::msgcat::mcset en mSmaller              {Smaller}

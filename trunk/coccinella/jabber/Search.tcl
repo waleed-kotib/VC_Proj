@@ -18,10 +18,9 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.52 2008-08-07 14:57:21 matben Exp $
+# $Id: Search.tcl,v 1.53 2008-08-08 08:09:37 matben Exp $
 
 package provide Search 1.0
-
 
 namespace eval ::Search {
 
