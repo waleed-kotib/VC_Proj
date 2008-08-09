@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.268 2008-08-08 08:09:37 matben Exp $
+# $Id: JUI.tcl,v 1.269 2008-08-09 16:00:59 matben Exp $
 
 package provide JUI 1.0
 
@@ -799,7 +799,7 @@ proc ::JUI::BuildToyStatus {wtoy} {
 proc ::JUI::ToyStatusCmd {} {
     global  config
     variable jwapp
-    
+
     if {[winfo ismapped $jwapp(wmp)]} {
 	if {$config(ui,main,slots-slide)} {
 	    if {$config(ui,main,slots-slide-fake)} {
@@ -872,6 +872,8 @@ proc ::JUI::BuildFakeToyStatus {win} {
 namespace eval ::JUI {
     
     #option add *RosterSlots.padding   {2}     50
+    variable slot
+    set slot(pending) 0
 }
 
 # JUI::SlotRegister --
@@ -931,8 +933,12 @@ proc ::JUI::SlotHide {} {
 #       Makes the slot panel slide up and down, way cool!
 
 proc ::JUI::SlotSlideUp {} {
+    variable slot
     variable jwapp
     
+    if {$slot(pending)} { return }
+    set slot(pending) 1
+
     set wtoy $jwapp(wtoy)
     set h [winfo height $wtoy]
     pack forget $wtoy
@@ -943,15 +949,21 @@ proc ::JUI::SlotSlideUp {} {
 }
 
 proc ::JUI::SlotSlideUpCmd {} {
+    variable slot
     variable jwapp
 
+    set slot(pending) 0
     set wtoy $jwapp(wtoy)
     place forget $wtoy
     pack $wtoy -side bottom -fill x
 }
 
 proc ::JUI::SlotSlideFakeUp {} {
+    variable slot
     variable jwapp
+
+    if {$slot(pending)} { return }
+    set slot(pending) 1
 
     set win .jmain.f.fake
     set jwapp(wtoyfake) $win
@@ -962,17 +974,23 @@ proc ::JUI::SlotSlideFakeUp {} {
 }
 
 proc ::JUI::SlotSlideFakeUpCmd {} {
+    variable slot
     variable jwapp
 
+    set slot(pending) 0
     SlotDisplay
     update idletasks
     destroy $jwapp(wtoyfake)
 }
 
 proc ::JUI::SlotSlideDown {} {
+    variable slot
     variable jwapp
     
+    if {$slot(pending)} { return }
+
     set wtoy $jwapp(wtoy)
+    set slot(pending) 1
     
     # Start height.
     set h [winfo height $wtoy]
@@ -988,8 +1006,10 @@ proc ::JUI::SlotSlideDown {} {
 }
 
 proc ::JUI::SlotSlideDownCmd {} {
+    variable slot
     variable jwapp
 
+    set slot(pending) 0
     set wtoy $jwapp(wtoy)
     SlotHide
     place forget $wtoy
@@ -997,10 +1017,14 @@ proc ::JUI::SlotSlideDownCmd {} {
 }
 
 proc ::JUI::SlotSlideFakeDown {} {
+    variable slot
     variable jwapp
 
+    if {$slot(pending)} { return }
+ 
     set win .jmain.f.fake
     set jwapp(wtoyfake) $win
+    set slot(pending) 1
 
     # Stop height.
     array set packA [pack info $jwapp(wtoyb)]
@@ -1016,7 +1040,9 @@ proc ::JUI::SlotSlideFakeDown {} {
 }
 
 proc ::JUI::SlotSlideFakeDownCmd {} {
+    variable slot
     variable jwapp
+    set slot(pending) 0
     destroy $jwapp(wtoyfake)
 }
 
@@ -1424,7 +1450,7 @@ proc ::JUI::SetSecurityIcons {} {
 	    set image [::Theme::Find16Icon $w secureLowImage]
 	    set any 1
 	}
-	puts "$sasl $tls"
+
 	if {$any} {
 	    foreach win $jwapp(securityWinL) {
 		if {[winfo exists $win]} {
