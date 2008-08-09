@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Roster.tcl,v 1.250 2008-08-04 13:05:28 matben Exp $
+# $Id: Roster.tcl,v 1.251 2008-08-09 13:15:04 matben Exp $
 
 # @@@ TODO: 1) rewrite the popup menu code to use AMenu!
 #           2) abstract all RosterTree calls to allow for any kind of roster
@@ -817,14 +817,12 @@ proc ::Roster::RepopulateTree {} {
 	eval {SetItem $jid} [::Jabber::Jlib roster getrosteritem $jid]
     }
     SortAtIdle
-    #Sort
 }
 
 proc ::Roster::ExitRoster {} {
     variable timer
 
     SortAtIdle
-    #Sort
     ::JUI::SetAppMessage [mc jarostupdate]
     set timer(exitroster,secs) [clock seconds]
 }
