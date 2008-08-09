@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.53 2008-08-08 08:09:37 matben Exp $
+# $Id: Search.tcl,v 1.54 2008-08-09 13:15:04 matben Exp $
 
 package provide Search 1.0
 
@@ -27,8 +27,7 @@ namespace eval ::Search {
     # Wait for this variable to be set.
     variable finished  
 
-    variable popMenuDefs
-    
+    variable popMenuDefs    
     set popMenuDefs {
 	{command    mAddContact...      {::JUser::NewDlg -jid $jid} }
 	{command    mBusinessCard...    {::VCard::Fetch other $jid} }	
@@ -475,15 +474,109 @@ proc ::Search::Free {w} {
 # Experiment: make a generic megawidget for displaying search results
 # using xdata forms.
 
-proc ::Search::BuildResultWidget {T xdataE} {
+proc ::Search::BuildResultWidget {w} {
+        
+    set T $w.t
+    set ysc $w.ysc
     
-    treectrl $T
+    ttk::frame $w
+    ttk::scrollbar $ysc -orient vertical -command [list $T yview]
     
+    treectrl $T -selectmode extended -showroot 0 \
+      -showrootbutton 0 -showbuttons 0 -showheader 1 \
+      -showrootlines 0 -showlines 0 \
+      -yscrollcommand [list ::UI::ScrollSet $ysc     \
+      [list grid $ysc -row 0 -column 1 -sticky ns]]  \
+      -borderwidth 0 -highlightthickness 0            \
+      -height 200 -width 300
 
+    grid  $T    -column 0 -row 0 -sticky news
+    grid  $ysc  -column 1 -row 0 -sticky ns -padx 2
+    grid columnconfigure $w 0 -weight 1
+    grid rowconfigure    $w 0 -weight 1
+
+    # The columns.
+    $T column create -resize 0 -expand 1
+
+    # The elements.
+    $T element create eText text
     
+    # Styles collecting the elements.
+    set S [$T style create styUser]
+    $T style elements $S {eText}
+    $T style layout $S eText -squeeze x -expand ns -pady 2 -padx 4
     
+    return $w 
+}
+
+proc ::Search::FillResultWidget {w xdataE} {
     
+    set T $w.t
     
+    $T item delete all
+    $T column delete all
+    $T item delete all
+    
+    set reportedE [wrapper::getfirstchildwithtag $xdataE reported]
+    if {![llength $reportedE]} {
+	# Error
+	return
+    }
+    set reportedL [list]
+    set styleSpecL [list]
+    foreach fieldE [wrapper::getchildren $reportedE] {
+	set var   [wrapper::getattribute $fieldE var]	    
+	set label [wrapper::getattribute $fieldE label]
+	set text $label
+	if {$text eq ""} {
+	    set text $var
+	}
+	set C [$T column create -text $text -tags $var -itemstyle styUser]
+	lappend reportedL $var
+	lappend styleSpecL $C styUser
+    }
+    foreach itemE [wrapper::getchildren $xdataE] {
+	if {[wrapper::gettag $itemE] ne "item"} { continue }
+	
+	set id [$T item create -parent root]
+	
+	foreach fieldE [wrapper::getchildren $itemE] {
+	    set var [wrapper::getattribute $fieldE var]
+	    set valueE [lindex [wrapper::getchildren $fieldE] 0]
+	    set text [wrapper::getcdata $valueE]
+	    
+	    $T item element configure $id $var eText -text $text
+	}	
+    }
+
+    bind $T <<ButtonPopup>>   { ::Search::ResultOnPopup %W %x %y }
+}
+
+proc ::Search::ResultOnPopup {T x y} {
+    variable popMenuDefs    
+    
+    set id [$T identify $x $y] 
+    if {[lindex $id 0] eq "item"} {
+	set item [lindex $id 1]
+	set cid [$T column id jid]
+	if {$cid eq ""} { return }
+	set jid [$T item element cget $item $cid eText -text]
+	if {$jid eq ""} { return }
+	
+	set m $T.m
+	destroy $m
+	menu $m -tearoff 0
+	
+	::AMenu::Build $m $popMenuDefs -varlist [list jid $jid]
+	
+	# This one is needed on the mac so the menu is built before it is posted.
+	update idletasks
+	
+	# Post popup menu.
+	set X [expr [winfo rootx $T] + $x]
+	set Y [expr [winfo rooty $T] + $y]
+	tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+    }
 }
 
 #--- Roster Slot --------------------------------------------------------------
@@ -563,7 +656,12 @@ proc ::Search::SlotBuild {w} {
     set slot(label,fn)    [mc "Full Name"]
     set slot(label,given) [mc "Name"]
     set slot(label,email) [mc "Email"]
-    
+
+    set slot(display,user)  1
+    set slot(display,fn)    0
+    set slot(display,given) 0
+    set slot(display,email) 0
+
     ::balloonhelp::balloonforwindow $box   $slot(text)
     ::balloonhelp::balloonforwindow $box.l $slot(text)
     ::balloonhelp::balloonforwindow $box.e $slot(text)
@@ -599,9 +697,8 @@ proc ::Search::SlotPopup {w x y} {
     foreach field $slot(fields) {
 	$m add checkbutton -label $slot(label,$field) \
 	  -command [namespace code [list SlotMenuCmd $w $field]] \
-	  -variable [namespace current]::slot($field,display)
+	  -variable [namespace current]::slot(display,$field)
     }
-    set slot(User,display) 1
     
     update idletasks
     
@@ -647,6 +744,12 @@ proc ::Search::SlotEntryFocusIn {} {
     }
 }
 
+proc ::Search::SlotClose {w} {
+    variable slot
+    set slot(show) 0
+    ::JUI::SlotClose search
+}
+
 proc ::Search::SlotSearch {} {
     variable slot
    
@@ -658,10 +761,15 @@ proc ::Search::SlotSearch {} {
 	set jud [lindex $servicesL 0]
     }
     set slot(jud) $jud
-    ::Jabber::Jlib search_get $jud [namespace code SlotGetCB]
+    
+    # Keep a dict on the stack for some data.
+    set slotD [dict create]
+    dict set slotD jud $jud
+    
+    ::Jabber::Jlib search_get $jud [namespace code [list SlotGetCB $slotD]]
 }
 
-proc ::Search::SlotGetCB {jlibname type queryE} {
+proc ::Search::SlotGetCB {slotD jlibname type queryE} {
     variable slot
     
     # Try match up the search criteria with what the service supports.
@@ -674,7 +782,7 @@ proc ::Search::SlotGetCB {jlibname type queryE} {
 	return
     }
     set slot(queryE) $queryE
-
+    
     set xmllist [list]
     set text [string trim $slot(text)]
     set type "text-single"
@@ -683,7 +791,7 @@ proc ::Search::SlotGetCB {jlibname type queryE} {
 	if {[wrapper::gettag $E] eq "field"} {
 	    set var [wrapper::getattribute $E var]
 	    if {$var in $slot(fields)} {
-		if {$slot($var,display)} {
+		if {$slot(display,$var)} {
 		    set valueE [wrapper::createtag value -chdata $text]
 		    set fieldE [wrapper::createtag field \
 		      -attrlist [list type $type var $var] \
@@ -696,25 +804,73 @@ proc ::Search::SlotGetCB {jlibname type queryE} {
     set searchE [wrapper::createtag x  \
       -attrlist {xmlns jabber:x:data type submit} -subtags $xmllist]
     
-    ::Jabber::Jlib search_set $slot(jud) [namespace code SlotSetCB] \
+    ::Jabber::Jlib search_set $slot(jud) [namespace code [list SlotSetCB $slotD]] \
       -subtags [list $searchE]
 }
 
-proc ::Search::SlotSetCB {type queryE} {
+proc ::Search::SlotSetCB {slotD type queryE} {
     variable slot
 
     if {$type eq "error"} {
 	HandleSetError $subiq
     } else {
-	
-	
+	set xE [wrapper::getfirstchild $queryE x "jabber:x:data"]
+	if {![llength $xE]} {
+	    ui::dialog -icon error -message "Search service \"$slot(jud)\" didn't return expected search elements."
+	    return
+	}
+	set w .search_slot
+	if {![winfo exists $w]} {
+	    SlotBuildResult $w $slotD
+	}
+	set wres [SlotResultGetWidget $w]
+	FillResultWidget $wres $xE
     }
 }
 
-proc ::Search::SlotClose {w} {
-    variable slot
-    set slot(show) 0
-    ::JUI::SlotClose search
+proc ::Search::SlotBuildResult {w slotD} {
+    
+    set jud [dict get $slotD jud]
+        
+    ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
+      -macclass {document {closeBox resizable}}  \
+      -closecommand [namespace code SlotResultCloseCmd]
+    wm title $w "[mc Search]: $jud"
+
+    ::UI::SetWindowGeometry $w
+
+    # Global frame.
+    ttk::frame $w.frall
+    pack $w.frall -fill both -expand 1
+
+    set wbox $w.frall.f
+    ttk::frame $wbox -padding [option get . dialogPadding {}]
+    pack $wbox -fill both -expand 1
+
+    set wres $wbox.res
+    
+    BuildResultWidget $wres
+    
+    pack $wres -side top -fill both -expand 1
+    
+    set wbot $wbox.bot
+    
+    ttk::frame $wbot -padding [option get . okcancelTopPadding {}]
+    ttk::button $wbot.close -text [mc Close] \
+      -command [namespace code [list SlotResultCloseCmd $w]]
+    
+    pack $wbot -side bottom -fill x
+    pack $wbot.close  -side right
+
+}
+
+proc ::Search::SlotResultGetWidget {w} {
+    return $w.frall.f.res
+}
+
+proc ::Search::SlotResultCloseCmd {w} {
+    ::UI::SaveWinGeom $w
+    destroy $w
 }
 
 #-------------------------------------------------------------------------------

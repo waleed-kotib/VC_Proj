@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: RosterAvatar.tcl,v 1.55 2008-07-20 14:06:04 matben Exp $
+# $Id: RosterAvatar.tcl,v 1.56 2008-08-09 13:15:04 matben Exp $
 
 #   This file also acts as a template for other style implementations.
 #   Requirements:
@@ -1205,7 +1205,7 @@ proc ::RosterAvatar::TreeConfigureHook {args} {
     }
     set wclass [::Roster::GetRosterWindow]
     set ename eBorder
-    set eopts {}
+    set eopts [list]
     if {[$T cget -backgroundimage] eq ""} {
 	set postfix ":nbg"
     } else {
