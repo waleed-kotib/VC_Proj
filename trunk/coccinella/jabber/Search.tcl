@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.54 2008-08-09 13:15:04 matben Exp $
+# $Id: Search.tcl,v 1.55 2008-08-10 08:19:37 matben Exp $
 
 package provide Search 1.0
 
@@ -549,7 +549,31 @@ proc ::Search::FillResultWidget {w xdataE} {
 	}	
     }
 
+    bind $T <Double-Button-1> { ::Search::ResultOnCmd %W %x %y }
     bind $T <<ButtonPopup>>   { ::Search::ResultOnPopup %W %x %y }
+}
+
+proc ::Search::ResultOnCmd {T x y} {
+    
+    set id [$T identify $x $y] 
+    if {[lindex $id 0] eq "item"} {
+	set item [lindex $id 1]
+	set cid [$T column id jid]
+	if {$cid eq ""} { return }
+	set jid [$T item element cget $item $cid eText -text]
+	if {$jid eq ""} { return }
+    
+	# Warn if already in our roster.
+	if {[::Jabber::Jlib roster isitem $jid]} {
+	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost2 $jid] \
+	      -icon error -title [mc Error] -type yesno]
+	    if {$ans eq "yes"} {
+		::JUser::NewDlg -jid $jid
+	    }
+	} else {
+	    ::JUser::NewDlg -jid $jid
+	}
+    }
 }
 
 proc ::Search::ResultOnPopup {T x y} {
@@ -657,10 +681,7 @@ proc ::Search::SlotBuild {w} {
     set slot(label,given) [mc "Name"]
     set slot(label,email) [mc "Email"]
 
-    set slot(display,user)  1
-    set slot(display,fn)    0
-    set slot(display,given) 0
-    set slot(display,email) 0
+    set slot(selected) user
 
     ::balloonhelp::balloonforwindow $box   $slot(text)
     ::balloonhelp::balloonforwindow $box.l $slot(text)
@@ -695,9 +716,10 @@ proc ::Search::SlotPopup {w x y} {
     menu $m -tearoff 0
     
     foreach field $slot(fields) {
-	$m add checkbutton -label $slot(label,$field) \
+	$m add radiobutton -label $slot(label,$field) \
 	  -command [namespace code [list SlotMenuCmd $w $field]] \
-	  -variable [namespace current]::slot(display,$field)
+	  -variable [namespace current]::slot(selected) \
+	  -value $field
     }
     
     update idletasks
@@ -786,20 +808,24 @@ proc ::Search::SlotGetCB {slotD jlibname type queryE} {
     set xmllist [list]
     set text [string trim $slot(text)]
     set type "text-single"
-
+    
+    # Try match the slot(selected) var attribute and form xml element.
+    set varL [list]
     foreach E [wrapper::getchildren $xE] {
 	if {[wrapper::gettag $E] eq "field"} {
-	    set var [wrapper::getattribute $E var]
-	    if {$var in $slot(fields)} {
-		if {$slot(display,$var)} {
-		    set valueE [wrapper::createtag value -chdata $text]
-		    set fieldE [wrapper::createtag field \
-		      -attrlist [list type $type var $var] \
-		      -subtags [list $valueE]]
-		    lappend xmllist $fieldE
-		}
-	    }	    
+	    lappend varL [wrapper::getattribute $E var]
 	}
+    }
+    if {$slot(selected) in $varL} {
+	set var $slot(selected)
+	set valueE [wrapper::createtag value -chdata $text]
+	set fieldE [wrapper::createtag field \
+	  -attrlist [list type $type var $var] \
+	  -subtags [list $valueE]]
+	lappend xmllist $fieldE
+    } else {
+	# error
+	return
     }
     set searchE [wrapper::createtag x  \
       -attrlist {xmlns jabber:x:data type submit} -subtags $xmllist]
