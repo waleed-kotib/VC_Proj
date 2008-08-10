@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.55 2008-08-10 08:19:37 matben Exp $
+# $Id: Search.tcl,v 1.56 2008-08-10 13:43:04 matben Exp $
 
 package provide Search 1.0
 
@@ -474,11 +474,14 @@ proc ::Search::Free {w} {
 # Experiment: make a generic megawidget for displaying search results
 # using xdata forms.
 
-proc ::Search::BuildResultWidget {w} {
+proc ::Search::ResultBuildWidget {w} {
+    global  this
         
     set T $w.t
     set ysc $w.ysc
     
+    set fillB [list $this(sysHighlight) {selected focus} gray {selected !focus}]
+
     ttk::frame $w
     ttk::scrollbar $ysc -orient vertical -command [list $T yview]
     
@@ -499,12 +502,29 @@ proc ::Search::BuildResultWidget {w} {
     $T column create -resize 0 -expand 1
 
     # The elements.
-    $T element create eText text
-    
+    $T element create eText text -lines 1
+    $T element create eBorder rect -open new -showfocus 1
+    $T element configure eBorder -fill $fillB
+
     # Styles collecting the elements.
     set S [$T style create styUser]
-    $T style elements $S {eText}
-    $T style layout $S eText -squeeze x -expand ns -pady 2 -padx 4
+    $T style elements $S {eBorder eText}
+    $T style layout $S eText   -squeeze x -expand ns -pady 2 -padx 4
+    $T style layout $S eBorder -detach 1 -iexpand xy
+
+    $T notify install <Header-invoke>
+    $T notify bind $T <Selection>      { ::Search::ResultSelection %T }
+    $T notify bind $T <Header-invoke>  { ::Search::ResultHeaderCmd %T %C }
+
+    bind $T <Double-Button-1> { ::Search::ResultOnCmd %W %x %y }
+    bind $T <<ButtonPopup>>   { ::Search::ResultOnPopup %W %x %y }
+
+    # Have movable columns.
+    $T column dragconfigure -enable yes
+    $T notify install <ColumnDrag-receive>
+    $T notify bind $T <ColumnDrag-receive> {
+	%T column move %C %b
+    }
     
     return $w 
 }
@@ -524,6 +544,7 @@ proc ::Search::FillResultWidget {w xdataE} {
     }
     set reportedL [list]
     set styleSpecL [list]
+
     foreach fieldE [wrapper::getchildren $reportedE] {
 	set var   [wrapper::getattribute $fieldE var]	    
 	set label [wrapper::getattribute $fieldE label]
@@ -544,13 +565,56 @@ proc ::Search::FillResultWidget {w xdataE} {
 	    set var [wrapper::getattribute $fieldE var]
 	    set valueE [lindex [wrapper::getchildren $fieldE] 0]
 	    set text [wrapper::getcdata $valueE]
+	    set cid [$T column id $var]
 	    
-	    $T item element configure $id $var eText -text $text
+	    $T item element configure $id "tag $var" eText -text $text
 	}	
     }
+}
 
-    bind $T <Double-Button-1> { ::Search::ResultOnCmd %W %x %y }
-    bind $T <<ButtonPopup>>   { ::Search::ResultOnPopup %W %x %y }
+proc ::Search::ResultSelection {T} {
+    
+    # ???
+    set itemL [$T selection get]
+    
+}
+
+proc ::Search::ResultHeaderCmd {T C} {
+
+    # Find the one last sorted.
+    set sortC 0
+    foreach c [$T column id all] {
+	if {[string is integer -strict $c]} {
+	    set arrow [$T column cget $c -arrow]
+	    if {[$T column cget $c -arrow] ne "none"} {
+		set sortC $c
+		break
+	    }
+	}
+    }    
+    set ctag [$T column cget $C -tags]
+    
+    if {[$T column compare $C == $sortC]} {
+	if {[$T column cget $sortC -arrow] eq "down"} {
+	    set order -increasing
+	    set arrow up
+	} else {
+	    set order -decreasing
+	    set arrow down
+	}
+    } else {
+	if {[$T column cget $sortC -arrow] eq "down"} {
+	    set order -decreasing
+	    set arrow down
+	} else {
+	    set order -increasing
+	    set arrow up
+	}
+	$T column configure $sortC -arrow none
+    }
+    $T column configure $C -arrow $arrow
+
+    $T item sort root $order -dictionary -column $C 
 }
 
 proc ::Search::ResultOnCmd {T x y} {
@@ -675,13 +739,13 @@ proc ::Search::SlotBuild {w} {
     set slot(text)  [mc $slot(dtext)]
     
     # Hardcoded :-( See comments below. Just to pick some.
-    set slot(fields) [list user fn given email]
-    set slot(label,user)  [mc "User"]
+    set slot(fields) [list fn given user email]
     set slot(label,fn)    [mc "Full Name"]
     set slot(label,given) [mc "Name"]
+    set slot(label,user)  [mc "User"]
     set slot(label,email) [mc "Email"]
 
-    set slot(selected) user
+    set slot(selected) fn
 
     ::balloonhelp::balloonforwindow $box   $slot(text)
     ::balloonhelp::balloonforwindow $box.l $slot(text)
@@ -806,7 +870,11 @@ proc ::Search::SlotGetCB {slotD jlibname type queryE} {
     set slot(queryE) $queryE
     
     set xmllist [list]
+    
+    # We add an * at the end by default.
     set text [string trim $slot(text)]
+    set text [string trimright $text *]
+    append text "*"
     set type "text-single"
     
     # Try match the slot(selected) var attribute and form xml element.
@@ -875,7 +943,7 @@ proc ::Search::SlotBuildResult {w slotD} {
 
     set wres $wbox.res
     
-    BuildResultWidget $wres
+    ResultBuildWidget $wres
     
     pack $wres -side top -fill both -expand 1
     
