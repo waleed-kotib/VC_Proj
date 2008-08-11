@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.56 2008-08-10 13:43:04 matben Exp $
+# $Id: Search.tcl,v 1.57 2008-08-11 07:39:15 matben Exp $
 
 package provide Search 1.0
 
@@ -30,6 +30,7 @@ namespace eval ::Search {
     variable popMenuDefs    
     set popMenuDefs {
 	{command    mAddContact...      {::JUser::NewDlg -jid $jid} }
+	{command    mMessage...         {::NewMsg::Build -to $jid} }	
 	{command    mBusinessCard...    {::VCard::Fetch other $jid} }	
     }
 }
@@ -307,7 +308,7 @@ proc ::Search::Get {w} {
     ::Jabber::Jlib search_get $state(server) [namespace code [list GetCB $w]]
     $state(wsearrows) start
     
-    $state(wtb) configure -columns [list 60 [mc {Search results}]]
+    $state(wtb) configure -columns [list 60 [mc "Search results"]]
     $state(wtb) delete 0 end
 }
 
@@ -471,8 +472,12 @@ proc ::Search::Free {w} {
     unset -nocomplain $w
 }
 
-# Experiment: make a generic megawidget for displaying search results
-# using xdata forms.
+#-------------------------------------------------------------------------------
+
+# Search::ResultBuildWidget, ... ---
+#
+#       Experiment: make a generic megawidget for displaying search results
+#       using xdata forms.
 
 proc ::Search::ResultBuildWidget {w} {
     global  this
@@ -499,7 +504,7 @@ proc ::Search::ResultBuildWidget {w} {
     grid rowconfigure    $w 0 -weight 1
 
     # The columns.
-    $T column create -resize 0 -expand 1
+    $T column create -resize 0 -expand 1 -text [mc "Search results"]
 
     # The elements.
     $T element create eText text -lines 1
@@ -525,11 +530,44 @@ proc ::Search::ResultBuildWidget {w} {
     $T notify bind $T <ColumnDrag-receive> {
 	%T column move %C %b
     }
-    
+
+    if {[tk windowingsystem] ne "aqua"} {
+	if {![catch {package require tkdnd}]} {
+	    ResultInitDnD $T
+	}
+    }
+
     return $w 
 }
 
-proc ::Search::FillResultWidget {w xdataE} {
+proc ::Search::ResultInitDnD {T} {
+    
+    dnd bindsource $T {text/plain;charset=UTF-8} { 
+	::Search::ResultDnDTextSource %W
+    }
+}
+
+proc ::Search::ResultDnDTextSource {T} {
+    global  config
+        
+    # We shall export a format other applications have a chance to understand.
+    # Our own targets must also understand this format.
+    set fmt $config(rost,dnd-xmpp-uri-format)
+    
+    if {![llength [$T column id "tag jid"]]} { return }
+    set jidL [list]
+    set itemL [$T selection get]
+    foreach item $itemL {
+	set jid [$T item text $item "tag jid"]
+	if {$jid ne ""} {
+	    lappend jidL [format $fmt [jlib::barejid $jid]]
+	}
+    }
+    set data [join $jidL ", "]
+    return $data
+}
+
+proc ::Search::ResultFillWidget {w xdataE} {
     
     set T $w.t
     
@@ -552,7 +590,7 @@ proc ::Search::FillResultWidget {w xdataE} {
 	if {$text eq ""} {
 	    set text $var
 	}
-	set C [$T column create -text $text -tags $var -itemstyle styUser]
+	set C [$T column create -text $text -tags $var -itemstyle styUser -textpadx {6 16}]
 	lappend reportedL $var
 	lappend styleSpecL $C styUser
     }
@@ -665,6 +703,31 @@ proc ::Search::ResultOnPopup {T x y} {
 	set Y [expr [winfo rooty $T] + $y]
 	tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
     }
+}
+
+proc ::Search::ResultFind {w} {
+    set wfind $w.find
+    if {![winfo exists $wfind]} {
+	set T $w.t
+	UI::TSearch $wfind $T all \
+	  -closecommand [namespace code [list ResultFindDestroy $w]]
+	grid  $wfind  -column 0 -row 2 -columnspan 2 -sticky ew
+    }
+}
+
+proc ::Search::ResultFindAgain {w dir} {
+    set wfind $w.find
+    if {[winfo exists $wfind]} {
+	$wfind [expr {$dir == 1 ? "Next" : "Previous"}]
+    }
+}
+
+proc ::Search::ResultFindDestroy {w} {
+    set wfind $w.find
+    destroy $wfind
+    
+    # Workaround for the grid bug.
+    after idle [list grid rowconfigure $w 2 -minsize 0]
 }
 
 #--- Roster Slot --------------------------------------------------------------
@@ -918,12 +981,16 @@ proc ::Search::SlotSetCB {slotD type queryE} {
 	    SlotBuildResult $w $slotD
 	}
 	set wres [SlotResultGetWidget $w]
-	FillResultWidget $wres $xE
+	ResultFillWidget $wres $xE
     }
 }
 
 proc ::Search::SlotBuildResult {w slotD} {
     
+    set token [namespace current]::$w
+    variable $w
+    upvar 0 $w state    
+
     set jud [dict get $slotD jud]
         
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
@@ -952,10 +1019,17 @@ proc ::Search::SlotBuildResult {w slotD} {
     ttk::frame $wbot -padding [option get . okcancelTopPadding {}]
     ttk::button $wbot.close -text [mc Close] \
       -command [namespace code [list SlotResultCloseCmd $w]]
+    ::UI::ChaseArrows $wbot.arrows
     
     pack $wbot -side bottom -fill x
     pack $wbot.close  -side right
+    pack $wbot.arrows -side left
 
+    bind $w <<Find>>         [namespace code [list ResultFind $wres]]
+    bind $w <<FindAgain>>    [namespace code [list ResultFindAgain $wres +1]]  
+    bind $w <<FindPrevious>> [namespace code [list ResultFindAgain $wres -1]]  
+
+    return $w
 }
 
 proc ::Search::SlotResultGetWidget {w} {
