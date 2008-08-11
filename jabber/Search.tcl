@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.57 2008-08-11 07:39:15 matben Exp $
+# $Id: Search.tcl,v 1.58 2008-08-11 14:03:17 matben Exp $
 
 package provide Search 1.0
 
@@ -31,6 +31,7 @@ namespace eval ::Search {
     set popMenuDefs {
 	{command    mAddContact...      {::JUser::NewDlg -jid $jid} }
 	{command    mMessage...         {::NewMsg::Build -to $jid} }	
+	{command    mChat...            {::Chat::StartThread $jid} }	
 	{command    mBusinessCard...    {::VCard::Fetch other $jid} }	
     }
 }
@@ -483,22 +484,27 @@ proc ::Search::ResultBuildWidget {w} {
     global  this
         
     set T $w.t
+    set xsc $w.xsc
     set ysc $w.ysc
     
     set fillB [list $this(sysHighlight) {selected focus} gray {selected !focus}]
 
     ttk::frame $w
-    ttk::scrollbar $ysc -orient vertical -command [list $T yview]
+    ttk::scrollbar $xsc -orient horizontal -command [list $T xview]
+    ttk::scrollbar $ysc -orient vertical   -command [list $T yview]
     
     treectrl $T -selectmode extended -showroot 0 \
       -showrootbutton 0 -showbuttons 0 -showheader 1 \
       -showrootlines 0 -showlines 0 \
+      -xscrollcommand [list ::UI::ScrollSet $xsc     \
+      [list grid $xsc -row 1 -column 0 -sticky ew]]  \
       -yscrollcommand [list ::UI::ScrollSet $ysc     \
       [list grid $ysc -row 0 -column 1 -sticky ns]]  \
       -borderwidth 0 -highlightthickness 0            \
       -height 200 -width 300
 
     grid  $T    -column 0 -row 0 -sticky news
+    grid  $xsc  -column 0 -row 1 -sticky ns -padx 2
     grid  $ysc  -column 1 -row 0 -sticky ns -padx 2
     grid columnconfigure $w 0 -weight 1
     grid rowconfigure    $w 0 -weight 1
@@ -540,6 +546,14 @@ proc ::Search::ResultBuildWidget {w} {
     return $w 
 }
 
+proc ::Search::ResultDeleteAll {w} {
+    set T $w.t
+    
+    $T item delete all
+    $T column delete all
+    $T item delete all
+}
+
 proc ::Search::ResultInitDnD {T} {
     
     dnd bindsource $T {text/plain;charset=UTF-8} { 
@@ -570,10 +584,6 @@ proc ::Search::ResultDnDTextSource {T} {
 proc ::Search::ResultFillWidget {w xdataE} {
     
     set T $w.t
-    
-    $T item delete all
-    $T column delete all
-    $T item delete all
     
     set reportedE [wrapper::getfirstchildwithtag $xdataE reported]
     if {![llength $reportedE]} {
@@ -736,6 +746,8 @@ namespace eval ::Search {
     
     variable slot
     set slot(all) [list]
+    set slot(wresult) .search_slot
+
 
     option add *SearchSlot.padding       {4 2 2 2}     50
     option add *SearchSlot.box.padding   {4 2 8 2}     50
@@ -746,6 +758,10 @@ namespace eval ::Search {
 
     ::hooks::register logoutHook    ::Search::SlotLogoutHook
     ::hooks::register discoInfoDirectoryUserHook  ::Search::SlotDiscoHook
+    
+    # Search all search services with this login server.
+    # If not we search max one.
+    set ::config(search,slot-all) 1
 }
 
 proc ::Search::SlotBuild {w} {
@@ -798,7 +814,7 @@ proc ::Search::SlotBuild {w} {
     set slot(box)   $w.box
     set slot(entry) $box.e
     set slot(show)  1
-    set slot(dtext) "Search People in Directory"
+    set slot(dtext) "Search People"
     set slot(text)  [mc $slot(dtext)]
     
     # Hardcoded :-( See comments below. Just to pick some.
@@ -815,7 +831,7 @@ proc ::Search::SlotBuild {w} {
     ::balloonhelp::balloonforwindow $box.e $slot(text)
 
     foreach m [::JUI::SlotGetAllMenus] {
-	$m add checkbutton -label [mc "Directory Search"] \
+	$m add checkbutton -label [mc $slot(dtext)] \
 	  -variable [namespace current]::slot(show) \
 	  -command [namespace code SlotCmd]
     }    
@@ -900,6 +916,7 @@ proc ::Search::SlotClose {w} {
 }
 
 proc ::Search::SlotSearch {} {
+    global  config
     variable slot
    
     # Select service. Preferrably on the same domain as the server.
@@ -909,16 +926,32 @@ proc ::Search::SlotSearch {} {
     if {$jud eq ""} {
 	set jud [lindex $servicesL 0]
     }
-    set slot(jud) $jud
-    
-    # Keep a dict on the stack for some data.
+
     set slotD [dict create]
-    dict set slotD jud $jud
+    dict set slotD text $slot(text)
     
-    ::Jabber::Jlib search_get $jud [namespace code [list SlotGetCB $slotD]]
+    set w $slot(wresult)
+    if {![winfo exists $w]} {
+	SlotResultBuild $w $slotD
+    }
+    ResultDeleteAll [SlotResultGetWidget $w]
+    
+    if {$config(search,slot-all)} {
+	dict set slotD all $servicesL
+	foreach jud $servicesL {
+	    SlotResultCount $w +1
+	    ::Jabber::Jlib search_get $jud \
+	      [namespace code [list SlotGetCB $jud $slotD]]
+	}
+    } else {
+	dict set slotD all $jud
+	SlotResultCount $w +1
+	::Jabber::Jlib search_get $jud \
+	  [namespace code [list SlotGetCB $jud $slotD]]
+    }
 }
 
-proc ::Search::SlotGetCB {slotD jlibname type queryE} {
+proc ::Search::SlotGetCB {jud slotD jlibname type queryE} {
     variable slot
     
     # Try match up the search criteria with what the service supports.
@@ -927,7 +960,8 @@ proc ::Search::SlotGetCB {slotD jlibname type queryE} {
         
     set xE [wrapper::getfirstchild $queryE x "jabber:x:data"]
     if {![llength $xE]} {
-	ui::dialog -icon error -message "Search service \"$slot(jud)\" didn't return expected search elements."
+	SlotResultCount $slot(wresult) -1
+	#ui::dialog -icon error -message "Search service \"$jud\" didn't return expected search elements."
 	return
     }
     set slot(queryE) $queryE
@@ -961,42 +995,43 @@ proc ::Search::SlotGetCB {slotD jlibname type queryE} {
     set searchE [wrapper::createtag x  \
       -attrlist {xmlns jabber:x:data type submit} -subtags $xmllist]
     
-    ::Jabber::Jlib search_set $slot(jud) [namespace code [list SlotSetCB $slotD]] \
+    ::Jabber::Jlib search_set $jud [namespace code [list SlotSetCB $jud $slotD]] \
       -subtags [list $searchE]
 }
 
-proc ::Search::SlotSetCB {slotD type queryE} {
+proc ::Search::SlotSetCB {jud slotD type queryE} {
     variable slot
 
+    SlotResultCount $slot(wresult) -1
+    
     if {$type eq "error"} {
 	HandleSetError $subiq
     } else {
 	set xE [wrapper::getfirstchild $queryE x "jabber:x:data"]
 	if {![llength $xE]} {
-	    ui::dialog -icon error -message "Search service \"$slot(jud)\" didn't return expected search elements."
+	    ui::dialog -icon error -message "Search service \"$jud\" didn't return expected search elements."
 	    return
 	}
-	set w .search_slot
+	set w $slot(wresult)
 	if {![winfo exists $w]} {
-	    SlotBuildResult $w $slotD
+	    SlotResultBuild $w $slotD
 	}
-	set wres [SlotResultGetWidget $w]
-	ResultFillWidget $wres $xE
+	ResultFillWidget [SlotResultGetWidget $w] $xE
     }
 }
 
-proc ::Search::SlotBuildResult {w slotD} {
+proc ::Search::SlotResultBuild {w slotD} {
     
     set token [namespace current]::$w
     variable $w
     upvar 0 $w state    
-
-    set jud [dict get $slotD jud]
+    
+    set text [dict get $slotD text]
         
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document {closeBox resizable}}  \
       -closecommand [namespace code SlotResultCloseCmd]
-    wm title $w "[mc Search]: $jud"
+    wm title $w "[mc Search]: $text"
 
     ::UI::SetWindowGeometry $w
 
@@ -1011,6 +1046,7 @@ proc ::Search::SlotBuildResult {w slotD} {
     set wres $wbox.res
     
     ResultBuildWidget $wres
+    ResultDeleteAll $wres
     
     pack $wres -side top -fill both -expand 1
     
@@ -1029,7 +1065,26 @@ proc ::Search::SlotBuildResult {w slotD} {
     bind $w <<FindAgain>>    [namespace code [list ResultFindAgain $wres +1]]  
     bind $w <<FindPrevious>> [namespace code [list ResultFindAgain $wres -1]]  
 
+    set state(count) 0
+    set state(arrows) $wbot.arrows
+
     return $w
+}
+
+proc ::Search::SlotResultCount {w dir} {
+    variable $w
+    upvar 0 $w state    
+    
+    incr state(count) $dir
+    if {$state(count) <= 0} {
+	if {$dir < 0} {
+	    $state(arrows) stop
+	}
+    } elseif {$state(count) == 1} {
+	if {$dir > 0} {
+	    $state(arrows) start
+	}
+    }
 }
 
 proc ::Search::SlotResultGetWidget {w} {
@@ -1037,6 +1092,10 @@ proc ::Search::SlotResultGetWidget {w} {
 }
 
 proc ::Search::SlotResultCloseCmd {w} {
+    variable $w
+    upvar 0 $w state  
+    
+    unset -nocomplain state
     ::UI::SaveWinGeom $w
     destroy $w
 }
