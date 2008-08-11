@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #       
-# $Id: TSearch.tcl,v 1.9 2008-08-07 14:57:21 matben Exp $
+# $Id: TSearch.tcl,v 1.10 2008-08-11 07:39:15 matben Exp $
 
 package require snit 1.0
 package require tileutils
@@ -174,10 +174,19 @@ snit::widgetadaptor UI::TSearch::widget {
 	set ifound [list]
 	if {[string length $string]} {
 	    set lstring [string tolower $string]
-	    foreach item [$T item descendants root] {
-		set text [$T item text $item $column]
-		if {[string match *${lstring}* [string tolower $text]]} {
-		    lappend itemL $item
+	    if {$column eq "all"} {
+		foreach item [$T item descendants root] {
+		    set textL [$T item text $item]
+		    if {[lsearch -glob -nocase $textL *${lstring}*] >= 0} {
+			lappend itemL $item
+		    }
+		}		
+	    } else {
+		foreach item [$T item descendants root] {
+		    set text [$T item text $item $column]
+		    if {[string match *${lstring}* [string tolower $text]]} {
+			lappend itemL $item
+		    }
 		}
 	    }
 	}
