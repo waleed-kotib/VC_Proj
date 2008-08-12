@@ -3,7 +3,7 @@
 #      This file is part of The Coccinella application. 
 #      It implements the new message dialog fo the jabber part.
 #      
-#  Copyright (c) 2001-2007  Mats Bengtsson
+#  Copyright (c) 2001-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NewMsg.tcl,v 1.104 2008-06-09 09:50:59 matben Exp $
+# $Id: NewMsg.tcl,v 1.105 2008-08-12 12:40:00 matben Exp $
 
 package require ui::entryex
 
@@ -490,7 +490,6 @@ proc ::NewMsg::Build {args} {
     if {[llength $jidL]} {
 	after 200 [list ::NewMsg::FillInAddresses $w $jidL]
     }
-    puts "jidL='$jidL'"
     
     # Focus.
     if {[llength $jidL]} {
@@ -576,9 +575,7 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     set bg3   [option get $wfr entry3Background {}]
     set bg4   [option get $wfr entry4Background {}]
     set bgpop [option get $wfr popup2Background {}]
-    
-    set locals(wpopupbase) ._[string range $wDlgs(jsendmsg) 1 end]_trpt
-    
+            
     set jidL [::Jabber::Jlib roster getusers]
     set num $locals($w,num)
     frame $wfr.f$n -bd 0
@@ -594,14 +591,7 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
       -library $jidL -bd 0 -highlightthickness 0 \
       -textvariable [namespace current]::locals($w,addr$n) -state disabled \
       -bg $bg2 -fg $fg2 -disabledbackground $bg4
-    
-    set m [menu $locals(wpopupbase)${num}_${n} -tearoff 0]
-    foreach {type name} $locals(menuDefs) {
-	$m add radiobutton -label $name -value $type  \
-	  -variable [namespace current]::locals($w,poptrpt$n)  \
-	  -command [list ::NewMsg::PopupCmd $w $n]
-    }
-    
+        
     bind $wentry <Button-1>   [list ::NewMsg::ButtonInAddr $w $wfr $n]
     bind $wentry <Tab>        [list ::NewMsg::TabInAddr $w $wfr $n]
     bind $wentry <BackSpace> +[list ::NewMsg::BackSpaceInAddr $w $wfr $n]
@@ -753,7 +743,6 @@ proc ::NewMsg::DeleteLastAddrLine {w wfr} {
     destroy $wfr.f$n.trpt
     destroy $wfr.f$n.la
     destroy $wfr.addr$n
-    destroy $locals(wpopupbase)${num}_$n
 }
 
 proc ::NewMsg::SeeLine {w n} {
@@ -849,12 +838,20 @@ proc ::NewMsg::TrptPopup {w n x y} {
     } else {
 	set ind 0
     }
+    set m $w.popup
+    destroy $m
+    menu $m -tearoff 0
+    foreach {type name} $locals(menuDefs) {
+	$m add radiobutton -label $name -value $type  \
+	  -variable [namespace current]::locals($w,poptrpt$n)  \
+	  -command [list ::NewMsg::PopupCmd $w $n]
+    }
     
     # For some reason we do never get a ButtonRelease event here.
     if {![string equal $this(platform) "unix"]} {
-	$wfr.f${n}.la configure -image $locals(popupbtpush)
+	$wfr.f$n.la configure -image $locals(popupbtpush)
     }
-    tk_popup $locals(wpopupbase)${num}_${n} [expr int($x)] [expr int($y)]
+    tk_popup $m [expr int($x)] [expr int($y)]
 }
 
 proc ::NewMsg::TrptPopupRelease {w n} {
@@ -862,7 +859,7 @@ proc ::NewMsg::TrptPopupRelease {w n} {
     variable locals
 
     set wfr $locals($w,wfrport)
-    $wfr.f${n}.la configure -image $locals(popupbt)
+    $wfr.f$n.la configure -image $locals(popupbt)
 }
 
 proc ::NewMsg::CommandReturnKeyPress {w} {
