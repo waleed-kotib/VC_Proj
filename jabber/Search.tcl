@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.58 2008-08-11 14:03:17 matben Exp $
+# $Id: Search.tcl,v 1.59 2008-08-12 12:40:00 matben Exp $
 
 package provide Search 1.0
 
@@ -33,6 +33,14 @@ namespace eval ::Search {
 	{command    mMessage...         {::NewMsg::Build -to $jid} }	
 	{command    mChat...            {::Chat::StartThread $jid} }	
 	{command    mBusinessCard...    {::VCard::Fetch other $jid} }	
+    }
+    
+    variable popMenuExDefs    
+    set popMenuExDefs {
+	{command    mAddContact...      {::JUser::MultiAdd $jidL} }
+	{command    mMessage...         {::NewMsg::Build -to $jid -tolist $jidL} }	
+	{command    mChat...            {::Chat::StartThread $jid} }	
+	{command    mBusinessCard...    {::UserInfo::GetJIDList $jidL} }	
     }
 }
 
@@ -527,6 +535,7 @@ proc ::Search::ResultBuildWidget {w} {
     $T notify bind $T <Selection>      { ::Search::ResultSelection %T }
     $T notify bind $T <Header-invoke>  { ::Search::ResultHeaderCmd %T %C }
 
+    bind $T <Button-1>        { ::Search::ResultOnButton %W %x %y }
     bind $T <Double-Button-1> { ::Search::ResultOnCmd %W %x %y }
     bind $T <<ButtonPopup>>   { ::Search::ResultOnPopup %W %x %y }
 
@@ -665,6 +674,10 @@ proc ::Search::ResultHeaderCmd {T C} {
     $T item sort root $order -dictionary -column $C 
 }
 
+proc ::Search::ResultOnButton {w x y} {
+    
+}
+
 proc ::Search::ResultOnCmd {T x y} {
     
     set id [$T identify $x $y] 
@@ -689,21 +702,42 @@ proc ::Search::ResultOnCmd {T x y} {
 }
 
 proc ::Search::ResultOnPopup {T x y} {
-    variable popMenuDefs    
+    variable popMenuExDefs    
     
+    set cid [$T column id jid]
+    if {$cid eq ""} { return }
+    
+    set jidL  [list]
+    set itemL [list]
+
+    # 1: Assemble itemL
     set id [$T identify $x $y] 
-    if {[lindex $id 0] eq "item"} {
+    if {[lindex $id 0] eq "item"} {	
+	set selected [$T selection get]
 	set item [lindex $id 1]
-	set cid [$T column id jid]
-	if {$cid eq ""} { return }
+
+	# If clicked an unselected item, pick this.
+	# If clicked any selected, pick the complete selection.
+	if {[lsearch $selected $item] >= 0} {
+	    set itemL $selected
+	} else {
+	    set itemL [list $item]
+	}
+    }	
+
+    # 2: From itemL, collect jidL    
+    foreach item $itemL {
 	set jid [$T item element cget $item $cid eText -text]
-	if {$jid eq ""} { return }
-	
+	if {$jid eq ""} { continue }
+	lappend jidL $jid
+    }
+    
+    if {[llength $itemL]} {
 	set m $T.m
 	destroy $m
 	menu $m -tearoff 0
 	
-	::AMenu::Build $m $popMenuDefs -varlist [list jid $jid]
+	::AMenu::Build $m $popMenuExDefs -varlist [list jid $jid jidL $jidL]
 	
 	# This one is needed on the mac so the menu is built before it is posted.
 	update idletasks
@@ -713,6 +747,7 @@ proc ::Search::ResultOnPopup {T x y} {
 	set Y [expr [winfo rooty $T] + $y]
 	tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
     }
+    return -code break
 }
 
 proc ::Search::ResultFind {w} {

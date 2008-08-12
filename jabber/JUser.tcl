@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUser.tcl,v 1.68 2008-06-09 09:50:59 matben Exp $
+# $Id: JUser.tcl,v 1.69 2008-08-12 12:40:00 matben Exp $
 
 package provide JUser 1.0
 
@@ -61,6 +61,12 @@ proc ::JUser::OnMenu {} {
     if {[::JUI::GetConnectState] eq "connectfin"} {
 	NewDlg
     }   
+}
+
+proc ::JUser::MultiAdd {jidL} {
+    foreach jid $jidL {
+	NewDlg -jid $jid
+    }
 }
 
 # JUser::NewDlg --
