@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AppStatusSlot.tcl,v 1.2 2008-08-08 08:09:37 matben Exp $
+# $Id: AppStatusSlot.tcl,v 1.3 2008-08-12 13:18:50 matben Exp $
 
 package provide AppStatusSlot 1.0
 
@@ -33,6 +33,12 @@ namespace eval ::AppStatusSlot {
     ::hooks::register highLoginStartHook   [namespace code HighLoginStartHook]
     ::hooks::register highLoginCBHook      [namespace code HighLoginCBHook]
     ::hooks::register appStatusMessageHook [namespace code MsgHook]
+
+    # Hooks we handle here.
+    ::hooks::register newMessageHook     [namespace code EventMsg]
+    ::hooks::register newChatMessageHook [namespace code EventMsg]
+    ::hooks::register newChatThreadHook  [namespace code EventChat]
+    ::hooks::register presenceNewHook    [namespace code EventPresence]
 }
 
 proc ::AppStatusSlot::Build {w} {
@@ -124,7 +130,59 @@ proc ::AppStatusSlot::MsgHook {msg} {
     variable priv
     set priv(status) $msg
 }
+
+proc ::AppStatusSlot::EventMsg {xmldata {uuid ""}} {
+    variable priv
     
+    set jid [wrapper::getattribute $xmldata from]
+    if {![::Roster::IsTransportEx $jid]} {
+	set jid2 [jlib::barejid $jid]
+	set dname [::Roster::GetDisplayName $jid2]
+
+	set str ""
+	set subjectE [wrapper::getfirstchildwithtag $xmldata "subject"]
+	if {[llength $subjectE]} {
+	    set str [wrapper::getcdata $subjectE]
+	}
+	if {$str eq ""} {
+	    set bodyE [wrapper::getfirstchildwithtag $xmldata "body"]
+	    if {[llength $bodyE]} {
+		set str [wrapper::getcdata $bodyE]
+	    }
+	}
+	set msg [mc "Message from %s, %s" $dname $str]
+	set priv(status) $msg
+    }
+}
+
+proc ::AppStatusSlot::EventChat {xmldata} {
+    variable priv
+    
+    set jid [wrapper::getattribute $xmldata from]
+    if {![::Roster::IsTransportEx $jid]} {
+	set jid2 [jlib::barejid $jid]
+	set dname [::Roster::GetDisplayName $jid2]
+	set msg [mc "New chat with %s" $dname]
+	set priv(status) $msg
+    }
+}
+
+
+proc ::AppStatusSlot::EventPresence {jid presence args} {
+    variable priv
+
+    array set argsA $args
+    set xmldata $argsA(-xmldata)
+    set from [wrapper::getattribute $xmldata from]
+    set jid2 [jlib::barejid $from]
+    if {[::Jabber::Jlib roster isitem $jid2]} {
+	set str [::Roster::GetPresenceAndStatusText $jid]
+	set dname [::Roster::GetDisplayName $jid2]
+	set msg [mc "User %s, %s" $dname $str]
+	set priv(status) $msg
+    }
+}
+
 proc ::AppStatusSlot::Close {w} {
     variable priv
     set priv(show) 0
