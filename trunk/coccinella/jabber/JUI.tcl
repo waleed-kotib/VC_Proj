@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.269 2008-08-09 16:00:59 matben Exp $
+# $Id: JUI.tcl,v 1.270 2008-08-12 14:28:52 matben Exp $
 
 package provide JUI 1.0
 
@@ -203,24 +203,24 @@ proc ::JUI::Init {} {
 	    {radio   mHugeFont      {::Theme::FontConfigSize +6}    {}
 	    {-variable prefs(fontSizePlus) -value 6}}
 	} }
-	{cascade     mShow          {}                                {} {} {
-	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}      {} 
+	{cascade     mShow          {}                              {} {} {
+	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}    {} 
 	    {-variable ::JUI::state(show,toolbar)}}
-	    {check   mTabs          {::JUI::OnMenuToggleNotebook}     {} 
+	    {check   mTabs          {::JUI::OnMenuToggleNotebook}   {} 
 	    {-variable ::JUI::state(show,notebook)}}
 	} }
-	{cascade     mControlPanel  {}                                {} {} {}}
+	{cascade     mControlPanel  {}                              {} {} {}}
 	{separator}
 	{command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
 	{checkbutton mDebug         {::Jabber::DebugCmd}            {} \
 	  {-variable ::Jabber::jstate(debugCmd)}}
-	{command     mBugReport...  {::JUI::OpenBugURL}            {}}
+	{command     mBugReport...  {::JUI::OpenBugURL}             {}}
 	{separator}
-	{command     mCoccinellaHome... {::JUI::OpenCoccinellaURL}     {}}
+	{command     mCoccinellaHome... {::JUI::OpenCoccinellaURL}  {}}
     }
     if {$config(ui,main,toy-status)} {
 	# NB: this may depend on our initial state if open or closed.
-	set m {command  mShowControlPanel  {::JUI::ToyStatusCmd}  {}}
+	set m {command  mShowControlPanel  {::JUI::ToyStatusCmd}  {Shift-O}}
 	set idx [lsearch -index 1 $mDefsInfo mControlPanel]
 	set mDefsInfo [linsert $mDefsInfo $idx $m]
     }
