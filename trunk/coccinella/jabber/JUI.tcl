@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.270 2008-08-12 14:28:52 matben Exp $
+# $Id: JUI.tcl,v 1.271 2008-08-13 08:09:02 matben Exp $
 
 package provide JUI 1.0
 
@@ -210,12 +210,12 @@ proc ::JUI::Init {} {
 	    {-variable ::JUI::state(show,notebook)}}
 	} }
 	{cascade     mControlPanel  {}                              {} {} {}}
-	{separator}
+	{separator {}}
 	{command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
 	{checkbutton mDebug         {::Jabber::DebugCmd}            {} \
 	  {-variable ::Jabber::jstate(debugCmd)}}
 	{command     mBugReport...  {::JUI::OpenBugURL}             {}}
-	{separator}
+	{separator {}}
 	{command     mCoccinellaHome... {::JUI::OpenCoccinellaURL}  {}}
     }
     if {$config(ui,main,toy-status)} {
@@ -228,7 +228,7 @@ proc ::JUI::Init {} {
 	set menuDefs(rost,info) $mDefsInfo
     } else {
 	set mAbout {command  mAboutCoccinella  {::Splash::SplashScreen}  {}}
-	set idx [lsearch $mDefsInfo -index 1 mCoccinellaHome...]
+	set idx [lsearch -index 1 $mDefsInfo mCoccinellaHome...]
 	set menuDefs(rost,info) [linsert $mDefsInfo $idx $mAbout]
     }
     
