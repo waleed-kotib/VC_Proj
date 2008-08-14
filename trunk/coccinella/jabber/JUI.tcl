@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.271 2008-08-13 08:09:02 matben Exp $
+# $Id: JUI.tcl,v 1.272 2008-08-14 14:21:39 matben Exp $
 
 package provide JUI 1.0
 
@@ -32,6 +32,9 @@ namespace eval ::JUI {
     ::hooks::register rosterIconsChangedHook ::JUI::RosterIconsChangedHook
     ::hooks::register prefsInitHook          ::JUI::InitPrefsHook
     ::hooks::register rosterTreeSelectionHook  ::JUI::RosterSelectionHook
+
+    ::hooks::register prefsInitHook          ::JUI::ToyStatusInitPrefsHook
+    ::hooks::register quitAppHook            ::JUI::ToyStatusQuitHook
 
     # Use option database for customization.
     # Shortcut buttons.
@@ -376,7 +379,7 @@ proc ::JUI::Build {w} {
    
     # Experiment!
     if {$config(ui,main,slots)} {
- 	::JUI::SlotBuild $wall.slot
+ 	SlotBuild $wall.slot
  	pack $wall.slot -side bottom -fill x
     }
 
@@ -751,8 +754,19 @@ proc ::JUI::CombiBoxOnFocusOut {} {
 
 #-------------------------------------------------------------------------------
 
+proc ::JUI::ToyStatusInitPrefsHook {} {
+    global jprefs
+
+    set jprefs(toystatus,mapped) 1
+    
+    ::PrefUtils::Add [list \
+      [list jprefs(toystatus,mapped) jprefs_toystatus_mapped $jprefs(toystatus,mapped)]  \
+      ]
+    
+}
+
 proc ::JUI::BuildToyStatus {wtoy} {
-    global  config
+    global  config jprefs
     variable jwapp
 	
     set im  [::Theme::FindIconSize 22 coccinella2]
@@ -773,6 +787,12 @@ proc ::JUI::BuildToyStatus {wtoy} {
     lappend jwapp(securityWinL) $wtoy.secure
     
     set wmp $wtoy.mp
+    
+    set jwapp(wtoy)    $wtoy
+    set jwapp(wtoyb)   $wtoy.b
+    set jwapp(wmp)     $wtoy.mp
+    set jwapp(wtoysec) $wtoy.secure
+
     if {$config(ui,main,toy-status-slots)} {
 	menu $wtoy.b.m -tearoff 0
 	bind $wtoy   <<ButtonPopup>> \
@@ -782,16 +802,15 @@ proc ::JUI::BuildToyStatus {wtoy} {
 	
 	set jwapp(slotmenu) $wtoy.b.m
 	SlotBuild $wmp
+	
+	if {$jprefs(toystatus,mapped)} {
+	    SlotDisplay
+	}
     } else {
 	::MegaPresence::Build $wmp -collapse 0
 	bind $wtoy.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
     }
     ::balloonhelp::balloonforwindow $wtoy.b [mc "Open control panel"]
-    
-    set jwapp(wtoy)    $wtoy
-    set jwapp(wtoyb)   $wtoy.b
-    set jwapp(wmp)     $wtoy.mp
-    set jwapp(wtoysec) $wtoy.secure
 
     return $wtoy
 }
@@ -865,6 +884,12 @@ proc ::JUI::BuildFakeToyStatus {win} {
 	# @@@ TODO
     }    
     return $win
+}
+
+proc ::JUI::ToyStatusQuitHook {} {
+    global  jprefs
+    
+    set jprefs(toystatus,mapped) [ToyStatusIsMapped]
 }
 
 #-------------------------------------------------------------------------------
