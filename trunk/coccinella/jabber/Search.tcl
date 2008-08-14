@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.60 2008-08-14 10:52:34 matben Exp $
+# $Id: Search.tcl,v 1.61 2008-08-14 13:30:55 matben Exp $
 
 package provide Search 1.0
 
@@ -483,6 +483,19 @@ proc ::Search::Free {w} {
 
 #-------------------------------------------------------------------------------
 
+namespace eval ::Search {
+    
+    variable dndSrc
+    array set dndSrc {
+	suffix,win32    .URL
+	suffix,x11      .desktop
+	content,win32   "\[InternetShortcut\]\nURL=%s"
+	content,x11     "\[Desktop Entry\]\nEncoding=UTF-8\nIcon=xmpp\nType=Link\nURL=%s"
+	suffix,aqua     .xxx
+	content,aqua    ""
+    }    
+}
+
 # Search::ResultBuildWidget, ... ---
 #
 #       Experiment: make a generic megawidget for displaying search results
@@ -578,6 +591,9 @@ proc ::Search::ResultInitDnD {T} {
     dnd bindsource $T {text/plain;charset=UTF-8} { 
 	::Search::ResultDnDTextSource %W
     }
+    dnd bindsource $T text/uri-list { 
+	::Search::ResultDnDFileSource %W
+    }
     bind $T <Button1-Leave> { dnd drag %W }
 }
 
@@ -599,6 +615,35 @@ proc ::Search::ResultDnDTextSource {T} {
     }
     set data [join $jidL ", "]
     return $data
+}
+
+proc ::Search::ResultDnDFileSource {T} {
+    global  this config
+    variable dndSrc
+
+    set fmt $config(rost,dnd-xmpp-uri-format)
+    set os [tk windowingsystem]
+    if {![llength [$T column id "tag jid"]]} { return }
+    set jidL [list]
+    set itemL [$T selection get]
+    foreach item $itemL {
+	set jid [$T item text $item "tag jid"]
+	if {$jid ne ""} {
+	    lappend jidL [format $fmt [jlib::barejid $jid]]
+	}
+    }
+    set jidL [lapply jlib::jidmap $jidL]
+    set fileL [list]
+    foreach jid $jidL {
+	set fileName [file join $this(tmpPath) [::uri::urn::quote $jid]]$dndSrc(suffix,$os)
+	set fd [open $fileName w]
+	puts $fd [format $dndSrc(content,$os) "xmpp:$jid?message"]
+ 	close $fd
+	# @@@ Do I need a "file://" prefix?
+	#lappend fileL $fileName
+	lappend fileL "file://$fileName"
+    }
+    return $fileL
 }
 
 proc ::Search::ResultFillWidget {w xdataE} {
