@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.54 2008-06-09 09:51:00 matben Exp $
+# $Id: Status.tcl,v 1.55 2008-08-14 10:52:34 matben Exp $
 
 package provide Status 1.0
 
@@ -312,7 +312,7 @@ proc ::Status::BuildMenuDef { } {
     variable mapShowTextToMLabel
     
     set entries {available {} away chat dnd xa invisible {} unavailable}
-    set statMenuDef {}
+    set statMenuDef [list]
 
     set menuImages [expr {[tk windowingsystem] ne "aqua" || [info tclversion] >= 8.5}]
 

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: UI.tcl,v 1.199 2008-08-08 08:09:37 matben Exp $
+# $Id: UI.tcl,v 1.200 2008-08-14 10:52:34 matben Exp $
 
 package require ui::dialog
 package require ui::entryex
@@ -668,7 +668,7 @@ namespace eval ::UI {
     if {[tk windowingsystem] eq "aqua"} {
 	set slide(ms) 20
     } else {
-	set slide(ms) 40
+	set slide(ms) 30
     }
 }
 
