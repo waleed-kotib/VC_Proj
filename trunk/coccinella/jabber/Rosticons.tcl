@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Rosticons.tcl,v 1.54 2008-06-09 09:51:00 matben Exp $
+# $Id: Rosticons.tcl,v 1.55 2008-08-14 10:52:34 matben Exp $
 
 #  From disco-categories:
 #
@@ -156,10 +156,15 @@ proc ::Rosticons::ThemeGetAllTypes {} {
 # Results:
 #       a valid image or empty.
 
-proc ::Rosticons::ThemeGet {typekey} {
+proc ::Rosticons::ThemeGet {typekey args} {
     global jprefs
     variable stateD
     variable imagesD
+    
+    array set argsA {
+	-forcethemed 0
+    }
+    array set argsA $args
         
     set typekey [string tolower $typekey]
     lassign [split $typekey /] type sub
@@ -187,7 +192,7 @@ proc ::Rosticons::ThemeGet {typekey} {
 	if {![info exists jprefs(rost,theme,use,$type)]} {
 	    set type "user"
 	}
-	if {!$jprefs(rost,theme,use,$type)} {
+	if {!$argsA(-forcethemed) && !$jprefs(rost,theme,use,$type)} {
 	    set type "user"
 	}	
 	set key $type/$sub

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.59 2008-08-12 12:40:00 matben Exp $
+# $Id: Search.tcl,v 1.60 2008-08-14 10:52:34 matben Exp $
 
 package provide Search 1.0
 
@@ -545,7 +545,17 @@ proc ::Search::ResultBuildWidget {w} {
     $T notify bind $T <ColumnDrag-receive> {
 	%T column move %C %b
     }
-
+    
+    # DnD:
+    set idx [lsearch [bindtags $T] TreeCtrl]
+    bindtags $T [linsert [bindtags $T] $idx TreeCtrlDnD]
+    
+    $T notify install <Drag-begin>
+    $T notify install <Drag-end>
+    $T notify install <Drag-receive>
+    $T notify install <Drag-enter>
+    $T notify install <Drag-leave>
+    
     if {[tk windowingsystem] ne "aqua"} {
 	if {![catch {package require tkdnd}]} {
 	    ResultInitDnD $T
@@ -568,6 +578,7 @@ proc ::Search::ResultInitDnD {T} {
     dnd bindsource $T {text/plain;charset=UTF-8} { 
 	::Search::ResultDnDTextSource %W
     }
+    bind $T <Button1-Leave> { dnd drag %W }
 }
 
 proc ::Search::ResultDnDTextSource {T} {
@@ -627,6 +638,12 @@ proc ::Search::ResultFillWidget {w xdataE} {
 	    $T item element configure $id "tag $var" eText -text $text
 	}	
     }
+
+    # List of lists: {column style element ...} specifying elements
+    # added to the drag image when dragging selected items.
+    ::TreeCtrl::DnDSetDragSources $T {
+	{jid styUser eText}
+    }
 }
 
 proc ::Search::ResultSelection {T} {
@@ -674,8 +691,13 @@ proc ::Search::ResultHeaderCmd {T C} {
     $T item sort root $order -dictionary -column $C 
 }
 
-proc ::Search::ResultOnButton {w x y} {
+proc ::Search::ResultOnButton {T x y} {
     
+    set id [$T identify $x $y]
+    if {$id eq ""} {
+	$T selection clear all
+    }
+    return
 }
 
 proc ::Search::ResultOnCmd {T x y} {
@@ -718,7 +740,7 @@ proc ::Search::ResultOnPopup {T x y} {
 
 	# If clicked an unselected item, pick this.
 	# If clicked any selected, pick the complete selection.
-	if {[lsearch $selected $item] >= 0} {
+	if {$item in $selected} {
 	    set itemL $selected
 	} else {
 	    set itemL [list $item]
