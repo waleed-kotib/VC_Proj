@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.273 2008-08-15 07:27:22 matben Exp $
+# $Id: JUI.tcl,v 1.274 2008-08-15 13:17:24 matben Exp $
 
 package provide JUI 1.0
 
@@ -957,14 +957,14 @@ proc ::JUI::SlotBuild {w} {
     incr row
     
     foreach name $slot(all) {
+	set slot($name,row) $row
+	set slot($name,win) $w.$row
+
 	uplevel #0 $slot($name,cmd) $w.$row
 # 	if {$name in $jprefs(slot,mapped)} {
 # 	    grid  $w.$row  -row $row -sticky ew
 # 	}
-	grid  $w.$row  -row $row -sticky ew
-	set slot($name,row) $row
-	set slot($name,win) $w.$row
-	set slot($name,display) 1
+	#grid  $w.$row  -row $row -sticky ew
 	incr row
     }
     grid columnconfigure $w 0 -weight 1
@@ -1159,6 +1159,16 @@ proc ::JUI::SlotQuitHook {} {
 	}
     }
     set jprefs(slot,mapped) $names
+}
+
+proc ::JUI::SlotPrefsMapped {name} {
+    global  jprefs
+    
+    if {$name in $jprefs(slot,mapped)} {
+	return 1
+    } else {
+	return 0
+    }
 }
 
 #-------------------------------------------------------------------------------

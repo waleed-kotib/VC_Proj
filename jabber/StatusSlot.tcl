@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: StatusSlot.tcl,v 1.5 2008-08-06 12:42:22 matben Exp $
+# $Id: StatusSlot.tcl,v 1.6 2008-08-15 13:17:24 matben Exp $
 
 package provide StatusSlot 1.0
 
@@ -38,16 +38,16 @@ namespace eval ::StatusSlot {
 }
 
 proc ::StatusSlot::BuildMessageSlot {w} {
-    variable priv
+    variable slot
     variable msgSlotD
     
     ttk::frame $w -class StatusSlot
     
     if {1} {
-	set priv(collapse) 0
+	set slot(collapse) 0
 	ttk::checkbutton $w.arrow -style Arrow.TCheckbutton \
 	  -command [list [namespace current]::Collapse $w] \
-	  -variable [namespace current]::priv(collapse)
+	  -variable [namespace current]::slot(collapse)
 	pack $w.arrow -side left -anchor n	
 	bind $w       <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
 	bind $w.arrow <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
@@ -72,9 +72,9 @@ proc ::StatusSlot::BuildMessageSlot {w} {
     grid  $box.e  -sticky ew
     grid columnconfigure $box 0 -weight 1
     
-    set priv(box)   $w.box
-    set priv(value) mejid
-    set priv(show)  1
+    set slot(box)   $w.box
+    set slot(value) mejid
+    set slot(show)  0
 
     bind $box   <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
     bind $box.e <<ButtonPopup>> [list [namespace current]::Popup $w %x %y]
@@ -82,8 +82,12 @@ proc ::StatusSlot::BuildMessageSlot {w} {
 
     foreach m [::JUI::SlotGetAllMenus] {
 	$m add checkbutton -label [mc "Status Info"] \
-	  -variable [namespace current]::priv(show) \
+	  -variable [namespace current]::slot(show) \
 	  -command [namespace code Cmd]
+    }
+    if {[::JUI::SlotPrefsMapped plainstatus]} {
+	::JUI::SlotShow plainstatus
+	set slot(show) 1
     }
     return $w
 }
@@ -97,12 +101,12 @@ proc ::StatusSlot::Cmd {} {
 }
 
 proc ::StatusSlot::Collapse {w} {
-    variable priv
+    variable slot
 
-    if {$priv(collapse)} {
-	pack forget $priv(box)
+    if {$slot(collapse)} {
+	pack forget $slot(box)
     } else {
-	pack $priv(box) -fill both -expand 1
+	pack $slot(box) -fill both -expand 1
     }
     #event generate $w <<Xxx>>
 }
@@ -117,7 +121,7 @@ proc ::StatusSlot::Popup {w x y} {
     # NB: The value is the array index of the jstate array having this info.
     dict for {value label} $msgSlotD {
 	$m add radiobutton -label $label \
-	  -variable [namespace current]::priv(value) -value $value \
+	  -variable [namespace current]::slot(value) -value $value \
 	  -command [namespace code [list MenuCmd $w $value]]
     }
     update idletasks
@@ -130,15 +134,15 @@ proc ::StatusSlot::Popup {w x y} {
 }
 
 proc ::StatusSlot::MenuCmd {w value} {
-    variable priv
+    variable slot
     variable msgSlotD
 
-    $priv(box).e configure -textvariable ::Jabber::jstate($value)
-    ::balloonhelp::balloonforwindow $priv(box).e [dict get $msgSlotD $value]
+    $slot(box).e configure -textvariable ::Jabber::jstate($value)
+    ::balloonhelp::balloonforwindow $slot(box).e [dict get $msgSlotD $value]
 }
 
 proc ::StatusSlot::Close {w} {
-    variable priv
-    set priv(show) 0
+    variable slot
+    set slot(show) 0
     ::JUI::SlotClose plainstatus
 }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.61 2008-08-14 13:30:55 matben Exp $
+# $Id: Search.tcl,v 1.62 2008-08-15 13:17:24 matben Exp $
 
 package provide Search 1.0
 
@@ -915,7 +915,7 @@ proc ::Search::SlotBuild {w} {
     set slot(w)     $w
     set slot(box)   $w.box
     set slot(entry) $box.e
-    set slot(show)  1
+    set slot(show)  0
     set slot(dtext) "Search People"
     set slot(text)  [mc $slot(dtext)]
     
@@ -937,6 +937,10 @@ proc ::Search::SlotBuild {w} {
 	  -variable [namespace current]::slot(show) \
 	  -command [namespace code SlotCmd]
     }    
+    if {[::JUI::SlotPrefsMapped search]} {
+	::JUI::SlotShow search
+	set slot(show) 1
+    }
     return $w
 }
 

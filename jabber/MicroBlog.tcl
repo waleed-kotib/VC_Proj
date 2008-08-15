@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MicroBlog.tcl,v 1.4 2008-08-04 09:46:33 matben Exp $
+# $Id: MicroBlog.tcl,v 1.5 2008-08-15 13:17:24 matben Exp $
 
 package provide MicroBlog 1.0
 
@@ -86,7 +86,7 @@ proc ::MicroBlog::SlotBuild {w} {
     set slot(box)   $w.box
     set slot(entry) $box.e
     set slot(text)  "Not implemented"
-    set slot(show)  1
+    set slot(show)  0
 
     # Add menu.    
     # This isn't the right way!
@@ -94,6 +94,10 @@ proc ::MicroBlog::SlotBuild {w} {
 	$m add checkbutton -label [mc "Micro Blog"] \
 	  -variable [namespace current]::slot(show) \
 	  -command [namespace code SlotCmd]
+    }
+    if {[::JUI::SlotPrefsMapped microblog]} {
+	::JUI::SlotShow microblog
+	set slot(show) 1
     }
     return $w
 }
