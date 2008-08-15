@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AppStatusSlot.tcl,v 1.4 2008-08-15 07:27:22 matben Exp $
+# $Id: AppStatusSlot.tcl,v 1.5 2008-08-15 13:17:24 matben Exp $
 
 package provide AppStatusSlot 1.0
 
@@ -83,13 +83,17 @@ proc ::AppStatusSlot::Build {w} {
 
     set priv(box)    $w.box
     set priv(arrows) $w.box.a
-    set priv(show)   1
+    set priv(show)   0
     set priv(status) [mc mNotAvailable]
 
     foreach m [::JUI::SlotGetAllMenus] {
 	$m add checkbutton -label $label \
 	  -variable [namespace current]::priv(show) \
 	  -command [namespace code Cmd]
+    }
+    if {[::JUI::SlotPrefsMapped appstatus]} {
+	::JUI::SlotShow appstatus
+	set priv(show) 1
     }
     return $w
 }
