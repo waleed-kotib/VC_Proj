@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AppStatusSlot.tcl,v 1.3 2008-08-12 13:18:50 matben Exp $
+# $Id: AppStatusSlot.tcl,v 1.4 2008-08-15 07:27:22 matben Exp $
 
 package provide AppStatusSlot 1.0
 
@@ -28,7 +28,7 @@ namespace eval ::AppStatusSlot {
     option add *AppStatusSlot.box.padding   {8 2 8 2}     50
     option add *AppStatusSlot*TEntry.font   CociSmallFont widgetDefault
     
-    ::JUI::SlotRegister appstatus [namespace code Build]
+    ::JUI::SlotRegister appstatus [namespace code Build] -priority 80
 
     ::hooks::register highLoginStartHook   [namespace code HighLoginStartHook]
     ::hooks::register highLoginCBHook      [namespace code HighLoginCBHook]

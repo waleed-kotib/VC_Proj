@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.16 2008-08-06 12:42:22 matben Exp $
+# $Id: MegaPresence.tcl,v 1.17 2008-08-15 07:27:22 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -31,7 +31,7 @@ namespace eval ::MegaPresence {
     variable widgets
     set widgets(all) [list]
     
-    ::JUI::SlotRegister megapresence [namespace code Build]
+    ::JUI::SlotRegister megapresence [namespace code Build] -priority 20
 }
 
 proc ::MegaPresence::Register {name label cmd} {
