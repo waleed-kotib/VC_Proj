@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.26 2008-08-06 13:05:18 matben Exp $
+# $Id: NotifyCall.tcl,v 1.27 2008-08-15 13:18:05 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -519,6 +519,8 @@ proc ::NotifyCallSlot::BuildEmpty {w args} {
     }
     set slot(wempty) $w
     set slot(show)   0
+
+    ::JUI::SlotShow notifycall
     
     return $w
 }
