@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.272 2008-08-14 14:21:39 matben Exp $
+# $Id: JUI.tcl,v 1.273 2008-08-15 07:27:22 matben Exp $
 
 package provide JUI 1.0
 
@@ -35,6 +35,9 @@ namespace eval ::JUI {
 
     ::hooks::register prefsInitHook          ::JUI::ToyStatusInitPrefsHook
     ::hooks::register quitAppHook            ::JUI::ToyStatusQuitHook
+
+    ::hooks::register prefsInitHook          ::JUI::SlotInitPrefsHook
+    ::hooks::register quitAppHook            ::JUI::SlotQuitHook
 
     # Use option database for customization.
     # Shortcut buttons.
@@ -896,9 +899,20 @@ proc ::JUI::ToyStatusQuitHook {} {
 
 namespace eval ::JUI {
     
-    #option add *RosterSlots.padding   {2}     50
     variable slot
+    set slot(all) [list]
+    set slot(allprio) [list]
     set slot(pending) 0
+}
+
+proc ::JUI::SlotInitPrefsHook {} {
+    global  jprefs
+    
+    set jprefs(slot,mapped) [list]
+    
+    ::PrefUtils::Add [list \
+      [list jprefs(slot,mapped) jprefs_slot_mapped $jprefs(slot,mapped)]  \
+      ]
 }
 
 # JUI::SlotRegister --
@@ -906,18 +920,32 @@ namespace eval ::JUI {
 #       A number of functions to allow components to abtain slots of space
 #       in the main window.
 
-proc ::JUI::SlotRegister {name cmd} {
+proc ::JUI::SlotRegister {name cmd args} {
     variable slot
-    variable jwapp
     
-    lappend slot(all) $name
+    array set argsA {
+	-priority 50
+    }
+    array set argsA $args
+    set prio $argsA(-priority)
     set slot($name,name) $name
     set slot($name,cmd)  $cmd
+    set slot($name,prio) $prio
+    
+    # Sort them in priority order.
+    set slot(all) [list]
+    lappend slot(allprio) [list $name $prio]
+    set slot(allprio) [lsort -integer -index 1 [lsort -unique $slot(allprio)]]
+    foreach specL $slot(allprio) {
+	lassign $specL name prio
+	lappend slot(all) $name
+    }    
     
     return $name
 }
 
 proc ::JUI::SlotBuild {w} {
+    global jprefs
     variable slot
     
     ttk::frame $w -class RosterSlots
@@ -930,6 +958,9 @@ proc ::JUI::SlotBuild {w} {
     
     foreach name $slot(all) {
 	uplevel #0 $slot($name,cmd) $w.$row
+# 	if {$name in $jprefs(slot,mapped)} {
+# 	    grid  $w.$row  -row $row -sticky ew
+# 	}
 	grid  $w.$row  -row $row -sticky ew
 	set slot($name,row) $row
 	set slot($name,win) $w.$row
@@ -1117,6 +1148,19 @@ proc ::JUI::SlotShowed {name} {
     }
 }
 
+proc ::JUI::SlotQuitHook {} {
+    global  jprefs
+    variable slot
+    
+    set names [list]
+    foreach name $slot(all) {
+	if {[SlotShowed $name]} {
+	    lappend names $name
+	}
+    }
+    set jprefs(slot,mapped) $names
+}
+
 #-------------------------------------------------------------------------------
 
 proc ::JUI::NotebookTabChanged {} {
@@ -1138,17 +1182,6 @@ proc ::JUI::NotebookTabChanged {} {
 	}
     }
     $jwapp(wtbar) buttonconfigure chat -state $state  
-}
-
-proc ::JUI::NotebookGetPage {} {
-    variable jwapp
-   
-    if {[winfo ismapped $jwapp(notebook)]} {
-	set current [$jwapp(notebook) index current]
-
-    } else {
-	return "roster"
-    }
 }
 
 proc ::JUI::BuildToolbar {w wtbar} {
