@@ -17,16 +17,20 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.43 2008-08-06 13:05:17 matben Exp $
+#  $Id: Mood.tcl,v 1.44 2008-08-16 15:24:30 matben Exp $
 
 package require jlib::pep
 
 namespace eval ::Mood {
 
     component::define Mood "Communicate information about user moods"
+    
+    # Shall we display all moods in menus or just a subset?
+    set ::config(mood,showall) 1
 }
 
 proc ::Mood::Init {} {
+    global  config
 
     component::register Mood
 
@@ -97,13 +101,19 @@ proc ::Mood::Init {} {
   
     variable menuDef
     set menuDef [list cascade mMood {} {} {} {}]
-    set subMenu {}
+    set subMenu [list]
     set opts [list -variable ::Mood::menuMoodVar -value "-"]
     lappend subMenu [list radio None ::Mood::MenuCmd {} $opts]
     lappend subMenu {separator}
-    foreach mood $myMoods {
+    if {$config(mood,showall)} {
+	set moodL $allMoods
+    } else {
+	set moodL $myMoods
+    }
+    foreach mood $moodL {
+	set label "m[string totitle $mood]"
 	set opts [list -variable ::Mood::menuMoodVar -value $mood]
-	lappend subMenu [list radio $mood2mLabel($mood) ::Mood::MenuCmd {} $opts]
+	lappend subMenu [list radio $label ::Mood::MenuCmd {} $opts]
     }
     lappend subMenu {separator}
     lappend subMenu [list command mCustomMood... ::Mood::CustomMoodDlg {} {}]
@@ -112,24 +122,6 @@ proc ::Mood::Init {} {
     variable menuMoodVar
     set menuMoodVar "-"
     
-    variable mapMoodTextToElem
-    array set mapMoodTextToElem [list \
-      [mc mAngry]       angry      \
-      [mc mAnxious]     anxious    \
-      [mc mAshamed]     ashamed    \
-      [mc mBored]       bored      \
-      [mc mCurious]     curious    \
-      [mc mDepressed]   depressed  \
-      [mc mExcited]     excited    \
-      [mc mHappy]       happy      \
-      [mc mInLove]      in_love    \
-      [mc mInvincible]  invincible \
-      [mc mJealous]     jealous    \
-      [mc mNervous]     nervous    \
-      [mc mSad]         sad        \
-      [mc mSleepy]      sleepy     \
-      [mc mStressed]    stressed   \
-      [mc mWorried]     worried]
 }
 
 # Mood::JabberInitHook --
@@ -175,7 +167,8 @@ proc ::Mood::HavePEP {jlibname have} {
     if {$have} {
 
 	# Get our own published mood and fill in.
-	set myjid2 [::Jabber::Jlib  myjid2]
+	# NB: I thought that this should work automatically but seems not.
+	set myjid2 [::Jabber::Jlib myjid2]
 	::Jabber::Jlib pubsub items $myjid2 $xmlns(mood) \
 	  -command [namespace code ItemsCB]
 	::JUI::RegisterMenuEntry action $menuDef
@@ -260,10 +253,10 @@ proc ::Mood::Publish {mood {text ""}} {
     set moodE [wrapper::createtag mood  \
       -attrlist [list xmlns $xmlns(mood)] -subtags $moodChildEs]
 
-    #   NB:  It is currently unclear there should be an id attribute in the item
-    #        element since PEP doesn't use it but pubsub do, and the experimental
-    #        OpenFire PEP implementation.
-    #set itemE [wrapper::createtag item -subtags [list $moodE]]
+    # NB: It is currently unclear there should be an id attribute in the item
+    #     element since PEP doesn't use it but pubsub do, and the experimental
+    #     OpenFire PEP implementation.
+    # set itemE [wrapper::createtag item -subtags [list $moodE]]
     set itemE [wrapper::createtag item \
       -attrlist [list id current] -subtags [list $moodE]]
 
@@ -281,7 +274,9 @@ proc ::Mood::Retract {} {
 #--------------------------------------------------------------
 
 proc ::Mood::CustomMoodDlg {} {
+    global  config
     variable myMoods
+    variable allMoods
     variable mood2mLabel
     variable menuMoodVar
     variable moodMessageDlg
@@ -299,8 +294,14 @@ proc ::Mood::CustomMoodDlg {} {
     set mDef [list]
     lappend mDef [list [mc None] -value "-"]
     lappend mDef [list separator]
-    foreach mood $myMoods {
-	lappend mDef [list [mc $mood2mLabel($mood)] -value $mood \
+    if {$config(mood,showall)} {
+	set moodL $allMoods
+    } else {
+	set moodL $myMoods
+    }
+    foreach mood $moodL {
+	set label "m[string totitle $mood]"
+	lappend mDef [list [mc $label] -value $mood \
 	  -image [::Theme::FindIconSize 16 mood-$mood]] 
     }
     ttk::label $fr.lmood -text "[mc mMood]:"     
@@ -420,9 +421,11 @@ namespace eval ::Mood {
 }
 
 proc ::Mood::MPBuild {win} {
+    global  config
     variable imblank
     variable mpwin
     variable myMoods
+    variable allMoods
     variable mood2mLabel
     variable mpMood
 
@@ -439,9 +442,14 @@ proc ::Mood::MPBuild {win} {
       -variable [namespace current]::mpMood \
       -command [namespace code MPCmd]
     $m add separator
-      
-    foreach mood $myMoods {
-	$m add radiobutton -label [mc $mood2mLabel($mood)] -value $mood \
+    if {$config(mood,showall)} {
+	set moodL $allMoods
+    } else {
+	set moodL $myMoods
+    }      
+    foreach mood $moodL {
+	set label "m[string totitle $mood]"
+	$m add radiobutton -label [mc $label] -value $mood \
 	  -image [::Theme::FindIconSize 16 mood-$mood] \
 	  -variable [namespace current]::mpMood \
 	  -command [namespace code MPCmd] -compound left

@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.149 2008-07-04 14:11:32 matben Exp $
+#   $Id: sv.msg,v 1.150 2008-08-16 15:24:30 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -1193,23 +1193,8 @@ if {0} {
 
 # Messages for Mood XEP
 # bug: this should be M&ood..., but this does not work!
-::msgcat::mcset sv mMood                 {Humör}
-::msgcat::mcset sv mAngry                {Arg}
-::msgcat::mcset sv mAnxious              {Orolig}
-::msgcat::mcset sv mAshamed              {Skamfull}
-::msgcat::mcset sv mBored                {Uttråkad}
-::msgcat::mcset sv mCurious              {Nyfiken}
-::msgcat::mcset sv mDepressed            {Deprimerad}
-::msgcat::mcset sv mExcited              {Upprymd}
-::msgcat::mcset sv mHappy                {Lycklig}
-::msgcat::mcset sv mInLove               {Kär}
-::msgcat::mcset sv mInvincible           {Oövervinnerlig}
-::msgcat::mcset sv mJealous              {Svartsjuk}
-::msgcat::mcset sv mNervous              {Nervös}
-::msgcat::mcset sv mSad                  {Ledsen}
-::msgcat::mcset sv mSleepy               {Sömnig}
-::msgcat::mcset sv mStressed             {Stressad}
-::msgcat::mcset sv mWorried              {Bekymrad}
+::msgcat::mcset sv mMood                {Humör}
+::msgcat::mcset sv mAfraid 		{Rädd}::msgcat::mcset sv mAmazed 		{Förvånad}::msgcat::mcset sv mAngry 		{Arg}::msgcat::mcset sv mAnnoyed 		{Irriterad}::msgcat::mcset sv mAnxious 		{Orolig}::msgcat::mcset sv mAroused 		Aroused::msgcat::mcset sv mAshamed 		{Skamful}::msgcat::mcset sv mBored 		{Uttråkad}::msgcat::mcset sv mBrave 		{Modig}::msgcat::mcset sv mCalm 		{Lugn}::msgcat::mcset sv mCold 		{Frusen}::msgcat::mcset sv mConfused 		{Förvirrad}::msgcat::mcset sv mContented 		Contended::msgcat::mcset sv mCranky 		Cranky::msgcat::mcset sv mCurious 		{Nyfiken}::msgcat::mcset sv mDepressed 		{Deprimerad}::msgcat::mcset sv mDisappointed 	{Besviken}::msgcat::mcset sv mDisgusted 		Disgusted::msgcat::mcset sv mDistracted 		{Distraherad}::msgcat::mcset sv mEmbarrassed 	{Skäms}::msgcat::mcset sv mExcited 		{Upprymd}::msgcat::mcset sv mFlirtatious 	{Flirtig}::msgcat::mcset sv mFrustrated 		{Frustrerad}::msgcat::mcset sv mGrumpy 		Grumpy::msgcat::mcset sv mGuilty 		{Skyldig}::msgcat::mcset sv mHappy 		{Lycklig}::msgcat::mcset sv mHot 		{Varm}::msgcat::mcset sv mHumbled 		{Ödmjuk}::msgcat::mcset sv mHumiliated 		{Förödmjukad}::msgcat::mcset sv mHungry 		{Hungrig}::msgcat::mcset sv mHurt 		{Sårad}::msgcat::mcset sv mImpressed 		{Imponerad}::msgcat::mcset sv mIn_awe 		{In awe}::msgcat::mcset sv mIn_love 		{Kär}::msgcat::mcset sv mIndignant 		{Indignerad}::msgcat::mcset sv mInterested 		{Intresserad}::msgcat::mcset sv mIntoxicated 	{Förgiftad}::msgcat::mcset sv mInvincible 		{Oövervinnerlig}::msgcat::mcset sv mJealous 		{Svartsjuk}::msgcat::mcset sv mLonely 		{Ensam}::msgcat::mcset sv mMean 		{Snål}::msgcat::mcset sv mMoody 		Moody::msgcat::mcset sv mNervous 		{Nervös}::msgcat::mcset sv mNeutral 		{Neutral}::msgcat::mcset sv mOffended 		{Förolämpad}::msgcat::mcset sv mPlayful 		{Lekfull}::msgcat::mcset sv mProud 		{Stolt}::msgcat::mcset sv mRelieved 		{Lättad}::msgcat::mcset sv mRemorseful 		{Ångerfull}::msgcat::mcset sv mRestless 		Restless::msgcat::mcset sv mSad 		{Ledsen}::msgcat::mcset sv mSarcastic 		{Sarkastisk}::msgcat::mcset sv mSerious 		{Allvarlig}::msgcat::mcset sv mShocked 		{Chockad}::msgcat::mcset sv mShy 		{Blyg}::msgcat::mcset sv mSick 		{Sjuk}::msgcat::mcset sv mSleepy 		{Sömnig}::msgcat::mcset sv mStressed 		{Stressad}::msgcat::mcset sv mSurprised 		{Förvånad}::msgcat::mcset sv mThirsty 		{Törstig}::msgcat::mcset sv mWorried 		{Bekymrad}
 
 ::msgcat::mcset sv moodEvent             {Humörändring}
 ::msgcat::mcset sv moodRetracted         {tog tillbaka humör}
