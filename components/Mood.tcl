@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.44 2008-08-16 15:24:30 matben Exp $
+#  $Id: Mood.tcl,v 1.45 2008-08-16 16:48:54 matben Exp $
 
 package require jlib::pep
 
@@ -79,38 +79,30 @@ proc ::Mood::Init {} {
 	worried 
     }
     
-    variable mood2mLabel
-    array set mood2mLabel {
-	angry       mAngry
-	anxious     mAnxious
-	ashamed     mAshamed
-	bored       mBored
-	curious     mCurious
-	depressed   mDepressed
-	excited     mExcited
-	happy       mHappy
-	in_love     mInLove
-	invincible  mInvincible
-	jealous     mJealous
-	nervous     mNervous
-	sad         mSad
-	sleepy      mSleepy
-	stressed    mStressed
-	worried     mWorried
+    if {$config(mood,showall)} {
+	set moodL $allMoods
+    } else {
+	set moodL $myMoods
     }
-  
+    
+    # Sort the localized list of moods.
+    variable sortedLocMoods [list]
+    set moodLocL [list]
+    foreach mood $moodL {
+	lappend moodLocL [list $mood [mc "m[string totitle $mood]"]]
+    }
+    set moodLocL [lsort -dictionary -index 1 $moodLocL]
+    foreach spec $moodLocL {
+	lappend sortedLocMoods [lindex $spec 0]
+    }
+    
     variable menuDef
     set menuDef [list cascade mMood {} {} {} {}]
     set subMenu [list]
     set opts [list -variable ::Mood::menuMoodVar -value "-"]
     lappend subMenu [list radio None ::Mood::MenuCmd {} $opts]
     lappend subMenu {separator}
-    if {$config(mood,showall)} {
-	set moodL $allMoods
-    } else {
-	set moodL $myMoods
-    }
-    foreach mood $moodL {
+    foreach mood $sortedLocMoods {
 	set label "m[string totitle $mood]"
 	set opts [list -variable ::Mood::menuMoodVar -value $mood]
 	lappend subMenu [list radio $label ::Mood::MenuCmd {} $opts]
@@ -269,15 +261,26 @@ proc ::Mood::Retract {} {
     ::Jabber::Jlib pep retract $xmlns(mood) -notify 1
 }
 
+proc ::Mood::MakeMDef {} {
+    variable sortedLocMoods
+    
+    set mDef [list]
+    lappend mDef [list [mc None] -value "-"]
+    lappend mDef [list separator]    
+    foreach mood $sortedLocMoods {
+	set label "m[string totitle $mood]"
+	lappend mDef [list [mc $label] -value $mood \
+	  -image [::Theme::FindIconSize 16 mood-$mood]] 
+    }
+    return $mDef
+}
+
 #--------------------------------------------------------------
 #----------------- UI for Custom Mood Dialog ------------------
 #--------------------------------------------------------------
 
 proc ::Mood::CustomMoodDlg {} {
-    global  config
-    variable myMoods
-    variable allMoods
-    variable mood2mLabel
+    variable sortedLocMoods
     variable menuMoodVar
     variable moodMessageDlg
     variable moodStateDlg
@@ -294,12 +297,7 @@ proc ::Mood::CustomMoodDlg {} {
     set mDef [list]
     lappend mDef [list [mc None] -value "-"]
     lappend mDef [list separator]
-    if {$config(mood,showall)} {
-	set moodL $allMoods
-    } else {
-	set moodL $myMoods
-    }
-    foreach mood $moodL {
+    foreach mood $sortedLocMoods {
 	set label "m[string totitle $mood]"
 	lappend mDef [list [mc $label] -value $mood \
 	  -image [::Theme::FindIconSize 16 mood-$mood]] 
@@ -421,13 +419,10 @@ namespace eval ::Mood {
 }
 
 proc ::Mood::MPBuild {win} {
-    global  config
     variable imblank
     variable mpwin
-    variable myMoods
-    variable allMoods
-    variable mood2mLabel
     variable mpMood
+    variable sortedLocMoods
 
     set mpwin $win
     ttk::menubutton $win -style SunkenMenubutton \
@@ -442,12 +437,7 @@ proc ::Mood::MPBuild {win} {
       -variable [namespace current]::mpMood \
       -command [namespace code MPCmd]
     $m add separator
-    if {$config(mood,showall)} {
-	set moodL $allMoods
-    } else {
-	set moodL $myMoods
-    }      
-    foreach mood $moodL {
+    foreach mood $sortedLocMoods {
 	set label "m[string totitle $mood]"
 	$m add radiobutton -label [mc $label] -value $mood \
 	  -image [::Theme::FindIconSize 16 mood-$mood] \
@@ -465,7 +455,6 @@ proc ::Mood::MPCmd {} {
     variable mpwin
     variable mpMood
     variable imblank
-    variable mood2mLabel
     variable menuMoodVar
     
     if {$mpMood eq "-"} {
@@ -473,8 +462,9 @@ proc ::Mood::MPCmd {} {
 	::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc None]"
 	Retract
     } else {
+	set label "m[string totitle $mpMood]"
 	$mpwin configure -image [::Theme::FindIconSize 16 mood-$mpMood]	
-        ::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc $mood2mLabel($mpMood)]"
+        ::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc $label]"
 	Publish $mpMood ""
     }
     set menuMoodVar $mpMood
