@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.18 2008-08-06 13:05:17 matben Exp $
+#  $Id: UserActivity.tcl,v 1.19 2008-08-16 06:51:22 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -185,8 +185,16 @@ proc ::UserActivity::LoginHook {} {
 
 proc ::UserActivity::HavePEP {jlibname have} {
     variable menuDef
+    variable xmlns
 
     if {$have} {
+
+	# Get our own published activity and fill in.
+	# NB: I thought that this should work automatically but seems not.
+	set myjid2 [::Jabber::Jlib myjid2]
+	::Jabber::Jlib pubsub items $myjid2 $xmlns(activity) \
+	  -command [namespace code ItemsCB]
+
 	::JUI::RegisterMenuEntry action $menuDef
 	if {[MPExists]} {
 	    [MPWin] state {!disabled}
@@ -202,11 +210,16 @@ proc ::UserActivity::LogoutHook {} {
     }
 }
 
+namespace eval ::UserActivity {
+    variable dialogL [list]
+}
+
 proc ::UserActivity::Dlg {} {
     variable allActivities    
     variable subActivities
     variable xmlns
-        
+    variable dialogL
+    
     set w [ui::dialog -message [mc activityPickMsg] \
       -detail [mc activityPickDtl] -icon info \
       -buttons {ok cancel remove} \
@@ -223,6 +236,8 @@ proc ::UserActivity::Dlg {} {
     set state(specific) -
     set state(text) ""
     set state(all) 0
+    
+    lappend dialogL $w
 
     set mDef [list]
     foreach name $allActivities {
@@ -257,8 +272,8 @@ proc ::UserActivity::Dlg {} {
             
     # Get our own published activity and fill in.
     set myjid2 [::Jabber::Jlib  myjid2]
-    set cb [namespace code [list ItemsCB $w]]
-    ::Jabber::Jlib pubsub items $myjid2 $xmlns(activity) -command $cb
+    ::Jabber::Jlib pubsub items $myjid2 $xmlns(activity) \
+      -command [namespace code ItemsCB]
 
 }
 
@@ -317,66 +332,85 @@ proc ::UserActivity::DlgCmd {w bt} {
     variable $w
     upvar 0 $w state
     variable xmlns
+    variable dialogL
     
     if {$bt eq "ok"} {
 	Publish $state(activity) $state(specific) $state(text)
     } elseif {$bt eq "remove"} {
 	Retract
     }
+    if {[MPExists]} {
+	MPSetActivity $state(activity)
+    }
     unset -nocomplain state
+    set dialogL [lsearch -inline -all -not $dialogL $w]
 }
 
-proc ::UserActivity::ItemsCB {w type subiq args} {
-    variable $w
-    upvar 0 $w state
+proc ::UserActivity::ItemsCB {type subiq args} {
     variable xmlns
     variable subActivities
+    variable dialogL
     
     if {$type eq "error"} {
 	return
-    }    
-    if {[winfo exists $w]} {
-	foreach itemsE [wrapper::getchildren $subiq] {
-	    set tag [wrapper::gettag $itemsE]
-	    set node [wrapper::getattribute $itemsE "node"]
-	    if {[string equal $tag "items"] && [string equal $node $xmlns(activity)]} {
-		set itemE [wrapper::getfirstchildwithtag $itemsE item]
-		set activityE [wrapper::getfirstchildwithtag $itemE activity]
-		if {![llength $activityE]} {
-		    return
-		}
-		foreach E [wrapper::getchildren $activityE] {
-		    set tag [wrapper::gettag $E]
-		    switch -- $tag {
-			text {
-			    set state(text) [wrapper::getcdata $E]
+    }   
+    
+    set activity -
+    set specific -
+    set activityText ""
+    
+    foreach itemsE [wrapper::getchildren $subiq] {
+	set tag [wrapper::gettag $itemsE]
+	set node [wrapper::getattribute $itemsE "node"]
+	if {[string equal $tag "items"] && [string equal $node $xmlns(activity)]} {
+	    set itemE [wrapper::getfirstchildwithtag $itemsE item]
+	    set activityE [wrapper::getfirstchildwithtag $itemE activity]
+	    if {![llength $activityE]} {
+		return
+	    }
+	    foreach E [wrapper::getchildren $activityE] {
+		set tag [wrapper::gettag $E]
+		switch -- $tag {
+		    text {
+			set activityText [wrapper::getcdata $E]
+		    }
+		    default {
+			if {![info exists subActivities($tag)]} {
+			    return
 			}
-			default {
-			    if {![info exists subActivities($tag)]} {
-				return
-			    }
-			    set activity $tag
-			    set state(activity) $activity
-			    set specificE [lindex [wrapper::getchildren $E] 0]
-			    if {[llength $specificE]} {
-				set specific [wrapper::gettag $specificE]
-				if {[lsearch $subActivities($activity) $specific] >= 0} {
-				    set state(specific) $specific
-				} else {
-				    set state(specific) -
-				}
-			    } else {
+			set activity $tag
+			set specificE [lindex [wrapper::getchildren $E] 0]
+			if {[llength $specificE]} {
+			    set specific [wrapper::gettag $specificE]
+			    if {[lsearch $subActivities($activity) $specific] < 0} {
 				set state(specific) -
 			    }
-			    if {[MPExists]} {
-				MPDisplayActivity $activity
-			    }
+			} else {
+			    set state(specific) -
 			}
 		    }
 		}
 	    }
 	}
     }
+    if {[MPExists]} {
+	MPDisplayActivity $activity
+    }
+    
+    foreach w $dialogL {
+	if {[winfo exists $w]} {
+	    SetDlg $w $activity $specific $activityText
+	}
+    }
+}
+
+proc ::UserActivity::SetDlg {w activity specific text} {
+    variable $w
+    upvar 0 $w state
+    
+    set state(activity) $activity
+    set state(specific) $specific
+    set state(text) $text
 }
 
 proc ::UserActivity::Publish {activity specific text} {
@@ -550,6 +584,7 @@ proc ::UserActivity::MPCmd {} {
 proc ::UserActivity::MPDisplayActivity {activity} {
     variable mpwin
     variable mpActivity
+    variable imblank
 
     set mpActivity $activity
     
