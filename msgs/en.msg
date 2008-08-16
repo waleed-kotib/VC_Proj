@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.251 2008-08-08 08:09:37 matben Exp $
+#   $Id: en.msg,v 1.252 2008-08-16 15:24:30 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -1189,25 +1189,71 @@ if {0} {
 # Messages for Mood XEP
 # bug: this should be M&ood..., but this does not work!
 ::msgcat::mcset en mMood        Mood 
-::msgcat::mcset en mAngry       Angry
-::msgcat::mcset en mAnxious     Anxious
-::msgcat::mcset en mAshamed     Ashamed
-::msgcat::mcset en mBored       Bored
-::msgcat::mcset en mCurious     Curious
-::msgcat::mcset en mDepressed   Depressed
-::msgcat::mcset en mExcited     Excited
-::msgcat::mcset en mHappy       Happy
-::msgcat::mcset en mInLove      {In love}
-::msgcat::mcset en mInvincible  Invincible
-::msgcat::mcset en mJealous     Jealous
-::msgcat::mcset en mNervous     Nervous
-::msgcat::mcset en mSad         Sad
-::msgcat::mcset en mSleepy      Sleepy
-::msgcat::mcset en mStressed    Stressed
-::msgcat::mcset en mWorried     Worried
+::msgcat::mcset en mAfraid Afraid
+::msgcat::mcset en mAmazed Amazed
+::msgcat::mcset en mAngry Angry
+::msgcat::mcset en mAnnoyed Annoyed
+::msgcat::mcset en mAnxious Anxious
+::msgcat::mcset en mAroused Aroused
+::msgcat::mcset en mAshamed Ashamed
+::msgcat::mcset en mBored Bored
+::msgcat::mcset en mBrave Brave
+::msgcat::mcset en mCalm Calm
+::msgcat::mcset en mCold Cold
+::msgcat::mcset en mConfused Confused
+::msgcat::mcset en mContented Contented
+::msgcat::mcset en mCranky Cranky
+::msgcat::mcset en mCurious Curious
+::msgcat::mcset en mDepressed Depressed
+::msgcat::mcset en mDisappointed Disappointed
+::msgcat::mcset en mDisgusted Disgusted
+::msgcat::mcset en mDistracted Distracted
+::msgcat::mcset en mEmbarrassed Embarrassed
+::msgcat::mcset en mExcited Excited
+::msgcat::mcset en mFlirtatious Flirtatious
+::msgcat::mcset en mFrustrated Frustrated
+::msgcat::mcset en mGrumpy Grumpy
+::msgcat::mcset en mGuilty Guilty
+::msgcat::mcset en mHappy Happy
+::msgcat::mcset en mHot Hot
+::msgcat::mcset en mHumbled Humbled
+::msgcat::mcset en mHumiliated Humiliated
+::msgcat::mcset en mHungry Hungry
+::msgcat::mcset en mHurt Hurt
+::msgcat::mcset en mImpressed Impressed
+::msgcat::mcset en mIn_awe {In awe}
+::msgcat::mcset en mIn_love {In love}
+::msgcat::mcset en mIndignant Indignant
+::msgcat::mcset en mInterested Interested
+::msgcat::mcset en mIntoxicated Intoxicated
+::msgcat::mcset en mInvincible Invincible
+::msgcat::mcset en mJealous Jealous
+::msgcat::mcset en mLonely Lonely
+::msgcat::mcset en mMean Mean
+::msgcat::mcset en mMoody Moody
+::msgcat::mcset en mNervous Nervous
+::msgcat::mcset en mNeutral Neutral
+::msgcat::mcset en mOffended Offended
+::msgcat::mcset en mPlayful Playful
+::msgcat::mcset en mProud Proud
+::msgcat::mcset en mRelieved Relieved
+::msgcat::mcset en mRemorseful Remorseful
+::msgcat::mcset en mRestless Restless
+::msgcat::mcset en mSad Sad
+::msgcat::mcset en mSarcastic Sarcastic
+::msgcat::mcset en mSerious Serious
+::msgcat::mcset en mShocked Shocked
+::msgcat::mcset en mShy Shy
+::msgcat::mcset en mSick Sick
+::msgcat::mcset en mSleepy Sleepy
+::msgcat::mcset en mStressed Stressed
+::msgcat::mcset en mSurprised Surprised
+::msgcat::mcset en mThirsty Thirsty
+::msgcat::mcset en mWorried Worried
 
 ::msgcat::mcset en moodEvent   {Mood change}
 ::msgcat::mcset en moodRetracted {retracted mood}
+# Why not reuse them above?
 ::msgcat::mcset en heIs        is
 ::msgcat::mcset en because     because
 ::msgcat::mcset en angry       angry
