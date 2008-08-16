@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.45 2008-08-16 16:48:54 matben Exp $
+#  $Id: Mood.tcl,v 1.46 2008-08-16 16:49:37 matben Exp $
 
 package require jlib::pep
 
@@ -259,20 +259,6 @@ proc ::Mood::Retract {} {
     variable xmlns
     
     ::Jabber::Jlib pep retract $xmlns(mood) -notify 1
-}
-
-proc ::Mood::MakeMDef {} {
-    variable sortedLocMoods
-    
-    set mDef [list]
-    lappend mDef [list [mc None] -value "-"]
-    lappend mDef [list separator]    
-    foreach mood $sortedLocMoods {
-	set label "m[string totitle $mood]"
-	lappend mDef [list [mc $label] -value $mood \
-	  -image [::Theme::FindIconSize 16 mood-$mood]] 
-    }
-    return $mDef
 }
 
 #--------------------------------------------------------------
