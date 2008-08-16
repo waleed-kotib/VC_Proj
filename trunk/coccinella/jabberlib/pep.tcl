@@ -9,7 +9,7 @@
 #  
 # This file is distributed under BSD style license.
 #
-# $Id: pep.tcl,v 1.10 2007-09-06 13:20:47 matben Exp $
+# $Id: pep.tcl,v 1.11 2008-08-16 06:33:07 matben Exp $
 #
 ############################# USAGE ############################################
 #
@@ -37,6 +37,16 @@
 #   NB:  It is currently unclear there should be an id attribute in the item
 #        element since PEP doesn't use it but pubsub do, and the experimental
 #        OpenFire PEP implementation.
+# 
+# NB: This seems not to work with ejabberd:
+#
+# 4.3.4 Sending the Last Published Item
+# As mentioned, a PEP service MUST send the last published item to all 
+# new subscribers and to all newly-available resources for each subscriber,
+# including the account owner itself. (That is, the default value 
+# of the "pubsub#send_last_published_item" node configuration field must 
+# be "on_sub_and_presence"; this behavior essentially mimics the 
+# functionality of presence as defined in XMPP IM.)
 
 package require jlib::disco
 package require jlib::pubsub
@@ -169,6 +179,12 @@ proc jlib::pep::create {jlibname node args} {
 # Results:
 #       none
 
+# BUG: http://www.xmpp.org/extensions/xep-0163.html
+#       "Because PEP services must send notifications to the account owner, 
+#       you too receive the notification at each of your resources..."
+#
+#       This seems not to be working!
+
 proc jlib::pep::publish {jlibname node itemE args} {
     eval {$jlibname pubsub publish $node -items [list $itemE]} $args
 }
@@ -215,118 +231,6 @@ proc jlib::pep::subscribe {jlibname jid node args} {
     # it MUST subscribe to a node using....
     set myjid2 [$jlibname myjid2]
     eval {$jlibname pubsub subscribe $jid $myjid2 -node $node} $args
-}
-
-# @@@ OUTDATED; BACKUP !!!!!!!!!!!!!!!
-
-# jlib::pep::set_auto_subscribe --
-# 
-#       Subscribe all available users automatically.
-
-proc jlib::pep::set_auto_subscribe {jlibname node args} {    
-    upvar ${jlibname}::pep::autosub  autosub
-
-    array set argsA {
-	-command    {}
-    }
-    array set argsA $args
-    set autosub($node,node) $node
-    set autosub($node,-command) $argsA(-command)
-    
-    # For those where we've already got presence.
-    set jidL [$jlibname roster getusers -type available]
-    foreach jid $jidL {
-	
-	# We may not yet have disco info for this.
-	if {[$jlibname disco iscategorytype gateway/* $jid]} {
-	    continue
-	}
-	
-	# If Juliet's server supports PEP (thereby making juliet@capulet.com 
-	# a virtual pubsub service), it MUST return an identity of "pubsub/pep"
-	$jlibname disco get_async items $jid  \
-	  [list [namespace current]::OnDiscoItems $node]
-    }
-    
-    # And register an event handler for any presence.    
-    if {!$autosub(presreg)} {
-	set autosub(presreg) 1
-	$jlibname presence_register_int available  \
-	  [namespace code [list PresenceEvent $node]]
-    }
-}
-
-proc jlib::pep::list_auto_subscribe {jlibname} {
-    upvar ${jlibname}::pep::autosub  autosub
-    
-    set nodes {}
-    foreach {key node} [array get autosub *,node] {
-	lappend nodes $node
-    }
-    return $nodes
-}
-
-proc jlib::pep::have_auto_subscribe {jlibname node} {
-    upvar ${jlibname}::pep::autosub  autosub
-    
-    return [info exists autosub($node,node)]
-}
-
-proc jlib::pep::unset_auto_subscribe {jlibname node} {
-    upvar ${jlibname}::pep::autosub  autosub
-    
-    array unset autosub $node,*
-    if {![llength [array names autosub *,node]]} {
-	set autosub(presreg) 0
-	$jlibname presence_deregister_int available \
-	  [namespace code [list PresenceEvent $node]]
-    }
-}
-
-proc jlib::pep::PresenceEvent {jlibname xmldata node} {
-    upvar ${jlibname}::pep::autosub  autosub
-    variable state
-    
-    set type [wrapper::getattribute $xmldata type]
-    set from [wrapper::getattribute $xmldata from]
-    if {$type eq ""} {
-        set type "available"
-    }
-    set jid2 [jlib::barejid $from]
-    if {![$jlibname roster isitem $jid2]} {
-        return
-    }
-    if {[$jlibname disco iscategorytype gateway/* $from]} {
-        return
-    }
-    
-    # We should be careful not to disco/publish for each presence change.
-    # @@@ There is a small glitch here if user changes presence before we
-    #     received its disco result.
-    if {![$jlibname disco isdiscoed info $from]} {
-	foreach {key node} [array get autosub $node,*] {
-	    $jlibname disco get_async items $jid2  \
-	      [list [namespace current]::OnDiscoItems $node]
-	}
-    }
-}
-
-proc jlib::pep::OnDiscoItems {node jlibname type from subiq args} {
-    
-    # Get contact PEP nodes.
-    if {$type eq "result"} {
-	set nodes [$jlibname disco nodes $from]
-	if {[lsearch -exact $nodes $node] >= 0} {
-
-	    # NEW PEP:
-	    # If an entity is not subscribed to the account owner's presence, 
-	    # it MUST subscribe to a node using....
-	    set subscribe [$jlibname roster getsubscription $from]
-	    set myjid2 [$jlibname myjid2]
-	    $jlibname pubsub subscribe $from $myjid2 -node $node  \
-	      -command $autosub($node,-command)
-	}
-    }
 }
 
 # We have to do it here since need the initProc before doing this.
