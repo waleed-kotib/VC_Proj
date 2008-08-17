@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Status.tcl,v 1.55 2008-08-14 10:52:34 matben Exp $
+# $Id: Status.tcl,v 1.56 2008-08-17 14:43:26 matben Exp $
 
 package provide Status 1.0
 
@@ -753,7 +753,8 @@ proc ::Status::ExBuildMenu {m varName args} {
 	}
 	$m add separator
     }
-    $m add command -label [mc mCustomStatus...] -accelerator $mod+B \
+    set label [string map {& ""} [mc mCustomStatus...]]
+    $m add command -label $label -accelerator $mod+B \
       -command [concat ::Status::ExCustomDlg $varName $args]
     update idletasks
     

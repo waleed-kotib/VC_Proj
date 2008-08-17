@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.150 2008-08-16 15:24:30 matben Exp $
+#   $Id: sv.msg,v 1.151 2008-08-17 14:43:27 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -1250,6 +1250,7 @@ if {0} {
 # Messages for User Activity XEP
 ::msgcat::mcset sv Activity              {Aktivitet}
 ::msgcat::mcset sv mActivity...          {Aktivitet...}
+::msgcat::mcset sv mCustomActivity...    {Anpassad aktivitet...}
 
 ::msgcat::mcset sv Traveling             {Traveling}
 ::msgcat::mcset sv Commuting             {Commuting}
