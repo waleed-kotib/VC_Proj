@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.46 2008-08-16 16:49:37 matben Exp $
+#  $Id: Mood.tcl,v 1.47 2008-08-17 07:01:04 matben Exp $
 
 package require jlib::pep
 
@@ -227,7 +227,7 @@ proc ::Mood::MenuCmd {} {
 	Publish $menuMoodVar
     }
     if {[MPExists]} {
-	MPSetMood $menuMoodVar
+	MPDisplayMood $menuMoodVar
     }
 }
 
@@ -438,22 +438,30 @@ proc ::Mood::MPBuild {win} {
 }
 
 proc ::Mood::MPCmd {} {
-    variable mpwin
     variable mpMood
-    variable imblank
     variable menuMoodVar
     
     if {$mpMood eq "-"} {
-	$mpwin configure -image $imblank
-	::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc None]"
 	Retract
     } else {
-	set label "m[string totitle $mpMood]"
-	$mpwin configure -image [::Theme::FindIconSize 16 mood-$mpMood]	
-        ::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc $label]"
 	Publish $mpMood ""
     }
     set menuMoodVar $mpMood
+    MPDisplayMood $mpMood
+}
+
+proc ::Mood::MPDisplayMood {mood} {
+    variable mpwin
+    variable imblank
+    
+    if {$mood eq "-"} {
+	$mpwin configure -image $imblank
+	::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc None]"
+    } else {
+	set label "m[string totitle $mood]"
+	$mpwin configure -image [::Theme::FindIconSize 16 mood-$mood]	
+        ::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc $label]"
+    }
 }
 
 proc ::Mood::MPSetMood {mood} {

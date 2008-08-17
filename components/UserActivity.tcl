@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.19 2008-08-16 06:51:22 matben Exp $
+#  $Id: UserActivity.tcl,v 1.20 2008-08-17 07:01:04 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -336,11 +336,14 @@ proc ::UserActivity::DlgCmd {w bt} {
     
     if {$bt eq "ok"} {
 	Publish $state(activity) $state(specific) $state(text)
+	if {[MPExists]} {
+	    MPDisplayActivity $state(activity)
+	}
     } elseif {$bt eq "remove"} {
 	Retract
-    }
-    if {[MPExists]} {
-	MPSetActivity $state(activity)
+	if {[MPExists]} {
+	    MPDisplayActivity -
+	}
     }
     unset -nocomplain state
     set dialogL [lsearch -inline -all -not $dialogL $w]
@@ -572,7 +575,7 @@ proc ::UserActivity::MPCmd {} {
     variable mpwin
     variable mpActivity
     variable imblank
-    
+        
     if {$mpActivity eq "-"} {
 	Retract
     } else {
@@ -585,7 +588,7 @@ proc ::UserActivity::MPDisplayActivity {activity} {
     variable mpwin
     variable mpActivity
     variable imblank
-
+    
     set mpActivity $activity
     
     if {$activity eq "-"} {
