@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyOnline.tcl,v 1.4 2007-11-17 07:40:52 matben Exp $
+# $Id: NotifyOnline.tcl,v 1.5 2008-08-17 07:01:04 matben Exp $
 
 package require http
 
@@ -46,7 +46,7 @@ proc ::NotifyOnline::Init {} {
     ::hooks::register initHook ::NotifyOnline::InitHook
 }
 
-proc ::NotifyOnline::InitHook { } {
+proc ::NotifyOnline::InitHook {} {
     global  config
     
     if {$config(notifyonline,do)} {
