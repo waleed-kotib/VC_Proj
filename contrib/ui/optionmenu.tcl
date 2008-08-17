@@ -6,7 +6,7 @@
 #  
 # This file is distributed under BSD style license.
 #       
-# $Id: optionmenu.tcl,v 1.28 2008-08-04 08:11:02 matben Exp $
+# $Id: optionmenu.tcl,v 1.29 2008-08-17 06:38:47 matben Exp $
 
 package require snit 1.0
 
@@ -119,6 +119,9 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    if {[info exists val2name($value)]} {
 		set menuVar $value
 		set nameVar $val2name($value)
+	    }
+	    if {[info exists val2im($value)]} {
+		$win configure -image $val2im($value)
 	    }
 	}
     }
