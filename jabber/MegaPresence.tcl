@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.18 2008-08-15 13:17:24 matben Exp $
+# $Id: MegaPresence.tcl,v 1.19 2008-08-17 07:08:09 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -32,6 +32,8 @@ namespace eval ::MegaPresence {
     set widgets(all) [list]
     
     ::JUI::SlotRegister megapresence [namespace code Build] -priority 20
+    
+    set ::config(megapresence,pack-side) right
 }
 
 proc ::MegaPresence::Register {name label cmd} {
@@ -103,7 +105,17 @@ proc ::MegaPresence::Build {w args} {
 
     ::balloonhelp::balloonforwindow $box.avatar [mc Avatar]
 
-    set column 1
+    if {$config(megapresence,pack-side) eq "right"} {
+	ttk::frame $box.pad
+	grid  $box.pad  -column 1 -sticky ew
+	grid columnconfigure $box 1 -weight 1
+	set column 2	
+    } else {
+	ttk::frame $box.pad
+	grid  $box.pad  -column 99 -sticky ew
+	grid columnconfigure $box 99 -weight 1
+	set column 1
+    }
     foreach name $widgets(all) {
 	set opts [uplevel #0 $widgets($name,cmd) $box.$column]
 	eval {grid  $box.$column  -row 0 -column $column -padx 4} $opts
@@ -117,11 +129,7 @@ proc ::MegaPresence::Build {w args} {
 	::balloonhelp::balloonforwindow $box.$column $widgets($name,label)
 	
 	incr column
-    }
-    
-    ttk::frame $box.pad
-    grid  $box.pad  -column 99 -sticky ew
-    grid columnconfigure $box 99 -weight 1
+    }    
     
     set slot(w)     $w
     set slot(show)  0
