@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.274 2008-08-15 13:17:24 matben Exp $
+# $Id: JUI.tcl,v 1.275 2008-08-17 13:02:29 matben Exp $
 
 package provide JUI 1.0
 
@@ -908,7 +908,11 @@ namespace eval ::JUI {
 proc ::JUI::SlotInitPrefsHook {} {
     global  jprefs
     
-    set jprefs(slot,mapped) [list]
+    # We keep track of pref values of which slot is mapped here.
+    # Then each slot just asks for it. This solution is simpler than if
+    # each slot need its own prefs.
+    # The initial state always show the Mege Presence slot.
+    set jprefs(slot,mapped) {megapresence}
     
     ::PrefUtils::Add [list \
       [list jprefs(slot,mapped) jprefs_slot_mapped $jprefs(slot,mapped)]  \
