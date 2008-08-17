@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.47 2008-08-17 07:01:04 matben Exp $
+#  $Id: Mood.tcl,v 1.48 2008-08-17 14:43:26 matben Exp $
 
 package require jlib::pep
 
@@ -275,8 +275,8 @@ proc ::Mood::CustomMoodDlg {} {
     set moodMessageDlg ""
     
     set w [ui::dialog -message [mc moodPickMsg] -detail [mc moodPickDtl] \
-      -icon info \
-      -type okcancel -modal 1 -geovariable ::prefs(winGeom,customMood) \
+      -buttons {ok cancel remove} -icon info \
+      -modal 1 -geovariable ::prefs(winGeom,customMood) \
       -title [mc "Custom Mood"] -command [namespace code CustomCmd]]
     set fr [$w clientframe]
 
@@ -288,7 +288,8 @@ proc ::Mood::CustomMoodDlg {} {
 	lappend mDef [list [mc $label] -value $mood \
 	  -image [::Theme::FindIconSize 16 mood-$mood]] 
     }
-    ttk::label $fr.lmood -text "[mc mMood]:"     
+    set label "[string map {& ""} [mc mMood]]:"
+    ttk::label $fr.lmood -text $label     
     ui::optionmenu $fr.cmood -menulist $mDef -direction flush \
       -variable [namespace current]::moodStateDlg
 
@@ -323,6 +324,12 @@ proc ::Mood::CustomCmd {w bt} {
 	set menuMoodVar $moodStateDlg	
 	if {[MPExists]} {
 	    MPSetMood $moodStateDlg
+	}
+    } elseif {$bt eq "remove"} {
+	Retract
+	set menuMoodVar -	
+	if {[MPExists]} {
+	    MPSetMood -
 	}
     }
 }
@@ -382,7 +389,8 @@ proc ::Mood::Event {jlibname xmldata} {
 		if {$mood eq ""} {
 		    set msg ""
 		} else {
-		    set msg "[mc mMood]: [mc $mood] $text"
+		    set mstr [string map {& ""} [mc mMood]]
+		    set msg "$mstr: [mc $mood] $text"
 		}
 	    }
 	    ::RosterTree::BalloonRegister mood $from $msg
@@ -431,7 +439,7 @@ proc ::Mood::MPBuild {win} {
 	  -command [namespace code MPCmd] -compound left
     }    
     $m add separator
-    $m add command -label [mc Dialog]... \
+    $m add command -label [string map {& ""} [mc mCustomMood...]] \
       -command [namespace code CustomMoodDlg]
     set mpMood "-"
     return

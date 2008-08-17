@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.20 2008-08-17 07:01:04 matben Exp $
+#  $Id: UserActivity.tcl,v 1.21 2008-08-17 14:43:26 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -240,6 +240,8 @@ proc ::UserActivity::Dlg {} {
     lappend dialogL $w
 
     set mDef [list]
+    lappend mDef [list [mc None] -value "-"]
+    lappend mDef {separator}
     foreach name $allActivities {
 	set dname [string totitle [string map {_ " "} $name]]
 	lappend mDef [list [mc $dname] -value $name \
@@ -311,18 +313,20 @@ proc ::UserActivity::ConfigSpecificMenu {w activity} {
     
     set mDef [list]
     lappend mDef [list [mc None] -value "-"]
-    lappend mDef [list separator]
-    if {$state(all)} {
-	foreach name $allSpecific {
-	    set dname [string totitle [string map {_ " "} $name]]
-	    lappend mDef [list [mc $dname] -value $name \
-	      -image [::Theme::FindIconSize 16 activity-$name]]
-	}
-    } else {
-	foreach name $subActivities($activity) {
-	    set dname [string totitle [string map {_ " "} $name]]
-	    lappend mDef [list [mc $dname] -value $name \
-	      -image [::Theme::FindIconSize 16 activity-$name]]
+    if {$activity ne "-"} {
+	lappend mDef [list separator]
+	if {$state(all)} {
+	    foreach name $allSpecific {
+		set dname [string totitle [string map {_ " "} $name]]
+		lappend mDef [list [mc $dname] -value $name \
+		  -image [::Theme::FindIconSize 16 activity-$name]]
+	    }
+	} else {
+	    foreach name $subActivities($activity) {
+		set dname [string totitle [string map {_ " "} $name]]
+		lappend mDef [list [mc $dname] -value $name \
+		  -image [::Theme::FindIconSize 16 activity-$name]]
+	    }
 	}
     }
     $fr.specific configure -menulist $mDef
@@ -335,7 +339,11 @@ proc ::UserActivity::DlgCmd {w bt} {
     variable dialogL
     
     if {$bt eq "ok"} {
-	Publish $state(activity) $state(specific) $state(text)
+	if {$state(activity) eq "-"} {
+	    Retract
+	} else {
+	    Publish $state(activity) $state(specific) $state(text)
+	}
 	if {[MPExists]} {
 	    MPDisplayActivity $state(activity)
 	}
@@ -369,7 +377,7 @@ proc ::UserActivity::ItemsCB {type subiq args} {
 	    set itemE [wrapper::getfirstchildwithtag $itemsE item]
 	    set activityE [wrapper::getfirstchildwithtag $itemE activity]
 	    if {![llength $activityE]} {
-		return
+		continue
 	    }
 	    foreach E [wrapper::getchildren $activityE] {
 		set tag [wrapper::gettag $E]
@@ -565,8 +573,7 @@ proc ::UserActivity::MPBuild {win} {
 	  -command [namespace code MPCmd] -compound left
     }    
     $m add separator
-    $m add command -label [mc Dialog]... -command [namespace code Dlg]
-    
+    $m add command -label [mc mCustomActivity...] -command [namespace code Dlg]
     set mpActivity "-"
     return
 }
