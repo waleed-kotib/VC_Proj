@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.29 2008-08-18 09:40:46 matben Exp $
+# $Id: NotifyCall.tcl,v 1.30 2008-08-18 09:42:44 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -33,7 +33,7 @@ proc ::NotifyCall::Init {} {
     
     # How shall the phone be dispayed: slot|dialog
     set ::config(phone,notify,type) dialog
-    set ::config(phone,notify,type) slot
+    #set ::config(phone,notify,type) slot
 }
 
 # These are the interfaces that the Phone component calls.......................
