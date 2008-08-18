@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.28 2008-08-17 14:43:26 matben Exp $
+# $Id: NotifyCall.tcl,v 1.29 2008-08-18 09:40:46 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -30,11 +30,86 @@ proc ::NotifyCall::Init {} {
     ::hooks::register  avatarNewPhotoHook   ::NotifyCall::AvatarNewPhotoHook
 
     variable wmain .notifycall
-    variable wslot -
     
     # How shall the phone be dispayed: slot|dialog
     set ::config(phone,notify,type) dialog
-    #set ::config(phone,notify,type) slot
+    set ::config(phone,notify,type) slot
+}
+
+# These are the interfaces that the Phone component calls.......................
+
+proc ::NotifyCall::SubjectEvent {textmessage} {
+
+    # Adding the Subject from Caller
+
+}
+
+proc ::NotifyCall::IncomingEvent {callNo remote remote_name} {
+    global config
+
+    ::Debug 4 "::NotifyCall::IncomingEvent $callNo $remote $remote_name"
+    
+    set phoneNameInput $remote
+    set phoneNumberInput $remote_name
+    if {$config(phone,notify,type) eq "dialog"} {
+	InboundCall $callNo "$phoneNameInput ($phoneNumberInput)"
+    } elseif {$config(phone,notify,type) eq "slot"} {
+	::NotifyCallSlot::InboundCall $callNo "$phoneNameInput ($phoneNumberInput)"
+    }
+}
+
+proc ::NotifyCall::OutgoingEvent {remote_name} {
+    global config
+
+    ::Debug 4 "::NotifyCall::OutgoingEvent"
+    
+    set phoneNameInput $remote_name
+    if {$config(phone,notify,type) eq "dialog"} {
+	OutboundCall 1 $phoneNameInput
+    } elseif {$config(phone,notify,type) eq "slot"} {
+	::NotifyCallSlot::OutboundCall 1 $phoneNameInput
+    }
+}
+
+proc ::NotifyCall::HangupEvent {args} {
+    global config
+    variable wmain
+
+    if {$config(phone,notify,type) eq "dialog"} {
+	destroy $wmain
+    } elseif {$config(phone,notify,type) eq "slot"} {
+	::NotifyCallSlot::HangupEvent
+    }
+}
+
+proc ::NotifyCall::TalkingEvent {args} {
+    global config
+    variable wmain
+    
+    # What to do when user is talking
+    if {$config(phone,notify,type) eq "dialog"} {
+	SetTalkingState [GetFrame $wmain]
+    } elseif {$config(phone,notify,type) eq "slot"} {
+	# ???
+    }
+}
+
+proc ::NotifyCall::LevelEvent {in out} {
+    global config
+    variable wmain
+    
+    if {$config(phone,notify,type) eq "dialog"} {
+	if {[winfo exists $wmain]} {
+	    set win [GetFrame $wmain]
+	    variable $win
+	    upvar #0 $win state
+	    
+	    set state(inlevel)  $in
+	    set state(outlevel) $out
+	}
+    } elseif {$config(phone,notify,type) eq "slot"} {
+	::NotifyCallSlot::LevelEvent $in $out
+    }
 }
 
 #-----------------------------------------------------------------------
@@ -45,16 +120,10 @@ proc ::NotifyCall::Init {} {
 # 
 
 proc ::NotifyCall::InboundCall { {line ""} {phoneNumber ""} } {
-    global config
     variable wmain
-    variable wslot
     
     if { $phoneNumber ne "" } { 
-	if {$config(phone,notify,type) eq "dialog"} {
-	    Toplevel $wmain $line $phoneNumber "in"
-	} elseif {$config(phone,notify,type) eq "slot"} {
-	    set wslot [::NotifyCallSlot::InboundCall $line $phoneNumber]
-	}
+	Toplevel $wmain $line $phoneNumber "in"
     }
 }
 
@@ -62,16 +131,10 @@ proc ::NotifyCall::InboundCall { {line ""} {phoneNumber ""} } {
 #
 
 proc ::NotifyCall::OutboundCall { {line ""} {phoneNumber ""} } {
-    global config
     variable wmain
-    variable wslot
 
     if { $phoneNumber ne "" } {
-	if {$config(phone,notify,type) eq "dialog"} {
-	    Toplevel $wmain $line $phoneNumber "out"
-	} elseif {$config(phone,notify,type) eq "slot"} {
-	    set wslot [::NotifyCallSlot::OutboundCall $line $phoneNumber]
-	}
+	Toplevel $wmain $line $phoneNumber "out"
     }
 }
 
@@ -397,67 +460,6 @@ proc ::NotifyCall::TimeUpdate {time} {
     }
 }
 
-proc ::NotifyCall::Free {win} {
-    variable $win
-    upvar #0 $win state
-    
-    unset -nocomplain state
-}
-
-# These are the interfaces that the Phone component calls.......................
-
-proc ::NotifyCall::SubjectEvent {textmessage} {
-
-    # Adding the Subject from Caller
-
-}
-
-proc ::NotifyCall::IncomingEvent {callNo remote remote_name} {
-
-    ::Debug 4 "::NotifyCall::IncomingEvent $callNo $remote $remote_name"
-    
-    set phoneNameInput $remote
-    set phoneNumberInput $remote_name
-    InboundCall $callNo "$phoneNameInput ($phoneNumberInput)"
-}
-
-proc ::NotifyCall::OutgoingEvent {remote_name} {
-
-    ::Debug 4 "::NotifyCall::OutgoingEvent"
-    
-    set phoneNameInput $remote_name
-    OutboundCall 1 $phoneNameInput
-}
-
-proc ::NotifyCall::HangupEvent {args} {
-    variable wmain
-
-    destroy $wmain
-}
-
-proc ::NotifyCall::TalkingEvent {args} {
-    variable wmain
-    
-    # What to do when user is talking
-    SetTalkingState [GetFrame $wmain]
-}
-
-proc ::NotifyCall::LevelEvent {in out} {
-    variable wmain
-    variable wslot
-    
-    if {[winfo exists $wmain]} {
-	set win [GetFrame $wmain]
-	variable $win
-	upvar #0 $win state
-    
-	set state(inlevel)  $in
-	set state(outlevel) $out
-    } elseif {[winfo exists $wslot]} {
-	::NotifyCallSlot::LevelEvent $in $out
-    }
-}
-
 proc ::NotifyCall::AvatarNewPhotoHook {jid2} {
     variable wmain
 
@@ -482,6 +484,13 @@ proc ::NotifyCall::AvatarNewPhotoHook {jid2} {
     }
 }
 
+proc ::NotifyCall::Free {win} {
+    variable $win
+    upvar #0 $win state
+    
+    unset -nocomplain state
+}
+
 #--- Experiment using slots ----------------------------------------------------
 
 namespace eval ::NotifyCallSlot {
@@ -490,13 +499,63 @@ namespace eval ::NotifyCallSlot {
     option add *NotifyCallSlot.box.padding   {4 2 8 2}     50
     option add *NotifyCallSlot*TLabel.style  Small.TLabel  widgetDefault
     
-    ::JUI::SlotRegister notifycall [namespace code BuildEmpty]
+    ::JUI::SlotRegister notifycall [namespace code BuildEmpty] -priority 90
 
     variable images
     set images(microphone) [::Theme::FindIconSize 16 audio-input-microphone]
     set images(speaker)    [::Theme::FindIconSize 16 audio-output-speaker]
     set images(online)     [::Theme::FindIconSize 16 phone-online]
     set images(talk)       [::Theme::FindIconSize 16 phone-talk]
+
+}
+
+# Event handlers.
+
+proc ::NotifyCallSlot::InboundCall {line number} {
+    return [CallEvent $line $number in]
+}
+
+proc ::NotifyCallSlot::OutboundCall {line number} {
+    return [CallEvent $line $number out]
+}
+
+proc ::NotifyCallSlot::CallEvent {line number inout} {
+    variable slot
+    
+    set w $slot(wempty).slot
+    set slot(w)      $w
+    set slot(line)   $line
+    set slot(number) $number
+
+    # This builds the actual megawidget.
+    Build $w $inout
+    pack $w -fill x -expand 1
+    
+    ::JUI::SlotDisplay
+    ::JUI::SlotShow notifycall    
+
+    return $w
+}
+
+proc ::NotifyCallSlot::LevelEvent {in out} {
+    variable slot
+
+    set win $slot(frame)
+    if {[winfo exists $win]} {
+	variable $win
+	upvar #0 $win state
+	
+	set state(inlevel)  $in
+	set state(outlevel) $out
+    }
+}
+
+proc ::NotifyCallSlot::HangupEvent {} {
+    variable slot
+
+    # destroy ????????????
+    ::JUI::SlotClose notifycall
+    destroy $slot(w)
 }
 
 # NotifyCallSlot::BuildEmpty --
@@ -519,8 +578,6 @@ proc ::NotifyCallSlot::BuildEmpty {w args} {
     }
     set slot(wempty) $w
     set slot(show)   0
-
-    #::JUI::SlotShow notifycall
     
     return $w
 }
@@ -554,41 +611,10 @@ proc ::NotifyCallSlot::Build {w inout args} {
     set win [Frame $box.f $inout]
     pack $win -fill x -expand 1
     
-    set slot(w)     $w
-    set slot(box)   $w.box
-    set slot(win)   $win
+    set slot(box) $w.box
+    set slot(frame) $win
     
     return $w
-}
-
-proc ::NotifyCallSlot::InboundCall {line number} {
-    variable slot
-    
-    ::JUI::SlotDisplay
-    
-    set win $slot(wempty).slot
-    set slot(line)   $line
-    set slot(number) $number
-
-    Build $win in
-    pack $win -fill x -expand 1
-    
-    return $win
-}
-
-proc ::NotifyCallSlot::OutboundCall {line number} {
-    variable slot
-    
-    ::JUI::SlotDisplay
-    
-    set win $slot(wempty).slot
-    set slot(line)   $line
-    set slot(number) $number
-
-    Build $win out
-    pack $win -fill x -expand 1
-    
-    return $win
 }
 
 proc ::NotifyCallSlot::Frame {win inout} {
@@ -701,7 +727,7 @@ proc ::NotifyCallSlot::HangUp {win} {
     
     ::Phone::HangupJingle $slot(line)
     
-    destroy $slot(win)
+    destroy $slot(frame)
 
     set slot(show) 0
     ::JUI::SlotClose notifycall
@@ -736,17 +762,6 @@ proc ::NotifyCallSlot::Mute {win which} {
     
 }
 
-proc ::NotifyCallSlot::LevelEvent {in out} {
-    variable slot
-
-    set win $slot(win)
-    variable $win
-    upvar #0 $win state
-    
-    set state(inlevel)  $in
-    set state(outlevel) $out
-}
-
 proc ::NotifyCallSlot::FrameFree {win} {
     variable $win
     upvar #0 $win state
@@ -779,7 +794,7 @@ proc ::NotifyCallSlot::Close {w} {
     set msg [mc "Do you want to hang up?"]
     set ans [tk_messageBox -icon question -type yesno -message [mc $msg]]
     if {$ans eq "yes"} {
-	HangUp $slot(win)
+	HangUp $slot(frame)
     }
 }
 
