@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #   
-#  $Id: UserActivity.tcl,v 1.21 2008-08-17 14:43:26 matben Exp $
+#  $Id: UserActivity.tcl,v 1.22 2008-08-18 12:34:22 matben Exp $
 
 package require jlib::pep
 package require ui::optionmenu
@@ -539,13 +539,15 @@ namespace eval ::UserActivity {
     
     ::MegaPresence::Register activity [mc Activity] [namespace code MPBuild]
     
+    variable imsize 16
     variable mpwin "-"
     variable imblank
-    set imblank [image create photo -height 16 -width 16]
+    set imblank [image create photo -height $imsize -width $imsize]
     $imblank blank
 }
 
 proc ::UserActivity::MPBuild {win} {
+    variable imsize
     variable imblank
     variable mpwin
     variable allActivities    
@@ -568,7 +570,7 @@ proc ::UserActivity::MPBuild {win} {
     foreach activity $allActivities {
 	set dname [string totitle [string map {_ " "} $activity]]
 	$m add radiobutton -label [mc $dname] -value $activity \
-	  -image [::Theme::FindIconSize 16 activity-$activity] \
+	  -image [::Theme::FindIconSize $imsize activity-$activity] \
 	  -variable [namespace current]::mpActivity \
 	  -command [namespace code MPCmd] -compound left
     }    
@@ -592,6 +594,7 @@ proc ::UserActivity::MPCmd {} {
 }
 
 proc ::UserActivity::MPDisplayActivity {activity} {
+    variable imsize
     variable mpwin
     variable mpActivity
     variable imblank
@@ -603,7 +606,7 @@ proc ::UserActivity::MPDisplayActivity {activity} {
 	::balloonhelp::balloonforwindow $mpwin "[mc Activity]: [mc None]"
     } else {
 	set dname [string totitle [string map {_ " "} $activity]]
-	$mpwin configure -image [::Theme::FindIconSize 16 activity-$activity]	
+	$mpwin configure -image [::Theme::FindIconSize $imsize activity-$activity]	
 	::balloonhelp::balloonforwindow $mpwin "[mc Activity]: [mc $dname]"
     }
 }

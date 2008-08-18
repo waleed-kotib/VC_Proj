@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.48 2008-08-17 14:43:26 matben Exp $
+#  $Id: Mood.tcl,v 1.49 2008-08-18 12:34:22 matben Exp $
 
 package require jlib::pep
 
@@ -406,13 +406,15 @@ namespace eval ::Mood {
     
     ::MegaPresence::Register mood [mc Mood] [namespace code MPBuild]
     
+    variable imsize 16
     variable mpwin "-"
     variable imblank
-    set imblank [image create photo -height 16 -width 16]
+    set imblank [image create photo -height $imsize -width $imsize]
     $imblank blank
 }
 
 proc ::Mood::MPBuild {win} {
+    variable imsize
     variable imblank
     variable mpwin
     variable mpMood
@@ -434,7 +436,7 @@ proc ::Mood::MPBuild {win} {
     foreach mood $sortedLocMoods {
 	set label "m[string totitle $mood]"
 	$m add radiobutton -label [mc $label] -value $mood \
-	  -image [::Theme::FindIconSize 16 mood-$mood] \
+	  -image [::Theme::FindIconSize $imsize mood-$mood] \
 	  -variable [namespace current]::mpMood \
 	  -command [namespace code MPCmd] -compound left
     }    
@@ -459,6 +461,7 @@ proc ::Mood::MPCmd {} {
 }
 
 proc ::Mood::MPDisplayMood {mood} {
+    variable imsize
     variable mpwin
     variable imblank
     
@@ -467,7 +470,7 @@ proc ::Mood::MPDisplayMood {mood} {
 	::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc None]"
     } else {
 	set label "m[string totitle $mood]"
-	$mpwin configure -image [::Theme::FindIconSize 16 mood-$mood]	
+	$mpwin configure -image [::Theme::FindIconSize $imsize mood-$mood]	
         ::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc $label]"
     }
 }

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.19 2008-08-17 07:08:09 matben Exp $
+# $Id: MegaPresence.tcl,v 1.20 2008-08-18 12:34:22 matben Exp $
 
 package provide MegaPresence 1.0
 
@@ -34,6 +34,7 @@ namespace eval ::MegaPresence {
     ::JUI::SlotRegister megapresence [namespace code Build] -priority 20
     
     set ::config(megapresence,pack-side) right
+    set ::config(megapresence,equal-size) 1
 }
 
 proc ::MegaPresence::Register {name label cmd} {
@@ -102,7 +103,11 @@ proc ::MegaPresence::Build {w args} {
     
     grid  $box.avatar   -column 100 -row 0
     grid  $box.lavatar  -column 100 -row 1
-
+    
+    set avatarW [winfo reqwidth $box.avatar]
+    set avatarH [winfo reqheight $box.avatar]
+    #puts "      $avatarW, $avatarH"
+    
     ::balloonhelp::balloonforwindow $box.avatar [mc Avatar]
 
     if {$config(megapresence,pack-side) eq "right"} {
@@ -121,18 +126,25 @@ proc ::MegaPresence::Build {w args} {
 	eval {grid  $box.$column  -row 0 -column $column -padx 4} $opts
 	ttk::label $box.l$column -text $widgets($name,label)
 	grid  $box.l$column  -row 1 -column $column -padx 2 -pady 0
+
+	#puts "    name=$name, [winfo reqwidth $box.$column], [winfo reqheight $box.$column]"
 	
 	set widgets($name,column) $column
 	set widgets($name,win) $box.$column
 	set widgets($name,lwin) $box.l$column
 	set widgets($name,display) 1
 	::balloonhelp::balloonforwindow $box.$column $widgets($name,label)
+
+	if {$config(megapresence,equal-size)} {
+	    grid  $box.$column  -sticky ns
+	    grid columnconfigure $box $column -minsize $avatarW
+	}
 	
 	incr column
     }    
-    
-    set slot(w)     $w
-    set slot(show)  0
+
+    set slot(w)    $w
+    set slot(show) 0
     
     foreach m [::JUI::SlotGetAllMenus] {
 	$m add checkbutton -label [mc "Presence Control"] \
