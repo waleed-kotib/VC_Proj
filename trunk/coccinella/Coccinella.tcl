@@ -10,7 +10,7 @@
 #  
 #  See the README file for license, bugs etc.
 #
-# $Id: Coccinella.tcl,v 1.187 2008-05-28 09:51:06 matben Exp $	
+# $Id: Coccinella.tcl,v 1.188 2008-08-19 14:06:27 matben Exp $	
 
 # Level of detail for printouts; >= 2 for my outputs; >= 6 to logfile.
 set debugLevel 0
@@ -158,11 +158,13 @@ package require Theme
 # Find our language and load message catalog.
 ::Init::Msgcat
 
-# Sets the window titlebar icon.
-wm iconphoto . -default \
-  [::Theme::FindIconSize 16 coccinella] \
-  [::Theme::FindIconSize 32 coccinella] \
-  [::Theme::FindIconSize 64 coccinella]
+# Sets the window titlebar icon. Win98 bails.
+catch {
+    wm iconphoto . -default \
+      [::Theme::FindIconSize 16 coccinella] \
+      [::Theme::FindIconSize 32 coccinella] \
+      [::Theme::FindIconSize 64 coccinella]
+}
 
 # Splash! Need a full update here, at least on Windows.
 package require Splash
