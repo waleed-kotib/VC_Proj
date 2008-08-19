@@ -17,7 +17,7 @@
 #   
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#  $Id: Mood.tcl,v 1.49 2008-08-18 12:34:22 matben Exp $
+#  $Id: Mood.tcl,v 1.50 2008-08-19 12:40:41 matben Exp $
 
 package require jlib::pep
 
@@ -404,7 +404,8 @@ proc ::Mood::Event {jlibname xmldata} {
 
 namespace eval ::Mood {
     
-    ::MegaPresence::Register mood [mc Mood] [namespace code MPBuild]
+    set label [string map {& ""} [mc mMood]]
+    ::MegaPresence::Register mood $label [namespace code MPBuild]
     
     variable imsize 16
     variable mpwin "-"
@@ -465,13 +466,13 @@ proc ::Mood::MPDisplayMood {mood} {
     variable mpwin
     variable imblank
     
+    set mstr [string map {& ""} [mc mMood]]
     if {$mood eq "-"} {
 	$mpwin configure -image $imblank
-	::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc None]"
+	::balloonhelp::balloonforwindow $mpwin "$mstr: [mc None]"
     } else {
-	set label "m[string totitle $mood]"
 	$mpwin configure -image [::Theme::FindIconSize $imsize mood-$mood]	
-        ::balloonhelp::balloonforwindow $mpwin "[mc Mood]: [mc $label]"
+        ::balloonhelp::balloonforwindow $mpwin "$mstr: [mc $mood]"
     }
 }
 

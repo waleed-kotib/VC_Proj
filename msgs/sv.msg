@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.151 2008-08-17 14:43:27 matben Exp $
+#   $Id: sv.msg,v 1.152 2008-08-19 12:40:42 matben Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -1200,25 +1200,10 @@ if {0} {
 ::msgcat::mcset sv moodRetracted         {tog tillbaka humör}
 ::msgcat::mcset sv heIs                  {är}
 ::msgcat::mcset sv because               {därför}
-::msgcat::mcset sv angry                 {arg}
-::msgcat::mcset sv anxious               {orolig}
-::msgcat::mcset sv ashamed               {skamfull}
-::msgcat::mcset sv bored                 {uttråkad}
-::msgcat::mcset sv curious               {nyfiken}
-::msgcat::mcset sv depressed             {deprimerad}
-::msgcat::mcset sv excited               {upprymd}
-::msgcat::mcset sv happy                 {lycklig}
-::msgcat::mcset sv in_love               {kär}
-::msgcat::mcset sv invincible            {oövervinnerlig}
-::msgcat::mcset sv jealous               {svartsjuk}
-::msgcat::mcset sv nervous               {nervös}
-::msgcat::mcset sv sad                   {ledsen}
-::msgcat::mcset sv sleepy                {sömnig}
-::msgcat::mcset sv stressed              {stressad}
-::msgcat::mcset sv worried               {bekymrad}
+::msgcat::mcset sv afraid   rädd::msgcat::mcset sv amazed   förvånad::msgcat::mcset sv angry   arg::msgcat::mcset sv annoyed   irriterad::msgcat::mcset sv anxious   orolig::msgcat::mcset sv aroused   aroused::msgcat::mcset sv ashamed   skamful::msgcat::mcset sv bored   uttråkad::msgcat::mcset sv brave   modig::msgcat::mcset sv calm   lugn::msgcat::mcset sv cold   frusen::msgcat::mcset sv confused   förvirrad::msgcat::mcset sv contented   contended::msgcat::mcset sv cranky   cranky::msgcat::mcset sv curious   nyfiken::msgcat::mcset sv depressed   deprimerad::msgcat::mcset sv disappointed   besviken::msgcat::mcset sv disgusted   disgusted::msgcat::mcset sv distracted   distraherad::msgcat::mcset sv embarrassed   skäms::msgcat::mcset sv excited   upprymd::msgcat::mcset sv flirtatious   flirtig::msgcat::mcset sv frustrated   frustrerad::msgcat::mcset sv grumpy   grumpy::msgcat::mcset sv guilty   skyldig::msgcat::mcset sv happy   lycklig::msgcat::mcset sv hot   varm::msgcat::mcset sv humbled   ödmjuk::msgcat::mcset sv humiliated   förödmjukad::msgcat::mcset sv hungry   hungrig::msgcat::mcset sv hurt   sårad::msgcat::mcset sv impressed   imponerad::msgcat::mcset sv in_awe   {in awe}::msgcat::mcset sv in_love   kär::msgcat::mcset sv indignant   indignerad::msgcat::mcset sv interested   intresserad::msgcat::mcset sv intoxicated   förgiftad::msgcat::mcset sv invincible   oövervinnerlig::msgcat::mcset sv jealous   svartsjuk::msgcat::mcset sv lonely   ensam::msgcat::mcset sv mean   snål::msgcat::mcset sv moody   moody::msgcat::mcset sv nervous   nervös::msgcat::mcset sv neutral   neutral::msgcat::mcset sv offended   förolämpad::msgcat::mcset sv playful   lekfull::msgcat::mcset sv proud   stolt::msgcat::mcset sv relieved   lättad::msgcat::mcset sv remorseful   ångerfull::msgcat::mcset sv restless   restless::msgcat::mcset sv sad   ledsen::msgcat::mcset sv sarcastic   sarkastisk::msgcat::mcset sv serious   allvarlig::msgcat::mcset sv shocked   chockad::msgcat::mcset sv shy   blyg::msgcat::mcset sv sick   sjuk::msgcat::mcset sv sleepy   sömnig::msgcat::mcset sv stressed   stressad::msgcat::mcset sv surprised   förvånad::msgcat::mcset sv thirsty   törstig::msgcat::mcset sv worried   bekymrad
 
-::msgcat::mcset sv {Custom Mood}         {Custom Mood}
-::msgcat::mcset sv mCustomMood...        {&Custom Mood...}
+::msgcat::mcset sv {Custom Mood}         {Anpassat humör}
+::msgcat::mcset sv mCustomMood...        {Anpassat humör...}
 ::msgcat::mcset sv moodPickMsg           {Välj ditt humör som ska visas för dina kontakter.}
 ::msgcat::mcset sv moodPickDtl           {Endast kontakter som också har stöd för protokollet kan se ditt humör.}
 
