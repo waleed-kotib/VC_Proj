@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: PrefUtils.tcl,v 1.17 2008-06-09 09:51:01 matben Exp $
+# $Id: PrefUtils.tcl,v 1.18 2008-08-19 07:56:57 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -88,7 +88,7 @@ proc ::PrefUtils::Init {} {
     
     if {[file exists $prefsFilePath]} {
 	if {[catch {option readfile $prefsFilePath} err]} {
-	    tk_messageBox -type ok -title [mc Error] -icon error \
+	    tk_messageBox -type ok -title [::msgcat::mc Error] -icon error \
 	      -message "Error reading preference file: $prefsFilePath."
 	}
     }
