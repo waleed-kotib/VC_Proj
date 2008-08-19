@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: de.msg,v 1.109 2008-04-25 07:06:42 matben Exp $
+#   $Id: de.msg,v 1.110 2008-08-19 12:40:41 matben Exp $
 
 ::msgcat::mcset de Abort                 {Abbruch}
 ::msgcat::mcset de Action                {Aktion}
@@ -1296,7 +1296,7 @@ if {0} {
 
 ::msgcat::mcset de Exercising            {Trainieren}
 # Duplicate:
-::msgcat::mcset de en                    {Radfahren}
+::msgcat::mcset de Cycling               {Radfahren}
 ::msgcat::mcset de Hiking                {Wandern}
 ::msgcat::mcset de Jogging               {Joggen}
 ::msgcat::mcset de {Playing sports}      {Sportausübung}

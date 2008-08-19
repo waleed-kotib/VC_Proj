@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.253 2008-08-17 14:43:27 matben Exp $
+#   $Id: en.msg,v 1.254 2008-08-19 12:40:42 matben Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -1186,92 +1186,146 @@ if {0} {
     ::msgcat::mcset en tooltip-gsm			{GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
 }
 
-# Messages for Mood XEP
+# Messages for Mood XEP: http://www.xmpp.org/extensions/xep-0107.html
+# Note to translators: The upper case menu strings have lower case
+# duplicates. If your language, like mine, always start with a lower case
+# character you can run the following script in a wish shell (uncommented):
+#
+# set lines {paste in the desired text chunk here...}
+# foreach line [split $lines "\n"] {
+#     set str [string tolower [string trimleft [lindex $line 2] m]]
+#     puts "::msgcat::mcset sv $str   [list [string tolower [lindex $line 3]]]"
+# }
 # bug: this should be M&ood..., but this does not work!
-::msgcat::mcset en mMood        Mood 
-::msgcat::mcset en mAfraid Afraid
-::msgcat::mcset en mAmazed Amazed
-::msgcat::mcset en mAngry Angry
-::msgcat::mcset en mAnnoyed Annoyed
-::msgcat::mcset en mAnxious Anxious
-::msgcat::mcset en mAroused Aroused
-::msgcat::mcset en mAshamed Ashamed
-::msgcat::mcset en mBored Bored
-::msgcat::mcset en mBrave Brave
-::msgcat::mcset en mCalm Calm
-::msgcat::mcset en mCold Cold
-::msgcat::mcset en mConfused Confused
-::msgcat::mcset en mContented Contented
-::msgcat::mcset en mCranky Cranky
-::msgcat::mcset en mCurious Curious
-::msgcat::mcset en mDepressed Depressed
-::msgcat::mcset en mDisappointed Disappointed
-::msgcat::mcset en mDisgusted Disgusted
-::msgcat::mcset en mDistracted Distracted
-::msgcat::mcset en mEmbarrassed Embarrassed
-::msgcat::mcset en mExcited Excited
-::msgcat::mcset en mFlirtatious Flirtatious
-::msgcat::mcset en mFrustrated Frustrated
-::msgcat::mcset en mGrumpy Grumpy
-::msgcat::mcset en mGuilty Guilty
-::msgcat::mcset en mHappy Happy
-::msgcat::mcset en mHot Hot
-::msgcat::mcset en mHumbled Humbled
-::msgcat::mcset en mHumiliated Humiliated
-::msgcat::mcset en mHungry Hungry
-::msgcat::mcset en mHurt Hurt
-::msgcat::mcset en mImpressed Impressed
-::msgcat::mcset en mIn_awe {In awe}
-::msgcat::mcset en mIn_love {In love}
-::msgcat::mcset en mIndignant Indignant
-::msgcat::mcset en mInterested Interested
-::msgcat::mcset en mIntoxicated Intoxicated
-::msgcat::mcset en mInvincible Invincible
-::msgcat::mcset en mJealous Jealous
-::msgcat::mcset en mLonely Lonely
-::msgcat::mcset en mMean Mean
-::msgcat::mcset en mMoody Moody
-::msgcat::mcset en mNervous Nervous
-::msgcat::mcset en mNeutral Neutral
-::msgcat::mcset en mOffended Offended
-::msgcat::mcset en mPlayful Playful
-::msgcat::mcset en mProud Proud
-::msgcat::mcset en mRelieved Relieved
-::msgcat::mcset en mRemorseful Remorseful
-::msgcat::mcset en mRestless Restless
-::msgcat::mcset en mSad Sad
-::msgcat::mcset en mSarcastic Sarcastic
-::msgcat::mcset en mSerious Serious
-::msgcat::mcset en mShocked Shocked
-::msgcat::mcset en mShy Shy
-::msgcat::mcset en mSick Sick
-::msgcat::mcset en mSleepy Sleepy
-::msgcat::mcset en mStressed Stressed
-::msgcat::mcset en mSurprised Surprised
-::msgcat::mcset en mThirsty Thirsty
-::msgcat::mcset en mWorried Worried
+::msgcat::mcset en mMood            Mood 
+::msgcat::mcset en mAfraid          Afraid
+::msgcat::mcset en mAmazed          Amazed
+::msgcat::mcset en mAngry           Angry
+::msgcat::mcset en mAnnoyed         Annoyed
+::msgcat::mcset en mAnxious         Anxious
+::msgcat::mcset en mAroused         Aroused
+::msgcat::mcset en mAshamed         Ashamed
+::msgcat::mcset en mBored           Bored
+::msgcat::mcset en mBrave           Brave
+::msgcat::mcset en mCalm            Calm
+::msgcat::mcset en mCold            Cold
+::msgcat::mcset en mConfused        Confused
+::msgcat::mcset en mContented       Contented
+::msgcat::mcset en mCranky          Cranky
+::msgcat::mcset en mCurious         Curious
+::msgcat::mcset en mDepressed       Depressed
+::msgcat::mcset en mDisappointed    Disappointed
+::msgcat::mcset en mDisgusted       Disgusted
+::msgcat::mcset en mDistracted      Distracted
+::msgcat::mcset en mEmbarrassed     Embarrassed
+::msgcat::mcset en mExcited         Excited
+::msgcat::mcset en mFlirtatious     Flirtatious
+::msgcat::mcset en mFrustrated      Frustrated
+::msgcat::mcset en mGrumpy          Grumpy
+::msgcat::mcset en mGuilty          Guilty
+::msgcat::mcset en mHappy           Happy
+::msgcat::mcset en mHot             Hot
+::msgcat::mcset en mHumbled         Humbled
+::msgcat::mcset en mHumiliated      Humiliated
+::msgcat::mcset en mHungry          Hungry
+::msgcat::mcset en mHurt            Hurt
+::msgcat::mcset en mImpressed       Impressed
+::msgcat::mcset en mIn_awe          {In awe}
+::msgcat::mcset en mIn_love         {In love}
+::msgcat::mcset en mIndignant       Indignant
+::msgcat::mcset en mInterested      Interested
+::msgcat::mcset en mIntoxicated     Intoxicated
+::msgcat::mcset en mInvincible      Invincible
+::msgcat::mcset en mJealous         Jealous
+::msgcat::mcset en mLonely          Lonely
+::msgcat::mcset en mMean            Mean
+::msgcat::mcset en mMoody           Moody
+::msgcat::mcset en mNervous         Nervous
+::msgcat::mcset en mNeutral         Neutral
+::msgcat::mcset en mOffended        Offended
+::msgcat::mcset en mPlayful         Playful
+::msgcat::mcset en mProud           Proud
+::msgcat::mcset en mRelieved        Relieved
+::msgcat::mcset en mRemorseful      Remorseful
+::msgcat::mcset en mRestless        Restless
+::msgcat::mcset en mSad             Sad
+::msgcat::mcset en mSarcastic       Sarcastic
+::msgcat::mcset en mSerious         Serious
+::msgcat::mcset en mShocked         Shocked
+::msgcat::mcset en mShy             Shy
+::msgcat::mcset en mSick            Sick
+::msgcat::mcset en mSleepy          Sleepy
+::msgcat::mcset en mStressed        Stressed
+::msgcat::mcset en mSurprised       Surprised
+::msgcat::mcset en mThirsty         Thirsty
+::msgcat::mcset en mWorried         Worried
 
 ::msgcat::mcset en moodEvent   {Mood change}
 ::msgcat::mcset en moodRetracted {retracted mood}
-# Why not reuse them above?
+
 ::msgcat::mcset en heIs        is
 ::msgcat::mcset en because     because
-::msgcat::mcset en angry       angry
-::msgcat::mcset en anxious     anxious
-::msgcat::mcset en ashamed     ashamed
-::msgcat::mcset en bored       bored
-::msgcat::mcset en curious     curious
+::msgcat::mcset en afraid   afraid
+::msgcat::mcset en amazed   amazed
+::msgcat::mcset en angry   angry
+::msgcat::mcset en annoyed   annoyed
+::msgcat::mcset en anxious   anxious
+::msgcat::mcset en aroused   aroused
+::msgcat::mcset en ashamed   ashamed
+::msgcat::mcset en bored   bored
+::msgcat::mcset en brave   brave
+::msgcat::mcset en calm   calm
+::msgcat::mcset en cold   cold
+::msgcat::mcset en confused   confused
+::msgcat::mcset en contented   contented
+::msgcat::mcset en cranky   cranky
+::msgcat::mcset en curious   curious
 ::msgcat::mcset en depressed   depressed
-::msgcat::mcset en excited     excited
-::msgcat::mcset en happy       happy
-::msgcat::mcset en in_love     {in love}
-::msgcat::mcset en invincible  invincible
-::msgcat::mcset en jealous     jealous
-::msgcat::mcset en nervous     nervous
-::msgcat::mcset en sad         sad
-::msgcat::mcset en sleepy      sleepy
-::msgcat::mcset en stressed    stressed
-::msgcat::mcset en worried     worried
+::msgcat::mcset en disappointed   disappointed
+::msgcat::mcset en disgusted   disgusted
+::msgcat::mcset en distracted   distracted
+::msgcat::mcset en embarrassed   embarrassed
+::msgcat::mcset en excited   excited
+::msgcat::mcset en flirtatious   flirtatious
+::msgcat::mcset en frustrated   frustrated
+::msgcat::mcset en grumpy   grumpy
+::msgcat::mcset en guilty   guilty
+::msgcat::mcset en happy   happy
+::msgcat::mcset en hot   hot
+::msgcat::mcset en humbled   humbled
+::msgcat::mcset en humiliated   humiliated
+::msgcat::mcset en hungry   hungry
+::msgcat::mcset en hurt   hurt
+::msgcat::mcset en impressed   impressed
+::msgcat::mcset en in_awe   {in awe}
+::msgcat::mcset en in_love   {in love}
+::msgcat::mcset en indignant   indignant
+::msgcat::mcset en interested   interested
+::msgcat::mcset en intoxicated   intoxicated
+::msgcat::mcset en invincible   invincible
+::msgcat::mcset en jealous   jealous
+::msgcat::mcset en lonely   lonely
+::msgcat::mcset en mean   mean
+::msgcat::mcset en moody   moody
+::msgcat::mcset en nervous   nervous
+::msgcat::mcset en neutral   neutral
+::msgcat::mcset en offended   offended
+::msgcat::mcset en playful   playful
+::msgcat::mcset en proud   proud
+::msgcat::mcset en relieved   relieved
+::msgcat::mcset en remorseful   remorseful
+::msgcat::mcset en restless   restless
+::msgcat::mcset en sad   sad
+::msgcat::mcset en sarcastic   sarcastic
+::msgcat::mcset en serious   serious
+::msgcat::mcset en shocked   shocked
+::msgcat::mcset en shy   shy
+::msgcat::mcset en sick   sick
+::msgcat::mcset en sleepy   sleepy
+::msgcat::mcset en stressed   stressed
+::msgcat::mcset en surprised   surprised
+::msgcat::mcset en thirsty   thirsty
+::msgcat::mcset en worried   worried
 
 ::msgcat::mcset en {Custom Mood}
 ::msgcat::mcset en mCustomMood...       {&Custom Mood...}
