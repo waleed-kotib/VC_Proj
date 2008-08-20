@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# $Id: PrefUtils.tcl,v 1.18 2008-08-19 07:56:57 matben Exp $
+# $Id: PrefUtils.tcl,v 1.19 2008-08-20 13:04:05 matben Exp $
 # 
 ################################################################################
 #                                                                                                                                                              
@@ -258,6 +258,9 @@ proc ::PrefUtils::PutsItem {item fid ignoreDefault} {
 	}
     } else {
 	if {$ignoreDefault || ![string equal $var $defVal]} {
+	    
+	    # Protect for buggy code that is trying to use multiline values.
+	    regsub -all "\n" $var {\\n} var
 	    puts $fid [format "%-24s\t%s" *${resName}: $var]
 	}
     }
