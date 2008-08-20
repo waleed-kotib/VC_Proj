@@ -17,13 +17,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.113 2008-07-09 07:49:41 matben Exp $
+# $Id: Profiles.tcl,v 1.114 2008-08-20 13:04:05 matben Exp $
 
 package require ui::megaentry
 
 package provide Profiles 1.0
 
-namespace eval ::Profiles:: {
+namespace eval ::Profiles {
     
     # Configurations:
     # This is a way to hardcode some or all of the profile. Same format.
@@ -119,16 +119,7 @@ proc ::Profiles::InitHook {} {
     ::PrefUtils::Add [list  \
       [list ::Profiles::profiles   profiles          $profiles   userDefault] \
       [list ::Profiles::selected   selected_profile  $selected   userDefault]]
-        
-    # Google Talk profile?
-    if {[::Preferences::UpgradedFromVersion 0.95.10]  \
-      && [lsearch -glob $profiles "gmail.com *"] < 0} {
-	lappend profiles {Google Talk} {
-	    gmail.com You from_gmail_your_account
-	    -ip talk.google.com -port 5223 -secure 1 -method ssl -digest 0
-	}	
-    }
-    
+            
     set cprofiles $config(profiles,profiles)
     set cselected $config(profiles,selected)
 
