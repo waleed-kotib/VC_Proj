@@ -3,17 +3,34 @@
 #      This file is part of the jabberlib. It provides support for the
 #      tls network socket security layer.
 #      
-#  Copyright (c) 2004  Mats Bengtsson
+#  Copyright (c) 2004-2008  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: jlibtls.tcl,v 1.19 2007-07-23 15:11:43 matben Exp $
+# $Id: jlibtls.tcl,v 1.20 2008-08-21 07:27:27 matben Exp $
 
 package require tls
 package require jlib
 
 package provide jlibtls 1.0
 
+proc jlib::tls_configure {jlibname args} {
+    
+    upvar ${jlibname}::locals locals
+    
+    foreach {key val} $args {
+	switch -- $key {
+	    -certfile -
+	    -keyfile -
+	    -command {
+		set locals($key) $val
+	    }
+	    default {
+		return -code error "Illegal option \"$key\""
+	    }
+	}
+    }
+}
 
 proc jlib::starttls {jlibname cmd args} {
     
