@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: PrefNet.tcl,v 1.12 2008-06-09 09:51:01 matben Exp $
+# $Id: PrefNet.tcl,v 1.13 2008-08-21 07:27:27 matben Exp $
  
 package provide PrefNet 1.0
 
@@ -32,17 +32,26 @@ namespace eval ::PrefNet:: {
 }
 
 proc ::PrefNet::InitPrefsHook { } {
-    global  prefs
+    global  prefs jprefs
         
     # ip numbers, port numbers, and names.
     set prefs(thisServPort) 8235
 
     # The tinyhttpd server port number and base directory.
     set prefs(httpdPort) 8077
+    
+    set jprefs(tls,usecertfile) 0
+    set jprefs(tls,certfile) ""
+    set jprefs(tls,usekeyfile) 0
+    set jprefs(tls,keyfile) ""
 
     ::PrefUtils::Add [list  \
       [list prefs(thisServPort)    prefs_thisServPort    $prefs(thisServPort)]   \
       [list prefs(httpdPort)       prefs_httpdPort       $prefs(httpdPort)]      \
+      [list jprefs(tls,usecertfile)  jprefs_tls_usecertfile  $jprefs(tls,usecertfile)]   \
+      [list jprefs(tls,certfile)     jprefs_tls_certfile     $jprefs(tls,certfile)]   \
+      [list jprefs(tls,usekeyfile)   jprefs_tls_usekeyfile   $jprefs(tls,usekeyfile)]   \
+      [list jprefs(tls,keyfile)      jprefs_tls_keyfile      $jprefs(tls,keyfile)]   \
       ]    
 }
 
@@ -96,6 +105,10 @@ proc ::PrefNet::BuildTabPage {wpage} {
     $nb.serv configure -padding $padding
     $nb add $nb.serv -text [mc Ports] -sticky news
 
+    BuildCertFrame $nb.cert
+    $nb.cert configure -padding $padding
+    $nb add $nb.cert -text [mc Certificates] -sticky news
+
     return $wpage
 }
     
@@ -137,13 +150,80 @@ proc ::PrefNet::BuildServersFrame {w} {
     return $w
 }
 
+proc ::PrefNet::BuildCertFrame {w} {
+    global  this prefs jprefs
+    variable certs
+    
+    set certs(usecertfile) $jprefs(tls,usecertfile)
+    set certs(certfile)    $jprefs(tls,certfile)
+    set certs(usekeyfile)  $jprefs(tls,usekeyfile)
+    set certs(keyfile)     $jprefs(tls,keyfile)
+    
+    ttk::frame $w
+    
+    set f $w.f
+    ttk::frame $f
+    pack $f -side top -anchor [option get . dialogAnchor {}]
+    
+    ttk::checkbutton $f.ccert -text [mc "TLS certificate file"] \
+      -variable [namespace current]::certs(usecertfile)
+    ttk::entry $f.ecert -textvariable [namespace current]::certs(certfile)
+    ttk::button $f.bcert -text "[mc Browse]..." \
+      -command [namespace code BrowseCertFile]
+    
+    ttk::checkbutton $f.ckey -text [mc "TLS private key file"] \
+      -variable [namespace current]::certs(usekeyfile)
+    ttk::entry $f.ekey -textvariable [namespace current]::certs(keyfile)
+    ttk::button $f.bkey -text "[mc Browse]..." \
+      -command [namespace code BrowseKeyFile]    
+    
+    grid  $f.ccert  -  -sticky w
+    grid  $f.ecert  $f.bcert
+    grid $f.ecert -sticky ew
+    
+    grid  $f.ckey  -  -sticky w
+    grid  $f.ekey  $f.bkey
+    grid $f.ekey -sticky ew
+        
+    return $w
+}
+
+proc ::PrefNet::BrowseCertFile {} {
+    variable certs
+    
+    set fileName [tk_getOpenFile -title [mc "TLS certificate file"] -filetypes {}]
+    if {[file exists $fileName]} {
+	set cert(certfile) $fileName
+    }
+}
+
+proc ::PrefNet::BrowseKeyFile {} {
+    variable certs
+    
+    set fileName [tk_getOpenFile -title [mc "TLS private key file"] -filetypes {}]
+    if {[file exists $fileName]} {
+	set cert(keyfile) $fileName
+    }
+}
+
 proc ::PrefNet::ServersSaveHook {} {
     global  prefs jprefs
     variable tmpServPrefs
+    variable certs
 
     set prefs(thisServPort)      $tmpServPrefs(thisServPort)
     set prefs(httpdPort)         $tmpServPrefs(httpdPort)
-    set jprefs(bytestreams,port) $tmpServPrefs(bytestreams,port)    
+    set jprefs(bytestreams,port) $tmpServPrefs(bytestreams,port)   
+    
+    foreach key {usecertfile certfile usekeyfile keyfile} {
+	set jprefs(tls,$key) $certs($key)
+    }
+    if {$jprefs(tls,usecertfile)} {
+	::Jabber::Jlib tls_configure -certfile $jprefs(tls,certfile)
+    }
+    if {$jprefs(tls,usekeyfile)} {
+	::Jabber::Jlib tls_configure -keyfile $jprefs(tls,keyfile)
+    }
 }
 
 proc ::PrefNet::ServersCancelHook {} {

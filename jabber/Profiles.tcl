@@ -2,7 +2,7 @@
 #  
 #      This file implements code for handling profiles.
 #      
-#  Copyright (c) 2003-2007  Mats Bengtsson
+#  Copyright (c) 2003-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Profiles.tcl,v 1.114 2008-08-20 13:04:05 matben Exp $
+# $Id: Profiles.tcl,v 1.115 2008-08-21 07:27:27 matben Exp $
 
 package require ui::megaentry
 
@@ -1785,6 +1785,9 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::checkbutton $wse.tls -style Small.TCheckbutton  \
       -text [mc "Use secure connection"] -variable $token\(secure)  \
       -command [list ::Profiles::NotebookSecCmd $w]
+    ttk::button $wse.cert -style Small.TButton \
+      -text "[mc Certificate]..." \
+      -command [list ::Preferences::Show {General {Network}}]
     ttk::radiobutton $wse.sasl -style Small.TRadiobutton  \
       -text [mc "Use SASL authentication"]  \
       -variable $token\(method) -value sasl
@@ -1797,11 +1800,11 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::checkbutton $wse.comp -style Small.TCheckbutton  \
       -text [mc "Use compression"] -variable $token\(compress)
     
-    grid  $wse.tls     -          -sticky w
-    grid  x            $wse.sasl  -sticky w
-    grid  x            $wse.mtls  -sticky w
-    grid  x            $wse.mssl  -sticky w
-    grid  $wse.comp    -          -sticky w
+    grid  $wse.tls     -          $wse.cert  -sticky w
+    grid  x            $wse.sasl  -  -sticky w
+    grid  x            $wse.mtls  -  -sticky w
+    grid  x            $wse.mssl  -  -sticky w
+    grid  $wse.comp    -          -  -sticky w
     grid columnconfigure $wse 0 -minsize 24
     
     grid  $wcon.se     -            -sticky ew -pady 1    
