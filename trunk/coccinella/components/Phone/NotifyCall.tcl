@@ -19,7 +19,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: NotifyCall.tcl,v 1.30 2008-08-18 09:42:44 matben Exp $
+# $Id: NotifyCall.tcl,v 1.31 2008-09-12 12:30:58 matben Exp $
 
 package provide NotifyCall 0.1
 
@@ -499,7 +499,7 @@ namespace eval ::NotifyCallSlot {
     option add *NotifyCallSlot.box.padding   {4 2 8 2}     50
     option add *NotifyCallSlot*TLabel.style  Small.TLabel  widgetDefault
     
-    ::JUI::SlotRegister notifycall [namespace code BuildEmpty] -priority 90
+    #::JUI::SlotRegister notifycall [namespace code BuildEmpty] -priority 90
 
     variable images
     set images(microphone) [::Theme::FindIconSize 16 audio-input-microphone]

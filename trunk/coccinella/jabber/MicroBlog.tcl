@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MicroBlog.tcl,v 1.5 2008-08-15 13:17:24 matben Exp $
+# $Id: MicroBlog.tcl,v 1.6 2008-09-12 12:30:58 matben Exp $
 
 package provide MicroBlog 1.0
 
@@ -30,10 +30,10 @@ namespace eval ::MicroBlog {
     option add *MicroBlogSlot*TLabel.style  Small.TLabel  widgetDefault
     option add *MicroBlogSlot*TEntry.font   CociSmallFont widgetDefault
 
-    ::JUI::SlotRegister microblog [namespace code SlotBuild]
-    
-    ::hooks::register loginHook     ::MicroBlog::SlotLoginHook
-    ::hooks::register logoutHook    ::MicroBlog::SlotLogoutHook
+#     ::JUI::SlotRegister microblog [namespace code SlotBuild]
+#     
+#     ::hooks::register loginHook     ::MicroBlog::SlotLoginHook
+#     ::hooks::register logoutHook    ::MicroBlog::SlotLogoutHook
     
     variable slot
 }
