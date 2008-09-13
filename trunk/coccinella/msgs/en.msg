@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.254 2008-08-19 12:40:42 matben Exp $
+#   $Id: en.msg,v 1.255 2008-09-13 22:11:26 sdevrieze Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -742,8 +742,8 @@
 ::msgcat::mcset en messsuassclose        {Are you sure you want to close the setup assistant? You may start it any time later from the menu.}
 ::msgcat::mcset en messsuassfillin       {Be sure to fill in all entries before you continue.}
 ::msgcat::mcset en messtimeout           {Timeout when waiting for connection to open.}
-::msgcat::mcset en messunsavedmsgQ       {Do you want to save edits in a file?}
-::msgcat::mcset en messunsaveddtl        {Edits will be lost unless you save them.}
+::msgcat::mcset en messunsavedmsgQ2       {This whiteboard document has been changed.}
+::msgcat::mcset en messunsaveddtl2        {Do you want to save the changes?}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset en jamessaddforeign2     {To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?}
@@ -796,7 +796,7 @@
 ::msgcat::mcset en jamessjidinvalid2     {Invalid Contact ID.}
 ::msgcat::mcset en jamesslocaltime2      {%s's local time is: %s}
 ::msgcat::mcset en jamesslogin409b       {Cannot login because this username is already in use by someone else (%s).}
-::msgcat::mcset en jamessloginnewprof    {The Jabber ID differs from your profile. Do you want to save a new profile?}
+::msgcat::mcset en jamessloginnewprof    {The Contact ID differs from your profile. Do you want to save a new profile?}
 ::msgcat::mcset en jamesslogindiff       {Your current login settings differ from your profile settings. Do you want to save them to your profile?}
 ::msgcat::mcset en jamessmsgwarnquit     {There are unsaved messages. Do you still want to quit?}
 ::msgcat::mcset en jamessnamemissing     {The "%s" is missing or is too short!}

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: MegaPresence.tcl,v 1.20 2008-08-18 12:34:22 matben Exp $
+# $Id: MegaPresence.tcl,v 1.21 2008-09-13 22:11:26 sdevrieze Exp $
 
 package provide MegaPresence 1.0
 
@@ -77,7 +77,7 @@ proc ::MegaPresence::Build {w args} {
 	  -command $argsA(-close)
 	pack $w.close -side right -anchor n	
 
-        ::balloonhelp::balloonforwindow $w.arrow [mc "Right click to get the selector"]
+        ::balloonhelp::balloonforwindow $w.arrow [mc "Right click to open menu"]
         ::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
     }    
     set box $w.box

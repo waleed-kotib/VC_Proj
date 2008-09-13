@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Search.tcl,v 1.62 2008-08-15 13:17:24 matben Exp $
+# $Id: Search.tcl,v 1.63 2008-09-13 22:11:26 sdevrieze Exp $
 
 package provide Search 1.0
 
@@ -887,7 +887,7 @@ proc ::Search::SlotBuild {w} {
 	  -command [namespace code [list SlotClose $w]]
 	pack $w.close -side right -anchor n	
 
-        ::balloonhelp::balloonforwindow $w.arrow [mc "Right click to get the selector"]
+        ::balloonhelp::balloonforwindow $w.arrow [mc "Right click to open menu"]
 	::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
     }    
     set imsearch [::Theme::FindIconSize 16 service-directory-user]
@@ -923,7 +923,7 @@ proc ::Search::SlotBuild {w} {
     set slot(fields) [list fn given user email]
     set slot(label,fn)    [mc "Full Name"]
     set slot(label,given) [mc "Name"]
-    set slot(label,user)  [mc "User"]
+    set slot(label,user)  [mc "Username"]
     set slot(label,email) [mc "Email"]
 
     set slot(selected) fn

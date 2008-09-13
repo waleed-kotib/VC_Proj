@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.275 2008-08-17 13:02:29 matben Exp $
+# $Id: JUI.tcl,v 1.276 2008-09-13 22:11:26 sdevrieze Exp $
 
 package provide JUI 1.0
 
@@ -813,7 +813,7 @@ proc ::JUI::BuildToyStatus {wtoy} {
 	::MegaPresence::Build $wmp -collapse 0
 	bind $wtoy.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
     }
-    ::balloonhelp::balloonforwindow $wtoy.b [mc "Open control panel"]
+    ::balloonhelp::balloonforwindow $wtoy.b [mc mShowControlPanel]
 
     return $wtoy
 }
@@ -979,13 +979,13 @@ proc ::JUI::SlotBuild {w} {
 proc ::JUI::SlotDisplay {} {
     variable jwapp
     pack $jwapp(wmp) -side bottom -fill x
-    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Hide control panel"]
+    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc mHideControlPanel]
 }
 
 proc ::JUI::SlotHide {} {
     variable jwapp
     pack forget $jwapp(wmp)
-    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Open control panel"]
+    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc mShowControlPanel]
 }
 
 # JUI::SlotSlideUp, SlotSlide, .. ---
