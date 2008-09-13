@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.177 2008-06-12 12:27:22 matben Exp $
+#   $Id: nl.msg,v 1.178 2008-09-13 19:55:59 sdevrieze Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}
@@ -316,6 +316,7 @@
 ::msgcat::mcset nl mCoccinellaHome...    {&Startpagina...}
 ::msgcat::mcset nl mColor...             {Kleur...}
 ::msgcat::mcset nl mContacts...          {&Contactpersonen...}
+::msgcat::mcset nl mControlPanel         {Controlepaneel}
 ::msgcat::mcset nl mCopy                 {&Kopiëren}
 ::msgcat::mcset nl mCreateRoom...        {Chatruimte &aanmaken...}
 ::msgcat::mcset nl mCustomStatus...      {Aangepaste aanwezig&heid...}
@@ -349,6 +350,7 @@
 ::msgcat::mcset nl mFont                 {Lettertype}
 ::msgcat::mcset nl mFontSize             {Letter&grootte}
 ::msgcat::mcset nl mGrid                 {Raster}
+::msgcat::mcset nl mHideControlPanel     {Controlepaneel verbergen}
 ::msgcat::mcset nl mHistory...           {&Geschiedenis...}
 ::msgcat::mcset nl mHorizontal           {Horizontaal}
 ::msgcat::mcset nl mHugeFont             {Groots&t}
@@ -421,6 +423,7 @@
 ::msgcat::mcset nl mSetupAssistant...    {&Installatieassistent...}
 ::msgcat::mcset nl mShiftConstrain       {Begrenzing roteren}
 ::msgcat::mcset nl mShow                 {&Tonen}
+::msgcat::mcset nl mShowControlPanel     {Controlepaneel tonen}
 ::msgcat::mcset nl mSize                 {Grootte}
 ::msgcat::mcset nl mSlideShow            {Diavoorstelling}
 ::msgcat::mcset nl mSmaller              {Smaller}
@@ -569,6 +572,7 @@
 ::msgcat::mcset nl {Open Image/Movie}    {Afbeelding/film openen}
 ::msgcat::mcset nl {Open Stream}         {Stream openen}
 ::msgcat::mcset nl {Open with}           {Openen met}
+::msgcat::mcset nl {Plain text password} {Wachtwoord in platte tekst}
 ::msgcat::mcset nl {Play sound}          {Geluid afspelen}
 ::msgcat::mcset nl {Postal code}         {Postcode}
 ::msgcat::mcset nl {Presence Error}      {Aanwezigheidsfout}
@@ -592,7 +596,6 @@
 ::msgcat::mcset nl {Save Message}        {Bericht opslaan}
 ::msgcat::mcset nl {Save password}       {Wachtwoord opslaan}
 ::msgcat::mcset nl {Save to disk}        {Op schijf opslaan}
-::msgcat::mcset nl {Scramble password}   {Wachtwoord vervormen}
 ::msgcat::mcset nl {Search results}      {Zoekresultaten}
 ::msgcat::mcset nl {Select Avatar}       {Avatar selecteren}
 ::msgcat::mcset nl {Select File}         {Bestand selecteren}
@@ -799,6 +802,8 @@
 ::msgcat::mcset nl jamessjidinvalid2     {Ongeldige Contact ID.}
 ::msgcat::mcset nl jamesslocaltime2      {%s's lokale tijd is: %s}
 ::msgcat::mcset nl jamesslogin409b       {Kan niet aanmelden omdat deze gebruikersnaam al in gebruik is door iemand anders (%s).}
+::msgcat::mcset nl jamessloginnewprof    {De Contact ID verschilt van uw profiel. Wilt u een nieuw profiel opslaan?}
+::msgcat::mcset nl jamesslogindiff       {Uw huidige instellingen verschillen van die van in uw profiel . Wilt u de nieuwe instellingen opslaan in uw profiel?}
 ::msgcat::mcset nl jamessmsgwarnquit     {Er zijn onopgeslagen berichten. Wilt u afsluiten?}
 ::msgcat::mcset nl jamessnamemissing     {%s is afwezig of is te kort!}
 ::msgcat::mcset nl jamessnofiletrpt2     {%s ondersteunt geen bestandsoverdracht.}
@@ -1189,44 +1194,135 @@ if {0} {
 
 # Messages for Mood XEP
 # bug: this should be M&ood..., but this does not work!
-::msgcat::mcset nl mMood                 {Stemmi&ng}
-::msgcat::mcset nl mAngry                {Boos}
-::msgcat::mcset nl mAnxious              {Bezorgd}
-::msgcat::mcset nl mAshamed              {Beschaamd}
-::msgcat::mcset nl mBored                {Verveeld}
-::msgcat::mcset nl mCurious              {Nieuwsgierig}
-::msgcat::mcset nl mDepressed            {Gedeprimeerd}
-::msgcat::mcset nl mExcited              {Opgewonden}
-::msgcat::mcset nl mHappy                {Gelukkig}
-::msgcat::mcset nl mInLove               {Verliefd}
-::msgcat::mcset nl mInvincible           {Onoverwinnelijk}
-::msgcat::mcset nl mJealous              {Jaloers}
-::msgcat::mcset nl mNervous              {Angstig}
-::msgcat::mcset nl mSad                  {Droevig}
-::msgcat::mcset nl mSleepy               {Slaperig}
-::msgcat::mcset nl mStressed             {Gestresseerd}
-::msgcat::mcset nl mWorried              {Ongerust}
+::msgcat::mcset nl mMood                 Stemmi&ng
+::msgcat::mcset nl mAfraid                Bang
+::msgcat::mcset nl mAmazed             Verbaasd
+::msgcat::mcset nl mAngry                Boos
+::msgcat::mcset nl mAnnoyed            Geërgerd
+::msgcat::mcset nl mAnxious              Bezorgd
+::msgcat::mcset nl mAroused            Alert
+::msgcat::mcset nl mAshamed           Beschaamd
+::msgcat::mcset nl mBored                Verveeld
+::msgcat::mcset nl mBrave               Dapper
+::msgcat::mcset nl mCalm                Rustig
+::msgcat::mcset nl mCold                 Onverschillig
+::msgcat::mcset nl mConfused          Verward
+::msgcat::mcset nl mContented         Tevreden
+::msgcat::mcset nl mCranky             Ontevreden
+::msgcat::mcset nl mCurious              Nieuwsgierig
+::msgcat::mcset nl mDepressed         Gedeprimeerd
+::msgcat::mcset nl mDisappointed      Teleurgesteld
+::msgcat::mcset nl mDisgusted          Walgend
+::msgcat::mcset nl mDistracted         Radeloos
+::msgcat::mcset nl mEmbarrassed     Beschaamd
+::msgcat::mcset nl mExcited              Opgewonden
+::msgcat::mcset nl mFlirtatious          Flirterig
+::msgcat::mcset nl mFrustrated        Gefrustreerd
+::msgcat::mcset nl mGrumpy            Knorrig
+::msgcat::mcset nl mGuilty              Schuldig
+::msgcat::mcset nl mHappy                Gelukkig
+::msgcat::mcset nl mHot                  Heet
+::msgcat::mcset nl mHumbled          Bescheiden
+::msgcat::mcset nl mHumiliated       Vernederd
+::msgcat::mcset nl mHungry            Hongerig
+::msgcat::mcset nl mHurt                Verwond
+::msgcat::mcset nl mImpressed       Geïmponeerd
+::msgcat::mcset nl mIn_awe           Eerbiedig
+::msgcat::mcset nl mIn_love             Verliefd
+::msgcat::mcset nl mIndignant         Verontwaardigd
+::msgcat::mcset nl mInterested       Geïnteresseerd
+::msgcat::mcset nl mIntoxicated       Dronken
+::msgcat::mcset nl mInvincible           Onoverwinnelijk
+::msgcat::mcset nl mJealous              Jaloers
+::msgcat::mcset nl mLonely              Eenzaam
+::msgcat::mcset nl mMean               Gemeen
+::msgcat::mcset nl mMoody              Humeurig
+::msgcat::mcset nl mNervous             Angstig
+::msgcat::mcset nl mNeutral             Neutraal
+::msgcat::mcset nl mOffended          Beledigd
+::msgcat::mcset nl mPlayful              Speels
+::msgcat::mcset nl mProud               Trots
+::msgcat::mcset nl mRelieved           Opgelucht
+::msgcat::mcset nl mRemorseful       Berouwvol
+::msgcat::mcset nl mRestless           Rusteloos
+::msgcat::mcset nl mSad                  Droevig
+::msgcat::mcset nl mSarcastic         Sarcastisch
+::msgcat::mcset nl mSerious            Ernstig
+::msgcat::mcset nl mShocked           Verbijsterd
+::msgcat::mcset nl mShy                  Verlegen
+::msgcat::mcset nl mSick                 Ziek
+::msgcat::mcset nl mSleepy               Slaperig
+::msgcat::mcset nl mStressed            Gestresseerd
+::msgcat::mcset nl mSurprised          Verrast
+::msgcat::mcset nl mThirsty              Dorstig
+::msgcat::mcset nl mWorried              Ongerust
 
 ::msgcat::mcset nl moodEvent             {Verandering van stemming}
 ::msgcat::mcset nl moodRetracted         {Ingetrokken stemming}
-::msgcat::mcset nl heIs                  {is}
-::msgcat::mcset nl because               {omdat}
-::msgcat::mcset nl angry                 {boos}
-::msgcat::mcset nl anxious               {bezorgd}
-::msgcat::mcset nl ashamed               {beschaamd}
-::msgcat::mcset nl bored                 {verveeld}
-::msgcat::mcset nl curious               {nieuwsgierig}
-::msgcat::mcset nl depressed             {gedeprimeerd}
-::msgcat::mcset nl excited               {opgewonden}
-::msgcat::mcset nl happy                 {gelukkig}
-::msgcat::mcset nl in_love               {verliefd}
-::msgcat::mcset nl invincible            {onoverwinnelijk}
-::msgcat::mcset nl jealous               {jaloers}
-::msgcat::mcset nl nervous               {angstig}
-::msgcat::mcset nl sad                   {droevig}
-::msgcat::mcset nl sleepy                {slaperig}
-::msgcat::mcset nl stressed              {gestresseerd}
-::msgcat::mcset nl worried               {ongerust}
+
+::msgcat::mcset nl heIs                   is
+::msgcat::mcset nl because              omdat
+::msgcat::mcset nl afraid                bang
+::msgcat::mcset nl amazed             verbaasd
+::msgcat::mcset nl angry                  boos
+::msgcat::mcset nl annoyed             geërgerd
+::msgcat::mcset nl anxious                bezorgd
+::msgcat::mcset nl aroused              alert
+::msgcat::mcset nl ashamed               beschaamd
+::msgcat::mcset nl bored                 verveeld
+::msgcat::mcset nl brave                dapper
+::msgcat::mcset nl calm                  rustig
+::msgcat::mcset nl cold                 onverschillig
+::msgcat::mcset nl confused          verward
+::msgcat::mcset nl contented         tevreden
+::msgcat::mcset nl cranky             ontevreden
+::msgcat::mcset nl curious               nieuwsgierig
+::msgcat::mcset nl depressed             gedeprimeerd
+::msgcat::mcset nl disappointed   teleurgesteld
+::msgcat::mcset nl disgusted   walgend
+::msgcat::mcset nl distracted   radeloos
+::msgcat::mcset nl embarrassed   beschaamd
+::msgcat::mcset nl excited               opgewonden
+::msgcat::mcset nl flirtatious   fliterig
+::msgcat::mcset nl frustrated   gefrustreerd
+::msgcat::mcset nl grumpy   knorrig
+::msgcat::mcset nl guilty   schuldig
+::msgcat::mcset nl happy                 gelukkig
+::msgcat::mcset nl hot   heet
+::msgcat::mcset nl humbled   bescheiden
+::msgcat::mcset nl humiliated   vernederd
+::msgcat::mcset nl hungry   hongerig
+::msgcat::mcset nl hurt   verwond
+::msgcat::mcset nl impressed   geïmponeerd
+::msgcat::mcset nl in_awe   eerbiedig
+::msgcat::mcset nl in_love               verliefd
+::msgcat::mcset nl indignant   verontwaardigd
+::msgcat::mcset nl interested   geïnteresseerd
+::msgcat::mcset nl intoxicated   dronken
+::msgcat::mcset nl invincible            onoverwinnelijk
+::msgcat::mcset nl jealous               jaloers
+::msgcat::mcset nl lonely   eenzaam
+::msgcat::mcset nl mean   gemeen
+::msgcat::mcset nl moody   humeurig
+::msgcat::mcset nl nervous               angstig
+::msgcat::mcset nl neutral   neutraal
+::msgcat::mcset nl offended   beledigd
+::msgcat::mcset nl playful   speels
+::msgcat::mcset nl proud   trots
+::msgcat::mcset nl relieved   opgelucht
+::msgcat::mcset nl remorseful   berouwvol
+::msgcat::mcset nl restless   rusteloos
+::msgcat::mcset nl sad                   droevig
+::msgcat::mcset nl sarcastic   sarcastisch
+::msgcat::mcset nl serious   ernstig
+::msgcat::mcset nl shocked   verbijsterd
+::msgcat::mcset nl shy   verlegen
+::msgcat::mcset nl sick   ziek
+::msgcat::mcset nl sleepy                slaperig
+::msgcat::mcset nl stressed              gestresseerd
+::msgcat::mcset nl surprised   verrast
+::msgcat::mcset nl thirsty   dorstig
+::msgcat::mcset nl worried               ongerust
 
 ::msgcat::mcset nl {Custom Mood}         {Aangepaste stemming}
 ::msgcat::mcset nl mCustomMood...        {&Aangepaste stemming...}
@@ -1248,9 +1344,10 @@ if {0} {
 
 ::msgcat::mcset nl tooltip-chatsubject   {Voer het onderwerp van het gesprek in, stel in met Enter}
 ::msgcat::mcset nl tooltip-chatoffline   {U moet aangemeld zijn om de aanwezigheid van deze contactpersoon te zien}
-::msgcat::mcset nl tooltip-chatsendtext  {Enter your message and press Return or Shift-Return}
+::msgcat::mcset nl tooltip-chatsendtext  {Voer uw bericht in en druk op Enter of Shift-Enter}
 ::msgcat::mcset nl tooltip-aaonhidden    {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
 ::msgcat::mcset nl tooltip-aabusychats   {Bij evenveel of meer actieve chatsessies dan het opgegeven aantal wordt de aanwezigheid automatisch verandert naar Niet storen.}
+::msgcat::mcset nl tooltip-togglesysmsg     {Aanwezigheidsveranderingen in het chatvenster tonen of verbergen}
 
 
 # Me knows :-)
@@ -1260,6 +1357,7 @@ if {0} {
 # Messages for User Activity XEP
 ::msgcat::mcset nl Activity              {Activiteit}
 ::msgcat::mcset nl mActivity...          {Acti&viteit...}
+::msgcat::mcset nl mCustomActivity... {Aangepaste acti&viteit...}
 
 ::msgcat::mcset nl Traveling             {Reizen}
 ::msgcat::mcset nl Commuting             {Pendelen}
