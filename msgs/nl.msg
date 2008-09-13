@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.178 2008-09-13 19:55:59 sdevrieze Exp $
+#   $Id: nl.msg,v 1.179 2008-09-13 22:11:27 sdevrieze Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}
@@ -118,6 +118,7 @@
 ::msgcat::mcset nl moderator             {Moderatorprivileges}
 ::msgcat::mcset nl Moderators            {Moderators}
 ::msgcat::mcset nl More                  {Meer}
+::msgcat::mcset nl Name               Naam
 ::msgcat::mcset nl Network               {Netwerk}
 ::msgcat::mcset nl Never                 {Nooit}
 ::msgcat::mcset nl New                   {Nieuw}
@@ -177,6 +178,7 @@
 ::msgcat::mcset nl Sleep                 {Slaapstand}
 ::msgcat::mcset nl Sounds                {Geluiden}
 ::msgcat::mcset nl Specific              {Specifiek}
+::msgcat::mcset nl Status                  {Status}
 ::msgcat::mcset nl Stop                  {Stoppen}
 ::msgcat::mcset nl Subject               {Onderwerp}
 ::msgcat::mcset nl System                {Systeem}
@@ -462,6 +464,7 @@
 ::msgcat::mcset nl {All Supported Files} {Alle ondersteunde bestanden}
 ::msgcat::mcset nl {Alternative chatroom} {Alternatieve chatruimte}
 ::msgcat::mcset nl {Always ask}          {Altijd vragen}
+::msgcat::mcset nl {Application Status}          {Programmastatus}
 ::msgcat::mcset nl {Auto Away}           {Automatisch afwezig}
 ::msgcat::mcset nl {Auto Join}           {Automatisch betreden}
 ::msgcat::mcset nl {Auto Reply}          {Automatisch beantwoorden}
@@ -481,6 +484,7 @@
 ::msgcat::mcset nl {Chatroom presence change} {Verandering van aanwezigheid in chatruimte}
 ::msgcat::mcset nl {Clear Cache}         {Cache legen}
 ::msgcat::mcset nl {Close page}          {Pagina sluiten}
+::msgcat::mcset nl {Close Slot}           {Slot sluiten}
 ::msgcat::mcset nl {Close tab}           {Tabblad sluiten}
 ::msgcat::mcset nl {Configure Chatroom}  {Chatruimte instellen}
 ::msgcat::mcset nl {Contact Actions}     {Contactpersoonacties}
@@ -525,6 +529,7 @@
 ::msgcat::mcset nl {Font weight}         {Opmaakprofiel}
 ::msgcat::mcset nl {Format: mm/dd/yyyy}  {Opmaak: mm/dd/jjjj}
 ::msgcat::mcset nl {Forwarded message}   {Doorgestuurd bericht}
+::msgcat::mcset nl {Full Name}   {Volledige naam}
 ::msgcat::mcset nl {History length}      {Lengte van geschiedenis}
 ::msgcat::mcset nl {Import Iconset}      {Emoticon-thema importeren}
 ::msgcat::mcset nl {Incoming Message}    {Inkomend bericht}
@@ -572,9 +577,12 @@
 ::msgcat::mcset nl {Open Image/Movie}    {Afbeelding/film openen}
 ::msgcat::mcset nl {Open Stream}         {Stream openen}
 ::msgcat::mcset nl {Open with}           {Openen met}
+::msgcat::mcset nl {Own Contact ID}           {Eigen Contact ID}
+::msgcat::mcset nl {Own Full Contact ID}           {Eigen volledige Contact ID}
 ::msgcat::mcset nl {Plain text password} {Wachtwoord in platte tekst}
 ::msgcat::mcset nl {Play sound}          {Geluid afspelen}
 ::msgcat::mcset nl {Postal code}         {Postcode}
+::msgcat::mcset nl {Presence Control}      {Aanwezigheidscontrole}
 ::msgcat::mcset nl {Presence Error}      {Aanwezigheidsfout}
 ::msgcat::mcset nl {Presence Subscription} {Aanwezigheidsabonnement}
 ::msgcat::mcset nl {Profile Name}        {Profielnaam}
@@ -589,6 +597,7 @@
 ::msgcat::mcset nl {Remove Item}         {Item verwijderen}
 ::msgcat::mcset nl {Requires a restart of} {Vereist een herstart van %s}
 ::msgcat::mcset nl {Retype password}     {Wachtwoord herhalen}
+::msgcat::mcset nl {Right click to open menu}     {Klik met de rechtermuisknop om het menu te openen}
 ::msgcat::mcset nl {Save As}             {Opslaan als}
 ::msgcat::mcset nl {Save As GIF}         {Opslaan als GIF}
 ::msgcat::mcset nl {Save Canvas Item}    {Item opslaan}
@@ -597,6 +606,7 @@
 ::msgcat::mcset nl {Save password}       {Wachtwoord opslaan}
 ::msgcat::mcset nl {Save to disk}        {Op schijf opslaan}
 ::msgcat::mcset nl {Search results}      {Zoekresultaten}
+::msgcat::mcset nl {Search People}      {Mensen zoeken}
 ::msgcat::mcset nl {Select Avatar}       {Avatar selecteren}
 ::msgcat::mcset nl {Select File}         {Bestand selecteren}
 ::msgcat::mcset nl {Select Font}         {Lettertype selecteren}
@@ -618,6 +628,7 @@
 ::msgcat::mcset nl {Start chat}          {Chatsessie starten}
 ::msgcat::mcset nl {Start minimized in system tray} {Geminimaliseerd in het systeemvak starten}
 ::msgcat::mcset nl {Start minimized in taskbar} {Geminimaliseerd in de taakbalk starten}
+::msgcat::mcset nl {Status Info}      {Statusinfo}
 ::msgcat::mcset nl {Status message}      {Bericht}
 ::msgcat::mcset nl {Subscription Failed} {Abonneren mislukte}
 ::msgcat::mcset nl {Subscription Pending} {Wachtend op abonnement}
@@ -748,8 +759,8 @@
 ::msgcat::mcset nl messsuassclose        {Wilt u de installatieassistent afsluiten? U kunt hem later altijd starten vanuit het menu.}
 ::msgcat::mcset nl messsuassfillin       {Vul eerst alle velden in.}
 ::msgcat::mcset nl messtimeout           {Tijdslimiet overschreden bij proberen te verbinden.}
-::msgcat::mcset nl messunsavedmsgQ       {Dit whiteboard-document is gewijzigd.}
-::msgcat::mcset nl messunsaveddtl        {Wilt u de wijzigingen opslaan?}
+::msgcat::mcset nl messunsavedmsgQ2       {Dit whiteboard-document is veranderd.}
+::msgcat::mcset nl messunsaveddtl2        {Wilt u de wijzigingen opslaan?}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset nl jamessaddforeign2     {Voor een contactpersoon op een chatsysteem zonder open federatie hebt u een account nodig op dit gesloten systeem. Daarnaast moet u deze account registreren op het transport %s. Wilt u dit nu doen?}

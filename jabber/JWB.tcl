@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JWB.tcl,v 1.99 2008-06-09 14:24:46 matben Exp $
+# $Id: JWB.tcl,v 1.100 2008-09-13 22:11:26 sdevrieze Exp $
 
 package require can2svgwb
 package require svgwb2can
@@ -654,7 +654,7 @@ proc ::JWB::CloseHook {w} {
 		set dtl [mc "Edits will be lost unless you save them."]
 		set ans [::UI::MessageBox -parent $w -icon question \
 		  -type yesnocancel \
-		  -message [mc messunsavedmsgQ] -detail [mc messunsaveddtl]]
+		  -message [mc messunsavedmsgQ2] -detail [mc messunsaveddtl2]]
 		if {$ans eq "yes"} {
 		    ::CanvasFile::Save $wcan
 		} elseif {$ans eq "cancel"} {

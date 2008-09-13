@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: StatusSlot.tcl,v 1.6 2008-08-15 13:17:24 matben Exp $
+# $Id: StatusSlot.tcl,v 1.7 2008-09-13 22:11:26 sdevrieze Exp $
 
 package provide StatusSlot 1.0
 
@@ -59,7 +59,7 @@ proc ::StatusSlot::BuildMessageSlot {w} {
 	  -command [namespace code [list Close $w]]
 	pack $w.close -side right -anchor n	
 
-	::balloonhelp::balloonforwindow $w.arrow [mc "Right click to get the selector"]
+	::balloonhelp::balloonforwindow $w.arrow [mc "Right click to open menu"]
         ::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
     }    
     set box $w.box

@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.153 2008-09-13 20:14:10 sdevrieze Exp $
+#   $Id: sv.msg,v 1.154 2008-09-13 22:11:27 sdevrieze Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -316,6 +316,7 @@
 ::msgcat::mcset sv mCoccinellaHome...    {Hemsida...}
 ::msgcat::mcset sv mColor...             {Färg...}
 ::msgcat::mcset sv mContacts...          {Kontakter...}
+::msgcat::mcset sv mControlPanel         {Control Panel}
 ::msgcat::mcset sv mCopy                 {Kopiera}
 ::msgcat::mcset sv mCreateRoom...        {Skapa chattrum...}
 ::msgcat::mcset sv mCustomStatus...      {Speciell status...}
@@ -349,6 +350,7 @@
 ::msgcat::mcset sv mFont                 {Typsnitt}
 ::msgcat::mcset sv mFontSize             {Typsnittsstorlek}
 ::msgcat::mcset sv mGrid                 {Gridd}
+::msgcat::mcset sv mHideControlPanel     {Hide Control Panel}
 ::msgcat::mcset sv mHistory...           {Historik...}
 ::msgcat::mcset sv mHorizontal           {Horisontellt}
 ::msgcat::mcset sv mHugeFont             {Jättestor}
@@ -421,6 +423,7 @@
 ::msgcat::mcset sv mSetupAssistant...    {Inställningsassistent...}
 ::msgcat::mcset sv mShiftConstrain       {Skiftbegränsning}
 ::msgcat::mcset sv mShow                 {Visa}
+::msgcat::mcset sv mShowControlPanel     {Show Control Panel}
 ::msgcat::mcset sv mSize                 {Storlek}
 ::msgcat::mcset sv mSlideShow            {Bildvisning}
 ::msgcat::mcset sv mSmaller              {Mindre}
@@ -569,6 +572,7 @@
 ::msgcat::mcset sv {Open Image/Movie}    {Öppna bild/film}
 ::msgcat::mcset sv {Open Stream}         {Öppna ström}
 ::msgcat::mcset sv {Open with}           {Öppna med}
+::msgcat::mcset sv {Plain text password} {Plain text password}
 ::msgcat::mcset sv {Play sound}          {Spela upp ljud}
 ::msgcat::mcset sv {Postal code}         {Postnummer}
 ::msgcat::mcset sv {Presence Error}      {Närvaro fel}
@@ -744,8 +748,8 @@
 ::msgcat::mcset sv messsuassclose        {Är du säker på att du vill stänga inställningsassistenten? Du kan starta den när som helst från menyn.}
 ::msgcat::mcset sv messsuassfillin       {Försäkra dig om att samtliga fält är ifyllda innan du fortsätter}
 ::msgcat::mcset sv messtimeout           {Fick timeout när väntade på att förbindelsen ska öppna.}
-::msgcat::mcset sv messunsavedmsgQ       {Do you want to save edits in a file?}
-::msgcat::mcset sv messunsaveddtl        {Edits will be lost unless you save them.}
+::msgcat::mcset sv messunsavedmsgQ2       {This whiteboard document has been changed.}
+::msgcat::mcset sv messunsaveddtl2        {Do you want to save the changes?}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset sv jamessaddforeign2     {För att lägga till en kontakt från ett slutet chattsystem så måste du ha ett användarkonto på detta system och sedan registrera detta konto hos motsvarande transport (%s). Vill du göra detta nu?}

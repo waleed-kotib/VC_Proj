@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: cs.msg,v 1.9 2008-04-25 07:06:41 matben Exp $
+#   $Id: cs.msg,v 1.10 2008-09-13 22:11:26 sdevrieze Exp $
 
 ::msgcat::mcset cs Abort                 {Storno}
 ::msgcat::mcset cs Action                {Akce}
@@ -316,6 +316,7 @@
 ::msgcat::mcset cs mCoccinellaHome...    {&Domovská stránka...}
 ::msgcat::mcset cs mColor...             {Barva...}
 ::msgcat::mcset cs mContacts...          {&Kontakty...}
+::msgcat::mcset cs mControlPanel         {Control Panel}
 ::msgcat::mcset cs mCopy                 {&Kopírovat}
 ::msgcat::mcset cs mCreateRoom...        {&Vytvořit místnost...}
 ::msgcat::mcset cs mCustomStatus...      {Vlastní stav...}
@@ -349,6 +350,7 @@
 ::msgcat::mcset cs mFont                 {Písmo}
 ::msgcat::mcset cs mFontSize             {Velikost písma}
 ::msgcat::mcset cs mGrid                 {Mřížka}
+::msgcat::mcset cs mHideControlPanel     {Hide Control Panel}
 ::msgcat::mcset cs mHistory...           {&Historie...}
 ::msgcat::mcset cs mHorizontal           {Horizontální}
 ::msgcat::mcset cs mHugeFont             {Veliké}
@@ -421,6 +423,7 @@
 ::msgcat::mcset cs mSetupAssistant...    {Asistent na&stavení...}
 ::msgcat::mcset cs mShiftConstrain       {Chování se shiftem}
 ::msgcat::mcset cs mShow                 {Ukázat}
+::msgcat::mcset cs mShowControlPanel     {Show Control Panel}
 ::msgcat::mcset cs mSize                 {Velikost}
 ::msgcat::mcset cs mSlideShow            {Prezentace}
 ::msgcat::mcset cs mSmaller              {Zmenšit}
@@ -569,6 +572,7 @@
 ::msgcat::mcset cs {Open Image/Movie}    {Otevřít obrázek/video}
 ::msgcat::mcset cs {Open Stream}         {Otevřít proud}
 ::msgcat::mcset cs {Open with}           {Otevřít čím}
+::msgcat::mcset cs {Plain text password} {Plain text password}
 ::msgcat::mcset cs {Play sound}          {Přehrát zvuk}
 ::msgcat::mcset cs {Postal code}         {PSČ}
 ::msgcat::mcset cs {Presence Error}      {Chyba přítomnosti}
@@ -592,7 +596,6 @@
 ::msgcat::mcset cs {Save Message}        {Uložit zprávu}
 ::msgcat::mcset cs {Save password}       {Uložit heslo}
 ::msgcat::mcset cs {Save to disk}        {Uložit na disk}
-::msgcat::mcset cs {Scramble password}   {Náhodné heslo}
 ::msgcat::mcset cs {Search results}      {Výsledky hledání}
 ::msgcat::mcset cs {Select Avatar}       {Vyběr avatara}
 ::msgcat::mcset cs {Select File}         {Výběr souboru}
@@ -745,8 +748,8 @@
 ::msgcat::mcset cs messsuassclose        {Opravdu chceš ukončit asistenta nastavení? Můžeš ho pak kdykoli spustit z menu.}
 ::msgcat::mcset cs messsuassfillin       {Přesvědč se, než budeš pokračovat, že jsi vyplnil(a) všechna pole.}
 ::msgcat::mcset cs messtimeout           {Vypršel čas při čekání na otevření spojení.}
-::msgcat::mcset cs messunsavedmsgQ       {Do you want to save edits in a file?}
-::msgcat::mcset cs messunsaveddtl        {Edits will be lost unless you save them.}
+::msgcat::mcset cs messunsavedmsgQ2       {This whiteboard document has been changed.}
+::msgcat::mcset cs messunsaveddtl2        {Do you want to save the changes?}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset cs jamessaddforeign2     {Jestli chceš přidat kontakt z uzavřeného IM systému, potřebuješ mít účet v tomto systému, dále si musíš zaregistrovat odpovídající transport (%s). Chceš se do toho pustit?}
@@ -799,6 +802,8 @@
 ::msgcat::mcset cs jamessjidinvalid2     {Nesprávné ID kontaktu.}
 ::msgcat::mcset cs jamesslocaltime2      {Místní čas kontaktu %s: %s}
 ::msgcat::mcset cs jamesslogin409b       {Nemohu se přihlásit, protože jméno již někdo používá (%s).}
+::msgcat::mcset cs jamessloginnewprof    {The Contact ID differs from your profile. Do you want to save a new profile?}
+::msgcat::mcset cs jamesslogindiff       {Your current login settings differ from your profile settings. Do you want to save them to your profile?}
 ::msgcat::mcset cs jamessmsgwarnquit     {Jsou tu nějaké neuložené zprávy. Opravdu chceš skončit?}
 ::msgcat::mcset cs jamessnamemissing     {"%s" chybí, nebo je příliš krátké!}
 ::msgcat::mcset cs jamessnofiletrpt2     {%s nepodporuje přenos souborů.}
@@ -1189,44 +1194,135 @@ if {0} {
 
 # Messages for Mood XEP
 # bug: this should be M&ood..., but this does not work!
-::msgcat::mcset cs mMood                 {Nálada}
-::msgcat::mcset cs mAngry                {Hladový}
-::msgcat::mcset cs mAnxious              {Nedočkavý}
-::msgcat::mcset cs mAshamed              {Zahanbený}
-::msgcat::mcset cs mBored                {Znuděný}
-::msgcat::mcset cs mCurious              {Zvědavý}
-::msgcat::mcset cs mDepressed            {Skleslý}
-::msgcat::mcset cs mExcited              {Nadšený}
-::msgcat::mcset cs mHappy                {Šťastný}
-::msgcat::mcset cs mInLove               {Zamilovaný}
-::msgcat::mcset cs mInvincible           {Nepřekonatelný}
-::msgcat::mcset cs mJealous              {Žárlivý}
-::msgcat::mcset cs mNervous              {Nervózní}
-::msgcat::mcset cs mSad                  {Smutný}
-::msgcat::mcset cs mSleepy               {Ospalý}
-::msgcat::mcset cs mStressed             {Přetížený}
-::msgcat::mcset cs mWorried              {Utrápený}
+::msgcat::mcset cs mMood                 Nálada
+::msgcat::mcset cs mAfraid               Afraid
+::msgcat::mcset cs mAmazed          Amazed
+::msgcat::mcset cs mAngry                Hladový
+::msgcat::mcset cs mAnnoyed         Annoyed
+::msgcat::mcset cs mAnxious              Nedočkavý
+::msgcat::mcset cs mAroused         Aroused
+::msgcat::mcset cs mAshamed              Zahanbený
+::msgcat::mcset cs mBored                Znuděný
+::msgcat::mcset cs mBrave           Brave
+::msgcat::mcset cs mCalm            Calm
+::msgcat::mcset cs mCold            Cold
+::msgcat::mcset cs mConfused        Confused
+::msgcat::mcset cs mContented       Contented
+::msgcat::mcset cs mCranky          Cranky
+::msgcat::mcset cs mCurious              Zvědavý
+::msgcat::mcset cs mDepressed            Skleslý
+::msgcat::mcset cs mDisappointed    Disappointed
+::msgcat::mcset cs mDisgusted       Disgusted
+::msgcat::mcset cs mDistracted      Distracted
+::msgcat::mcset cs mEmbarrassed     Embarrassed
+::msgcat::mcset cs mExcited              Nadšený
+::msgcat::mcset cs mFlirtatious     Flirtatious
+::msgcat::mcset cs mFrustrated      Frustrated
+::msgcat::mcset cs mGrumpy          Grumpy
+::msgcat::mcset cs mGuilty          Guilty
+::msgcat::mcset cs mHappy                Šťastný
+::msgcat::mcset cs mHot             Hot
+::msgcat::mcset cs mHumbled         Humbled
+::msgcat::mcset cs mHumiliated      Humiliated
+::msgcat::mcset cs mHungry          Hungry
+::msgcat::mcset cs mHurt            Hurt
+::msgcat::mcset cs mImpressed       Impressed
+::msgcat::mcset cs mIn_awe          {In awe}
+::msgcat::mcset cs mIn_love               Zamilovaný
+::msgcat::mcset cs mIndignant       Indignant
+::msgcat::mcset cs mInterested      Interested
+::msgcat::mcset cs mIntoxicated     Intoxicated
+::msgcat::mcset cs mInvincible           Nepřekonatelný
+::msgcat::mcset cs mJealous              Žárlivý
+::msgcat::mcset cs mLonely          Lonely
+::msgcat::mcset cs mMean            Mean
+::msgcat::mcset cs mMoody           Moody
+::msgcat::mcset cs mNervous              Nervózní
+::msgcat::mcset cs mNeutral         Neutral
+::msgcat::mcset cs mOffended        Offended
+::msgcat::mcset cs mPlayful         Playful
+::msgcat::mcset cs mProud           Proud
+::msgcat::mcset cs mRelieved        Relieved
+::msgcat::mcset cs mRemorseful      Remorseful
+::msgcat::mcset cs mRestless        Restless
+::msgcat::mcset cs mSad                  Smutný
+::msgcat::mcset cs mSarcastic       Sarcastic
+::msgcat::mcset cs mSerious         Serious
+::msgcat::mcset cs mShocked         Shocked
+::msgcat::mcset cs mShy             Shy
+::msgcat::mcset cs mSick            Sick
+::msgcat::mcset cs mSleepy               Ospalý
+::msgcat::mcset cs mStressed             Přetížený
+::msgcat::mcset cs mSurprised       Surprised
+::msgcat::mcset cs mThirsty         Thirsty
+::msgcat::mcset cs mWorried              Utrápený
 
 ::msgcat::mcset cs moodEvent             {Změna nálady}
 ::msgcat::mcset cs moodRetracted         {stažená nálada}
-::msgcat::mcset cs heIs                  {je}
-::msgcat::mcset cs because               {protože}
-::msgcat::mcset cs angry                 {hladový}
-::msgcat::mcset cs anxious               {nedočkavý}
-::msgcat::mcset cs ashamed               {zahanbený}
-::msgcat::mcset cs bored                 {znuděný}
-::msgcat::mcset cs curious               {zvědavý}
-::msgcat::mcset cs depressed             {skleslý}
-::msgcat::mcset cs excited               {nadšený}
-::msgcat::mcset cs happy                 {šťastný}
-::msgcat::mcset cs in_love               {zamilovaný}
-::msgcat::mcset cs invincible            {nepřekonatelný}
-::msgcat::mcset cs jealous               {žárlivý}
-::msgcat::mcset cs nervous               {nervózní}
-::msgcat::mcset cs sad                   {smutný}
-::msgcat::mcset cs sleepy                {ospalý}
-::msgcat::mcset cs stressed              {přetížený}
-::msgcat::mcset cs worried               {utrápený}
+
+::msgcat::mcset cs heIs                  je
+::msgcat::mcset cs because               protože
+::msgcat::mcset cs afraid   afraid
+::msgcat::mcset cs amazed   amazed
+::msgcat::mcset cs angry                 hladový
+::msgcat::mcset cs annoyed   annoyed
+::msgcat::mcset cs anxious               nedočkavý
+::msgcat::mcset cs aroused   aroused
+::msgcat::mcset cs ashamed               zahanbený
+::msgcat::mcset cs bored                 znuděný
+::msgcat::mcset cs brave   brave
+::msgcat::mcset cs calm   calm
+::msgcat::mcset cs cold   cold
+::msgcat::mcset cs confused   confused
+::msgcat::mcset cs contented   contented
+::msgcat::mcset cs cranky   cranky
+::msgcat::mcset cs curious               zvědavý
+::msgcat::mcset cs depressed             skleslý
+::msgcat::mcset cs disappointed   disappointed
+::msgcat::mcset cs disgusted   disgusted
+::msgcat::mcset cs distracted   distracted
+::msgcat::mcset cs embarrassed   embarrassed
+::msgcat::mcset cs excited               nadšený
+::msgcat::mcset cs flirtatious   flirtatious
+::msgcat::mcset cs frustrated   frustrated
+::msgcat::mcset cs grumpy   grumpy
+::msgcat::mcset cs guilty   guilty
+::msgcat::mcset cs happy                 šťastný
+::msgcat::mcset cs hot   hot
+::msgcat::mcset cs humbled   humbled
+::msgcat::mcset cs humiliated   humiliated
+::msgcat::mcset cs hungry   hungry
+::msgcat::mcset cs hurt   hurt
+::msgcat::mcset cs impressed   impressed
+::msgcat::mcset cs in_awe   {in awe}
+::msgcat::mcset cs in_love               zamilovaný
+::msgcat::mcset cs indignant   indignant
+::msgcat::mcset cs interested   interested
+::msgcat::mcset cs intoxicated   intoxicated
+::msgcat::mcset cs invincible            nepřekonatelný
+::msgcat::mcset cs jealous               žárlivý
+::msgcat::mcset cs lonely   lonely
+::msgcat::mcset cs mean   mean
+::msgcat::mcset cs moody   moody
+::msgcat::mcset cs nervous               nervózní
+::msgcat::mcset cs neutral   neutral
+::msgcat::mcset cs offended   offended
+::msgcat::mcset cs playful   playful
+::msgcat::mcset cs proud   proud
+::msgcat::mcset cs relieved   relieved
+::msgcat::mcset cs remorseful   remorseful
+::msgcat::mcset cs restless   restless
+::msgcat::mcset cs sad                   smutný
+::msgcat::mcset cs sarcastic   sarcastic
+::msgcat::mcset cs serious   serious
+::msgcat::mcset cs shocked   shocked
+::msgcat::mcset cs shy   shy
+::msgcat::mcset cs sick   sick
+::msgcat::mcset cs sleepy                ospalý
+::msgcat::mcset cs stressed              přetížený
+::msgcat::mcset cs surprised   surprised
+::msgcat::mcset cs thirsty   thirsty
+::msgcat::mcset cs worried               utrápený
 
 ::msgcat::mcset cs {Custom Mood}         {Vlastní nálada}
 ::msgcat::mcset cs mCustomMood...        {&Vlastní nálada...}
@@ -1248,8 +1344,10 @@ if {0} {
 
 ::msgcat::mcset cs tooltip-chatsubject   {Vlož předmět konverzace, odešli pomocí Enter}
 ::msgcat::mcset cs tooltip-chatoffline   {Musíš být přihlášen(a), abys viděl(a) stav tohoto kontaktu}
+::msgcat::mcset cs tooltip-chatsendtext     {Enter your message and press Return or Shift-Return}
 ::msgcat::mcset cs tooltip-aaonhidden    {Jesliže je zaškrtnuto, pak uživatelům ve schovaných záložkách chatu je odesláno, že jsi pryč na dlouho}
 ::msgcat::mcset cs tooltip-aabusychats   {Když máš <číslo> nebo více aktivních chatů, bude tvůj stav automaticky změněn na Nerušit.}
+::msgcat::mcset cs tooltip-togglesysmsg     {Show or hide status changes in chat}
 
 
 # Me knows :-)
@@ -1259,6 +1357,7 @@ if {0} {
 # Messages for User Activity XEP
 ::msgcat::mcset cs Activity              {Aktivita}
 ::msgcat::mcset cs mActivity...          {Akti&vita...}
+::msgcat::mcset cs mCustomActivity... {Custom Activity...}
 
 ::msgcat::mcset cs Traveling             {Cestování}
 ::msgcat::mcset cs Commuting             {Dojíždění}
