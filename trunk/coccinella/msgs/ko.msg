@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: ko.msg,v 1.4 2008-04-25 07:06:44 matben Exp $
+#   $Id: ko.msg,v 1.5 2008-09-14 13:02:31 sdevrieze Exp $
 
 ::msgcat::mcset ko Abort                 {Abort}
 ::msgcat::mcset ko Action                {활동}
@@ -118,6 +118,7 @@
 ::msgcat::mcset ko moderator             {진행자}
 ::msgcat::mcset ko Moderators            {진행자}
 ::msgcat::mcset ko More                  {더}
+::msgcat::mcset ko Name               {Name}
 ::msgcat::mcset ko Network               {Network}
 ::msgcat::mcset ko Never                 {결코}
 ::msgcat::mcset ko New                   {새}
@@ -177,6 +178,7 @@
 ::msgcat::mcset ko Sleep                 {Sleep}
 ::msgcat::mcset ko Sounds                {소리}
 ::msgcat::mcset ko Specific              {Specific}
+::msgcat::mcset ko Status                  {Status}
 ::msgcat::mcset ko Stop                  {정지}
 ::msgcat::mcset ko Subject               {주제}
 ::msgcat::mcset ko System                {System}
@@ -316,6 +318,7 @@
 ::msgcat::mcset ko mCoccinellaHome...    {&Home Page...}
 ::msgcat::mcset ko mColor...             {Color...}
 ::msgcat::mcset ko mContacts...          {&Contacts...}
+::msgcat::mcset ko mControlPanel         {Control Panel}
 ::msgcat::mcset ko mCopy                 {빼끼기}
 ::msgcat::mcset ko mCreateRoom...        {&Create Chatroom...}
 ::msgcat::mcset ko mCustomStatus...      {Custom Status...}
@@ -349,6 +352,7 @@
 ::msgcat::mcset ko mFont                 {서체}
 ::msgcat::mcset ko mFontSize             {Font Size}
 ::msgcat::mcset ko mGrid                 {격자눈금}
+::msgcat::mcset ko mHideControlPanel     {Hide Control Panel}
 ::msgcat::mcset ko mHistory...           {&History...}
 ::msgcat::mcset ko mHorizontal           {수평의}
 ::msgcat::mcset ko mHugeFont             {Huge}
@@ -421,6 +425,7 @@
 ::msgcat::mcset ko mSetupAssistant...    {설정 도움...}
 ::msgcat::mcset ko mShiftConstrain       {제한점 옮기기}
 ::msgcat::mcset ko mShow                 {보여주기}
+::msgcat::mcset ko mShowControlPanel     {Show Control Panel}
 ::msgcat::mcset ko mSize                 {크기}
 ::msgcat::mcset ko mSlideShow            {Slide Show}
 ::msgcat::mcset ko mSmaller              {작은 것}
@@ -459,6 +464,7 @@
 ::msgcat::mcset ko {All Supported Files} {All Supported Files}
 ::msgcat::mcset ko {Alternative chatroom} {Alternative chatroom}
 ::msgcat::mcset ko {Always ask}          {Always ask}
+::msgcat::mcset ko {Application Status} {Application Status}
 ::msgcat::mcset ko {Auto Away}           {자동으로 나가기}
 ::msgcat::mcset ko {Auto Join}           {자동 합류}
 ::msgcat::mcset ko {Auto Reply}          {Auto Reply}
@@ -478,6 +484,7 @@
 ::msgcat::mcset ko {Chatroom presence change} {Chatroom presence change}
 ::msgcat::mcset ko {Clear Cache}         {Clear Cache}
 ::msgcat::mcset ko {Close page}          {Close page}
+::msgcat::mcset ko {Close Slot}         {Close Slot}
 ::msgcat::mcset ko {Close tab}           {Close tab}
 ::msgcat::mcset ko {Configure Chatroom}  {Configure Chatroom}
 ::msgcat::mcset ko {Contact Actions}     {Contact Actions}
@@ -522,6 +529,7 @@
 ::msgcat::mcset ko {Font weight}         {Font weight}
 ::msgcat::mcset ko {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 ::msgcat::mcset ko {Forwarded message}   {Forwarded message}
+::msgcat::mcset ko {Full Name}         {Full Name}
 ::msgcat::mcset ko {History length}      {기록 길이}
 ::msgcat::mcset ko {Import Iconset}      {Import Iconset}
 ::msgcat::mcset ko {Incoming Message}    {받은 메세지}
@@ -569,8 +577,12 @@
 ::msgcat::mcset ko {Open Image/Movie}    {그림/동영상 열기}
 ::msgcat::mcset ko {Open Stream}         {스트림 열기}
 ::msgcat::mcset ko {Open with}           {Open with}
+::msgcat::mcset ko {Own Contact ID}           {Own Contact ID}
+::msgcat::mcset ko {Own Full Contact ID}           {Own Full Contact ID}
+::msgcat::mcset ko {Plain text password} {Plain text password}
 ::msgcat::mcset ko {Play sound}          {Play sound}
 ::msgcat::mcset ko {Postal code}         {Postal code}
+::msgcat::mcset ko {Presence Control} {Presence Control}
 ::msgcat::mcset ko {Presence Error}      {존제 오류}
 ::msgcat::mcset ko {Presence Subscription} {Presence Subscription}
 ::msgcat::mcset ko {Profile Name}        {프로파일 명}
@@ -585,6 +597,7 @@
 ::msgcat::mcset ko {Remove Item}         {아이템 제거하기}
 ::msgcat::mcset ko {Requires a restart of} {Requires a restart of %s}
 ::msgcat::mcset ko {Retype password}     {Retype password}
+::msgcat::mcset ko {Right click to open menu} {Right click to open menu}
 ::msgcat::mcset ko {Save As}             {다른이름으로 저장하기}
 ::msgcat::mcset ko {Save As GIF}         {GIF 파일로 저장하기}
 ::msgcat::mcset ko {Save Canvas Item}    {Save Canvas Item}
@@ -592,7 +605,7 @@
 ::msgcat::mcset ko {Save Message}        {메세지 저장하기}
 ::msgcat::mcset ko {Save password}       {Save password}
 ::msgcat::mcset ko {Save to disk}        {Save to disk}
-::msgcat::mcset ko {Scramble password}   {암호 뒤섞기}
+::msgcat::mcset ko {Search People} {Search People}
 ::msgcat::mcset ko {Search results}      {찾은 결과}
 ::msgcat::mcset ko {Select Avatar}       {Select Avatar}
 ::msgcat::mcset ko {Select File}         {Select File}
@@ -615,6 +628,7 @@
 ::msgcat::mcset ko {Start chat}          {Start chat}
 ::msgcat::mcset ko {Start minimized in system tray} {Start minimized in system tray}
 ::msgcat::mcset ko {Start minimized in taskbar} {Start minimized in taskbar}
+::msgcat::mcset ko {Status Info} {Status Info}
 ::msgcat::mcset ko {Status message}      {상태 메세지}
 ::msgcat::mcset ko {Subscription Failed} {서명 실패}
 ::msgcat::mcset ko {Subscription Pending} {서명 지체}
@@ -677,14 +691,14 @@
 ::msgcat::mcset ko {One hour}            {1 시간}
 
 # Language names.
-::msgcat::mcset ko Czech                 {Czech}
+::msgcat::mcset ko Czech                 {체코어}
 ::msgcat::mcset ko Danish                {덴마크어}
 ::msgcat::mcset ko Dutch                 {네덜란드어}
 ::msgcat::mcset ko English               {영어}
 ::msgcat::mcset ko French                {불어}
 ::msgcat::mcset ko German                {독일어}
 ::msgcat::mcset ko Italian               {이태리어}
-::msgcat::mcset ko Korean                {Korean}
+::msgcat::mcset ko Korean                {한국어}
 ::msgcat::mcset ko Polish                {폴란드어}
 ::msgcat::mcset ko Russian               {러시아어}
 ::msgcat::mcset ko Spanish               {스페인어}
@@ -698,10 +712,10 @@
 ::msgcat::mcset ko nativeEnglish         {English}
 ::msgcat::mcset ko nativeFrench          {Francais}
 ::msgcat::mcset ko nativeGerman          {Deutsch}
-::msgcat::mcset ko nativeItalian         {nativeItalian}
-::msgcat::mcset ko nativeKorean          {nativeKorean}
-::msgcat::mcset ko nativePolish          {nativePolish}
-::msgcat::mcset ko nativeRussian         {nativeRussian}
+::msgcat::mcset ko nativeItalian         {Italiano}
+::msgcat::mcset ko nativeKorean          {한국어}
+::msgcat::mcset ko nativePolish          {Polski}
+::msgcat::mcset ko nativeRussian         {русский}
 ::msgcat::mcset ko nativeSpanish         {Castellano}
 ::msgcat::mcset ko nativeSwedish         {Svenska}
 
@@ -745,8 +759,8 @@
 ::msgcat::mcset ko messsuassclose        {정말 설정 도우미를 닫기를 원하나요? 나중에 메뉴에서 언제든지 다시 사용할 수 있습니다.}
 ::msgcat::mcset ko messsuassfillin       {계속하기 전에 모든 항목을 채웟는지 확인하세요}
 ::msgcat::mcset ko messtimeout           {열기 시도중 시간초과되었습니다.}
-::msgcat::mcset ko messunsavedmsgQ       {Do you want to save edits in a file?}
-::msgcat::mcset ko messunsaveddtl        {Edits will be lost unless you save them.}
+::msgcat::mcset ko messunsavedmsgQ2       {This whiteboard document has been changed.}
+::msgcat::mcset ko messunsaveddtl2        {Do you want to save the changes?}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset ko jamessaddforeign2     {To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?}
@@ -799,6 +813,8 @@
 ::msgcat::mcset ko jamessjidinvalid2     {Invalid Contact ID.}
 ::msgcat::mcset ko jamesslocaltime2      {%s's local time is: %s}
 ::msgcat::mcset ko jamesslogin409b       {Cannot login because this username is already in use by someone else (%s).}
+::msgcat::mcset ko jamessloginnewprof    {The Contact ID differs from your profile. Do you want to save a new profile?}
+::msgcat::mcset ko jamesslogindiff       {Your current login settings differ from your profile settings. Do you want to save them to your profile?}
 ::msgcat::mcset ko jamessmsgwarnquit     {There are unsaved messages. Do you still want to quit?}
 ::msgcat::mcset ko jamessnamemissing     {%s 는 읽어버린 것이거나 너무 짧습니다!}
 ::msgcat::mcset ko jamessnofiletrpt2     {%s does not support file transfer.}
@@ -1190,42 +1206,133 @@ if {0} {
 # Messages for Mood XEP
 # bug: this should be M&ood..., but this does not work!
 ::msgcat::mcset ko mMood                 {분위기}
+::msgcat::mcset ko mAfraid               {Afraid}
+::msgcat::mcset ko mAmazed          {Amazed}
 ::msgcat::mcset ko mAngry                {화난}
+::msgcat::mcset ko mAnnoyed         {Annoyed}
 ::msgcat::mcset ko mAnxious              {불안한}
+::msgcat::mcset ko mAroused         {Aroused}
 ::msgcat::mcset ko mAshamed              {부끄러운}
 ::msgcat::mcset ko mBored                {지겨운}
+::msgcat::mcset ko mBrave           {Brave}
+::msgcat::mcset ko mCalm            {Calm}
+::msgcat::mcset ko mCold            {Cold}
+::msgcat::mcset ko mConfused        {Confused}
+::msgcat::mcset ko mContented       {Contented}
+::msgcat::mcset ko mCranky          {Cranky}
 ::msgcat::mcset ko mCurious              {궁금한}
 ::msgcat::mcset ko mDepressed            {의기소침한}
+::msgcat::mcset ko mDisappointed    {Disappointed}
+::msgcat::mcset ko mDisgusted       {Disgusted}
+::msgcat::mcset ko mDistracted      {Distracted}
+::msgcat::mcset ko mEmbarrassed     {Embarrassed}
 ::msgcat::mcset ko mExcited              {흥분한}
+::msgcat::mcset ko mFlirtatious     {Flirtatious}
+::msgcat::mcset ko mFrustrated      {Frustrated}
+::msgcat::mcset ko mGrumpy          {Grumpy}
+::msgcat::mcset ko mGuilty          {Guilty}
 ::msgcat::mcset ko mHappy                {행복한}
-::msgcat::mcset ko mInLove               {사랑에 빠진}
+::msgcat::mcset ko mHot             {Hot}
+::msgcat::mcset ko mHumbled         {Humbled}
+::msgcat::mcset ko mHumiliated      {Humiliated}
+::msgcat::mcset ko mHungry          {Hungry}
+::msgcat::mcset ko mHurt            {Hurt}
+::msgcat::mcset ko mImpressed       {Impressed}
+::msgcat::mcset ko mIn_awe          {In awe}
+::msgcat::mcset ko mIn_love               {사랑에 빠진}
+::msgcat::mcset ko mIndignant       {Indignant}
+::msgcat::mcset ko mInterested      {Interested}
+::msgcat::mcset ko mIntoxicated     {Intoxicated}
 ::msgcat::mcset ko mInvincible           {완강한}
 ::msgcat::mcset ko mJealous              {샘나는}
+::msgcat::mcset ko mLonely          {Lonely}
+::msgcat::mcset ko mMean            {Mean}
+::msgcat::mcset ko mMoody           {Moody}
 ::msgcat::mcset ko mNervous              {날카로운}
+::msgcat::mcset ko mNeutral         {Neutral}
+::msgcat::mcset ko mOffended        {Offended}
+::msgcat::mcset ko mPlayful         {Playful}
+::msgcat::mcset ko mProud           {Proud}
+::msgcat::mcset ko mRelieved        {Relieved}
+::msgcat::mcset ko mRemorseful      {Remorseful}
+::msgcat::mcset ko mRestless        {Restless}
 ::msgcat::mcset ko mSad                  {슬픈}
+::msgcat::mcset ko mSarcastic       {Sarcastic}
+::msgcat::mcset ko mSerious         {Serious}
+::msgcat::mcset ko mShocked         {Shocked}
+::msgcat::mcset ko mShy             {Shy}
+::msgcat::mcset ko mSick            {Sick}
 ::msgcat::mcset ko mSleepy               {졸리는}
 ::msgcat::mcset ko mStressed             {스트레스받은}
+::msgcat::mcset ko mSurprised       {Surprised}
+::msgcat::mcset ko mThirsty         {Thirsty}
 ::msgcat::mcset ko mWorried              {걱정하는}
 
 ::msgcat::mcset ko moodEvent             {분위기 변화}
 ::msgcat::mcset ko moodRetracted         {retracted mood}
+
 ::msgcat::mcset ko heIs                  {..}
 ::msgcat::mcset ko because               {왜냐하면}
+::msgcat::mcset ko afraid   {afraid}
+::msgcat::mcset ko amazed   {amazed}
 ::msgcat::mcset ko angry                 {화남}
+::msgcat::mcset ko annoyed   {annoyed}
 ::msgcat::mcset ko anxious               {불안함}
+::msgcat::mcset ko aroused   {aroused}
 ::msgcat::mcset ko ashamed               {부끄러움}
 ::msgcat::mcset ko bored                 {지겨움}
+::msgcat::mcset ko brave   {brave}
+::msgcat::mcset ko calm   {calm}
+::msgcat::mcset ko cold   {cold}
+::msgcat::mcset ko confused   {confused}
+::msgcat::mcset ko contented   {contented}
+::msgcat::mcset ko cranky   {cranky}
 ::msgcat::mcset ko curious               {궁금함}
 ::msgcat::mcset ko depressed             {의기소침함}
+::msgcat::mcset ko disappointed   {disappointed}
+::msgcat::mcset ko disgusted   {disgusted}
+::msgcat::mcset ko distracted   {distracted}
+::msgcat::mcset ko embarrassed   {embarrassed}
 ::msgcat::mcset ko excited               {흥분함}
+::msgcat::mcset ko flirtatious   {flirtatious}
+::msgcat::mcset ko frustrated   {frustrated}
+::msgcat::mcset ko grumpy   {grumpy}
+::msgcat::mcset ko guilty   {guilty}
 ::msgcat::mcset ko happy                 {행복함}
+::msgcat::mcset ko hot   {hot}
+::msgcat::mcset ko humbled   {humbled}
+::msgcat::mcset ko humiliated   {humiliated}
+::msgcat::mcset ko hungry   {hungry}
+::msgcat::mcset ko hurt   {hurt}
+::msgcat::mcset ko impressed   {impressed}
+::msgcat::mcset ko in_awe   {in awe}
 ::msgcat::mcset ko in_love               {사랑에 빠짐}
+::msgcat::mcset ko indignant   {indignant}
+::msgcat::mcset ko interested   {interested}
+::msgcat::mcset ko intoxicated   {intoxicated}
 ::msgcat::mcset ko invincible            {완강함}
 ::msgcat::mcset ko jealous               {샘}
+::msgcat::mcset ko lonely   {lonely}
+::msgcat::mcset ko mean   {mean}
+::msgcat::mcset ko moody   {moody}
 ::msgcat::mcset ko nervous               {신경질남}
+::msgcat::mcset ko neutral   {neutral}
+::msgcat::mcset ko offended   {offended}
+::msgcat::mcset ko playful   {playful}
+::msgcat::mcset ko proud   {proud}
+::msgcat::mcset ko relieved   {relieved}
+::msgcat::mcset ko remorseful   {remorseful}
+::msgcat::mcset ko restless   {restless}
 ::msgcat::mcset ko sad                   {슬픔}
+::msgcat::mcset ko sarcastic   {sarcastic}
+::msgcat::mcset ko serious   {serious}
+::msgcat::mcset ko shocked   {shocked}
+::msgcat::mcset ko shy   {shy}
+::msgcat::mcset ko sick   {sick}
 ::msgcat::mcset ko sleepy                {졸림}
 ::msgcat::mcset ko stressed              {스트레스받음}
+::msgcat::mcset ko surprised   {surprised}
+::msgcat::mcset ko thirsty   {thirsty}
 ::msgcat::mcset ko worried               {걱정함}
 
 ::msgcat::mcset ko {Custom Mood}         {Custom Mood}
@@ -1248,8 +1355,10 @@ if {0} {
 
 ::msgcat::mcset ko tooltip-chatsubject   {Enter the subject of the conversation, set by pressing Return}
 ::msgcat::mcset ko tooltip-chatoffline   {You need to be logged in to see the presence of this contact}
+::msgcat::mcset ko tooltip-chatsendtext     {Enter your message and press Return or Shift-Return}
 ::msgcat::mcset ko tooltip-aaonhidden    {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
 ::msgcat::mcset ko tooltip-aabusychats   {When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb.}
+::msgcat::mcset ko tooltip-togglesysmsg     {Show or hide status changes in chat}
 
 
 # Me knows :-)
@@ -1259,6 +1368,7 @@ if {0} {
 # Messages for User Activity XEP
 ::msgcat::mcset ko Activity              {Activity}
 ::msgcat::mcset ko mActivity...          {Acti&vity...}
+::msgcat::mcset ko mCustomActivity... {Custom Activity...}
 
 ::msgcat::mcset ko Traveling             {Traveling}
 ::msgcat::mcset ko Commuting             {Commuting}

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: Utils.tcl,v 1.78 2008-06-11 08:12:05 matben Exp $
+# $Id: Utils.tcl,v 1.79 2008-09-14 13:02:27 sdevrieze Exp $
 
 package require uri
 package provide Utils 1.0
@@ -516,7 +516,7 @@ proc ::Utils::LanguageMenubutton {w varName args} {
 	fr {French} 
 	de {German} 
 	it {Italian}
-	kr {Korean}
+	ko {Korean}
 	pl {Polish} 
 	ru {Russian} 
 	es {Spanish} 

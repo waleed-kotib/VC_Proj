@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: it.msg,v 1.50 2008-04-25 07:06:44 matben Exp $
+#   $Id: it.msg,v 1.51 2008-09-14 13:02:31 sdevrieze Exp $
 
 ::msgcat::mcset it Abort                 {Annulla}
 ::msgcat::mcset it Action                {Azione}
@@ -36,7 +36,7 @@
 ::msgcat::mcset it Address               {Indirizzo}
 ::msgcat::mcset it Admin                 {Amministratore}
 ::msgcat::mcset it admin                 {Amministratore}
-::msgcat::mcset it Affiliation           {Societ�}
+::msgcat::mcset it Affiliation           {Societ�}
 ::msgcat::mcset it Any                   {Qualsiasi}
 ::msgcat::mcset it Appearance            {Aspetto}
 ::msgcat::mcset it Author                {Autore}
@@ -118,6 +118,7 @@
 ::msgcat::mcset it moderator             {moderatore}
 ::msgcat::mcset it Moderators            {Moderatori}
 ::msgcat::mcset it More                  {Più}
+::msgcat::mcset it Name               {Name}
 ::msgcat::mcset it Network               {Rete}
 ::msgcat::mcset it Never                 {Mai}
 ::msgcat::mcset it New                   {Nuovo}
@@ -177,6 +178,7 @@
 ::msgcat::mcset it Sleep                 {Addormentato}
 ::msgcat::mcset it Sounds                {Suoni}
 ::msgcat::mcset it Specific              {Specifico}
+::msgcat::mcset it Status                  {Status}
 ::msgcat::mcset it Stop                  {Stop}
 ::msgcat::mcset it Subject               {Oggetto}
 ::msgcat::mcset it System                {Sistema}
@@ -316,6 +318,7 @@
 ::msgcat::mcset it mCoccinellaHome...    {&Home Page...}
 ::msgcat::mcset it mColor...             {Colore...}
 ::msgcat::mcset it mContacts...          {&Contatti...}
+::msgcat::mcset it mControlPanel         {Control Panel}
 ::msgcat::mcset it mCopy                 {&Copia}
 ::msgcat::mcset it mCreateRoom...        {&Crea Chatroom...}
 ::msgcat::mcset it mCustomStatus...      {Stato Personalizzato...}
@@ -349,6 +352,7 @@
 ::msgcat::mcset it mFont                 {Carattere}
 ::msgcat::mcset it mFontSize             {Dimensione Carattere}
 ::msgcat::mcset it mGrid                 {Griglia}
+::msgcat::mcset it mHideControlPanel     {Hide Control Panel}
 ::msgcat::mcset it mHistory...           {&Storia...}
 ::msgcat::mcset it mHorizontal           {Orizzontale}
 ::msgcat::mcset it mHugeFont             {Enorme}
@@ -421,6 +425,7 @@
 ::msgcat::mcset it mSetupAssistant...    {&Configurazione assistita}
 ::msgcat::mcset it mShiftConstrain       {Rotazione}
 ::msgcat::mcset it mShow                 {Visualizza}
+::msgcat::mcset it mShowControlPanel     {Show Control Panel}
 ::msgcat::mcset it mSize                 {Dimensione}
 ::msgcat::mcset it mSlideShow            {Presentazione}
 ::msgcat::mcset it mSmaller              {Riduci}
@@ -459,6 +464,7 @@
 ::msgcat::mcset it {All Supported Files} {Tutti i File Supportati}
 ::msgcat::mcset it {Alternative chatroom} {Chatroom alternativa}
 ::msgcat::mcset it {Always ask}          {Chiedi Sempre}
+::msgcat::mcset it {Application Status} {Application Status}
 ::msgcat::mcset it {Auto Away}           {Allontanamento automatico}
 ::msgcat::mcset it {Auto Join}           {Auto Connessione}
 ::msgcat::mcset it {Auto Reply}          {Auto Replica}
@@ -478,6 +484,7 @@
 ::msgcat::mcset it {Chatroom presence change} {Cambia presenza in chatroom}
 ::msgcat::mcset it {Clear Cache}         {Svuota la Cache}
 ::msgcat::mcset it {Close page}          {Chiudi pagina}
+::msgcat::mcset it {Close Slot}         {Close Slot}
 ::msgcat::mcset it {Close tab}           {Close tab}
 ::msgcat::mcset it {Configure Chatroom}  {Configura Chatroom}
 ::msgcat::mcset it {Contact Actions}     {Azioni per il Contatto}
@@ -522,6 +529,7 @@
 ::msgcat::mcset it {Font weight}         {Peso del Carattere}
 ::msgcat::mcset it {Format: mm/dd/yyyy}  {Formato: mm/dd/yyyy}
 ::msgcat::mcset it {Forwarded message}   {Forwarded message}
+::msgcat::mcset it {Full Name}         {Full Name}
 ::msgcat::mcset it {History length}      {Lunghezza archivio storico}
 ::msgcat::mcset it {Import Iconset}      {Importa Insieme di Icone}
 ::msgcat::mcset it {Incoming Message}    {Messaggio arrivato}
@@ -569,8 +577,12 @@
 ::msgcat::mcset it {Open Image/Movie}    {Apri immagine/filmato}
 ::msgcat::mcset it {Open Stream}         {Apri stream}
 ::msgcat::mcset it {Open with}           {Apri con}
+::msgcat::mcset it {Own Contact ID}           {Own Contact ID}
+::msgcat::mcset it {Own Full Contact ID}           {Own Full Contact ID}
+::msgcat::mcset it {Plain text password} {Plain text password}
 ::msgcat::mcset it {Play sound}          {Riproduci suono}
 ::msgcat::mcset it {Postal code}         {Codice postale}
+::msgcat::mcset it {Presence Control} {Presence Control}
 ::msgcat::mcset it {Presence Error}      {Errore di presenza}
 ::msgcat::mcset it {Presence Subscription} {Sottoscrizione alla Presenza}
 ::msgcat::mcset it {Profile Name}        {Nome profilo}
@@ -585,6 +597,7 @@
 ::msgcat::mcset it {Remove Item}         {Rimuovi oggetto}
 ::msgcat::mcset it {Requires a restart of} {Richiede un riavvio di %s}
 ::msgcat::mcset it {Retype password}     {Riscrivi la password}
+::msgcat::mcset it {Right click to open menu} {Right click to open menu}
 ::msgcat::mcset it {Save As}             {Salva con nome}
 ::msgcat::mcset it {Save As GIF}         {Salva come GIF}
 ::msgcat::mcset it {Save Canvas Item}    {Salva Contenitore}
@@ -592,7 +605,7 @@
 ::msgcat::mcset it {Save Message}        {Salva messaggio}
 ::msgcat::mcset it {Save password}       {Salva password}
 ::msgcat::mcset it {Save to disk}        {Salva su disco}
-::msgcat::mcset it {Scramble password}   {Nascondi password}
+::msgcat::mcset it {Search People} {Search People}
 ::msgcat::mcset it {Search results}      {Cerca nei risultati}
 ::msgcat::mcset it {Select Avatar}       {Seleziona Avatar}
 ::msgcat::mcset it {Select File}         {Seleziona File}
@@ -615,6 +628,7 @@
 ::msgcat::mcset it {Start chat}          {Inizia chat}
 ::msgcat::mcset it {Start minimized in system tray} {Start minimized in system tray}
 ::msgcat::mcset it {Start minimized in taskbar} {Start minimized in taskbar}
+::msgcat::mcset it {Status Info} {Status Info}
 ::msgcat::mcset it {Status message}      {Messaggio di stato}
 ::msgcat::mcset it {Subscription Failed} {Iscrizione fallita}
 ::msgcat::mcset it {Subscription Pending} {Iscrizione pendente}
@@ -699,7 +713,7 @@
 ::msgcat::mcset it nativeFrench          {Français}
 ::msgcat::mcset it nativeGerman          {Deutsch}
 ::msgcat::mcset it nativeItalian         {Italiano}
-::msgcat::mcset it nativeKorean          {한국�}
+::msgcat::mcset it nativeKorean          {한국어}
 ::msgcat::mcset it nativePolish          {Polski}
 ::msgcat::mcset it nativeRussian         {русский}
 ::msgcat::mcset it nativeSpanish         {Castellano}
@@ -745,8 +759,8 @@
 ::msgcat::mcset it messsuassclose        {Sicuro di voler chiudere l'assistente di configurazione? In seguito, se vorrai, potrai comunque avviarlo dal menu.}
 ::msgcat::mcset it messsuassfillin       {Assicurati di aver riempito tutti i campi prima di continuare.}
 ::msgcat::mcset it messtimeout           {Raggiunto tempo massimo durante l'attesa per l'apertura della connessione.}
-::msgcat::mcset it messunsavedmsgQ       {Do you want to save edits in a file?}
-::msgcat::mcset it messunsaveddtl        {Edits will be lost unless you save them.}
+::msgcat::mcset it messunsavedmsgQ2       {This whiteboard document has been changed.}
+::msgcat::mcset it messunsaveddtl2        {Do you want to save the changes?}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset it jamessaddforeign2     {Per aggiungere un contatto da un sistema di chat senza federazioni aperte, devi avere un account su tale sistema, ed in più dovrai registrare l'account sul trasporto corrispondente (%s). Vuoi farlo adesso?}
@@ -799,6 +813,8 @@
 ::msgcat::mcset it jamessjidinvalid2     {ID non valido.}
 ::msgcat::mcset it jamesslocaltime2      {L'ora locale di %s è: %s}
 ::msgcat::mcset it jamesslogin409b       {Impossibile connettersi perchè questo utente è già in uso da qualcun altro (%s).}
+::msgcat::mcset it jamessloginnewprof    {The Contact ID differs from your profile. Do you want to save a new profile?}
+::msgcat::mcset it jamesslogindiff       {Your current login settings differ from your profile settings. Do you want to save them to your profile?}
 ::msgcat::mcset it jamessmsgwarnquit     {Ci sono messaggi non salvati. Vuoi uscire ugualmente?}
 ::msgcat::mcset it jamessnamemissing     {%s è mancante oppure è troppo corto!}
 ::msgcat::mcset it jamessnofiletrpt2     {%s non supporta il trasferimento file.}
@@ -1189,44 +1205,135 @@ if {0} {
 
 # Messages for Mood XEP
 # bug: this should be M&ood..., but this does not work!
-::msgcat::mcset it mMood                 {Umore}
-::msgcat::mcset it mAngry                {Arrabbiato}
-::msgcat::mcset it mAnxious              {Ansioso}
+::msgcat::mcset it mMood                 Umore
+::msgcat::mcset it mAfraid               Afraid
+::msgcat::mcset it mAmazed          Amazed
+::msgcat::mcset it mAngry                Arrabbiato
+::msgcat::mcset it mAnnoyed         Annoyed
+::msgcat::mcset it mAnxious              Ansioso
+::msgcat::mcset it mAroused         Aroused
 ::msgcat::mcset it mAshamed              {Si vergogna}
-::msgcat::mcset it mBored                {Annoiato}
-::msgcat::mcset it mCurious              {Curioso}
-::msgcat::mcset it mDepressed            {Depresso}
-::msgcat::mcset it mExcited              {Eccitato}
-::msgcat::mcset it mHappy                {Felice}
-::msgcat::mcset it mInLove               {Innamorato}
-::msgcat::mcset it mInvincible           {Invincibile}
-::msgcat::mcset it mJealous              {Geloso}
-::msgcat::mcset it mNervous              {Nervoso}
-::msgcat::mcset it mSad                  {Triste}
-::msgcat::mcset it mSleepy               {Assonnato}
-::msgcat::mcset it mStressed             {Stressato}
-::msgcat::mcset it mWorried              {Preoccupato}
+::msgcat::mcset it mBored                Annoiato
+::msgcat::mcset it mBrave           Brave
+::msgcat::mcset it mCalm            Calm
+::msgcat::mcset it mCold            Cold
+::msgcat::mcset it mConfused        Confused
+::msgcat::mcset it mContented       Contented
+::msgcat::mcset it mCranky          Cranky
+::msgcat::mcset it mCurious              Curioso
+::msgcat::mcset it mDepressed            Depresso
+::msgcat::mcset it mDisappointed    Disappointed
+::msgcat::mcset it mDisgusted       Disgusted
+::msgcat::mcset it mDistracted      Distracted
+::msgcat::mcset it mEmbarrassed     Embarrassed
+::msgcat::mcset it mExcited              Eccitato
+::msgcat::mcset it mFlirtatious     Flirtatious
+::msgcat::mcset it mFrustrated      Frustrated
+::msgcat::mcset it mGrumpy          Grumpy
+::msgcat::mcset it mGuilty          Guilty
+::msgcat::mcset it mHappy                Felice
+::msgcat::mcset it mHot             Hot
+::msgcat::mcset it mHumbled         Humbled
+::msgcat::mcset it mHumiliated      Humiliated
+::msgcat::mcset it mHungry          Hungry
+::msgcat::mcset it mHurt            Hurt
+::msgcat::mcset it mImpressed       Impressed
+::msgcat::mcset it mIn_awe          {In awe}
+::msgcat::mcset it mIn_love               Innamorato
+::msgcat::mcset it mIndignant       Indignant
+::msgcat::mcset it mInterested      Interested
+::msgcat::mcset it mIntoxicated     Intoxicated
+::msgcat::mcset it mInvincible           Invincibile
+::msgcat::mcset it mJealous              Geloso
+::msgcat::mcset it mLonely          Lonely
+::msgcat::mcset it mMean            Mean
+::msgcat::mcset it mMoody           Moody
+::msgcat::mcset it mNervous              Nervoso
+::msgcat::mcset it mNeutral         Neutral
+::msgcat::mcset it mOffended        Offended
+::msgcat::mcset it mPlayful         Playful
+::msgcat::mcset it mProud           Proud
+::msgcat::mcset it mRelieved        Relieved
+::msgcat::mcset it mRemorseful      Remorseful
+::msgcat::mcset it mRestless        Restless
+::msgcat::mcset it mSad                  Triste
+::msgcat::mcset it mSarcastic       Sarcastic
+::msgcat::mcset it mSerious         Serious
+::msgcat::mcset it mShocked         Shocked
+::msgcat::mcset it mShy             Shy
+::msgcat::mcset it mSick            Sick
+::msgcat::mcset it mSleepy               Assonnato
+::msgcat::mcset it mStressed             Stressato
+::msgcat::mcset it mSurprised       Surprised
+::msgcat::mcset it mThirsty         Thirsty
+::msgcat::mcset it mWorried              Preoccupato
 
 ::msgcat::mcset it moodEvent             {Cambio d'umore}
 ::msgcat::mcset it moodRetracted         {retracted mood}
+
 ::msgcat::mcset it heIs                  {è}
-::msgcat::mcset it because               {perchè}
-::msgcat::mcset it angry                 {arrabbiato}
-::msgcat::mcset it anxious               {ansioso}
+::msgcat::mcset it because               perchè
+::msgcat::mcset it afraid   afraid
+::msgcat::mcset it amazed   amazed
+::msgcat::mcset it angry                 arrabbiato
+::msgcat::mcset it annoyed   annoyed
+::msgcat::mcset it anxious               ansioso
+::msgcat::mcset it aroused   aroused
 ::msgcat::mcset it ashamed               {si vergogna}
-::msgcat::mcset it bored                 {annoiato}
-::msgcat::mcset it curious               {curioso}
-::msgcat::mcset it depressed             {depresso}
-::msgcat::mcset it excited               {eccitato}
-::msgcat::mcset it happy                 {felice}
-::msgcat::mcset it in_love               {innamorato}
-::msgcat::mcset it invincible            {invincibile}
-::msgcat::mcset it jealous               {geloso}
-::msgcat::mcset it nervous               {nervoso}
-::msgcat::mcset it sad                   {triste}
-::msgcat::mcset it sleepy                {assonnato}
-::msgcat::mcset it stressed              {stressato}
-::msgcat::mcset it worried               {preoccupato}
+::msgcat::mcset it bored                 annoiato
+::msgcat::mcset it brave   brave
+::msgcat::mcset it calm   calm
+::msgcat::mcset it cold   cold
+::msgcat::mcset it confused   confused
+::msgcat::mcset it contented   contented
+::msgcat::mcset it cranky   cranky
+::msgcat::mcset it curious               curioso
+::msgcat::mcset it depressed             depresso
+::msgcat::mcset it disappointed   disappointed
+::msgcat::mcset it disgusted   disgusted
+::msgcat::mcset it distracted   distracted
+::msgcat::mcset it embarrassed   embarrassed
+::msgcat::mcset it excited               eccitato
+::msgcat::mcset it flirtatious   flirtatious
+::msgcat::mcset it frustrated   frustrated
+::msgcat::mcset it grumpy   grumpy
+::msgcat::mcset it guilty   guilty
+::msgcat::mcset it happy                 felice
+::msgcat::mcset it hot   hot
+::msgcat::mcset it humbled   humbled
+::msgcat::mcset it humiliated   humiliated
+::msgcat::mcset it hungry   hungry
+::msgcat::mcset it hurt   hurt
+::msgcat::mcset it impressed   impressed
+::msgcat::mcset it in_awe   {in awe}
+::msgcat::mcset it in_love               innamorato
+::msgcat::mcset it indignant   indignant
+::msgcat::mcset it interested   interested
+::msgcat::mcset it intoxicated   intoxicated
+::msgcat::mcset it invincible            invincibile
+::msgcat::mcset it jealous               geloso
+::msgcat::mcset it lonely   lonely
+::msgcat::mcset it mean   mean
+::msgcat::mcset it moody   moody
+::msgcat::mcset it nervous               nervoso
+::msgcat::mcset it neutral   neutral
+::msgcat::mcset it offended   offended
+::msgcat::mcset it playful   playful
+::msgcat::mcset it proud   proud
+::msgcat::mcset it relieved   relieved
+::msgcat::mcset it remorseful   remorseful
+::msgcat::mcset it restless   restless
+::msgcat::mcset it sad                   triste
+::msgcat::mcset it sarcastic   sarcastic
+::msgcat::mcset it serious   serious
+::msgcat::mcset it shocked   shocked
+::msgcat::mcset it shy   shy
+::msgcat::mcset it sick   sick
+::msgcat::mcset it sleepy                assonnato
+::msgcat::mcset it stressed              stressato
+::msgcat::mcset it surprised   surprised
+::msgcat::mcset it thirsty   thirsty
+::msgcat::mcset it worried               preoccupato
 
 ::msgcat::mcset it {Custom Mood}         {Umore personalizzato}
 ::msgcat::mcset it mCustomMood...        {&Umore personalizzato...}
@@ -1248,8 +1355,10 @@ if {0} {
 
 ::msgcat::mcset it tooltip-chatsubject   {Enter the subject of the conversation, set by pressing Return}
 ::msgcat::mcset it tooltip-chatoffline   {You need to be logged in to see the presence of this contact}
+::msgcat::mcset it tooltip-chatsendtext     {Enter your message and press Return or Shift-Return}
 ::msgcat::mcset it tooltip-aaonhidden    {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
 ::msgcat::mcset it tooltip-aabusychats   {When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb.}
+::msgcat::mcset it tooltip-togglesysmsg     {Show or hide status changes in chat}
 
 
 # Me knows :-)
@@ -1259,6 +1368,7 @@ if {0} {
 # Messages for User Activity XEP
 ::msgcat::mcset it Activity              {Attività}
 ::msgcat::mcset it mActivity...          {Atti&vità...}
+::msgcat::mcset it mCustomActivity... {Custom Activity...}
 
 ::msgcat::mcset it Traveling             {Viaggiando}
 ::msgcat::mcset it Commuting             {Scambiando}

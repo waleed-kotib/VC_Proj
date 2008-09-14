@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.255 2008-09-13 22:11:26 sdevrieze Exp $
+#   $Id: en.msg,v 1.256 2008-09-14 13:02:30 sdevrieze Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -112,6 +112,7 @@
 ::msgcat::mcset en moderator
 ::msgcat::mcset en Moderators
 ::msgcat::mcset en More
+::msgcat::mcset en Name
 ::msgcat::mcset en Network
 ::msgcat::mcset en Never
 ::msgcat::mcset en New
@@ -171,6 +172,7 @@
 ::msgcat::mcset en Sleep
 ::msgcat::mcset en Sounds
 ::msgcat::mcset en Specific
+::msgcat::mcset en Status
 ::msgcat::mcset en Stop
 ::msgcat::mcset en Subject
 ::msgcat::mcset en System
@@ -456,6 +458,7 @@
 ::msgcat::mcset en {All Supported Files}
 ::msgcat::mcset en {Alternative chatroom}
 ::msgcat::mcset en {Always ask}
+::msgcat::mcset en {Application Status}
 ::msgcat::mcset en {Auto Away}
 ::msgcat::mcset en {Auto Join}
 ::msgcat::mcset en {Auto Reply}
@@ -475,6 +478,7 @@
 ::msgcat::mcset en {Chatroom presence change}
 ::msgcat::mcset en {Clear Cache}
 ::msgcat::mcset en {Close page}
+::msgcat::mcset en {Close Slot}
 ::msgcat::mcset en {Close tab}
 ::msgcat::mcset en {Configure Chatroom}
 ::msgcat::mcset en {Contact Actions}
@@ -519,6 +523,7 @@
 ::msgcat::mcset en {Font weight}
 ::msgcat::mcset en {Format: mm/dd/yyyy}
 ::msgcat::mcset en {Forwarded message}
+::msgcat::mcset en {Full Name}
 ::msgcat::mcset en {History length}
 ::msgcat::mcset en {Import Iconset}
 ::msgcat::mcset en {Incoming Message}
@@ -566,9 +571,12 @@
 ::msgcat::mcset en {Open Image/Movie}
 ::msgcat::mcset en {Open Stream}
 ::msgcat::mcset en {Open with}
+::msgcat::mcset en {Own Contact ID}
+::msgcat::mcset en {Own Full Contact ID}
 ::msgcat::mcset en {Plain text password}
 ::msgcat::mcset en {Play sound}
 ::msgcat::mcset en {Postal code}
+::msgcat::mcset en {Presence Control}
 ::msgcat::mcset en {Presence Error}
 ::msgcat::mcset en {Presence Subscription}
 ::msgcat::mcset en {Profile Name}
@@ -583,6 +591,7 @@
 ::msgcat::mcset en {Remove Item}
 ::msgcat::mcset en {Requires a restart of} {Requires a restart of %s}
 ::msgcat::mcset en {Retype password}
+::msgcat::mcset en {Right click to open menu}
 ::msgcat::mcset en {Save As}
 ::msgcat::mcset en {Save As GIF}
 ::msgcat::mcset en {Save Canvas Item}
@@ -590,6 +599,7 @@
 ::msgcat::mcset en {Save Message}
 ::msgcat::mcset en {Save password}
 ::msgcat::mcset en {Save to disk}
+::msgcat::mcset en {Search People}
 ::msgcat::mcset en {Search results}
 ::msgcat::mcset en {Select Avatar}
 ::msgcat::mcset en {Select File}
@@ -612,6 +622,7 @@
 ::msgcat::mcset en {Start chat}
 ::msgcat::mcset en {Start minimized in system tray}
 ::msgcat::mcset en {Start minimized in taskbar}
+::msgcat::mcset en {Status Info}
 ::msgcat::mcset en {Status message}
 ::msgcat::mcset en {Subscription Failed}
 ::msgcat::mcset en {Subscription Pending}
@@ -696,7 +707,7 @@
 ::msgcat::mcset en nativeFrench     Français
 ::msgcat::mcset en nativeGerman     Deutsch
 ::msgcat::mcset en nativeItalian    Italiano
-::msgcat::mcset en nativeKorean     한국�
+::msgcat::mcset en nativeKorean     한국어
 ::msgcat::mcset en nativePolish     Polski
 ::msgcat::mcset en nativeRussian    русский
 ::msgcat::mcset en nativeSpanish    Castellano
