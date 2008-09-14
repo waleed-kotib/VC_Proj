@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.180 2008-09-14 13:02:31 sdevrieze Exp $
+#   $Id: nl.msg,v 1.181 2008-09-14 18:52:25 sdevrieze Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}
@@ -1223,7 +1223,7 @@ if {0} {
 ::msgcat::mcset nl mCurious              Nieuwsgierig
 ::msgcat::mcset nl mDepressed         Gedeprimeerd
 ::msgcat::mcset nl mDisappointed      Teleurgesteld
-::msgcat::mcset nl mDisgusted          Walgend
+::msgcat::mcset nl mDisgusted          {Vol afkeer}
 ::msgcat::mcset nl mDistracted         Radeloos
 ::msgcat::mcset nl mEmbarrassed     Beschaamd
 ::msgcat::mcset nl mExcited              Opgewonden
@@ -1290,7 +1290,7 @@ if {0} {
 ::msgcat::mcset nl curious               nieuwsgierig
 ::msgcat::mcset nl depressed             gedeprimeerd
 ::msgcat::mcset nl disappointed   teleurgesteld
-::msgcat::mcset nl disgusted   walgend
+::msgcat::mcset nl disgusted   {vol afkeer}
 ::msgcat::mcset nl distracted   radeloos
 ::msgcat::mcset nl embarrassed   beschaamd
 ::msgcat::mcset nl excited               opgewonden
