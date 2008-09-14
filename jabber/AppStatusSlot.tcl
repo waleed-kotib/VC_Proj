@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: AppStatusSlot.tcl,v 1.6 2008-09-13 22:11:26 sdevrieze Exp $
+# $Id: AppStatusSlot.tcl,v 1.7 2008-09-14 13:02:27 sdevrieze Exp $
 
 package provide AppStatusSlot 1.0
 
@@ -182,7 +182,7 @@ proc ::AppStatusSlot::EventPresence {jid presence args} {
     if {[::Jabber::Jlib roster isitem $jid2]} {
 	set str [::Roster::GetPresenceAndStatusText $jid]
 	set dname [::Roster::GetDisplayName $jid2]
-	set msg [mc "User %s, %s" $dname $str]
+	set msg [mc "%s: %s" $dname $str]
 	set priv(status) $msg
     }
 }

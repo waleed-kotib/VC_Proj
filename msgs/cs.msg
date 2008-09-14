@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: cs.msg,v 1.10 2008-09-13 22:11:26 sdevrieze Exp $
+#   $Id: cs.msg,v 1.11 2008-09-14 13:02:27 sdevrieze Exp $
 
 ::msgcat::mcset cs Abort                 {Storno}
 ::msgcat::mcset cs Action                {Akce}
@@ -118,6 +118,7 @@
 ::msgcat::mcset cs moderator             {moderátor}
 ::msgcat::mcset cs Moderators            {Moderátoři}
 ::msgcat::mcset cs More                  {Více}
+::msgcat::mcset cs Name               {Name}
 ::msgcat::mcset cs Network               {Síť}
 ::msgcat::mcset cs Never                 {Nikdy}
 ::msgcat::mcset cs New                   {Nový}
@@ -177,6 +178,7 @@
 ::msgcat::mcset cs Sleep                 {Spát}
 ::msgcat::mcset cs Sounds                {Zvuky}
 ::msgcat::mcset cs Specific              {Zvláštní}
+::msgcat::mcset cs Status                  {Status}
 ::msgcat::mcset cs Stop                  {Stop}
 ::msgcat::mcset cs Subject               {Předmět}
 ::msgcat::mcset cs System                {Systém}
@@ -462,6 +464,7 @@
 ::msgcat::mcset cs {All Supported Files} {Všechny podporované soubory}
 ::msgcat::mcset cs {Alternative chatroom} {Alternativní místnost}
 ::msgcat::mcset cs {Always ask}          {Vždy se ptát}
+::msgcat::mcset cs {Application Status} {Application Status}
 ::msgcat::mcset cs {Auto Away}           {Automaticky pryč}
 ::msgcat::mcset cs {Auto Join}           {Automaticky vejít}
 ::msgcat::mcset cs {Auto Reply}          {Automaticky odpovědět}
@@ -481,6 +484,7 @@
 ::msgcat::mcset cs {Chatroom presence change} {Změna přítomnosti v místnosti}
 ::msgcat::mcset cs {Clear Cache}         {Vyprázdnit keš}
 ::msgcat::mcset cs {Close page}          {Zavřít stránku}
+::msgcat::mcset cs {Close Slot}         {Close Slot}
 ::msgcat::mcset cs {Close tab}           {Zavřít záložku}
 ::msgcat::mcset cs {Configure Chatroom}  {Nastavení místnosti}
 ::msgcat::mcset cs {Contact Actions}     {Akce kontaktu}
@@ -525,6 +529,7 @@
 ::msgcat::mcset cs {Font weight}         {Styl písma}
 ::msgcat::mcset cs {Format: mm/dd/yyyy}  {Formát: mm/dd/rrrr}
 ::msgcat::mcset cs {Forwarded message}   {Přeposlaná zpráva}
+::msgcat::mcset cs {Full Name}         {Full Name}
 ::msgcat::mcset cs {History length}      {Délka historie}
 ::msgcat::mcset cs {Import Iconset}      {Importovat soubor ikon}
 ::msgcat::mcset cs {Incoming Message}    {Příchozí zpráva}
@@ -572,9 +577,12 @@
 ::msgcat::mcset cs {Open Image/Movie}    {Otevřít obrázek/video}
 ::msgcat::mcset cs {Open Stream}         {Otevřít proud}
 ::msgcat::mcset cs {Open with}           {Otevřít čím}
+::msgcat::mcset cs {Own Contact ID}           {Own Contact ID}
+::msgcat::mcset cs {Own Full Contact ID}           {Own Full Contact ID}
 ::msgcat::mcset cs {Plain text password} {Plain text password}
 ::msgcat::mcset cs {Play sound}          {Přehrát zvuk}
 ::msgcat::mcset cs {Postal code}         {PSČ}
+::msgcat::mcset cs {Presence Control} {Presence Control}
 ::msgcat::mcset cs {Presence Error}      {Chyba přítomnosti}
 ::msgcat::mcset cs {Presence Subscription} {Zprávy o přítomnosti}
 ::msgcat::mcset cs {Profile Name}        {Název profilu}
@@ -589,6 +597,7 @@
 ::msgcat::mcset cs {Remove Item}         {Smazat položku}
 ::msgcat::mcset cs {Requires a restart of} {%s vyžaduje restart}
 ::msgcat::mcset cs {Retype password}     {Heslo znovu}
+::msgcat::mcset cs {Right click to open menu} {Right click to open menu}
 ::msgcat::mcset cs {Save As}             {Uložit jako}
 ::msgcat::mcset cs {Save As GIF}         {Uložit jako GIF}
 ::msgcat::mcset cs {Save Canvas Item}    {Uložit položku}
@@ -596,6 +605,7 @@
 ::msgcat::mcset cs {Save Message}        {Uložit zprávu}
 ::msgcat::mcset cs {Save password}       {Uložit heslo}
 ::msgcat::mcset cs {Save to disk}        {Uložit na disk}
+::msgcat::mcset cs {Search People} {Search People}
 ::msgcat::mcset cs {Search results}      {Výsledky hledání}
 ::msgcat::mcset cs {Select Avatar}       {Vyběr avatara}
 ::msgcat::mcset cs {Select File}         {Výběr souboru}
@@ -618,6 +628,7 @@
 ::msgcat::mcset cs {Start chat}          {Začít povídat}
 ::msgcat::mcset cs {Start minimized in system tray} {Spustit minimalizovaně v oznamovací oblasti}
 ::msgcat::mcset cs {Start minimized in taskbar} {Spustit minimalizovaně v pruhu úloh}
+::msgcat::mcset cs {Status Info} {Status Info}
 ::msgcat::mcset cs {Status message}      {Stavová zpráva}
 ::msgcat::mcset cs {Subscription Failed} {Povolení selhalo}
 ::msgcat::mcset cs {Subscription Pending} {Povolení čeká}
@@ -702,7 +713,7 @@
 ::msgcat::mcset cs nativeFrench          {Français}
 ::msgcat::mcset cs nativeGerman          {Deutsch}
 ::msgcat::mcset cs nativeItalian         {Italiano}
-::msgcat::mcset cs nativeKorean          {한국�}
+::msgcat::mcset cs nativeKorean          {한국어}
 ::msgcat::mcset cs nativePolish          {Polski}
 ::msgcat::mcset cs nativeRussian         {русский}
 ::msgcat::mcset cs nativeSpanish         {Castellano}

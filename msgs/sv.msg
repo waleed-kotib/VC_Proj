@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.154 2008-09-13 22:11:27 sdevrieze Exp $
+#   $Id: sv.msg,v 1.155 2008-09-14 13:02:32 sdevrieze Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -118,6 +118,7 @@
 ::msgcat::mcset sv moderator             {moderator}
 ::msgcat::mcset sv Moderators            {Moderatorer}
 ::msgcat::mcset sv More                  {Mer}
+::msgcat::mcset sv Name               {Name}
 ::msgcat::mcset sv Network               {Nätverk}
 ::msgcat::mcset sv Never                 {Aldrig}
 ::msgcat::mcset sv New                   {Nytt}
@@ -177,6 +178,7 @@
 ::msgcat::mcset sv Sleep                 {Sömn}
 ::msgcat::mcset sv Sounds                {Ljud}
 ::msgcat::mcset sv Specific              {Speciell}
+::msgcat::mcset sv Status                  {Status}
 ::msgcat::mcset sv Stop                  {Stopp}
 ::msgcat::mcset sv Subject               {Ämne}
 ::msgcat::mcset sv System                {System}
@@ -462,6 +464,7 @@
 ::msgcat::mcset sv {All Supported Files} {Samtliga filtyper}
 ::msgcat::mcset sv {Alternative chatroom} {Alternativt chattrum}
 ::msgcat::mcset sv {Always ask}          {Fråga alltid}
+::msgcat::mcset sv {Application Status} {Application Status}
 ::msgcat::mcset sv {Auto Away}           {Auto frånvarande}
 ::msgcat::mcset sv {Auto Join}           {Anslut automatiskt}
 ::msgcat::mcset sv {Auto Reply}          {Auto svar}
@@ -481,6 +484,7 @@
 ::msgcat::mcset sv {Chatroom presence change} {Närvaroändring chattrum}
 ::msgcat::mcset sv {Clear Cache}         {Radera cache}
 ::msgcat::mcset sv {Close page}          {Stäng sida}
+::msgcat::mcset sv {Close Slot}         {Close Slot}
 ::msgcat::mcset sv {Close tab}           {Stäng flik}
 ::msgcat::mcset sv {Configure Chatroom}  {Konfigurera chattrum}
 ::msgcat::mcset sv {Contact Actions}     {Kontaktaktioner}
@@ -525,6 +529,7 @@
 ::msgcat::mcset sv {Font weight}         {Typsnittvikt}
 ::msgcat::mcset sv {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 ::msgcat::mcset sv {Forwarded message}   {Förmedlat meddelande}
+::msgcat::mcset sv {Full Name}         {Full Name}
 ::msgcat::mcset sv {History length}      {Historielängd}
 ::msgcat::mcset sv {Import Iconset}      {Importera smileysamling}
 ::msgcat::mcset sv {Incoming Message}    {Inkommande meddelande}
@@ -572,9 +577,12 @@
 ::msgcat::mcset sv {Open Image/Movie}    {Öppna bild/film}
 ::msgcat::mcset sv {Open Stream}         {Öppna ström}
 ::msgcat::mcset sv {Open with}           {Öppna med}
+::msgcat::mcset sv {Own Contact ID}           {Own Contact ID}
+::msgcat::mcset sv {Own Full Contact ID}           {Own Full Contact ID}
 ::msgcat::mcset sv {Plain text password} {Plain text password}
 ::msgcat::mcset sv {Play sound}          {Spela upp ljud}
 ::msgcat::mcset sv {Postal code}         {Postnummer}
+::msgcat::mcset sv {Presence Control} {Presence Control}
 ::msgcat::mcset sv {Presence Error}      {Närvaro fel}
 ::msgcat::mcset sv {Presence Subscription} {Närvaro prenumeration}
 ::msgcat::mcset sv {Profile Name}        {Profilnamn}
@@ -589,6 +597,7 @@
 ::msgcat::mcset sv {Remove Item}         {Tag bort användare}
 ::msgcat::mcset sv {Requires a restart of} {Kräver en nystart av %s}
 ::msgcat::mcset sv {Retype password}     {Upprepa lösenord}
+::msgcat::mcset sv {Right click to open menu} {Right click to open menu}
 ::msgcat::mcset sv {Save As}             {Spara som}
 ::msgcat::mcset sv {Save As GIF}         {Spara som GIF}
 ::msgcat::mcset sv {Save Canvas Item}    {Spara element från skrivtavla}
@@ -596,6 +605,7 @@
 ::msgcat::mcset sv {Save Message}        {Spara meddelande}
 ::msgcat::mcset sv {Save password}       {Spara lösenord}
 ::msgcat::mcset sv {Save to disk}        {Spara till disk}
+::msgcat::mcset sv {Search People} {Search People}
 ::msgcat::mcset sv {Search results}      {Sökresultat}
 ::msgcat::mcset sv {Select Avatar}       {Välj avatar}
 ::msgcat::mcset sv {Select File}         {Välj fil}
@@ -618,6 +628,7 @@
 ::msgcat::mcset sv {Start chat}          {Starta chatt}
 ::msgcat::mcset sv {Start minimized in system tray} {Starta minimerad i aktivitetslistan}
 ::msgcat::mcset sv {Start minimized in taskbar} {Starta minimerad i aktivitetslistan}
+::msgcat::mcset sv {Status Info} {Status Info}
 ::msgcat::mcset sv {Status message}      {Statusmeddelande}
 ::msgcat::mcset sv {Subscription Failed} {Prenumerationen misslyckades}
 ::msgcat::mcset sv {Subscription Pending} {Vilande prenumerationer}
@@ -702,7 +713,7 @@
 ::msgcat::mcset sv nativeFrench          {Français}
 ::msgcat::mcset sv nativeGerman          {Deutsch}
 ::msgcat::mcset sv nativeItalian         {Italiano}
-::msgcat::mcset sv nativeKorean          {한국�}
+::msgcat::mcset sv nativeKorean          {한국어}
 ::msgcat::mcset sv nativePolish          {Polski}
 ::msgcat::mcset sv nativeRussian         {русский}
 ::msgcat::mcset sv nativeSpanish         {Castellano}

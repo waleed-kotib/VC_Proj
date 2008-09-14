@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.179 2008-09-13 22:11:27 sdevrieze Exp $
+#   $Id: nl.msg,v 1.180 2008-09-14 13:02:31 sdevrieze Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}
@@ -605,8 +605,8 @@
 ::msgcat::mcset nl {Save Message}        {Bericht opslaan}
 ::msgcat::mcset nl {Save password}       {Wachtwoord opslaan}
 ::msgcat::mcset nl {Save to disk}        {Op schijf opslaan}
-::msgcat::mcset nl {Search results}      {Zoekresultaten}
 ::msgcat::mcset nl {Search People}      {Mensen zoeken}
+::msgcat::mcset nl {Search results}      {Zoekresultaten}
 ::msgcat::mcset nl {Select Avatar}       {Avatar selecteren}
 ::msgcat::mcset nl {Select File}         {Bestand selecteren}
 ::msgcat::mcset nl {Select Font}         {Lettertype selecteren}
@@ -713,7 +713,7 @@
 ::msgcat::mcset nl nativeFrench          {Français}
 ::msgcat::mcset nl nativeGerman          {Deutsch}
 ::msgcat::mcset nl nativeItalian         {Italiano}
-::msgcat::mcset nl nativeKorean          {한국�}
+::msgcat::mcset nl nativeKorean          {한국어}
 ::msgcat::mcset nl nativePolish          {Polski}
 ::msgcat::mcset nl nativeRussian         {русский}
 ::msgcat::mcset nl nativeSpanish         {Castellano}
