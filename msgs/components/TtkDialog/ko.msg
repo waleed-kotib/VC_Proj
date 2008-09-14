@@ -8,75 +8,75 @@
 namespace eval ::ttk::dialog::file {   
 # Reference: {Location}
 # Find in sources: fsdialog.tcl:440 Geolocation.tcl:157
-::msgcat::mcset kr Location              {Location}
+::msgcat::mcset ko Location              {Location}
 # Reference: {Filter}
 # Find in sources: fsdialog.tcl:444
-::msgcat::mcset kr Filter                {Filter}
+::msgcat::mcset ko Filter                {Filter}
 # Reference: {Name}
 # Find in sources: fsdialog.tcl:507
-::msgcat::mcset kr Name                  {Name}
+::msgcat::mcset ko Name                  {Name}
 # Reference: {Size}
 # Find in sources: fsdialog.tcl:509
-::msgcat::mcset kr Size                  {Size}
+::msgcat::mcset ko Size                  {Size}
 # Reference: {Date}
 # Find in sources: fsdialog.tcl:511
-::msgcat::mcset kr Date                  {Date}
+::msgcat::mcset ko Date                  {Date}
 # Reference: {Permissions}
 # Find in sources: fsdialog.tcl:513
-::msgcat::mcset kr Permissions           {Permissions}
+::msgcat::mcset ko Permissions           {Permissions}
 # Reference: {Owner}
 # Find in sources: fsdialog.tcl:515
-::msgcat::mcset kr Owner                 {Owner}
+::msgcat::mcset ko Owner                 {Owner}
 # Reference: {Group}
 # Find in sources: fsdialog.tcl:517
-::msgcat::mcset kr Group                 {Group}
+::msgcat::mcset ko Group                 {Group}
 # Reference: {Folder}
 # Find in sources: fsdialog.tcl:1448
-::msgcat::mcset kr Folder                {Folder}
+::msgcat::mcset ko Folder                {Folder}
 # Reference: {Sorting}
 # Find in sources: fsdialog.tcl:363
-::msgcat::mcset kr Sorting               {Sorting}
+::msgcat::mcset ko Sorting               {Sorting}
 # Reference: {Reverse}
 # Find in sources: fsdialog.tcl:408
-::msgcat::mcset kr Reverse               {Reverse}
+::msgcat::mcset ko Reverse               {Reverse}
     
 # Reference: {Short View}
 # Find in sources: fsdialog.tcl:366
-::msgcat::mcset kr {Short View}          {Short View}
+::msgcat::mcset ko {Short View}          {Short View}
 # Reference: {Detailed View}
 # Find in sources: fsdialog.tcl:372
-::msgcat::mcset kr {Detailed View}       {Detailed View}
+::msgcat::mcset ko {Detailed View}       {Detailed View}
 # Reference: {Show Hidden Files}
 # Find in sources: fsdialog.tcl:379
-::msgcat::mcset kr {Show Hidden Files}   {Show Hidden Files}
+::msgcat::mcset ko {Show Hidden Files}   {Show Hidden Files}
 # Reference: {Separate Folders}
 # Find in sources: fsdialog.tcl:384
-::msgcat::mcset kr {Separate Folders}    {Separate Folders}
+::msgcat::mcset ko {Separate Folders}    {Separate Folders}
 # Reference: {By Name}
 # Find in sources: fsdialog.tcl:389
-::msgcat::mcset kr {By Name}             {By Name}
+::msgcat::mcset ko {By Name}             {By Name}
 # Reference: {By Date}
 # Find in sources: fsdialog.tcl:395
-::msgcat::mcset kr {By Date}             {By Date}
+::msgcat::mcset ko {By Date}             {By Date}
 # Reference: {By Size}
 # Find in sources: fsdialog.tcl:401
-::msgcat::mcset kr {By Size}             {By Size}
+::msgcat::mcset ko {By Size}             {By Size}
 # Reference: {Folders First}
 # Find in sources: fsdialog.tcl:413
-::msgcat::mcset kr {Folders First}       {Folders First}
+::msgcat::mcset ko {Folders First}       {Folders First}
 # Reference: {New Folder}
 # Find in sources: fsdialog.tcl:1059
-::msgcat::mcset kr {New Folder}          {New Folder}
+::msgcat::mcset ko {New Folder}          {New Folder}
 # Reference: {Create new folder in}
 # Find in sources: fsdialog.tcl:1064
-::msgcat::mcset kr {Create new folder in} {Create new folder in}
+::msgcat::mcset ko {Create new folder in} {Create new folder in}
     
 # Reference: {File "%s" already exists. Do you want to overwrite it?}
-::msgcat::mcset kr {File "%s" already exists. Do you want to overwrite it?} {File "%s" already exists. Do you want to overwrite it?}
+::msgcat::mcset ko {File "%s" already exists. Do you want to overwrite it?} {File "%s" already exists. Do you want to overwrite it?}
 # Reference: {File "%s" does not exist.}
-::msgcat::mcset kr {File "%s" does not exist.} {File "%s" does not exist.}
+::msgcat::mcset ko {File "%s" does not exist.} {File "%s" does not exist.}
 # Reference: {Cannot change to the directory "%s". Permission denied.}
-::msgcat::mcset kr {Cannot change to the directory "%s". Permission denied.} {Cannot change to the directory "%s". Permission denied.}
+::msgcat::mcset ko {Cannot change to the directory "%s". Permission denied.} {Cannot change to the directory "%s". Permission denied.}
 }
 
 
