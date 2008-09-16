@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: ru.msg,v 1.48 2008-09-14 13:02:32 sdevrieze Exp $
+#   $Id: ru.msg,v 1.49 2008-09-16 17:39:39 sdevrieze Exp $
 
 ::msgcat::mcset ru Abort                 {Abort}
 ::msgcat::mcset ru Action                {Действие}
@@ -37,6 +37,7 @@
 ::msgcat::mcset ru Admin                 {Администратор}
 ::msgcat::mcset ru admin                 {admin}
 ::msgcat::mcset ru Affiliation           {Affiliation}
+::msgcat::mcset ru Always                {Always}
 ::msgcat::mcset ru Any                   {Any}
 ::msgcat::mcset ru Appearance            {Внешность}
 ::msgcat::mcset ru Author                {Author}
@@ -529,7 +530,8 @@
 ::msgcat::mcset ru {Font weight}         {Font weight}
 ::msgcat::mcset ru {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 ::msgcat::mcset ru {Forwarded message}   {Forwarded message}
-::msgcat::mcset ru {Full Name}         {Full Name}
+::msgcat::mcset ru {Full Name}           {Full Name}
+::msgcat::mcset ru {Hide all on system tray click}   {Hide all on system tray click}
 ::msgcat::mcset ru {History length}      {Длинна истории}
 ::msgcat::mcset ru {Import Iconset}      {Import Iconset}
 ::msgcat::mcset ru {Incoming Message}    {Входящее сообщение}

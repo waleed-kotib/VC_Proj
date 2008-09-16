@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: da.msg,v 1.55 2008-09-14 13:02:27 sdevrieze Exp $
+#   $Id: da.msg,v 1.56 2008-09-16 17:39:36 sdevrieze Exp $
 
 ::msgcat::mcset da Abort                 {Abort}
 ::msgcat::mcset da Action                {Handling}
@@ -37,6 +37,7 @@
 ::msgcat::mcset da Admin                 {Admin}
 ::msgcat::mcset da admin                 {admin}
 ::msgcat::mcset da Affiliation           {Affiliation}
+::msgcat::mcset da Always                {Always}
 ::msgcat::mcset da Any                   {Any}
 ::msgcat::mcset da Appearance            {Udseende}
 ::msgcat::mcset da Author                {Author}
@@ -529,7 +530,8 @@
 ::msgcat::mcset da {Font weight}         {Font weight}
 ::msgcat::mcset da {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 ::msgcat::mcset da {Forwarded message}   {Forwarded message}
-::msgcat::mcset da {Full Name}         {Full Name}
+::msgcat::mcset da {Full Name}           {Full Name}
+::msgcat::mcset da {Hide all on system tray click}   {Hide all on system tray click}
 ::msgcat::mcset da {History length}      {Historielængde}
 ::msgcat::mcset da {Import Iconset}      {Import Iconset}
 ::msgcat::mcset da {Incoming Message}    {Inkommende meddelelser}

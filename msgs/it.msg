@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: it.msg,v 1.51 2008-09-14 13:02:31 sdevrieze Exp $
+#   $Id: it.msg,v 1.52 2008-09-16 17:39:38 sdevrieze Exp $
 
 ::msgcat::mcset it Abort                 {Annulla}
 ::msgcat::mcset it Action                {Azione}
@@ -37,6 +37,7 @@
 ::msgcat::mcset it Admin                 {Amministratore}
 ::msgcat::mcset it admin                 {Amministratore}
 ::msgcat::mcset it Affiliation           {Societ�}
+::msgcat::mcset it Always                {Always}
 ::msgcat::mcset it Any                   {Qualsiasi}
 ::msgcat::mcset it Appearance            {Aspetto}
 ::msgcat::mcset it Author                {Autore}
@@ -118,7 +119,7 @@
 ::msgcat::mcset it moderator             {moderatore}
 ::msgcat::mcset it Moderators            {Moderatori}
 ::msgcat::mcset it More                  {Più}
-::msgcat::mcset it Name               {Name}
+::msgcat::mcset it Name                  {Name}
 ::msgcat::mcset it Network               {Rete}
 ::msgcat::mcset it Never                 {Mai}
 ::msgcat::mcset it New                   {Nuovo}
@@ -178,7 +179,7 @@
 ::msgcat::mcset it Sleep                 {Addormentato}
 ::msgcat::mcset it Sounds                {Suoni}
 ::msgcat::mcset it Specific              {Specifico}
-::msgcat::mcset it Status                  {Status}
+::msgcat::mcset it Status                {Status}
 ::msgcat::mcset it Stop                  {Stop}
 ::msgcat::mcset it Subject               {Oggetto}
 ::msgcat::mcset it System                {Sistema}
@@ -529,7 +530,8 @@
 ::msgcat::mcset it {Font weight}         {Peso del Carattere}
 ::msgcat::mcset it {Format: mm/dd/yyyy}  {Formato: mm/dd/yyyy}
 ::msgcat::mcset it {Forwarded message}   {Forwarded message}
-::msgcat::mcset it {Full Name}         {Full Name}
+::msgcat::mcset it {Full Name}           {Full Name}
+::msgcat::mcset it {Hide all on system tray click}   {Hide all on system tray click}
 ::msgcat::mcset it {History length}      {Lunghezza archivio storico}
 ::msgcat::mcset it {Import Iconset}      {Importa Insieme di Icone}
 ::msgcat::mcset it {Incoming Message}    {Messaggio arrivato}

@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: de.msg,v 1.111 2008-09-14 13:02:29 sdevrieze Exp $
+#   $Id: de.msg,v 1.112 2008-09-16 17:39:37 sdevrieze Exp $
 
 ::msgcat::mcset de Abort                 {Abbruch}
 ::msgcat::mcset de Action                {Aktion}
@@ -37,6 +37,7 @@
 ::msgcat::mcset de Admin                 {Administrator}
 ::msgcat::mcset de admin                 {Administrator}
 ::msgcat::mcset de Affiliation           {Zugehörigkeit}
+::msgcat::mcset de Always                {Always}
 ::msgcat::mcset de Any                   {irgendeine}
 ::msgcat::mcset de Appearance            {Aussehen}
 ::msgcat::mcset de Author                {Autor}
@@ -529,7 +530,8 @@
 ::msgcat::mcset de {Font weight}         {Schriftgewicht}
 ::msgcat::mcset de {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 ::msgcat::mcset de {Forwarded message}   {Nachricht weiterleiten}
-::msgcat::mcset de {Full Name}         {Full Name}
+::msgcat::mcset de {Full Name}           {Full Name}
+::msgcat::mcset de {Hide all on system tray click}   {Hide all on system tray click}
 ::msgcat::mcset de {History length}      {Verlaufs-Umfang}
 ::msgcat::mcset de {Import Iconset}      {Importiere Iconset}
 ::msgcat::mcset de {Incoming Message}    {Eingehende Nachricht}

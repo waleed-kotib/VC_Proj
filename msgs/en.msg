@@ -22,7 +22,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: en.msg,v 1.256 2008-09-14 13:02:30 sdevrieze Exp $
+#   $Id: en.msg,v 1.257 2008-09-16 17:39:38 sdevrieze Exp $
 
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
@@ -31,6 +31,7 @@
 ::msgcat::mcset en Admin
 ::msgcat::mcset en admin
 ::msgcat::mcset en Affiliation
+::msgcat::mcset en Always
 ::msgcat::mcset en Any
 ::msgcat::mcset en Appearance
 ::msgcat::mcset en Author
@@ -524,6 +525,7 @@
 ::msgcat::mcset en {Format: mm/dd/yyyy}
 ::msgcat::mcset en {Forwarded message}
 ::msgcat::mcset en {Full Name}
+::msgcat::mcset en {Hide all on system tray click}
 ::msgcat::mcset en {History length}
 ::msgcat::mcset en {Import Iconset}
 ::msgcat::mcset en {Incoming Message}

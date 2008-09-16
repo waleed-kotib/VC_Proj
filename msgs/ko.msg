@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: ko.msg,v 1.5 2008-09-14 13:02:31 sdevrieze Exp $
+#   $Id: ko.msg,v 1.6 2008-09-16 17:39:38 sdevrieze Exp $
 
 ::msgcat::mcset ko Abort                 {Abort}
 ::msgcat::mcset ko Action                {활동}
@@ -37,6 +37,7 @@
 ::msgcat::mcset ko Admin                 {관리자}
 ::msgcat::mcset ko admin                 {관리자}
 ::msgcat::mcset ko Affiliation           {가입}
+::msgcat::mcset ko Always                {Always}
 ::msgcat::mcset ko Any                   {Any}
 ::msgcat::mcset ko Appearance            {모양}
 ::msgcat::mcset ko Author                {저자}
@@ -530,6 +531,7 @@
 ::msgcat::mcset ko {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 ::msgcat::mcset ko {Forwarded message}   {Forwarded message}
 ::msgcat::mcset ko {Full Name}         {Full Name}
+::msgcat::mcset ko {Hide all on system tray click}   {Hide all on system tray click}
 ::msgcat::mcset ko {History length}      {기록 길이}
 ::msgcat::mcset ko {Import Iconset}      {Import Iconset}
 ::msgcat::mcset ko {Incoming Message}    {받은 메세지}
