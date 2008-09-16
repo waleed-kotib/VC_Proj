@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: sv.msg,v 1.155 2008-09-14 13:02:32 sdevrieze Exp $
+#   $Id: sv.msg,v 1.156 2008-09-16 17:39:39 sdevrieze Exp $
 
 ::msgcat::mcset sv Abort                 {Avbryt}
 ::msgcat::mcset sv Action                {Åtgärd}
@@ -37,6 +37,7 @@
 ::msgcat::mcset sv Admin                 {Administratör}
 ::msgcat::mcset sv admin                 {administratör}
 ::msgcat::mcset sv Affiliation           {Adoption}
+::msgcat::mcset sv Always                {Always}
 ::msgcat::mcset sv Any                   {Any}
 ::msgcat::mcset sv Appearance            {Utseende}
 ::msgcat::mcset sv Author                {Författare}
@@ -529,7 +530,8 @@
 ::msgcat::mcset sv {Font weight}         {Typsnittvikt}
 ::msgcat::mcset sv {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 ::msgcat::mcset sv {Forwarded message}   {Förmedlat meddelande}
-::msgcat::mcset sv {Full Name}         {Full Name}
+::msgcat::mcset sv {Full Name}           {Full Name}
+::msgcat::mcset sv {Hide all on system tray click}   {Hide all on system tray click}
 ::msgcat::mcset sv {History length}      {Historielängd}
 ::msgcat::mcset sv {Import Iconset}      {Importera smileysamling}
 ::msgcat::mcset sv {Incoming Message}    {Inkommande meddelande}

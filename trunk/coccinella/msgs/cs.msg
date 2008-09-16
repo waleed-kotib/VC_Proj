@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: cs.msg,v 1.11 2008-09-14 13:02:27 sdevrieze Exp $
+#   $Id: cs.msg,v 1.12 2008-09-16 17:39:36 sdevrieze Exp $
 
 ::msgcat::mcset cs Abort                 {Storno}
 ::msgcat::mcset cs Action                {Akce}
@@ -37,6 +37,7 @@
 ::msgcat::mcset cs Admin                 {Správce}
 ::msgcat::mcset cs admin                 {správce}
 ::msgcat::mcset cs Affiliation           {Vztah}
+::msgcat::mcset cs Always                {Always}
 ::msgcat::mcset cs Any                   {Libovolný}
 ::msgcat::mcset cs Appearance            {Vzhled}
 ::msgcat::mcset cs Author                {Autor}
@@ -529,7 +530,8 @@
 ::msgcat::mcset cs {Font weight}         {Styl písma}
 ::msgcat::mcset cs {Format: mm/dd/yyyy}  {Formát: mm/dd/rrrr}
 ::msgcat::mcset cs {Forwarded message}   {Přeposlaná zpráva}
-::msgcat::mcset cs {Full Name}         {Full Name}
+::msgcat::mcset cs {Full Name}           {Full Name}
+::msgcat::mcset cs {Hide all on system tray click}   {Hide all on system tray click}
 ::msgcat::mcset cs {History length}      {Délka historie}
 ::msgcat::mcset cs {Import Iconset}      {Importovat soubor ikon}
 ::msgcat::mcset cs {Incoming Message}    {Příchozí zpráva}

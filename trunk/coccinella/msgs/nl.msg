@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.181 2008-09-14 18:52:25 sdevrieze Exp $
+#   $Id: nl.msg,v 1.182 2008-09-16 17:39:38 sdevrieze Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}
@@ -37,6 +37,7 @@
 ::msgcat::mcset nl Admin                 {Beheerdersprivileges}
 ::msgcat::mcset nl admin                 {Beheerdersprivileges}
 ::msgcat::mcset nl Affiliation           {Afilliatie}
+::msgcat::mcset nl Always                {Altijd}
 ::msgcat::mcset nl Any                   {Elke}
 ::msgcat::mcset nl Appearance            {Uiterlijk}
 ::msgcat::mcset nl Author                {Auteur}
@@ -530,6 +531,7 @@
 ::msgcat::mcset nl {Format: mm/dd/yyyy}  {Opmaak: mm/dd/jjjj}
 ::msgcat::mcset nl {Forwarded message}   {Doorgestuurd bericht}
 ::msgcat::mcset nl {Full Name}   {Volledige naam}
+::msgcat::mcset nl {Hide all on system tray click}   {Alles verbergen bij klik in systeemvak}
 ::msgcat::mcset nl {History length}      {Lengte van geschiedenis}
 ::msgcat::mcset nl {Import Iconset}      {Emoticon-thema importeren}
 ::msgcat::mcset nl {Incoming Message}    {Inkomend bericht}

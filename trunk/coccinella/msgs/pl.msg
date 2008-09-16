@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: pl.msg,v 1.81 2008-09-14 13:02:31 sdevrieze Exp $
+#   $Id: pl.msg,v 1.82 2008-09-16 17:39:38 sdevrieze Exp $
 
 ::msgcat::mcset pl Abort                 {Przerwij}
 ::msgcat::mcset pl Action                {akcja}
@@ -37,6 +37,7 @@
 ::msgcat::mcset pl Admin                 {Administrator}
 ::msgcat::mcset pl admin                 {administrator}
 ::msgcat::mcset pl Affiliation           {Towarzystwo}
+::msgcat::mcset pl Always                {Always}
 ::msgcat::mcset pl Any                   {Dowolny}
 ::msgcat::mcset pl Appearance            {Wygląd}
 ::msgcat::mcset pl Author                {Autor}
@@ -529,7 +530,8 @@
 ::msgcat::mcset pl {Font weight}         {Rodzaj kroju}
 ::msgcat::mcset pl {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 ::msgcat::mcset pl {Forwarded message}   {Wiadomość przekazana}
-::msgcat::mcset pl {Full Name}         {Full Name}
+::msgcat::mcset pl {Full Name}           {Full Name}
+::msgcat::mcset pl {Hide all on system tray click}   {Hide all on system tray click}
 ::msgcat::mcset pl {History length}      {Rozmiar dziennika}
 ::msgcat::mcset pl {Import Iconset}      {Import zestawu ikonek}
 ::msgcat::mcset pl {Incoming Message}    {Wiadomość nadchodzi}
