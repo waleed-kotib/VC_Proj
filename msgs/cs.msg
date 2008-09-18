@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: cs.msg,v 1.12 2008-09-16 17:39:36 sdevrieze Exp $
+#   $Id: cs.msg,v 1.13 2008-09-18 17:50:35 sdevrieze Exp $
 
 ::msgcat::mcset cs Abort                 {Storno}
 ::msgcat::mcset cs Action                {Akce}
@@ -37,7 +37,7 @@
 ::msgcat::mcset cs Admin                 {Správce}
 ::msgcat::mcset cs admin                 {správce}
 ::msgcat::mcset cs Affiliation           {Vztah}
-::msgcat::mcset cs Always                {Always}
+::msgcat::mcset cs Always                {Vždy}
 ::msgcat::mcset cs Any                   {Libovolný}
 ::msgcat::mcset cs Appearance            {Vzhled}
 ::msgcat::mcset cs Author                {Autor}
@@ -119,7 +119,7 @@
 ::msgcat::mcset cs moderator             {moderátor}
 ::msgcat::mcset cs Moderators            {Moderátoři}
 ::msgcat::mcset cs More                  {Více}
-::msgcat::mcset cs Name               {Name}
+::msgcat::mcset cs Name               {Jméno}
 ::msgcat::mcset cs Network               {Síť}
 ::msgcat::mcset cs Never                 {Nikdy}
 ::msgcat::mcset cs New                   {Nový}
@@ -178,9 +178,9 @@
 ::msgcat::mcset cs Skin                  {Vzhled}
 ::msgcat::mcset cs Sleep                 {Spát}
 ::msgcat::mcset cs Sounds                {Zvuky}
-::msgcat::mcset cs Specific              {Zvláštní}
-::msgcat::mcset cs Status                  {Status}
-::msgcat::mcset cs Stop                  {Stop}
+::msgcat::mcset cs Specific              {Upřesnění}
+::msgcat::mcset cs Status                  {Stav}
+::msgcat::mcset cs Stop                  {Zastavit}
 ::msgcat::mcset cs Subject               {Předmět}
 ::msgcat::mcset cs System                {Systém}
 ::msgcat::mcset cs Text                  {Text}
@@ -289,13 +289,13 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset cs mAboutCoccinella      {&O programu Coccinella}
-::msgcat::mcset cs mAboutQuickTimeTcl    {About QuickTimeTcl}
+::msgcat::mcset cs mAboutQuickTimeTcl    {O QuickTimeTcl}
 ::msgcat::mcset cs mAction               {&Akce}
 ::msgcat::mcset cs mAddToDictionary      {Přidat do slovníku}
 ::msgcat::mcset cs mAdHocCommands        {Pří&kazy}
-::msgcat::mcset cs mAddContact...        {&Přidat kontakt...}
-::msgcat::mcset cs mAddSpeechBubble      {Add Speech Bubble}
-::msgcat::mcset cs mAll                  {All}
+::msgcat::mcset cs mAddContact...        {Přidat &kontakt...}
+::msgcat::mcset cs mAddSpeechBubble      {Přidat bublinu}
+::msgcat::mcset cs mAll                  {Všechny}
 ::msgcat::mcset cs mArc                  {Oblouk}
 ::msgcat::mcset cs mArcs                 {Oblouky}
 ::msgcat::mcset cs mAttachMessage        {Připojit zprávu...}
@@ -312,14 +312,14 @@
 ::msgcat::mcset cs mCall                 {&Volání...}
 ::msgcat::mcset cs mChat                 {Chat}
 ::msgcat::mcset cs mChat...              {Chatova&t...}
-::msgcat::mcset cs mChord                {Akord}
+::msgcat::mcset cs mChord                {Úseč}
 ::msgcat::mcset cs mClear                {Smazat}
 ::msgcat::mcset cs mClearMenu            {Vymazat nabídku}
 ::msgcat::mcset cs mCloseWindow          {&Zavřít okno}
 ::msgcat::mcset cs mCoccinellaHome...    {&Domovská stránka...}
 ::msgcat::mcset cs mColor...             {Barva...}
 ::msgcat::mcset cs mContacts...          {&Kontakty...}
-::msgcat::mcset cs mControlPanel         {Control Panel}
+::msgcat::mcset cs mControlPanel         {Ovládací panel}
 ::msgcat::mcset cs mCopy                 {&Kopírovat}
 ::msgcat::mcset cs mCreateRoom...        {&Vytvořit místnost...}
 ::msgcat::mcset cs mCustomStatus...      {Vlastní stav...}
@@ -338,7 +338,7 @@
 ::msgcat::mcset cs mEditNick             {Upravit &přezdívku}
 ::msgcat::mcset cs mEditProfiles...      {Upravit &profily...}
 ::msgcat::mcset cs mEnterRoom...         {Vstoupit do mís&tnosti...}
-::msgcat::mcset cs mErrorLog             {&Chybový záznam...}
+::msgcat::mcset cs mErrorLog             {Záznam &chyb...}
 ::msgcat::mcset cs mExport               {Export}
 ::msgcat::mcset cs mExportImage...       {Exportovat obrázek...}
 ::msgcat::mcset cs mExportMovie...       {Exportovat film...}
@@ -353,7 +353,7 @@
 ::msgcat::mcset cs mFont                 {Písmo}
 ::msgcat::mcset cs mFontSize             {Velikost písma}
 ::msgcat::mcset cs mGrid                 {Mřížka}
-::msgcat::mcset cs mHideControlPanel     {Hide Control Panel}
+::msgcat::mcset cs mHideControlPanel     {Schovat ovládací panel}
 ::msgcat::mcset cs mHistory...           {&Historie...}
 ::msgcat::mcset cs mHorizontal           {Horizontální}
 ::msgcat::mcset cs mHugeFont             {Veliké}
@@ -400,7 +400,7 @@
 ::msgcat::mcset cs mPageSetup            {Nastavení stránky...}
 ::msgcat::mcset cs mNewPassword...       {Nové heslo...}
 ::msgcat::mcset cs mPaste                {&Vložit}
-::msgcat::mcset cs mPieslice             {Kruhová výseč}
+::msgcat::mcset cs mPieslice             {Výseč}
 ::msgcat::mcset cs mPlugins              {Plu&giny}
 ::msgcat::mcset cs mPreferences          {&Nastavení}
 ::msgcat::mcset cs mPreferences...       {&Nastavení...}
@@ -425,8 +425,8 @@
 ::msgcat::mcset cs mServer               {&Server}
 ::msgcat::mcset cs mSetupAssistant...    {Asistent na&stavení...}
 ::msgcat::mcset cs mShiftConstrain       {Chování se shiftem}
-::msgcat::mcset cs mShow                 {Ukázat}
-::msgcat::mcset cs mShowControlPanel     {Show Control Panel}
+::msgcat::mcset cs mShow                 {Zobrazit}
+::msgcat::mcset cs mShowControlPanel     {Zobrazit ovládací panel}
 ::msgcat::mcset cs mSize                 {Velikost}
 ::msgcat::mcset cs mSlideShow            {Prezentace}
 ::msgcat::mcset cs mSmaller              {Zmenšit}
@@ -440,7 +440,7 @@
 ::msgcat::mcset cs mTabs                 {&Záložky}
 ::msgcat::mcset cs mTakeSnapShot         {Sejmout &obrazovku}
 ::msgcat::mcset cs mThickness            {Šířka čáry}
-::msgcat::mcset cs mTimeCode             {Timecode}
+::msgcat::mcset cs mTimeCode             {Časový kód}
 ::msgcat::mcset cs mTo45degrees          {Po 45 stupních}
 ::msgcat::mcset cs mTo90degrees          {Po 90 stupních}
 ::msgcat::mcset cs mToolbar              {Nástrojová &lišta}
@@ -465,7 +465,7 @@
 ::msgcat::mcset cs {All Supported Files} {Všechny podporované soubory}
 ::msgcat::mcset cs {Alternative chatroom} {Alternativní místnost}
 ::msgcat::mcset cs {Always ask}          {Vždy se ptát}
-::msgcat::mcset cs {Application Status} {Application Status}
+::msgcat::mcset cs {Application Status} {Stav aplikace}
 ::msgcat::mcset cs {Auto Away}           {Automaticky pryč}
 ::msgcat::mcset cs {Auto Join}           {Automaticky vejít}
 ::msgcat::mcset cs {Auto Reply}          {Automaticky odpovědět}
@@ -475,7 +475,7 @@
 ::msgcat::mcset cs {Bookmark this chatroom} {Vložit místnost do záložek}
 ::msgcat::mcset cs {Broken Image}        {Porušený obrázek}
 ::msgcat::mcset cs {Buffering support}   {Podpora buferování}
-::msgcat::mcset cs {Built in server}     {Built in server}
+::msgcat::mcset cs {Built in server}     {Vestavěný server}
 ::msgcat::mcset cs {Business Card}       {Vizitka}
 ::msgcat::mcset cs {Cache folder}        {Složka keše}
 ::msgcat::mcset cs {Changes since previous release} {Změny od předešlé verze}
@@ -485,7 +485,7 @@
 ::msgcat::mcset cs {Chatroom presence change} {Změna přítomnosti v místnosti}
 ::msgcat::mcset cs {Clear Cache}         {Vyprázdnit keš}
 ::msgcat::mcset cs {Close page}          {Zavřít stránku}
-::msgcat::mcset cs {Close Slot}         {Close Slot}
+::msgcat::mcset cs {Close Slot}         {Zavřít slot}
 ::msgcat::mcset cs {Close tab}           {Zavřít záložku}
 ::msgcat::mcset cs {Configure Chatroom}  {Nastavení místnosti}
 ::msgcat::mcset cs {Contact Actions}     {Akce kontaktu}
@@ -500,7 +500,7 @@
 ::msgcat::mcset cs {Default nickname}    {Výchozí přezdívka}
 ::msgcat::mcset cs {Delete Profile}      {Smazat profil}
 ::msgcat::mcset cs {Disable All}         {Zakázat vše}
-::msgcat::mcset cs {Discover permanently} {Discover permanently}
+::msgcat::mcset cs {Discover permanently} {Stále zjišťovat}
 ::msgcat::mcset cs {Discover Server}     {Prohlédnout služby}
 ::msgcat::mcset cs {Disk cache size}     {Velikost diskové keše}
 ::msgcat::mcset cs {Edit Bookmarks}      {Upravit záložky}
@@ -512,7 +512,7 @@
 ::msgcat::mcset cs {Edit Profiles}       {Upravit profily}
 ::msgcat::mcset cs {Email addresses}     {Emailové adresy}
 ::msgcat::mcset cs {Email client}        {Poštovní program}
-::msgcat::mcset cs {Enable nickname coloring} {Enable nickname coloring}
+::msgcat::mcset cs {Enable nickname coloring} {Povolit obarvování přezdívek}
 ::msgcat::mcset cs {Enter Chatroom}      {Vstoupit do místnosti}
 ::msgcat::mcset cs {Enter/Create Chatroom} {Vstoupit/vytvořit místnost}
 ::msgcat::mcset cs {Exit room}           {Opustit místnost}
@@ -530,8 +530,8 @@
 ::msgcat::mcset cs {Font weight}         {Styl písma}
 ::msgcat::mcset cs {Format: mm/dd/yyyy}  {Formát: mm/dd/rrrr}
 ::msgcat::mcset cs {Forwarded message}   {Přeposlaná zpráva}
-::msgcat::mcset cs {Full Name}           {Full Name}
-::msgcat::mcset cs {Hide all on system tray click}   {Hide all on system tray click}
+::msgcat::mcset cs {Full Name}           {Celé jméno}
+::msgcat::mcset cs {Hide all on system tray click}   {Schovat všechna do oznamovací oblasti}
 ::msgcat::mcset cs {History length}      {Délka historie}
 ::msgcat::mcset cs {Import Iconset}      {Importovat soubor ikon}
 ::msgcat::mcset cs {Incoming Message}    {Příchozí zpráva}
@@ -579,12 +579,12 @@
 ::msgcat::mcset cs {Open Image/Movie}    {Otevřít obrázek/video}
 ::msgcat::mcset cs {Open Stream}         {Otevřít proud}
 ::msgcat::mcset cs {Open with}           {Otevřít čím}
-::msgcat::mcset cs {Own Contact ID}           {Own Contact ID}
-::msgcat::mcset cs {Own Full Contact ID}           {Own Full Contact ID}
-::msgcat::mcset cs {Plain text password} {Plain text password}
+::msgcat::mcset cs {Own Contact ID}           {Vlastní ID kontaktu}
+::msgcat::mcset cs {Own Full Contact ID}           {Plné vlastní ID kontaktu}
+::msgcat::mcset cs {Plain text password} {Čistě textové heslo}
 ::msgcat::mcset cs {Play sound}          {Přehrát zvuk}
 ::msgcat::mcset cs {Postal code}         {PSČ}
-::msgcat::mcset cs {Presence Control} {Presence Control}
+::msgcat::mcset cs {Presence Control} {Ovládání přítomnosti}
 ::msgcat::mcset cs {Presence Error}      {Chyba přítomnosti}
 ::msgcat::mcset cs {Presence Subscription} {Zprávy o přítomnosti}
 ::msgcat::mcset cs {Profile Name}        {Název profilu}
@@ -592,14 +592,14 @@
 ::msgcat::mcset cs {Recent Avatars}      {Poslední avataři}
 ::msgcat::mcset cs {Reject file}         {Odmítnout soubor}
 ::msgcat::mcset cs {Relogin on activity} {Znovu přihlásit při aktivitě}
-::msgcat::mcset cs {Relogin on wakeup}   {Relogin on wakeup}
+::msgcat::mcset cs {Relogin on wakeup}   {Znovu přihlásit při probuzení}
 ::msgcat::mcset cs {Remove Account}      {Smazat účet}
 ::msgcat::mcset cs {Remove Avatar}       {Smazat avatara}
 ::msgcat::mcset cs {Remove Contact}      {Smazat kontakt}
 ::msgcat::mcset cs {Remove Item}         {Smazat položku}
 ::msgcat::mcset cs {Requires a restart of} {%s vyžaduje restart}
 ::msgcat::mcset cs {Retype password}     {Heslo znovu}
-::msgcat::mcset cs {Right click to open menu} {Right click to open menu}
+::msgcat::mcset cs {Right click to open menu} {Pravé tlačítko otevře menu}
 ::msgcat::mcset cs {Save As}             {Uložit jako}
 ::msgcat::mcset cs {Save As GIF}         {Uložit jako GIF}
 ::msgcat::mcset cs {Save Canvas Item}    {Uložit položku}
@@ -607,7 +607,7 @@
 ::msgcat::mcset cs {Save Message}        {Uložit zprávu}
 ::msgcat::mcset cs {Save password}       {Uložit heslo}
 ::msgcat::mcset cs {Save to disk}        {Uložit na disk}
-::msgcat::mcset cs {Search People} {Search People}
+::msgcat::mcset cs {Search People} {Vyhledat kamarády}
 ::msgcat::mcset cs {Search results}      {Výsledky hledání}
 ::msgcat::mcset cs {Select Avatar}       {Vyběr avatara}
 ::msgcat::mcset cs {Select File}         {Výběr souboru}
@@ -619,8 +619,8 @@
 ::msgcat::mcset cs {Setup Assistant}     {Asistent nastavení}
 ::msgcat::mcset cs {Show Icon}           {Zobrazit ikonu}
 ::msgcat::mcset cs {Show navigation buttons} {Ukazovat navigační tlačítka}
-::msgcat::mcset cs {Show notifier window} {Show notifier window}
-::msgcat::mcset cs {Show popup}          {Ukázat vyskakovací okno}
+::msgcat::mcset cs {Show notifier window} {Zobrazit oznamovací okno}
+::msgcat::mcset cs {Show popup}          {Zobrazit vyskakovací okno}
 ::msgcat::mcset cs {Show offline users}  {Zobrazit nepřipojené}
 ::msgcat::mcset cs {Show Text}           {Zobrazit text}
 ::msgcat::mcset cs {Show Text and Icon}  {Zobrazit text a ikonu}
@@ -630,14 +630,14 @@
 ::msgcat::mcset cs {Start chat}          {Začít povídat}
 ::msgcat::mcset cs {Start minimized in system tray} {Spustit minimalizovaně v oznamovací oblasti}
 ::msgcat::mcset cs {Start minimized in taskbar} {Spustit minimalizovaně v pruhu úloh}
-::msgcat::mcset cs {Status Info} {Status Info}
+::msgcat::mcset cs {Status Info} {Informace o stavu}
 ::msgcat::mcset cs {Status message}      {Stavová zpráva}
 ::msgcat::mcset cs {Subscription Failed} {Povolení selhalo}
 ::msgcat::mcset cs {Subscription Pending} {Povolení čeká}
 ::msgcat::mcset cs {Synchronise cache}   {Synchronizovat keš}
 ::msgcat::mcset cs {Take Snapshot}       {Sejmout obrazovku}
-::msgcat::mcset cs {Tel (fax)}           {Tel (fax)}
-::msgcat::mcset cs {Tel (voice)}         {Tel (hlas)}
+::msgcat::mcset cs {Tel (fax)}           {Tel. (fax)}
+::msgcat::mcset cs {Tel (voice)}         {Tel. (hlas)}
 ::msgcat::mcset cs Text-to-Speech        {Čtení textu}
 ::msgcat::mcset cs {Thread started}      {Vlákno začato}
 ::msgcat::mcset cs {Update Check}        {Kontrola aktualizace}
@@ -674,15 +674,15 @@
 
 # Naming of protocol systems and their identifiers.
 # Low priority.
-::msgcat::mcset cs Email                 {Email}
-::msgcat::mcset cs {Screen Name}         {Screen Name}
-::msgcat::mcset cs {Gadu-Gadu Number}    {Gadu-Gadu Number}
-::msgcat::mcset cs {ICQ Number}          {ICQ Number}
+::msgcat::mcset cs Email                 {e-mail}
+::msgcat::mcset cs {Screen Name}         {Zobrazované jméno}
+::msgcat::mcset cs {Gadu-Gadu Number}    {Gadu-Gadu číslo}
+::msgcat::mcset cs {ICQ Number}          {ICQ číslo}
 ::msgcat::mcset cs IRC                   {IRC}
-::msgcat::mcset cs {MSN Address}         {MSN Address}
-::msgcat::mcset cs {Email Address}       {Email Address}
-::msgcat::mcset cs {QQ Number}           {QQ Number}
-::msgcat::mcset cs {Tlen Address}        {Tlen Address}
+::msgcat::mcset cs {MSN Address}         {MSN adresa}
+::msgcat::mcset cs {Email Address}       {e-mailová adresa}
+::msgcat::mcset cs {QQ Number}           {QQ číslo}
+::msgcat::mcset cs {Tlen Address}        {Tlen adresa}
 ::msgcat::mcset cs {Jabber ID}           {Jabber ID}
 ::msgcat::mcset cs {Yahoo ID}            {Yahoo ID}
 
@@ -761,8 +761,8 @@
 ::msgcat::mcset cs messsuassclose        {Opravdu chceš ukončit asistenta nastavení? Můžeš ho pak kdykoli spustit z menu.}
 ::msgcat::mcset cs messsuassfillin       {Přesvědč se, než budeš pokračovat, že jsi vyplnil(a) všechna pole.}
 ::msgcat::mcset cs messtimeout           {Vypršel čas při čekání na otevření spojení.}
-::msgcat::mcset cs messunsavedmsgQ2       {This whiteboard document has been changed.}
-::msgcat::mcset cs messunsaveddtl2        {Do you want to save the changes?}
+::msgcat::mcset cs messunsavedmsgQ2       {Tento soubor s plochou byl změněn.}
+::msgcat::mcset cs messunsaveddtl2        {Chceš změny uložit?}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset cs jamessaddforeign2     {Jestli chceš přidat kontakt z uzavřeného IM systému, potřebuješ mít účet v tomto systému, dále si musíš zaregistrovat odpovídající transport (%s). Chceš se do toho pustit?}
@@ -815,8 +815,8 @@
 ::msgcat::mcset cs jamessjidinvalid2     {Nesprávné ID kontaktu.}
 ::msgcat::mcset cs jamesslocaltime2      {Místní čas kontaktu %s: %s}
 ::msgcat::mcset cs jamesslogin409b       {Nemohu se přihlásit, protože jméno již někdo používá (%s).}
-::msgcat::mcset cs jamessloginnewprof    {The Contact ID differs from your profile. Do you want to save a new profile?}
-::msgcat::mcset cs jamesslogindiff       {Your current login settings differ from your profile settings. Do you want to save them to your profile?}
+::msgcat::mcset cs jamessloginnewprof    {ID kontaktu je jiné než v profilu. Chceš nový profil uložit?}
+::msgcat::mcset cs jamesslogindiff       {Tvé přihlašovací údaje jsou jiné než v profilu. Chceš údaje uložit do profilu?}
 ::msgcat::mcset cs jamessmsgwarnquit     {Jsou tu nějaké neuložené zprávy. Opravdu chceš skončit?}
 ::msgcat::mcset cs jamessnamemissing     {"%s" chybí, nebo je příliš krátké!}
 ::msgcat::mcset cs jamessnofiletrpt2     {%s nepodporuje přenos souborů.}
@@ -911,7 +911,7 @@
 ::msgcat::mcset cs registration-address  {Ulice (z adresy trvalého nebo přechodného bydliště)}
 ::msgcat::mcset cs registration-city     {Místo (z adresy trvalého nebo přechodného bydliště)}
 ::msgcat::mcset cs registration-date     {Nějaké datum (např. narození, výplaty)}
-::msgcat::mcset cs registration-email    {Emailová adresa}
+::msgcat::mcset cs registration-email    {E-mailová adresa}
 ::msgcat::mcset cs registration-first    {Jméno}
 ::msgcat::mcset cs registration-is-registered {Již jsi k této službě přihlášen(a). Tady jsou přihlašovací údaje.}
 ::msgcat::mcset cs registration-last     {Příjmení}
@@ -967,7 +967,7 @@
 # Preferences:
 ::msgcat::mcset cs prefaaonhidden        {Ve skrytých záložkách chatu nastavit, že jsi pryč na dlouho}
 ::msgcat::mcset cs prefaabusychats       {Nerušit když (si povídám)}
-::msgcat::mcset cs prefchactret2         {Přednastaveno je klávesou <Enter> odeslat zprávu}
+::msgcat::mcset cs prefchactret2         {Přednastaveno je, že klávesa <Enter> odešle zprávu}
 ::msgcat::mcset cs prefchnormal          {Zacházet s normálními zprávami jako s povídacími}
 ::msgcat::mcset cs prefcu2clk            {Dvojklik na zprávě ve schránce}
 ::msgcat::mcset cs prefcuautologin2      {Při startu se přihlásit k %s}
@@ -1175,28 +1175,28 @@ namespace eval ::EditShortcuts:: {
 # IAX Phone
 # Note to translators: these strings are not yet activated
 if {0} {
-::msgcat::mcset cs Codecs                {Codecs}
-::msgcat::mcset cs Devices               {Devices}
-::msgcat::mcset cs Filters               {Filters}
-::msgcat::mcset cs {IAX Phone}           {IAX Phone}
-::msgcat::mcset cs {IAX Account}         {IAX Account}
+::msgcat::mcset cs Codecs                {Kodeky}
+::msgcat::mcset cs Devices               {Zařízení}
+::msgcat::mcset cs Filters               {Filtry}
+::msgcat::mcset cs {IAX Phone}           {IAX telefon}
+::msgcat::mcset cs {IAX Account}         {IAX účet}
     # translation help: http://en.wikipedia.org/wiki/Caller_id
-::msgcat::mcset cs {Caller ID number}    {Caller ID number}
-::msgcat::mcset cs {Caller ID name}      {Caller ID name}
-::msgcat::mcset cs Microphone            {Microphone}
-::msgcat::mcset cs Speakers              {Speakers}
+::msgcat::mcset cs {Caller ID number}    {Číslo volajícího}
+::msgcat::mcset cs {Caller ID name}      {Jméno volajícího}
+::msgcat::mcset cs Microphone            {Mikrofon}
+::msgcat::mcset cs Speakers              {Reproduktory}
     # translation help: http://en.wikipedia.org/wiki/Automatic_gain_control
-::msgcat::mcset cs {Automatic gain control (AGC)} {Automatic gain control (AGC)}
-::msgcat::mcset cs agcTip                {Automatically adjust volume levels}
+::msgcat::mcset cs {Automatic gain control (AGC)} {Automatické řízení citlivosti (AGC)}
+::msgcat::mcset cs agcTip                {Automaticky nastavit úroveň hlasitosti}
     # translation help: http://lists.xiph.org/pipermail/speex-dev/2007-May/005565.html
-::msgcat::mcset cs {Analog automatic gain control (AAGC)} {Analog automatic gain control (AAGC)}
-::msgcat::mcset cs {Can prevent clipping} {Can prevent clipping}
+::msgcat::mcset cs {Analog automatic gain control (AAGC)} {Analogové automatické řízení zesílení (AAGC)}
+::msgcat::mcset cs {Can prevent clipping} {Omezit ořezávání}
     # translation help: http://en.wikipedia.org/wiki/Noise_reduction
-::msgcat::mcset cs {Noise reduction}     {Noise reduction}
+::msgcat::mcset cs {Noise reduction}     {Redukce šumu}
     # translation help: http://en.wikipedia.org/wiki/Comfort_noise
 ::msgcat::mcset cs {Comfort noise}       {Comfort noise}
-::msgcat::mcset cs comfortTip            {Artificial background noise to fill silence}
-::msgcat::mcset cs Codec                 {Codec}
+::msgcat::mcset cs comfortTip            {Uměle vytvořený šum pro potlačení ticha}
+::msgcat::mcset cs Codec                 {Kodek}
     # I copied the following descriptions from the websites of these projects; do you think we should ask permission for this?
 ::msgcat::mcset cs tooltip-ilbc          {iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
 ::msgcat::mcset cs tooltip-speex         {Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
@@ -1208,66 +1208,66 @@ if {0} {
 # Messages for Mood XEP
 # bug: this should be M&ood..., but this does not work!
 ::msgcat::mcset cs mMood                 Nálada
-::msgcat::mcset cs mAfraid               Afraid
-::msgcat::mcset cs mAmazed          Amazed
+::msgcat::mcset cs mAfraid               {Obávající se}
+::msgcat::mcset cs mAmazed          Udivený
 ::msgcat::mcset cs mAngry                Hladový
-::msgcat::mcset cs mAnnoyed         Annoyed
+::msgcat::mcset cs mAnnoyed         Znepokojený
 ::msgcat::mcset cs mAnxious              Nedočkavý
-::msgcat::mcset cs mAroused         Aroused
+::msgcat::mcset cs mAroused         Probuzený
 ::msgcat::mcset cs mAshamed              Zahanbený
 ::msgcat::mcset cs mBored                Znuděný
-::msgcat::mcset cs mBrave           Brave
-::msgcat::mcset cs mCalm            Calm
-::msgcat::mcset cs mCold            Cold
-::msgcat::mcset cs mConfused        Confused
-::msgcat::mcset cs mContented       Contented
-::msgcat::mcset cs mCranky          Cranky
+::msgcat::mcset cs mBrave           Statečný
+::msgcat::mcset cs mCalm            Uklidněný
+::msgcat::mcset cs mCold            Chladný
+::msgcat::mcset cs mConfused        Zmatený
+::msgcat::mcset cs mContented       Spokojený
+::msgcat::mcset cs mCranky          Podrážděný
 ::msgcat::mcset cs mCurious              Zvědavý
 ::msgcat::mcset cs mDepressed            Skleslý
-::msgcat::mcset cs mDisappointed    Disappointed
-::msgcat::mcset cs mDisgusted       Disgusted
-::msgcat::mcset cs mDistracted      Distracted
-::msgcat::mcset cs mEmbarrassed     Embarrassed
+::msgcat::mcset cs mDisappointed    Zklamaný
+::msgcat::mcset cs mDisgusted       Znechucený
+::msgcat::mcset cs mDistracted      Roztržitý
+::msgcat::mcset cs mEmbarrassed     Rozpačitý
 ::msgcat::mcset cs mExcited              Nadšený
-::msgcat::mcset cs mFlirtatious     Flirtatious
-::msgcat::mcset cs mFrustrated      Frustrated
-::msgcat::mcset cs mGrumpy          Grumpy
-::msgcat::mcset cs mGuilty          Guilty
+::msgcat::mcset cs mFlirtatious     Flirtující
+::msgcat::mcset cs mFrustrated      Znechucený
+::msgcat::mcset cs mGrumpy          Nevrlý
+::msgcat::mcset cs mGuilty          Provinilý
 ::msgcat::mcset cs mHappy                Šťastný
-::msgcat::mcset cs mHot             Hot
-::msgcat::mcset cs mHumbled         Humbled
-::msgcat::mcset cs mHumiliated      Humiliated
-::msgcat::mcset cs mHungry          Hungry
-::msgcat::mcset cs mHurt            Hurt
-::msgcat::mcset cs mImpressed       Impressed
-::msgcat::mcset cs mIn_awe          {In awe}
+::msgcat::mcset cs mHot             Vášnivý
+::msgcat::mcset cs mHumbled         Pokorný
+::msgcat::mcset cs mHumiliated      Ponížený
+::msgcat::mcset cs mHungry          Hladový
+::msgcat::mcset cs mHurt            Zraněný
+::msgcat::mcset cs mImpressed       Ohromený
+::msgcat::mcset cs mIn_awe          Bázlivý
 ::msgcat::mcset cs mIn_love               Zamilovaný
-::msgcat::mcset cs mIndignant       Indignant
-::msgcat::mcset cs mInterested      Interested
-::msgcat::mcset cs mIntoxicated     Intoxicated
+::msgcat::mcset cs mIndignant       Rozhořčený
+::msgcat::mcset cs mInterested      Zaujatý
+::msgcat::mcset cs mIntoxicated     Opilý
 ::msgcat::mcset cs mInvincible           Nepřekonatelný
 ::msgcat::mcset cs mJealous              Žárlivý
-::msgcat::mcset cs mLonely          Lonely
-::msgcat::mcset cs mMean            Mean
-::msgcat::mcset cs mMoody           Moody
+::msgcat::mcset cs mLonely          Osamělý
+::msgcat::mcset cs mMean            Lakomý
+::msgcat::mcset cs mMoody           Náladový
 ::msgcat::mcset cs mNervous              Nervózní
-::msgcat::mcset cs mNeutral         Neutral
-::msgcat::mcset cs mOffended        Offended
-::msgcat::mcset cs mPlayful         Playful
-::msgcat::mcset cs mProud           Proud
-::msgcat::mcset cs mRelieved        Relieved
-::msgcat::mcset cs mRemorseful      Remorseful
-::msgcat::mcset cs mRestless        Restless
+::msgcat::mcset cs mNeutral         Neutrální
+::msgcat::mcset cs mOffended        Uražený
+::msgcat::mcset cs mPlayful         Hravý
+::msgcat::mcset cs mProud           Hrdý
+::msgcat::mcset cs mRelieved        Uvolněný
+::msgcat::mcset cs mRemorseful      Kajícný
+::msgcat::mcset cs mRestless        Netrpělivý
 ::msgcat::mcset cs mSad                  Smutný
-::msgcat::mcset cs mSarcastic       Sarcastic
-::msgcat::mcset cs mSerious         Serious
-::msgcat::mcset cs mShocked         Shocked
-::msgcat::mcset cs mShy             Shy
-::msgcat::mcset cs mSick            Sick
+::msgcat::mcset cs mSarcastic       Jízlivý
+::msgcat::mcset cs mSerious         Vážný
+::msgcat::mcset cs mShocked         Šokovaný
+::msgcat::mcset cs mShy             Plachý
+::msgcat::mcset cs mSick            Nemocný
 ::msgcat::mcset cs mSleepy               Ospalý
 ::msgcat::mcset cs mStressed             Přetížený
-::msgcat::mcset cs mSurprised       Surprised
-::msgcat::mcset cs mThirsty         Thirsty
+::msgcat::mcset cs mSurprised       Překvapený
+::msgcat::mcset cs mThirsty         Žíznivý
 ::msgcat::mcset cs mWorried              Utrápený
 
 ::msgcat::mcset cs moodEvent             {Změna nálady}
@@ -1275,66 +1275,66 @@ if {0} {
 
 ::msgcat::mcset cs heIs                  je
 ::msgcat::mcset cs because               protože
-::msgcat::mcset cs afraid   afraid
-::msgcat::mcset cs amazed   amazed
+::msgcat::mcset cs afraid   {obávající se}
+::msgcat::mcset cs amazed   udivený
 ::msgcat::mcset cs angry                 hladový
-::msgcat::mcset cs annoyed   annoyed
+::msgcat::mcset cs annoyed   znepokojený
 ::msgcat::mcset cs anxious               nedočkavý
-::msgcat::mcset cs aroused   aroused
+::msgcat::mcset cs aroused   probuzený
 ::msgcat::mcset cs ashamed               zahanbený
 ::msgcat::mcset cs bored                 znuděný
-::msgcat::mcset cs brave   brave
-::msgcat::mcset cs calm   calm
-::msgcat::mcset cs cold   cold
-::msgcat::mcset cs confused   confused
-::msgcat::mcset cs contented   contented
-::msgcat::mcset cs cranky   cranky
+::msgcat::mcset cs brave   statečný
+::msgcat::mcset cs calm   uklidněný
+::msgcat::mcset cs cold   chladný
+::msgcat::mcset cs confused   zmatený
+::msgcat::mcset cs contented   spokojený
+::msgcat::mcset cs cranky   podrážděný
 ::msgcat::mcset cs curious               zvědavý
 ::msgcat::mcset cs depressed             skleslý
-::msgcat::mcset cs disappointed   disappointed
-::msgcat::mcset cs disgusted   disgusted
-::msgcat::mcset cs distracted   distracted
-::msgcat::mcset cs embarrassed   embarrassed
+::msgcat::mcset cs disappointed   zklamaný
+::msgcat::mcset cs disgusted   znechucený
+::msgcat::mcset cs distracted   roztržitý
+::msgcat::mcset cs embarrassed   rozpačitý
 ::msgcat::mcset cs excited               nadšený
-::msgcat::mcset cs flirtatious   flirtatious
-::msgcat::mcset cs frustrated   frustrated
-::msgcat::mcset cs grumpy   grumpy
-::msgcat::mcset cs guilty   guilty
+::msgcat::mcset cs flirtatious   flirtující
+::msgcat::mcset cs frustrated   znechucený
+::msgcat::mcset cs grumpy   nevrlý
+::msgcat::mcset cs guilty   provinilý
 ::msgcat::mcset cs happy                 šťastný
-::msgcat::mcset cs hot   hot
-::msgcat::mcset cs humbled   humbled
-::msgcat::mcset cs humiliated   humiliated
-::msgcat::mcset cs hungry   hungry
-::msgcat::mcset cs hurt   hurt
-::msgcat::mcset cs impressed   impressed
-::msgcat::mcset cs in_awe   {in awe}
+::msgcat::mcset cs hot   vášnivý
+::msgcat::mcset cs humbled   pokorný
+::msgcat::mcset cs humiliated   ponížený
+::msgcat::mcset cs hungry   hladový
+::msgcat::mcset cs hurt   zraněný
+::msgcat::mcset cs impressed   ohromený
+::msgcat::mcset cs in_awe   bázlivý
 ::msgcat::mcset cs in_love               zamilovaný
-::msgcat::mcset cs indignant   indignant
-::msgcat::mcset cs interested   interested
-::msgcat::mcset cs intoxicated   intoxicated
+::msgcat::mcset cs indignant   rozhořčený
+::msgcat::mcset cs interested   zaujatý
+::msgcat::mcset cs intoxicated   opilý
 ::msgcat::mcset cs invincible            nepřekonatelný
 ::msgcat::mcset cs jealous               žárlivý
-::msgcat::mcset cs lonely   lonely
-::msgcat::mcset cs mean   mean
-::msgcat::mcset cs moody   moody
+::msgcat::mcset cs lonely   osamělý
+::msgcat::mcset cs mean   lakomý
+::msgcat::mcset cs moody   náladový
 ::msgcat::mcset cs nervous               nervózní
-::msgcat::mcset cs neutral   neutral
-::msgcat::mcset cs offended   offended
-::msgcat::mcset cs playful   playful
-::msgcat::mcset cs proud   proud
-::msgcat::mcset cs relieved   relieved
-::msgcat::mcset cs remorseful   remorseful
-::msgcat::mcset cs restless   restless
+::msgcat::mcset cs neutral   neutrální
+::msgcat::mcset cs offended   uražený
+::msgcat::mcset cs playful   hravý
+::msgcat::mcset cs proud   hrdý
+::msgcat::mcset cs relieved   uvolněný
+::msgcat::mcset cs remorseful   kajícný
+::msgcat::mcset cs restless   netrpělivý
 ::msgcat::mcset cs sad                   smutný
-::msgcat::mcset cs sarcastic   sarcastic
-::msgcat::mcset cs serious   serious
-::msgcat::mcset cs shocked   shocked
-::msgcat::mcset cs shy   shy
-::msgcat::mcset cs sick   sick
+::msgcat::mcset cs sarcastic   jízlivý
+::msgcat::mcset cs serious   vážný
+::msgcat::mcset cs shocked   šokovaný
+::msgcat::mcset cs shy   plachý
+::msgcat::mcset cs sick   nemocný
 ::msgcat::mcset cs sleepy                ospalý
 ::msgcat::mcset cs stressed              přetížený
-::msgcat::mcset cs surprised   surprised
-::msgcat::mcset cs thirsty   thirsty
+::msgcat::mcset cs surprised   překvapený
+::msgcat::mcset cs thirsty   žíznivý
 ::msgcat::mcset cs worried               utrápený
 
 ::msgcat::mcset cs {Custom Mood}         {Vlastní nálada}
@@ -1357,10 +1357,10 @@ if {0} {
 
 ::msgcat::mcset cs tooltip-chatsubject   {Vlož předmět konverzace, odešli pomocí Enter}
 ::msgcat::mcset cs tooltip-chatoffline   {Musíš být přihlášen(a), abys viděl(a) stav tohoto kontaktu}
-::msgcat::mcset cs tooltip-chatsendtext     {Enter your message and press Return or Shift-Return}
+::msgcat::mcset cs tooltip-chatsendtext     {Vlož zprávu a stiskni Enter nebo Shift-Enter}
 ::msgcat::mcset cs tooltip-aaonhidden    {Jesliže je zaškrtnuto, pak uživatelům ve schovaných záložkách chatu je odesláno, že jsi pryč na dlouho}
 ::msgcat::mcset cs tooltip-aabusychats   {Když máš <číslo> nebo více aktivních chatů, bude tvůj stav automaticky změněn na Nerušit.}
-::msgcat::mcset cs tooltip-togglesysmsg     {Show or hide status changes in chat}
+::msgcat::mcset cs tooltip-togglesysmsg     {Zobrazovat, nebo neukazovat změny stavu při chatu}
 
 
 # Me knows :-)
@@ -1370,7 +1370,7 @@ if {0} {
 # Messages for User Activity XEP
 ::msgcat::mcset cs Activity              {Aktivita}
 ::msgcat::mcset cs mActivity...          {Akti&vita...}
-::msgcat::mcset cs mCustomActivity... {Custom Activity...}
+::msgcat::mcset cs mCustomActivity... {Vlastní aktivita...}
 
 ::msgcat::mcset cs Traveling             {Cestování}
 ::msgcat::mcset cs Commuting             {Dojíždění}
@@ -1418,9 +1418,9 @@ if {0} {
 ::msgcat::mcset cs {Working out}         {Práce venku}
 
 ::msgcat::mcset cs Talking               {Povídání}
-::msgcat::mcset cs {In real life}        {s člověkem}
-::msgcat::mcset cs {On the phone}        {po telefonu}
-::msgcat::mcset cs {On video phone}      {po videotelefonu}
+::msgcat::mcset cs {In real life}        {S člověkem}
+::msgcat::mcset cs {On the phone}        {Po telefonu}
+::msgcat::mcset cs {On video phone}      {Po videotelefonu}
 
 ::msgcat::mcset cs Relaxing              {Odpočinek}
 ::msgcat::mcset cs Gaming                {Hraní her}
@@ -1449,9 +1449,9 @@ if {0} {
 
 ::msgcat::mcset cs Inactive              {Volno}
 ::msgcat::mcset cs {Day off}             {Volný den}
-::msgcat::mcset cs {Hanging out}         {Hanging out}
+::msgcat::mcset cs {Hanging out}         {Volno}
 ::msgcat::mcset cs {On vacation}         {Na prázdninách}
-::msgcat::mcset cs {Scheduled holiday}   {Plánovaná dovolená}
+::msgcat::mcset cs {Scheduled holiday}   {Naplánovaná dovolená}
 ::msgcat::mcset cs Sleeping              {Spánek}
 
 ::msgcat::mcset cs {Having appointment}  {Schůzka}
@@ -1460,10 +1460,10 @@ if {0} {
 ::msgcat::mcset cs activityPickDtl       {Z prvního tlačítka si vyber aktivitu obecně a volitelně specifikuj aktivitu na druhém tlačítku. Můžeš také přidat popisný text.}
 
 # XEP-0080: User Location
-::msgcat::mcset cs Location              {Zeměpisná poloha}
+::msgcat::mcset cs Location              {Místo}
 ::msgcat::mcset cs mLocation...          {Po&loha...}
 ::msgcat::mcset cs locationPickMsg       {Nastav zeměpisnou polohu, kterou uvidí tvé kontakty.}
-::msgcat::mcset cs locationPickDtl       {Vlož údaje o poloze. Na konec bys měl(a) vložit zeměpisnou šířku a délku.}
+::msgcat::mcset cs locationPickDtl       {Vlož údaje o poloze. Nakonec bys měl(a) vložit zeměpisnou šířku a délku.}
 
 # Note to translators: The commented strings are just there for completeness with the protocol, still not in UI
 ::msgcat::mcset cs Altitude              {Nadm. výška}
@@ -1530,7 +1530,7 @@ if {0} {
 ::msgcat::mcset cs {Itcl File}           {Itcl soubor}
 ::msgcat::mcset cs {Session Description Protocol} {Protokol popisující sezení}
 ::msgcat::mcset cs {Adobe Flash Media}   {Adobe Flash Media}
-::msgcat::mcset cs {Mac Binary}          {Mac Binary}
+::msgcat::mcset cs {Mac Binary}          {Binární pro Mac}
 ::msgcat::mcset cs {VTK 3D}              {VTK 3D}
 ::msgcat::mcset cs {Generic File}        {Obecný soubor}
 ::msgcat::mcset cs {PDF Document}        {PDF}
