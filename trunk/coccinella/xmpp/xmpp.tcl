@@ -2,13 +2,13 @@
 #  
 #      This is a skeleton to create a xmpp library from scratch.
 #      The intention is to pick relevant parts from jabberlib and rewrite.
-#      Dicts will be used extensively instaead of arrays why we require Tcl 8.5.
+#      Dicts will be used extensively instead of arrays why we require Tcl 8.5.
 #      
 #  Copyright (c) 2008  Mats Bengtsson
 #  
 # This file is distributed under BSD style license.
 #  
-# $Id: xmpp.tcl,v 1.1 2008-08-19 13:47:57 matben Exp $
+# $Id: xmpp.tcl,v 1.2 2008-09-20 02:32:55 sdevrieze Exp $
 
 package require Tcl 8.5
 package require sha1
