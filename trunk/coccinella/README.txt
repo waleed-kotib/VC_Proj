@@ -89,9 +89,8 @@ Developers:
 Distribution:
 
     It is distributed under the standard GPL license.
-    (c) Copyright by Mats Bengtsson (1999-2007).
-    Whiteboard tool buttons are stolen from Gimp and slightly changed (Thank You!).
-    Other graphics elements, see README-Crystal-icons.
+    (c) Copyright by Mats Bengtsson (1999-2008).
+    Graphics elements, see themes/Oxygen/AUTHORS.
 
 Home:
 
