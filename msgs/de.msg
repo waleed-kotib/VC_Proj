@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: de.msg,v 1.112 2008-09-16 17:39:37 sdevrieze Exp $
+#   $Id: de.msg,v 1.113 2008-09-21 17:32:24 sdevrieze Exp $
 
 ::msgcat::mcset de Abort                 {Abbruch}
 ::msgcat::mcset de Action                {Aktion}
@@ -37,7 +37,7 @@
 ::msgcat::mcset de Admin                 {Administrator}
 ::msgcat::mcset de admin                 {Administrator}
 ::msgcat::mcset de Affiliation           {Zugehörigkeit}
-::msgcat::mcset de Always                {Always}
+::msgcat::mcset de Always                {Immer}
 ::msgcat::mcset de Any                   {irgendeine}
 ::msgcat::mcset de Appearance            {Aussehen}
 ::msgcat::mcset de Author                {Autor}
@@ -217,14 +217,14 @@
 ::msgcat::mcset de anchor                {Anker}
 ::msgcat::mcset de arrow                 {Pfeil}
 ::msgcat::mcset de arrowshape            {Pfeilform}
-::msgcat::mcset de capstyle              {Cap Style}
+::msgcat::mcset de capstyle              {Cap-Stil}
 ::msgcat::mcset de dash                  {Strich}
 ::msgcat::mcset de fill                  {Füllen}
 ::msgcat::mcset de fontfamily            {Schrift-Familie}
 ::msgcat::mcset de fontsize              {Schrift-Größe}
 ::msgcat::mcset de fontweight            {Schrift-Breite}
 ::msgcat::mcset de image                 {Bild}
-::msgcat::mcset de joinstyle             {Join Style}
+::msgcat::mcset de joinstyle             {Join-Stil}
 ::msgcat::mcset de justify               {Justiert}
 ::msgcat::mcset de outline               {Umriss}
 ::msgcat::mcset de outlinestipple        {Umriss gepunktet}
@@ -319,7 +319,7 @@
 ::msgcat::mcset de mCoccinellaHome...    {Startseite...}
 ::msgcat::mcset de mColor...             {Farbe...}
 ::msgcat::mcset de mContacts...          {Kontakte...}
-::msgcat::mcset de mControlPanel         {Control Panel}
+::msgcat::mcset de mControlPanel         {Steuerung}
 ::msgcat::mcset de mCopy                 {Kopieren}
 ::msgcat::mcset de mCreateRoom...        {&Chatroom anlegen...}
 ::msgcat::mcset de mCustomStatus...      {angepasster Status...}
@@ -334,7 +334,7 @@
 ::msgcat::mcset de mEditBookmarks...     {Lesezeichen bearbeiten...}
 ::msgcat::mcset de mEditBC...            {Visitenkarte bearbeiten...}
 ::msgcat::mcset de mEditContact...       {Kontakt bearbeiten...}
-::msgcat::mcset de mEditItem...          {Eintrag &Editieren...}
+::msgcat::mcset de mEditItem...          {Eintrag b&earbeiten...}
 ::msgcat::mcset de mEditNick             {Spitzname bearbeiten}
 ::msgcat::mcset de mEditProfiles...      {Profile bearbeiten...}
 ::msgcat::mcset de mEnterRoom...         {Chat&room betreten...}
@@ -353,16 +353,16 @@
 ::msgcat::mcset de mFont                 {Schriftart}
 ::msgcat::mcset de mFontSize             {Schriftgröße}
 ::msgcat::mcset de mGrid                 {Grid}
-::msgcat::mcset de mHideControlPanel     {Hide Control Panel}
+::msgcat::mcset de mHideControlPanel     {Steuerung ausblenden}
 ::msgcat::mcset de mHistory...           {Verlauf...}
 ::msgcat::mcset de mHorizontal           {Horizontal}
 ::msgcat::mcset de mHugeFont             {Riesig}
-::msgcat::mcset de mIconSet...           {Icon &Set...}
+::msgcat::mcset de mIconSet...           {Icon-&Set...}
 ::msgcat::mcset de mIgnore               {Ignorieren}
 ::msgcat::mcset de mImageLarger          {Bild größer}
 ::msgcat::mcset de mImageSmaller         {Bild kleiner}
 ::msgcat::mcset de mImport               {Import}
-::msgcat::mcset de mImportImage/Movie... {Bild/File importieren...}
+::msgcat::mcset de mImportImage/Movie... {Bild/Film importieren...}
 ::msgcat::mcset de mInbox...             {&Inbox...}
 ::msgcat::mcset de mIncreasing           {Aufsteigend}
 ::msgcat::mcset de mInfo                 {Information}
@@ -426,7 +426,7 @@
 ::msgcat::mcset de mSetupAssistant...    {Einrichtungs-Assistent...}
 ::msgcat::mcset de mShiftConstrain       {Verschiebe-Beschränkung}
 ::msgcat::mcset de mShow                 {Zeige}
-::msgcat::mcset de mShowControlPanel     {Show Control Panel}
+::msgcat::mcset de mShowControlPanel     {Steuerung anzeigen}
 ::msgcat::mcset de mSize                 {Größe}
 ::msgcat::mcset de mSlideShow            {Bilder-Show}
 ::msgcat::mcset de mSmaller              {kleiner}
@@ -485,7 +485,7 @@
 ::msgcat::mcset de {Chatroom presence change} {Chatraum Statuswechsel}
 ::msgcat::mcset de {Clear Cache}         {Cache löschen}
 ::msgcat::mcset de {Close page}          {Seite schliessen}
-::msgcat::mcset de {Close Slot}         {Close Slot}
+::msgcat::mcset de {Close Slot}         {Slot schliessen}
 ::msgcat::mcset de {Close tab}           {Tab schliessen}
 ::msgcat::mcset de {Configure Chatroom}  {Chatraum konfigurieren}
 ::msgcat::mcset de {Contact Actions}     {Kontakt-Aktionen}
@@ -507,12 +507,12 @@
 ::msgcat::mcset de {Do you want to hang up?} {Wollen Sie trennen?}
 ::msgcat::mcset de {Edit Business Card}  {Visitenkarte bearbeiten}
 ::msgcat::mcset de {Edit Contact}        {Kontakt bearbeiten}
-::msgcat::mcset de {Edit File Type}      {Dateityü bearbeiten}
+::msgcat::mcset de {Edit File Type}      {Dateityp bearbeiten}
 ::msgcat::mcset de {Edit Item}           {Element bearbeiten}
 ::msgcat::mcset de {Edit Profiles}       {Profile bearbeiten}
 ::msgcat::mcset de {Email addresses}     {Email-Adressen}
 ::msgcat::mcset de {Email client}        {Email-Client}
-::msgcat::mcset de {Enable nickname coloring} {Enable nickname coloring}
+::msgcat::mcset de {Enable nickname coloring} {Spitznamen-Einfärbung aktivieren}
 ::msgcat::mcset de {Enter Chatroom}      {Chatraum betreten}
 ::msgcat::mcset de {Enter/Create Chatroom} {Chatraum anlegen/betreten}
 ::msgcat::mcset de {Exit room}           {Raum verlassen}
@@ -530,8 +530,8 @@
 ::msgcat::mcset de {Font weight}         {Schriftgewicht}
 ::msgcat::mcset de {Format: mm/dd/yyyy}  {Format: mm/dd/yyyy}
 ::msgcat::mcset de {Forwarded message}   {Nachricht weiterleiten}
-::msgcat::mcset de {Full Name}           {Full Name}
-::msgcat::mcset de {Hide all on system tray click}   {Hide all on system tray click}
+::msgcat::mcset de {Full Name}         {Vollständiger Name}
+::msgcat::mcset de {Hide all on system tray click}   {Bei System-Tray-Klick alles ausblenden}
 ::msgcat::mcset de {History length}      {Verlaufs-Umfang}
 ::msgcat::mcset de {Import Iconset}      {Importiere Iconset}
 ::msgcat::mcset de {Incoming Message}    {Eingehende Nachricht}
@@ -579,14 +579,14 @@
 ::msgcat::mcset de {Open Image/Movie}    {Bild/Film öffnen}
 ::msgcat::mcset de {Open Stream}         {Datenstrom öffnen}
 ::msgcat::mcset de {Open with}           {Öffnen mit}
-::msgcat::mcset de {Own Contact ID}           {Own Contact ID}
-::msgcat::mcset de {Own Full Contact ID}           {Own Full Contact ID}
-::msgcat::mcset de {Plain text password} {Plain text password}
+::msgcat::mcset de {Own Contact ID}           {Eigene Kontakt-ID}
+::msgcat::mcset de {Own Full Contact ID}           {Eigene vollständige Kontakt-ID}
+::msgcat::mcset de {Plain text password} {Klartext-Passwort}
 ::msgcat::mcset de {Play sound}          {Klang spielen}
 ::msgcat::mcset de {Postal code}         {Postleitzahl}
 ::msgcat::mcset de {Presence Control} {Presence Control}
 ::msgcat::mcset de {Presence Error}      {Fehler bei Anwesenheit}
-::msgcat::mcset de {Presence Subscription} {Presence Subscription}
+::msgcat::mcset de {Presence Subscription} {Anwesenheits-Subskription}
 ::msgcat::mcset de {Profile Name}        {Profil-Name}
 ::msgcat::mcset de {Receive File}        {Datei empfangen}
 ::msgcat::mcset de {Recent Avatars}      {Letzte Avatare}
@@ -599,7 +599,7 @@
 ::msgcat::mcset de {Remove Item}         {Element entfernen}
 ::msgcat::mcset de {Requires a restart of} {Erfordert Neustart von %s}
 ::msgcat::mcset de {Retype password}     {Passwort erneut eingeben}
-::msgcat::mcset de {Right click to open menu} {Right click to open menu}
+::msgcat::mcset de {Right click to open menu} {Rechtsklick zum Menü-Öffnen}
 ::msgcat::mcset de {Save As}             {Speichern als}
 ::msgcat::mcset de {Save As GIF}         {Speichern als GIF}
 ::msgcat::mcset de {Save Canvas Item}    {Canvas-Eintrag speichern}
@@ -608,7 +608,7 @@
 ::msgcat::mcset de {Save password}       {Passwort speichern}
 ::msgcat::mcset de {Save to disk}        {Auf Platte speichern}
 ::msgcat::mcset de {Search results}      {Such-Ergebnisse}
-::msgcat::mcset de {Search People} {Search People}
+::msgcat::mcset de {Search People} {Personen suchen}
 ::msgcat::mcset de {Select Avatar}       {Avatar wählen}
 ::msgcat::mcset de {Select File}         {Datei wählen}
 ::msgcat::mcset de {Select Font}         {Schriftart wählen}
@@ -619,7 +619,7 @@
 ::msgcat::mcset de {Setup Assistant}     {Einrichtungs-Assistent}
 ::msgcat::mcset de {Show Icon}           {Icon zeigen}
 ::msgcat::mcset de {Show navigation buttons} {Navigationsflächen zeigen}
-::msgcat::mcset de {Show notifier window} {Show notifier window}
+::msgcat::mcset de {Show notifier window} {Benachrichtigungsfenster zeigen}
 ::msgcat::mcset de {Show popup}          {Popup zeigen}
 ::msgcat::mcset de {Show offline users}  {Offline-Benutzer zeigen}
 ::msgcat::mcset de {Show Text}           {Text zeigen}
@@ -630,7 +630,7 @@
 ::msgcat::mcset de {Start chat}          {Starte Chat}
 ::msgcat::mcset de {Start minimized in system tray} {minimiert im Systemtray starten}
 ::msgcat::mcset de {Start minimized in taskbar} {minimiert in Taskbar starten}
-::msgcat::mcset de {Status Info} {Status Info}
+::msgcat::mcset de {Status Info} {Status-Information}
 ::msgcat::mcset de {Status message}      {Status-Nachricht}
 ::msgcat::mcset de {Subscription Failed} {Fehler bei Zulassung}
 ::msgcat::mcset de {Subscription Pending} {Zulassung anhängig}
@@ -675,16 +675,16 @@
 # Naming of protocol systems and their identifiers.
 # Low priority.
 ::msgcat::mcset de Email                 {E-Mail}
-::msgcat::mcset de {Screen Name}         {Screen Name}
-::msgcat::mcset de {Gadu-Gadu Number}    {Gadu-Gadu Number}
-::msgcat::mcset de {ICQ Number}          {ICQ Number}
+::msgcat::mcset de {Screen Name}         {Screen-Name}
+::msgcat::mcset de {Gadu-Gadu Number}    {Gadu-Gadu-Nummer}
+::msgcat::mcset de {ICQ Number}          {ICQ-Nummer}
 ::msgcat::mcset de IRC                   {IRC}
-::msgcat::mcset de {MSN Address}         {MSN Address}
-::msgcat::mcset de {Email Address}       {Email Address}
-::msgcat::mcset de {QQ Number}           {QQ Number}
-::msgcat::mcset de {Tlen Address}        {Tlen Address}
+::msgcat::mcset de {MSN Address}         {MSN-Adresse}
+::msgcat::mcset de {Email Address}       {Email-Adresse}
+::msgcat::mcset de {QQ Number}           {QQ-Nummer}
+::msgcat::mcset de {Tlen Address}        {Tlen-Adresse}
 ::msgcat::mcset de {Jabber ID}           {Jabber-ID}
-::msgcat::mcset de {Yahoo ID}            {Yahoo ID}
+::msgcat::mcset de {Yahoo ID}            {Yahoo-ID}
 
 # Time intervals.
 ::msgcat::mcset de {Ten seconds}         {10 Sekunden}
@@ -693,14 +693,14 @@
 ::msgcat::mcset de {One hour}            {1 Stunde}
 
 # Language names.
-::msgcat::mcset de Czech                 {Czech}
+::msgcat::mcset de Czech                 {Tschechisch}
 ::msgcat::mcset de Danish                {Dänisch}
 ::msgcat::mcset de Dutch                 {Niederländisch}
 ::msgcat::mcset de English               {Englisch}
 ::msgcat::mcset de French                {Französisch}
 ::msgcat::mcset de German                {Deutsch}
 ::msgcat::mcset de Italian               {Italienisch}
-::msgcat::mcset de Korean                {Korean}
+::msgcat::mcset de Korean                {Koreanisch}
 ::msgcat::mcset de Polish                {Polnisch}
 ::msgcat::mcset de Russian               {Russisch}
 ::msgcat::mcset de Spanish               {Spanisch}
@@ -761,8 +761,8 @@
 ::msgcat::mcset de messsuassclose        {Wollen Sie den Einrichtungsassistenten wirklich beenden? Sie können ihn später über das Menü starten.}
 ::msgcat::mcset de messsuassfillin       {Füllen Sie bitte alle Einträge aus, bevor Sie weitermachen}
 ::msgcat::mcset de messtimeout           {Zeitablauf bei Verbindungsaufbau.}
-::msgcat::mcset de messunsavedmsgQ2       {This whiteboard document has been changed.}
-::msgcat::mcset de messunsaveddtl2        {Do you want to save the changes?}
+::msgcat::mcset de messunsavedmsgQ2       {Das Zeichenbrett-Dokument wurde verändert.}
+::msgcat::mcset de messunsaveddtl2        {Möchten Sie die Änderungen speichern?}
 
 # Messages for tk_messageBox:
 ::msgcat::mcset de jamessaddforeign2     {Zum Hinzufügen eines Kontaktes aus einem Chatsystem ohne offenen Zugang benötigen Sie ein Konto in diesem geschlossenen System und Sie müssen dieses Konto mit dem entsprechenden Transport (%s) verbinden. Möchten Sie das jetzt tun?}
@@ -815,8 +815,8 @@
 ::msgcat::mcset de jamessjidinvalid2     {Ungültige Kontakt-ID.}
 ::msgcat::mcset de jamesslocaltime2      {%ss lokale Zeit ist: %s}
 ::msgcat::mcset de jamesslogin409b       {Anmeldung nicht möglich, weil der Benutzername bereits von jemand verwendet wird (%s).}
-::msgcat::mcset de jamessloginnewprof    {The Contact ID differs from your profile. Do you want to save a new profile?}
-::msgcat::mcset de jamesslogindiff       {Your current login settings differ from your profile settings. Do you want to save them to your profile?}
+::msgcat::mcset de jamessloginnewprof    {Die Kontakt-ID weicht von Ihrem Profil ab. Möchten Sie in ein neues Profil speichern?}
+::msgcat::mcset de jamesslogindiff       {Ihre aktuellen Anmeldeeinstellungen weichen von Ihren Profileinstelllungen ab. Möchten Sie diese in Ihrem neuen Profil speichern?}
 ::msgcat::mcset de jamessmsgwarnquit     {Es gibt ungespeicherte Meldungen. Möchten Sie wirklich beenden?}
 ::msgcat::mcset de jamessnamemissing     {%s fehlt oder ist zu kurz!}
 ::msgcat::mcset de jamessnofiletrpt2     {%s unterstützt keine Dateiübertragung.}
@@ -899,7 +899,7 @@
 ::msgcat::mcset de starttls-nofeature    {Der Server "%s" bietet keine Unterstützung für TLS.}
 ::msgcat::mcset de starttls-failure      {TLS-Aushandlung mit Server "%s" fehlerhaft.}
 ::msgcat::mcset de sasl-no-mechanisms    {Der Server bietet keine Unterstützung für SASL-Authentifizierung.}
-::msgcat::mcset de sasl-protocol-error   {Authentication failed due to internal protocol error.}
+::msgcat::mcset de sasl-protocol-error   {Authentifizierung aufgrund internen Protokollfehlers nicht erfolgreich.}
 
 # A collective description of all stream errors.
 ::msgcat::mcset de xmpp-streams-error    {Stream-Fehler vom Server mit Code: %s}
@@ -917,7 +917,7 @@
 ::msgcat::mcset de registration-last     {Nachname oder Familienname des Anwenders}
 ::msgcat::mcset de registration-name     {Vollständiger Name des Anwenders}
 ::msgcat::mcset de registration-nick     {Familien-Name des Anwenders}
-::msgcat::mcset de registration-password {Passwort/Geheimnsi des Anwenders}
+::msgcat::mcset de registration-password {Passwort/Geheimnis des Anwenders}
 ::msgcat::mcset de registration-phone    {Telefonnummer des Anwenders}
 ::msgcat::mcset de registration-state    {Regionalteil der realen oder Post-Adresse}
 ::msgcat::mcset de registration-url      {URL zur Webseite des Anwenders}
@@ -930,7 +930,7 @@
 ::msgcat::mcset de version-os            {Betriebssystem}
 
 
-::msgcat::mcset de register-trpt-unreg2  {You are about to unregister a transport with a number of dependent contacts. Do you want to remove these contacts as well (Yes), keep them (No), or cancel everything (Cancel).}
+::msgcat::mcset de register-trpt-unreg2  {Sie wollen einen Transport mit davon abhängigen Kontakten deregistrieren. Möchten Sie diese Kontakte auch löschen (Ja), behalten (Nein), oder alles abbrechen (Abbruch).}
 
 ::msgcat::mcset de reply-prefix          { %s, %s schrieb %s:}
 
@@ -957,7 +957,7 @@
 ::msgcat::mcset de uastatdel             {Klick zum Löschen}
 ::msgcat::mcset de uastatpen             {Stift}
 ::msgcat::mcset de uastatbrush           {Pinsel}
-::msgcat::mcset de uastatpaint           {Malen, Shift-Klick für transparency}
+::msgcat::mcset de uastatpaint           {Malen, Umschalt-Klick für Transparenz}
 ::msgcat::mcset de uastatpoly            {Polygone, Leertaste zum Abbruch}
 ::msgcat::mcset de uastatarc             {Bögen, Klick = Mittelpunkt, Leertaste zum Abbruch}
 ::msgcat::mcset de uastatarc2            {Bögen, Klicken und Ziehen}
@@ -965,12 +965,12 @@
 
 
 # Preferences:
-::msgcat::mcset de prefaaonhidden        {Apply auto-away on hidden chat tabs}
-::msgcat::mcset de prefaabusychats       {Do Not Disturb when (active chat sessions)}
-::msgcat::mcset de prefchactret2         {By default use active <Return> to send messages}
+::msgcat::mcset de prefaaonhidden        {Auto-Abwesenheit bei versteckkten Chat-Reitern anwenden}
+::msgcat::mcset de prefaabusychats       {Nicht stören bei (aktiven Chat-Sitzungen)}
+::msgcat::mcset de prefchactret2         {Standardmäßig <Return> zum Senden von Nachrichten nutzen}
 ::msgcat::mcset de prefchnormal          {Normale Nachrichten als Chat-Nachrichten behandeln}
 ::msgcat::mcset de prefcu2clk            {Doppelklick auf Nachricht im Postfach:}
-::msgcat::mcset de prefcuautologin2      {Login on %s startup}
+::msgcat::mcset de prefcuautologin2      {Anmelden bei %s-Start}
 ::msgcat::mcset de prefcuopen            {Nachricht in neuem Fenster öffnen}
 ::msgcat::mcset de prefcuremdlgs2        {Offene Fenster zwischen Sitzungen merken}
 ::msgcat::mcset de prefcureply           {Anwort an Absender}
@@ -1007,8 +1007,8 @@
 ::msgcat::mcset de prefsounvoou2         {Stimme für ausgehenden Text wählen}
 ::msgcat::mcset de prefssresize2         {Fenster an Foliengröße anpassen}
 ::msgcat::mcset de prefstabui2           {Tabulator-Oberfläche benutzen}
-::msgcat::mcset de prefsuaasecs          {The dialog is closed after (Seconds)}
-::msgcat::mcset de prefsuaatimer         {If auto-accept/reject show dialog with timer}
+::msgcat::mcset de prefsuaasecs          {Dieser Dialog wird geschlossen in (Sekunden)}
+::msgcat::mcset de prefsuaatimer         {Bei Auto-Annahme/-Verweigerung Dialog mit Zeitablauf zeigen}
 ::msgcat::mcset de prefsuauto2           {Setze Kontakte, die mich in ihre Liste aufnehmen, in}
 ::msgcat::mcset de prefsuif2             {Wenn jemand meine Präsenz sehen möchte und}
 ::msgcat::mcset de prefsuis2             {in meiner Liste ist}
@@ -1169,105 +1169,105 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de outboundCall          {Ausgehender Anruf}
 ::msgcat::mcset de callAnswer            {Antwort}
 ::msgcat::mcset de callHungUp            {Auflegen}
-::msgcat::mcset de callInfo              {Info}
+::msgcat::mcset de callInfo              {Information}
 ::msgcat::mcset de callVM                {Call VM?}
 
 # IAX Phone
 # Note to translators: these strings are not yet activated
 if {0} {
 ::msgcat::mcset de Codecs                {Codecs}
-::msgcat::mcset de Devices               {Devices}
-::msgcat::mcset de Filters               {Filters}
-::msgcat::mcset de {IAX Phone}           {IAX Phone}
-::msgcat::mcset de {IAX Account}         {IAX Account}
+::msgcat::mcset de Devices               {Geräte}
+::msgcat::mcset de Filters               {Filterr}
+::msgcat::mcset de {IAX Phone}           {IAX-Telefon}
+::msgcat::mcset de {IAX Account}         {IAX-Konto}
     # translation help: http://en.wikipedia.org/wiki/Caller_id
-::msgcat::mcset de {Caller ID number}    {Caller ID number}
-::msgcat::mcset de {Caller ID name}      {Caller ID name}
-::msgcat::mcset de Microphone            {Microphone}
-::msgcat::mcset de Speakers              {Speakers}
+::msgcat::mcset de {Caller ID number}    {Caller ID-Nummer}
+::msgcat::mcset de {Caller ID name}      {Caller ID-Name}
+::msgcat::mcset de Microphone            {Mikrofon}
+::msgcat::mcset de Speakers              {Sprecher}
     # translation help: http://en.wikipedia.org/wiki/Automatic_gain_control
 ::msgcat::mcset de {Automatic gain control (AGC)} {Automatic gain control (AGC)}
-::msgcat::mcset de agcTip                {Automatically adjust volume levels}
+::msgcat::mcset de agcTip                {Lautstärke automatisch anpassen}
     # translation help: http://lists.xiph.org/pipermail/speex-dev/2007-May/005565.html
 ::msgcat::mcset de {Analog automatic gain control (AAGC)} {Analog automatic gain control (AAGC)}
 ::msgcat::mcset de {Can prevent clipping} {Can prevent clipping}
     # translation help: http://en.wikipedia.org/wiki/Noise_reduction
-::msgcat::mcset de {Noise reduction}     {Noise reduction}
+::msgcat::mcset de {Noise reduction}     {Geräuschreduzierung}
     # translation help: http://en.wikipedia.org/wiki/Comfort_noise
 ::msgcat::mcset de {Comfort noise}       {Comfort noise}
 ::msgcat::mcset de comfortTip            {Artificial background noise to fill silence}
 ::msgcat::mcset de Codec                 {Codec}
     # I copied the following descriptions from the websites of these projects; do you think we should ask permission for this?
-::msgcat::mcset de tooltip-ilbc          {iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP}
-::msgcat::mcset de tooltip-speex         {Speex is an Open Source/Free Software patent-free audio compression format designed for speech}
-::msgcat::mcset de tooltip-alaw          {Standard used in European digital communication systems (ITU-T)}
-::msgcat::mcset de tooltip-ulaw          {Standard used in digital communication systems in North America and Japan (ITU-T)}
-::msgcat::mcset de tooltip-gsm           {GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)}
+::msgcat::mcset de tooltip-ilbc          {iLBC (internet Low Bitrate Codec) ist ein freier Sprach-Codec, der für robuste IP-Sprachkommunikation geeignet ist}
+::msgcat::mcset de tooltip-speex         {Speex ist ein quelloffenes/freies und Patentfreies Audio-Komprimierungsformat für Sprache}
+::msgcat::mcset de tooltip-alaw          {in Europa für digitale Kommunikationssysteme genutzter Standard (ITU-T)}
+::msgcat::mcset de tooltip-ulaw          {in Nordamarika und Japan für digitale Kommunikationssysteme genutzter Standard (ITU-T)}
+::msgcat::mcset de tooltip-gsm           {GSM 06.10 Übergangs-Standard für normale Sprachkodierung (ETSI)}
 }
 
 # Messages for Mood XEP
 # bug: this should be M&ood..., but this does not work!
 ::msgcat::mcset de mMood                 Stimmung
-::msgcat::mcset de mAfraid               Afraid
-::msgcat::mcset de mAmazed          Amazed
+::msgcat::mcset de mAfraid               Besorgt
+::msgcat::mcset de mAmazed          Verblüfft
 ::msgcat::mcset de mAngry                Ärgerlich
-::msgcat::mcset de mAnnoyed         Annoyed
+::msgcat::mcset de mAnnoyed         Verärgert
 ::msgcat::mcset de mAnxious              Ängstlich
-::msgcat::mcset de mAroused         Aroused
+::msgcat::mcset de mAroused         Erregt
 ::msgcat::mcset de mAshamed              Beschämt
 ::msgcat::mcset de mBored                Gelangweilt
-::msgcat::mcset de mBrave           Brave
-::msgcat::mcset de mCalm            Calm
-::msgcat::mcset de mCold            Cold
-::msgcat::mcset de mConfused        Confused
-::msgcat::mcset de mContented       Contented
-::msgcat::mcset de mCranky          Cranky
+::msgcat::mcset de mBrave           Tapfer
+::msgcat::mcset de mCalm            Ruhig
+::msgcat::mcset de mCold            Kalt
+::msgcat::mcset de mConfused        Verwirrt
+::msgcat::mcset de mContented       Umstritten
+::msgcat::mcset de mCranky          Launisch
 ::msgcat::mcset de mCurious              Neugierig
 ::msgcat::mcset de mDepressed            Bedrückt
-::msgcat::mcset de mDisappointed    Disappointed
-::msgcat::mcset de mDisgusted       Disgusted
-::msgcat::mcset de mDistracted      Distracted
-::msgcat::mcset de mEmbarrassed     Embarrassed
+::msgcat::mcset de mDisappointed    Enttäuscht
+::msgcat::mcset de mDisgusted       Empört
+::msgcat::mcset de mDistracted      Abgelenkt
+::msgcat::mcset de mEmbarrassed     Verlegen
 ::msgcat::mcset de mExcited              Aufgeregt
-::msgcat::mcset de mFlirtatious     Flirtatious
-::msgcat::mcset de mFrustrated      Frustrated
-::msgcat::mcset de mGrumpy          Grumpy
-::msgcat::mcset de mGuilty          Guilty
+::msgcat::mcset de mFlirtatious     Kokett
+::msgcat::mcset de mFrustrated      Frustriert
+::msgcat::mcset de mGrumpy          Kauzig
+::msgcat::mcset de mGuilty          Schuldig
 ::msgcat::mcset de mHappy                Glücklich
-::msgcat::mcset de mHot             Hot
-::msgcat::mcset de mHumbled         Humbled
-::msgcat::mcset de mHumiliated      Humiliated
-::msgcat::mcset de mHungry          Hungry
-::msgcat::mcset de mHurt            Hurt
-::msgcat::mcset de mImpressed       Impressed
-::msgcat::mcset de mIn_awe          {In awe}
+::msgcat::mcset de mHot             Heiß
+::msgcat::mcset de mHumbled         Demütig
+::msgcat::mcset de mHumiliated      Verletzt
+::msgcat::mcset de mHungry          Hungrig
+::msgcat::mcset de mHurt            Gekränkt
+::msgcat::mcset de mImpressed       Beeindruckt
+::msgcat::mcset de mIn_awe          {Bewundernd}
 ::msgcat::mcset de mIn_love               Verliebt
-::msgcat::mcset de mIndignant       Indignant
-::msgcat::mcset de mInterested      Interested
-::msgcat::mcset de mIntoxicated     Intoxicated
+::msgcat::mcset de mIndignant       Ungehalten
+::msgcat::mcset de mInterested      Interessiert
+::msgcat::mcset de mIntoxicated     Berauscht
 ::msgcat::mcset de mInvincible           Unsichtbar
 ::msgcat::mcset de mJealous              Eifersüchtig
-::msgcat::mcset de mLonely          Lonely
-::msgcat::mcset de mMean            Mean
-::msgcat::mcset de mMoody           Moody
+::msgcat::mcset de mLonely          Einsam
+::msgcat::mcset de mMean            Mies
+::msgcat::mcset de mMoody           Launisch
 ::msgcat::mcset de mNervous              Nervös
 ::msgcat::mcset de mNeutral         Neutral
-::msgcat::mcset de mOffended        Offended
-::msgcat::mcset de mPlayful         Playful
-::msgcat::mcset de mProud           Proud
-::msgcat::mcset de mRelieved        Relieved
-::msgcat::mcset de mRemorseful      Remorseful
-::msgcat::mcset de mRestless        Restless
+::msgcat::mcset de mOffended        Verletzt
+::msgcat::mcset de mPlayful         Verspielt
+::msgcat::mcset de mProud           Stolz
+::msgcat::mcset de mRelieved        Erleichtert
+::msgcat::mcset de mRemorseful      Reuig
+::msgcat::mcset de mRestless        Ruhelos
 ::msgcat::mcset de mSad                  Traurig
-::msgcat::mcset de mSarcastic       Sarcastic
-::msgcat::mcset de mSerious         Serious
-::msgcat::mcset de mShocked         Shocked
-::msgcat::mcset de mShy             Shy
-::msgcat::mcset de mSick            Sick
+::msgcat::mcset de mSarcastic       Sarkastisch
+::msgcat::mcset de mSerious         Ernsthaft
+::msgcat::mcset de mShocked         Schockiert
+::msgcat::mcset de mShy             Schüchtern
+::msgcat::mcset de mSick            Krank
 ::msgcat::mcset de mSleepy               Schläfrig
 ::msgcat::mcset de mStressed            Gestresst
-::msgcat::mcset de mSurprised       Surprised
-::msgcat::mcset de mThirsty         Thirsty
+::msgcat::mcset de mSurprised       Überrascht
+::msgcat::mcset de mThirsty         Durstig
 ::msgcat::mcset de mWorried              Besorgt
 
 ::msgcat::mcset de moodEvent             {Stimmungsänderung}
@@ -1275,66 +1275,66 @@ if {0} {
 
 ::msgcat::mcset de heIs                  ist
 ::msgcat::mcset de because               weil
-::msgcat::mcset de afraid   afraid
-::msgcat::mcset de amazed   amazed
+::msgcat::mcset de afraid   besorgt
+::msgcat::mcset de amazed   verblüfft
 ::msgcat::mcset de angry                 ärgerlich
-::msgcat::mcset de annoyed   annoyed
+::msgcat::mcset de annoyed   verärgert
 ::msgcat::mcset de anxious               ängstlich
-::msgcat::mcset de aroused   aroused
+::msgcat::mcset de aroused   erregt
 ::msgcat::mcset de ashamed               beschämt
 ::msgcat::mcset de bored                 gelangweilt
-::msgcat::mcset de brave   brave
-::msgcat::mcset de calm   calm
-::msgcat::mcset de cold   cold
-::msgcat::mcset de confused   confused
-::msgcat::mcset de contented   contented
-::msgcat::mcset de cranky   cranky
+::msgcat::mcset de brave   mutig
+::msgcat::mcset de calm   ruhig
+::msgcat::mcset de cold   kalt
+::msgcat::mcset de confused   verwirrt
+::msgcat::mcset de contented   umstritten
+::msgcat::mcset de cranky   launisch
 ::msgcat::mcset de curious               neugierig
 ::msgcat::mcset de depressed             bedrückt
-::msgcat::mcset de disappointed   disappointed
-::msgcat::mcset de disgusted   disgusted
-::msgcat::mcset de distracted   distracted
-::msgcat::mcset de embarrassed   embarrassed
+::msgcat::mcset de disappointed   enttäuscht
+::msgcat::mcset de disgusted   empört
+::msgcat::mcset de distracted   abgelenkt
+::msgcat::mcset de embarrassed   verwirrt
 ::msgcat::mcset de excited               aufgeregt
-::msgcat::mcset de flirtatious   flirtatious
-::msgcat::mcset de frustrated   frustrated
-::msgcat::mcset de grumpy   grumpy
-::msgcat::mcset de guilty   guilty
+::msgcat::mcset de flirtatious   kokett
+::msgcat::mcset de frustrated   frustriert
+::msgcat::mcset de grumpy   mürrisch
+::msgcat::mcset de guilty   schuldig
 ::msgcat::mcset de happy                 glücklich
-::msgcat::mcset de hot   hot
-::msgcat::mcset de humbled   humbled
-::msgcat::mcset de humiliated   humiliated
-::msgcat::mcset de hungry   hungry
-::msgcat::mcset de hurt   hurt
-::msgcat::mcset de impressed   impressed
-::msgcat::mcset de in_awe   {in awe}
+::msgcat::mcset de hot   heiß
+::msgcat::mcset de humbled   demütig
+::msgcat::mcset de humiliated   verletzt
+::msgcat::mcset de hungry   hungrig
+::msgcat::mcset de hurt   verletzt
+::msgcat::mcset de impressed   beeindruckt
+::msgcat::mcset de in_awe   {bewundernd}
 ::msgcat::mcset de in_love               verliebt
-::msgcat::mcset de indignant   indignant
-::msgcat::mcset de interested   interested
-::msgcat::mcset de intoxicated   intoxicated
+::msgcat::mcset de indignant   empört
+::msgcat::mcset de interested   interessiert
+::msgcat::mcset de intoxicated   berauscht
 ::msgcat::mcset de invincible            unsichtbar
 ::msgcat::mcset de jealous               eifersüchtig
-::msgcat::mcset de lonely   lonely
-::msgcat::mcset de mean   mean
-::msgcat::mcset de moody   moody
+::msgcat::mcset de lonely   einsam
+::msgcat::mcset de mean   mies
+::msgcat::mcset de moody   launisch
 ::msgcat::mcset de nervous               nervös
 ::msgcat::mcset de neutral   neutral
-::msgcat::mcset de offended   offended
-::msgcat::mcset de playful   playful
-::msgcat::mcset de proud   proud
-::msgcat::mcset de relieved   relieved
-::msgcat::mcset de remorseful   remorseful
-::msgcat::mcset de restless   restless
+::msgcat::mcset de offended   verletzt
+::msgcat::mcset de playful   verspielt
+::msgcat::mcset de proud   stolz
+::msgcat::mcset de relieved   erleichtert
+::msgcat::mcset de remorseful   reuig
+::msgcat::mcset de restless   ruhelos
 ::msgcat::mcset de sad                   traurig
-::msgcat::mcset de sarcastic   sarcastic
-::msgcat::mcset de serious   serious
-::msgcat::mcset de shocked   shocked
-::msgcat::mcset de shy   shy
-::msgcat::mcset de sick   sick
+::msgcat::mcset de sarcastic   sarkastisch
+::msgcat::mcset de serious   ernsthaft
+::msgcat::mcset de shocked   schockiert
+::msgcat::mcset de shy   schüchtern
+::msgcat::mcset de sick   krank
 ::msgcat::mcset de sleepy                schläfrig
 ::msgcat::mcset de stressed              gestresst
-::msgcat::mcset de surprised   surprised
-::msgcat::mcset de thirsty   thirsty
+::msgcat::mcset de surprised   überrascht
+::msgcat::mcset de thirsty   durstig
 ::msgcat::mcset de worried               besorgt
 
 ::msgcat::mcset de {Custom Mood}         {Angepasste Stimmung}
@@ -1357,10 +1357,10 @@ if {0} {
 
 ::msgcat::mcset de tooltip-chatsubject   {Geben Sie das Thema der Konversation ein, wird durch RETURN gesetzt}
 ::msgcat::mcset de tooltip-chatoffline   {Sie müssen angemeldet sein, um den Status dieses Kontaks zu sehen}
-::msgcat::mcset de tooltip-chatsendtext     {Enter your message and press Return or Shift-Return}
+::msgcat::mcset de tooltip-chatsendtext     {Schreiben Sie Ihre Nachricht und drücken Sie Return oder Umschalt-Return}
 ::msgcat::mcset de tooltip-aaonhidden    {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
 ::msgcat::mcset de tooltip-aabusychats   {When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb.}
-::msgcat::mcset de tooltip-togglesysmsg     {Show or hide status changes in chat}
+::msgcat::mcset de tooltip-togglesysmsg     {Statuswechsel im Chat zeigen/verstecken}
 
 
 # Me knows :-)
@@ -1370,7 +1370,7 @@ if {0} {
 # Messages for User Activity XEP
 ::msgcat::mcset de Activity              {Aktivität}
 ::msgcat::mcset de mActivity...          {Aktivität...}
-::msgcat::mcset de mCustomActivity... {Custom Activity...}
+::msgcat::mcset de mCustomActivity... {Spezille Aktivität...}
 
 ::msgcat::mcset de Traveling             {Reisen}
 ::msgcat::mcset de Commuting             {Pendeln}
@@ -1503,7 +1503,7 @@ if {0} {
 ::msgcat::mcset de locationCountry       {Die Nation, in der der Anwender lebt}
 
 ::msgcat::mcset de {Synchronize with Google Earth} {Synchronisiere mit Google Earth}
-::msgcat::mcset de {This is location data for} {This is location data for}
+::msgcat::mcset de {This is location data for} {Dies sind Lokalisierungsdaten für}
 
 # Buddy pouncing:
 ::msgcat::mcset de budpounce-user        {Setze eine spezielle Aktion für auf %s bezogene Ereignisse. Ereignisse über die unteren Tabs wählen.}
