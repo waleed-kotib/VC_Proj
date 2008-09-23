@@ -28,7 +28,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: de.msg,v 1.113 2008-09-21 17:32:24 sdevrieze Exp $
+#   $Id: de.msg,v 1.114 2008-09-23 07:11:09 sdevrieze Exp $
 
 ::msgcat::mcset de Abort                 {Abbruch}
 ::msgcat::mcset de Action                {Aktion}
@@ -289,13 +289,13 @@
 
 # All menu labels; concateneted and prepended with 'm' for the database key.
 ::msgcat::mcset de mAboutCoccinella      {Über Coccinella...}
-::msgcat::mcset de mAboutQuickTimeTcl    {About QuickTimeTcl}
+::msgcat::mcset de mAboutQuickTimeTcl    {Über QuickTimeTcl}
 ::msgcat::mcset de mAction               {Aktion}
 ::msgcat::mcset de mAddToDictionary      {Zum Wörterbuch hinzufügen}
 ::msgcat::mcset de mAdHocCommands        {Direkt-Befehle}
 ::msgcat::mcset de mAddContact...        {Kont&Akt hinzufügen...}
 ::msgcat::mcset de mAddSpeechBubble      {Sprechblase hinzufügen}
-::msgcat::mcset de mAll                  {All}
+::msgcat::mcset de mAll                  {Alle}
 ::msgcat::mcset de mArc                  {Bogen}
 ::msgcat::mcset de mArcs                 {Bögen}
 ::msgcat::mcset de mAttachMessage        {Nachricht anhängen...}
@@ -465,7 +465,7 @@
 ::msgcat::mcset de {All Supported Files} {Alle unterstützten Dateien}
 ::msgcat::mcset de {Alternative chatroom} {Alternativer Chatraum}
 ::msgcat::mcset de {Always ask}          {Immer fragen}
-::msgcat::mcset de {Application Status} {Application Status}
+::msgcat::mcset de {Application Status} {Anwendungsstatus}
 ::msgcat::mcset de {Auto Away}           {Autom. Abwesenheit}
 ::msgcat::mcset de {Auto Join}           {Autom. Anschluß}
 ::msgcat::mcset de {Auto Reply}          {Autom. Antwort}
@@ -584,7 +584,7 @@
 ::msgcat::mcset de {Plain text password} {Klartext-Passwort}
 ::msgcat::mcset de {Play sound}          {Klang spielen}
 ::msgcat::mcset de {Postal code}         {Postleitzahl}
-::msgcat::mcset de {Presence Control} {Presence Control}
+::msgcat::mcset de {Presence Control} {Anwesenheitssteuerung}
 ::msgcat::mcset de {Presence Error}      {Fehler bei Anwesenheit}
 ::msgcat::mcset de {Presence Subscription} {Anwesenheits-Subskription}
 ::msgcat::mcset de {Profile Name}        {Profil-Name}
@@ -879,10 +879,10 @@
 # Do not translate these, just for reference.
 ::msgcat::mcset de xmpp-stanzas-aborted  {The receiving entity acknowledges an abort element sent by the initiating entity.}
 ::msgcat::mcset de xmpp-stanzas-incorrect-encoding {The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect.}
-::msgcat::mcset de xmpp-stanzas-invalid-authzid {The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID.}
+::msgcat::mcset de xmpp-stanzas-invalid-authzid {Die authzid des Anfragers ist ungültig, entweder weil sie falsch formatiert ist  oder weil der Anfrager keine Berechtigung zur Autorisierung dieser ID hat.}
 ::msgcat::mcset de xmpp-stanzas-invalid-mechanism {The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity.}
 ::msgcat::mcset de xmpp-stanzas-mechanism-too-weak {The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity.}
-::msgcat::mcset de xmpp-stanzas-not-authorized {The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username).}
+::msgcat::mcset de xmpp-stanzas-not-authorized {Authentifizierung war nicht erfolgreich, weil der Anfrager über keine gültige Berechtigung verfügte (das umfasst nicht nur unbekannte Anmeldenamen).}
 ::msgcat::mcset de xmpp-stanzas-temporary-auth-failure {Authentifizierung erfolglos aufgrund einer Fehlersituation in der Empfangseinheit.}
 
 # Short messages in place of the above ones.
@@ -1048,7 +1048,7 @@ namespace eval ::EditShortcuts:: {
 ::msgcat::mcset de jaregalready2         {Sie sind bereits bei diesem Dienst registriert. Dies sind ihre aktuellen Einstellungen.}
 ::msgcat::mcset de jaregisterex3         {Wählen Sie einen Server aus der Liste oder geben Sie einen manuell ein. Dann wählen Sie Weiter zum Abruf der Registrierungsanweisungen. Folgen Sie den Anweisugen und drücen Register.}
 ::msgcat::mcset de jaregisterexserv2     {Beim Dienst %s anmelden. Sie müssen evtl. die Weiter-Schaltfläche drücken, um die Registrierungsanweisungen abzurufen.}
-::msgcat::mcset de jaregmsg3             {Select a service and press Next}
+::msgcat::mcset de jaregmsg3             {Wählen Sie einen Dienst und klicken Sie auf Weiter}
 ::msgcat::mcset de jaregnewwith          {Möchten Sie ein neues Konto bei %s anlegen.}
 ::msgcat::mcset de jarostadd3            {Wählen Sie das Chatsystem und die Kontakt-ID des Kontaktes, den Sie hinzufügen wollen.}
 ::msgcat::mcset de jarostaddopt          {Spitzname und Gruppe sind optional und können später gesetzt oder geändert werden.}
@@ -1359,7 +1359,7 @@ if {0} {
 ::msgcat::mcset de tooltip-chatoffline   {Sie müssen angemeldet sein, um den Status dieses Kontaks zu sehen}
 ::msgcat::mcset de tooltip-chatsendtext     {Schreiben Sie Ihre Nachricht und drücken Sie Return oder Umschalt-Return}
 ::msgcat::mcset de tooltip-aaonhidden    {If activated then directed auto-away presence will be sent to users on hidden chat tabs}
-::msgcat::mcset de tooltip-aabusychats   {When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb.}
+::msgcat::mcset de tooltip-aabusychats   {Wenn Sie <number> oder mehr Chatsitzungen aktiv haben, wird der Präsenzstatus automatisch auf Nicht stören gesetzt.}
 ::msgcat::mcset de tooltip-togglesysmsg     {Statuswechsel im Chat zeigen/verstecken}
 
 
