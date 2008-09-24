@@ -1,34 +1,30 @@
-# This template catalog is automatically generated with a script
-# /cvsroot/coccinella/tools/i18n/template.tcl which can be obtained
-# from http://sourceforge.net/projects/coccinella/
-#
-# Generated: Fre Apr 25 09:00:07 CEST 2008
-
-# English language version of the Coccinella message catalog.
+# Dutch language version of the Coccinella message catalog.
 #
 #       The English catalog is the master of all other catalogs
-#       
-#       Contibutors:
-#         cs  David Stancl	david.stancl@seznam.cz
-#         da  Mogens Pedersen  Mogens.Pedersen@skolekom.dk
-#         de  Hermann J. Beckers (hj dot beckers at onlinehome dot de)
-#         es  Néstor Díaz (n3storm at grupoikusnet.com) 2004
-#             Antonio F. Cano (antonio at grupoikusnet.com) 2006
-#             Agustin Vericat (agustin at grupoikusnet.com) 2006
-#         fr  Guillaume Ayoub (xovni at wanadoo.fr)
-#         it  Mirko Graziani (contatto@imatica.it)
-#         kr  Dylan Park, Korea NVC Center (hanmaum@krnvc.org) 
-#         nl  Sander Devrieze (s.devrieze at pandora.be), 2004-2007
+#
+#       Translators:
+#         cs  David Stancl (david.stancl at seznam.cz), 2007-2008
+#         da  Mogens Pedersen  (Mogens.Pedersen at skolekom.dk), 2006
+#         de  Hermann J. Beckers (hj dot beckers at onlinehome dot de), 2004-2008
+#         es  Néstor Díaz (n3storm at grupoikusnet.com), 2004
+#             Antonio F. Cano (antonio at grupoikusnet.com), 2006
+#             Agustin Vericat (agustin at grupoikusnet.com), 2006
+#             César Alcalde (lambda512 at gmail.com), 2008
+#         fr  Guillaume Ayoub (xovni at wanadoo.fr), 2004-2005
+#             Nicolas Vérité (xmpp:nyco@jabber.fr, nicolas.verite at gmail.com), 2008
+#         it  Mirko Graziani (contatto at imatica.it), 2006-2008
+#         ko  Dylan Park, Korea NVC Center (hanmaum AT krnvc.org), 2006
+#         nl  Sander Devrieze (s.devrieze at pandora.be), 2004-2008
 #             Bart Van Hove (bartvanhove at skynet.be), 2004
-#         pl  Zbigniew Baniewski (zb at ispid.com.pl)
-#         ru  Alexander Balezin (xmmp:gescheit@jabber.ttn.ru) gescheit@list.ru
-#         sv  Mats Bengtsson
+#         pl  Zbigniew Baniewski (zb at ispid.com.pl), 2005-2008
+#         ru  Alexander Balezin (xmpp:gescheit@jabber.ttn.ru, gescheit at list.ru), 2005-2007
+#         sv  Mats Bengtsson, 2002-2008
 #
 # General type of text, such as "OK", "Cancel", and the like. 
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: nl.msg,v 1.182 2008-09-16 17:39:38 sdevrieze Exp $
+#   $Id: nl.msg,v 1.183 2008-09-24 18:37:59 sdevrieze Exp $
 
 ::msgcat::mcset nl Abort                 {Afbreken}
 ::msgcat::mcset nl Action                {Actie}

@@ -18,7 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #  
-# $Id: JUI.tcl,v 1.276 2008-09-13 22:11:26 sdevrieze Exp $
+# $Id: JUI.tcl,v 1.277 2008-09-24 18:37:58 sdevrieze Exp $
 
 package provide JUI 1.0
 
@@ -911,8 +911,8 @@ proc ::JUI::SlotInitPrefsHook {} {
     # We keep track of pref values of which slot is mapped here.
     # Then each slot just asks for it. This solution is simpler than if
     # each slot need its own prefs.
-    # The initial state always show the Mege Presence slot.
-    set jprefs(slot,mapped) {megapresence}
+    # The initial state always show the Mege Presence slot. and the Search People slot
+    set jprefs(slot,mapped) {megapresence search}
     
     ::PrefUtils::Add [list \
       [list jprefs(slot,mapped) jprefs_slot_mapped $jprefs(slot,mapped)]  \
