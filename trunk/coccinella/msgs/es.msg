@@ -24,7 +24,7 @@
 # We use the source string as the message.
 # Defined in global namespace and may therefore be used in any namespace.
 # 
-#   $Id: es.msg,v 1.110 2008-09-24 18:37:59 sdevrieze Exp $
+#   $Id: es.msg,v 1.111 2008-10-07 10:57:24 sdevrieze Exp $
 
 ::msgcat::mcset es Abort                 {Cancelar}
 ::msgcat::mcset es Action                {Acción}
@@ -417,7 +417,7 @@
 ::msgcat::mcset es mSaveImageAs          {Guardar la &imagen como...}
 ::msgcat::mcset es mSearch...            {Busca&r...}
 ::msgcat::mcset es mSelectAll            {Selecionar &todo}
-::msgcat::mcset es mSendFile...          {Enviar un mensaje...}
+::msgcat::mcset es mSendFile...          {Enviar un archivo...}
 ::msgcat::mcset es mServer               {&Servidor}
 ::msgcat::mcset es mSetupAssistant...    {&Asistente de configuración}
 ::msgcat::mcset es mShiftConstrain       {Girar}
