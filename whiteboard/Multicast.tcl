@@ -90,7 +90,7 @@ proc ::Multicast::OpenMulticast {wcan} {
       -command [list Multicast::OpenMulticastQTStream $wcan $frtot.entip]
     ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list set [namespace current]::finished 0]
-    ttk::button $frbot.btedit -text "[mc mEdit]..."   \
+    ttk::button $frbot.btedit -text [mc "&Edit"]...   \
       -command [list ::Multicast::DoAddOrEditQTMulticastShort edit $frtot.optm]
     ttk::button $frbot.btadd -text [mc "Add"]...   \
       -command [list ::Multicast::DoAddOrEditQTMulticastShort add $frtot.optm]

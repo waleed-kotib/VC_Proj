@@ -802,7 +802,7 @@ proc ::VCard::FileMenuPostHook {wmenu} {
 	set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
 	set token [GetFrontToken]
 	if {$token ne ""} {
-	    ::UI::MenuMethod $m entryconfigure mBC... -state normal
+	    ::UI::MenuMethod $m entryconfigure mBC... -state normal -label [mc "&Business Card"]...
 	}
     }
 }

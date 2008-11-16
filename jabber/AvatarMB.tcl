@@ -575,7 +575,7 @@ proc ::AvatarMB::Menu {m args} {
 	pack $f.edit -side top -anchor w -fill x
     }
     
-    ttk::button $f.clear -style FMenu -text [mc mClearMenu] \
+    ttk::button $f.clear -style FMenu -text [mc "Clear Menu"] \
       -command ::AvatarMB::MenuClear
     BindFMenu $f.clear
     pack $f.clear -side top -anchor w -fill x

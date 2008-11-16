@@ -2521,7 +2521,7 @@ proc ::WB::BuildToolPopups {w} {
 	}
 	::UI::NewMenu $w $wtool.pop${name} {} $mDef($name)
 	if {!$prefs(haveDash) && ([lsearch $menuArr($name) dash] >= 0)} {
-	    ::UI::MenuMethod $wtool.pop${name} entryconfigure mDash -state disabled
+	    ::UI::MenuMethod $wtool.pop${name} entryconfigure mDash -state disabled -label [mc "Dash"]
 	}
     }
 }

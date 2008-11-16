@@ -808,7 +808,7 @@ proc ::RosterTree::BackgroundImageCmd {} {
     ::UI::MenubarDisableBut $mbar edit
     set fileName [ui::openimage::modal -message $str -detail $dtl -menu $mbar \
       -filetypes $types -initialfile $currentFile -defaultfile $defaultFile \
-      -geovariable prefs(winGeom,jbackgroundimage) -title [mc mBackgroundImage]]
+      -geovariable prefs(winGeom,jbackgroundimage) -title [mc "Background Image"]]
     ::UI::MenubarEnableAll $mbar
 
     set image ""
@@ -1977,7 +1977,7 @@ proc ::RosterTree::FileMenuPostHook {wmenu} {
 	set jidL [GetSelectedJID]
 	if {[llength $jidL] == 1} {
 	    set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
-	    ::UI::MenuMethod $m entryconfigure mBC... -state normal
+	    ::UI::MenuMethod $m entryconfigure mBC... -state normal -label [mc "&Business Card"]...
 	}
     }
 }

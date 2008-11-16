@@ -275,45 +275,42 @@
 ::msgcat::mcset en mArc                  {Arc}
 ::msgcat::mcset en mArcs                 {Arcs}
 ::msgcat::mcset en mAttachMessage        {Attach Message...}
-::msgcat::mcset en mAvailable            {Available}
+::msgcat::mcset en {Available}
 ::msgcat::mcset en {Away}
 ::msgcat::mcset en mBackgroundColor...   {Background Color...}
-::msgcat::mcset en mBackgroundImage      {Background Image}
+::msgcat::mcset en {Background Image}
 ::msgcat::mcset en mBackgroundImage...   {&Background Image...}
 ::msgcat::mcset en mBold                 {Bold}
 ::msgcat::mcset en mBrushThickness       {Brush Thickness}
 ::msgcat::mcset en mBugReport...         {&Report Bug...}
 ::msgcat::mcset en mBusinessCard...      {View &Business Card...}
-::msgcat::mcset en mBC...                {&Business Card...}
+::msgcat::mcset en {&Business Card...}
 ::msgcat::mcset en mCall                 {&Call...}
 ::msgcat::mcset en {Chat}
 ::msgcat::mcset en mChat...              {Cha&t...}
 ::msgcat::mcset en mChord                {Chord}
-::msgcat::mcset en mClear                {Clear}
-::msgcat::mcset en mClearMenu		 {Clear Menu}
+::msgcat::mcset en {Clear Menu}
 ::msgcat::mcset en {&Close Window}
 ::msgcat::mcset en mCoccinellaHome...    {&Home Page...}
 ::msgcat::mcset en mColor...             {Color...}
 ::msgcat::mcset en mContacts...          {&Contacts...}
 ::msgcat::mcset en mControlPanel         {Control Panel}
-::msgcat::mcset en mCopy                 {&Copy}
+::msgcat::mcset en {&Copy}
 ::msgcat::mcset en {&Create Chatroom...}
-::msgcat::mcset en mCustomStatus...      {Custom Status...}
-::msgcat::mcset en mCut                  {Cu&t}
-::msgcat::mcset en mDash                 {Dash}
+::msgcat::mcset en {Cu&t}
 ::msgcat::mcset en mDebug                {&Debug}
 ::msgcat::mcset en mDecreasing           {&Decreasing}
 ::msgcat::mcset en mDictionaries         {Dictionaries}
-::msgcat::mcset en mDiscoverServer...    {&Discover Server...}
+::msgcat::mcset en {&Discover Server...}
 ::msgcat::mcset en {Do Not Disturb}
-::msgcat::mcset en mEdit                 {&Edit}
-::msgcat::mcset en mEditBookmarks...     {Edit &Bookmarks...}
-::msgcat::mcset en mEditBC...            {Edit &Business Card...}
+::msgcat::mcset en {&Edit}
+::msgcat::mcset en {Edit &Bookmarks...}
+::msgcat::mcset en {Edit &Business Card...}
 ::msgcat::mcset en mEditContact...       {&Edit Contact...}
-::msgcat::mcset en mEditItem...          {&Edit Item...}
+::msgcat::mcset en {&Edit Item...}
 ::msgcat::mcset en mEditNick             {&Edit Nickname}
-::msgcat::mcset en mEditProfiles...      {&Edit Profiles...}
-::msgcat::mcset en mEnterRoom...         {Enter Chat&room...}
+::msgcat::mcset en {&Edit Profiles...}
+::msgcat::mcset en {Enter Chat&room...}
 ::msgcat::mcset en mErrorLog             {&Error Log...}
 ::msgcat::mcset en mExport               {Export}
 ::msgcat::mcset en mExportImage...       {Export Image...}
@@ -325,7 +322,7 @@
 ::msgcat::mcset en {Find}
 ::msgcat::mcset en {Find Next}
 ::msgcat::mcset en {Find Previous}
-::msgcat::mcset en mFlip                 {Flip}
+::msgcat::mcset en {Flip}
 ::msgcat::mcset en mFont                 {Font}
 ::msgcat::mcset en mFontSize             {Font Size}
 ::msgcat::mcset en mGrid                 {Grid}
@@ -335,8 +332,8 @@
 ::msgcat::mcset en mHugeFont             {Huge}
 ::msgcat::mcset en mIconSet...           {Icon &Set...}
 ::msgcat::mcset en mIgnore               {&Ignore}
-::msgcat::mcset en mImageLarger          {Image Larger}
-::msgcat::mcset en mImageSmaller         {Image Smaller}
+::msgcat::mcset en {Image Larger}
+::msgcat::mcset en {Image Smaller}
 ::msgcat::mcset en mImport               {Import}
 ::msgcat::mcset en mImportImage/Movie... {&Import Image/Movie...}
 ::msgcat::mcset en mInbox...             {&Inbox...}
@@ -347,7 +344,7 @@
 ::msgcat::mcset en mJiveCall             {Call}
 ::msgcat::mcset en mJiveForward          {Forward Call}
 ::msgcat::mcset en mLargeFont            {Large}
-::msgcat::mcset en mLarger               {Larger}
+::msgcat::mcset en {Larger}
 ::msgcat::mcset en mLargerFont           {Larger}
 ::msgcat::mcset en mLastLogin/Activity   {Last Login/Activity}
 ::msgcat::mcset en mLibrary              {&Library}
@@ -359,53 +356,51 @@
 ::msgcat::mcset en mLogoutTrpt           {Logout from Transport}
 ::msgcat::mcset en {&Lower}
 ::msgcat::mcset en {&Message}
-::msgcat::mcset en mMinimal              {&Minimal}
-::msgcat::mcset en mMinimize             {Mi&nimize}
-::msgcat::mcset en mNewAccount...        {&New Account...}
+::msgcat::mcset en {Mi&nimize}
+::msgcat::mcset en {&New Account}
 ::msgcat::mcset en mNewWindow            {New &Window}
 ::msgcat::mcset en mNormal               {Normal}
 ::msgcat::mcset en {Not Available}
 ::msgcat::mcset en mOffline              {&Offline}
 ::msgcat::mcset en mOpenFile...          {&Open File...}
 ::msgcat::mcset en mOpenFolder...        {&Open Folder...}
-::msgcat::mcset en mOpenStream...        {Open St&ream...}
+::msgcat::mcset en {Open St&ream}
 ::msgcat::mcset en mOutlineColor         {Outline Color}
 ::msgcat::mcset en mPageSetup            {Page Set&up...}
-::msgcat::mcset en mNewPassword...       {New P&assword...}
-::msgcat::mcset en mPaste                {&Paste}
+::msgcat::mcset en {New P&assword}
+::msgcat::mcset en {&Paste}
 ::msgcat::mcset en mPieslice             {Pieslice}
 ::msgcat::mcset en mPlugins              {Plu&gins}
 ::msgcat::mcset en mPreferences          {&Preferences}
 ::msgcat::mcset en mPreferences...       {&Preferences...}
 ::msgcat::mcset en mPrint...             {&Print...}
 ::msgcat::mcset en mQuit                 {&Quit}
-::msgcat::mcset en mRaise                {&Raise}
-::msgcat::mcset en mRedo                 {Re&do}
-::msgcat::mcset en mRefresh              {Refresh}
-::msgcat::mcset en mRegister...          {Re&gister...}
-::msgcat::mcset en mRemoveAccount...     {&Remove Account...}
+::msgcat::mcset en {&Raise}
+::msgcat::mcset en {Re&do}
+::msgcat::mcset en {Refresh}
+::msgcat::mcset en {Re&gister}
+::msgcat::mcset en {&Remove Account}
 ::msgcat::mcset en mRemoveContact        {&Remove Contact...}
 ::msgcat::mcset en mRemoveListing        {Remove &Listing}
-::msgcat::mcset en mRestore              {&Restore}
+::msgcat::mcset en {&Restore}
 ::msgcat::mcset en mSave		 {&Save...}
 ::msgcat::mcset en mSaveAs               {Save &As...}
 ::msgcat::mcset en mSaveAsItem           {Save As Item...}
 ::msgcat::mcset en mSaveCanvas           {&Save...}
 ::msgcat::mcset en mSaveImageAs          {Save Image As...}
-::msgcat::mcset en mSearch...            {&Search...}
-::msgcat::mcset en mSelectAll            {Select &All}
+::msgcat::mcset en {&Search}
+::msgcat::mcset en {Select &All}
 ::msgcat::mcset en mSendFile...          {Send &File...}
 ::msgcat::mcset en mServer               {&Server}
 ::msgcat::mcset en {&Setup Assistant}
 ::msgcat::mcset en mShiftConstrain       {Shift Constrain}
-::msgcat::mcset en mShow                 {Show}
+::msgcat::mcset en {Show}
 ::msgcat::mcset en {Show Control Panel}
 ::msgcat::mcset en mSize                 {Size}
 ::msgcat::mcset en {Slide Show}
-::msgcat::mcset en mSmaller              {Smaller}
+::msgcat::mcset en {Smaller}
 ::msgcat::mcset en mSort                 {Sort}
 ::msgcat::mcset en mCheckSpell           {Check Spelling}
-::msgcat::mcset en mStatus               {Status}
 ::msgcat::mcset en mStopTrans            {Stop &Transactions}
 ::msgcat::mcset en mStraighten           {Straighten}
 ::msgcat::mcset en mStyle                {Style}
@@ -418,7 +413,7 @@
 ::msgcat::mcset en mTo90degrees          {To 90 degrees}
 ::msgcat::mcset en mToolbar              {Tool&bar}
 ::msgcat::mcset en mTransports           {&Transports}
-::msgcat::mcset en mUndo                 {&Undo}
+::msgcat::mcset en {&Undo}
 ::msgcat::mcset en mUnregister           {&Unregister}
 ::msgcat::mcset en mUpdateCheck          {&Update Check}
 ::msgcat::mcset en mVersion              {Version}

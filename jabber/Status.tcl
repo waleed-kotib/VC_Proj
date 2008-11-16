@@ -753,7 +753,7 @@ proc ::Status::ExBuildMenu {m varName args} {
 	}
 	$m add separator
     }
-    set label [string map {& ""} [mc mCustomStatus...]]
+    set label [string map {& ""} [mc "Custom Status"]...]
     $m add command -label $label -accelerator $mod+B \
       -command [concat ::Status::ExCustomDlg $varName $args]
     update idletasks
