@@ -74,7 +74,7 @@ proc ::FilePrefs::InitPrefsHook {} {
 proc ::FilePrefs::BuildPrefsHook {wtree nbframe} {
     
     if {![::Preferences::HaveTableItem Whiteboard]} {
-	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
+	::Preferences::NewTableItem {Whiteboard} [mc "Whiteboard"]
     }
     ::Preferences::NewTableItem {Whiteboard {File Mappings}} [mc "File Types"]
 
@@ -141,11 +141,11 @@ proc ::FilePrefs::BuildPage {page} {
     ttk::frame $wbuttons
     grid $wbuttons -row 1 -column 0 -columnspan 2 -sticky news
     
-    ttk::button $wbuttons.rem -text [mc Delete]  \
+    ttk::button $wbuttons.rem -text [mc "Delete"]  \
       -command [namespace current]::DeleteAssociation
-    ttk::button $wbuttons.edit -text "[mc {Edit File Type}]..."  \
+    ttk::button $wbuttons.edit -text [mc "Edit File Type"]...  \
       -command [list [namespace current]::OnInspect edit]
-    ttk::button $wbuttons.new -text "[mc {Add File Type}]..." \
+    ttk::button $wbuttons.new -text [mc "Add File Type"]... \
       -command [list [namespace current]::OnInspect new]
 
     pack  $wbuttons.rem  $wbuttons.edit  $wbuttons.new  -side right -padx 10 -pady 5 \
@@ -433,8 +433,8 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
 	if {[llength $packageList] > 0} {		    
 	    set packageVar $tmpPrefMimeType2Package($mime)
 	} else {
-	    set packageList [mc None]
-	    set packageVar [mc None]
+	    set packageList [mc "None"]
+	    set packageVar [mc "None"]
 	}
     } elseif {$what eq "new"} {
 	set textVarMime   ""
@@ -442,8 +442,8 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
 	set textVarSuffix ""
 	set codingVar 0
 	set receiveVar reject
-	set packageVar [mc None]
-	set packageList [mc None]
+	set packageVar [mc "None"]
+	set packageList [mc "None"]
     }
 
     # Global frame.
@@ -459,29 +459,29 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
     ttk::frame $wty -padding [option get . groupSmallPadding {}]
     pack $wty -fill x
     
-    ttk::label $wty.x1 -text "[mc Type]:"
+    ttk::label $wty.x1 -text [mc "Type"]:
     ttk::entry $wty.x2 -font CociSmallFont -width 30   \
       -textvariable [namespace current]::textVarDesc
-    ttk::label $wty.x3 -text "[mc {MIME type}]:"
+    ttk::label $wty.x3 -text [mc "MIME type"]:
     ttk::entry $wty.x4 -font CociSmallFont -width 30   \
       -textvariable [namespace current]::textVarMime
-    ttk::label $wty.x5 -text "[mc Extensions]:"
+    ttk::label $wty.x5 -text [mc "Extensions"]:
     ttk::entry $wty.x6 -font CociSmallFont -width 30   \
       -textvariable [namespace current]::textVarSuffix
     
-    ttk::label $wty.x7 -text "[mc Encoding]:"
-    ttk::radiobutton $wty.x8 -text [mc text]  \
+    ttk::label $wty.x7 -text [mc "Encoding"]:
+    ttk::radiobutton $wty.x8 -text [mc "Text"]  \
       -variable [namespace current]::codingVar -value 1
-    ttk::radiobutton $wty.x9 -text [mc Binary]  \
+    ttk::radiobutton $wty.x9 -text [mc "Binary"]  \
       -variable [namespace current]::codingVar -value 0
     ttk::frame $wty.pad -height 8
-    ttk::label $wty.x10 -text "[mc mAction]:"
-    ttk::radiobutton $wty.x11 -text [mc {Reject file}]  \
+    ttk::label $wty.x10 -text [mc "Action"]:
+    ttk::radiobutton $wty.x11 -text [mc "Reject file"]  \
       -variable [namespace current]::receiveVar -value reject
     ttk::radiobutton $wty.x12 -text [mc "Save to disk"]  \
       -variable [namespace current]::receiveVar -value save
     ttk::frame $wty.fr
-    ttk::radiobutton $wty.x13 -text "[mc {Open with}]:"  \
+    ttk::radiobutton $wty.x13 -text [mc "Open with"]:  \
       -variable [namespace current]::receiveVar -value import
 
     set wMenu [eval {
@@ -489,7 +489,7 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
     } $packageList]
     $wMenu configure -font CociSmallFont     
 
-    ttk::radiobutton $wty.x14 -text [mc {Always ask}]  \
+    ttk::radiobutton $wty.x14 -text [mc "Always ask"]  \
       -variable [namespace current]::receiveVar -value ask
     
     grid  $wty.x1  $wty.x2  -         -sticky e -pady 2
@@ -511,7 +511,7 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
     # If we dont have any registered packages for this MIME, disable this
     # option.
     
-    if {($what eq "edit") && ($packageList eq [mc None])} {
+    if {($what eq "edit") && ($packageList eq [mc "None"])} {
 	$wty.x13  state {disabled}
 	$wty.x13m state {disabled}
     }
@@ -523,10 +523,10 @@ proc ::FilePrefs::Inspect {w what {mime ""}} {
     set frbot $wbox.b
     ttk::frame $frbot
     ttk::button $frbot.btok -style TButton \
-      -text [mc Save] -default active  \
+      -text [mc "Save"] -default active  \
       -command [namespace current]::SaveThisAss
     ttk::button $frbot.btcancel -style TButton \
-      -text [mc Cancel]  \
+      -text [mc "Cancel"]  \
       -command [list set [namespace current]::finishedInspect 0]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -583,14 +583,14 @@ proc ::FilePrefs::SaveThisAss {} {
 
     # Check that no fields are empty.
     if {($desc eq "") || ($mime eq "") || ($suff eq "")} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok  \
-	  -message [mc messfieldsmissing]
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok  \
+	  -message [mc "One or more fields are missing. Try again or cancel."]
 	return
     }
     
     # Put this specific MIME type associations in the tmp arrays.
     set tmpMime2Description($mime) $desc
-    if {$packageVar eq [mc None]} {
+    if {$packageVar eq [mc "None"]} {
 	set tmpPrefMimeType2Package($mime) ""
     }
     

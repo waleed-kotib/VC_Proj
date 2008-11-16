@@ -66,32 +66,35 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
 	set $tag [wrapper::getcdata $child]
     }
     if {![info exists url]} {
-	#::UI::MessageBox -title [mc Error] -icon error -type ok \
-	#  -message [mc jamessoobnourl2 $from]
+	#::UI::MessageBox -title [mc "Error"] -icon error -type ok \
+	#  -message [mc "%s did not sent the download location of the file." $from]
 	return 0
     }
     
     # Validate URL, determine the server host and port.
     if {![regexp -nocase {^(([^:]*)://)?([^/:]+)(:([0-9]+))?(/.*)?$} $url \
       x prefix proto host y port path]} {
-	#::UI::MessageBox -title [mc Error] -icon error -type ok \
-	#  -message [mc jamessoobbad2 $from $url]
+	#::UI::MessageBox -title [mc "Error"] -icon error -type ok \
+	#  -message [mc "Received invalid URL from %s. URL: %s" $from $url]
 	return 0
     }
     if {[string length $proto] == 0} {
 	set proto http
     }
     if {$proto ne "http"} {
-	#::UI::MessageBox -title [mc Error] -icon error -type ok \
-	#  -message [mc jamessoonnohttp2 $from $proto]
+	#::UI::MessageBox -title [mc "Error"] -icon error -type ok \
+	#  -message [mc "The URL from %s does not use the HTTP protocol, but instead %s which is not supported." $from $proto]
 	return 0
     }
     set tail [file tail $url]
     set tailDec [::uri::urn::unquote $tail]
     
-    set str "[mc File]: $tailDec"
+    set str [mc "File"]
+    append str ": $tailDec"
     if {[info exists desc]} {
-	append str "\n" "[mc Description]: $desc"
+	append str "\n"
+	append str [mc "Description"]
+	append str ": $desc"
     }
     
     set w [ui::autoname]
@@ -107,7 +110,7 @@ proc ::OOB::ParseSet {jlibname from subiq args} {
     set state(queryE) $subiq
     set state(args)   $args
     
-    set msg [mc jamessoobask2 $from $str]
+    set msg [mc "%s wants to send you this file: %s Do you want to receive this file?" $from $str]
     ui::dialog $w -title [mc "Receive File"] -icon info \
       -type yesno -default yes -message $msg \
       -command [namespace code ParseSetCmd]

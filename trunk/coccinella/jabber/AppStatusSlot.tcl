@@ -182,6 +182,7 @@ proc ::AppStatusSlot::EventPresence {jid presence args} {
     if {[::Jabber::Jlib roster isitem $jid2]} {
 	set str [::Roster::GetPresenceAndStatusText $jid]
 	set dname [::Roster::GetDisplayName $jid2]
+	# is mc needed Mats?
 	set msg [mc "%s: %s" $dname $str]
 	set priv(status) $msg
     }

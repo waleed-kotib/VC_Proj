@@ -149,20 +149,24 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	    set state(jid)  $jid
 	    set state(jid2) $jid2
 	    set state(type) jid
-	    set msg [mc budpounce-user $jid]
-	    set title "[mc {Contact Actions}]: $jid"
+	    set msg [mc "Set a specific action for events related to %s. Select events using the tabs below." $jid]
+	    set title [mc "Contact Actions"]
+	    append title ": $jid"
 	}
 	group {
 	    set group [lindex $groupL 0]
 	    set state(group) $group
 	    set state(type)  group
-	    set msg [mc budpounce-group $group]
-	    set title "[mc {Contact Actions}]: $group"
+	    set msg [mc "Set a specific action for events related to any contact belonging to the group %s. Select events using the tabs below." $group]
+	    set title [mc "Contact Actions"]
+	    append title ": $group"
 	}
 	"" {
 	    set state(type) any
-	    set msg [mc budpounce-any]
-	    set title "[mc {Contact Actions}]: [mc Any]"
+	    set msg [mc "Set a specific action for events related to any contact in your contact list. Select events using the tabs below."]
+	    set title [mc "Contact Actions"]
+	    append title ": "
+	    append title [mc "Any"]
 	}
 	default {
 	    unset state
@@ -179,8 +183,8 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	}
 	set soundfileDef [lindex $allSounds 0]
     } else {
-	set menuDef [list [list [mc None]]]
-	set soundfileDef [mc None]
+	set menuDef [list [list [mc "None"]]]
+	set soundfileDef [mc "None"]
     }
     
     # Toplevel with class BuddyPounce.
@@ -229,7 +233,7 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	ttk::checkbutton $wact.alrt -text [mc "Show popup"] \
 	  -variable $token\($ekey,msgbox)
 	
-	ttk::checkbutton $wact.lsound -text "[mc {Play sound}]:" \
+	ttk::checkbutton $wact.lsound -text [mc "Play sound"]: \
 	  -variable $token\($ekey,sound)
 	ui::combobutton $wact.msound -variable $token\($ekey,soundfile) \
 	  -menulist $menuDef
@@ -242,7 +246,7 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	
 	ttk::frame $wmsg.f1
 	pack  $wmsg.f1 -side top -anchor w
-	ttk::checkbutton $wmsg.f1.c -text "[mc budpounce-sendmsg]:" \
+	ttk::checkbutton $wmsg.f1.c -text [mc "Send message with subject"]: \
 	  -variable $token\($ekey,msg)
 	ttk::entry $wmsg.f1.e -textvariable $token\($ekey,msg,subject)
 	pack  $wmsg.f1.c -side left
@@ -250,7 +254,7 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	
 	ttk::frame $wmsg.f2 -padding {0 2}
 	pack  $wmsg.f2 -side top -anchor w -fill x
-	ttk::label $wmsg.f2.l -text "[mc Message]:"
+	ttk::label $wmsg.f2.l -text [mc "Message"]:
 	text  $wmsg.f2.t -height 2 -width 24 -wrap word -bd 1 -relief sunken
 	pack  $wmsg.f2.l -side left -anchor n
 	pack  $wmsg.f2.t -side top -fill x
@@ -280,9 +284,9 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -default active \
+    ttk::button $frbot.btok -text [mc "OK"] -default active \
       -command [list [namespace current]::OK $token]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::Cancel $token]
     ttk::button $frbot.btoff -text [mc "Disable All"]  \
       -command [list [namespace current]::AllOff $token]
@@ -553,11 +557,17 @@ proc ::BuddyPounce::Event {from eventkey args} {
 	}
     }
     
+    set budpounce [dict create]
+    dict set budpounce available [mc "%s just went online!" $from]
+    dict set budpounce unavailable [mc "%s just went offline!" $from]
+    dict set budpounce msg [mc "%s just sent you a message!" $from]
+    dict set budpounce chat [mc "%s just started a chat!" $from]
+
     foreach action $actions {
 	
 	switch -- $action {
 	    msgbox {
-		ui::dialog -message [mc budpounce-$eventkey $from] \
+		ui::dialog -message [dict get $budpounce $eventkey] \
 		  -title [mc $alertTitle($eventkey)]
 	    }
 	    sound {
@@ -607,7 +617,7 @@ proc ::BuddyPounce::GetAllSounds {} {
 	set all [::Sounds::GetAllSoundsPresentSet]
     }
     if {[llength $all] == 0} {
-	set all [msgcat::mc None]
+	set all [msgcat::mc "None"]
     }
     return $all
 }

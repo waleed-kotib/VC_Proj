@@ -379,7 +379,7 @@ proc ::Phone::NewPage {} {
 	set im  [::Theme::Find16Icon $wphone phone16Image]
 	set imd [::Theme::Find16Icon $wphone phone16DisImage]
         set imSpec [list $im disabled $imd background $imd]
-        $wnb add $wphone -text [mc Phone] -image $imSpec -compound image \
+        $wnb add $wphone -text [mc "Phone"] -image $imSpec -compound image \
 	  -sticky nw
     }
 
@@ -401,7 +401,7 @@ proc ::Phone::NewTransferDlg {} {
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace current]::CloseCmd
 
-    wm title $w [mc phoneDialerForward]
+    wm title $w [mc "Forward to"]...
     
     ::UI::SetWindowPosition $w
     set phoneNumber ""
@@ -410,7 +410,7 @@ proc ::Phone::NewTransferDlg {} {
     ttk::frame $w.f
     pack  $w.f  -fill x
 				 
-    ttk::label $w.f.head -style Headlabel -text [mc {Phone}]
+    ttk::label $w.f.head -style Headlabel -text [mc "Phone"]
     pack  $w.f.head  -side top -fill both -expand 1
 
     ttk::separator $w.f.s -orient horizontal
@@ -424,12 +424,12 @@ proc ::Phone::NewTransferDlg {} {
     ttk::frame $box
     pack $box -side bottom -fill x
     
-    ttk::label $box.l -text "[mc phoneNumber]:"
+    ttk::label $box.l -text [mc "Number"]:
     ttk::entry $box.e -textvariable [namespace current]::transferPhoneNumber  \
       -width 18
-    ttk::button $box.dial -text [mc phoneDial]  \
+    ttk::button $box.dial -text [mc "Dial"]  \
       -command [list [namespace current]::TransferTo $w]
-    ttk::button $box.btcancel -text [mc Cancel]  \
+    ttk::button $box.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelEnter $w]
 
     grid  $box.l  $box.e  $box.dial $box.btcancel -padx 1 -pady 4

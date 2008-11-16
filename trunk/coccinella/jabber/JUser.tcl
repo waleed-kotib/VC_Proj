@@ -107,7 +107,7 @@ proc ::JUser::NewDlg {args} {
 
     # Find all our groups for any jid.
     set allGroups [::Jabber::Jlib roster getgroups]
-    set groupValues [concat [list [mc None]] $allGroups]
+    set groupValues [concat [list [mc "None"]] $allGroups]
     
     # Design the menu.
     set menuDef [list]
@@ -160,9 +160,9 @@ proc ::JUser::NewDlg {args} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
 
-    set str [mc jarostadd3]
+    set str [mc "Select the chat system and contact ID of the contact you would like to add."]
     if {$config(adduser,show-nick-group)} {
-	append str " " [mc jarostaddopt]
+	append str " " [mc "Nickname and group are optional and can be set or changed later."]
     }
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 280 -justify left -text $str
@@ -174,14 +174,14 @@ proc ::JUser::NewDlg {args} {
 
     # NB: the state(jid) is actually the prompt which is a real JID
     # on xmpp systems and the native ID on foreign IM systems.
-    ttk::label $frmid.ltype -text "[mc {Chat system}]:"
+    ttk::label $frmid.ltype -text [mc "Chat system"]:
     ui::optionmenu $frmid.type -menulist $menuDef -direction flush  \
       -variable $token\(gjid) -command [namespace code [list TrptCmd $token]]
-    ttk::label $frmid.ljid -text "[mc {Contact ID}]:" -anchor e
+    ttk::label $frmid.ljid -text [mc "Contact ID"]: -anchor e
     ttk::entry $frmid.ejid -textvariable $token\(jid)
-    ttk::label $frmid.lnick -text "[mc Nickname]:" -anchor e
+    ttk::label $frmid.lnick -text [mc "Nickname"]: -anchor e
     ttk::entry $frmid.enick -textvariable $token\(name)
-    ttk::label $frmid.lgroup -text "[mc Group]:" -anchor e
+    ttk::label $frmid.lgroup -text [mc "Group"]: -anchor e
     ttk::combobox $frmid.egroup  \
       -textvariable $token\(group) -values $groupValues
     
@@ -190,15 +190,15 @@ proc ::JUser::NewDlg {args} {
     grid $frmid.type $frmid.ejid -sticky ew
     grid columnconfigure $frmid 1 -minsize [$frmid.type maxwidth]
 
-    ::balloonhelp::balloonforwindow $frmid.ejid [mc tooltip-contactid]
+    ::balloonhelp::balloonforwindow $frmid.ejid [mc "Chat address"]
 
     if {$config(adduser,show-nick-group)} {
 	grid  $frmid.lnick   $frmid.enick  -sticky e -pady 2
 	grid  $frmid.lgroup  $frmid.egroup -sticky e -pady 2
 	grid $frmid.enick $frmid.egroup -sticky ew
 
-	::balloonhelp::balloonforwindow $frmid.enick [mc registration-nick]
-	::balloonhelp::balloonforwindow $frmid.egroup [mc tooltip-group]
+	::balloonhelp::balloonforwindow $frmid.enick [mc "Familiar name"]
+	::balloonhelp::balloonforwindow $frmid.egroup [mc "Group to which this contact should belong to"]
     }
 
     set state(gjid)  $defaultJID
@@ -225,9 +225,9 @@ proc ::JUser::NewDlg {args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Add] -default active \
+    ttk::button $frbot.btok -text [mc "Add"] -default active \
       -command [list [namespace current]::DoAdd $token]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelAdd $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -291,16 +291,16 @@ proc ::JUser::DoAdd {token} {
 
     # In any case the jid should be well formed.
     if {![jlib::jidvalidate $jid]} {
-	set ans [::UI::MessageBox -message [mc jamessjidinvalid2 $jid] \
-	  -icon error -title [mc Error] -parent $state(w)]
+	set ans [::UI::MessageBox -message [mc "Invalid Contact ID." $jid] \
+	  -icon error -title [mc "Error"] -parent $state(w)]
 	return
     }
     
     # Warn if already in our roster.
     set users [$jlib roster getusers]
     if {[$jlib roster isitem $jid]} {
-	set ans [::UI::MessageBox -message [mc jamessalreadyinrost2 $jid] \
-	  -icon error -title [mc Error] -type yesno]
+	set ans [::UI::MessageBox -message [mc "%s is already in your list. Do you want to continue anyway?" $jid] \
+	  -icon error -title [mc "Error"] -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
 	}
@@ -319,8 +319,8 @@ proc ::JUser::DoAdd {token} {
 		# Seems we are not registered.
 		set ans [::UI::MessageBox \
 		  -type $config(adduser,dlg-type-ask-register) -icon error \
-		  -title [mc Error] \
-		  -parent $state(w) -message [mc jamessaddforeign2 $host]]
+		  -title [mc "Error"] \
+		  -parent $state(w) -message [mc "To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?" $host]]
 
 	      if {$ans eq "yes"} {
 		    ::GenRegister::NewDlg -server $host -autoget 1
@@ -342,7 +342,7 @@ proc ::JUser::DoAdd {token} {
     if {[string length $name]} {
 	lappend opts -name $name
     }
-    if {($group ne [mc None]) && ($group ne "")} {
+    if {($group ne [mc "None"]) && ($group ne "")} {
 	lappend opts -groups [list $group]
     }
     
@@ -379,10 +379,13 @@ proc ::JUser::SetCB {jid type queryE} {
     if {[string equal $type "error"]} {
 	foreach {errcode errmsg} $queryE break
 	set ujid [jlib::unescapejid $jid]
-	set str [mc jamessfailsetnick2 $ujid]
-	append str "\n" "[mc {Error code}]: $errcode\n"
-	append str "[mc Message]: $errmsg"
-	::UI::MessageBox -icon error -title [mc Error] -type ok -message $str
+	set str [mc "Cannot set %s's nickname or group." $ujid]
+	append str "\n"
+	append str [mc "Error code"]
+	append str ": $errcode\n"
+	append str [mc "Message"]
+	append str ": $errmsg"
+	::UI::MessageBox -icon error -title [mc "Error"] -type ok -message $str
     }	
 }
 
@@ -406,7 +409,7 @@ proc ::JUser::PresError {jlibname xmldata} {
 	    set str "We received an error when (un)subscribing to $ujid.\
 	      The error is: $errmsg ($errcode).\
 	      Do you want to remove it from your roster?"
-	    set ans [::UI::MessageBox -icon error -title [mc Error] -type yesno \
+	    set ans [::UI::MessageBox -icon error -title [mc "Error"] -type yesno \
 	      -message $str]
 	    if {$ans eq "yes"} {
 		::Jabber::Jlib roster send_remove $from
@@ -471,7 +474,7 @@ proc ::JUser::TrptMultiCmd {token gjid} {
 	    tk_messageBox -icon warning -parent $state(w) -message $str
 	} elseif {$config(adduser,add-non-xmpp-onselect)} {
 	    set ans [::UI::MessageBox -type yesno -icon warning \
-	      -parent $state(w) -message [mc jamessaddforeign2 $gjid]]
+	      -parent $state(w) -message [mc "To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?" $gjid]]
 	    if {$ans eq "yes"} {
 		::GenRegister::NewDlg -server $gjid -autoget 1
 	    }
@@ -528,7 +531,7 @@ proc ::JUser::TrptSingleCmd {token gjid} {
 	    tk_messageBox -icon warning -parent $state(w) -message $str
 	} elseif {$config(adduser,add-non-xmpp-onselect)} {
 	    set ans [::UI::MessageBox -type yesno -icon warning \
-	      -parent $state(w) -message [mc jamessaddforeign2 $gjid]]
+	      -parent $state(w) -message [mc "To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?" $gjid]]
 	    if {$ans eq "yes"} {
 		
 		if {[llength $jidL] > 1} {
@@ -585,9 +588,9 @@ proc ::JUser::EditTransportDlg {jid} {
     set subtype [lindex [split $trpttype /] 1]
     set typename [::Roster::GetNameFromTrpt $subtype]
     set ujid [jlib::unescapejid $jid3]
-    set msg [mc jamessowntrpt2 $typename $ujid $subscription]
+    set msg [mc "This is your own account at %s that acts as a service that transports messages to that IM system. It needs to be in your list. You have a subscription for %s: %s." $typename $ujid $subscription]
 
-    ::ui::dialog -title [mc Info] -type ok -message $msg -icon info
+    ::ui::dialog -title [mc "Info"] -type ok -message $msg -icon info
 }
 
 proc ::JUser::EditGetAllTokens {} {    
@@ -694,9 +697,9 @@ proc ::JUser::EditUserDlg {jid} {
 	jlib::splitjidex $jid node host res
 	set trpttype [lindex [$jlib disco types $host] 0]
 	set subtype [lindex [split $trpttype /] 1]
-	set msg [mc jamessowntrpt2 $subtype $ujid $subscription]
+	set msg [mc "This is your own account at %s that acts as a service that transports messages to that IM system. It needs to be in your list. You have a subscription for %s: %s." $subtype $ujid $subscription]
     } else {
-	set msg [mc jarostset2 $ujid]
+	set msg [mc "Edit nickname and group of %s. You also can request or remove presence subscription." $ujid]
     }
 
     # Global frame.
@@ -724,7 +727,7 @@ proc ::JUser::EditUserDlg {jid} {
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    ttk::label $frmid.lnick -text "[mc {Nickname}]:" -anchor e
+    ttk::label $frmid.lnick -text [mc "Nickname"]: -anchor e
     ttk::entry $frmid.enick -textvariable $token\(name)
     grid  $frmid.lnick   $frmid.enick   -pady 2
     grid  $frmid.lnick  -sticky e
@@ -734,7 +737,7 @@ proc ::JUser::EditUserDlg {jid} {
     foreach group $groups {
 	set wglabel $frmid.lgroup${igroup}
 	set wgcombo $frmid.egroup${igroup}
-	ttk::label $wglabel -text "[mc Group]:" -anchor e
+	ttk::label $wglabel -text [mc "Group"]: -anchor e
 	ttk::combobox $wgcombo  \
 	  -textvariable $token\(group${igroup}) -values [concat None $allGroups]
 	set state(group${igroup}) $group
@@ -749,18 +752,24 @@ proc ::JUser::EditUserDlg {jid} {
 	switch -- $subscription {
 	    from - none {
 		ttk::checkbutton $frmid.csubs -style Small.TCheckbutton \
-		  -text [mc jarostsub2]  \
+		  -text [mc "Request presence subscription"]  \
 		  -variable $token\(subscribe)
 	    }
 	    both - to {
 		ttk::checkbutton $frmid.csubs -style Small.TCheckbutton \
-		  -text [mc jarostunsub2]  \
+		  -text [mc "Remove presence subscription"]  \
 		  -variable $token\(unsubscribe)
 	    }
 	}
-	
-	# Present subscription.
-	set str [mc subscription[string totitle $subscription]]
+
+	# Presence subscription.
+	set subDescr [dict create]
+	dict set subDescr both [mc "Both you and your contact can see eachother's presence."]
+	dict set subDescr from [mc "You cannot see your contact's presence, but your contact can see yours."]
+	dict set subDescr none [mc "Both you and your contact cannot see eachother's presence."]
+	dict set subDescr to   [mc "You can see your contact's presence, but your contact can't see yours."]
+
+	set str [dict get $subDescr $subscription]
 	ttk::label $frmid.lsub -style Small.TLabel -text $str -anchor e
 	    
 	# Presence presence subscription in a userfriendly way. Not sure if this is a good idea, but what about using $frmid.lsub in a balloon help string for $frmid.csubs instead of a label?
@@ -787,9 +796,9 @@ proc ::JUser::EditUserDlg {jid} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Save] -default active \
+    ttk::button $frbot.btok -text [mc "Save"] -default active \
       -command [list [namespace current]::DoEdit $token]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelEdit $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {

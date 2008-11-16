@@ -255,9 +255,10 @@ proc ::Subscribe::NewDlg {jid args} {
 
     set name [::Roster::GetDisplayName $jid]
     
-    set str [mc jasubwant2 $name]
+    set str [mc "May %s see your presence?" $name]
     if {!$havesubsc && $config(subscribe,show-nick-group)} {
-	append str " [mc jasubopts2]"
+	append str " "
+	append str [mc "Entering a nickname and group is optional, and for your personal use only."]
     }
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 200 -justify left -text $str
@@ -271,10 +272,10 @@ proc ::Subscribe::NewDlg {jid args} {
 	
 	#set secs [expr {$config(subscribe,accept-after)/1000}]
 	set secs $jprefs(subsc,timer-secs)
-	set msg [mc jamesssubscautoacc $secs]
+	set msg [mc "Subscription request will be accepted in: %s secs." $secs]
 	ttk::label $wbox.accept -style Small.TLabel \
 	  -text $msg -wraplength 200 -justify left
-	ttk::button $wbox.pause -style Url -text [mc Pause] \
+	ttk::button $wbox.pause -style Url -text [mc "Pause"] \
 	  -command [namespace code [list Pause $w]]
 	
 	pack $wbox.accept -side top -anchor w	
@@ -291,10 +292,10 @@ proc ::Subscribe::NewDlg {jid args} {
 
 	#set secs [expr {$config(subscribe,reject-after)/1000}]
 	set secs $jprefs(subsc,timer-secs)
-	set msg [mc jamesssubscautorej $secs]
+	set msg [mc "Subscription request will be rejected in: %s secs." $secs]
 	ttk::label $wbox.reject -style Small.TLabel \
 	  -text $msg -wraplength 200 -justify left
-	ttk::button $wbox.pause -style Url -text [mc Pause] \
+	ttk::button $wbox.pause -style Url -text [mc "Pause"] \
 	  -command [namespace code [list Pause $w]]
 	
 	pack $wbox.reject -side top -anchor w	
@@ -315,10 +316,10 @@ proc ::Subscribe::NewDlg {jid args} {
 	ttk::frame $frmid
 	pack $frmid -side top -fill both -expand 1
 	
-	ttk::label $frmid.lnick -text "[mc {Nickname}]:" -anchor e
+	ttk::label $frmid.lnick -text [mc "Nickname"]: -anchor e
 	ttk::entry $frmid.enick -width 22 -textvariable $token\(name)
-	ttk::label $frmid.lgroup -text "[mc Group]:" -anchor e
-	ttk::combobox $frmid.egroup -values [concat [list [mc None]] $allGroups] \
+	ttk::label $frmid.lgroup -text [mc "Group"]: -anchor e
+	ttk::combobox $frmid.egroup -values [concat [list [mc "None"]] $allGroups] \
 	  -textvariable $token\(group)
 	
 	if {$config(subscribe,ui-vcard-pos) eq "name"} {
@@ -344,9 +345,9 @@ proc ::Subscribe::NewDlg {jid args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Yes] -default active \
+    ttk::button $frbot.btok -text [mc "Yes"] -default active \
       -command [list [namespace current]::Accept $w]
-    ttk::button $frbot.btcancel -text [mc No]  \
+    ttk::button $frbot.btcancel -text [mc "No"]  \
       -command [list [namespace current]::Deny $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -439,11 +440,11 @@ proc ::Subscribe::AcceptTimer {w secs} {
 	incr secs -1
 	set name [GetDisplayName $state(jid)]
 	if {$secs <= 0} {
-	    set msg [mc jamessautoaccepted2 $name]
-	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	    set msg [mc "%s can see your presence." $name]
+	    ::ui::dialog -title [mc "Info"] -icon info -type ok -message $msg
 	    $state(btaccept) invoke
 	} else {
-	    set msg [mc jamesssubscautoacc $secs]
+	    set msg [mc "Subscription request will be accepted in: %s secs." $secs]
 	    $state(waccept) configure -text $msg
 	    set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
 	}
@@ -459,11 +460,11 @@ proc ::Subscribe::RejectTimer {w secs} {
 	incr secs -1
 	set name [GetDisplayName $state(jid)]
 	if {$secs <= 0} {
-	    set msg [mc jamessautoreject2 $name]
-	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	    set msg [mc "%s cannot see your presence." $name]
+	    ::ui::dialog -title [mc "Info"] -icon info -type ok -message $msg
 	    $state(btdeny) invoke
 	} else {
-	    set msg [mc jamesssubscautorej $secs]
+	    set msg [mc "Subscription request will be rejected in: %s secs." $secs]
 	    $state(wreject) configure -text $msg
 	    set state(timer-id) [after 1000 [namespace code [list RejectTimer $w $secs]]]
 	}
@@ -563,7 +564,7 @@ proc ::Subscribe::Subscribe {jid name group} {
 	if {[string length $name]} {
 	    lappend opts -name $name
 	}
-	if {($group ne "") && ($group ne "None") && ($group ne [mc None])} {
+	if {($group ne "") && ($group ne "None") && ($group ne [mc "None"])} {
 	    lappend opts -groups [list $group]
 	}
 	eval {$jlib roster send_set $jid  \
@@ -612,8 +613,8 @@ proc ::Subscribe::ResProc {type queryE} {
 
 namespace eval ::SubscribeAuto {
     
-    ui::dialog button accept -text [mc Accept]
-    ui::dialog button reject -text [mc Reject]
+    ui::dialog button accept -text [mc "Accept"]
+    ui::dialog button reject -text [mc "Reject"]
 
     # We have different queues for ask/auto-accept/auto-reject (timers).
     variable queue
@@ -658,8 +659,8 @@ proc ::SubscribeAuto::HandleAccept {jid} {
 	    QueueConfirm accept $jid
 	} else {
 	    set name [::Roster::GetDisplayName $jid]
-	    set msg [mc jamessautoaccepted2 $name]
-	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	    set msg [mc "%s can see your presence." $name]
+	    ::ui::dialog -title [mc "Info"] -icon info -type ok -message $msg
 	}
 	if {$config(subscribe,auto-accept-send-msg)} {
 	    SendAcceptMsg $jid
@@ -691,8 +692,8 @@ proc ::SubscribeAuto::HandleReject {jid} {
 	    QueueConfirm reject $jid
 	} else {
 	    set name [::Roster::GetDisplayName $jid]
-	    set msg [mc jamessautoreject2 $name]
-	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	    set msg [mc "%s cannot see your presence." $name]
+	    ::ui::dialog -title [mc "Info"] -icon info -type ok -message $msg
 	}
 	if {$config(subscribe,auto-reject-send-msg)} {
 	    SendRejectMsg $jid
@@ -771,7 +772,7 @@ proc ::SubscribeAuto::QueueConfirm {type jid} {
 proc ::SubscribeAuto::ExecQueueConfirm {type} {
     variable wconfirm
     
-    ui::dialog $wconfirm($type) -title [mc Info] -icon info -type ok \
+    ui::dialog $wconfirm($type) -title [mc "Info"] -icon info -type ok \
       -message [QueueConfirmMsg $type] \
       -command [namespace code [list ConfirmOnDestroy $type]]
 }
@@ -784,9 +785,9 @@ proc ::SubscribeAuto::QueueConfirmMsg {type} {
 	lappend names [::Roster::GetDisplayName $jid]
     }	
     if {$type eq "accept"} {
-	set key jamessautoaccepted2
+	set key "%s can see your presence."
     } else {
-	set key jamessautoreject2
+	set key "%s cannot see your presence."
     }
     return [mc $key [join $names ", "]]
 }
@@ -804,7 +805,7 @@ proc ::SubscribeAuto::AcceptAfter {jid} {
     global  config
     
     set secs [expr {$config(subscribe,accept-after)/1000}]
-    set msg [mc jamesssubscautoacc $secs]
+    set msg [mc "Subscription request will be accepted in: %s secs." $secs]
     set w [ui::dialog -message $msg -buttons {accept reject} -default accept \
       -command [namespace code [list AcceptCmd $jid]]]    
     after 1000 [namespace code [list AcceptTimer $w $jid $secs]]
@@ -817,10 +818,10 @@ proc ::SubscribeAuto::AcceptTimer {w jid secs} {
 	if {$secs <= 0} {
 	    $w invoke accept
 	    set name [::Roster::GetDisplayName $jid]
-	    set msg [mc jamessautoaccepted2 $name]
-	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	    set msg [mc "%s can see your presence." $name]
+	    ::ui::dialog -title [mc "Info"] -icon info -type ok -message $msg
 	} else {
-	    set msg [mc jamesssubscautoacc $secs]
+	    set msg [mc "Subscription request will be accepted in: %s secs." $secs]
 	    $w configure -message $msg
 	    after 1000 [namespace code [list AcceptTimer $w $jid $secs]]
 	}
@@ -861,8 +862,8 @@ proc ::SubscribeAuto::SendSubscribe {jid} {
 	    $jlib roster send_set $jid -groups [list $jprefs(subsc,group)]
 	}
 	$jlib send_presence -to $jid -type "subscribe"
-	#set msg [mc jamessautosubs2 $jid]
-	#::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	#set msg [mc "You can see %s's presence." $jid]
+	#::ui::dialog -title [mc "Info"] -icon info -type ok -message $msg
     }    
 }
 
@@ -870,7 +871,7 @@ proc ::SubscribeAuto::RejectAfter {jid} {
     global  config
     
     set secs [expr {$config(subscribe,reject-after)/1000}]
-    set msg [mc jamesssubscautorej $secs]
+    set msg [mc "Subscription request will be rejected in: %s secs." $secs]
     set w [ui::dialog -message $msg -buttons {reject accept} -default reject \
       -command [namespace code [list RejectCmd $jid]]]    
     after 1000 [namespace code [list RejectTimer $w $jid $secs]]
@@ -883,10 +884,10 @@ proc ::SubscribeAuto::RejectTimer {w jid secs} {
 	if {$secs <= 0} {
 	    $w invoke reject
 	    set name [::Roster::GetDisplayName $jid]
-	    set msg [mc jamessautoreject2 $name]
-	    ::ui::dialog -title [mc Info] -icon info -type ok -message $msg
+	    set msg [mc "%s cannot see your presence." $name]
+	    ::ui::dialog -title [mc "Info"] -icon info -type ok -message $msg
 	} else {
-	    set msg [mc jamesssubscautorej $secs]
+	    set msg [mc "Subscription request will be rejected in: %s secs." $secs]
 	    $w configure -message $msg
 	    after 1000 [namespace code [list RejectTimer $w $jid $secs]]
 	}
@@ -1022,17 +1023,17 @@ proc ::SubscribeMulti::NewDlg {args} {
 
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 320 -justify left \
-      -text [mc jasubmulti $state(nusers)]
+      -text [mc "%s contacts want to see your presence. Select those who may see your presence." $state(nusers)]
     pack $wbox.msg -side top -anchor w
 
     if {$state(auto) eq "accept"} {
 	
 	#set secs [expr {$config(subscribe,accept-after)/1000}]
 	set secs $jprefs(subsc,timer-secs)
-	set msg [mc jamesssubscautoacc $secs]
+	set msg [mc "Subscription request will be accepted in: %s secs." $secs]
 	ttk::label $wbox.accept -style Small.TLabel \
 	  -text $msg -wraplength 320 -justify left
-	ttk::button $wbox.pause -style Url -text [mc Pause] \
+	ttk::button $wbox.pause -style Url -text [mc "Pause"] \
 	  -command [namespace code [list Pause $w]]
 	
 	pack $wbox.accept -side top -anchor w	
@@ -1049,10 +1050,10 @@ proc ::SubscribeMulti::NewDlg {args} {
 
 	#set secs [expr {$config(subscribe,reject-after)/1000}]
 	set secs $jprefs(subsc,timer-secs)
-	set msg [mc jamesssubscautorej $secs]
+	set msg [mc "Subscription request will be rejected in: %s secs." $secs]
 	ttk::label $wbox.reject -style Small.TLabel \
 	  -text $msg -wraplength 320 -justify left
-	ttk::button $wbox.pause -style Url -text [mc Pause] \
+	ttk::button $wbox.pause -style Url -text [mc "Pause"] \
 	  -command [namespace code [list Pause $w]]
 	
 	pack $wbox.reject -side top -anchor w	
@@ -1078,12 +1079,12 @@ proc ::SubscribeMulti::NewDlg {args} {
  	set wframe [::UI::ScrollFrameInterior $wbox.f]
     }
     
-    ttk::label $wframe.allow -text [mc Allow]
+    ttk::label $wframe.allow -text [mc "Allow"]
     ttk::label $wframe.jid   -text [mc "Contact ID"]
     ttk::checkbutton $wframe.all \
       -command [namespace code [list All $w]] \
       -variable $token\(all)
-    ttk::label $wframe.lall -text [mc All]
+    ttk::label $wframe.lall -text [mc "All"]
     
     grid  $wframe.allow  x  $wframe.jid -padx 0 -pady 4
     grid  $wframe.all    x  $wframe.lall
@@ -1099,7 +1100,7 @@ proc ::SubscribeMulti::NewDlg {args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -default active \
+    ttk::button $frbot.btok -text [mc "OK"] -default active \
       -command [list [namespace current]::Accept $w]
     pack $frbot.btok -side right
 
@@ -1137,7 +1138,7 @@ proc ::SubscribeMulti::AcceptTimer {w secs} {
 	if {$secs <= 0} {
 	    $state(btok) invoke
 	} else {
-	    set msg [mc jamesssubscautoacc $secs]
+	    set msg [mc "Subscription request will be accepted in: %s secs." $secs]
 	    $state(waccept) configure -text $msg
 	    set state(timer-id) [after 1000 [namespace code [list AcceptTimer $w $secs]]]
 	}
@@ -1154,7 +1155,7 @@ proc ::SubscribeMulti::RejectTimer {w secs} {
 	if {$secs <= 0} {
 	    $state(btok) invoke
 	} else {
-	    set msg [mc jamesssubscautorej $secs]
+	    set msg [mc "Subscription request will be rejected in: %s secs." $secs]
 	    $state(wreject) configure -text $msg
 	    set state(timer-id) [after 1000 [namespace code [list RejectTimer $w $secs]]]
 	}
@@ -1212,7 +1213,7 @@ proc ::SubscribeMulti::AddJID {w jid} {
     set f $state(frame)
         
     incr state(nusers)
-    $state(label) configure -text [mc jasubmulti $state(nusers)]
+    $state(label) configure -text [mc "%s contacts want to see your presence. Select those who may see your presence." $state(nusers)]
     
     set name   [::Jabber::Jlib roster getname $jid]
     set groups [::Jabber::Jlib roster getgroups $jid]
@@ -1275,11 +1276,11 @@ proc ::SubscribeMulti::More {w row} {
 
 	# Find all our groups for any jid.
 	set allGroups [::Jabber::Jlib roster getgroups]
-	set values [concat [list [mc None]] $allGroups]
+	set values [concat [list [mc "None"]] $allGroups]
 		
-	ttk::label $wcont.lnick -text "[mc {Nickname}]:" -anchor e
+	ttk::label $wcont.lnick -text [mc "Nickname"]: -anchor e
 	ttk::entry $wcont.enick -width 1 -textvariable $token\($row,name)
-	ttk::label $wcont.lgroup -text "[mc Group]:" -anchor e
+	ttk::label $wcont.lgroup -text [mc "Group"]: -anchor e
 	ttk::combobox $wcont.egroup -width 1 -values $values \
 	  -textvariable $token\($row,group)
 	ttk::button $wcont.vcard -style Plainer \
@@ -1318,7 +1319,7 @@ proc ::SubscribeMulti::GetContent {w} {
 	}
 	if {[info exists state($row,group)]} {
 	    set value [string trim $state($row,group)]
-	    set value [string map [list [mc None] ""] $value]
+	    set value [string map [list [mc "None"] ""] $value]
 	    if {$value ne ""} {
 		lappend content -group $value
 	    }
@@ -1404,7 +1405,7 @@ proc ::Subscribed::Handle {jid} {
     } else {
 	set name [::Roster::GetDisplayName $jid]
 	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
-	  -message [mc jamessallowsub2 $name]
+	  -message [mc "%s allows you to see his/her presence." $name]
     }
 }
 
@@ -1432,7 +1433,7 @@ proc ::Subscribed::ExecQueue {} {
 	set jid [lindex $queue 0]
 	set name [::Roster::GetDisplayName $jid]
 	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
-	  -message [mc jamessallowsub2 $name]
+	  -message [mc "%s allows you to see his/her presence." $name]
     } elseif {$len > 1} {
 	set w $wDlgs(jsubsced)
 	if {$config(subscribed,fancy-dlg)} {
@@ -1441,7 +1442,7 @@ proc ::Subscribed::ExecQueue {} {
 	    # This string is not in catalog by default.
 	    set str [mc "The following contacts can see your presence"]
 	    ::ui::dialog $w -title [mc "Presence Subscription"] -icon info \
-	      -type ok -message "[mc jasubmultians]:\n"
+	      -type ok -message [mc "%s contacts want to see your presence. Select those who may see your presence."]
 	}
 	AddJID [lindex $queue 0] 1
 	foreach jid [lrange $queue 1 end] {
@@ -1483,7 +1484,7 @@ proc ::Subscribed::FancyDlg {} {
     upvar 0 $w state
     set token [namespace current]::$w
 
-    set msg [mc jamesssubscedfancy 0]
+    set msg [mc "%s additional contacts can see your presence." 0]
     ::ui::dialog $w -title [mc "Presence Subscription"] -icon info -type ok \
       -expandclient 1
     set fr [$w clientframe]
@@ -1530,7 +1531,7 @@ proc ::Subscribed::AddJIDFancy {w jid {first 0}} {
     lassign [grid size $fr] ncol nrow
     
     set nusers [expr {$nrow + 1}]
-    $state(label) configure -text [mc jamesssubscedfancy $nusers]
+    $state(label) configure -text [mc "%s additional contacts can see your presence." $nusers]
   
     set jstr [::Roster::GetDisplayName $jid]
     set jlen [font measure CociSmallFont $jstr]
@@ -1624,21 +1625,15 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     set wsubs $wc.fr
     ttk::frame $wsubs -padding {0 0 0 12}
     pack  $wsubs  -side top -fill x
-    
-    array set strA {
-	ask     "Always ask"
-	accept  "Auto-accept"
-	reject  "Auto-reject"
-    }
 
-    ttk::label $wsubs.la1  -text "[mc prefsuif2]..."
-    ttk::label $wsubs.lnot -text "...[mc prefsuisnot2]:"
-    ttk::label $wsubs.lin  -text "...[mc prefsuis2]:"
+    ttk::label $wsubs.la1  -text [mc "If someone wants to see my presence and"]...
+    ttk::label $wsubs.lnot -text ...[mc "is not in my list"]:
+    ttk::label $wsubs.lin  -text ...[mc "is in my list"]:
 
     set mDef [list \
-      [list [mc $strA(ask)] -value ask] \
-      [list [mc $strA(accept)] -value accept] \
-      [list [mc $strA(reject)] -value reject] ]
+      [list [mc "Always ask"] -value ask] \
+      [list [mc "Auto-accept"] -value accept] \
+      [list [mc "Auto-reject"] -value reject] ]
     
     ui::optionmenu $wsubs.min -menulist $mDef \
       -variable [namespace current]::tmpp(subsc,inrost)
@@ -1661,10 +1656,10 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
     
     set autoCmd [list PrefsSetEntryState $wtimer.e tmpp(subsc,timer)]
     
-    ttk::checkbutton $wtimer.c -text "[mc prefsuaatimer]:" \
+    ttk::checkbutton $wtimer.c -text [mc "If auto-accept/reject show dialog with timer"]: \
       -variable [namespace current]::tmpp(subsc,timer) \
       -command [namespace code $autoCmd]
-    ttk::label $wtimer.l -text "[mc prefsuaasecs]:"
+    ttk::label $wtimer.l -text [mc "The dialog is closed after (Seconds)"]:
     ttk::entry $wtimer.e -width 3 \
       -textvariable [namespace current]::tmpp(subsc,timer-secs) \
       -validate key -validatecommand [namespace code {ValidSecs %S}]
@@ -1684,7 +1679,7 @@ proc ::Subscribe::BuildPageSubscriptions {page} {
 
     set groupCmd [list PrefsSetEntryState $wauto.ent tmpp(subsc,auto)]
 
-    ttk::checkbutton $wauto.sub -text "[mc prefsuauto2]:" \
+    ttk::checkbutton $wauto.sub -text [mc "Put contacts who add me to their list in"]: \
       -variable [namespace current]::tmpp(subsc,auto) \
       -command [namespace code $groupCmd]
     ttk::label $wauto.la -text [mc "Default group"]:

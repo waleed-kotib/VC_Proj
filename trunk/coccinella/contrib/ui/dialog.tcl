@@ -239,13 +239,13 @@ snit::widget ui::dialog::widget {
 
 	# Built-in button types:
 	#
-	StockButton ok 	    -text [::msgcat::mc OK]
-	StockButton cancel  -text [::msgcat::mc Cancel]
-	StockButton yes	    -text [::msgcat::mc Yes]
-	StockButton no	    -text [::msgcat::mc No]
-	StockButton retry   -text [::msgcat::mc Retry]
-	StockButton abort   -text [::msgcat::mc Abort]
-	StockButton ignore  -text [::msgcat::mc Ignore]
+	StockButton ok 	    -text [::msgcat::mc "OK"]
+	StockButton cancel  -text [::msgcat::mc "Cancel"]
+	StockButton yes	    -text [::msgcat::mc "Yes"]
+	StockButton no	    -text [::msgcat::mc "No"]
+	StockButton retry   -text [::msgcat::mc "Retry"]
+	StockButton abort   -text [::msgcat::mc "Abort"]
+	StockButton ignore  -text [::msgcat::mc "Ignore"]
 
 	# Built-in dialog types:
 	#

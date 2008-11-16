@@ -229,7 +229,7 @@ proc ::NewMsg::Build {args} {
       -usemacmainmenu 1 \
       -closecommand ::NewMsg::CloseHook
 
-    wm title $w [mc Message]
+    wm title $w [mc "Message"]
     
     bind $w <<ToolbarButton>> { ::NewMsg::OnToolbarButton %W }
 
@@ -299,17 +299,17 @@ proc ::NewMsg::Build {args} {
 	pack  $wbot.banner -side $buttonRowSide -fill x -expand 1
     }
 
-    $wtray newbutton send  -text [mc Send]  \
+    $wtray newbutton send  -text [mc "Send"]  \
       -image $iconSend -disabledimage $iconSendDis  \
       -command [list ::NewMsg::DoSend $w]
-    $wtray newbutton quote -text [mc Quote]  \
+    $wtray newbutton quote -text [mc "Quote"]  \
       -image $iconQuote -disabledimage $iconQuoteDis  \
       -command [list ::NewMsg::DoQuote $w $opts(-quotemessage) $opts(-to) $opts(-time)] \
       -state $quotestate
-    $wtray newbutton save  -text [mc Save]  \
+    $wtray newbutton save  -text [mc "Save"]  \
       -image $iconSave -disabledimage $iconSaveDis  \
       -command [list ::NewMsg::SaveMsg $w]
-    $wtray newbutton print -text [mc Print]  \
+    $wtray newbutton print -text [mc "Print"]  \
       -image $iconPrint -disabledimage $iconPrintDis  \
       -command [list ::NewMsg::DoPrint $w]
     
@@ -364,7 +364,7 @@ proc ::NewMsg::Build {args} {
     ttk::frame $frsub
     pack  $frsub -side top -fill x
     ttk::label $frsub.lsub -style Small.TLabel \
-      -text "[mc Subject]:" -anchor e -takefocus 0 -padding {2 0}
+      -text [mc "Subject"]: -anchor e -takefocus 0 -padding {2 0}
     ttk::entry $wsubject -font CociSmallFont \
       -textvariable [namespace current]::locals($w,subject)
     pack  $frsub.lsub -side left
@@ -439,11 +439,17 @@ proc ::NewMsg::Build {args} {
 	$wtext insert end [mc "Forwarded message"]
 	$wtext insert end " ----------"
 	$wtext insert end "\n"
-	$wtext insert end "[mc From]: $name <$from>"
+	set msg [mc "From"]
+	append msg ": $name <$from>"
+	$wtext insert end $msg
 	$wtext insert end "\n"
-	$wtext insert end "[mc Date]: $date"
+	set msg [mc "Date"]
+	append msg ": $date"
+	$wtext insert end $msg
 	$wtext insert end "\n"
-	$wtext insert end "[mc Subject]: $origSubject"
+	set msg [mc "Subject"]
+	append msg ": $origSubject"
+	$wtext insert end $msg
 	$wtext insert end "\n\n"
 	$wtext insert end $opts(-forwardmessage)
     }
@@ -879,7 +885,7 @@ proc ::NewMsg::DoSend {w} {
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
 	::UI::MessageBox -type ok -icon error -parent $w \
-	  -title [mc Error] -message [mc jamessnotconnected2]
+	  -title [mc "Error"] -message [mc "Cannot send when not logged in."]
 	return
     }
     array set oopts $locals($w,opts)
@@ -892,10 +898,10 @@ proc ::NewMsg::DoSend {w} {
 	if {[string length $jid] > 0} {
 	    if {![jlib::jidvalidate $jid]} {
 		if {$locals($w,addrline) > 1} {
-		    set msg [mc jamessskipsendq2 $addr]
+		    set msg [mc "Contact ID %s is invalid. Do you want to skip it and send to the rest?" $addr]
 		    set type yesnocancel
 		} else {
-		    set msg [mc jamessillformresend2 $addr]
+		    set msg [mc "Invalid Contact ID: %s. Please correct and resend." $addr]
 		    set type ok
 		}
 		set ans [::UI::MessageBox -type $type -parent $w -message $msg]
@@ -915,8 +921,8 @@ proc ::NewMsg::DoSend {w} {
     
     # Be sure there are at least one jid.
     if {[llength $jidL] == 0} {
-	::UI::MessageBox -title [mc Error] \
-	  -icon error -type ok -parent $w -message [mc jamessaddrmiss]
+	::UI::MessageBox -title [mc "Error"] \
+	  -icon error -type ok -parent $w -message [mc "You need to fill in at least one valid address."]
 	return
     }
     set opts [list]
@@ -975,7 +981,7 @@ proc ::NewMsg::DoQuote {w message to time} {
     set tfmt [option get $w replyTimeFormat {}]
     set date [clock format $secs -format $tfmt]
     set name [::Roster::GetShortName $to]
-    set prefix [mc reply-prefix $date $name "<$to>"]    
+    set prefix [mc "On %s, %s %s wrote:" $date $name "<$to>"]    
     regsub -all "\n" $message "\n> " quoteMsg
 
     $wtext insert end "$prefix"
@@ -999,7 +1005,7 @@ proc ::NewMsg::SaveMsg {w} {
 	set wtext $locals($w,wtext)
 	set allText [::Text::TransformToPureText $wtext]
     }
-    set ans [tk_getSaveFile -title [mc {Save Message}] \
+    set ans [tk_getSaveFile -title [mc "Save Message"] \
       -initialfile Untitled.txt]
     if {[string length $ans]} {
 	set fd [open $ans w]
@@ -1057,9 +1063,9 @@ proc ::NewMsg::QuitAppHook {} {
 		set warn 1
 	    }
 	    if {$warn} {
-		set ans [::UI::MessageBox -title [mc Warning] \
+		set ans [::UI::MessageBox -title [mc "Warning"] \
 		  -icon warning -type yesno -default "no" \
-		  -message [mc jamessmsgwarnquit]]
+		  -message [mc "There are unsaved messages. Do you still want to quit?"]]
 		if {$ans eq "no"} {
 		    # @@@ missing return check here!
 		    return "stop"
@@ -1088,11 +1094,11 @@ proc ::NewMsg::CloseDlg {w} {
     }
     set doDestroy 0
     if {$warn} {
-	set ans [::UI::MessageBox -title [mc Warning]  \
+	set ans [::UI::MessageBox -title [mc "Warning"]  \
 	  -icon warning -type yesnocancel -default "no" -parent $w \
-	  -message [mc jamesssavemsg]]
+	  -message [mc "Do you want to save this message before closing?"]]
 	if {$ans eq "yes"} {
-	    set ansFile [tk_getSaveFile -title [mc {Save Message}] \
+	    set ansFile [tk_getSaveFile -title [mc "Save Message"] \
 		-initialfile Untitled.txt]
 	    if {[string length $ansFile] > 0} {
 		set doDestroy 1

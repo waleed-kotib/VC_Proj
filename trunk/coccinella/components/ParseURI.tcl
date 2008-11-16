@@ -217,7 +217,7 @@ proc ::ParseURI::Parse {args} {
 	set profname $state(profname)
 	variable ans "ok"
 	if {$password eq ""} {
-	    set w [ui::dialog -message [mc enterpassword $state(jid)]  \
+	    set w [ui::dialog -message [mc "Enter the password for your account %s" $state(jid)]  \
 	      -icon info -type okcancel -modal 1  \
 	      -variable [namespace current]::ans]
 	    set fr [$w clientframe]
@@ -388,12 +388,12 @@ proc ::ParseURI::HandleJoinGroupchat {token} {
     set state(nick) $state(resource)
     if {$state(nick) eq ""} {
 	variable ans
-	set str [mc jagcreqnick $state(jid2)]
-	set w [ui::dialog -message $str -title [mc Nickname]  \
+	set str [mc "Please enter your desired nickname for the chatroom %s" $state(jid2)]
+	set w [ui::dialog -message $str -title [mc "Nickname"]  \
 	  -icon info -type okcancel -modal 1  \
 	  -variable [namespace current]::ans]
 	set fr [$w clientframe]
-	ttk::label $fr.l -text "[mc Nickname]:"
+	ttk::label $fr.l -text [mc "Nickname"]:
 	ttk::entry $fr.e -textvariable $token\(nick)
 	pack $fr.l -side left
 	pack $fr.e -side top -fill x

@@ -47,33 +47,32 @@ namespace eval ::Gateway {
     # Names for popup etc.
     # These go into the message catalog.
     variable shortName
-    array set shortName {
-	aim         AIM
-	gadu-gadu   Gadu-Gadu
-	icq         ICQ
-	irc         IRC
-	jabber      Jabber
-	msn         MSN
-	qq          QQ
-	smtp        Email
-	tlen        Tlen
-	xmpp        Jabber
-	yahoo       Yahoo
-    }
+    set shortName [dict create]
+	dict set shortName aim         [mc "AIM"]
+	dict set shortName gadu-gadu   [mc "Gadu-Gadu"]
+	dict set shortName icq         [mc "ICQ"]
+	dict set shortName irc         [mc "IRC"]
+	dict set shortName jabber      [mc "Jabber"]
+	dict set shortName msn         [mc "MSN"]
+	dict set shortName qq          [mc "QQ"]
+	dict set shortName smtp        [mc "Email"]
+	dict set shortName tlen        [mc "Tlen"]
+	dict set shortName xmpp        [mc "Jabber"]
+	dict set shortName yahoo       [mc "Yahoo"]
     
     # Default prompts and descriptions.
-    # These go into the message catalog.
     variable promptText
-    set promptText(aim)        "Screen Name"
-    set promptText(gadu-gadu)  "Gadu-Gadu Number"
-    set promptText(icq)        "ICQ Number"
-    set promptText(irc)        "IRC"
-    set promptText(msn)        "MSN Address"
-    set promptText(smtp)       "Email Address"
-    set promptText(qq)         "QQ Number"
-    set promptText(tlen)       "Tlen Address"
-    set promptText(xmpp)       "Jabber ID"
-    set promptText(yahoo)      "Yahoo ID"
+    set promptText [dict create]
+    dict set promptText aim        [mc "Screen Name"]
+    dict set promptText gadu-gadu  [mc "Gadu-Gadu Number"]
+    dict set promptText icq        [mc "ICQ Number"]
+    dict set promptText irc        [mc "IRC"]
+    dict set promptText msn        [mc "MSN Address"]
+    dict set promptText smtp       [mc "Email Address"]
+    dict set promptText qq         [mc "QQ Number"]
+    dict set promptText tlen       [mc "Tlen Address"]
+    dict set promptText xmpp       [mc "Jabber ID"]
+    dict set promptText yahoo      [mc "Yahoo ID"]
     
     # Each gateway must transform its "prompt" (user ID) to a JID.
     # These templates provides such a mapping. 
@@ -81,7 +80,7 @@ namespace eval ::Gateway {
     variable template
     array set template {
 	aim         userName@%s
-	icq         screeNumber@%s
+	icq         screenNumber@%s
 	jabber      userName@%s
 	msn         userName%%hotmail.com@%s
 	smtp        userName%%emailserver@%s
@@ -148,8 +147,8 @@ proc ::Gateway::GetShort {type} {
     variable shortName
     
     set type [string map {"x-" ""} $type]
-    if {[info exists shortName($type)]} {
-	return [mc $shortName($type)]
+    if {[dict exists $shortName $type]} {
+	return [dict get $shortName $type]
     } else {
 	return [string totitle $type]
     }
@@ -179,8 +178,8 @@ proc ::Gateway::GetPrompt {type} {
     set type [string map {"x-" ""} $type]
     if {[info exists gateway(prompt,$type)]} {
 	return $gateway(prompt,$type)
-    } elseif {[info exists promptText($type)]} {
-	return [mc $promptText($type)]
+    } elseif {[dict exists $promptText $type]} {
+	return [dict get $promptText $type]
     } else {
 	return [string totitle $type]
     }

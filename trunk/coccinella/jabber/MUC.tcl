@@ -172,7 +172,7 @@ proc ::MUC::Invite {roomjid args} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
     
-    set msg [mc jainvitegchat2 $node]
+    set msg [mc "Invite contact to chatroom %s." $node]
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 300 -justify left -text $msg
     pack $wbox.msg -side top -anchor w
@@ -185,7 +185,7 @@ proc ::MUC::Invite {roomjid args} {
 
     InviteMakeContactWidgets $w $jidL
     
-    ttk::label $wmid.lre -text "[mc Message]:"
+    ttk::label $wmid.lre -text [mc "Message"]:
     ttk::entry $wmid.ere -textvariable $token\(reason)
     
     grid  $wmid.lre  $wmid.ere   -sticky e -padx 2 -pady 2 -row 100
@@ -198,9 +198,9 @@ proc ::MUC::Invite {roomjid args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK]  \
+    ttk::button $frbot.btok -text [mc "OK"]  \
       -default active -command [list [namespace current]::DoInvite $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::InviteClose $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -238,7 +238,7 @@ proc ::MUC::InviteMakeContactWidgets {w jidL} {
 	}
 	set invite(jid$n) $jid
 	if {![winfo exists $wmid.la$n]} {
-	    ttk::label $wmid.la$n -text "[mc {Contact ID}]:"
+	    ttk::label $wmid.la$n -text [mc "Contact ID"]:
 	    ui::comboboxex $wmid.ejid$n -library $users \
 	      -textvariable $token\(jid$n) -values $users
 	
@@ -310,13 +310,14 @@ proc ::MUC::InviteCB {roomjid jid jlibname type args} {
     array set argsA $args
     
     if {$type eq "error"} {
-	set msg [mc mucErrInvite2 $jid $roomjid]
+	set msg [mc "Cannot invite %s to %s." $jid $roomjid]
 	if {[info exists argsA(-error)]} {
 	    set errcode [lindex $argsA(-error) 0]
 	    set errmsg [lindex $argsA(-error) 1]
-	    append msg "[mc Error]: $errmsg"
+	    append msg [mc "Error"]
+	    append msg ": $errmsg"
 	}
-	::UI::MessageBox -icon error -title [mc Error] -type ok -message $msg
+	::UI::MessageBox -icon error -title [mc "Error"] -type ok -message $msg
     }
 }
 
@@ -357,17 +358,18 @@ proc ::MUC::MUCMessage {jlibname xmlns msgElem args} {
     }
     
     if {$invite} {        
-	set msg [mc mucInviteText2]
+	set msg [mc "%s invites you to join chatroom %s."]
 	set opts [list]
 	if {[info exists reason]} {
-	    append msg "\n" "[mc Message]: $reason"
+	    append msg "\n" [mc "Message"]
+	    append msg ": $reason"
 	}
 	if {[info exists password]} {
-	    append msg " " [mc mucInvitePass $password]
+	    append msg " " [mc "The password %s is needed for entry." $password]
 	    lappend opts -password $password
 	}
-	append msg [mc mucInviteQuest]
-	set ans [::UI::MessageBox -icon info -type yesno -title [mc Invitation] \
+	append msg [mc "Do you want to join right away?"]
+	set ans [::UI::MessageBox -icon info -type yesno -title [mc "Invitation"] \
 	  -message $msg]
 	if {$ans eq "yes"} {
 	    eval {BuildEnter -roomjid $from} $opts
@@ -421,7 +423,9 @@ proc ::MUC::BuildInfo {roomjid} {
     ::UI::Toplevel $w -class JMUCInfo \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace current]::InfoCloseHook
-    wm title $w "[mc {Configure Chatroom}]: $roomName"
+    set msg [mc "Configure Chatroom"]
+    append msg ": $roomName"
+    wm title $w $msg
     
     # Global frame.
     ttk::frame $w.frall
@@ -432,7 +436,7 @@ proc ::MUC::BuildInfo {roomjid} {
 	set imd [::Theme::Find32Icon $w infoDisImage]
 
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc {Configure Chatroom}] -compound left \
+	  -text [mc "Configure Chatroom"] -compound left \
 	  -image [list $im background $imd]
 	pack $w.frall.head -side top -anchor w
 	
@@ -444,17 +448,17 @@ proc ::MUC::BuildInfo {roomjid} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
     
-    if {0} {
-	set msg [mc InfoRoomDesc]
-	ttk::label $wbox.msg -style Small.TLabel \
-	  -padding {0 0 0 12} -wraplength 300 -justify left -text $msg
-	pack $wbox.msg -side top -anchor w
-    }
+#    if {0} {
+#	set msg [mc "This dialog makes available a number of options and actions for a chatroom. Your role and affiliation determines your privilege to act. Further restrictions may exist depending on specific chatroom configuration."]
+#	ttk::label $wbox.msg -style Small.TLabel \
+#	  -padding {0 0 0 12} -wraplength 300 -justify left -text $msg
+#	pack $wbox.msg -side top -anchor w
+#    }
     
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btcancel -style TButton -text [mc Cancel] \
+    ttk::button $frbot.btcancel -style TButton -text [mc "Cancel"] \
       -command [list [namespace current]::Close $roomjid]
     pack $frbot.btcancel -side right
     pack $frbot -side bottom -fill x
@@ -470,7 +474,7 @@ proc ::MUC::BuildInfo {roomjid} {
     set wtbl  $frtab.tb
     ttk::frame $frtab
     pack $frtab -side top
-    set columns [list 0 [mc Nickname] 0 [mc Role] 0 [mc Affiliation]]
+    set columns [list 0 [mc "Nickname"] 0 [mc "Role"] 0 [mc "Affiliation"]]
     
     tablelist::tablelist $wtbl  \
       -columns $columns -stretch all -selectmode single  \
@@ -500,19 +504,26 @@ proc ::MUC::BuildInfo {roomjid} {
         
     # Grant buttons ---
     set wgrant $frgrantrevoke.grant
-    ttk::labelframe $wgrant -text "[mc Grant]:" \
+    ttk::labelframe $wgrant -text [mc "Grant"]: \
       -padding [option get . groupSmallPadding {}]
     
+    set MucButtons [dict create]
+    dict set MucButtons Voice     [mc "Voice"]
+    dict set MucButtons Member    [mc "Member"]
+    dict set MucButtons Moderator [mc "Moderator"]
+    dict set MucButtons Admin     [mc "Admin"]
+    dict set MucButtons Owner     [mc "Owner"]
+
     foreach txt {Voice Member Moderator Admin Owner} {
 	set stxt [string tolower $txt]
-	ttk::button $wgrant.bt$stxt -text [mc $txt]  \
+	ttk::button $wgrant.bt$stxt -text [dict get $MucButtons $txt]  \
 	  -command [list [namespace current]::GrantRevoke $roomjid grant $stxt]
 	grid  $wgrant.bt$stxt  -sticky ew -pady 4
     }
     
     # Revoke buttons ---
     set wrevoke $frgrantrevoke.rev
-    ttk::labelframe $wrevoke -text "[mc Revoke]:" \
+    ttk::labelframe $wrevoke -text [mc "Revoke"]: \
       -padding [option get . groupSmallPadding {}]
     
     foreach txt {Voice Member Moderator Admin Owner} {
@@ -549,7 +560,7 @@ proc ::MUC::BuildInfo {roomjid} {
     
     # Edit lists ---
     set wlist $frmid.lists
-    ttk::labelframe $wlist -text "[mc {Edit Lists}]:" \
+    ttk::labelframe $wlist -text [mc "Edit Lists"]: \
       -padding [option get . groupSmallPadding {}]
     pack $wlist -side top -pady 8
 
@@ -765,7 +776,7 @@ proc ::MUC::GrantRevoke {roomjid which type} {
     set sdef [subst $dlgDefs($which,$type)]
     set title [lindex $sdef 0]
     set msg   [lindex $sdef 1]
-    set ans [ui::megaentry -label "[mc {Profile Name}]:" -icon "" \
+    set ans [ui::megaentry -label [mc "Profile Name"]: -icon "" \
       -geovariable prefs(winGeom,jmucact) -title $title -message $msg]
 
     if {$ans ne ""} {
@@ -794,9 +805,9 @@ proc ::MUC::Kick {roomjid} {
     set nick [jlib::escapestr $unick]
     jlib::splitjidex $roomjid roomName - -
     
-    set title [mc {Kick Participant}]
-    set msg [mmc mucKick $unick $roomName]
-    set ans [ui::megaentry -label "[mc Message]:" -icon "" \
+    set title [mc "Kick Participant"]
+    set msg [mc "Kick %s from the chatroom %s." $unick $roomName]
+    set ans [ui::megaentry -label [mc "Message"]: -icon "" \
       -geovariable prefs(winGeom,jmucact) -title $title -message $msg]
 
     if {$ans ne ""} {
@@ -824,8 +835,8 @@ proc ::MUC::Ban {roomjid} {
     set nick [jlib::escapestr $unick]
     jlib::splitjidex $roomjid roomName - -
 
-    set msg [mc mucBan2 $unick $roomName]
-    set ans [ui::megaentry -label "[mc Message]:" -icon "" \
+    set msg [mc "Ban %s from the chatroom %s." $unick $roomName]
+    set ans [ui::megaentry -label [mc "Message"]: -icon "" \
       -geovariable prefs(winGeom,jmucact) -message $msg]
 
     if {$ans ne ""} {
@@ -863,14 +874,14 @@ proc ::MUC::EditListBuild {roomjid type} {
     variable setListDefs
     
     # Customize according to the $type.
-    array set editmsg {
-	voice     "Edit the voice list"
-	ban       "Edit the ban list"
-	member    "Edit the member list"
-	moderator "Edit the moderator list"
-	admin     "Edit the admin list"
-	owner     "Edit the owner list"
-    }
+    set editmsg [dict create]
+	dict set editmsg voice     [mc "Edit the voice list"]
+	dict set editmsg ban       [mc "Edit the ban list"]
+	dict set editmsg member    [mc "Edit the member list"]
+	dict set editmsg moderator [mc "Edit the moderator list"]
+	dict set editmsg admin     [mc "Edit the admin list"]
+	dict set editmsg owner     [mc "Edit the owner list"]
+    
     array set setListDefs {
 	voice     {nick affiliation role jid reason}
 	ban       {jid reason}
@@ -912,7 +923,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     pack $wbox -fill both -expand 1
     
     ttk::label $wbox.msg  \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc $editmsg($type)]
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [dict get $editmsg $type]
     pack $wbox.msg -side top -anchor w
     
     #
@@ -973,11 +984,11 @@ proc ::MUC::EditListBuild {roomjid type} {
     ttk::frame $wbts
     pack $wbts -side right -anchor n -padx 4 -pady 4
     
-    ttk::button $wbtadd -text [mc Add] \
+    ttk::button $wbtadd -text [mc "Add"] \
       -command [list [namespace current]::EditListDoAdd $token]
     ttk::button $wbtedit -text [mc mEdit] \
       -command [list [namespace current]::EditListDoEdit $token]
-    ttk::button $wbtrm -text [mc Remove] \
+    ttk::button $wbtrm -text [mc "Remove"] \
       -command [list [namespace current]::EditListDoRemove $token]
     
     grid  $wbtadd   -pady 8 -sticky ew
@@ -994,12 +1005,12 @@ proc ::MUC::EditListBuild {roomjid type} {
     set wbtok     $frbot.btok
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     pack $frbot  -side bottom -fill x -padx 10 -pady 8
-    ttk::button $frbot.btok -text [mc OK] \
+    ttk::button $frbot.btok -text [mc "OK"] \
       -default active -command [list [namespace current]::EditListOK $token]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::EditListCancel $token]
     ::UI::ChaseArrows $frbot.arr
-    ttk::button $frbot.btres -text [mc Reset]  \
+    ttk::button $frbot.btres -text [mc "Reset"]  \
       -command [list [namespace current]::EditListReset $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -1147,7 +1158,7 @@ proc ::MUC::EditListGetCB {token callid jlibname type subiq} {
 	set state(finished) 0
 	update idletasks
 	lassign $subiq errkey errmsg
-	::UI::MessageBox -type ok -title [mc Error] -icon error -message $errmsg
+	::UI::MessageBox -type ok -title [mc "Error"] -icon error -message $errmsg
 	return
     }
     
@@ -1232,8 +1243,8 @@ proc ::MUC::VerifyEditEntry {token wtbl row col text} {
     
     if {![jlib::jidvalidate $text]} {
 	bell
-	::UI::MessageBox -icon error -title [mc Error] \
-	  -message [mc jamessbadjid2 $text] \
+	::UI::MessageBox -icon error -title [mc "Error"] \
+	  -message [mc "%s is invalid. Do you want to continue anyway?" $text] \
 	  -parent [winfo toplevel $wtbl] -type ok
 	$wtbl rejectinput
 	return
@@ -1341,8 +1352,8 @@ proc ::MUC::EditListSet {token} {
     upvar 0 $token state
     variable setListDefs
     
-    tk_messageBox -icon error -title [mc Error] \
-      -message [mc matsShouldReplaceThis]
+    tk_messageBox -icon error -title [mc "Error"] \
+      -message [mc "Not yet implemented."]
     return
 
     # Original and present content of tablelist.
@@ -1408,7 +1419,7 @@ proc ::MUC::RoomConfig {roomjid} {
     set w $wDlgs(jmuccfg)[incr dlguid]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} -class MUCConfig
-    wm title $w [mc {Configure Chatroom}]
+    wm title $w [mc "Configure Chatroom"]
     
     # Global frame.
     ttk::frame $w.frall
@@ -1424,9 +1435,9 @@ proc ::MUC::RoomConfig {roomjid} {
     set wbtok     $frbot.btok
     set wbtcancel $frbot.btcancel
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -default active \
+    ttk::button $frbot.btok -text [mc "OK"] -default active \
       -command [list [namespace current]::DoRoomConfig $roomjid $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelConfig $roomjid $w]
     ::UI::ChaseArrows $warrows
     set padx [option get . buttonPadX {}]
@@ -1499,7 +1510,7 @@ proc ::MUC::ConfigGetCB {roomjid jlibname type subiq} {
     if {$type eq "error"} {
 	destroy [winfo toplevel $wscrollframe]
 	lassign $subiq errcode errmsg
-	::UI::MessageBox -icon error -type ok -title [mc Error] -message $errmsg
+	::UI::MessageBox -icon error -type ok -title [mc "Error"] -message $errmsg
     } else {
 	set frint [::UI::ScrollFrameInterior $wscrollframe]
 	set wform $frint.f
@@ -1526,7 +1537,7 @@ proc ::MUC::RoomConfigResult {roomjid jlibname type subiq} {
 
     if {$type eq "error"} {
 	regexp {^([^@]+)@.*} $roomjid match roomName
-	::UI::MessageBox -type ok -icon error -title [mc Error] \
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
 	  -message "We failed trying to configurate room \"$roomName\".\
 	  [lindex $subiq 0] [lindex $subiq 1]"
     }
@@ -1539,9 +1550,9 @@ proc ::MUC::RoomConfigResult {roomjid jlibname type subiq} {
 proc ::MUC::SetNick {roomjid} {
     variable locals
         
-    set title [mc {Set New Nickname}]
-    set msg   [mc {Select a new nickname}]
-    set ans [ui::megaentry -label "[mc {New Nickname}]:" -icon question \
+    set title [mc "Set New Nickname"]
+    set msg   [mc "Select a new nickname"]
+    set ans [ui::megaentry -label [mc "New Nickname"]: -icon question \
       -geovariable prefs(winGeom,jmucnick) -title $title -message $msg]
 	
     if {$ans ne ""} {
@@ -1576,7 +1587,9 @@ proc ::MUC::Destroy {roomjid} {
     if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y
     }
-    wm title $w "[mc {Destroy Chatroom}]: $roomName"
+    set msg [mc "Destroy Chatroom"]
+    append msg ": $roomName"
+    wm title $w $msg
     ::UI::SetWindowPosition $w $wDlgs(jmucdestroy)
     set findestroy -1
     
@@ -1588,7 +1601,7 @@ proc ::MUC::Destroy {roomjid} {
     ttk::frame $wbox -padding [option get . dialogPadding {}]
     pack $wbox -fill both -expand 1
     
-    set msg [mc mucDestroy2 $roomName]
+    set msg [mc "Do you want to destroy the chatroom %s? Optionally, you can point present chatroom participants to an alternative chatroom and tell why the chatroom is destroyed." $roomName]
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 360 -justify left -text $msg
     pack $wbox.msg -side top -anchor w
@@ -1599,9 +1612,9 @@ proc ::MUC::Destroy {roomjid} {
     
     ttk::label $wmid.la -text [mc "Alternative chatroom"]
     ttk::combobox $wmid.ejid -textvariable [namespace current]::destroyAltJID
-    ttk::button $wmid.browse -text [mc Discover] \
+    ttk::button $wmid.browse -text [mc "Discover"] \
       -command [namespace code DestroyBrowse]
-    ttk::label $wmid.lre -text "[mc Message]:"
+    ttk::label $wmid.lre -text [mc "Message"]:
     ttk::entry $wmid.ere -textvariable [namespace current]::destroyreason
     
     grid  $wmid.la   $wmid.ejid  $wmid.browse  -pady 2
@@ -1615,9 +1628,9 @@ proc ::MUC::Destroy {roomjid} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK]  \
+    ttk::button $frbot.btok -text [mc "OK"]  \
       -default active -command [list set [namespace current]::findestroy 1]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list set [namespace current]::findestroy 0]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -1698,9 +1711,11 @@ proc ::MUC::IQCallback {roomjid jlibname type subiq} {
     
     if {[string equal $type "error"]} {
 	jlib::splitjidex $roomjid roomName - -
-	set str [mc mucIQError2 $roomName]
-	append str "\n" "[mc Error]: $subiq"
-	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
+	set str [mc "Cannot interact with the chatroom %s." $roomName]
+	append str "\n"
+	    append str [mc "Error"]
+	    append str ": $subiq"
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] -message $str
     }
 }
 
@@ -1719,9 +1734,11 @@ proc ::MUC::PresCallback {jlibname xmldata} {
 	    set errmsg  [lindex $errspec 1]
 	}
 	jlib::splitjidex $from roomName - -
-	set str [mc mucIQError2 $roomName]
-	append str "\n" "[mc Error]: $errmsg"
-	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
+	set str [mc "Cannot interact with the chatroom %s." $roomName]
+	append str "\n"
+	append str [mc "Error"]
+	append str ": $errmsg"
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] -message $str
     }
 }
 

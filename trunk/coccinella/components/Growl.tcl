@@ -68,9 +68,10 @@ proc ::Growl::MessageHook {xmldata uuid} {
     set jid [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $jid]
     set ujid [jlib::unescapejid $jid2]
-    set title "[mc Message]: $ujid"
+    set title [mc "Message"]
+    append title ": $ujid"
     set subject [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata subject]]
-    growl post [mc Message] $title $subject $cociFile
+    growl post [mc "Message"] $title $subject $cociFile
 }
 
 proc ::Growl::ChatMessageHook {xmldata} {    
@@ -89,7 +90,8 @@ proc ::Growl::ChatMessageHook {xmldata} {
     if {[::Chat::HaveChat $jid]} {
 	return
     }
-    set title "[mc Message]: $ujid"
+    set title [mc "Message"]
+    append title ": $ujid"
     
     # Not sure if only new subjects should be added.
     # If we've got a threadid we can always geta a handle on to
@@ -101,7 +103,7 @@ proc ::Growl::ChatMessageHook {xmldata} {
     if {$subject ne ""} {
 	append title "\n$subject"
     }
-    growl post [mc Message] $title $body $cociFile
+    growl post [mc "Message"] $title $body $cociFile
 }
 
 proc ::Growl::PresenceHook {jid type args} {
@@ -157,7 +159,7 @@ proc ::Growl::PresenceHook {jid type args} {
 	if {$status ne ""} {
 	    append msg "\n$status"
 	}
-	growl post [mc Status] $title $msg $cociFile
+	growl post [mc "Status"] $title $msg $cociFile
     }
 }
 
@@ -166,10 +168,14 @@ proc ::Growl::FileTransferRecvHook {jid name size} {
     
     if {![::UI::IsAppInFront]} {
 	set title [mc "Receive File"]
-	set str "\n[mc File]: $name\n[mc Size]: [::Utils::FormatBytes $size]\n\n"
+	set str "\n"
+	append str [mc "File"]
+	append str ": $name\n"
+	append str [mc "Size"]
+	append str ": [::Utils::FormatBytes $size]\n\n"
 	set ujid [jlib::unescapejid $jid]
-	set msg [mc jamessoobask2 $ujid $str]
-	growl post [mc File] $title $msg $cociFile
+	set msg [mc "%s wants to send you this file: %s Do you want to receive this file?" $ujid $str]
+	growl post [mc "File"] $title $msg $cociFile
     }
 }
 
@@ -177,27 +183,28 @@ proc ::Growl::JivePhoneEventHook {type cid callID {xmldata {}}} {
     variable cociFile
     
     if {$type eq "RING"} {
-	set title [mc phoneRing]
-	set msg [mc phoneRingFrom $cid]
-	growl post [mc Phone] $title $msg $cociFile
+	set title [mc "Ring, ring"]...
+	set msg [mc "Phone is ringing from %s" $cid]
+	growl post [mc "Phone"] $title $msg $cociFile
     }
 }
 
 proc ::Growl::MoodEventHook {xmldata mood text} {
     variable cociFile
+    variable moodTextSmall
 
-    set title [mc moodEvent]
+    set title [mc "Mood change"]
     set from [wrapper::getattribute $xmldata from]
     set ujid [jlib::unescapejid $from]
     if {$mood ne ""} {
-	set msg "$ujid [mc heIs] [mc $mood]"
+	set msg "$ujid " [mc "is"] " " [dict get $moodTextSmall $mood]
 	if {$text ne ""} {
-	    append msg " " [mc because] " " $text
+	    append msg " " [mc "because"] " " $text
 	}
     } else {
-	set msg "$ujid [mc moodRetracted]"
+	set msg "$ujid " [mc "retracted mood"]
     }
-    growl post [mc Mood] $title $msg $cociFile
+    growl post [mc "Mood"] $title $msg $cociFile
 } 
 
 #-------------------------------------------------------------------------------

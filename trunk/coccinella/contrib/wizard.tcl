@@ -215,11 +215,15 @@ proc ::wizard::wizard {w args} {
     ttk::separator $w.div2
     pack $w.div2 -side top -fill x
     ttk::frame $widgets(btframe) -padding [option get . okcancelPadding {}]
-    ttk::button $widgets(btforward) -text "[::msgcat::mc Next] >" \
+    set msg [::msgcat::mc "Next"]
+    append msg " >"
+    ttk::button $widgets(btforward) -text $msg \
       -command [list [namespace current]::ForwardCmd $w] -width -8
-    ttk::button $widgets(btbackward) -text "< [::msgcat::mc Previous]" \
+    set msg "< "
+    append msg [::msgcat::mc "Previous"]
+    ttk::button $widgets(btbackward) -text $msg \
       -command [list [namespace current]::BackwardCmd $w] -width -8
-    ttk::button $widgets(btcancel) -text [::msgcat::mc Cancel] \
+    ttk::button $widgets(btcancel) -text [::msgcat::mc "Cancel"] \
       -command [list [namespace current]::CloseCmd $w] -width -8
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -575,10 +579,12 @@ proc ::wizard::Display {w name} {
 	$widgets(btbackward) state {!disabled}
     } 
     if {$ind == $lastInd} {
-	$widgets(btforward) configure -text [::msgcat::mc Finish]   \
+	$widgets(btforward) configure -text [::msgcat::mc "Finish"]   \
 	  -command $options(-finishcommand)
     } else {
-	$widgets(btforward) configure -text "[::msgcat::mc Next] >" \
+	set msg [::msgcat::mc "Next"]
+	append msg " >"
+	$widgets(btforward) configure -text $msg \
 	  -command [list [namespace current]::ForwardCmd $w]
     }
     

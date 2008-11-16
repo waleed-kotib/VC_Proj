@@ -59,6 +59,7 @@ namespace eval ::WB {
     # Tool button mappings.
     variable btNo2Name 
     variable btName2No
+    variable BtName
     array set btNo2Name	{
 	00 point  01 move  10 line   11 arrow 
 	20 rect   21 oval  30 pen    31 brush
@@ -71,6 +72,21 @@ namespace eval ::WB {
 	text  40  del  41  paint 50  poly  51 
 	arc   60  rot  61
     }
+    set BtName [dict create]
+    dict set BtName point [mc "Point tool, click to mark, double click to inspect, right click to popup"]
+    dict set BtName move  [mc "Move tool"]
+    dict set BtName line  [mc "Line tool"]
+    dict set BtName arrow [mc "Arrow tool"]
+    dict set BtName rect  [mc "Rectangle tool"]
+    dict set BtName oval  [mc "Oval tool"]
+    dict set BtName del   [mc "Click to delete"]
+    dict set BtName pen   [mc "Pen tool"]
+    dict set BtName brush [mc "Brush tool"]
+    dict set BtName paint [mc "Paint tool, shift-click for transparency"]
+    dict set BtName poly  [mc "Polygon tool, spacebar to cancel"]
+    dict set BtName arc   [mc "Arc tool, click to set center, spacebar to cancel"]
+    dict set BtName rot   [mc "Rotate tool, select item first"]
+    dict set BtName text  [mc "Text tool"]
 
     # Use option database for customization.
     option add *TopWhiteboard*TRadiobutton.padding  {0}             50
@@ -1458,6 +1474,8 @@ proc ::WB::SetBindtags {wcan btName} {
     
     set w [winfo toplevel $wcan]
     
+    variable BtName
+
     switch -- $btName {
 	point - move - line - arrow - rect - oval -
 	del - pen - brush - paint - poly - arc - rot {
@@ -1626,17 +1644,19 @@ proc ::WB::SetItemBinds {wcan btName} {
 proc ::WB::SetToolUI {wcan btName} {
     global  this
 
+    variable BtName
+
     set w [winfo toplevel $wcan]
-    SetStatusMessage $w [mc uastat$btName]
+    SetStatusMessage $w [dict get $BtName $btName]
 
     switch -- $btName {
 	point {
 	    switch -- $this(platform) {
 		macosx {
-		    SetStatusMessage $w [mc uastatpointmac]
+		    SetStatusMessage $w [mc "Point tool, click to mark, double click to inspect, press to popup"]
 		}
 		default {
-		    SetStatusMessage $w [mc uastatpoint]		      
+		    SetStatusMessage $w [mc "Point tool, click to mark, double click to inspect, right click to popup"]		      
 		}
 	    }
 	}
@@ -2247,9 +2267,9 @@ proc ::WB::RegisterMenuEntry {name menuSpec} {
 proc ::WB::MenubarSetState {wmenu mbstate} {
     variable menuSpecPublic
     
-    $wmenu entryconfigure [mc mPreferences] -state $mbstate
-    $wmenu entryconfigure [mc mLibrary] -state $mbstate
-    $wmenu entryconfigure [mc mInfo] -state $mbstate
+    $wmenu entryconfigure [mc "&Preferences"] -state $mbstate
+    $wmenu entryconfigure [mc "&Library"] -state $mbstate
+    $wmenu entryconfigure [mc "&Info"] -state $mbstate
 	
     # Handle all 'plugins'.
     foreach wpath $menuSpecPublic(wpaths) {
@@ -2380,6 +2400,7 @@ proc ::WB::BuildAllButtons {w} {
     
     variable btNo2Name 
     variable btName2No
+    variable BtName
     variable wbicons
     upvar ::WB::${w}::state state
     upvar ::WB::${w}::wapp wapp
@@ -2411,9 +2432,9 @@ proc ::WB::BuildAllButtons {w} {
 		}
 		bind $wlabel <<ButtonPopup>> [list [namespace current]::DoToolPopup $w %W $name]
 	    }
-	    set str [mc uastat$name]
+	    set str [dict get $BtName $name]
 	    if {($name eq "point") && ($this(platform) eq "macosx")} {
-		set str [mc uastatpointmac]
+		set str [mc "Point tool, click to mark, double click to inspect, press to popup"]
 	    }
 	    ::balloonhelp::balloonforwindow $wlabel $str
 	}
@@ -2735,7 +2756,7 @@ proc ::WB::FilePostCommand {w wmenu} {
     if {$editable} {
 	::UI::MenuEnableAll $wmenu
 	if {![::Plugins::HavePackage QuickTimeTcl]} {
-	    ::UI::MenuMethod $wmenu entryconfigure mOpenStream... -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mOpenStream... -state disabled -label [mc "Open St&ream"]...
 	}
     } else {
 	::UI::MenuDisableAllBut $wmenu {
@@ -2858,79 +2879,79 @@ proc ::WB::EditPostCommandWhiteboard {w wmenu} {
 
     # Undo and redo.
     if {$normal && [undo::canundo [GetUndoToken $wcan]]} {
-	::UI::MenuMethod $wmenu entryconfigure mUndo -state normal
+	::UI::MenuMethod $wmenu entryconfigure mUndo -state normal -label [mc "&Undo"]
     } else {
-	::UI::MenuMethod $wmenu entryconfigure mUndo -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mUndo -state disabled -label [mc "&Undo"]
     }
     if {$normal && [undo::canredo [GetUndoToken $wcan]]} {
-	::UI::MenuMethod $wmenu entryconfigure mRedo -state normal
+	::UI::MenuMethod $wmenu entryconfigure mRedo -state normal -label [mc "Re&do"]
     } else {
-	::UI::MenuMethod $wmenu entryconfigure mRedo -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mRedo -state disabled -label [mc "Re&do"]
     }
     
     # Cut, copy and paste menu entries.
     if {$haveSelection} {
 	if {$normal} {
-	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state normal -label [mc "Cu&t"]
 	} else {
-	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled -label [mc "Cu&t"]
 	}
-	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal 
+	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal -label [mc "&Copy"]
     } elseif {$haveTextSelection} {
-	::UI::MenuMethod $wmenu entryconfigure mCut  -state normal
-	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal    
+	::UI::MenuMethod $wmenu entryconfigure mCut  -state normal -label [mc "Cu&t"]
+	::UI::MenuMethod $wmenu entryconfigure mCopy -state normal -label [mc "&Copy"]
     } else {
-	::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled
-	::UI::MenuMethod $wmenu entryconfigure mCopy -state disabled    
+	::UI::MenuMethod $wmenu entryconfigure mCut  -state disabled -label [mc "Cu&t"]
+	::UI::MenuMethod $wmenu entryconfigure mCopy -state disabled -label [mc "&Copy"]
     }
     if {[catch {selection get -sel CLIPBOARD} str]} {
-	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled -label [mc "&Paste"]
     } elseif {$normal && ($str ne "")} {
-	::UI::MenuMethod $wmenu entryconfigure mPaste -state normal
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state normal -label [mc "&Paste"]
     } else {
-	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mPaste -state disabled -label [mc "&Paste"]
     }
 
     # All and Erase All.
-    ::UI::MenuMethod $wmenu entryconfigure mSelectAll -state normal
+    ::UI::MenuMethod $wmenu entryconfigure mSelectAll -state normal -label [mc "Select &All"]
     if {$normal} {
-	::UI::MenuMethod $wmenu entryconfigure mClear -state normal
+	::UI::MenuMethod $wmenu entryconfigure mClear -state normal -label [mc "Clear"]
     } else {
-	::UI::MenuMethod $wmenu entryconfigure mClear -state disabled
+	::UI::MenuMethod $wmenu entryconfigure mClear -state disabled -label [mc "Clear"]
     }
     if {!$len || !$normal} {
 	
 	# There is no selection in the canvas or whiteboard disabled.
-	::UI::MenuMethod $wmenu entryconfigure mEditItem... -state disabled
-	::UI::MenuMethod $wmenu entryconfigure mRaise -state disabled
-	::UI::MenuMethod $wmenu entryconfigure mLower -state disabled
-	::UI::MenuMethod $wmenu entryconfigure mLarger -state disabled
-	::UI::MenuMethod $wmenu entryconfigure mSmaller -state disabled
-	::UI::MenuMethod $wmenu entryconfigure mFlip -state disabled
-	::UI::MenuMethod $wmenu entryconfigure mImageLarger -state disabled
-	::UI::MenuMethod $wmenu entryconfigure mImageSmaller -state disabled    
+	::UI::MenuMethod $wmenu entryconfigure mEditItem... -state disabled -label [mc "&Edit Item"]...
+	::UI::MenuMethod $wmenu entryconfigure mRaise -state disabled -label [mc "&Raise"]
+	::UI::MenuMethod $wmenu entryconfigure mLower -state disabled -label [mc "&Lower"]
+	::UI::MenuMethod $wmenu entryconfigure mLarger -state disabled -label [mc "Larger"]
+	::UI::MenuMethod $wmenu entryconfigure mSmaller -state disabled -label [mc "Smaller"]
+	::UI::MenuMethod $wmenu entryconfigure mFlip -state disabled -label [mc "Flip"]
+	::UI::MenuMethod $wmenu entryconfigure mImageLarger -state disabled -label [mc "Image Larger"]
+	::UI::MenuMethod $wmenu entryconfigure mImageSmaller -state disabled -label [mc "Image Smaller"]  
     } else {	
-	::UI::MenuMethod $wmenu entryconfigure mEditItem... -state normal
-	::UI::MenuMethod $wmenu entryconfigure mRaise -state normal
-	::UI::MenuMethod $wmenu entryconfigure mLower -state normal
+	::UI::MenuMethod $wmenu entryconfigure mEditItem... -state normal -label [mc "&Edit Item"]...
+	::UI::MenuMethod $wmenu entryconfigure mRaise -state normal [mc "&Raise"]
+	::UI::MenuMethod $wmenu entryconfigure mLower -state normal -label [mc "&Lower"]
 	if {$flip} {
-	    ::UI::MenuMethod $wmenu entryconfigure mFlip -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFlip -state normal -label [mc "Flip"]
 	} else {
-	    ::UI::MenuMethod $wmenu entryconfigure mFlip -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mFlip -state disabled -label [mc "Flip"]
 	}
 	if {$resizeImage} {
-	    ::UI::MenuMethod $wmenu entryconfigure mImageLarger -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mImageSmaller -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mImageLarger -state normal -label [mc "Image Larger"]
+	    ::UI::MenuMethod $wmenu entryconfigure mImageSmaller -state normal -label [mc "Image Smaller"]  
 	} else {
-	    ::UI::MenuMethod $wmenu entryconfigure mImageLarger -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mImageSmaller -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mImageLarger -state disabled -label [mc "Image Larger"]
+	    ::UI::MenuMethod $wmenu entryconfigure mImageSmaller -state disabled -label [mc "Image Smaller"]  
 	}	
 	if {$resize} {
-	    ::UI::MenuMethod $wmenu entryconfigure mLarger -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mSmaller -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mLarger -state normal -label [mc "Larger"]
+	    ::UI::MenuMethod $wmenu entryconfigure mSmaller -state normal -label [mc "Smaller"]
 	} else {
-	    ::UI::MenuMethod $wmenu entryconfigure mLarger -state disabled
-	    ::UI::MenuMethod $wmenu entryconfigure mSmaller -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mLarger -state disabled -label [mc "Larger"]
+	    ::UI::MenuMethod $wmenu entryconfigure mSmaller -state disabled -label [mc "Smaller"]
 	}
     }
 }
@@ -3231,14 +3252,14 @@ proc ::WB::DnDDrop {wcan data type x y} {
 		set opts [list -coords [list $x $y]]
 		set errMsg [::Import::DoImport $wcan $opts -file $f]
 		if {$errMsg ne ""} {
-		    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+		    ::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 		      -message "Failed importing: $errMsg" -parent $w
 		}
 		incr x $prefs(offsetCopy)
 		incr y $prefs(offsetCopy)
 	    } else {
-		::UI::MessageBox -title [mc Error] -icon error -type ok \
-		  -message [mc messfailmimeimp2 $mime] -parent $w
+		::UI::MessageBox -title [mc "Error"] -icon error -type ok \
+		  -message [mc "Cannot find importer for the MIME type %s" $mime] -parent $w
 	    }
 	}
     }

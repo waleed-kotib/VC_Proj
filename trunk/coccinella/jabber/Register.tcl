@@ -73,15 +73,15 @@ proc ::Register::Remove {{jid {}}} {
     }
     if {$login} {
 	set ans [::UI::MessageBox -icon warning -title [mc "Remove Account"] \
-	  -type yesno -default no -message [mc jamessremoveaccount2]]
+	  -type yesno -default no -message [mc "Do you really want to remove your account? This process cannot be undone."]]
 	if {$ans eq "yes"} {
 	    set remove 1
 	}
     } else {
 	set jidL [::Roster::GetUsersWithSameHost $jid]
 	if {[llength $jidL]} {
-	    set ans [::UI::MessageBox -icon warning -title [mc Warning] \
-	      -type yesnocancel -default no -message [mc register-trpt-unreg2]]
+	    set ans [::UI::MessageBox -icon warning -title [mc "Warning"] \
+	      -type yesnocancel -default no -message [mc "You are about to unregister a transport with a number of dependent contacts. Do you want to remove these contacts as well (Yes), keep them (No), or cancel everything (Cancel)?"]]
 	    if {$ans eq "cancel"} {
 		return
 	    } elseif {$ans eq "yes"} {
@@ -114,10 +114,13 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
     
     if {[string equal $type "error"]} {
 	lassign $theQuery errcode errmsg
-	set str [mc jamesserrunreg2 [jlib::unescapejid $jid]]
-	append str "\n" "[mc {Error code}]: $errcode\n"
-	append str "[mc Message]: $errmsg"
-	ui::dialog -icon error -title [mc Error] -type ok -message $str
+	set str [mc "Cannot unregister from %s." [jlib::unescapejid $jid]]
+	append str "\n"
+	append str [mc "Error code"]
+	append str ": $errcode\n"
+	append str [mc "Message"]
+	append str ": $errmsg"
+	ui::dialog -icon error -title [mc "Error"] -type ok -message $str
     } else {
 	
 	# If we don't do this the server may shut us down instead.
@@ -126,8 +129,8 @@ proc ::Register::RemoveCallback {jid jlibName type theQuery} {
 	    ::Jabber::DoCloseClientConnection
 	}
 	set name [::Roster::GetDisplayName $jid]
-	ui::dialog -icon info -title [mc Unregister] -type ok  \
-	  -message [mc jamessokunreg2 $name]
+	ui::dialog -icon info -title [mc "Unregister"] -type ok  \
+	  -message [mc "You are unregistered from %s." $name]
     }
 }
 
@@ -253,9 +256,9 @@ proc ::RegisterEx::New {args} {
     pack  $wbox  -fill both -expand 1
 
     if {$state(-server) ne ""} {
-	set str [mc jaregisterexserv2 $state(-server)]
+	set str [mc "Register with the service %s. You may need to press the Next button to retrieve the registration instructions." $state(-server)]
     } else {
-	set str [mc jaregisterex3]
+	set str [mc "Select a server from the list or manually enter one. Then press Next to retrieve the registration instructions. Follow the instructions and hit Register."]
     }
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 320 -justify left -anchor w -text $str
@@ -267,7 +270,7 @@ proc ::RegisterEx::New {args} {
     pack  $frmid  -side top -fill both -expand 1
 
     set wserv $frmid.eserv
-    ttk::label $frmid.lserv -text "[mc Server]:" -anchor e
+    ttk::label $frmid.lserv -text [mc "Server"]: -anchor e
     ttk::combobox $frmid.eserv -width 22 \
       -textvariable $token\(-server) -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
@@ -286,16 +289,18 @@ proc ::RegisterEx::New {args} {
     if {0} {
 	ttk::button $wmore.tri -style Small.Toolbutton \
 	  -compound left -image [::UI::GetIcon mactriangleclosed] \
-	  -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
+	  -text [mc "More"]... -command [list [namespace current]::MoreOpts $token]
     } elseif {0} {
 	ttk::button $wmore.tri -style Small.Plain -padding {6 1} \
 	  -compound left -image [::UI::GetIcon closeAqua] \
-	  -text "[mc More]..." -command [list [namespace current]::MoreOpts $token]
+	  -text [mc "More"]... -command [list [namespace current]::MoreOpts $token]
     } else {
 	set state(morevar) 0
+	set msg "  "
+	append msg [mc "More"]...
 	ttk::checkbutton $wmore.tri -style ArrowText.TCheckbutton \
 	  -onvalue 0 -offvalue 1 -variable $token\(morevar) \
-	  -text "  [mc More]..." \
+	  -text $msg \
 	  -command [list [namespace current]::MoreOpts $token]
     }
     ::UI::ChaseArrows $wmore.arr
@@ -318,9 +323,9 @@ proc ::RegisterEx::New {args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Next] -default active \
+    ttk::button $frbot.btok -text [mc "Next"] -default active \
       -command [list [namespace current]::Get $token]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::Cancel $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -520,7 +525,9 @@ proc ::RegisterEx::MoreOpts {token} {
     upvar 0 $token state
       
     grid  $state(wfmore)  -  -  -sticky ew
-    $state(wtri) configure -text "  [mc Less]..." \
+    set msg "  "
+    set append [mc "Less"]...
+    $state(wtri) configure -text $msg \
       -command [list [namespace current]::LessOpts $token]
 }
 
@@ -529,7 +536,9 @@ proc ::RegisterEx::LessOpts {token} {
     upvar 0 $token state
     
     grid remove $state(wfmore)
-    $state(wtri) configure -text "  [mc More]..." \
+    set msg "  "
+    append msg [mc "More"]...
+    $state(wtri) configure -text $msg \
       -command [list [namespace current]::MoreOpts $token]
 }
 
@@ -570,18 +579,18 @@ proc ::RegisterEx::Get {token} {
     
     # Verify.
     if {$state(-server) eq ""} {
-	::UI::MessageBox -type ok -icon error -title [mc Error] \
-	  -message [mc jamessregnoserver2]
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
+	  -message [mc "Please enter or select first a server."]
 	return
     }	
     # This is just to check the validity!
     if {[catch {jlib::nameprep $state(-server)} err]} {
-	::UI::MessageBox -icon error -title [mc Error] -type ok \
-	  -message [mc jamessillegalchar "server" $state(-server)]
+	::UI::MessageBox -icon error -title [mc "Error"] -type ok \
+	  -message [mc "Illegal character(s) in %s: %s!" "server" $state(-server)]
 	return
     }
     #SetState $token {disabled}
-    set state(status) "[mc jawaitserver]..."
+    set state(status) [mc "Waiting for server response"]...
     $state(wprog) start
 
     set opts [list -noauth 1]
@@ -645,16 +654,19 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
     DestroyForm $token
     
     if {[string equal $type "error"]} {
-	set str [mc jamesserrregget2]
-	append str "\n" "[mc {Error code}]: [lindex $iqchild 0]\n"
-	append str "[mc Message]: [lindex $iqchild 1]"
-	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
+	set str [mc "Cannot obtain registration information."]
+	append str "\n"
+	append str  [mc "Error code"]
+	append str ": [lindex $iqchild 0]\n"
+	append str [mc "Message"]
+	append str ": [lindex $iqchild 1]"
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] -message $str
 	return
     } 
     bind $state(w) <Return> [namespace code [list SendRegister $token]]
     
     $state(wbtok) state {!disabled}
-    $state(wbtok) configure -text [mc Register] \
+    $state(wbtok) configure -text [mc "Register"] \
       -command [list [namespace current]::SendRegister $token]
     
     # XEP-0077:
@@ -691,6 +703,23 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
     # Not sure how this happens.
     set state(elem,password) ""
     
+    set registration [dict create]
+    dict set registration address [mc "Street portion of a physical or mailing address"]
+    dict set registration city [mc "Locality portion of a physical or mailing address"]
+    dict set registration date [mc "Some date (e.g., birth date, hire date, sign-up date)"]
+    dict set registration email [mc "Email address"]
+    dict set registration first [mc "First name or given name"]
+    dict set registration is-registered [mc "You are already registered with this service. These are your current login settings."]
+    dict set registration last [mc "Last name, surname, or family name"]
+    dict set registration name [mc "Full name"]
+    dict set registration nick [mc "Familiar name"]
+    dict set registration password [mc "Password or secret"]
+    dict set registration phone [mc "Telephone number"]
+    dict set registration state [mc "An administrative region of the nation, such as a state or province"]
+    dict set registration url [mc "URL to personal website"]
+    dict set registration username [mc "Account name associated with the user"]
+    dict set registration zip [mc "Postal code portion of a physical or mailing address"]
+
     foreach tag {username password} {
 	if {[info exists data($tag)]} {
 	    set str "[mc [string totitle $tag]]:"
@@ -713,7 +742,7 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
 	    grid  $wfr.l$tag  $wfr.e$tag  -sticky e -pady 2
 	    grid  $wfr.e$tag  -sticky ew
 	    if {$tag eq "password"} {
-		set str "[mc {Retype password}]:"
+		set str [mc "Retype password"]:
 		if {[info exists state(-password)]} {
 		    set state(elem,${tag}2) $state(-password)
 		} else {
@@ -732,7 +761,8 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
 	    if {[info exists state(-$tag)]} {
 		$wfr.e$tag state {disabled}
 	    }
-	    set help [mc registration-$tag]
+
+	    set help [dict get $registration $tag]
 	    if {$help ne "registration-$tag"} {
 		::balloonhelp::balloonforwindow $wfr.l$tag $help
 		::balloonhelp::balloonforwindow $wfr.e$tag $help
@@ -750,7 +780,7 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
 	grid  $wfr.l$tag  $wfr.e$tag  -sticky e -pady 2
 	grid  $wfr.e$tag  -sticky ew
 
-	set help [mc registration-$tag]
+	set help [dict get $registration $tag]
 	if {$help ne "registration-$tag"} {
 	    ::balloonhelp::balloonforwindow $wfr.l$tag $help
 	    ::balloonhelp::balloonforwindow $wfr.e$tag $help
@@ -762,7 +792,7 @@ proc ::RegisterEx::GetCB {token cuid jlibName type iqchild} {
     grid  x  $wfr.csavepw  -sticky w
 
     if {$isRegistered} {
-	ttk::label $wfr.lregistered -text [mc registration-is-registered]  \
+	ttk::label $wfr.lregistered -text [mc "You are already registered with this service. These are your current login settings."]  \
 	  -anchor w -wraplength 260 -justify left
 	grid  $wfr.lregistered  -  -sticky ew
     }
@@ -799,8 +829,8 @@ proc ::RegisterEx::SendRegister {token} {
     # Error checking.
     if {[info exists state(elem,password)] && [info exists state(elem,password2)]} {
 	if {$state(elem,password) ne $state(elem,password2)} {
-	    ::UI::MessageBox -icon error -title [mc Error] \
-	      -message [mc messpasswddifferent2] -parent $state(w)
+	    ::UI::MessageBox -icon error -title [mc "Error"] \
+	      -message [mc "Passwords do not match. Please try again."] -parent $state(w)
 	    set state(elem,password)  ""
 	    set state(elem,password2) ""
 	    return
@@ -857,13 +887,17 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	set errcode [lindex $theQuery 0]
 	set errmsg [lindex $theQuery 1]
 	if {$errcode == 409} {
-	    set msg [mc jamessregerrinuse2]
-	    append msg "\n" "[mc Error]: $errmsg"
+	    set msg [mc "The registration failed because this username is already in use by someone else."]
+	    append msg "\n"
+	append str [mc "Error"]
+	append str ": $errmsg"
 	} else {
-	    set msg [mc jamessregerr2]
-	    append msg "\n" "[mc Error]: $errmsg"
+	    set msg [mc "The registration failed."]
+	    append msg "\n"
+	    append msg [mc "Error"]
+	    append msg ": $errmsg"
 	}
-	::UI::MessageBox -title [mc Error] -icon error -type ok -message $msg
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok -message $msg
 	NotBusy $token
     } else {
 	
@@ -886,7 +920,7 @@ proc ::RegisterEx::SendRegisterCB {token type theQuery} {
 	    ::Jabber::Jlib connect auth -command [namespace code AuthCB]
 	} else {
 	    ui::dialog -icon info -type ok \
-	      -message [mc jamessregisterok2 $server]
+	      -message [mc "The registration with %s was successful. Now you just need to Login using the same username and password." $server]
 	
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    # Beware: we are in the middle of a callback from the xml parser,
@@ -916,12 +950,23 @@ proc ::RegisterEx::AuthCB {jlibname status {errcode ""} {errmsg ""}} {
 
 	    set jid [::Jabber::GetMyJid]
 	    ui::dialog -icon info -type ok \
-	      -message [mc jamessregloginok [jlib::unescapejid $jid]]
+	      -message [mc "You are now registered and automatically logged in as %s" [jlib::unescapejid $jid]]
 	    $jlibname connect free
 	}
 	error {
-	    set str [mc xmpp-stanzas-short-$errcode]
-	    ui::dialog -icon error -type ok -title [mc Error] -message $str
+
+	    # RFC 3929 (XMPP Core): 6.4 SASL Errors (short version)
+	    set xmppShort [dict create]
+	    dict set xmppShort aborted [mc "The login process was aborted."]
+	    dict set xmppShort incorrect-encoding [mc "Protocol error during the login process."]
+	    dict set xmppShort invalid-authzid [mc "Protocol error during the login process."]
+	    dict set xmppShort invalid-mechanism [mc "Protocol error during the login process."]
+	    dict set xmppShort mechanism-too-weak [mc "Protocol error during the login process."]
+	    dict set xmppShort not-authorized [mc "Login failed because of unknown account or wrong password."]
+	    dict set xmppShort temporary-auth-failure [mc "Protocol error during the login process."]
+
+	    set str [dict get $xmppShort $errcode]
+	    ui::dialog -icon error -type ok -title [mc "Error"] -message $str
 	    ::JUI::SetConnectState "disconnect"
 	    $jlibname connect free
 	}
@@ -990,7 +1035,7 @@ proc ::GenRegister::NewDlg {args} {
     ::UI::Toplevel $w -class JRegister -macstyle documentProc -usemacmainmenu 1 \
       -closecommand [list [namespace current]::CloseCmd $token] \
       -macclass {document closeBox}
-    wm title $w [mc Register]
+    wm title $w [mc "Register"]
     set wtop $w
     
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jreg)]]
@@ -1027,7 +1072,7 @@ proc ::GenRegister::NewDlg {args} {
 	set gateway [lsearch -glob -inline $types gateway/*]
 	set type [lindex [split $gateway /] 1]
     }
-    set label [mc Register]
+    set label [mc "Register"]
     
     if {$config(genregister,show-head)} {
 	if {($dialogType eq "server") || ($dialogType eq "serverlist")} {
@@ -1039,7 +1084,8 @@ proc ::GenRegister::NewDlg {args} {
 		set spec protocol-$type
 		set im   [::Theme::FindIconSize 32 $spec]
 		set imd  [::Theme::FindIconSize 32 $spec-Dis]
-		set label "[mc Register] [::Gateway::GetShort $type]"
+		set label [mc "Register"]
+		append label " [::Gateway::GetShort $type]"
 	    } elseif {$conference ne ""} {
 		set type [lindex [split $conference /] 1]
 		set spec protocol-$type
@@ -1069,12 +1115,12 @@ proc ::GenRegister::NewDlg {args} {
     if {$dialogType ne "server"} {
 	ttk::label $wbox.msg -style Small.TLabel \
 	  -padding {0 0 0 6} -wraplength $state(wraplength) \
-	  -text [mc jaregmsg3] -justify left
+	  -text [mc "Select a service and press Next"] -justify left
 	pack $wbox.msg -side top -anchor w
     }    
     set frserv $wbox.serv
     ttk::frame $frserv
-    ttk::label $frserv.lserv -text "[mc Service]:"
+    ttk::label $frserv.lserv -text [mc "Service"]:
 
     set wcomboserver $frserv.eserv
 
@@ -1118,11 +1164,11 @@ proc ::GenRegister::NewDlg {args} {
     set wbtget      $frbot.btget
     set wbtcancel   $frbot.btcancel
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $wbtget -text [mc Next] \
+    ttk::button $wbtget -text [mc "Next"] \
       -command [list [namespace current]::Get $token]
-    ttk::button $wbtregister -text [mc Register] \
+    ttk::button $wbtregister -text [mc "Register"] \
       -command [list [namespace current]::DoRegister $token]
-    ttk::button $wbtcancel -text [mc Cancel]  \
+    ttk::button $wbtcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::Cancel $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -1172,7 +1218,8 @@ proc ::GenRegister::NewDlg {args} {
     if {$config(genregister,server-simple)} {
 	set state(stattxt) ""
     } else {
-	set state(stattxt) [mc jasearchwait]
+	# String wrong or obsolete?
+	set state(stattxt) [mc "Waiting for Get to be pressed"]
     }
     set state(wcomboserver) $wcomboserver
     set state(wform)        $wform
@@ -1204,15 +1251,15 @@ proc ::GenRegister::Get {token} {
     
     # Verify.
     if {[string length $state(server)] == 0} {
-	::UI::MessageBox -title [mc Error] -type ok -icon error  \
-	  -message [mc jamessregnoserver2]
+	::UI::MessageBox -title [mc "Error"] -type ok -icon error  \
+	  -message [mc "Please enter or select first a server."]
 	return
     }	
     if {[winfo exists $state(wcomboserver)]} {
 	$state(wcomboserver) state disabled
     }
     $state(wbtget) state disabled
-    set state(stattxt) "[mc jawaitserver]..."
+    set state(stattxt) [mc "Waiting for server response"]...
     
     # Send get register.
     ::Jabber::Jlib register_get [list ::GenRegister::GetCB $token] \
@@ -1236,10 +1283,13 @@ proc ::GenRegister::GetCB {token jlibName type subiq} {
 	$state(wcomboserver) state !disabled
     }    
     if {[string equal $type "error"]} {
-	set str [mc jamesserrregget2]
-	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
-	append str "[mc Message]: [lindex $subiq 1]"
-	::ui::dialog -type ok -title [mc Error] -icon error -message $str
+	set str [mc "Cannot obtain registration information."]
+	append str "\n"
+	append str  [mc "Error code"]
+	append str ": [lindex $subiq 0]\n"
+	append str [mc "Message"]
+	append str ": [lindex $subiq 1]"
+	::ui::dialog -type ok -title [mc "Error"] -icon error -message $str
 	return
     }
     set wform $state(wform)
@@ -1298,13 +1348,16 @@ proc ::GenRegister::ResultCallback {token type subiq args} {
     set jid $state(server)
 
     if {[string equal $type "error"]} {
-	set str [mc jamesserrregset2 $jid]
-	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
-	append str "[mc Message]: [lindex $subiq 1]"
-	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
+	set str [mc "Cannot register with service %s." $jid]
+	append str "\n"
+	append str [mc "Error code"]
+	append str ": [lindex $subiq 0]\n"
+	append str [mc "Message"]
+	append str ": [lindex $subiq 1]"
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] -message $str
     } else {
 	::UI::MessageBox -type ok -icon info \
-	  -message [mc jamessokreg2 [jlib::unescapejid $jid]]
+	  -message [mc "Registration with service %s was successful." [jlib::unescapejid $jid]]
     }
     
     # Time to clean up.
@@ -1361,7 +1414,7 @@ proc ::GenRegister::Simple {w args} {
     
     ::UI::Toplevel $w -class JRegister -macstyle documentProc \
       -usemacmainmenu 1 -macclass {document closeBox}
-    wm title $w [mc Register]
+    wm title $w [mc "Register"]
     set wtop $w
  
     set im   [::Theme::Find32Icon $w registerImage]
@@ -1373,7 +1426,7 @@ proc ::GenRegister::Simple {w args} {
     pack $wall -fill x
 
     ttk::label $wall.head -style Headlabel \
-      -text [mc Register] -compound left \
+      -text [mc "Register"] -compound left \
       -image [list $im background $imd]
     pack $wall.head -side top -fill both
 
@@ -1385,7 +1438,7 @@ proc ::GenRegister::Simple {w args} {
     pack $wbox -fill both -expand 1
 
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc jaregmsg3]
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc "Select a service and press Next"]
     pack $wbox.msg -side top -anchor w
 
     set wmid $wbox.m
@@ -1394,14 +1447,14 @@ proc ::GenRegister::Simple {w args} {
     
     set regServers [::Jabber::Jlib disco getjidsforfeature "jabber:iq:register"]
 
-    ttk::label $wmid.lserv -text "[mc Service]:"
+    ttk::label $wmid.lserv -text [mc "Service"]:
     ttk::combobox $wmid.combo -state readonly  \
       -textvariable [namespace current]::server -values $regServers    
-    ttk::label $wmid.luser -text "[mc Username]:" -anchor e
+    ttk::label $wmid.luser -text [mc "Username"]: -anchor e
     ttk::entry $wmid.euser  \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStr %S}
-    ttk::label $wmid.lpass -text "[mc Password]:" -anchor e
+    ttk::label $wmid.lpass -text [mc "Password"]: -anchor e
     ttk::entry $wmid.epass  \
       -textvariable [namespace current]::password -validate key \
       -validatecommand {::Jabber::ValidatePasswordStr %S}
@@ -1426,9 +1479,9 @@ proc ::GenRegister::Simple {w args} {
     set wbtregister $frbot.btreg
     set wbtcancel   $frbot.btcancel
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $wbtregister -text [mc Register] \
+    ttk::button $wbtregister -text [mc "Register"] \
       -default active -command [namespace current]::DoSimple
-    ttk::button $wbtcancel -text [mc Cancel]  \
+    ttk::button $wbtcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelSimple $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -1479,12 +1532,15 @@ proc ::GenRegister::SimpleCallback {server jlibName type subiq} {
     ::Debug 2 "::GenRegister::ResultCallback server=$server, type=$type, subiq='$subiq'"
 
     if {[string equal $type "error"]} {
-	set str [mc jamesserrregset2 $server]
-	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
-	append str "[mc Message]: [lindex $subiq 1]"
-	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
+	set str [mc "Cannot register with service %s." $server]
+	append str "\n"
+	append str [mc "Error code"]
+	append str ": [lindex $subiq 0]\n"
+	append str [mc "Message"]
+	append str ": [lindex $subiq 1]"
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] -message $str
     } else {
-	::UI::MessageBox -type ok -icon info -message [mc jamessokreg2 $server]
+	::UI::MessageBox -type ok -icon info -message [mc "Registration with service %s was successful." $server]
     }
 }
 

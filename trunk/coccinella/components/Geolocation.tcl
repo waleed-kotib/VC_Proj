@@ -68,24 +68,24 @@ proc ::Geolocation::Init {} {
     set	help(timestamp)   "UTC timestamp specifying the moment when the reading was taken"
     
     variable taglabel
-    set	taglabel(alt)         [mc Altitude]
+    set	taglabel(alt)         [mc "Altitude"]
     set	taglabel(area)        [mc "Named Area"]
     set	taglabel(bearing)     [mc "GPS Bearing"]
-    set	taglabel(building)    [mc Building]
-    set	taglabel(country)     [mc Country]
+    set	taglabel(building)    [mc "Building"]
+    set	taglabel(country)     [mc "Country"]
     set	taglabel(datum)       [mc "GPS Datum"]
-    set	taglabel(description) [mc Description]
+    set	taglabel(description) [mc "Description"]
     set	taglabel(error)       [mc "GPS Error"]
-    set	taglabel(floor)       [mc Floor]
-    set	taglabel(lat)         [mc Latitude]
-    set	taglabel(locality)    [mc Locality]
-    set	taglabel(lon)         [mc Longitude]
-    set	taglabel(postalcode)  [mc Postalcode]
-    set	taglabel(region)      [mc Region]
-    set	taglabel(room)        [mc Room]
-    set	taglabel(street)      [mc Street]
-    set	taglabel(text)        [mc Text]
-    set	taglabel(timestamp)   [mc Timestamp]
+    set	taglabel(floor)       [mc "Floor"]
+    set	taglabel(lat)         [mc "Latitude"]
+    set	taglabel(locality)    [mc "Locality"]
+    set	taglabel(lon)         [mc "Longitude"]
+    set	taglabel(postalcode)  [mc "Postalcode"]
+    set	taglabel(region)      [mc "Region"]
+    set	taglabel(room)        [mc "Room"]
+    set	taglabel(street)      [mc "Street"]
+    set	taglabel(text)        [mc "Text"]
+    set	taglabel(timestamp)   [mc "Timestamp"]
     
     # string is the default if not defined.
     variable xs
@@ -101,7 +101,7 @@ proc ::Geolocation::Init {} {
     # This is our cache for other users geoloc.
     variable geoloc
     
-    ui::dialog button remove -text [mc Remove]
+    ui::dialog button remove -text [mc "Remove"]
 }
 
 # Geolocation::JabberInitHook --
@@ -153,11 +153,11 @@ proc ::Geolocation::Dlg {} {
     variable gearth 0
     variable taglabel
     
-    set w [ui::dialog -message [mc locationPickMsg] \
-      -detail [mc locationPickDtl] -icon worldmap \
+    set w [ui::dialog -message [mc "Set your location that will be shown to your contacts."] \
+      -detail [mc "Enter your location details below. At least you should set latitude and longitude."] -icon worldmap \
       -buttons {ok cancel remove} -modal 1 \
       -geovariable ::prefs(winGeom,geoloc) \
-      -title [mc Location] -command [namespace code DlgCmd]]
+      -title [mc "Location"] -command [namespace code DlgCmd]]
     set fr [$w clientframe]
     
     # State array variable.
@@ -178,7 +178,14 @@ proc ::Geolocation::Dlg {} {
 	grid  $fr.l$name  $fr.e$name  -sticky e -pady 2
 	grid $fr.e$name -sticky ew
 	
-	set str [mc location[string totitle $name]]
+	variable $location
+	set location [dict create]
+	dict set location alt [mc "Altitude in meters above or below sea level"]
+	dict set location lon [mc "Longitude in decimal degrees East"]
+	dict set location lat [mc "Latitude in decimal degrees North"]
+	dict set location country [mc "The nation where the user is located"]
+	
+	set str [dict get $location $name]
 	::balloonhelp::balloonforwindow $fr.l$name $str
 	::balloonhelp::balloonforwindow $fr.e$name $str
     }
@@ -352,6 +359,7 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
     variable xmlns
     variable geoloc
     variable help
+    variable location
     variable taglabel
 
     set mjid [jlib::jidmap [jlib::barejid $jid]]
@@ -359,7 +367,7 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
 	return
     }
     
-    $wnb add [ttk::frame $wnb.geo] -text [mc {Geo}] -sticky news
+    $wnb add [ttk::frame $wnb.geo] -text [mc "Geo"] -sticky news
 
     set wpage $wnb.geo.f
     ttk::frame $wpage -padding [option get . notebookPagePadding {}]
@@ -399,7 +407,7 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
 			grid $wpage.l$tag -sticky e
 			grid $wpage.e$tag -sticky w
 			
-			set bstr [mc location[string totitle $tag]]
+			set bstr [dict get $location $name]
 			::balloonhelp::balloonforwindow $wpage.l$tag $bstr
 			::balloonhelp::balloonforwindow $wpage.e$tag $bstr
 		    }

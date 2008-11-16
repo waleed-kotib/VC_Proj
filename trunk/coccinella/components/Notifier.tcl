@@ -129,9 +129,13 @@ proc ::Notifier::PresenceHook {jid type args} {
 proc ::Notifier::FileTransferRecvHook {jid name size} {
     
     if {![::UI::IsAppInFront]} {
-	set str "\n[mc File]: $name\n[mc Size]: [::Utils::FormatBytes $size]\n"
+	set str "\n"
+	append str [mc "File"]
+	append str ": $name\n"
+	append str [mc "Size"]
+	append str ": [::Utils::FormatBytes $size]\n"
 	set djid [::Roster::GetDisplayName $jid]
-	set msg [mc jamessoobask2 $djid $str]
+	set msg [mc "%s wants to send you this file: %s Do you want to receive this file?" $djid $str]
 	after 200 [list ::Notifier::DisplayMsg $str]
     }
 }

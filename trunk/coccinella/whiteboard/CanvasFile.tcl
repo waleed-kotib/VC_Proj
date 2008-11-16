@@ -48,8 +48,8 @@ proc ::CanvasFile::DrawCanvasItemFromFile {w filePath args} {
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
-	::UI::MessageBox -icon error -title [mc Error] -type ok  \
-	  -message [mc messfailopread2 $tail $fd]
+	::UI::MessageBox -icon error -title [mc "Error"] -type ok  \
+	  -message [mc "Cannot read %s: %s" $tail $fd]
 	return
     }
     fconfigure $fd -encoding utf-8
@@ -68,8 +68,8 @@ proc ::CanvasFile::OpenCanvas {wcan fileName args} {
     # Opens the data file.
     if {[catch {open $fileName r} fd]} {
 	set tail [file tail $fileName]
-	::UI::MessageBox -message [mc messfailopread2 $tail $fd] \
-	  -icon error -title [mc Error] -type ok
+	::UI::MessageBox -message [mc "Cannot read %s: %s" $tail $fd] \
+	  -icon error -title [mc "Error"] -type ok
 	return
     }
     ::CanvasCmd::DoEraseAll $wcan   
@@ -497,8 +497,8 @@ proc ::CanvasFile::DataToFile {filePath canvasList} {
     
     if {[catch {open $filePath w} fd]} {
 	set tail [file tail $filePath]
-	::UI::MessageBox -message [mc messfailopread2 $tail $fd] \
-	  -icon error -title [mc Error] -type ok
+	::UI::MessageBox -message [mc "Cannot read %s: %s" $tail $fd] \
+	  -icon error -title [mc "Error"] -type ok
 	return
     }
     fconfigure $fd -encoding utf-8
@@ -545,8 +545,8 @@ proc ::CanvasFile::OpenCanvasFileDlg {wcan {filePath {}}} {
 	    lappend typelist [list $regOpen($name,label) $regOpen($name,suffix)]
 	}
 
-	set ans [::UI::MessageBox -icon warning -title [mc Warning] -type okcancel -default ok \
-	  -parent $w -message [mc messcanerasewarn2]]
+	set ans [::UI::MessageBox -icon warning -title [mc "Warning"] -type okcancel -default ok \
+	  -parent $w -message [mc "Opening a whiteboard file clears the current whiteboard!"]]
 	if {$ans eq "cancel"} {
 	    return
 	}
@@ -683,7 +683,7 @@ proc ::CanvasFile::SaveCanvasFileDlg {wcan} {
     if {[string match "mac*" $this(platform)]} {
 	lappend opts -message "Pick .svg suffix for SVG, .can as default"
     }
-    set fileName [eval {tk_getSaveFile -title [mc Save] \
+    set fileName [eval {tk_getSaveFile -title [mc "Save"] \
       -defaultextension ".can"} $opts]
     if {$fileName eq ""} {
 	return
@@ -733,8 +733,8 @@ proc ::CanvasFile::SaveCanvas {wcan fileName args} {
 		# Opens the data file.
 		if {[catch {open $fileName w} fd]} {
 		    set tail [file tail $fileName]
-		    ::UI::MessageBox -icon error -title [mc Error] -type ok \
-		      -message [mc messfailopwrite2 $tail $fd]
+		    ::UI::MessageBox -icon error -title [mc "Error"] -type ok \
+		      -message [mc "Cannot write to %s: %s" $tail $fd]
 		    return
 		}	    
 		fconfigure $fd -encoding utf-8
@@ -764,8 +764,8 @@ proc ::CanvasFile::DoSaveAsItem {wcan} {
     set fileName $ans
     if {[catch {open $fileName w} fd]} {
 	set tail [file tail $fileName]
-	::UI::MessageBox -icon error -title [mc Error] -type ok \
-	  -message [mc messfailopwrite2 $tail $fd]
+	::UI::MessageBox -icon error -title [mc "Error"] -type ok \
+	  -message [mc "Cannot write to %s: %s" $tail $fd]
 	return
     }	    
     fconfigure $fd -encoding utf-8
@@ -839,8 +839,8 @@ proc ::CanvasFile::SVGFileToCanvas {w filePath} {
     # Opens the data file.
     if {[catch {open $filePath r} fd]} {
 	set tail [file tail $filePath]
-	::UI::MessageBox -icon error -title [mc Error] -type ok -parent $w \
-	  -message [mc messfailopread2 $tail $fd]
+	::UI::MessageBox -icon error -title [mc "Error"] -type ok -parent $w \
+	  -message [mc "Cannot read %s: %s" $tail $fd]
 	return
     }
     fconfigure $fd -encoding utf-8

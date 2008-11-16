@@ -206,6 +206,46 @@ proc ::ItemInspector::Build {wcan itemid args} {
     # Overall frame for whole container.
     set frtot $w1
     
+    # Strings
+    set MenuOpts [dict create]
+    dict set MenuOpts fill [mc "Fill"]
+    dict set MenuOpts none [mc "None"]
+    dict set MenuOpts first [mc "First"]
+    dict set MenuOpts last [mc "Last"]
+    dict set MenuOpts both [mc "Both"]
+    dict set MenuOpts butt [mc "Butt"]
+    dict set MenuOpts projecting [mc "Projecting"]
+    dict set MenuOpts round [mc "Round"]
+    dict set MenuOpts bevel [mc "Bevel"]
+    dict set MenuOpts miter [mc "Miter"]
+    dict set MenuOpts dotted [mc "Dotted"]
+    dict set MenuOpts dash-dotted [mc "Dash-dotted"]
+    dict set MenuOpts dashed [mc "Dashed"]
+    dict set MenuOpts false [mc "False"]
+    dict set MenuOpts true [mc "True"]
+    dict set MenuOpts gray75 [mc "Gray 75%"]
+    dict set MenuOpts gray50 [mc "Gray 50%"]
+    dict set MenuOpts gray25 [mc "Gray 25%"]
+    dict set MenuOpts gray12 [mc "Gray 12%"]
+    dict set MenuOpts pieslice [mc "Pieslice"]
+    dict set MenuOpts chord [mc "Chord"]
+    dict set MenuOpts arc [mc "Arc"]
+    dict set MenuOpts n [mc "N"]
+    dict set MenuOpts ne [mc "NE"]
+    dict set MenuOpts e [mc "E"]
+    dict set MenuOpts se [mc "SE"]
+    dict set MenuOpts s [mc "S"]
+    dict set MenuOpts sw [mc "SW"]
+    dict set MenuOpts w [mc "W"]
+    dict set MenuOpts nw [mc "NW"]
+    dict set MenuOpts center [mc "Center"]
+    dict set MenuOpts normal [mc "Normal"]
+    dict set MenuOpts bold [mc "Bold"]
+    dict set MenuOpts italic [mc "Italic"]
+    dict set MenuOpts left [mc "Left"]
+    dict set MenuOpts right [mc "Right"]
+    dict set MenuOpts transparent [mc "Transparent"]
+    
     # List available options of the option menus.
     array set menuOpts {
 	arrow             {none first last both}
@@ -228,7 +268,11 @@ proc ::ItemInspector::Build {wcan itemid args} {
     foreach {key values} [array get menuOpts] {
 	set exlist {}
 	foreach value $values {
-	    lappend exlist $value [mc $value]
+	    if {[dict exists $MenuOpts $value]} {
+		lappend exlist $value [dict get $MenuOpts $value]
+	    } else {
+		lappend exlist $value $value
+	    }
 	}
 	set menuOptsEx($key) $exlist
     }
@@ -242,7 +286,7 @@ proc ::ItemInspector::Build {wcan itemid args} {
     set state(type,value) $itemType
     set wlabel $frtot.l$line
     set wentry $frtot.e$line
-    ttk::label $wlabel -text "[mc Type]:"
+    ttk::label $wlabel -text [mc "Type"]:
     ttk::entry $wentry -width $typWidth -textvariable $token\(type)
     $wentry state {disabled}
     grid  $wlabel  $wentry  -padx 2 -pady 2
@@ -258,7 +302,7 @@ proc ::ItemInspector::Build {wcan itemid args} {
     incr line
     set wlabel $frtot.l$line
     set wentry $frtot.e$line
-    ttk::label $wlabel -text "[mc Coordinates]:"
+    ttk::label $wlabel -text [mc "Coordinates"]:
     ttk::entry $wentry -width $typWidth -textvariable $token\(coords)
     $wentry state {disabled}
     grid  $wlabel  $wentry  -padx 2 -pady 2
@@ -310,7 +354,33 @@ proc ::ItemInspector::Build {wcan itemid args} {
 	    regsub -all "\r" $oneliner $nl_ oneliner
 	    set val $oneliner
 	}
-	ttk::label $frtot.l$line -text "[mc $opname]:"
+    set Op [dict create]
+    dict set Op arrow [mc "Arrow"]:
+    dict set Op arrowshape [mc "Arrow shape"]:
+    dict set Op capstyle [mc "Cap style"]:
+    dict set Op joinstyle [mc "Join style"]:
+    dict set Op dash [mc "Dash"]:
+    dict set Op fill [mc "Fill"]:
+    dict set Op fontfamily [mc "Font familiy"]:
+    dict set Op fontsize [mc "Font size"]:
+    dict set Op fontweight [mc "Font weight"]:
+    dict set Op image [mc "Image"]:
+    dict set Op underline [mc "Underline"]:
+    dict set Op smooth [mc "Smooth"]:
+    dict set Op stipple [mc "Stipple"]:
+    dict set Op tags [mc "Tags"]:
+    dict set Op text [mc "Text"]:
+    dict set Op width [mc "Width"]:
+    dict set Op outlinestipple [mc "Outline stipple"]:
+    dict set Op style [mc "Style"]:
+    dict set Op anchor [mc "Anchor"]:
+    dict set Op fontsize [mc "Font size"]:
+    dict set Op fontweight [mc "Font weight"]:
+    dict set Op justify [mc "Justify"]:
+    dict set Op outline [mc "Outline"]:
+    dict set Op outlinestipple [mc "Outline stipple"]:
+    dict set Op extend [mc "Extend"]:
+	ttk::label $frtot.l$line -text [dict get $Op $opname]
 	
 	# Intercept options for nontext output.
 	switch -exact -- $op {
@@ -418,7 +488,7 @@ proc ::ItemInspector::Build {wcan itemid args} {
     
     incr line
     set lockCmd [list [namespace current]::LockCmd $token]
-    ttk::checkbutton $frtot.lock$line -text [mc wblockitem] \
+    ttk::checkbutton $frtot.lock$line -text [mc "Lock this item from being edited"] \
       -variable $token\(locked) -command $lockCmd
     grid  x  $frtot.lock$line  -sticky w
     set state(locked) 0
@@ -432,9 +502,9 @@ proc ::ItemInspector::Build {wcan itemid args} {
     set cancelCmd [list [namespace current]::Cancel $token]
     set frbot $w.frall.frbot
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btsave -text [mc Save] -default active \
+    ttk::button $frbot.btsave -text [mc "Save"] -default active \
       -command $saveCmd
-    ttk::button $frbot.btcancel -text [mc Cancel] -command $cancelCmd
+    ttk::button $frbot.btcancel -text [mc "Cancel"] -command $cancelCmd
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btsave -side right
@@ -758,7 +828,7 @@ proc ::ItemInspector::Movie {wcan winfr args} {
 		set wmb $frtot.e$i
 		set state($op) $val
 		set wMenu [ttk::optionmenuex $wmb $token\($op)  \
-		  1 [mc true] 0 [mc false]]
+		  1 [mc "True"] 0 [mc "False"]]
 		if {$canvasState eq "disabled"} {
 		    $wmb state disabled
 		}
@@ -793,9 +863,9 @@ proc ::ItemInspector::Movie {wcan winfr args} {
     set cancelCmd [list [namespace current]::Cancel $token]
     set frbot $w.frall.frbot
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btsave -text [mc Save] -default active \
+    ttk::button $frbot.btsave -text [mc "Save"] -default active \
       -command $saveCmd
-    ttk::button $frbot.btcancel -text [mc Cancel] -command $cancelCmd
+    ttk::button $frbot.btcancel -text [mc "Cancel"] -command $cancelCmd
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	pack $frbot.btsave -side right
@@ -884,7 +954,7 @@ proc ::ItemInspector::Broken {wcan itemid args} {
 
     set w1 $w.frall.fr1
     ttk::labelframe $w1 -padding [option get . groupSmallPadding {}]  \
-      -text [mc {Broken Image}]
+      -text [mc "Broken Image"]
     pack $w1
     
     # Overall frame for whole container.
@@ -918,7 +988,7 @@ proc ::ItemInspector::Broken {wcan itemid args} {
     # Button part.
     set frbot $w.frall.frbot
     ttk::frame $w.frall.frbot
-    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w]
+    ttk::button $frbot.btok -text [mc "OK"] -command [list destroy $w]
     pack $frbot.btok -side right
     pack $frbot -side top -fill both -expand 1
         

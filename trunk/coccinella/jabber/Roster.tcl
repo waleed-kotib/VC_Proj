@@ -78,21 +78,21 @@ namespace eval ::Roster {
     
     # Cache messages for efficiency.
     array set mapShowTextToElem [list \
-      [mc mAvailable]       available  \
-      [mc mAway]            away       \
-      [mc mChat]            chat       \
-      [mc mDoNotDisturb]    dnd        \
-      [mc mExtendedAway]    xa         \
-      [mc mInvisible]       invisible  \
-      [mc mNotAvailable]    unavailable]
+      [mc "Available"]       available  \
+      [mc "Away"]            away       \
+      [mc "Chat"]            chat       \
+      [mc "Do Not Disturb"]    dnd        \
+      [mc "Extended Away"]    xa         \
+      [mc "Invisible"]       invisible  \
+      [mc "Not Available"]    unavailable]
     array set mapShowElemToText [list \
-      available       [mc mAvailable]     \
-      away            [mc mAway]          \
-      chat            [mc mChat]          \
-      dnd             [mc mDoNotDisturb]  \
-      xa              [mc mExtendedAway]  \
-      invisible       [mc mInvisible]     \
-      unavailable     [mc mNotAvailable]]
+      available       [mc "Available"]     \
+      away            [mc "Away"]          \
+      chat            [mc "Chat"]          \
+      dnd             [mc "Do Not Disturb"]  \
+      xa              [mc "Extended Away"]  \
+      invisible       [mc "Invisible"]     \
+      unavailable     [mc "Not Available"]]
     
     # Various time values.
     variable timer
@@ -392,7 +392,7 @@ proc ::Roster::Sort {{item root}} {
 proc ::Roster::SendRemove {jid} {    
 
     set ans [::UI::MessageBox -title [mc "Remove Contact"] \
-      -message [mc jamesswarnremove2] -icon warning -type yesno -default no]
+      -message [mc "Do you really want to remove this contact? This action cannot be undone."] -icon warning -type yesno -default no]
     if {[string equal $ans "yes"]} {
 	set jid [::Jabber::Jlib roster getrosterjid $jid]
 	::Jabber::Jlib roster send_remove $jid
@@ -403,7 +403,7 @@ proc ::Roster::RemoveJIDList {jidL} {
     
     # @@@ We could use a plural text here.
     set ans [::UI::MessageBox -title [mc "Remove Contact"] \
-      -message [mc jamesswarnremove2] -icon warning -type yesno -default no]
+      -message [mc "Do you really want to remove this contact? This action cannot be undone."] -icon warning -type yesno -default no]
     if {[string equal $ans "yes"]} {
 	foreach jid $jidL {
 	    set jid [::Jabber::Jlib roster getrosterjid $jid]
@@ -515,7 +515,9 @@ proc ::Roster::DoPopup {jidL groupL x y} {
 	    
 	    set mSub [list]
 	    set str $jid2
-	    append str " ([mc Default])"
+	    append str " ("
+	    append str [mc "Default"]
+	    append str ")"
 	    lappend mSub [list command $str [list ::Chat::StartThread $jid2]]
 	    lappend mSub [list separator]
 	    foreach res $resOnL {
@@ -593,10 +595,10 @@ proc ::Roster::PostMenuCmd {m mType clicked jidL presL} {
 	    if {[regexp {gateway/([^ ]+)} $types - trpt]} {
 		if {[HaveNameForTrpt $trpt]} {
 		    set tname [GetNameFromTrpt $trpt]
-		    $m entryconfigure $midx -label [mc mLoginTo $tname]
+		    $m entryconfigure $midx -label [mc "Login to %s" $tname]
 
 		    set midx [::AMenu::GetMenuIndex $m mLogoutTrpt]
-		    $m entryconfigure $midx -label [mc mLogoutFrom $tname]
+		    $m entryconfigure $midx -label [mc "Logout from %s" $tname]
 		}
 	    }
 	}
@@ -823,7 +825,7 @@ proc ::Roster::ExitRoster {} {
     variable timer
 
     SortAtIdle
-    ::JUI::SetAppMessage [mc jarostupdate]
+    ::JUI::SetAppMessage [mc "The roster is up to date"]
     set timer(exitroster,secs) [clock seconds]
 }
 
@@ -1380,7 +1382,9 @@ proc ::Roster::GetTransportSpecXMPP {} {
     
     # Disco doesn't return he server. Make sure it's first.
     set name [GetNameFromTrpt xmpp]
-    set xname "$name ([mc Default])"
+    set xname "$name ("
+    set xname [mc "Default"]
+    set xname ")"
     set server [::Jabber::Jlib getserver]
     set xmppSpec [list [list $server xmpp $xname]]
     
@@ -1388,7 +1392,9 @@ proc ::Roster::GetTransportSpecXMPP {} {
 	if {[jlib::jidequal $jid $server]} { continue }
 	set xname $name
 	if {$count} {
-	    set xname "$name ([mc Transport])"
+	    set xname "$name ("
+	    append xname [mc "Transport"]
+	    append xname ")"
 	}
 	lappend xmppSpec [list $jid xmpp $xname]
     }
@@ -1564,7 +1570,7 @@ proc ::Roster::InitPrefsHook {} {
 
 proc ::Roster::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Roster} [mc Contacts]
+    ::Preferences::NewTableItem {Jabber Roster} [mc "Contacts"]
         
     # Roster page ----------------------------------------------------------
     set wpage [$nbframe page {Roster}]
@@ -1585,18 +1591,18 @@ proc ::Roster::BuildPageRoster {page} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::checkbutton $wc.rmifunsub -text [mc prefrorm2]  \
+    ttk::checkbutton $wc.rmifunsub -text [mc "Remove contact without presence subscription"]  \
       -variable [namespace current]::tmpJPrefs(rost,rmIfUnsub)
-    ttk::checkbutton $wc.clrout -text [mc prefroclr2]  \
+    ttk::checkbutton $wc.clrout -text [mc "Clear list of contacts on logout"]  \
       -variable [namespace current]::tmpJPrefs(rost,clrLogout)
-    ttk::checkbutton $wc.dblclk -text [mc prefrochat2] \
+    ttk::checkbutton $wc.dblclk -text [mc "Chat on double-click instead of message"] \
       -variable [namespace current]::tmpJPrefs(rost,dblClk)  \
       -onvalue chat -offvalue normal
     ttk::checkbutton $wc.showoff -text [mc "Show offline users"] \
       -variable [namespace current]::tmpJPrefs(rost,showOffline)
     ttk::checkbutton $wc.showtrpt -text [mc "Show transports"] \
       -variable [namespace current]::tmpJPrefs(rost,showTrpts)
-    ttk::checkbutton $wc.showsubno -text [mc prefroshowsubno]  \
+    ttk::checkbutton $wc.showsubno -text [mc "Show contacts without any subscription"]  \
       -variable [namespace current]::tmpJPrefs(rost,showSubNone)
     
     grid  $wc.rmifunsub  -sticky w
@@ -1607,7 +1613,7 @@ proc ::Roster::BuildPageRoster {page} {
     grid  $wc.showtrpt   -sticky w
     grid  $wc.showsubno  -sticky w
     
-    ::balloonhelp::balloonforwindow $wc.rmifunsub [mc subscriptionTo]
+    ::balloonhelp::balloonforwindow $wc.rmifunsub [mc "You can see your contact's presence, but your contact can't see yours."]
 }
 
 proc ::Roster::SavePrefsHook {} {

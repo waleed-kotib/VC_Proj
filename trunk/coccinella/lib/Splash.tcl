@@ -80,7 +80,7 @@ proc ::Splash::SplashScreen {} {
 	}
 	wm transient $w
     }
-    wm title $w [mc {About %s} $prefs(theAppName)]
+    wm title $w [mc "About %s" $prefs(theAppName)]
     wm resizable $w 0 0
     set screenW [winfo vrootwidth .]
     set screenH [winfo vrootheight .]

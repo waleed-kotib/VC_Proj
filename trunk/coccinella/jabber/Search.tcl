@@ -85,7 +85,7 @@ proc ::Search::Build {args} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document {closeBox resizable}}  \
       -closecommand ::Search::CloseCmd
-    wm title $w [mc Search]
+    wm title $w [mc "Search"]
     set state(w) $w
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jsearch)]]
@@ -113,7 +113,7 @@ proc ::Search::Build {args} {
     
     ttk::label $wleft.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength $wraplength -justify left \
-      -text [mc jasearch2]
+      -text [mc "Search contacts with the selected service. A new search form will empty the previous one."]
     pack $wleft.msg -side top -anchor w
     
     set frtop $wleft.top
@@ -125,9 +125,9 @@ proc ::Search::Build {args} {
     set wsearch $frbot.search
     
     ttk::frame $frbot
-    ttk::button $frbot.search -text [mc Search] \
+    ttk::button $frbot.search -text [mc "Search"] \
       -command [namespace code [list DoSearch $w]]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [namespace code [list CloseCmd $w]]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -150,7 +150,7 @@ proc ::Search::Build {args} {
     set searchServ [::Jabber::Jlib disco getjidsforfeature "jabber:iq:search"]
     set wservice $frtop.eserv
     set wbtget       $frtop.btget
-    ttk::label    $frtop.lserv -text "[mc Service]:"
+    ttk::label    $frtop.lserv -text [mc "Service"]:
     ttk::button   $frtop.btget -text [mc "New Form"] -default active \
       -command [namespace code [list Get $w]]
     ttk::combobox $frtop.eserv -values $searchServ \
@@ -199,7 +199,7 @@ proc ::Search::Build {args} {
     pack $wright.se -side top -fill both -expand 1
     tablelist::tablelist $wtb \
       -width 60 -height 20  \
-      -columns [list 60 [mc {Search results}]]  \
+      -columns [list 60 [mc "Search results"]]  \
       -xscrollcommand [list $wxsc set]  \
       -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list grid $wysc -column 1 -row 0 -sticky ns]]
@@ -253,8 +253,8 @@ proc ::Search::TableCmd {w x y} {
 
 	# Warn if already in our roster.
 	if {[::Jabber::Jlib roster isitem $jid]} {
-	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost2 $jid] \
-	      -icon error -title [mc Error] -type ok]
+	    set ans [::UI::MessageBox -message [mc "%s is already in your list. Do you want to continue anyway?" $jid] \
+	      -icon error -title [mc "Error"] -type ok]
 	} else {
 	    ::JUser::NewDlg -jid $jid
 	}
@@ -305,13 +305,13 @@ proc ::Search::Get {w} {
     
     # Verify.
     if {$state(server) eq ""} {
-	::UI::MessageBox -type ok -icon error -title [mc Error] \
-	  -message [mc jamessregnoserver2]
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
+	  -message [mc "Please enter or select first a server."]
 	return
     }	
     $state(wservice) state {disabled}
     $state(wbtget)   state {disabled}
-    set state(status) "[mc jawaitserver]..."
+    set state(status) [mc "Waiting for server response"]...
     
     # Send get register.
     ::Jabber::Jlib search_get $state(server) [namespace code [list GetCB $w]]
@@ -343,10 +343,13 @@ proc ::Search::GetCB {w jlibName type subiq} {
     set state(status) ""
     
     if {$type eq "error"} {
-	set str [mc jamesserrsearch2]
-	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
-	append str "[mc Message]: [lindex $subiq 1]"
-	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
+	set str [mc "Cannot obtain search form."]
+	append str "\n"
+	append str [mc "Error code"]
+	append str ": [lindex $subiq 0]\n"
+	append str [mc "Message"]
+	append str ": [lindex $subiq 1]"
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] -message $str
 	return
     }
     set subiqChildList [wrapper::getchildren $subiq]
@@ -410,14 +413,20 @@ proc ::Search::HandleSetError {subiq} {
     
     foreach {ecode emsg} [lrange $subiq 0 1] break
     if {$ecode eq "406"} {
-	set msg [mc jamesssearchinval2]
-	append msg "\n[mc Message]: $emsg"
+	set msg [mc "There was an invalid field. Please correct it."]
+	append msg "\n"
+	append msg [mc "Message"]
+	append msg ": $emsg"
     } else {
-	set msg [mc jamesssearcherr]
-	append msg "\n" "[mc {Error code}]: $ecode"
-	append msg "\n" "[mc Message]: $emsg"
+	set msg [mc "Cannot search."]
+	append msg "\n"
+	append msg [mc "Error code"]
+	append msg ": $ecode"
+	append msg "\n"
+	append msg  [mc "Message"]
+	append msg ": $emsg"
     }
-    ui::dialog -type ok -title [mc Error] -icon error -message $msg
+    ui::dialog -type ok -title [mc "Error"] -icon error -message $msg
 }
 
 # Search::ResultCallback --
@@ -757,8 +766,8 @@ proc ::Search::ResultOnCmd {T x y} {
     
 	# Warn if already in our roster.
 	if {[::Jabber::Jlib roster isitem $jid]} {
-	    set ans [::UI::MessageBox -message [mc jamessalreadyinrost2 $jid] \
-	      -icon error -title [mc Error] -type yesno]
+	    set ans [::UI::MessageBox -message [mc "%s is already in your list. Do you want to continue anyway?" $jid] \
+	      -icon error -title [mc "Error"] -type yesno]
 	    if {$ans eq "yes"} {
 		::JUser::NewDlg -jid $jid
 	    }
@@ -916,8 +925,7 @@ proc ::Search::SlotBuild {w} {
     set slot(box)   $w.box
     set slot(entry) $box.e
     set slot(show)  0
-    set slot(dtext) "Search People"
-    set slot(text)  [mc $slot(dtext)]
+    set slot(text)  [mc "Search People"]
     
     # Hardcoded :-( See comments below. Just to pick some.
     set slot(fields) [list fn given user email]
@@ -933,7 +941,7 @@ proc ::Search::SlotBuild {w} {
     ::balloonhelp::balloonforwindow $box.e $slot(text)
 
     foreach m [::JUI::SlotGetAllMenus] {
-	$m add checkbutton -label [mc $slot(dtext)] \
+	$m add checkbutton -label [mc "Search People"] \
 	  -variable [namespace current]::slot(show) \
 	  -command [namespace code SlotCmd]
     }    
@@ -1010,7 +1018,7 @@ proc ::Search::SlotLogoutHook {} {
 proc ::Search::SlotEntryFocusIn {} {
     variable slot
     
-    if {[$slot(entry) get] eq [mc $slot(dtext)]} {
+    if {[$slot(entry) get] eq [mc "Search People"]} {
 	set slot(text) ""
     }
 }
@@ -1137,7 +1145,9 @@ proc ::Search::SlotResultBuild {w slotD} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document {closeBox resizable}}  \
       -closecommand [namespace code SlotResultCloseCmd]
-    wm title $w "[mc Search]: $text"
+    set msg [mc "Search"]
+    append msg ": $text"
+    wm title $w $msg
 
     ::UI::SetWindowGeometry $w
 
@@ -1159,7 +1169,7 @@ proc ::Search::SlotResultBuild {w slotD} {
     set wbot $wbox.bot
     
     ttk::frame $wbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $wbot.close -text [mc Close] \
+    ttk::button $wbot.close -text [mc "Close"] \
       -command [namespace code [list SlotResultCloseCmd $w]]
     ::UI::ChaseArrows $wbot.arrows
     

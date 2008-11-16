@@ -101,7 +101,7 @@ proc ::AddressBook::NewPage {} {
 	set im  [::Theme::Find16Icon $wtab addressBook16Image]
 	set imd [::Theme::Find16Icon $wtab addressBook16DisImage]
 	set imSpec [list $im disabled $imd background $imd]
-        $wnb add $wtab -text [mc AddressBook] -image $imSpec -compound image
+        $wnb add $wtab -text [mc "Address Book"] -image $imSpec -compound image
     }
 }
 
@@ -341,7 +341,7 @@ proc ::AddressBook::NewAddressbookDlg {{phonenumber ""}} {
     ::UI::Toplevel $w \
       -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
       -closecommand [namespace current]::CloseCmd
-    wm title $w [mc {newAddressbookDlg}]
+    wm title $w [mc "New address book"]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
     if {$nwin == 1} {
@@ -357,17 +357,17 @@ proc ::AddressBook::NewAddressbookDlg {{phonenumber ""}} {
     pack $wbox -fill both -expand 1
    
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc newAddressbook ]
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc "New address book"]
     pack $wbox.msg -side top -anchor w
 
     set frmid $wbox.frmid
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    ttk::label $frmid.lname -text "[mc {abName}]:"
+    ttk::label $frmid.lname -text [mc "Name"]:
     ttk::entry $frmid.ename -textvariable [namespace current]::abName
 
-    ttk::label $frmid.lphone -text "[mc {abPhone}]:"
+    ttk::label $frmid.lphone -text [mc "Phone number"]:
     ttk::entry $frmid.ephone -textvariable [namespace current]::abPhoneNumber
 
     grid  $frmid.lname    $frmid.ename        -  -sticky e -pady 2
@@ -379,9 +379,9 @@ proc ::AddressBook::NewAddressbookDlg {{phonenumber ""}} {
     set frbot $wbox.b
     set wenter  $frbot.btok
     ttk::frame $frbot
-    ttk::button $wenter -text [mc Enter] \
+    ttk::button $wenter -text [mc "Enter"] \
       -default active -command [list [namespace current]::addItemAddressBook $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelEnter $w]
 
     set padx [option get . buttonPadX {}]
@@ -424,7 +424,7 @@ proc ::AddressBook::ModifyAddressbookDlg {phone} {
     ::UI::Toplevel $w \
       -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
       -closecommand [namespace current]::CloseCmd
-    wm title $w [mc {modifyAddressbookDlg}]
+    wm title $w [mc "Modify address book"]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
     if {$nwin == 1} {
@@ -440,17 +440,17 @@ proc ::AddressBook::ModifyAddressbookDlg {phone} {
     pack $wbox -fill both -expand 1
 
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc modifyAddressbook ]
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc "Modify address book"]
     pack $wbox.msg -side top -anchor w
 
     set frmid $wbox.frmid
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    ttk::label $frmid.lname -text "[mc {abName}]:"
+    ttk::label $frmid.lname -text [mc "Name"]:
     ttk::entry $frmid.ename -textvariable [namespace current]::abName
 
-    ttk::label $frmid.lphone -text "[mc {abPhone}]:"
+    ttk::label $frmid.lphone -text [mc "Phone number"]:
     ttk::entry $frmid.ephone -textvariable [namespace current]::abPhoneNumber
 
     grid  $frmid.lname    $frmid.ename        -  -sticky e -pady 2
@@ -462,9 +462,9 @@ proc ::AddressBook::ModifyAddressbookDlg {phone} {
     set frbot $wbox.b
     set wenter  $frbot.btok
     ttk::frame $frbot
-    ttk::button $wenter -text [mc Enter] \
+    ttk::button $wenter -text [mc "Enter"] \
       -default active -command [list [namespace current]::modifyItemAddressBook $w $phone]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelEnter $w]
 
     set padx [option get . buttonPadX {}]
@@ -688,7 +688,8 @@ proc ::AddressBook::UpdateLogs {type remote remote_name initDate callLength} {
 
     if {[winfo exists $wtab]} {
         if { [clock format [clock seconds] -format %D] eq  [clock format $initDate -format "%D"]} {
-            set textDate "[mc Today] [clock format $initDate -format "%X"]"
+            set textDate [mc "Today"]
+            append textDate " [clock format $initDate -format "%X"]"
         } else {
             set textDate [clock format $initDate -format "%D %X"]
         }

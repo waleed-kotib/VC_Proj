@@ -33,21 +33,21 @@ namespace eval ::Status {
     variable mapShowElemToText
     
     array set mapShowTextToElem [list  \
-      [mc mAvailable]       available  \
-      [mc mAway]            away       \
-      [mc mChat]            chat       \
-      [mc mDoNotDisturb]    dnd        \
-      [mc mExtendedAway]    xa         \
-      [mc mInvisible]       invisible  \
-      [mc mNotAvailable]    unavailable]
+      [mc "Available"]       available  \
+      [mc "Away"]            away       \
+      [mc "Chat"]            chat       \
+      [mc "Do Not Disturb"]    dnd        \
+      [mc "Extended Away"]    xa         \
+      [mc "Invisible"]       invisible  \
+      [mc "Not Available"]    unavailable]
     array set mapShowElemToText [list     \
-      available       [mc mAvailable]     \
-      away            [mc mAway]          \
-      chat            [mc mChat]          \
-      dnd             [mc mDoNotDisturb]  \
-      xa              [mc mExtendedAway]  \
-      invisible       [mc mInvisible]     \
-      unavailable     [mc mNotAvailable]]
+      available       [mc "Available"]     \
+      away            [mc "Away"]          \
+      chat            [mc "Chat"]          \
+      dnd             [mc "Do Not Disturb"]  \
+      xa              [mc "Extended Away"]  \
+      invisible       [mc "Invisible"]     \
+      unavailable     [mc "Not Available"]]
 
     variable mapShowMLabelToText
     variable mapShowTextToMLabel
@@ -397,7 +397,7 @@ proc ::Status::SetWithMessage {varName args} {
 
     # Top frame.
     set wtop $wbox.top
-    ttk::labelframe $wtop -text [mc {My Status}] \
+    ttk::labelframe $wtop -text [mc "My Status"] \
       -padding [option get . groupPadding {}]
     pack $wtop -side top -fill x
 
@@ -410,7 +410,7 @@ proc ::Status::SetWithMessage {varName args} {
 	grid  $wtop.$val  -sticky w
     }
         
-    ttk::label $wbox.lbl -text "[mc {Status message}]:" \
+    ttk::label $wbox.lbl -text [mc "Status message"]: \
       -padding [option get . groupTopPadding {}]
     pack $wbox.lbl -side top -anchor w -padx 6
 
@@ -425,9 +425,9 @@ proc ::Status::SetWithMessage {varName args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -default active \
+    ttk::button $frbot.btok -text [mc "OK"] -default active \
       -command [list [namespace current]::BtSetStatus $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::SetStatusCancel $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -857,8 +857,8 @@ proc ::Status::ExCustomDlg {varName args} {
 	set im [::Rosticons::ThemeGet user/$show]
 	lappend menuDef [list $mapShowElemToText($show) -value $show -image $im]
     }
-    ui::dialog $w -type okcancel -message [mc jamessstatuscust2] \
-      -detail [mc jamessstatuscustdtl2] -icon info  \
+    ui::dialog $w -type okcancel -message [mc "Select a presence state and optionally enter a message."] \
+      -detail [mc "The most frequent combinations are easily reachable as menu entries."] -icon info  \
       -command ::Status::ExCustomDlgCmd -geovariable prefs(winGeom,$w)  \
       -title [mc "Custom Status"]
     set fr [$w clientframe]
@@ -872,7 +872,7 @@ proc ::Status::ExCustomDlg {varName args} {
     grid columnconfigure $fr 0 -minsize $maxw
     grid columnconfigure $fr 1 -weight 1
     
-    ::balloonhelp::balloonforwindow $fr.e [mc Message]
+    ::balloonhelp::balloonforwindow $fr.e [mc "Message"]
 
     bind $fr.m <Map> { focus %W }
     bind $w <Destroy> +[subst { if {"%W" eq "$w"} {::Status::ExCustomDlgFree %W} }]

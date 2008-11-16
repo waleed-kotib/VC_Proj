@@ -444,16 +444,16 @@ proc ::CanvasCmd::DoPutCanvas {wcan {toIPnum all}} {
 
     # Save canvas to temporary file.
     if {[catch {open $absFilePath w} fileId]} {
-	::UI::MessageBox -message [mc messfailopwrite2 $tmpFile $fileId] \
-	  -icon error -title [mc Error] -type ok
+	::UI::MessageBox -message [mc "Cannot write to %s: %s" $tmpFile $fileId] \
+	  -icon error -title [mc "Error"] -type ok
     }
     fconfigure $fileId -encoding utf-8
     ::CanvasFile::CanvasToChannel $wcan $fileId $absFilePath
     catch {close $fileId}
 
     if {[catch {open $absFilePath r} fileId]} {
-	::UI::MessageBox -message [mcset en messfailopread2 $tmpFile $fileId] \
-	  -icon error -title [mc Error] -type ok
+	::UI::MessageBox -message [mc "Cannot read %s: %s" $tmpFile $fileId] \
+	  -icon error -title [mc "Error"] -type ok
     }
     fconfigure $fileId -encoding utf-8
     

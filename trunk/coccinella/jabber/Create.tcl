@@ -54,7 +54,7 @@ proc ::Create::Build {args} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document {closeBox resizable}} \
       -closecommand [list [namespace current]::Close $token]
-    wm title $w [mc {Create Chatroom}]
+    wm title $w [mc "Create Chatroom"]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jcreateroom)]]
     if {$nwin == 1} {
@@ -93,7 +93,7 @@ proc ::Create::Build {args} {
 
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength $state(wraplength) -justify left \
-      -text [mc jacreateroom2]
+      -text [mc "Select a service, and enter a chatroom and nickname. Optionally, you can configure the chatroom."]
     pack $wbox.msg -side top -anchor w
     
     set frtop        $wbox.top
@@ -102,13 +102,13 @@ proc ::Create::Build {args} {
     ttk::frame $frtop
     pack $frtop -side top -fill x
         
-    ttk::label $frtop.lserv -text "[mc Service]:"
+    ttk::label $frtop.lserv -text [mc "Service"]:
     ui::combobutton $frtop.eserv -variable $token\(server) \
       -menulist [ui::optionmenu::menuList $serviceList]
-    ttk::label $frtop.lroom -text "[mc Chatroom]:"    
+    ttk::label $frtop.lroom -text [mc "Chatroom"]:
     ttk::entry $frtop.eroom -textvariable $token\(roomname)  \
       -validate key -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
-    ttk::label $frtop.lnick -text "[mc Nickname]:"    
+    ttk::label $frtop.lnick -text [mc "Nickname"]: 
     ttk::entry $frtop.enick -textvariable $token\(nickname)  \
       -validate key -validatecommand {::Jabber::ValidateResourceStr %S}
     
@@ -119,9 +119,9 @@ proc ::Create::Build {args} {
     grid  $frtop.eserv  $frtop.eroom  $frtop.enick  -sticky ew
     grid columnconfigure $frtop 1 -weight 1
 
-    ::balloonhelp::balloonforwindow $frtop.eserv [mc tooltip-chatroomservice]
-    ::balloonhelp::balloonforwindow $frtop.eroom [mc tooltip-chatroomselect]
-    ::balloonhelp::balloonforwindow $frtop.enick [mc registration-nick]
+    ::balloonhelp::balloonforwindow $frtop.eserv [mc "Select or manually enter a chatroom service"]
+    ::balloonhelp::balloonforwindow $frtop.eroom [mc "Select or manually enter the name of a chatroom"]
+    ::balloonhelp::balloonforwindow $frtop.enick [mc "Familiar name"]
 
     # Find the default conferencing server.
     if {[info exists argsA(-server)]} {
@@ -144,11 +144,11 @@ proc ::Create::Build {args} {
     set wbtcreate $frbot.btok
     set wbtget    $frbot.btget
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $wbtget -text [mc Configure] -default active \
+    ttk::button $wbtget -text [mc "Configure"] -default active \
       -command [list [namespace current]::Get $token]
-    ttk::button $wbtcreate -text [mc Create] \
+    ttk::button $wbtcreate -text [mc "Create"] \
       -command [list [namespace current]::SetRoom $token]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::Cancel $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -311,17 +311,17 @@ proc ::Create::Get {token} {
     # Verify:
     if {$state(server) eq ""} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -title [mc Error] -message [mc jamessnogroupchat2]
+	  -title [mc "Error"] -message [mc "Cannot find any chatroom service."]
 	return
     }
     if {$state(roomname) eq ""} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -title [mc Error] -message [mc jamessgcnoroomname2]
+	  -title [mc "Error"] -message [mc "You must provide a chatroom name."]
 	return
     }
     if {($state(usemuc) && ($state(nickname) eq ""))} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -title [mc Error] -message [mc jamessgcnoroomnick]
+	  -title [mc "Error"] -message [mc "You must provide a nickname."]
 	return
     }
 
@@ -329,12 +329,12 @@ proc ::Create::Get {token} {
     set roomjid [jlib::joinjid $node $state(server) ""]
     if {![jlib::jidvalidate $roomjid]} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -title [mc Error] -message [mc jamessjidinvalid2]
+	  -title [mc "Error"] -message [mc "Invalid Contact ID."]
 	return
     }
     $state(wpopupserver) state {disabled}
     $state(wbtget)       state {disabled}
-    set state(status) "[mc jawaitform]..."
+    set state(status) [mc "Downloading configuration form"]...
     
     # Send get create room. NOT the server!
     set state(roomjid) [jlib::jidmap $roomjid]
@@ -420,13 +420,17 @@ proc ::Create::CreateMUCCB {token jlibname xmldata} {
 	    set errcode [lindex $errspec 0]
 	    set errmsg  [lindex $errspec 1]
 	}
-	set str [mc jamesserrconfgetcre2]
-	append str "\n" "[mc {Error code}]: $errcode\n"
-	append str "[mc Message]: $errmsg"
-	::UI::MessageBox -type ok -icon error -title [mc Error] \
+	set str [mc "Cannot download the configuration form of the chatroom."]
+	append str "\n"
+	append str [mc "Error code"]
+	append str ": $errcode\n"
+	append str [mc "Message"]
+	append str ": $errmsg"
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
 	  -message $str
 
-      set state(status) [mc jasearchwait]
+      # String wrong or obsolete?
+      set state(status) [mc "Waiting for Get to be pressed"]
 	$state(wpopupserver) configure -state normal
 	$state(wbtget) configure -state normal
 	return
@@ -458,10 +462,13 @@ proc ::Create::GetFormCB {token jlibName type subiq} {
     set state(status) ""
     
     if {$type eq "error"} {
-	set str [mc jamesserrconfgetcre2]
-	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
-	append str "[mc Message]: [lindex $subiq 1]"
-	::UI::MessageBox -type ok -icon error -title [mc Error] -parent $state(w) \
+	set str [mc "Cannot download the configuration form of the chatroom."]
+	append str "\n"
+	append str [mc "Error code"]
+	append str ": [lindex $subiq 0]\n"
+	append str [mc "Message"]
+	append str ": [lindex $subiq 1]"
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] -parent $state(w) \
 	  -message $str
 
       return
@@ -505,7 +512,7 @@ proc ::Create::SetRoom {token} {
     set roomjid [jlib::joinjid $node $state(server) ""]
     if {![jlib::jidvalidate $roomjid]} {
 	::UI::MessageBox -type ok -icon error -parent $state(w) \
-	  -title [mc Error] -message [mc jamessjidinvalid2]
+	  -title [mc "Error"] -message [mc "Invalid Contact ID."]
 	return
     }
     set state(roomjid) [jlib::jidmap $roomjid]
@@ -533,10 +540,13 @@ proc ::Create::SetRoomCB {usemuc roomjid jlibName type subiq} {
     ::Debug 2 "::Create::SetRoomCB"
     
     if {$type eq "error"} {
-	set str [mc jamessconffailed2 $roomjid]
-	append str "\n" "[mc {Error code}]: [lindex $subiq 0]\n"
-	append str "[mc Message]: [lindex $subiq 1]"
-	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
+	set str [mc "Cannot enter/create chatroom %s." $roomjid]
+	append str "\n"
+	append str [mc "Error code"]
+	append str ": [lindex $subiq 0]\n"
+	append str [mc "Message"]
+	append str ": [lindex $subiq 1]"
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] -message $str
 
     } elseif {[regexp {.+@([^@]+)$} $roomjid match service]} {
 		    
@@ -567,8 +577,8 @@ proc ::Create::GCBuild {args} {
     ::Debug 2 "::Create::GCBuild chatservers=$chatservers args='$args'"
     
     if {0 && $chatservers == {}} {
-	::UI::MessageBox -icon error -title [mc Error] \
-	  -message [mc jamessnogroupchat2]
+	::UI::MessageBox -icon error -title [mc "Error"] \
+	  -message [mc "Cannot find any chatroom service."]
 	return
     }
 
@@ -611,19 +621,19 @@ proc ::Create::GCBuild {args} {
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    set msg [mc jagchatmsg]
+    set msg [mc "Select a chatroom service, a chatroom, and a nickname."]
     ttk::label $frmid.msg -style Small.TLabel \
       -padding {0 0 0 6} -anchor w -wraplength 300 -justify left -text $msg
-    ttk::label $frmid.lserv -text "[mc Service]:" -anchor e
+    ttk::label $frmid.lserv -text [mc "Service"]: -anchor e
 
     set wcomboserver $frmid.eserv
     ttk::combobox $wcomboserver -width 18  \
       -textvariable $token\(server) -values $chatservers
-    ttk::label $frmid.lroom -text "[mc Chatroom]:" -anchor e
+    ttk::label $frmid.lroom -text [mc "Chatroom"]: -anchor e
     ttk::entry $frmid.eroom -width 24    \
       -textvariable $token\(roomname) -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
-    ttk::label $frmid.lnick -text "[mc Nickname]:" \
+    ttk::label $frmid.lnick -text [mc "Nickname"]: \
       -anchor e
     ttk::entry $frmid.enick -width 24    \
       -textvariable $token\(nickname) -validate key  \
@@ -655,9 +665,9 @@ proc ::Create::GCBuild {args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Enter] -default active \
+    ttk::button $frbot.btok -text [mc "Enter"] -default active \
       -command [list [namespace current]::GCDoEnter $token]
-    ttk::button $frbot.btcancel -text [mc Cancel]   \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]   \
       -command [list [namespace current]::GCCancel $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -710,8 +720,8 @@ proc ::Create::GCDoEnter {token} {
     # Verify the fields first.
     if {($enter(server) eq "") || ($enter(roomname) eq "") ||  \
       ($enter(nickname) eq "")} {
-	::UI::MessageBox -icon error -title [mc Warning] -type ok -message \
-	  [mc jamessgchatfields2] -parent $enter(w)
+	::UI::MessageBox -icon error -title [mc "Warning"] -type ok -message \
+	  [mc "Please fill in all fields before entering chatroom."] -parent $enter(w)
 	return
     }
 
@@ -734,15 +744,19 @@ proc ::Create::EnterCallback {jlibname xmldata} {
     }    
     if {[string equal $type "error"]} {
 	set ujid [jlib::unescapejid $from]
-	set msg [mc mucErrEnter2 $from]
+	set msg [mc "Cannot enter chatroom %s." $from]
 	set errspec [jlib::getstanzaerrorspec $xmldata]
 	if {[llength $errspec]} {
 	    set errcode [lindex $errspec 0]
 	    set errmsg  [lindex $errspec 1]
-	    append msg "\n[mc {Error code}]: $errcode"
-	    append msg "\n[mc Message]: $errmsg"
+	    append msg "\n"
+	    append msg [mc "Error code"]
+	    append msg ": $errcode"
+	    append msg "\n"
+	    append msg [mc "Message"]
+	    append msg ": $errmsg"
 	}
-	::UI::MessageBox -title [mc Error] -message $msg -icon error
+	::UI::MessageBox -title [mc "Error"] -message $msg -icon error
 	return
     }
     

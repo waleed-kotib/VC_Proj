@@ -328,9 +328,9 @@ proc ::JWB::NewWhiteboardTo {jid args} {
 	}
 	set name [$jlib roster getname $jid]
 	if {[string length $name]} {
-	    set title "[mc {Chat With}] $name"
+	    set title [mc "Chat With %s" $name]
 	} else {
-	    set title "[mc {Chat With}] $jid"
+	    set title [mc "Chat With %s" $jid]
 	}	
 	set argsA(-title)  $title
 	set argsA(-type)   chat
@@ -446,11 +446,11 @@ proc ::JWB::BuildEntryHook {w wcomm} {
     }
 
     ttk::label $wframe.ljid -style Small.TLabel \
-      -text "[mc {Contact ID}]:" -padding {16 4 4 4}
+      -text [mc "Contact ID"]: -padding {16 4 4 4}
     ui::entryex $wframe.ejid -font CociSmallFont  \
       -library $jidlist -textvariable [namespace current]::jwbstate($w,jid)
     ttk::checkbutton $wframe.to -style Small.TCheckbutton \
-      -text [mc {Send Live}] \
+      -text [mc "Send Live"] \
       -variable [namespace current]::jwbstate($w,send)
     $wframe.to state {disabled}
     if {[::Jabber::IsConnected]} {
@@ -627,7 +627,7 @@ proc ::JWB::CloseHook {w} {
     switch -- $jwbstate($w,type) {
 	chat {
 	    set ans [::UI::MessageBox -icon question -parent $w -type yesno \
-	      -message [mc jamesswbchatlost2]]
+	      -message [mc "Do you want to close this whiteboard and lose the complete session?"]]
 	    if {$ans ne "yes"} {
 		return stop
 	    }
@@ -642,7 +642,7 @@ proc ::JWB::CloseHook {w} {
 		}
 	    }
 	    set ans [::UI::MessageBox -icon question -parent $w -type yesno \
-	      -message [mc jamesswbchatlost2]]
+	      -message [mc "Do you want to close this whiteboard and lose the complete session?"]]
 	    if {$ans ne "yes"} {
 		return stop
 	    }
@@ -654,7 +654,7 @@ proc ::JWB::CloseHook {w} {
 		set dtl [mc "Edits will be lost unless you save them."]
 		set ans [::UI::MessageBox -parent $w -icon question \
 		  -type yesnocancel \
-		  -message [mc messunsavedmsgQ2] -detail [mc messunsaveddtl2]]
+		  -message [mc "This whiteboard document has been changed."] -detail [mc "Do you want to save the changes?"]]
 		if {$ans eq "yes"} {
 		    ::CanvasFile::Save $wcan
 		} elseif {$ans eq "cancel"} {
@@ -813,7 +813,7 @@ proc ::JWB::CheckIfOnline {w} {
 	set isok [::Jabber::Jlib roster isavailable $jwbstate($w,jid)]
 	if {!$isok} {
 	    ::UI::MessageBox -type ok -icon warning -parent $w \
-	      -message [mc jamesschatoffline2]
+	      -message [mc "This contact is not online anymore and the message is therefore not sent."]
 	}
     }
     return $isok
@@ -975,7 +975,7 @@ proc ::JWB::DoSendCanvas {w} {
 	# If user not online no files may be sent off.
 	if {![::Jabber::Jlib roster isavailable $jid]} {
 	    set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
-	      -message [mc jamesswarnsendcanoff2 $jid]]
+	      -message [mc "%s is not online. If your message contains any images or other multimedia, your contact will not see them unless you are online while he/she reads your message. Do you want to send it anyway?" $jid]]
 	    if {$ans eq "no"} {
 		return
 	    }
@@ -984,7 +984,7 @@ proc ::JWB::DoSendCanvas {w} {
 	::WB::CloseWhiteboard $w
     } else {
 	::UI::MessageBox -icon warning -type ok -parent $w \
-	  -message [mc jamessinvalidjid2]
+	  -message [mc "Invalid Contact ID. You need to enter a valid one at the bottom (e.g. user@example.org)."]
     }
 }
 
@@ -1521,7 +1521,7 @@ proc ::JWB::SVGPrepare {wcan url mime opts} {
 	set prep "mime-unsupported"
     } elseif {$do eq "ask"} {
 	set ans [::UI::MessageBox -title [mc "Request To User"] \
-	  -type yesno -default yes -message [mc messaskreceive $tail]]
+	  -type yesno -default yes -message [mc "We are about to receive the file %s. Do you want to receive it?" $tail]]
 	if {$ans eq "no"} {
 	    set prep "rejected"
 	}
@@ -2050,13 +2050,13 @@ proc ::JWB::DispatchToImporter {mime opts args} {
 	    set wcan [::WB::GetCanvasFromWtop $w]
 	    set errMsg [eval {::Import::DoImport $wcan $opts} $args]
 	    if {$errMsg ne ""} {
-		::UI::MessageBox -title [mc Error] -icon error -type ok \
+		::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 		  -message "Failed importing: $errMsg" \
 		  -parent [winfo toplevel $wcan]
 	    }
 	} else {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
-	      -message [mc messfailmimeimp2 $mime] \
+	    ::UI::MessageBox -title [mc "Error"] -icon error -type ok \
+	      -message [mc "Cannot find importer for the MIME type %s" $mime] \
 	      -parent [winfo toplevel $wcan]
 	}
     }
@@ -2078,7 +2078,7 @@ proc ::JWB::VerifyJIDWhiteboard {w} {
     if {$jwbstate($w,send)} {
 	if {![jlib::jidvalidate $jwbstate($w,jid)]} {
 	    ::UI::MessageBox -icon warning -type ok -parent $w \
-	      -message [mc jamessinvalidjid2]
+	      -message [mc "Invalid Contact ID. You need to enter a valid one at the bottom (e.g. user@example.org)."]
 	    return 0
 	}
     }

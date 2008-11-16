@@ -145,7 +145,7 @@ proc ::Carbon::InitPrefsHook {} {
 
 proc ::Carbon::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Sleep} [mc machine-Sleep]
+    ::Preferences::NewTableItem {Jabber Sleep} [mc "Sleep"]
     
     set wpage [$nbframe page Sleep]    
     BuildPage $wpage
@@ -166,7 +166,7 @@ proc ::Carbon::BuildPage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
     
     ttk::frame $wc.head -padding {0 0 0 6}
-    ttk::label $wc.head.l -text [mc machine-Sleep]
+    ttk::label $wc.head.l -text [mc "Sleep"]
     ttk::separator $wc.head.s -orient horizontal
 
     grid  $wc.head.l  $wc.head.s
@@ -180,7 +180,7 @@ proc ::Carbon::BuildPage {page} {
     set varName [namespace current]::tmp(sleeplogout)
     ttk::checkbutton $ws.clout -text [mc "Logout on sleep"]: -variable $varName \
       -command [namespace code [list SetEntryState [list $ws.emsg $ws.clin] $varName]]
-    ttk::label $ws.lmsg -text [mc Message]:
+    ttk::label $ws.lmsg -text [mc "Message"]:
     ttk::entry $ws.emsg -font CociSmallFont -width 32  \
       -textvariable [namespace current]::tmp(sleeploutmsg)
     ttk::checkbutton $ws.clin -text [mc "Relogin on wakeup"] \

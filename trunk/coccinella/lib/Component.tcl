@@ -56,7 +56,7 @@ proc ::Component::Dlg {} {
     # Check first of there are *any* components.
     set compList [component::getall]
     if {[llength $compList] == 0} {
-	::UI::MessageBox -icon info -type ok -message [mc messnoplugs]
+	::UI::MessageBox -icon info -type ok -message [mc "There are no plugins or helper applications identified on this system."]
 	return  
     }
     set w $wDlgs(comp)
@@ -65,7 +65,7 @@ proc ::Component::Dlg {} {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [mc Plugins]
+    wm title $w [mc "Plugins"]
      
     ttk::frame $w.frall
     pack $w.frall -fill both -expand 1
@@ -77,9 +77,9 @@ proc ::Component::Dlg {} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -default active \
+    ttk::button $frbot.btok -text [mc "OK"] -default active \
       -command [namespace code [list OK $w]]
-    ttk::button $frbot.btcancel -text [mc Cancel] \
+    ttk::button $frbot.btcancel -text [mc "Cancel"] \
       -command [namespace code [list Cancel $w]]
 
     set padx [option get . buttonPadX {}]

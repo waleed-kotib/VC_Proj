@@ -520,7 +520,7 @@ proc ::AvatarMB::Menu {m args} {
     pack $m.f -fill both -expand 1
     set f $m.f
     
-    ttk::label $f.l -text "[mc {Recent Avatars}]:"
+    ttk::label $f.l -text [mc "Recent Avatars"]:
     pack $f.l -side top -anchor w -padx 18 -pady 2
     
     ttk::frame $f.box
@@ -564,13 +564,13 @@ proc ::AvatarMB::Menu {m args} {
     
     bind $m <KeyPress> { }
     
-    ttk::button $f.new -style FMenu -text "[mc Open]..." \
+    ttk::button $f.new -style FMenu -text [mc "Open"]... \
       -command ::AvatarMB::MenuNew
     BindFMenu $f.new
     pack $f.new -side top -anchor w -fill x
 
     if {0} {
-	ttk::button $f.edit -style FMenu -text "[mc Edit]..." -state disabled
+	ttk::button $f.edit -style FMenu -text [mc "Edit"]... -state disabled
 	BindFMenu $f.edit
 	pack $f.edit -side top -anchor w -fill x
     }
@@ -580,7 +580,7 @@ proc ::AvatarMB::Menu {m args} {
     BindFMenu $f.clear
     pack $f.clear -side top -anchor w -fill x
     
-    ttk::button $f.remove -style FMenu -text [mc Remove] \
+    ttk::button $f.remove -style FMenu -text [mc "Remove"] \
       -command ::AvatarMB::MenuRemove
     BindFMenu $f.remove
     pack $f.remove -side top -anchor w -fill x

@@ -17,7 +17,7 @@ package provide ui::fontselector 0.1
 namespace eval ui::fontselector {
 
     set str   "Hello cruel World!"
-    set title [::msgcat::mc {Select Font}]
+    set title [::msgcat::mc "Select Font"]
 
     option add *FontSelector.text             $str                widgetDefault
     option add *FontSelector.title            $title              widgetDefault
@@ -111,7 +111,7 @@ snit::widget ui::fontselector::widget {
 	ttk::frame $frprop -padding {12 0 0 0}
 	pack  $frprop  -side top -fill y
 
-	ttk::label    $frprop.lsize -text "[::msgcat::mc {Font size}]:"
+	ttk::label    $frprop.lsize -text [::msgcat::mc "Font size"]:
 	ttk::combobox $frprop.csize -width 8  \
 	  -textvariable [myvar size]  \
 	  -values {9 10 12 14 16 18 24 36 48 60 72}
@@ -121,7 +121,7 @@ snit::widget ui::fontselector::widget {
 	grid  $frprop.csize  -sticky ew
 	grid  $frprop.s      -sticky ew -pady 12
 
-	ttk::label    $frprop.lwe -text "[::msgcat::mc {Font weight}]:"
+	ttk::label    $frprop.lwe -text [::msgcat::mc "Font weight"]:
 	ttk::combobox $frprop.cwe -width 10  \
 	  -textvariable [myvar weight] -state readonly \
 	  -values {normal bold italic}
@@ -144,11 +144,11 @@ snit::widget ui::fontselector::widget {
 	# Button part.
 	set frbot  $win.frm.b
 	ttk::frame $frbot
-	ttk::button $frbot.btset -text [::msgcat::mc OK] -default active  \
+	ttk::button $frbot.btset -text [::msgcat::mc "OK"] -default active  \
 	  -command [list $self OK]
-	ttk::button $frbot.btcancel -text [::msgcat::mc Cancel]  \
+	ttk::button $frbot.btcancel -text [::msgcat::mc "Cancel"]  \
 	  -command [list $self Cancel]
-	ttk::button $frbot.btdef -text [::msgcat::mc Default]  \
+	ttk::button $frbot.btdef -text [::msgcat::mc "Default"]  \
 	  -command [list $self Default]
 	set padx [option get $win buttonPadX {}]
 	if {[option get $win buttonOrder {}] eq "cancelok"} {

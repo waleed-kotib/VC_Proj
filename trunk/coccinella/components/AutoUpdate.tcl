@@ -118,8 +118,8 @@ proc ::AutoUpdate::GetURL {args} {
 	::httpex::get $url -command [namespace code [list Command $opts(-locale)]]
     } $tmopts} token]} {
 	if {!$opts(-silent)} {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
-	      -message [mc jamesserrautouphttp2 $url $token]
+	    ::UI::MessageBox -title [mc "Error"] -icon error -type ok \
+	      -message [mc "Cannot connect to server %s to download update details: %s" $url $token]
 	}
     }
 }
@@ -173,7 +173,7 @@ proc ::AutoUpdate::Command {locale token} {
 	    Dialog $releaseAttr $message $changesL
 	} elseif {!$opts(-silent)} {
 	    ::UI::MessageBox -title [mc "Update Check"] -icon info -type ok \
-	      -message [mc messaupdatelatest $this(vers,full)]
+	      -message [mc "You already have the latest version available (%s)." $this(vers,full)]
 	}
 	tinydom::cleanup $token
     } elseif {$locale} {
@@ -254,14 +254,14 @@ proc ::AutoUpdate::Dialog {releaseAttr message changesL} {
     if {[package vcompare $this(vers,full) $prefs(autoupdate,lastVersion)] <= 0} {
     	set autocheck 0
     }
-    ttk::checkbutton $wbox.ch -text [mc autoupdatedo] \
+    ttk::checkbutton $wbox.ch -text [mc "Automatically check for updates"] \
       -variable [namespace current]::autocheck
     pack $wbox.ch -side top -anchor w -pady 8
     
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot
-    ttk::button $frbot.btok -text [mc Close] \
+    ttk::button $frbot.btok -text [mc "Close"] \
       -command [list destroy $w]
     pack $frbot.btok -side right
     pack $frbot -side top -fill x

@@ -473,7 +473,7 @@ proc ::JUI::Build {w} {
     frame $wrostco
 
     set imSpec [list $iconRoster disabled $iconRosterDis background $iconRosterDis]
-    $wnb add $wrostco -compound left -text [mc Contacts] -image $imSpec  \
+    $wnb add $wrostco -compound left -text [mc "Contacts"] -image $imSpec  \
       -sticky news
     pack $wroster -in $wnb.cont -fill both -expand 1
 
@@ -518,8 +518,8 @@ proc ::JUI::BuildStatusMB {win} {
 
     dict set msgD mejid    [mc "Own Contact ID"]
     dict set msgD mejidres [mc "Own Full Contact ID"]
-    dict set msgD server   [mc Server]
-    dict set msgD status   [mc Status]
+    dict set msgD server   [mc "Server"]
+    dict set msgD status   [mc "Status"]
     
     set m $win.m
     menu $m -tearoff 0
@@ -593,7 +593,7 @@ proc ::JUI::BuildCombiBox {w} {
     grid $w.combo -stick ew
     grid columnconfigure $w 2 -weight 1
     
-    ::balloonhelp::balloonforwindow $w.nick  [mc "Displays your JID or nickname"]
+    ::balloonhelp::balloonforwindow $w.nick  [mc "Displays your Contact ID or nickname"]
     ::balloonhelp::balloonforwindow $w.combo [mc "Set your presence message"]
     
     set combiBox(w) $w
@@ -813,7 +813,7 @@ proc ::JUI::BuildToyStatus {wtoy} {
 	::MegaPresence::Build $wmp -collapse 0
 	bind $wtoy.b <<ButtonPopup>> [list ::MegaPresence::Popup %W $wmp %x %y]
     }
-    ::balloonhelp::balloonforwindow $wtoy.b [mc mShowControlPanel]
+    ::balloonhelp::balloonforwindow $wtoy.b [mc "Show Control Panel"]
 
     return $wtoy
 }
@@ -979,13 +979,13 @@ proc ::JUI::SlotBuild {w} {
 proc ::JUI::SlotDisplay {} {
     variable jwapp
     pack $jwapp(wmp) -side bottom -fill x
-    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc mHideControlPanel]
+    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Hide Control Panel"]
 }
 
 proc ::JUI::SlotHide {} {
     variable jwapp
     pack forget $jwapp(wmp)
-    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc mShowControlPanel]
+    ::balloonhelp::balloonforwindow $jwapp(wtoyb) [mc "Show Control Panel"]
 }
 
 # JUI::SlotSlideUp, SlotSlide, .. ---
@@ -1216,19 +1216,19 @@ proc ::JUI::BuildToolbar {w wtbar} {
     
     ::ttoolbar::ttoolbar $wtbar
     
-    $wtbar newbutton connect -text [mc Login] \
+    $wtbar newbutton connect -text [mc "Login"] \
       -image $iconConnect -disabledimage $iconConnectDis \
       -command ::Jabber::OnMenuLogInOut
     if {[::MailBox::HaveMailBox]} {
-	$wtbar newbutton inbox -text [mc Inbox] \
+	$wtbar newbutton inbox -text [mc "Inbox"] \
 	  -image $iconInboxLett -disabledimage $iconInboxLettDis  \
 	  -command [list ::MailBox::ShowHide -visible 1]
     } else {
-	$wtbar newbutton inbox -text [mc Inbox] \
+	$wtbar newbutton inbox -text [mc "Inbox"] \
 	  -image $iconInbox -disabledimage $iconInboxDis  \
 	  -command [list ::MailBox::ShowHide -visible 1]
     }
-    $wtbar newbutton newuser -text [mc Contact] \
+    $wtbar newbutton newuser -text [mc "Contact"] \
       -image $iconAddUser -disabledimage $iconAddUserDis  \
       -command ::JUser::NewDlg -state disabled \
       -balloontext [mc "Add Contact"]
@@ -1514,7 +1514,7 @@ proc ::JUI::SetSecurityIcons {} {
 	    set image [::Theme::Find16Icon $w secureHighImage]
 	    set any 1
 	} elseif {($sasl && $tls) || $ssl} {
-	    set str [mc "The connection is medium secure: ..."]
+	    set str [mc "The connection is medium secure"]
 	    set image [::Theme::Find16Icon $w secureMedImage]
 	    set any 1
 	} elseif {$sasl} {
@@ -1680,10 +1680,10 @@ proc ::JUI::DeRegisterMenuEntry {name mLabel} {
 
 proc ::JUI::FilePostCommand {wmenu} {
     
-    ::UI::MenuMethod $wmenu entryconfigure mCloseWindow -state normal
+    ::UI::MenuMethod $wmenu entryconfigure mCloseWindow -state normal -label [mc "&Close Window"]
     if {[winfo exists [focus]]} {
 	if {[winfo class [winfo toplevel [focus]]] eq "JMain"} {
-	    ::UI::MenuMethod $wmenu entryconfigure mCloseWindow -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mCloseWindow -state disabled -label [mc "&Close Window"]
 	}
     }
     
@@ -1700,31 +1700,31 @@ proc ::JUI::FilePostCommand {wmenu} {
 	
 	switch -- [GetConnectState] {
 	    connectinit {
-		::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled -label [mc "&New Account"]...
+		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled -label [mc "&Setup Assistant"]...
 	    }
 	    connectfin - connect {
-		::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mNewPassword... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mEditBC... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled -label [mc "&New Account"]...
+		::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state normal -label [mc "&Remove Account"]...
+		::UI::MenuMethod $wmenu entryconfigure mNewPassword... -state normal -label [mc "New P&assword"]...
+		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state disabled -label [mc "&Setup Assistant"]...
+		::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled -label [mc "&Edit Profiles"]...
+		::UI::MenuMethod $wmenu entryconfigure mEditBC... -state normal -label [mc "Edit &Business Card"]...
 		
-		::UI::MenuMethod $mimport entryconfigure mBC... -state normal
+		::UI::MenuMethod $mimport entryconfigure mBC... -state normal -label [mc "&Business Card"]...
 	    }
 	    disconnect {
 		if {[llength [ui::findalltoplevelwithclass JLogin]]} {
-		    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled
-		    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled
+		    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled -label [mc "&Edit Profiles"]...
+		    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled -label [mc "&New Account"]...
 		} else {
-		    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state normal
-		    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state normal
+		    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state normal -label [mc "&Edit Profiles"]...
+		    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state normal -label [mc "&New Account"]...
 		}
-		::UI::MenuMethod $wmenu entryconfigure mNewPassword... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mEditBC... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mNewPassword... -state disabled -label [mc "New P&assword"]...
+		::UI::MenuMethod $wmenu entryconfigure mSetupAssistant... -state normal -label [mc "&Setup Assistant"]...
+		::UI::MenuMethod $wmenu entryconfigure mEditBC... -state disabled -label [mc "Edit &Business Card"]...
+		::UI::MenuMethod $wmenu entryconfigure mRemoveAccount... -state disabled -label [mc "&Remove Account"]...
 	    }	
 	}   
     }
@@ -1746,28 +1746,28 @@ proc ::JUI::EditPostCommand {wmenu} {
     foreach {mkey mstate} [::UI::GenericCCPMenuStates] {
 	::UI::MenuMethod $wmenu entryconfigure $mkey -state $mstate
     }	
-    ::UI::MenuMethod $wmenu entryconfigure mAll -state disabled
-    ::UI::MenuMethod $wmenu entryconfigure mUndo -state disabled
-    ::UI::MenuMethod $wmenu entryconfigure mRedo -state disabled
+    ::UI::MenuMethod $wmenu entryconfigure mAll -state disabled -label [mc "All"]
+    ::UI::MenuMethod $wmenu entryconfigure mUndo -state disabled -label [mc "&Undo"]
+    ::UI::MenuMethod $wmenu entryconfigure mRedo -state disabled -label [mc "Re&do"]
 
     set wfocus [focus]
     if {[winfo exists $wfocus]} {
 	switch -- [winfo class $wfocus] {
 	    Text {
-		::UI::MenuMethod $wmenu entryconfigure mAll -state normal
+		::UI::MenuMethod $wmenu entryconfigure mAll -state normal -label [mc "All"]
 		if {[$wfocus edit modified]} {
-		    ::UI::MenuMethod $wmenu entryconfigure mUndo -state normal
+		    ::UI::MenuMethod $wmenu entryconfigure mUndo -state normal -label [mc "&Undo"]
 		}
-		::UI::MenuMethod $wmenu entryconfigure mRedo -state normal
+		::UI::MenuMethod $wmenu entryconfigure mRedo -state normal -label [mc "Re&do"]
 	    }
 	    Entry - TEntry {
-		::UI::MenuMethod $wmenu entryconfigure mAll -state normal
+		::UI::MenuMethod $wmenu entryconfigure mAll -state normal -label [mc "All"]
 	    }
 	}
     }
-    ::UI::MenuMethod $wmenu entryconfigure mFind -state disabled
-    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state disabled
-    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state disabled
+    ::UI::MenuMethod $wmenu entryconfigure mFind -state disabled -label [mc "Find"]
+    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state disabled -label [mc "Find Next"]
+    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state disabled -label [mc "Find Previous"]
     
     ::hooks::run menuPostCommand main-edit $wmenu
     
@@ -1802,42 +1802,42 @@ proc ::JUI::ActionPostCommand {wmenu} {
 	switch -- [GetConnectState] {
 	    connectinit {
 		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal \
-		  -label mLogout
+		  -label [mc "Logout"]
 	    }
 	    connectfin - connect {
-		::UI::MenuMethod $wmenu entryconfigure mRegister... -state normal
+		::UI::MenuMethod $wmenu entryconfigure mRegister... -state normal -label [mc "Re&gister"]...
 		::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal \
-		  -label mLogout
-		::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mSearch... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mAddContact... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mMessage... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mChat... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mStatus -state normal
-		::UI::MenuMethod $wmenu entryconfigure mEnterRoom... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mCreateRoom... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state normal
-		::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state normal
+		  -label [mc "Logout"]
+		::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state normal -label [mc "Logout With Message"]...
+		::UI::MenuMethod $wmenu entryconfigure mSearch... -state normal -label [mc "&Search"]...
+		::UI::MenuMethod $wmenu entryconfigure mAddContact... -state normal -label [mc "&Add Contact"]...
+		::UI::MenuMethod $wmenu entryconfigure mMessage... -state normal -label [mc "&Message"]...
+		::UI::MenuMethod $wmenu entryconfigure mChat... -state normal -label [mc "Cha&t"]...
+		::UI::MenuMethod $wmenu entryconfigure mStatus -state normal -label [mc "Status"]
+		::UI::MenuMethod $wmenu entryconfigure mEnterRoom... -state normal -label [mc "Enter Chat&room"]...
+		::UI::MenuMethod $wmenu entryconfigure mCreateRoom... -state normal -label [mc "&Create Chatroom"]...
+		::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state normal -label [mc "Edit &Bookmarks"]...
+		::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state normal -label [mc "&Discover Server"]...
 	    }
 	    disconnect {
-		::UI::MenuMethod $wmenu entryconfigure mRegister... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mRegister... -state disabled -label [mc "Re&gister"]...
 		if {[llength [ui::findalltoplevelwithclass JProfiles]]} {
 		    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state disabled  \
-		      -label mLogin...
+		      -label [mc "Login"]...
 		} else {
 		    ::UI::MenuMethod $wmenu entryconfigure mLogin... -state normal  \
-		      -label mLogin...
+		      -label [mc "Login"]...
 		}
-		::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mSearch... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mAddContact... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mMessage... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mChat... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mStatus -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mEnterRoom... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mCreateRoom... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state disabled
-		::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state disabled
+		::UI::MenuMethod $wmenu entryconfigure mLogoutWith... -state disabled -label [mc "Logout With Message"]...
+		::UI::MenuMethod $wmenu entryconfigure mSearch... -state disabled -label [mc "&Search"]...
+		::UI::MenuMethod $wmenu entryconfigure mAddContact... -state disabled -label [mc "&Add Contact"]...
+		::UI::MenuMethod $wmenu entryconfigure mMessage... -state disabled -label [mc "&Message"]...
+		::UI::MenuMethod $wmenu entryconfigure mChat... -state disabled -label [mc "Cha&t"]...
+		::UI::MenuMethod $wmenu entryconfigure mStatus -state disabled -label [mc "Status"]
+		::UI::MenuMethod $wmenu entryconfigure mEnterRoom... -state disabled -label [mc "Enter Chat&room"]...
+		::UI::MenuMethod $wmenu entryconfigure mCreateRoom... -state disabled -label [mc "&Create Chatroom"]...
+		::UI::MenuMethod $wmenu entryconfigure mEditBookmarks... -state disabled -label [mc "Edit &Bookmarks"]...
+		::UI::MenuMethod $wmenu entryconfigure mDiscoverServer... -state disabled -label [mc "&Discover Server"]...
 	    }	
 	}    
     }
@@ -1890,7 +1890,7 @@ proc ::JUI::InfoPostCommand {wmenu} {
 	    }	    
 	}
 	if {$showState eq "normal"} {
-	    ::UI::MenuMethod $wmenu entryconfigure mShow -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mShow -state normal -label [mc "Show"]
 	    
 	    # Set -variable values.
 	    if {[winfo ismapped $jwapp(wtbar)]} {
@@ -1904,17 +1904,17 @@ proc ::JUI::InfoPostCommand {wmenu} {
 		set state(show,notebook) 0
 	    }
 	} else {
-	    ::UI::MenuMethod $wmenu entryconfigure mShow -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure mShow -state disabled -label [mc "Show"]
 	}
     }
     
     if {$config(ui,main,toy-status)} {
 	if {[ToyStatusIsMapped]} {
 	    ::UI::MenuMethod $wmenu entryconfigure mShowControlPanel \
-	      -label mHideControlPanel
+	      -label [mc "Hide Control Panel"]
 	} else {
 	    ::UI::MenuMethod $wmenu entryconfigure mShowControlPanel \
-	      -label mShowControlPanel
+	      -label [mc "Show Control Panel"]
 	}
     }
     
@@ -1964,7 +1964,7 @@ proc ::JUI::FixUIWhen {what} {
 	connectinit {
 	    set stopImage [::Theme::Find32Icon $w stopImage]
 
-	    $wtbar buttonconfigure connect -text [mc Stop] \
+	    $wtbar buttonconfigure connect -text [mc "Stop"] \
 	      -image $stopImage -disabledimage $stopImage
     
 	    ::hooks::run connectInitHook
@@ -1973,7 +1973,7 @@ proc ::JUI::FixUIWhen {what} {
 	    set connectedImage    [::Theme::Find32Icon $w connectedImage]
 	    set connectedDisImage [::Theme::Find32Icon $w connectedDisImage]
 
-	    $wtbar buttonconfigure connect -text [mc Logout] \
+	    $wtbar buttonconfigure connect -text [mc "Logout"] \
 	      -image $connectedImage -disabledimage $connectedDisImage
 	    $wtbar buttonconfigure newuser -state normal
 
@@ -1983,7 +1983,7 @@ proc ::JUI::FixUIWhen {what} {
 	    set iconConnect     [::Theme::Find32Icon $w connectImage]
 	    set iconConnectDis  [::Theme::Find32Icon $w connectDisImage]
 
-	    $wtbar buttonconfigure connect -text [mc Login] \
+	    $wtbar buttonconfigure connect -text [mc "Login"] \
 	      -image $iconConnect -disabledimage $iconConnectDis
 	    $wtbar buttonconfigure newuser -state disabled
 

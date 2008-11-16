@@ -56,13 +56,13 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     # Settings drive.
     set wd $wc.d
     ttk::frame $wc.d
-    ttk::label $wd.l -text [mc Settings]
+    ttk::label $wd.l -text [mc "Settings"]
     ttk::separator $wd.s -orient horizontal
     if {$config(prefs,sameDrive)} {
-	ttk::checkbutton $wd.c -text [mc prefdrivesame2] \
+	ttk::checkbutton $wd.c -text [mc "Store preferences on same drive as program"] \
 	  -variable [namespace current]::tmpPrefs(prefsSameDrive)
     } elseif {$config(prefs,sameDir)} {
-	ttk::checkbutton $wd.c -text [mc prefdirsame] \
+	ttk::checkbutton $wd.c -text [mc "Store preferences in same folder as program"] \
 	  -variable [namespace current]::tmpPrefs(prefsSameDir)
     }
     
@@ -99,9 +99,9 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     # Language.
     set wl $wc.l
     ttk::frame $wc.l -padding {0 6 0 0}
-    ttk::label $wl.l -text [mc Language]
+    ttk::label $wl.l -text [mc "Language"]
     ttk::separator $wl.s -orient horizontal
-    ttk::label $wl.lr -text [mc "Requires a restart of" $prefs(appName)]
+    ttk::label $wl.lr -text [mc "Requires a restart of %s" $prefs(appName)]
     ::Utils::LanguageMenubutton $wl.mb [namespace current]::tmpPrefs(locale)
 
     grid  $wl.l   $wl.s  -sticky w
@@ -113,7 +113,7 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     pack $wl -side top -fill x -anchor w
 
     ::balloonhelp::balloonforwindow $wl.mb \
-      [mc "Requires a restart of" $prefs(appName)]
+      [mc "Requires a restart of %s" $prefs(appName)]
 
     bind $wpage <Destroy> {+::PrefGeneral::Free }
 }
@@ -125,7 +125,7 @@ proc ::PrefGeneral::SavePrefsHook {} {
     if {$config(prefs,sameDrive)} {
 	if {$tmpPrefs(prefsSameDrive) && !$prefs(prefsSameDrive)} {
 	    set ans [tk_messageBox -icon question -type yesno  \
-	      -message [mc prefdriwsame]]
+	      -message [mc "You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible. Do you want to continue?"]]
 	    if {$ans eq "yes"} {
 		set prefs(prefsSameDrive) 1
 		
@@ -140,7 +140,7 @@ proc ::PrefGeneral::SavePrefsHook {} {
 	    set prefFile [file join [::Init::GetAppDrivePrefsPath] $this(prefsName)]
 	    if {[file exists $prefFile]} {
 		set ans [tk_messageBox -icon question -type yesno  \
-		  -message [mc prefdriwdef2 $prefFile $prefs(appName)]]
+		  -message [mc "You have chosen to store your preferences in the default location. If you remove or move your personal settings at %s, the preferences in the default location will be used the next time you start %s. Do you want to remove the old preferences?" $prefFile $prefs(appName)]]
 		if {$ans eq "yes"} {
 		    file delete $prefFile
 		}	
@@ -164,7 +164,7 @@ proc ::PrefGeneral::SavePrefsHook {} {
 	    set prefFile [file join [::Init::GetAppDirPrefsPath] $this(prefsName)]
 	    if {[file exists $prefFile]} {
 		set ans [tk_messageBox -icon question -type yesno  \
-		  -message [mc prefdriwdef2 $prefFile $prefs(appName)]]
+		  -message [mc "You have chosen to store your preferences in the default location. If you remove or move your personal settings at %s, the preferences in the default location will be used the next time you start %s. Do you want to remove the old preferences?" $prefFile $prefs(appName)]]
 		if {$ans eq "yes"} {
 		    file delete $prefFile
 		}	

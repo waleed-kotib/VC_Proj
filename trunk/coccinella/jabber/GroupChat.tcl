@@ -168,10 +168,10 @@ namespace eval ::GroupChat {
     variable autojoinDone 0
 
     variable userRoleToStr
-    set userRoleToStr(moderator)   [mc Moderators]
-    set userRoleToStr(none)        [mc None]
-    set userRoleToStr(participant) [mc Participants]
-    set userRoleToStr(visitor)     [mc Visitors]
+    set userRoleToStr(moderator)   [mc "Moderators"]
+    set userRoleToStr(none)        [mc "None"]
+    set userRoleToStr(participant) [mc "Participants"]
+    set userRoleToStr(visitor)     [mc "Visitors"]
     
     variable userRoleSortOrder
     array set userRoleSortOrder {
@@ -183,13 +183,13 @@ namespace eval ::GroupChat {
     
     # Not used.
     variable show2String
-    set show2String(available)   [mc available]
-    set show2String(away)        [mc away]
-    set show2String(chat)        [mc chat]
-    set show2String(dnd)         [mc {do not disturb}]
-    set show2String(xa)          [mc {extended away}]
-    set show2String(invisible)   [mc invisible]
-    set show2String(unavailable) [mc {not available}]
+    set show2String(available)   [mc "available"]
+    set show2String(away)        [mc "away"]
+    set show2String(chat)        [mc "chat"]
+    set show2String(dnd)         [mc "do not disturb"]
+    set show2String(xa)          [mc "extended away"]
+    set show2String(invisible)   [mc "invisible"]
+    set show2String(unavailable) [mc "not available"]
 
     # @@@ Should get this from a global reaource.
     variable buttonPressMillis 1000
@@ -357,8 +357,8 @@ proc ::GroupChat::EnterOrCreate {what args} {
 	    set ans [eval {::Create::Build} $args]
 	}
 	default {
-	    ::ui::dialog -icon error -title [mc Error] \
-	      -message [mc jamessnogroupchat2]
+	    ::ui::dialog -icon error -title [mc "Error"] \
+	      -message [mc "Cannot find any chatroom service."]
 	}
     }    
     
@@ -384,7 +384,7 @@ proc ::GroupChat::EnterHook {roomjid protocol} {
 	TreeDeleteAll $chatstate(wusers)
 	AddUsers $chattoken
 	SetState $chattoken normal
-	#$chatstate(wbtexit) configure -text [mc Exit]
+	#$chatstate(wbtexit) configure -text [mc "Exit"]
 
 	set chatstate(show)           "available"
 	set chatstate(oldShow)        "available"
@@ -470,9 +470,9 @@ proc ::GroupChat::NormalMsgHook {xmldata uuid} {
 
 	::Debug 2 "::GroupChat::NormalMsgHook"
 
-	set str [mc jamessgcinvite2 $invitejid $roomjid]
+	set str [mc "%s invited you to %s. Do you want to enter this chatroom?" $invitejid $roomjid]
 	append str " " $str2
-	set ans [::UI::MessageBox -title [mc Invite] -icon info -type yesno \
+	set ans [::UI::MessageBox -title [mc "Invite"] -icon info -type yesno \
 	  -message $str]
 	if {$ans eq "yes"} {
 	    EnterOrCreate enter -roomjid $roomjid
@@ -650,26 +650,26 @@ proc ::GroupChat::Build {roomjid} {
     ::ttoolbar::ttoolbar $wtray
     pack $wtray -side top -fill x
 
-    $wtray newbutton send -text [mc Send] \
+    $wtray newbutton send -text [mc "Send"] \
       -image $iconSend -disabledimage $iconSendDis    \
       -command [list [namespace current]::Send $dlgtoken]
-    $wtray newbutton save -text [mc Save] \
+    $wtray newbutton save -text [mc "Save"] \
       -image $iconSave -disabledimage $iconSaveDis    \
        -command [list [namespace current]::Save $dlgtoken]
-    $wtray newbutton history -text [mc History] \
+    $wtray newbutton history -text [mc "History"] \
       -image $iconHistory -disabledimage $iconHistoryDis \
       -command [list [namespace current]::BuildHistory $dlgtoken]
-    $wtray newbutton invite -text [mc Invite] \
+    $wtray newbutton invite -text [mc "Invite"] \
       -image $iconInvite -disabledimage $iconInviteDis  \
       -command [list [namespace current]::Invite $dlgtoken]
-    $wtray newbutton info -text [mc Configure] \
+    $wtray newbutton info -text [mc "Configure"] \
       -image $iconInfo -disabledimage $iconInfoDis    \
       -command [list [namespace current]::Info $dlgtoken]
-    $wtray newbutton print -text [mc Print] \
+    $wtray newbutton print -text [mc "Print"] \
       -image $iconPrint -disabledimage $iconPrintDis   \
       -command [list [namespace current]::Print $dlgtoken]
     if {[::Jabber::HaveWhiteboard]} {
-	$wtray newbutton whiteboard -text [mc Whiteboard] \
+	$wtray newbutton whiteboard -text [mc "Whiteboard"] \
 	  -image $iconWB -disabledimage $iconWBDis    \
 	  -command [list [namespace current]::Whiteboard $dlgtoken] 
     }
@@ -855,9 +855,9 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     set wbtbmark  $wgroup.bmark
 
     ttk::frame $wbot
-    ttk::button $wbot.btok -text [mc Send]  \
+    ttk::button $wbot.btok -text [mc "Send"]  \
       -default active -command [list [namespace current]::Send $dlgtoken]
-    #ttk::button $wbot.btcancel -text [mc Exit]  \
+    #ttk::button $wbot.btcancel -text [mc "Exit"]  \
      # -command [list [namespace current]::ExitAndClose $chattoken]
 
     ttk::frame $wgroup
@@ -909,15 +909,15 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
 	
     set wbtsend $wbot.btok
 
-    ::balloonhelp::balloonforwindow $wgroup.active [mc jaactiveret]
+    ::balloonhelp::balloonforwindow $wgroup.active [mc "If checked Return sends message, else use Ctrl/Cmd-Return"]
     ::balloonhelp::balloonforwindow $wgroup.bmark  [mc "Bookmark this chatroom"]
-    ::balloonhelp::balloonforwindow $wgroup.elsys  [mc tooltip-togglesysmsg]
+    ::balloonhelp::balloonforwindow $wgroup.elsys  [mc "Show or hide status changes in chat"]
 
     # Header fields.
     ttk::frame $wtop
     pack $wtop -side top -fill x
 
-    ttk::label $wtop.btp -style Small.TLabel -text "[mc Topic]:"
+    ttk::label $wtop.btp -style Small.TLabel -text [mc "Topic"]:
     ttk::entry $wtop.etp -font CociSmallFont -textvariable $chattoken\(subject)
     
     grid  $wtop.btp  $wtop.etp  -sticky e -padx 0
@@ -1161,10 +1161,10 @@ proc ::GroupChat::MenuEditPostHook {wmenu} {
 	upvar 0 $chattoken chatstate
 	
 	set wfind $chatstate(wfind)
-	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
+	::UI::MenuMethod $wmenu entryconfigure mFind -state normal -label [mc "Find"]
 	if {[winfo exists $wfind]} {
-	    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal -label [mc "Find Next"]
+	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal -label [mc "Find Previous"]
 	}
     }
 }
@@ -1498,13 +1498,15 @@ proc ::GroupChat::SetLogout {chattoken} {
 	set prefix ""
     }
     InsertTagString $chattoken $prefix syspre
-    InsertTagString $chattoken "  [mc jagclogoutmsg]\n" systext    
+    set logoutstr "  "
+    append logoutstr [mc "You logged out and exited the chatroom"]\n
+    InsertTagString $chattoken $logoutstr systext    
 
     set nick [::Jabber::Jlib service mynick $chatstate(roomjid)]
     set myjid $chatstate(roomjid)/$nick
     TreeRemoveUser $chattoken $myjid
 
-    #$chatstate(wbtexit) configure -text [mc Close]
+    #$chatstate(wbtexit) configure -text [mc "Close"]
     
     set chatstate(show)           "unavailable"
     set chatstate(oldShow)        "unavailable"
@@ -1537,9 +1539,11 @@ proc ::GroupChat::SetTitle {chattoken} {
     set roomjid $chatstate(roomjid)
     set ujid [jlib::unescapejid $roomjid]
     if {$name ne ""} {
-	set str "[mc Chatroom]: $name"
+	set str [mc "Chatroom"]
+	append str ": $name"
     } else {
-	set str "[mc Chatroom]: $ujid"
+	set str [mc "Chatroom"]
+	append str ": $ujid"
     }
 
     # Put an extra (*) in the windows title if not in focus.
@@ -2352,7 +2356,8 @@ proc ::GroupChat::InsertMessage {chattoken xmldata} {
     set subjectE [wrapper::getfirstchildwithtag $xmldata "subject"]
     if {[llength $subjectE]} {
 	set subject [wrapper::getcdata $subjectE]
-	set str "[mc Subject]: $subject"
+	set str [mc "Subject"]
+	append str ": $subject"
 	set txttags ${whom}text${htag}
 
 	$wtext insert end $prefix $pretags
@@ -2523,7 +2528,7 @@ proc ::GroupChat::ExitWarn {chattoken} {
     }
     set roomjid $chatstate(roomjid)
     return [eval {::UI::MessageBox -icon warning -type yesno  \
-      -message [mc jamesswarnexitroom2 $roomjid]} $opts]
+      -message [mc "Do you want to exit the chatroom %s?" $roomjid]} $opts]
 }
 
 # GroupChat::Exit --
@@ -2694,9 +2699,11 @@ proc ::GroupChat::SetNickCB {chattoken jlib xmldata} {
 	    set errmsg  [lindex $errspec 1]
 	}
 	jlib::splitjidex $from roomName - -
-	set str [mc mucIQError2 $roomName]
-	append str "\n[mc Error]: $errmsg"
-	::UI::MessageBox -type ok -icon error -title [mc Error] -message $str
+	set str [mc "Cannot interact with the chatroom %s." $roomName]
+	append str "\n"
+	append str [mc "Error"]
+	append str ": $errmsg"
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] -message $str
     }
 }
 
@@ -2704,8 +2711,8 @@ proc ::GroupChat::Send {dlgtoken} {
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
-	::UI::MessageBox -type ok -icon error -title [mc Error] \
-	  -message [mc jamessnotconnected2]
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
+	  -message [mc "Cannot send when not logged in."]
 	return
     }
     SendChat [GetActiveChatToken $dlgtoken]
@@ -3167,7 +3174,7 @@ proc ::GroupChat::Save {dlgtoken} {
     set wtext   $chatstate(wtext)
     set roomjid $chatstate(roomjid)
     
-    set ans [tk_getSaveFile -title [mc Save] \
+    set ans [tk_getSaveFile -title [mc "Save"] \
       -initialfile "Groupchat ${roomjid}.txt"]
     
     if {[string length $ans]} {
@@ -3462,9 +3469,9 @@ proc ::GroupChat::EditBookmarks {} {
     }
     set m [::JUI::GetMainMenu]
     set columns [list  \
-      0 [mc Chatroom] 0 [mc Location] \
-      0 [mc Nickname] 0 [mc Password] \
-      0 [mc {Auto Join}]]
+      0 [mc "Chatroom"] 0 [mc "Location"] \
+      0 [mc "Nickname"] 0 [mc "Password"] \
+      0 [mc "Auto Join"]]
 
     set bookmarksVar {}
     ::Bookmarks::Dialog $dlg [namespace current]::bookmarksVar  \
@@ -3490,7 +3497,7 @@ proc ::GroupChat::BookmarkSendGetCB {type queryElem args} {
     }
     
     if {$type eq "error"} {
-	::UI::MessageBox -type ok -icon error -title [mc Error]  \
+	::UI::MessageBox -type ok -icon error -title [mc "Error"]  \
 	  -message "Failed to obtain conference bookmarks: [lindex $queryElem 1]"
 	destroy $dlg
     } else {
@@ -3664,7 +3671,7 @@ proc ::GroupChat::InitPrefsHook {} {
 
 proc ::GroupChat::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Conference} [mc Chatroom]
+    ::Preferences::NewTableItem {Jabber Conference} [mc "Chatroom"]
     
     # Conference page ------------------------------------------------------
     set wpage [$nbframe page {Conference}]
@@ -3689,7 +3696,7 @@ proc ::GroupChat::BuildPageConf {page} {
       -class GroupChatPrefs
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::checkbutton $wc.sync -text [mc jagcsyncpres2] \
+    ttk::checkbutton $wc.sync -text [mc "Synchronize chatroom presence with global presence"] \
       -variable [namespace current]::tmpJPrefs(gchat,syncPres)	      
     pack $wc.sync -side top -anchor w
     
@@ -3698,7 +3705,7 @@ proc ::GroupChat::BuildPageConf {page} {
 	lappend menuDef [list $name]
     }
     lappend menuDef separator
-    lappend menuDef [list [mc Custom] -value custom]
+    lappend menuDef [list [mc "Custom"] -value custom]
     set size [option get $wc schemeSize {}]
 
     set wcols $wc.cols
@@ -3732,14 +3739,14 @@ proc ::GroupChat::BuildPageConf {page} {
     # Nickname
     set wnick $wc.n
     ttk::frame $wnick
-    ttk::label $wnick.l -text "[mc {Default nickname}]:"
+    ttk::label $wnick.l -text [mc "Default nickname"]:
     ttk::entry $wnick.e \
       -textvariable [namespace current]::tmpJPrefs(defnick)
     pack $wnick.l $wnick.e -side left
     pack $wnick.e -fill x
     pack $wnick -side top -anchor w -pady 8 -fill x
     
-    ::balloonhelp::balloonforwindow $wnick.e [mc registration-nick]
+    ::balloonhelp::balloonforwindow $wnick.e [mc "Familiar name"]
     
     bind $page <Destroy> ::GroupChat::PrefsFree
 }

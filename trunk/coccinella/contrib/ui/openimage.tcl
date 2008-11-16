@@ -59,7 +59,7 @@ proc ui::openimage::widget {w args} {
     upvar 0 $w state
     variable $w
     
-    set filetypes [list [list [::msgcat::mc {Image Files}] {.gif}]]
+    set filetypes [list [list [::msgcat::mc "Image Files"] {.gif}]]
         
     # We must hijack the -command if any and use our own.
     set state(-command)     [ui::from args -command]
@@ -90,11 +90,11 @@ proc ui::openimage::widget {w args} {
 
     ttk::frame $fr.r
     ttk::button $fr.r.new \
-      -command [namespace code [list New $w]] -text "[::msgcat::mc {Open Image}]..."
+      -command [namespace code [list New $w]] -text [::msgcat::mc "Open Image"]...
     ttk::button $fr.r.rem \
-      -command [namespace code [list Remove $w]] -text [::msgcat::mc Clear]
+      -command [namespace code [list Remove $w]] -text [::msgcat::mc "Clear"]
     ttk::button $fr.r.def \
-      -command [namespace code [list Default $w]] -text [::msgcat::mc Default]
+      -command [namespace code [list Default $w]] -text [::msgcat::mc "Default"]
 
     grid  $fr.r.new  -pady 2 -sticky ew
     grid  $fr.r.rem  -pady 2 -sticky ew

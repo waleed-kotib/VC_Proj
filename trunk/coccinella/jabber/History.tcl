@@ -798,8 +798,8 @@ proc ::History::XInsertText {w} {
 		    if {$body ne ""} {
 			append body ", "
 		    }
-		    append body "[mc Subject]: "
-		    append body [tinydom::chdata $subjectE]
+		    append body [mc "Subject"]:
+		    append body " [tinydom::chdata $subjectE]"
 		    set tag sys
 		}
 	    }
@@ -838,7 +838,9 @@ proc ::History::XInsertText {w} {
 	    chat {
 		if {($thread ne "") && ($thread ne $prevthread)} {
 		    set when [clock format $secs -format "%A %B %e, %Y"]
-		    $wtext insert end "[mc {Thread started}] $when\n" histhead
+		    set str [mc "Thread started"]
+		    append str " $when\n"
+		    $wtext insert end $str histhead
 		    set prevthread $thread
 		    set havehisthead 1
 		}
@@ -848,12 +850,14 @@ proc ::History::XInsertText {w} {
 		    if {$xmppTag eq "presence" && $myShow ne $myPrevShow} {
 			if {$myShow eq "available"} {
 			    set prefix [GetTimeStr $secs $clockFormat $clockFormatNotToday]
-			    set str "$prefix [mc jagcloginmsg]"
+			    set str "$prefix "
+			    append str [mc "You entered the chatroom"]
 			    $wtext insert end $str\n histhead
 			    set havehisthead 1
 			} elseif {$myShow eq "unavailable"} {
 			    set prefix [GetTimeStr $secs $clockFormat $clockFormatNotToday]
-			    set str "$prefix [mc {Exit room}]"
+			    set str "$prefix "
+			    append str [mc "Exit chatroom"]
 			    $wtext insert end $str\n histhead
 			    set havehisthead 1
 			}
@@ -941,11 +945,13 @@ proc ::History::BuildHistory {jid dlgtype args} {
     variable uiddlg
     variable historyOptions
     
+    set msg [mc "History"]
+    append msg ": $jid"
     array set argsA [list  \
       -class        History  \
-      -headtitle    "[mc Date]:" \
+      -headtitle    [mc "Date"]: \
       -tagscommand  ""       \
-      -title        "[mc History]: $jid"  \
+      -title        $msg  \
       ]
     array set argsA $args
     
@@ -980,13 +986,13 @@ proc ::History::BuildHistory {jid dlgtype args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btcancel -text [mc Cancel] \
+    ttk::button $frbot.btcancel -text [mc "Cancel"] \
       -command [list destroy $w]
-    ttk::button $frbot.btclear -text [mc Clear]  \
+    ttk::button $frbot.btclear -text [mc "Clear"]  \
       -command [list [namespace current]::ClearHistory $jid $wtext]
-    ttk::button $frbot.btprint -text [mc Print]  \
+    ttk::button $frbot.btprint -text [mc "Print"]  \
       -command [list [namespace current]::PrintHistory $wtext]
-    ttk::button $frbot.btsave -text [mc Save]  \
+    ttk::button $frbot.btsave -text [mc "Save"]  \
       -command [list [namespace current]::SaveHistory $jid $wtext]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -1065,11 +1071,11 @@ proc ::History::MenuEditPostHook {wmenu} {
 	    variable $w
 	    upvar 0 $w state
 	    
-	    ::UI::MenuMethod $wmenu entryconfigure mFind -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFind -state normal -label [mc "Find"]
 	    set wfind $state(wfind)
 	    if {[winfo exists $wfind]} {
-		::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal
-		::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
+		::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal -label [mc "Find Next"]
+		::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal -label [mc "Find Previous"]
 	    }
 	}
     }
@@ -1147,7 +1153,9 @@ proc ::History::InsertText {w} {
 	if {!$havehisthead && ($msg(-type) eq "chat")} {
 	    if {$msg(-thread) ne $prevthread} {
 		set when [clock format $secs -format "%A %B %e, %Y"]
-		$wtext insert end "[mc {Thread started}] $when\n" histhead
+		set str [mc "Thread started"]
+		append str " $when\n"
+		$wtext insert end $str histhead
 	    }
 	}
 	set prevthread $msg(-thread)
@@ -1336,7 +1344,7 @@ proc ::History::PrintHistory {wtext} {
 proc ::History::SaveHistory {jid wtext} {
     global  this
 	
-    set ans [tk_getSaveFile -title [mc Save] \
+    set ans [tk_getSaveFile -title [mc "Save"] \
       -initialfile "Chat [::uri::urn::quote $jid].txt"]
 
     if {$ans ne ""} {

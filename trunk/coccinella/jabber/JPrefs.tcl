@@ -106,8 +106,8 @@ proc ::JPrefs::InitPrefsHook { } {
 
 proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
         
-    ::Preferences::NewTableItem {Jabber Appearance} [mc Appearance]
-    ::Preferences::NewTableItem {Jabber Customization} [mc Customization]
+    ::Preferences::NewTableItem {Jabber Appearance} [mc "Appearance"]
+    ::Preferences::NewTableItem {Jabber Customization} [mc "Customization"]
      	    
     # Appearance page -------------------------------------------------------
     set wpage [$nbframe page {Appearance}]    
@@ -173,7 +173,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     ttk::frame $wc.head -padding {0 0 0 6}
-    ttk::label $wc.head.l -text [mc Appearance]
+    ttk::label $wc.head.l -text [mc "Appearance"]
     ttk::separator $wc.head.s -orient horizontal
 
     grid  $wc.head.l  $wc.head.s
@@ -184,27 +184,27 @@ proc ::JPrefs::BuildAppearancePage {page} {
     set wap $wc.ap
     ttk::frame $wap
      
-    ttk::checkbutton $wap.tab -text [mc prefstabui2]  \
+    ttk::checkbutton $wap.tab -text [mc "Use tabbed interface"]  \
       -variable [namespace current]::tmpJPrefs(chat,tabbedui)
 
     # Chat font.
-    ttk::label  $wap.lfont -text "[mc {Chat window}]:"
-    ttk::button $wap.btfont -text "[mc {Select Font}]..." -style Small.TButton \
+    ttk::label  $wap.lfont -text [mc "Chat window"]:
+    ttk::button $wap.btfont -text [mc "Select Font"]... -style Small.TButton \
       -command [namespace current]::PickFont
     
-    ttk::label $wap.lthe -text "[mc Theme]:"
+    ttk::label $wap.lthe -text [mc "Theme"]:
     ui::combobutton $wap.pthe \
       -variable [namespace current]::tmpPrefs(themeName) \
       -menulist [ui::optionmenu::menuList $themeL]
     
     ::balloonhelp::balloonforwindow $wap.pthe \
-      [mc "Requires a restart of" $prefs(appName)]
+      [mc "Requires a restart of %s" $prefs(appName)]
 
     # Tile's themes (skins).
     # This is applied immediately and unaffected by Cancel/Save actions.
     # The theme state is kept in two variables: 
     #   ::tile::currentTheme and prefs(tileTheme)
-    ttk::label $wap.lskin -text "[mc Skin]:"
+    ttk::label $wap.lskin -text [mc "Skin"]:
     
 #     ui::optionmenu $wap.bskin -menulist $menuDef \
 #       -variable [namespace current]::tmpPrefs(tileTheme) \
@@ -230,7 +230,7 @@ proc ::JPrefs::BuildAppearancePage {page} {
     set haveOpacity 0
     if {[info exists wmopts(-alpha)]} {
 	set haveOpacity 1
-	ttk::label $wap.lop -text "[mc {Windows opacity}]:"
+	ttk::label $wap.lop -text [mc "Windows opacity"]:
 	ttk::scale $wap.sop -orient horizontal -from 50 -to 100 \
 	  -variable [namespace current]::tmpPrefs(opacity) \
 	  -value $tmpPrefs(opacity)
@@ -285,7 +285,7 @@ proc ::JPrefs::BuildCustomPage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
     ttk::frame $wc.head -padding {0 0 0 6}
-    ttk::label $wc.head.l -text [mc Customization]
+    ttk::label $wc.head.l -text [mc "Customization"]
     ttk::separator $wc.head.s -orient horizontal
 
     grid  $wc.head.l  $wc.head.s
@@ -296,11 +296,11 @@ proc ::JPrefs::BuildCustomPage {page} {
     set wcu $wc.fr
     ttk::frame $wcu
          
-    ttk::checkbutton $wcu.savein -text [mc prefcusave] \
+    ttk::checkbutton $wcu.savein -text [mc "Save message inbox between sessions"] \
       -variable [namespace current]::tmpJPrefs(inboxSave)
-    ttk::checkbutton $wcu.log -text [mc prefcuautologin2 $prefs(appName)] \
+    ttk::checkbutton $wcu.log -text [mc "Login on %s startup" $prefs(appName)] \
       -variable [namespace current]::tmpJPrefs(autoLogin)
-    ttk::checkbutton $wcu.rem -text [mc prefcuremdlgs2] \
+    ttk::checkbutton $wcu.rem -text [mc "Remember open windows between sessions"] \
       -variable [namespace current]::tmpJPrefs(rememberDialogs)
     if {[string equal $this(platform) "windows"]} {
 	ttk::checkbutton $wcu.not -text [mc "Show notifier window"] \

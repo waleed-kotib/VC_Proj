@@ -31,8 +31,8 @@ namespace eval ::StatusSlot {
     variable msgSlotD
     dict set msgSlotD mejid    [mc "Own Contact ID"]
     dict set msgSlotD mejidres [mc "Own Full Contact ID"]
-    dict set msgSlotD server   [mc Server]
-    dict set msgSlotD status   [mc Status]
+    dict set msgSlotD server   [mc "Server"]
+    dict set msgSlotD status   [mc "Status"]
 
     ::JUI::SlotRegister plainstatus [namespace code BuildMessageSlot]
 }

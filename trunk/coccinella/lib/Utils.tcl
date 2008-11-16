@@ -376,7 +376,7 @@ proc ::Utils::UnixOpenUrl {url} {
 	}
     } 
     if {$browser eq ""} {
-	::UI::MessageBox -icon error -type ok -title [mc Error] -message \
+	::UI::MessageBox -icon error -type ok -title [mc "Error"] -message \
 	  "Couldn't localize a web browser on this system.\
 	  Define a shell variable \"BROWSER\" to point to a web browser."
     }
@@ -509,30 +509,25 @@ proc ::Utils::LanguageMenubutton {w varName args} {
     
     # Add entries here for new message catalogs.
     array set code2Name {
-	cs {Czech}
-	da {Danish} 
-	nl {Dutch} 
-	en {English} 
-	fr {French} 
-	de {German} 
-	it {Italian}
-	ko {Korean}
-	pl {Polish} 
-	ru {Russian} 
-	es {Spanish} 
-	sv {Swedish} 
+	cs {Čeština}
+	da {Dansk}
+	nl {Nederlands}
+	en {English}
+	fr {Français}
+	de {Deutsch}
+	it {Italiano}
+	ko {한국어}
+	pl {Polski}
+	pt {Português}
+	ru {русский}
+	es {Castellano}
+	sv {Svenska}
     }
     set langs [list]
     foreach f [glob -nocomplain -tails -directory $this(msgcatPath) *.msg] {
 	set code [file rootname $f]
 	if {[info exists code2Name($code)]} {
-	    set name $code2Name($code)
-	    set key native${name}
-	    set str [mc $key]
-	    if {$str eq $key} {
-		# Fallback.
-		set str $name
-	    }
+	    set str $code2Name($code)
 	} else {
 	    set str $code
 	}

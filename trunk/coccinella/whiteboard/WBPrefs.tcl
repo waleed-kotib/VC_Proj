@@ -71,9 +71,9 @@ proc ::WBPrefs::InitPrefsHook {} {
 proc ::WBPrefs::BuildPrefsHook {wtree nbframe} {
     
     if {![::Preferences::HaveTableItem Whiteboard]} {
-	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
+	::Preferences::NewTableItem {Whiteboard} [mc "Whiteboard"]
     }
-    ::Preferences::NewTableItem {Whiteboard {Edit Fonts}} [mc Fonts]
+    ::Preferences::NewTableItem {Whiteboard {Edit Fonts}} [mc "Fonts"]
     
     set wpage [$nbframe page {Whiteboard}]
     BuildWhiteboardPage $wpage
@@ -105,10 +105,10 @@ proc ::WBPrefs::BuildWhiteboardPage {page} {
     ttk::frame $afr
     pack  $afr -side top -anchor [option get . dialogAnchor {}]
     
-    ttk::label $afr.w -text [mc Width]
+    ttk::label $afr.w -text [mc "Width"]
     ttk::label $afr.x1 -text x
     ttk::label $afr.x2 -text x
-    ttk::label $afr.h -text [mc Height]
+    ttk::label $afr.h -text [mc "Height"]
     ttk::entry $afr.width -font CociSmallFont -width 6 \
       -textvariable [namespace current]::tmpPrefs(canScrollWidth)
     ttk::entry $afr.height -font CociSmallFont -width 6 \
@@ -117,19 +117,23 @@ proc ::WBPrefs::BuildWhiteboardPage {page} {
     grid  $afr.w      $afr.x1  $afr.h       -pady 2
     grid  $afr.width  $afr.x2  $afr.height  -pady 2
     
-    ::balloonhelp::balloonforwindow $afr.width  "[mc Default]: $prefs(mincanScrollWidth)"
-    ::balloonhelp::balloonforwindow $afr.height "[mc Default]: $prefs(mincanScrollHeight)"
+    set msg [mc "Default"]
+    append msg ": $prefs(mincanScrollWidth)"
+    ::balloonhelp::balloonforwindow $afr.width  $msg
+    set msg [mc "Default"]
+    append msg ": $prefs(mincanScrollHeight)"
+    ::balloonhelp::balloonforwindow $afr.height $msg
 
-    ttk::checkbutton $wc.spost -text [mc {Smooth freehand strokes}]  \
+    ttk::checkbutton $wc.spost -text [mc "Smooth freehand strokes"]  \
       -variable [namespace current]::tmpPrefs(wb,strokePost)
     ttk::checkbutton $wc.nlnew -text [mc "Create new item for each line of text"] \
       -variable [namespace current]::tmpPrefs(wb,nlNewText)
-    ttk::checkbutton $wc.only -text [mc prefpriv3]  \
+    ttk::checkbutton $wc.only -text [mc "Only edit local whiteboard items"]  \
       -variable [namespace current]::tmpPrefs(privacy)
     
     pack  $wc.spost  $wc.nlnew $wc.only -side top -anchor w
     
-    ::balloonhelp::balloonforwindow $wc.only [mc prefpriv4]
+    ::balloonhelp::balloonforwindow $wc.only [mc "Items created by others cannot be edited when enabled"]
 }
 
 # Fonts Page ...................................................................
@@ -148,7 +152,7 @@ proc ::WBPrefs::BuildFontsPage {page} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::label $wc.sysfont -text [mc System]
+    ttk::label $wc.sysfont -text [mc "System"]
     ttk::label $wc.wifont -text $prefs(appName)
     ttk::frame $wc.fr1
     ttk::frame $wc.fr2
@@ -177,13 +181,19 @@ proc ::WBPrefs::BuildFontsPage {page} {
     # Mid buttons.
     set btimport $wc.fr2.imp
     set btremove $wc.fr2.rm
-    ttk::button $btimport -text "  [mc Import]>>" \
+    set msg "  "
+    append msg [mc "Import"]
+    append msg ">>"
+    ttk::button $btimport -text $msg \
       -command "[namespace current]::PushBtImport \
       \[$wlbsys curselection] $wlbsys $wlbwb"
-    ttk::button $btremove -text "<<[mc {Remove}]  " \
+    set msg "<<"
+    append msg [mc "Remove"]
+    append msg "  "
+    ttk::button $btremove -text $msg \
       -command "[namespace current]::PushBtRemove \
       \[$wlbwb curselection] $wlbwb"
-    ttk::button $wc.fr2.std -text [mc Default] \
+    ttk::button $wc.fr2.std -text [mc "Default"] \
       -command [list [namespace current]::PushBtStandard $wlbwb]
     
     pack  $btimport  $btremove  $wc.fr2.std  -padx 1 -pady 6 -fill x
@@ -199,7 +209,7 @@ proc ::WBPrefs::BuildFontsPage {page} {
     pack $wlbwb $wc.fr3.sc -side left -fill y
     eval $wlbwb insert 0 $prefs(canvasFonts)
     
-    ttk::label $wc.msg -text [mc preffontmsg] -wraplength 300 \
+    ttk::label $wc.msg -text [mc "Warning: by importing any other fonts than the standard three ones (Times, Helvetica or Courier), you must be confident that all remote clients also have this font installed on their system."] -wraplength 300 \
       -justify left -padding {0 6}
     set wsamp $wc.samp
     canvas $wsamp -width 200 -height 48 -highlightthickness 0 -border 1 \
@@ -286,8 +296,8 @@ proc ::WBPrefs::PushBtRemove {indSel wapp} {
     
     # Check that not the standard fonts are removed.
     if {[lsearch {Times Helvetica Courier} $fntName] >= 0} {
-	::UI::MessageBox -message [mc messrmstandardfonts] \
-	  -icon error -title [mc Error] -type ok
+	::UI::MessageBox -message [mc "The standard fonts, Times, Helvetica, and Courier, may not be removed."] \
+	  -icon error -title [mc "Error"] -type ok
 	return
     }
     $wapp delete $indSel	

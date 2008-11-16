@@ -205,7 +205,7 @@ proc ::GotMsg::Build {} {
     # Toplevel with class GotMsg.
     ::UI::Toplevel $w -class GotMsg \
       -usemacmainmenu 1 -macstyle documentProc -closecommand ::GotMsg::CloseHook
-    wm title $w [mc {Incoming Message}]
+    wm title $w [mc "Incoming Message"]
     
     set bg [option get . backgroundGeneral {}]
     
@@ -221,11 +221,11 @@ proc ::GotMsg::Build {} {
     set frbot $wbox.b
     ttk::frame $frbot
     set wbtnext $frbot.btnext
-    ttk::button $wbtnext -text [mc Next] -default active \
+    ttk::button $wbtnext -text [mc "Next"] -default active \
       -width -8 -command [list ::GotMsg::NextMsg]
-    ttk::button $frbot.btfwd -text [mc Forward]   \
+    ttk::button $frbot.btfwd -text [mc "Forward"]   \
       -width -8 -command [list ::GotMsg::Forward]
-    ttk::button $frbot.btreply -text [mc Reply]   \
+    ttk::button $frbot.btreply -text [mc "Reply"]   \
       -width -8 -command [list ::GotMsg::Reply]
     set padx [option get . buttonPadX {}]
 
@@ -235,7 +235,7 @@ proc ::GotMsg::Build {} {
     pack $frbot -side bottom -fill x
 
     ttk::checkbutton $wbox.ch -style Small.TCheckbutton \
-      -text [mc jainmsgshow] \
+      -text [mc "Show incoming messages in this window"] \
       -variable jprefs(showMsgNewWin)
     pack  $wbox.ch  -side bottom -anchor w -pady 4
     
@@ -247,7 +247,7 @@ proc ::GotMsg::Build {} {
     # From field.
     set wfrom     $frmid.lfrom
     set wpresence $frmid.ifrom
-    ttk::label $frmid.lfrom -text "[mc From]:"
+    ttk::label $frmid.lfrom -text [mc "From"]:
     ttk::label $frmid.efrom \
       -textvariable [namespace current]::username
     ttk::label $frmid.time -style Small.TLabel \
@@ -257,7 +257,7 @@ proc ::GotMsg::Build {} {
       -textvariable [namespace current]::prestext
 
     # Subject field.
-    ttk::label $frmid.lsub -text "[mc Subject]:" -anchor e
+    ttk::label $frmid.lsub -text [mc "Subject"]: -anchor e
     ttk::label $frmid.esub \
       -textvariable [namespace current]::subject
     

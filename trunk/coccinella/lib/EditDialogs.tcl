@@ -77,7 +77,7 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand ::EditShortcuts::CloseCmd
-    wm title $w [mc {Edit Shortcuts}]
+    wm title $w [mc "Edit Shortcuts"]
 
     # Global frame.
     ttk::frame $w.frall
@@ -89,7 +89,7 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
 
     set wcont $wbox.f
     ttk::labelframe $wcont -padding [option get . groupSmallPadding {}] \
-      -text [mc {Edit Shortcuts}]
+      -text [mc "Edit Shortcuts"]
     pack $wcont
         
     # Frame for listbox and scrollbar.
@@ -115,10 +115,10 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     set frbt $wcont.b
     ttk::frame $frbt -padding {10 0 0 0}
     pack $frbt -side right -fill y
-    ttk::button $frbt.btadd -text "[mc Add]..."   \
+    ttk::button $frbt.btadd -text [mc "Add"]...   \
       -command "[namespace current]::AddOrEditShortcuts add  \
       [namespace current]::shortCopy -1 $wlbox"
-    ttk::button $frbt.btrem -text [mc Remove]  \
+    ttk::button $frbt.btrem -text [mc "Remove"]  \
       -command [list [namespace current]::RemoveShortcuts $wlbox]
     
     # Trick: postpone command substitution; only variable substitution.
@@ -136,10 +136,10 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     # The bottom part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Save] -default active  \
+    ttk::button $frbot.btok -text [mc "Save"] -default active  \
       -command [list [namespace current]::DoSaveEditedShortcuts   \
       $nameOfShortcutList]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::DoCancel $nameOfShortcutList]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -222,7 +222,7 @@ proc ::EditShortcuts::DoCancel {nameOfShortcutList} {
     # Cancel, keep old shortcuts. If changed something then warn.
     if {$anyChange} {
 	set ans [::UI::MessageBox -icon error -type yesnocancel \
-	  -title [mc Warning] -message [mc shortwarn]]
+	  -title [mc "Warning"] -message [mc "Warning: you have edited the shortcuts. Don't you want to save them?"]]
 	if {[string equal $ans "yes"]} {
 	    DoSaveEditedShortcuts $nameOfShortcutList
 	    return
@@ -272,15 +272,15 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
 	return
     }
     if {$what eq "add"} {
-	set txt [mc {Add Shortcut}]
-	set txt1 "[mc {New shortcut}]:"
-	set txt2 "[mc shortip]:"
-	set txtbt [mc Add]
+	set txt [mc "Add Shortcut"]
+	set txt1 [mc "New shortcut"]:
+	set txt2 [mc "Complete ip number or name"]:
+	set txtbt [mc "Add"]
     } elseif {$what eq "edit"} {
-	set txt [mc {Edit Shortcut}]
-	set txt1 "[mc Shortcut]:"
-	set txt2 "[mc shortip]:"
-	set txtbt [mc Save]
+	set txt [mc "Edit Shortcut"]
+	set txt1 [mc "Shortcut"]:
+	set txt2 [mc "Complete ip number or name"]:
+	set txtbt [mc "Save"]
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
@@ -328,7 +328,7 @@ proc ::EditShortcuts::AddOrEditShortcuts {what nameOfShortsCopy indShortcuts  \
     ttk::button $frbot.btok -text $txtbt -default active  \
       -command "[namespace current]::PushBtAddOrEditShortcut $what  \
       $nameOfShortsCopy $indShortcuts \[$frtot.ent1 get] \[$frtot.ent2 get] "
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list set [namespace current]::finAdd 0]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {

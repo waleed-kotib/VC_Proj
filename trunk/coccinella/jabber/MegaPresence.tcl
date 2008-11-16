@@ -93,13 +93,13 @@ proc ::MegaPresence::Build {w args} {
 	::Status::ExMainButton $box.pres ::Jabber::jstate(show+status)
 	#	-style SunkenMenubutton
     }
-    ttk::label $box.lpres -text [mc Status]
+    ttk::label $box.lpres -text [mc "Status"]
     
     grid  $box.pres   -column 0 -row 0
     grid  $box.lpres  -column 0 -row 1
     
     ::AvatarMB::Button $box.avatar
-    ttk::label $box.lavatar -text [mc Avatar]
+    ttk::label $box.lavatar -text [mc "Avatar"]
     
     grid  $box.avatar   -column 100 -row 0
     grid  $box.lavatar  -column 100 -row 1
@@ -108,7 +108,7 @@ proc ::MegaPresence::Build {w args} {
     set avatarH [winfo reqheight $box.avatar]
     #puts "      $avatarW, $avatarH"
     
-    ::balloonhelp::balloonforwindow $box.avatar [mc Avatar]
+    ::balloonhelp::balloonforwindow $box.avatar [mc "Avatar"]
 
     if {$config(megapresence,pack-side) eq "right"} {
 	ttk::frame $box.pad

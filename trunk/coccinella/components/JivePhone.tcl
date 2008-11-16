@@ -247,7 +247,7 @@ proc ::JivePhone::WeHavePhone { } {
     set image [::Rosticons::ThemeGet [string tolower phone/online]]
     set win [::JUI::SetAlternativeStatusImage jivephone $image]
     bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
-    ::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
+    ::balloonhelp::balloonforwindow $win [mc "Call"]
     
     set state(wstatus) $win
     set state(setui)   1
@@ -351,22 +351,22 @@ proc ::JivePhone::MessageHook {xmldata uuid} {
 	    
 	    ::Roster::RegisterPopupEntry $popMenuDef(forward) $popMenuType(forward)
 	    bind $win <Button-1> [list ::JivePhone::DoDial "FORWARD"]
-	    ::balloonhelp::balloonforwindow $win [mc phoneMakeForward]
+	    ::balloonhelp::balloonforwindow $win [mc "Forward current call to"]...
 	    ::hooks::run jivePhoneEvent $type $cid $callID $xmldata
 	}
 	if {$type eq "HANG_UP"} {
 	    ::Roster::DeRegisterPopupEntry mJiveForward
 	    
 	    bind $win <Button-1> [list ::JivePhone::DoDial "DIAL"]
-	    ::balloonhelp::balloonforwindow $win [mc phoneMakeCall]
+	    ::balloonhelp::balloonforwindow $win [mc "Call"]
 	    ::hooks::run jivePhoneEvent $type $cid "" $xmldata
 	}
 	
 	# Provide a default notifier?
 	#	    if {[hooks::info jivePhoneEvent] eq {}} {
 	#		NotifyCall::InboundCall{ $cid }
-	#		set title [mc phoneRing]
-	#		set msg [mc phoneRingFrom $cid]
+	#		set title [mc "Ring, ring"]...
+	#		set msg [mc "Phone is ringing from %s" $cid]
 	#		ui::dialog -icon info -buttons {} -title $title  \
 	#		  -message $msg -timeout 4000
 	#	    }
@@ -465,9 +465,9 @@ proc ::JivePhone::BuildDialer {w type} {
       -closecommand [namespace current]::CloseDialer
 
     if {$type eq "DIAL"} {
-	wm title $w [mc phoneDialerCall]
+	wm title $w [mc "Call to"]...
     } else {
-	wm title $w [mc phoneDialerForward]
+	wm title $w [mc "Forward to"]...
     }
 
     ::UI::SetWindowPosition $w
@@ -477,7 +477,7 @@ proc ::JivePhone::BuildDialer {w type} {
     ttk::frame $w.f
     pack  $w.f  -fill x
 				 
-    ttk::label $w.f.head -style Headlabel -text [mc {Phone}]
+    ttk::label $w.f.head -style Headlabel -text [mc "Phone"]
     pack  $w.f.head  -side top -fill both -expand 1
 
     ttk::separator $w.f.s -orient horizontal
@@ -491,10 +491,10 @@ proc ::JivePhone::BuildDialer {w type} {
     ttk::frame $box
     pack $box -side bottom -fill x
     
-    ttk::label $box.l -text "[mc phoneNumber]:"
+    ttk::label $box.l -text [mc "Number"]:
     ttk::entry $box.e -textvariable [namespace current]::phoneNumber  \
       -width 18
-    ttk::button $box.dial -text [mc phoneDial]  \
+    ttk::button $box.dial -text [mc "Dial"]  \
       -command [list [namespace current]::OnDial $w $type]
     
     grid  $box.l  $box.e  $box.dial -padx 1 -pady 4
@@ -609,8 +609,8 @@ proc ::JivePhone::DialExtension {extension type {callID ""}} {
 proc ::JivePhone::DialCB {dnid type subiq args} {
     
     if {$type eq "error"} {
-	ui::dialog -title [mc Error] -icon error -type ok \
-	  -message [mc phoneFailedCalling $dnid] -detail $subiq
+	ui::dialog -title [mc "Error"] -icon error -type ok \
+	  -message [mc "Failed calling %s" $dnid] -detail $subiq
     }
 }
 
@@ -626,7 +626,7 @@ proc ::JivePhone::NewPage {} {
     set wtab $wnb.ab
     if {![winfo exists $wtab]} {
         Build $wtab
-        $wnb add $wtab -text [mc AddressBook]
+        $wnb add $wtab -text [mc "Address Book"]
     }
 }
 
@@ -862,7 +862,7 @@ proc ::JivePhone::NewAddressbookDlg {} {
     ::UI::Toplevel $w \
       -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
       -closecommand [namespace current]::CloseCmd
-    wm title $w [mc {newAddressbookDlg}]
+    wm title $w [mc "New address book"]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
     if {$nwin == 1} {
@@ -878,17 +878,17 @@ proc ::JivePhone::NewAddressbookDlg {} {
     pack $wbox -fill both -expand 1
    
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc newAddressbook ]
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc "New address book"]
     pack $wbox.msg -side top -anchor w
 
     set frmid $wbox.frmid
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    ttk::label $frmid.lname -text "[mc {abName}]:"
+    ttk::label $frmid.lname -text [mc "Name"]:
     ttk::entry $frmid.ename -textvariable [namespace current]::abName
 
-    ttk::label $frmid.lphone -text "[mc {abPhone}]:"
+    ttk::label $frmid.lphone -text [mc "Phone number"]:
     ttk::entry $frmid.ephone -textvariable [namespace current]::abPhoneNumber
 
     grid  $frmid.lname    $frmid.ename        -  -sticky e -pady 2
@@ -900,9 +900,9 @@ proc ::JivePhone::NewAddressbookDlg {} {
     set frbot $wbox.b
     set wenter  $frbot.btok
     ttk::frame $frbot
-    ttk::button $wenter -text [mc Enter] \
+    ttk::button $wenter -text [mc "Enter"] \
       -default active -command [list [namespace current]::addItemAddressBook $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelEnter $w]
 
     set padx [option get . buttonPadX {}]
@@ -944,7 +944,7 @@ proc ::JivePhone::ModifyAddressbookDlg {jid} {
     ::UI::Toplevel $w \
       -macstyle documentProc -macclass {document closeBox} -usemacmainmenu 1 \
       -closecommand [namespace current]::CloseCmd
-    wm title $w [mc {modifyAddressbookDlg}]
+    wm title $w [mc "Modify address book"]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(jmucenter)]]
     if {$nwin == 1} {
@@ -960,17 +960,17 @@ proc ::JivePhone::ModifyAddressbookDlg {jid} {
     pack $wbox -fill both -expand 1
 
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc modifyAddressbook ]
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc "Modify address book"]
     pack $wbox.msg -side top -anchor w
 
     set frmid $wbox.frmid
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
 
-    ttk::label $frmid.lname -text "[mc {abName}]:"
+    ttk::label $frmid.lname -text [mc "Name"]:
     ttk::entry $frmid.ename -textvariable [namespace current]::abName
 
-    ttk::label $frmid.lphone -text "[mc {abPhone}]:"
+    ttk::label $frmid.lphone -text [mc "Phone number"]:
     ttk::entry $frmid.ephone -textvariable [namespace current]::abPhoneNumber
 
     grid  $frmid.lname    $frmid.ename        -  -sticky e -pady 2
@@ -982,9 +982,9 @@ proc ::JivePhone::ModifyAddressbookDlg {jid} {
     set frbot $wbox.b
     set wenter  $frbot.btok
     ttk::frame $frbot
-    ttk::button $wenter -text [mc Enter] \
+    ttk::button $wenter -text [mc "Enter"] \
       -default active -command [list [namespace current]::modifyItemAddressBook $w $oldPhoneNumber]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelEnter $w]
 
     set padx [option get . buttonPadX {}]
@@ -1103,7 +1103,7 @@ proc ::JivePhone::buildChatButtonTrayHook {wtray dlgtoken args} {
         set iconCallDis [::Theme::FindIconSize 32 phone-call-Dis]
 
         $wtray newbutton call  \
-          -text [mc phoneMakeCall] -image $iconCall  \
+          -text [mc "Call"] -image $iconCall  \
           -disabledimage $iconCallDis   \
           -command [list [namespace current]::chatCall $dlgtoken]
     }

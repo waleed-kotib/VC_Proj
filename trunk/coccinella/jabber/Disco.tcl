@@ -782,7 +782,7 @@ proc ::Disco::NewPage {} {
 	set imd [::Theme::Find16Icon $wdisco tabDisImage]
 	set imSpec [list $im disabled $imd background $imd]
 	# This seems to pick up *Disco.padding ?
-	$wnb add $wtab -text [mc Services] -image $imSpec -compound left  \
+	$wnb add $wtab -text [mc "Services"] -image $imSpec -compound left  \
 	  -sticky news -padding 0
     }
 }
@@ -866,8 +866,8 @@ proc ::Disco::BackgroundImageCmd {} {
 
     # Dialog:
     set typeText [join $typeL ", "]
-    set str [mc jaopenbgimage]
-    set dtl [mc jasuppimagefmts]
+    set str [mc "Select an image file for the background. To remove a background image press Remove and Save."]
+    set dtl [mc "The supported image formats are"]
     append dtl " " $typeText
     append dtl "."
     set mbar [::JUI::GetMainMenu]
@@ -1484,7 +1484,7 @@ proc ::Disco::InfoResultCB {type jid queryE args} {
 	set imd [::Theme::FindIconSize 32 dialog-information-Dis]
 
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc Discover] -compound left \
+	  -text [mc "Discover"] -compound left \
 	  -image [list $im background $imd]
 	pack $w.frall.head -side top -anchor w
 	
@@ -1502,7 +1502,7 @@ proc ::Disco::InfoResultCB {type jid queryE args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btcancel -text [mc Cancel] \
+    ttk::button $frbot.btcancel -text [mc "Cancel"] \
       -command [list destroy $w]
     pack $frbot.btcancel -side right
     pack $frbot -side top -fill x
@@ -1643,14 +1643,14 @@ proc ::Disco::AddServerDlg {} {
     pack $wbox -fill both -expand 1
 
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc jadisaddserv2]
+      -padding {0 0 0 6} -wraplength 300 -justify left -text [mc "Enter a server to discover and use its services."]
     pack $wbox.msg -side top -anchor w
     
     set wfr $wbox.fr
     set waddservlist $wfr.e
     ttk::frame $wfr
     pack $wfr -side top -fill x -pady 4
-    ttk::label $wfr.l -text "[mc Server]:"
+    ttk::label $wfr.l -text [mc "Server"]:
     if {$config(disco,add-server-autolist)} {
 	ttk::combobox $wfr.e -textvariable [namespace current]::dlgaddjid
     } else {
@@ -1669,9 +1669,9 @@ proc ::Disco::AddServerDlg {} {
         
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Discover] \
+    ttk::button $frbot.btok -text [mc "Discover"] \
       -command [list [namespace current]::AddServerDo $w]
-    ttk::button $frbot.btcancel -text [mc Cancel] \
+    ttk::button $frbot.btcancel -text [mc "Cancel"] \
       -command [namespace code [list AddCancel $w]]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -1776,8 +1776,8 @@ proc ::Disco::AddServerDo {w} {
     if {$dlgaddjid ne ""} {
 	set jid [jlib::escapejid $dlgaddjid]
 	if {![jlib::jidvalidate $jid]} {
-	    set ans [::UI::MessageBox -message [mc jamessbadjid2 $jid] \
-	      -title [mc Error] -icon error -type yesno]
+	    set ans [::UI::MessageBox -message [mc "%s is invalid. Do you want to continue anyway?" $jid] \
+	      -title [mc "Error"] -icon error -type yesno]
 	    if {[string equal $ans "no"]} {
 		return
 	    }
@@ -1800,7 +1800,7 @@ proc ::Disco::AddServerCB {type from queryE args} {
     
     if {$type eq "error"} {
 	set ujid [jlib::unescapejid $from]
-	ui::dialog -icon error -title [mc Error] \
+	ui::dialog -icon error -title [mc "Error"] \
 	  -message "We failed discovering the server \"$ujid\"" \
 	  -detail [lindex $queryE 1]
     }

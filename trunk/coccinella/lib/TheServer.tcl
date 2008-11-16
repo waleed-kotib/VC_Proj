@@ -61,8 +61,8 @@ proc ::TheServer::DoStartServer {thisServPort} {
     if {[catch {
 	socket -server [namespace current]::SetupChannel $thisServPort
     } sock]} {
-	after 500 {::UI::MessageBox -message [mc messfailserver2] \
-	  -icon error -title [mc Error] -type ok}
+	after 500 {::UI::MessageBox -message [mc "Cannot start server socket. Perhaps you are not connected."] \
+	  -icon error -title [mc "Error"] -type ok}
     } else {
 	set state(serverSocket) $sock
 	set state(isServerUp) 1

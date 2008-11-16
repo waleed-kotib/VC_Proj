@@ -98,9 +98,9 @@ proc ::SetupAss::SetupAss {} {
     set p1 [$su newpage "intro" -headtext [mc "Setup Assistant"]]
     ttk::frame $p1.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p1.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -anchor w -text [mc suintro1a $prefs(appName)]
+      -wraplength 260 -justify left -anchor w -text [mc "This setup assistant will help you to configure the most important settings to get started with %s." $prefs(appName)]
     ttk::label $p1.fr.msg3 -style Small.TLabel \
-      -wraplength 260 -justify left -anchor w -text [mc suintro3a]
+      -wraplength 260 -justify left -anchor w -text [mc "Any time you can press Previous to go back. Press Next to proceed."]
     
     pack $p1.fr.msg1 $p1.fr.msg3 -side top -anchor w -fill x -pady 4
     pack $p1.fr -side top -fill x
@@ -108,12 +108,12 @@ proc ::SetupAss::SetupAss {} {
     lappend wrapthese $p1.fr.msg1 $p1.fr.msg3
     
     # Language catalog.
-    set plang [$su newpage "language" -headtext [mc Language]]
+    set plang [$su newpage "language" -headtext [mc "Language"]]
     ttk::frame $plang.fr -padding [option get . notebookPagePadding {}]
     ttk::label $plang.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -text [mc sulang2]
+      -wraplength 260 -justify left -text [mc "Choose your language"]
     ::Utils::LanguageMenubutton $plang.fr.pop [namespace current]::locale
-    ttk::button $plang.fr.def -text [mc Default]  \
+    ttk::button $plang.fr.def -text [mc "Default"]  \
       -command [namespace current]::DefaultLang
     
     pack  $plang.fr.msg1  -side top -anchor w -pady $pady
@@ -124,7 +124,7 @@ proc ::SetupAss::SetupAss {} {
     lappend wrapthese $plang.fr.msg1
     
     ::balloonhelp::balloonforwindow $plang.fr.pop \
-      [mc "Requires a restart of" $prefs(appName)]
+      [mc "Requires a restart of %s" $prefs(appName)]
     
     # Server.
     if {$config(setupass,page,server)} {
@@ -132,9 +132,9 @@ proc ::SetupAss::SetupAss {} {
 	set fr2 $p2.fr
 	ttk::frame $fr2 -padding [option get . notebookPagePadding {}]
 	ttk::label $fr2.msg1 -style Small.TLabel \
-	  -wraplength 260 -justify left -text [mc suservmsg2]
+	  -wraplength 260 -justify left -text [mc "Select or enter a server you wish to have your account on. If you already have an account, use the server of this account."]
 	
-	ttk::label $fr2.la -text "[mc Server]:"
+	ttk::label $fr2.la -text [mc "Server"]:
 	ttk::combobox $fr2.serv -textvariable [namespace current]::server \
 	  -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
 	
@@ -161,12 +161,12 @@ proc ::SetupAss::SetupAss {} {
     set fr3 $p3.fr
     ttk::frame $p3.fr -padding [option get . notebookPagePadding {}]
     ttk::label $fr3.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -text [mc suusermsg2]
-    ttk::label $fr3.srv  -text "[mc Server]:"
+      -wraplength 260 -justify left -text [mc "Enter your username and password. If the chosen username is already in use by someone else, you will not be able to register."]
+    ttk::label $fr3.srv  -text [mc "Server"]:
     ttk::label $fr3.srv2 -textvariable [namespace current]::server
-    ttk::label $fr3.lan  -text "[mc Username]:"
-    ttk::label $fr3.lap  -text "[mc Password]:"
-    ttk::label $fr3.lap2 -text "[mc {Retype password}]:"
+    ttk::label $fr3.lan  -text [mc "Username"]:
+    ttk::label $fr3.lap  -text [mc "Password"]:
+    ttk::label $fr3.lap2 -text [mc "Retype password"]:
     ttk::entry $fr3.name -textvariable [namespace current]::username \
        -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
     ttk::entry $fr3.pass -textvariable [namespace current]::password -show {*} \
@@ -192,8 +192,8 @@ proc ::SetupAss::SetupAss {} {
     set p4 [$su newpage "register" -headtext [mc "New Account"]]
     ttk::frame $p4.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p4.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -text [mc suregmsg2]
-    ttk::button $p4.fr.btreg -text "[mc {New Account}]... "  \
+      -wraplength 260 -justify left -text [mc "Click on the button below to create a new account. You must be connected to with the Internet. Pay attention to a possible firewall!"]
+    ttk::button $p4.fr.btreg -text [mc "New Account"]...  \
       -command [namespace current]::DoRegister
 
     grid  $p4.fr.msg1   -pady $pady -sticky w
@@ -204,10 +204,10 @@ proc ::SetupAss::SetupAss {} {
     lappend wrapthese $p4.fr.msg1
 
     # Finish.
-    set p5 [$su newpage "fin" -headtext [mc Finished]]
+    set p5 [$su newpage "fin" -headtext [mc "Finished"]]
     ttk::frame $p5.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p5.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -text [mc sufinmsg2]
+      -wraplength 260 -justify left -text [mc "That's all. Also, be nice to the bug and his friends ;-)"]
     ttk::label $p5.fr.piga -image [::Theme::FindIconSize 128 coccinella]
     
     grid  $p5.fr.msg1  -sticky n
@@ -303,12 +303,12 @@ proc ::SetupAss::NextPage {w page} {
 		set missing 1
 	    }
 	    if {$missing} {
-		::UI::MessageBox -icon error -title [mc Error] \
-		  -message [mc messsuassfillin] -parent $w
+		::UI::MessageBox -icon error -title [mc "Error"] \
+		  -message [mc "Be sure to fill in all entries before you continue."] -parent $w
 		return -code 3
 	    } elseif {$password ne $password2} {
-		::UI::MessageBox -icon error -title [mc Error] \
-		  -message [mc messpasswddifferent2] -parent $w
+		::UI::MessageBox -icon error -title [mc "Error"] \
+		  -message [mc "Passwords do not match. Please try again."] -parent $w
 		set password ""
 		set password2 ""
 		return -code 3
@@ -316,8 +316,8 @@ proc ::SetupAss::NextPage {w page} {
 	}
 	server {
 	    if {$server eq ""} {
-		::UI::MessageBox -icon error -title [mc Error] \
-		  -message [mc suservmsg2] -parent $w
+		::UI::MessageBox -icon error -title [mc "Error"] \
+		  -message [mc "Select or enter a server you wish to have your account on. If you already have an account, use the server of this account."] -parent $w
 		focus $wserver
 		return -code 3
 	    }
@@ -339,7 +339,7 @@ proc ::SetupAss::DefaultLang { } {
 proc ::SetupAss::DoClose {w} {
     
     set ans [::UI::MessageBox -type yesno -parent $w -icon info \
-      -title [mc "Setup Assistant"] -message [mc messsuassclose]]
+      -title [mc "Setup Assistant"] -message [mc "Are you sure you want to close the setup assistant? You may start it any time later from the menu."]]
     if {$ans eq "yes"} {
 	destroy $w
     }
