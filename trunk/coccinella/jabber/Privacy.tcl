@@ -164,7 +164,7 @@ proc ::Privacy::BuildPrefsPage {page} {
     
     ttk::button $wfrbt.new -text [mc "New"] -state disabled \
       -command [namespace current]::NewList
-    ttk::button $wfrbt.edit -text [mc mEdit] -state disabled \
+    ttk::button $wfrbt.edit -text [mc "&Edit"] -state disabled \
       -command [namespace current]::EditList
     ttk::button $wfrbt.del -text [mc "Delete"] -state disabled \
       -command [namespace current]::DelList

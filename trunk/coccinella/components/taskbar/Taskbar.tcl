@@ -371,13 +371,13 @@ proc ::Taskbar::Update {w} {
 	zoomed - normal {
 	    set state1 disabled
 	    set state2 normal
-	    ::AMenu::EntryConfigure $m mMinimize -label mMinimize \
+	    ::AMenu::EntryConfigure $m mMinimize -label [mc "Mi&nimize"] \
 	      -command ::Taskbar::HideMain
 	}
 	default {
 	    set state1 normal
 	    set state2 disabled
-	    ::AMenu::EntryConfigure $m mMinimize -label mRestore \
+	    ::AMenu::EntryConfigure $m mMinimize -label [mc "&Restore"] \
 	      -command ::Taskbar::ShowMain
 	}
     }

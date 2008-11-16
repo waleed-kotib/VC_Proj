@@ -122,7 +122,7 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
       -command [list [namespace current]::RemoveShortcuts $wlbox]
     
     # Trick: postpone command substitution; only variable substitution.
-    ttk::button $frbt.btedit -text "[mc mEdit]..."  \
+    ttk::button $frbt.btedit -text [mc "&Edit"]...  \
       -command "[namespace current]::AddOrEditShortcuts edit   \
       [namespace current]::shortCopy \[$wlbox curselection] $wlbox"
     

@@ -480,7 +480,7 @@ proc ::MUC::BuildInfo {roomjid} {
       -columns $columns -stretch all -selectmode single  \
       -yscrollcommand [list $wysc set] -width 36 -height 8
     ttk::scrollbar $wysc -orient vertical -command [list $wtbl yview]
-    ttk::button $frtab.ref -style Small.TButton -text [mc mRefresh] \
+    ttk::button $frtab.ref -style Small.TButton -text [mc "Refresh"] \
       -command [list [namespace current]::Refresh $roomjid]
 
     grid  $wtbl       $wysc  -sticky news
@@ -986,7 +986,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     
     ttk::button $wbtadd -text [mc "Add"] \
       -command [list [namespace current]::EditListDoAdd $token]
-    ttk::button $wbtedit -text [mc mEdit] \
+    ttk::button $wbtedit -text [mc "&Edit"] \
       -command [list [namespace current]::EditListDoEdit $token]
     ttk::button $wbtrm -text [mc "Remove"] \
       -command [list [namespace current]::EditListDoRemove $token]

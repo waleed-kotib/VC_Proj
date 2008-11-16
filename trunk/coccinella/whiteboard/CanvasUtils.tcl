@@ -1422,7 +1422,7 @@ proc ::CanvasUtils::DoItemPopup {wcan x y} {
 	}
 	set popupVars(-dash) $dashShort
 	if {!$prefs(haveDash)} {
-	    $m entryconfigure [msgcat::mc mDash] -state disabled
+	    $m entryconfigure [msgcat::mc "Dash"] -state disabled
 	}
     }
     if {[regexp {line|polygon} $type]} {

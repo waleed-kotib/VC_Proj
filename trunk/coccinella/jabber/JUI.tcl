@@ -1689,10 +1689,10 @@ proc ::JUI::FilePostCommand {wmenu} {
     
     # Disable some menus by default and let any hooks enable them.
     set m [::UI::MenuMethod $wmenu entrycget mExport -menu]
-    ::UI::MenuMethod $m entryconfigure mBC... -state disabled
+    ::UI::MenuMethod $m entryconfigure mBC... -state disabled -label [mc "&Business Card"]...
     
     set mimport [::UI::MenuMethod $wmenu entrycget mImport -menu]
-    ::UI::MenuMethod $mimport entryconfigure mBC... -state disabled
+    ::UI::MenuMethod $mimport entryconfigure mBC... -state disabled -label [mc "&Business Card"]...
     
     if {([tk windowingsystem] eq "aqua") && [llength [grab current]]} { 
 	::UI::MenuDisableAllBut $wmenu mCloseWindow

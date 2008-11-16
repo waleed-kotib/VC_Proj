@@ -874,7 +874,7 @@ proc ::Disco::BackgroundImageCmd {} {
     ::UI::MenubarDisableBut $mbar edit
     set fileName [ui::openimage::modal -message $str -detail $dtl -menu $mbar \
       -filetypes $types -initialfile $currentFile -defaultfile $defaultFile \
-      -geovariable prefs(winGeom,jbackgroundimage) -title [mc mBackgroundImage]]
+      -geovariable prefs(winGeom,jbackgroundimage) -title [mc "Background Image"]]
     ::UI::MenubarEnableAll $mbar
 
     set image ""
