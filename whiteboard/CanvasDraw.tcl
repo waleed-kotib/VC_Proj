@@ -1350,7 +1350,7 @@ proc ::CanvasDraw::InitArc {wcan x y {shift 0}} {
 	bind $wcan <KeyPress-space> {
 	    ::CanvasDraw::ArcCancel %W
 	}
-	::WB::SetStatusMessage $w [mc uastatarc2]
+	::WB::SetStatusMessage $w [mc "Arc tool, click and drag"]
 	
     } else {
 	
@@ -1459,7 +1459,7 @@ proc ::CanvasDraw::FinalizeArc {wcan x y} {
 
     Debug 2 "FinalizeArc:: wcan=$wcan"
 
-    ::WB::SetStatusMessage $w [mc uastatarc]
+    ::WB::SetStatusMessage $w [mc "Arc tool, click to set center, spacebar to cancel"]
     bind $wcan <B1-Motion> {}
     bind $wcan <ButtonRelease-1> {}
     bind $wcan <KeyPress-space> {}
@@ -1516,7 +1516,7 @@ proc ::CanvasDraw::ArcCancel {wcan} {
     bind $wcan <ButtonRelease-1> {}
     bind $wcan <KeyPress-space> {}
 
-    ::WB::SetStatusMessage $w [mc uastatarc]
+    ::WB::SetStatusMessage $w [mc "Arc tool, click to set center, spacebar to cancel"]
     catch {$wcan delete tcent}
     catch {$wcan delete $arcBox($wcan,last)}
     unset -nocomplain arcBox

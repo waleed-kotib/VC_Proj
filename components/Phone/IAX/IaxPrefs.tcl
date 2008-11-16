@@ -96,7 +96,7 @@ proc ::IaxPrefs::BuildPrefsHook {wtree nbframe} {
     variable tmpPrefs
 
     if {![::Preferences::HaveTableItem {phone}]} {
-        ::Preferences::NewTableItem {phone} [mc Phone]
+        ::Preferences::NewTableItem {phone} [mc "Phone"]
     }
     ::Preferences::NewTableItem {phone iax} [mc "IAX Phone"]
 
@@ -123,9 +123,9 @@ proc ::IaxPrefs::BuildPage {page} {
     grid  $wnb       -sticky ew
     
     # Switch off devices since can create a misery for some users!
-    #$wnb add [DevicesFrame $wnb.de] -text [mc Devices]
-    $wnb add [FiltersFrame $wnb.fi] -text [mc Filters]
-    #$wnb add [CodecsFrame  $wnb.co] -text [mc Codecs]
+    #$wnb add [DevicesFrame $wnb.de] -text [mc "Devices"]
+    $wnb add [FiltersFrame $wnb.fi] -text [mc "Filters"]
+    #$wnb add [CodecsFrame  $wnb.co] -text [mc "Codecs"]
 
     bind $page <Destroy> +[namespace current]::Free
 }
@@ -142,19 +142,19 @@ proc ::IaxPrefs::AccountFrame {win} {
 	set tmpPrefs($key) $prefs(iaxPhone,$key)
     }
     
-    ttk::label $win.luser -text "[mc Username]:"
+    ttk::label $win.luser -text [mc "Username"]:
     ttk::entry $win.user -textvariable [namespace current]::tmpPrefs(user)
 
-    ttk::label $win.lpassword -text "[mc Password]:"
+    ttk::label $win.lpassword -text [mc "Password"]:
     ttk::entry $win.password -textvariable [namespace current]::tmpPrefs(password)
 
-    ttk::label $win.lhost -text "[mc Host]:"
+    ttk::label $win.lhost -text [mc "Host"]:
     ttk::entry $win.host -textvariable [namespace current]::tmpPrefs(host)
 
-    ttk::label $win.lcidnum -text "[mc {Caller ID number}]:"
+    ttk::label $win.lcidnum -text [mc "Caller ID number"]:
     ttk::entry $win.cidnum -textvariable [namespace current]::tmpPrefs(cidnum)
 
-    ttk::label $win.lcidname -text "[mc {Caller ID name}]:"
+    ttk::label $win.lcidname -text [mc "Caller ID name"]:
     ttk::entry $win.cidname -textvariable [namespace current]::tmpPrefs(cidname)
 
     grid  $win.luser      $win.user      -sticky e -pady 2
@@ -190,14 +190,14 @@ proc ::IaxPrefs::DevicesFrame {win} {
     foreach device $listInputDevices {
         lappend inputDevices [lindex $device 0]
     } 
-    ttk::label $win.linputDev -text "[mc Microphone]:"
+    ttk::label $win.linputDev -text [mc "Microphone"]:
     ttk::combobox $win.input_dev -state readonly  \
       -textvariable [namespace current]::tmpPrefs(inputDevices) -values $inputDevices
 
     foreach device $listOutputDevices {
         lappend outputDevices [lindex $device 0]
     }
-    ttk::label $win.loutputDev -text "[mc Speakers]:"
+    ttk::label $win.loutputDev -text [mc "Speakers"]:
     ttk::combobox $win.output_dev -state readonly  \
       -textvariable [namespace current]::tmpPrefs(outputDevices)  \
       -values $outputDevices
@@ -228,7 +228,7 @@ proc ::IaxPrefs::FiltersFrame {win} {
       -variable [namespace current]::tmpPrefs(noise)
     ttk::checkbutton $win.comfort -text [mc "Comfort noise"] \
       -variable [namespace current]::tmpPrefs(comfort)
-#    ttk::checkbutton $win.echo -text [mc Echo] \
+#    ttk::checkbutton $win.echo -text [mc "Echo"] \
 #      -variable [namespace current]::tmpPrefs(echo)
 
     grid  $win.agc      -sticky w
@@ -237,9 +237,9 @@ proc ::IaxPrefs::FiltersFrame {win} {
     grid  $win.comfort  -sticky w
 #    grid  $win.echo   -sticky w
 
-    ::balloonhelp::balloonforwindow $win.agc [mc agcTip]
+    ::balloonhelp::balloonforwindow $win.agc [mc "Automatically adjust volume levels"]
     ::balloonhelp::balloonforwindow $win.aagc [mc "Can prevent clipping"]
-    ::balloonhelp::balloonforwindow $win.comfort [mc comfortTip]
+    ::balloonhelp::balloonforwindow $win.comfort [mc "Artificial background noise to fill silence"]
 
     return $win
 }
@@ -253,7 +253,7 @@ proc ::IaxPrefs::CodecsFrame {win} {
 
     set tmpPrefs(codec) $prefs(iaxPhone,codec)
 
-    ttk::label $win.lcodec -text "[mc Codec]:"
+    ttk::label $win.lcodec -text [mc "Codec"]:
 
     ttk::radiobutton $win.codeci -text "iLBC" -variable [namespace current]::tmpPrefs(codec) -value "ILBC"
     ttk::radiobutton $win.codecs -text "Speex" -variable [namespace current]::tmpPrefs(codec) -value "SPEEX"
@@ -269,11 +269,11 @@ proc ::IaxPrefs::CodecsFrame {win} {
     grid  x            $win.codecg  -sticky w
     grid $win.lcodec -padx 4
 
-    ::balloonhelp::balloonforwindow $win.codeci [mc tooltip-ilbc]
-    ::balloonhelp::balloonforwindow $win.codecs [mc tooltip-speex]
-    ::balloonhelp::balloonforwindow $win.codeca [mc tooltip-alaw]
-    ::balloonhelp::balloonforwindow $win.codecu [mc tooltip-ulaw]
-    ::balloonhelp::balloonforwindow $win.codecg [mc tooltip-gsm]
+    ::balloonhelp::balloonforwindow $win.codeci [mc "iLBC (internet Low Bitrate Codec) is a free speech codec suitable for robust voice communication over IP"]
+    ::balloonhelp::balloonforwindow $win.codecs [mc "Speex is an Open Source/Free Software patent-free audio compression format designed for speech"]
+    ::balloonhelp::balloonforwindow $win.codeca [mc "Standard used in European digital communication systems (ITU-T)"]
+    ::balloonhelp::balloonforwindow $win.codecu [mc "Standard used in digital communication systems in North America and Japan (ITU-T)"]
+    ::balloonhelp::balloonforwindow $win.codecg [mc "GSM 06.10 provisional standard for full-rate speech transcoding (ETSI)"]
     
     return $win
 }

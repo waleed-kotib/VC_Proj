@@ -65,11 +65,11 @@ snit::widgetadaptor UI::WSearch::widget {
 	  -image [list $im active $ima] -compound image  \
 	  -command [list $self Close]
 	ttk::label $win.find -style Small.TLabel -padding {4 0 0 0}  \
-	  -text "[mc Search]:"
+	  -text [mc "Search"]:
 	ttk::entry $win.entry -style Small.Search.TEntry -font CociSmallFont \
 	  -textvariable [myvar string]
 	ttk::button $win.next -style Small.TButton -command [list $self Next] \
-	  -text [mc Next]
+	  -text [mc "Next"]
 	
 	grid  $win.close  $win.find  $win.entry  $win.next
 	grid $win.entry -sticky ew

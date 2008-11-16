@@ -58,7 +58,7 @@ proc ::Windows::OpenURI {uri} {
     if {[catch {
 	eval exec $appCmd &
     } err]} {
-	tk_messageBox -icon error -title [mc Error] -message $err
+	tk_messageBox -icon error -title [mc "Error"] -message $err
     }
 }
 
@@ -106,7 +106,7 @@ proc ::Windows::OpenUrl {url} {
 	    eval exec $finCmd [list $url] &
 	}
     } err]} {
-	tk_messageBox -icon error -title [mc Error] -message $err
+	tk_messageBox -icon error -title [mc "Error"] -message $err
     }
 }
 
@@ -148,7 +148,7 @@ proc ::Windows::OpenFileFromSuffix {path} {
     if {[catch {
 	eval exec $appCmd [list $path] &
     } err]} {
-	tk_messageBox -icon error -title [mc Error] -message $err
+	tk_messageBox -icon error -title [mc "Error"] -message $err
     }
 }
 

@@ -88,7 +88,7 @@ proc ::PrefUtils::Init {} {
     
     if {[file exists $prefsFilePath]} {
 	if {[catch {option readfile $prefsFilePath} err]} {
-	    tk_messageBox -type ok -title [::msgcat::mc Error] -icon error \
+	    tk_messageBox -type ok -title [::msgcat::mc "Error"] -icon error \
 	      -message "Error reading preference file: $prefsFilePath."
 	}
     }
@@ -214,8 +214,8 @@ proc ::PrefUtils::SaveToFile {} {
     # Work on a temporary file and switch later.
     set tmpFile $userPrefsFile.tmp
     if {[catch {open $tmpFile w} fid]} {
-	::UI::MessageBox -icon error -title [mc Error] -type ok \
-	  -message [mc messerrpreffile2 $tmpFile]
+	::UI::MessageBox -icon error -title [mc "Error"] -type ok \
+	  -message [mc "Cannot open file %s." $tmpFile]
 	return
     }
     fconfigure $fid -encoding utf-8

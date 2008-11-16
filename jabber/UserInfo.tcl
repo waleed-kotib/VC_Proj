@@ -132,7 +132,7 @@ proc ::UserInfo::Get {jid {node ""}} {
     
     if {[::Jabber::IsConnected]} {
 	set ujid [jlib::unescapejid $jid]
-	::JUI::SetAppMessage "[mc vcardget2 $ujid]..."
+	::JUI::SetAppMessage [mc "Downloading business card from %s" $ujid]...
 	$priv(warrow) start
     }
     
@@ -160,7 +160,7 @@ proc ::UserInfo::DiscoCB {token disconame type from subiq args} {
     
     set wnb $priv(wnb)
 
-    $wnb add [ttk::frame $wnb.di] -text [mc Discover] -sticky news
+    $wnb add [ttk::frame $wnb.di] -text [mc "Discover"] -sticky news
 
     set wpage $wnb.di.f
     ttk::frame $wpage -padding [option get . notebookPagePadding {}]
@@ -190,17 +190,24 @@ proc ::UserInfo::VersionCB {token jlibname type subiq} {
     set ujid [jlib::unescapejid $jid]
     
     if {$type == "error"} {
-	set str [mc Version]
-	append str "\n" "[mc jamesserrvers2 $ujid]\n"
-	append str "[mc Error]: [lindex $subiq 1]"
+	set str [mc "Version"]
+	append str "\n"
+	append str  [mc "Cannot query %s's version." $ujid]
+	append str "\n"
+	append str [mc "Error"]
+	append str ": [lindex $subiq 1]"
 
 	::Jabber::AddErrorLog $jid $str
     } else {
-	set str [mc Version]:
+	set str [mc "Version"]:
 	set f $priv(wpageversion)
 	set i 0
+	set version [dict create]
+	dict set version name [mc "Name"]
+	dict set version version [mc "Version"]
+	dict set version os [mc "Operating system"]
 	foreach c [wrapper::getchildren $subiq] {	    
-	    set key [mc version-[wrapper::gettag $c]]
+	    set key [dict get $version [wrapper::gettag $c]]
 	    ttk::label $f.l$i -text $key: \
 	      -wraplength 300 -justify left
 	    ttk::label $f.t$i -text [wrapper::getcdata $c] \
@@ -231,8 +238,11 @@ proc ::UserInfo::LastCB {token jlibname type subiq} {
     
     if {$type eq "error"} {
 	set str [mc "Last Activity"]
-	append str "\n" "[mc jamesserrlastactive2 $ujid]\n"
-	append str "[mc Error]: [lindex $subiq 1]"
+	append str "\n"
+	append str [mc "Cannot query %s's last activity." $ujid]
+	append str "\n"
+	append str [mc "Error"]
+	append str ": [lindex $subiq 1]"
 
 	::Jabber::AddErrorLog $jid $str
     } else {
@@ -260,13 +270,16 @@ proc ::UserInfo::TimeCB {token jlibname type subiq} {
 
     if {$type eq "error"} {
 	set str [mc "Local Time"]
-	append str "\n" "[mc jamesserrtime2 $ujid]\n"
-	append str "[mc Error]: [lindex $subiq 1]"
+	append str "\n"
+	append str  [mc "Cannot query %s's local time." $ujid]
+	append str "\n"
+	append str [mc "Error"]
+	append str ": [lindex $subiq 1]"
 
 	::Jabber::AddErrorLog $jid $str
     } else {
 	set str [::Jabber::GetTimeString $subiq]
-	set priv(strtime) [mc jamesslocaltime2 $ujid $str]
+	set priv(strtime) [mc "%s's local time is: %s" $ujid $str]
     }    
 }
 
@@ -286,14 +299,16 @@ proc ::UserInfo::EntityTimeCB {token jlibname type subiq} {
     set ujid [jlib::unescapejid $jid]
 
     if {$type eq "error"} {
-	set str [mc "Local Time"]"
-	append str "\n" "[mc jamesserrtime2 $ujid]\n"
-	append str "[mc Error]: [lindex $subiq 1]"
+	set str [mc "Local Time"]
+	append str "\n"
+	append str [mc "Cannot query %s's local time." $ujid]\n
+	append str [mc "Error"]
+	append str ": [lindex $subiq 1]"
 
 	::Jabber::AddErrorLog $jid $str
     } else {
 	set str [::Jabber::GetEntityTimeString $subiq]
-	set priv(strtime) [mc jamesslocaltime2 $ujid $str]
+	set priv(strtime) [mc "%s's local time is: %s" $ujid $str]
     }    
 }
 
@@ -313,7 +328,7 @@ proc ::UserInfo::VCardCB {token jlibname type subiq} {
 
     if {$type eq "error"} {
 	set errmsg "([lindex $subiq 0]) [lindex $subiq 1]"
-	set str [mc vcarderrget2 $errmsg]
+	set str [mc "Cannot download business card." $errmsg]
 	::Jabber::AddErrorLog $jid $str
     } else {
 	set priv(subiq) $subiq
@@ -335,7 +350,7 @@ proc ::UserInfo::Build {token} {
       -macclass {document closeBox} \
       -closecommand ::UserInfo::CloseHook
     set djid [::Roster::GetDisplayName $jid]
-    wm title $w "[mc {Business Card}]: $djid"
+    wm title $w [mc "Business Card: %s" $djid]
 
     set nwin [llength [::UI::GetPrefixedToplevels $wDlgs(juserinfo)]]
     if {$nwin == 1} {
@@ -357,9 +372,9 @@ proc ::UserInfo::Build {token} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelNoTopPadding {}]
-    ttk::button $frbot.btok -text [mc Save] \
+    ttk::button $frbot.btok -text [mc "Save"] \
       -command [list [namespace current]::Save $token]
-    ttk::button $frbot.btcancel -text [mc Cancel] \
+    ttk::button $frbot.btcancel -text [mc "Cancel"] \
       -command [list [namespace current]::Close $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -369,7 +384,7 @@ proc ::UserInfo::Build {token} {
 	pack $frbot.btcancel -side right
 	pack $frbot.btok -side right -padx $padx
     }
-    ttk::button $frbot.export -text "[mc Export]..." \
+    ttk::button $frbot.export -text [mc "Export"]... \
       -command [list [namespace current]::Export $token]
     pack $frbot.export -side left
 
@@ -419,13 +434,13 @@ proc ::UserInfo::NotesPage {token} {
     
     set wnb $priv(wnb)
 
-    $wnb add [ttk::frame $wnb.not] -text [mc {Notes}] -sticky news
+    $wnb add [ttk::frame $wnb.not] -text [mc "Notes"] -sticky news
 
     set wpage $wnb.not.f
     ttk::frame $wpage -padding [option get . notebookPagePadding {}]
     pack  $wpage  -side top -fill x -anchor [option get . dialogAnchor {}]
     
-    ttk::label $wpage.l -style Small.TLabel -text [mc jauserinnote2]
+    ttk::label $wpage.l -style Small.TLabel -text [mc "Add your personal notes about this contact."]
     pack  $wpage.l -side bottom -anchor w
     
     set wtext $wpage.t
@@ -456,9 +471,9 @@ proc ::UserInfo::LastAndVersionPage {token} {
     set wnb $priv(wnb)
 
     if {$priv(type) eq "user"} {
-	set name [mc {Client}]
+	set name [mc "Client"]
     } else {
-	set name [mc {Service}]
+	set name [mc "Service"]
     }
     $wnb add [ttk::frame $wnb.ver] -text $name -sticky news
 
@@ -496,7 +511,7 @@ proc ::UserInfo::BuildErrorPage {token} {
     
     set wnb $priv(wnb)
 
-    $wnb add [ttk::frame $wnb.err] -text [mc {Error}] -sticky news
+    $wnb add [ttk::frame $wnb.err] -text [mc "Error"] -sticky news
 
     set wpage $wnb.err.f
     ttk::frame $wpage -padding [option get . notebookPagePadding {}]

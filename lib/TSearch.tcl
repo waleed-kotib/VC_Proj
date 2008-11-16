@@ -73,12 +73,12 @@ snit::widgetadaptor UI::TSearch::widget {
 	set ima [::Theme::FindIconSize 16 close-aqua-active]
 
 	ttk::label $win.find -style Small.TLabel -padding {4 0 0 0}  \
-	  -text "[mc Search]:"
+	  -text [mc "Search"]:
 	ttk::entry $win.entry -style Small.Search.TEntry -font CociSmallFont \
 	  -textvariable [myvar string]
 	ttk::button $win.next -style $options(-nextstyle) \
 	  -command [list $self Next] \
-	  -text [mc Next] -takefocus 0
+	  -text [mc "Next"] -takefocus 0
 	ttk::button $win.close -style Plain  \
 	  -image [list $im active $ima] -compound image  \
 	  -command [list $self Close]

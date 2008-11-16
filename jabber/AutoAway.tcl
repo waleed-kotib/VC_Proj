@@ -280,14 +280,17 @@ proc ::AutoAway::BuildPage {page} {
     ttk::frame $waa
     pack  $waa  -side top -fill x
     
-    set str "[mc prefminaw2] ([mc Minutes]):"
+    set str [mc "Away after"]
+    append str " ("
+    append str [mc "Minutes"]
+    append str "):"
     set varName [namespace current]::tmpp(autoaway)
     ttk::checkbutton $waa.lminaw -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.eminaw $waa.eawmsg] $varName]]
     ttk::entry $waa.eminaw -font CociSmallFont -width 3 \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
       -textvariable [namespace current]::tmpp(awaymin)
-    ttk::label $waa.law -text [mc Message]:
+    ttk::label $waa.law -text [mc "Message"]:
     ttk::entry $waa.eawmsg -font CociSmallFont -width 32  \
       -textvariable [namespace current]::tmpp(awaymsg)
     ttk::frame $waa.paw -height 6
@@ -300,14 +303,17 @@ proc ::AutoAway::BuildPage {page} {
     grid $waa.lminaw -sticky w
     grid $waa.eawmsg -sticky ew
 
-    set str "[mc prefminea2] ([mc Minutes]):"
+    set str [mc "Extended Away after"]
+    append str " ("
+    append str [mc "Minutes"]
+    append str "):"
     set varName [namespace current]::tmpp(xautoaway)
     ttk::checkbutton $waa.lminxa -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.eminxa $waa.examsg] $varName]]
     ttk::entry $waa.eminxa -font CociSmallFont -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
       -textvariable [namespace current]::tmpp(xawaymin)
-    ttk::label $waa.lxa -text [mc Message]:
+    ttk::label $waa.lxa -text [mc "Message"]:
     ttk::entry $waa.examsg -font CociSmallFont -width 32  \
       -textvariable [namespace current]::tmpp(xawaymsg)
     ttk::frame $waa.pxa -height 6
@@ -320,14 +326,17 @@ proc ::AutoAway::BuildPage {page} {
     grid $waa.lminxa -sticky w
     grid $waa.eawmsg -sticky ew    
         
-    set str "[mc prefminlogout] ([mc Minutes]):"
+    set str [mc "Logout after"]
+    append str " ("
+    append str [mc "Minutes"]
+    append str "):"
     set varName [namespace current]::tmpp(autologout)
     ttk::checkbutton $waa.clo -text $str -variable $varName \
       -command [namespace code [list SetEntryState [list $waa.elomin $waa.elomsg $waa.cli] $varName]]
     ttk::entry $waa.elomin -font CociSmallFont -width 3  \
       -validate key -validatecommand {::Utils::ValidMinutes %S} \
       -textvariable [namespace current]::tmpp(logoutmin)
-    ttk::label $waa.llo -text [mc Message]:
+    ttk::label $waa.llo -text [mc "Message"]:
     ttk::entry $waa.elomsg -font CociSmallFont -width 32  \
       -textvariable [namespace current]::tmpp(logoutmsg)
     ttk::checkbutton $waa.cli -text [mc "Relogin on activity"] \
@@ -346,23 +355,23 @@ proc ::AutoAway::BuildPage {page} {
     grid columnconfigure $waa 2 -weight 1
 
     if {$config(aa,on-hidden-tabs)} {
-	ttk::checkbutton $waa.htabs -text [mc prefaaonhidden] \
+	ttk::checkbutton $waa.htabs -text [mc "Apply auto-away on hidden chat tabs"] \
 	  -variable [namespace current]::tmpp(aa,on-hidden-tabs)
 	
 	grid  $waa.htabs  -  -  -  -sticky w
 	
-	::balloonhelp::balloonforwindow $waa.htabs [mc tooltip-aaonhidden]
+	::balloonhelp::balloonforwindow $waa.htabs [mc "If activated then directed auto-away presence will be sent to users on hidden chat tabs"]
     }
     
     if {$config(aa,busy-chats)} {
 	set varName [namespace current]::tmpp(aa,busy-chats)
-	ttk::checkbutton $waa.cbusy -text [mc prefaabusychats]: \
+	ttk::checkbutton $waa.cbusy -text [mc "Do Not Disturb when (active chat sessions)"]: \
 	  -variable $varName \
 	  -command [namespace code [list SetEntryState [list $waa.ebusy $waa.mbusy] $varName]]
 	ttk::entry $waa.ebusy -font CociSmallFont -width 3  \
 	  -validate key -validatecommand {::Utils::ValidMinutes %S} \
 	  -textvariable [namespace current]::tmpp(aa,busy-chats-n)
-	ttk::label $waa.lbusy -text [mc Message]:
+	ttk::label $waa.lbusy -text [mc "Message"]:
 	ttk::entry $waa.mbusy -font CociSmallFont -width 32  \
 	  -textvariable [namespace current]::tmpp(aa,busy-chats-msg)
 	
@@ -373,7 +382,7 @@ proc ::AutoAway::BuildPage {page} {
 
 	SetEntryState [list $waa.ebusy $waa.mbusy] $varName
 
-	::balloonhelp::balloonforwindow $waa.cbusy [mc tooltip-aabusychats]
+	::balloonhelp::balloonforwindow $waa.cbusy [mc "When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb."]
     }
     return $page
 }

@@ -75,8 +75,8 @@ proc ::Httpd::Httpd {} {
 		::tinyhttpd::addmimemappings [::Types::GetSuffMimeArr]
 	    }
 	} msg]} {
-	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
-	      -message [mc messfailedhttp2 $msg]
+	    ::UI::MessageBox -icon error -title [mc "Error"] -type ok \
+	      -message [mc "Cannot start the internal HTTP server: %s" $msg]
 	} else {
 	    
 	    # Stop before quitting.

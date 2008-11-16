@@ -79,7 +79,7 @@ proc ::VCard::Fetch {type {jid {}}} {
     set priv(w)    $wDlgs(jvcard)$uid
     
     # We should query the server for this and then fill in.
-    ::JUI::SetAppMessage "[mc vcardget2 $jid]..."
+    ::JUI::SetAppMessage [mc "Downloading business card from %s" $jid]...
     if {$type eq "own"} {
 	::Jabber::Jlib vcard send_get_own  \
 	  [list [namespace current]::FetchCallback $token]
@@ -99,14 +99,16 @@ proc ::VCard::FetchCallback {token jlibName result theQuery} {
     ::Debug 4 "::VCard::FetchCallback"
     
     if {$result eq "error"} {
-	set str [mc vcarderrget2]
-	append str "\n" "[mc Error]: ([lindex $theQuery 0]) [lindex $theQuery 1]"
-	::UI::MessageBox -title [mc Error] -icon error -type ok -message $str
+	set str [mc "Cannot download business card."]
+	append str "\n"
+	append str [mc "Error"]
+	append str ": ([lindex $theQuery 0]) [lindex $theQuery 1]"
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok -message $str
         ::JUI::SetAppMessage ""
 	Free $token
         return
     }
-    ::JUI::SetAppMessage [mc vcardrec2]
+    ::JUI::SetAppMessage [mc "Business card downloaded."]
     
     # The 'theQuery' now contains all the vCard data in a xml list.
     if {[llength $theQuery]} {
@@ -219,10 +221,10 @@ proc ::VCard::Build {token} {
     }
 
     if {$type eq "own"} {
-	wm title $w [mc {Edit Business Card}]
+	wm title $w [mc "Edit Business Card"]
     } else {
 	set djid [::Roster::GetDisplayName $jid]
-	wm title $w "[mc {Business Card}]: $djid"
+	wm title $w [mc "Business Card: %s" $djid]
     }
     set priv(vcardjid) $jid
     set elem(jid) [jlib::unescapejid $jid]
@@ -243,9 +245,9 @@ proc ::VCard::Build {token} {
     ttk::frame $frbot -padding [option get . okcancelNoTopPadding {}]
     set padx [option get . buttonPadX {}]
     if {$type eq "own"} {
-	ttk::button $frbot.btok -text [mc Save]  \
+	ttk::button $frbot.btok -text [mc "Save"]  \
 	  -default active -command [list [namespace current]::SetVCard $token]
-	ttk::button $frbot.btcancel -text [mc Cancel]  \
+	ttk::button $frbot.btcancel -text [mc "Cancel"]  \
 	  -command [list [namespace current]::Close $token]
 	if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
 	    pack $frbot.btok -side right
@@ -255,11 +257,11 @@ proc ::VCard::Build {token} {
 	    pack $frbot.btok -side right -padx $padx
 	}
     } else {
-	ttk::button $frbot.btcancel -text [mc Cancel] \
+	ttk::button $frbot.btcancel -text [mc "Cancel"] \
 	  -command [list [namespace current]::Close $token]
 	pack $frbot.btcancel -side right
     }
-    ttk::button $frbot.export -text "[mc Export]..." \
+    ttk::button $frbot.export -text [mc "Export"]... \
       -command [list [namespace current]::Export $token]
     pack $frbot.export -side left
     
@@ -282,16 +284,16 @@ proc ::VCard::Pages {nbframe etoken type} {
     
     # Start with the Basic Info -------------------------------------------------
    
-    $nbframe add [ttk::frame $nbframe.fbas] -text [mc General] -sticky news
+    $nbframe add [ttk::frame $nbframe.fbas] -text [mc "General"] -sticky news
 
     set pbi $nbframe.fbas.f
     ttk::frame $pbi -padding [option get . notebookPagePadding {}]
     pack  $pbi  -side top -anchor [option get . dialogAnchor {}]
 
     # Name part.
-    ttk::label $pbi.first  -text "[mc {First name}]:"
-    ttk::label $pbi.middle -text "[mc Middle]:  "
-    ttk::label $pbi.fam    -text "[mc {Last name}]:"
+    ttk::label $pbi.first  -text [mc "First name"]:
+    ttk::label $pbi.middle -text [mc "Middle"]:
+    ttk::label $pbi.fam    -text [mc "Last name"]:
     ttk::entry $pbi.efirst  -width 16 -textvariable $etoken\(n_given)
     ttk::entry $pbi.emiddle -width 2 -textvariable $etoken\(n_middle)
     ttk::entry $pbi.efam    -width 18 -textvariable $etoken\(n_family)
@@ -302,9 +304,9 @@ proc ::VCard::Pages {nbframe etoken type} {
     bind $pbi.efirst <Map> { focus %W }
     
     # Other part.
-    ttk::label $pbi.nick   -text "[mc Nickname]:"
-    ttk::label $pbi.email  -text "[mc Email]:"
-    ttk::label $pbi.jid    -text "[mc {Contact ID}]:"
+    ttk::label $pbi.nick   -text [mc "Nickname"]:
+    ttk::label $pbi.email  -text [mc "Email"]:
+    ttk::label $pbi.jid    -text [mc "Contact ID"]:
     ttk::entry $pbi.enick  -textvariable $etoken\(nickname)
     ttk::entry $pbi.eemail -textvariable $etoken\(email_internet_pref)
     ttk::entry $pbi.ejid   -textvariable $etoken\(jid)
@@ -317,13 +319,13 @@ proc ::VCard::Pages {nbframe etoken type} {
     
     $pbi.ejid state {readonly}
         
-    ::balloonhelp::balloonforwindow $pbi.ejid [mc tooltip-contactid]
-    ::balloonhelp::balloonforwindow $pbi.enick [mc registration-nick]
-    ::balloonhelp::balloonforwindow $pbi.eemail [mc registration-email]
+    ::balloonhelp::balloonforwindow $pbi.ejid [mc "Chat address"]
+    ::balloonhelp::balloonforwindow $pbi.enick [mc "Familiar name"]
+    ::balloonhelp::balloonforwindow $pbi.eemail [mc "Email address"]
 
     # Description part.
     set wdesctxt $pbi.tdes
-    ttk::label $pbi.ldes -text "[mc Description]:"    
+    ttk::label $pbi.ldes -text [mc "Description"]:   
 
     set wdesctxt $pbi.fde.t
     set wdysc    $pbi.fde.y
@@ -340,7 +342,7 @@ proc ::VCard::Pages {nbframe etoken type} {
             
     # Personal Info page -------------------------------------------------------
     
-    $nbframe add [ttk::frame $nbframe.fp] -text [mc Personal] -sticky news
+    $nbframe add [ttk::frame $nbframe.fp] -text [mc "Personal"] -sticky news
 
     set pbp $nbframe.fp.f
     ttk::frame $pbp -padding [option get . notebookPagePadding {}]
@@ -355,7 +357,13 @@ proc ::VCard::Pages {nbframe etoken type} {
         Occupation        role
         Birthday          bday
     } {
-	ttk::label $wtop.l$tag -text "[mc $name]:"
+	
+	set Name [dict create]
+	dict set Name Website [mc "Website"]:
+	dict set Name Occupation [mc "Occupation"]:
+	dict set Name Birthday [mc "Birthday"]:
+	
+	ttk::label $wtop.l$tag -text [dict get $Name $name]
 	if {$tag eq "url" && $type ne "own"} {
 	    if {[info exists elem(url)]} {
 		set url $elem(url)
@@ -378,13 +386,13 @@ proc ::VCard::Pages {nbframe etoken type} {
     grid  x  $wtop.frmt  -sticky w
     grid columnconfigure $wtop 1 -weight 1
 
-    ::balloonhelp::balloonforwindow $wtop.eurl [mc registration-url]
+    ::balloonhelp::balloonforwindow $wtop.eurl [mc "URL to personal website"]
 
     set wmid $pbp.m
     ttk::frame $wmid
     pack $wmid -fill x -expand 1 -pady 8
 
-    ttk::label $wmid.email -text "[mc {Email addresses}]:"
+    ttk::label $wmid.email -text [mc "Email addresses"]:
     grid  $wmid.email  -  -sticky w
     
     set  wemails $wmid.emails
@@ -400,8 +408,8 @@ proc ::VCard::Pages {nbframe etoken type} {
     ttk::frame $wp1
     pack $wp1 -side left -padx 4 -fill y
 
-    ttk::label $wp1.l -text "[mc Avatar]:"
-    ttk::button $wp1.b -text "[mc {Select Avatar}]..."  \
+    ttk::label $wp1.l -text [mc "Avatar"]:
+    ttk::button $wp1.b -text [mc "Select Avatar"]...  \
       -command [list ::VCard::SelectPhoto $etoken]
     ttk::button $wp1.br -text [mc "Remove Avatar"] \
       -command [list ::VCard::DeletePhoto $etoken]
@@ -439,7 +447,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     
     # Home page --------------------------------------------------------------
 
-    $nbframe add [ttk::frame $nbframe.fh] -text [mc Home] -sticky news
+    $nbframe add [ttk::frame $nbframe.fh] -text [mc "Home"] -sticky news
 
     set pbh $nbframe.fh.f
     ttk::frame $pbh -padding [option get . notebookPagePadding {}]
@@ -467,7 +475,7 @@ proc ::VCard::Pages {nbframe etoken type} {
     
     # Work page ----------------------------------------------------------
 
-    $nbframe add [ttk::frame $nbframe.fw] -text [mc Work] -sticky news
+    $nbframe add [ttk::frame $nbframe.fw] -text [mc "Work"] -sticky news
 
     set pbw $nbframe.fw.f
     ttk::frame $pbw -padding [option get . notebookPagePadding {}]
@@ -486,12 +494,26 @@ proc ::VCard::Pages {nbframe etoken type} {
         "Tel (voice)"     tel_voice_work
         "Tel (fax)"       tel_fax_work
     } {
-	if {$tag eq "adr_home_street"} {
+	if {$tag eq "adr_work_street"} {
 	    append name " 1"
-	} elseif {$tag eq "adr_home_extadd"} {
+	} elseif {$tag eq "adr_work_extadd"} {
 	    append name " 2"
 	}
-	ttk::label $pbw.l$tag -text "[mc $name]:"
+
+	set Name [dict create]
+	dict set Name Company [mc "Company"]:
+	dict set Name Department [mc "Department"]:
+	dict set Name Title [mc "Title"]:
+	dict set Name "Address 1" [mc "Address 1"]:
+	dict set Name "Address 2" [mc "Address 2"]:
+	dict set Name City [mc "City"]:
+	dict set Name Region [mc "Region"]:
+	dict set Name "Postal code" [mc "Postal code"]:
+	dict set Name Country [mc "Country"]:
+	dict set Name "Tel (voice)" [mc "Tel (voice)"]:
+	dict set Name "Tel (fax)" [mc "Tel (fax)"]:
+
+	ttk::label $pbw.l$tag -text [dict get $Name $name]
 	ttk::entry $pbw.e$tag -width 28 -textvariable $etoken\($tag)
         grid  $pbw.l$tag  $pbw.e$tag  -sticky e -pady 2
     }
@@ -765,7 +787,7 @@ proc ::VCard::Close {token} {
 proc ::VCard::SetVCardCallback {jlibName type theQuery} {
 
     if {$type eq "error"} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 	  -message "Failed setting the vCard. The result was: $theQuery"
 	return
     }
@@ -824,8 +846,11 @@ proc ::VCard::ExportJIDCB {jid fileName jlib type vcardE} {
 	SaveElementToFile $fileName $jid $vcardE
     } else {
 	set errmsg "([lindex $vcardE 0]) [lindex $vcardE 1]"
-	ui::dialog -title [mc Error] -icon error -type ok \
-	  -message [mc vcarderrget $errmsg]
+	set msg [mc "Cannot download business card."]
+	append msg [mc "Error"]
+	append msg ": %s $errmsg"
+	ui::dialog -title [mc "Error"] -icon error -type ok \
+	  -message $msg
     }
 }
 
@@ -870,7 +895,7 @@ proc ::VCard::Import {} {
       -title [mc "Open Business Card"] -filetypes {{"vCard" ".xml"}}]
     if {$fileName ne ""} {
 	if {[file extension $fileName] ne ".xml"} {
-	    tk_messageBox -icon error -title [mc Error] \
+	    tk_messageBox -icon error -title [mc "Error"] \
 	      -message "File must have an extension \".xml\""
 	    return
 	}
@@ -891,7 +916,7 @@ proc ::VCard::ImportFromFile {fileName} {
     
     if {([tinydom::tagname $xmllist] ne "vCard") || \
       ([tinydom::getattribute $xmllist xmlns] ne "vcard-temp")} {
-	tk_messageBox -icon error -title [mc Error] \
+	tk_messageBox -icon error -title [mc "Error"] \
 	  -message "Not a proper vCard XML format"
 	return
     }

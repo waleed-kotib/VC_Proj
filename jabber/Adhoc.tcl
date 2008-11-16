@@ -140,7 +140,7 @@ proc ::Adhoc::ExecuteCB {jid node type subiq args} {
 	set errcode [lindex $subiq 0]
 	set errmsg  [lindex $subiq 1]
 	set label [FindLabelForJIDNode $jid $node]
-	ui::dialog -icon error -title [mc Error] \
+	ui::dialog -icon error -title [mc "Error"] \
 	  -message "Ad-Hoc command for \"$label\" at $jid failed because: $errmsg"
     } else {
 	BuildDlg $jid $node $subiq
@@ -198,15 +198,15 @@ proc ::Adhoc::BuildDlg {jid node subiq} {
 	
 	# completed: The command has completed. The command session has ended.
 	# Typical if a command does not require any interaction.
-	ttk::button $bot.close -text [mc Cancel] -default active \
+	ttk::button $bot.close -text [mc "Cancel"] -default active \
 	  -command [namespace code [list CloseCmd $w]]
 	pack $bot.close -side right
 	
 	bind $w <Return> [list $bot.close invoke]
     } else {
-	ttk::button $bot.next -text [mc Next] -default active \
+	ttk::button $bot.next -text [mc "Next"] -default active \
 	  -command [namespace code [list Action $w execute]]
-	ttk::button $bot.prev -text [mc Previous] \
+	ttk::button $bot.prev -text [mc "Previous"] \
 	  -command [namespace code [list Action $w prev]]
 	$bot.prev state {disabled}
 	set padx [option get . buttonPadX {}]
@@ -380,7 +380,7 @@ proc ::Adhoc::ActionCB {w type subiq args} {
 	set errcode [lindex $subiq 0]
 	set errmsg  [lindex $subiq 1]
 	set label [FindLabelForJIDNode $state(jid) $state(node)]
-	ui::dialog -icon error -title [mc Error] \
+	ui::dialog -icon error -title [mc "Error"] \
 	  -message "Ad-Hoc command for \"$label\" at $jid failed because: $errmsg"
 	Close $w
     } else {
@@ -393,7 +393,7 @@ proc ::Adhoc::ActionCB {w type subiq args} {
 	    $state(wprev) configure -default normal
 	    $state(wnext) configure -default normal
 	    $state(wnext) state {!disabled}
-	    $state(wnext) configure -text [mc Cancel] -default active \
+	    $state(wnext) configure -text [mc "Cancel"] -default active \
 	      -command [namespace code [list Close $w]]
 	} else {
 	    SetActionButtons $w $subiq
@@ -422,7 +422,7 @@ proc ::Adhoc::SetActionButtons {w subiq} {
 	    }
 	    complete {
 		$state(wnext) state {!disabled}
-		$state(wnext) configure -text [mc Finish] \
+		$state(wnext) configure -text [mc "Finish"] \
 		  -default active \
 		  -command [namespace code [list Action $w complete]]
 	    }

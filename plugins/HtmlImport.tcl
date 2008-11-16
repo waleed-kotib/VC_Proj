@@ -281,7 +281,7 @@ proc ::HtmlImport::SaveAs {id} {
 	return
     }
     if {[catch {file copy $locals(id2file,$id) $ans} err]} {
-	::UI::MessageBox -type ok -title [mc Error] -icon error -message \
+	::UI::MessageBox -type ok -title [mc "Error"] -icon error -message \
 	  "Failed copying file: $err"
 	return
     }

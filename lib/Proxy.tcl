@@ -141,7 +141,7 @@ proc ::Proxy::BuildPage {wpage} {
     pack $wc -side top -anchor $anchor
 
     # Proxy:
-    ttk::labelframe $wc.p -text [mc Proxy]  \
+    ttk::labelframe $wc.p -text [mc "Proxy"]  \
       -padding [option get . groupSmallPadding {}]
     pack $wc.p -side top -fill x -anchor $anchor
 
@@ -149,7 +149,7 @@ proc ::Proxy::BuildPage {wpage} {
     pack $wc.p.f -side top -fill x -anchor $anchor
 
     # NAT:
-    ttk::labelframe $wc.n -text [mc {NAT Address}] \
+    ttk::labelframe $wc.n -text [mc "NAT Address"] \
       -padding [option get . groupSmallPadding {}]
     pack $wc.n -side top -fill x -anchor $anchor -pady 8
     
@@ -193,27 +193,27 @@ proc ::Proxy::BuildFrame {w} {
     pack $wprx -side top -anchor [option get . dialogAnchor {}]
     
     ttk::label $wprx.msg -wraplength 300 -justify left \
-      -text [mc prefproxymsg2]
-    ttk::checkbutton $wprx.use -text [mc {Use proxy}]  \
+      -text [mc "Usage of this HTTP proxy settings is determined by each profile's settings. File transfers will not work if you use an HTTP proxy."]
+    ttk::checkbutton $wprx.use -text [mc "Use proxy"]  \
       -command [namespace code SetUseProxyState]  \
       -variable [namespace current]::tmpPrefs(useproxy)  
-    ttk::label $wprx.lmb -text [mc Type]:
+    ttk::label $wprx.lmb -text [mc "Type"]:
     ui::optionmenu $wprx.mb -menulist $menulist -direction flush \
       -command [namespace code SetProxyType] \
       -variable [namespace current]::tmpPrefs(proxy_type)
-    ttk::label $wprx.lserv -text [mc Host]:
+    ttk::label $wprx.lserv -text [mc "Host"]:
     ttk::entry $wprx.eserv -textvariable [namespace current]::tmpPrefs(proxy_host)
-    ttk::label $wprx.lport -text [mc Port]:
+    ttk::label $wprx.lport -text [mc "Port"]:
     ttk::entry $wprx.eport -textvariable [namespace current]::tmpPrefs(proxy_port) \
       -width 6
-    ttk::label $wprx.luser -text [mc Username]:
+    ttk::label $wprx.luser -text [mc "Username"]:
     ttk::entry $wprx.euser -textvariable [namespace current]::tmpPrefs(proxy_user)
-    ttk::label $wprx.lpass -text [mc Password]:
+    ttk::label $wprx.lpass -text [mc "Password"]:
     ttk::entry $wprx.epass -textvariable [namespace current]::tmpPrefs(proxy_pass) \
       -show {*}
   
     set wnoproxy $wprx.noproxy
-    ttk::label $wprx.lnop -text [mc prefproxyexc]:
+    ttk::label $wprx.lnop -text [mc "Exclude addresses (* as wildcard)."]:
     text $wprx.noproxy -font CociSmallFont -height 4 -width 24 -bd 1 -relief sunken
     
     grid  $wprx.msg  -      -            -sticky w
@@ -264,13 +264,13 @@ proc ::Proxy::BuildNATFrame {w} {
     ttk::frame $wnat
     pack $wnat -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::checkbutton $wnat.use -text [mc prefnatip2] \
+    ttk::checkbutton $wnat.use -text [mc "Use the following external address"] \
       -command [namespace code SetUseNATState]  \
       -variable [namespace current]::tmpPrefs(setNATip)
     ttk::entry $wnat.eip \
       -textvariable [namespace current]::tmpPrefs(NATip)
     if {$stun} {
-	ttk::button $wnat.stun -text [mc Detect] -command ::Proxy::GetStun
+	ttk::button $wnat.stun -text [mc "Detect"] -command ::Proxy::GetStun
     }
     
     grid  $wnat.use  -  -sticky w

@@ -1598,7 +1598,7 @@ proc ::CanvasUtils::SetItemColorDialog {wcan id opt} {
     if {$presentColor eq ""} {
 	set presentColor black
     }
-    set color [tk_chooseColor -initialcolor $presentColor -title [mc Color]]
+    set color [tk_chooseColor -initialcolor $presentColor -title [mc "Color"]]
     if {$color ne ""} {
 	ItemConfigure $wcan $id $opt $color
     }

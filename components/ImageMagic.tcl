@@ -57,7 +57,7 @@ proc ::ImageMagic::Init {} {
 	# 'type' 'label' 'command' 'opts' {subspec}
 	# where subspec defines a cascade menu recursively
 	set menuspec [list \
-	    command [mc {Take Snapshot}] {::ImageMagic::ImportWindowSnapShot $w} {} {} \
+	    command [mc "Take Snapshot"] {::ImageMagic::ImportWindowSnapShot $w} {} {} \
 	]
       ::WB::RegisterNewMenu addon [mc mPlugins] $menuspec
     }
@@ -73,7 +73,7 @@ proc ::ImageMagic::ImportWindowSnapShot {w} {
     set wcan [::WB::GetCanvasFromWtop $w]
     
     if {$haveImageMagic == 0} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok -message \
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok -message \
 	  "Failed to locate ImageMagic package! Can't do screen snap shot :-("
 	return
     }
@@ -89,7 +89,7 @@ proc ::ImageMagic::ImportWindowSnapShot {w} {
 	if {$errMsg eq ""} {
 	    lappend tmpfiles $tmpfile
 	} else {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	    ::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
 	}
     }
@@ -114,7 +114,7 @@ proc ::ImageMagic::BuildDialog {w} {
 
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 300 -justify left \
-      -text [mc immagic-msg]
+      -text [mc "Click on a window or drag a rectangular area to import a snapshot into the current whiteboard."]
     pack $wbox.msg -side top -fill x -anchor w
     
     ttk::label $wbox.la -text {Captured image format:} -style Small.TLabel
@@ -139,9 +139,9 @@ proc ::ImageMagic::BuildDialog {w} {
     # Button part.
     set frbot     $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -default active \
+    ttk::button $frbot.btok -text [mc "OK"] -default active \
       -command [list set [namespace current]::finished 1]
-    ttk::button $frbot.btcancel -text [mc Cancel] \
+    ttk::button $frbot.btcancel -text [mc "Cancel"] \
       -command [list set [namespace current]::finished 0]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -179,7 +179,7 @@ proc ::ImageMagic::ClearImportFiles {wcan} {
     variable tmpfiles
 
     if {$prefs(incomingFilePath) eq "" || [string match {*[*?]*} $prefs(incomingFilePath)]} {
-	::UI::MessageBox -message [mc immagic-warn $prefs(incomingFilePath)] \
+	::UI::MessageBox -message [mc "Dangerous in-box path name: %s" $prefs(incomingFilePath)] \
 	  -icon warning
 	return
     }
@@ -191,7 +191,7 @@ proc ::ImageMagic::ClearImportFiles {wcan} {
     if {$all_files == ""} {
 	return
     }
-    set msg [mc immagic-rem "\n[join $all_files \n]"]
+    set msg [mc "Click OK to remove files: %s" "\n[join $all_files \n]"]
     set ans [::UI::MessageBox -message $msg -type okcancel -icon warning]
     if {"$ans" eq "ok"} {
 	foreach file $all_files {

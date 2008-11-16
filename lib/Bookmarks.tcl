@@ -119,14 +119,14 @@ snit::widget ::Bookmarks::Dialog {
 	# Button part.
 	set bot $wbox.b
 	ttk::frame $bot -padding [option get . okcancelTopPadding {}]
-	ttk::button $bot.save -text [mc Save] -default active  \
+	ttk::button $bot.save -text [mc "Save"] -default active  \
 	  -command [list $self Save]
 	::chasearrows::chasearrows $bot.run -size 16
-	ttk::button $bot.cancel -text [mc Cancel]  \
+	ttk::button $bot.cancel -text [mc "Cancel"]  \
 	  -command [list $self Destroy]
-	ttk::button $bot.new -text [mc {New Bookmark}]  \
+	ttk::button $bot.new -text [mc "New Bookmark"]  \
 	  -command [list $self New]
-	ttk::button $bot.del -text [mc Delete]  \
+	ttk::button $bot.del -text [mc "Delete"]  \
 	  -command [list $self Delete]
 	set padx [option get . buttonPadX {}]
 	if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -169,7 +169,7 @@ snit::widget ::Bookmarks::Dialog {
     }
     
     method New {} {
-	set line [list [mc {New Bookmark}]]
+	set line [list [mc "New Bookmark"]]
 	set ncol [$wtablelist columncount]
 	for {set i 1} {$i < $ncol} {incr i} {
 	    lappend line {}

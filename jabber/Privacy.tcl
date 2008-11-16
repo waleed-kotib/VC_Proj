@@ -60,7 +60,7 @@ proc ::Privacy::InitPrefsHook { } {
 
 proc ::Privacy::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Filter} [mc Filter]
+    ::Preferences::NewTableItem {Jabber Filter} [mc "Filter"]
     
     # Blockers page --------------------------------------------------------
     set wpage [$nbframe page {Filter}]    
@@ -89,11 +89,11 @@ proc ::Privacy::BuildPrefsPage {page} {
     pack $wc -side top -anchor [option get . dialogAnchor {}]
     
     set wfi $wc.fi
-    ttk::labelframe $wfi -text [mc Filter] \
+    ttk::labelframe $wfi -text [mc "Filter"] \
       -padding [option get . groupSmallPadding {}]
     pack  $wfi  -side top -fill x
 	      
-    ttk::label $wfi.lmsg -text [mc prefprivmsg] \
+    ttk::label $wfi.lmsg -text [mc "Each user may administrate zero or many lists. Only the active or default list affect message processing. Any active list affects only the session. The default list is processed if there is no active list."] \
       -wraplength 300 -justify left -padding {0 0 0 6}
     pack  $wfi.lmsg -side top -anchor w
     
@@ -162,11 +162,11 @@ proc ::Privacy::BuildPrefsPage {page} {
     set wbts(edit) $wfrbt.edit
     set wbts(del)  $wfrbt.del    
     
-    ttk::button $wfrbt.new -text [mc New] -state disabled \
+    ttk::button $wfrbt.new -text [mc "New"] -state disabled \
       -command [namespace current]::NewList
     ttk::button $wfrbt.edit -text [mc mEdit] -state disabled \
       -command [namespace current]::EditList
-    ttk::button $wfrbt.del -text [mc Delete] -state disabled \
+    ttk::button $wfrbt.del -text [mc "Delete"] -state disabled \
       -command [namespace current]::DelList
     pack $wfrbt.new $wfrbt.edit $wfrbt.del -side top -padx 6 -pady 4 \
       -fill x
@@ -174,7 +174,7 @@ proc ::Privacy::BuildPrefsPage {page} {
     
     Deselected
     if {[::Jabber::IsConnected]} {
-	set statmsg [mc {Obtaining filter options}]
+	set statmsg [mc "Obtaining filter options"]
 	GetLists
     } else {
 	set statmsg [mc prefprivunav]
@@ -530,14 +530,14 @@ namespace eval ::Privacy::List:: {
     
     # Need to map from menu entry to actual tag or attribute.
     variable strToTag
-    set strToTag(type,[mc JID])          jid
-    set strToTag(type,[mc Group])        group
-    set strToTag(type,[mc Subscription]) subscription
-    set strToTag(block,[mc {Incoming Messages}]) message
-    set strToTag(block,[mc {Incoming Presence}]) presence-in
-    set strToTag(block,[mc {Outgoing Presence}]) presence-out
-    set strToTag(action,[mc Allow]) allow
-    set strToTag(action,[mc Deny])  deny
+    set strToTag(type,[mc "Contact ID"])          jid
+    set strToTag(type,[mc "Group"])        group
+    set strToTag(type,[mc "Subscription"]) subscription
+    set strToTag(block,[mc "Incoming Messages"]) message
+    set strToTag(block,[mc "Incoming Presence"]) presence-in
+    set strToTag(block,[mc "Outgoing Presence"]) presence-out
+    set strToTag(action,[mc "Allow"]) allow
+    set strToTag(action,[mc "Deny"])  deny
     
     # Labels for the menubuttons.
     variable labels
@@ -639,7 +639,7 @@ proc ::Privacy::List::Build { } {
       -usemacmainmenu 1 -macstyle documentProc \
       -closecommand ::Privacy::List::CloseHook
 
-    wm title $w [mc {Privacy List}]
+    wm title $w [mc "Privacy List"]
     
     # Global frame.
     ttk::frame $w.frall
@@ -658,7 +658,7 @@ proc ::Privacy::List::Build { } {
     pack  $wfr -side top -anchor w
     
     set state(wname) $wfr.ename
-    ttk::label $wfr.lname -text "[mc {Name of list}]:"
+    ttk::label $wfr.lname -text [mc "List name"]:
     ttk::entry $wfr.ename -width 16 -textvariable $token\(name)
     pack  $wfr.lname  $wfr.ename  -side left
     
@@ -671,10 +671,10 @@ proc ::Privacy::List::Build { } {
     set i 0    
     foreach {wtype wval wblk wact wdel}  \
       [list $wit.t$i $wit.v$i $wit.bl$i $wit.a$i $wit.bt$i] break
-    ttk::label $wtype -text [mc Type]
-    ttk::label $wval  -text [mc Value]
-    ttk::label $wblk  -text [mc Block]    
-    ttk::label $wact  -text [mc Action]    
+    ttk::label $wtype -text [mc "Type"]
+    ttk::label $wval  -text [mc "Value"]
+    ttk::label $wblk  -text [mc "Block"]    
+    ttk::label $wact  -text [mc "Action"]    
     ttk::label $wdel  -text [mc "Delete Rule"]    
 
     grid  $wtype  $wval  $wblk  $wact  $wdel
@@ -699,11 +699,11 @@ proc ::Privacy::List::Build { } {
     set frbot $wbox.b
     set warrows $frbot.arr
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] \
+    ttk::button $frbot.btok -text [mc "OK"] \
       -default active -command [list [namespace current]::Set $token]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::Cancel $token]
-    ttk::button $frbot.btprof -text [mc {New Rule}]  \
+    ttk::button $frbot.btprof -text [mc "New Rule"]  \
       -command [list [namespace current]::New $token]
     ::UI::ChaseArrows $warrows
     ttk::label $frbot.stat -textvariable $token\(statmsg)
@@ -816,12 +816,12 @@ proc ::Privacy::List::BuildItem {token} {
       -menulist [ui::optionmenu::menuList $labels(block)]
     ui::combobutton $wact -variable $token\(action$i) \
       -menulist [ui::optionmenu::menuList $labels(action)]
-    ttk::button $wdel -text [mc Delete]  \
+    ttk::button $wdel -text [mc "Delete"]  \
       -command [list [namespace current]::Delete $token $i]
     
     grid $wtype $wval $wblk $wact $wdel -sticky e
     
-    set state(action$i) [mc Deny]
+    set state(action$i) [mc "Deny"]
     set state(value$i)  ""
     set state(block$i)  {Incoming Messages}
     return $state(i)
@@ -875,7 +875,7 @@ proc ::Privacy::List::ExtractListElement {token} {
     set name $state(name)
 
     if {$name == ""} {
-	::UI::MessageBox -title [mc Error] -message \
+	::UI::MessageBox -title [mc "Error"] -message \
 	  {You must specify a nonempty list name!} -icon error
 	return
     }
@@ -891,7 +891,7 @@ proc ::Privacy::List::ExtractListElement {token} {
 	    
 	    # Do some error checking here.
 	    if {$value == ""} {
-		::UI::MessageBox -title [mc Error] -message \
+		::UI::MessageBox -title [mc "Error"] -message \
 		  "You must specify a nonempty value for $type!" -icon error
 		return
 	    }

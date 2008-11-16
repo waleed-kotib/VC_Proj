@@ -53,7 +53,7 @@ proc ::JPubServers::Build {w {command ""}} {
     upvar #0 $w state
 
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [mc Servers]
+    wm title $w [mc "Servers"]
     
     # Global frame.
     ttk::frame $w.frall
@@ -67,9 +67,9 @@ proc ::JPubServers::Build {w {command ""}} {
     set frbot $wbox.b
     set wset  $frbot.btok
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -default active \
+    ttk::button $frbot.btok -text [mc "OK"] -default active \
       -state disabled -command [list [namespace current]::Set $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::Cancel $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -84,7 +84,7 @@ proc ::JPubServers::Build {w {command ""}} {
     # List of servers.
     ttk::label $wbox.msg  \
       -padding {0 0 0 6} -wraplength 300 -justify left \
-      -text "[mc suservlist]:"
+      -text [mc "List of open XMPP servers"]:
     pack $wbox.msg -side top -anchor w
 
     set wtbfr $wbox.wtbfr
@@ -93,7 +93,7 @@ proc ::JPubServers::Build {w {command ""}} {
     frame $wtbfr -borderwidth 1 -relief sunken
     pack $wtbfr -side top -fill both -expand 1
     tablelist::tablelist $wtbl \
-      -columns [list 40 [mc Host]] -stretch all \
+      -columns [list 40 [mc "Host"]] -stretch all \
       -yscrollcommand [list $wysc set] \
       -width 40 -height 16
     ttk::scrollbar $wysc -orient vertical -command [list $wtbl yview]
@@ -134,7 +134,7 @@ proc ::JPubServers::Build {w {command ""}} {
 	  -timeout $prefs(timeoutMillis)
     } token]} {
 	destroy $w
-	::UI::MessageBox -title [mc Error] -icon error -type ok  \
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok  \
 	  -message "Failed to obtain list of open Jabber servers from\
 	  \"$url\": $token"
 	return
@@ -204,17 +204,17 @@ proc ::JPubServers::HttpCommand {w token} {
     
     switch -- $status {
 	timeout {
-	    ::UI::MessageBox -title [mc Timeout] -icon info -type ok \
+	    ::UI::MessageBox -title [mc "Timeout"] -icon info -type ok \
 	      -message "Timeout while waiting for response."
 	}
 	error {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	    ::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 	      -message "File transport error when getting server list:\
 	      [::httpex::error $token]"
 	}
 	eof {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
-	      -message [mc httptrpteof]
+	    ::UI::MessageBox -title [mc "Error"] -icon error -type ok \
+	      -message [mc "The server closed the socket without replying."]
 	}
 	reset {
 	    # Did this ourself?

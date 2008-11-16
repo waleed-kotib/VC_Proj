@@ -108,7 +108,7 @@ proc ::Login::Dlg {} {
     ::UI::Toplevel $w -class JLogin \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [namespace current]::Close
-    wm title $w [mc Login]
+    wm title $w [mc "Login"]
 
     ::UI::SetWindowPosition $w
         
@@ -121,7 +121,7 @@ proc ::Login::Dlg {} {
 	set connectimd  [::Theme::Find32Icon $w connectDisImage]
 
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc Login] -compound left \
+	  -text [mc "Login"] -compound left \
 	  -image [list $connectim background $connectimd]
 	pack  $w.frall.head  -side top -fill both -expand 1
 	
@@ -134,14 +134,14 @@ proc ::Login::Dlg {} {
     pack  $wbox  -fill both -expand 1
 
     if {$config(login,style) eq "jid"} {
-	set str [mc jaloginjid3]
+	set str [mc "Enter your account as user@example.org, or choose a profile. You should already have an account."]
     } elseif {$config(login,style) eq "jidpure"} {
-	set str [mc jaloginjidpure]
+	set str [mc "Enter your Contact ID as user@example.org. You should already have an account with this server."]
     } elseif {$config(login,style) eq "parts"} {
-	set str [mc jalogin]
+	set str [mc "Write Jabber server ip number or name, or choose from the popup menu. You should already have an account with this server."]
     } elseif {$config(login,style) eq "username"} {
 	set domain [::Profiles::Get [::Profiles::GetSelectedName] domain]
-	set str [mc jaloginuser $domain]
+	set str [mc "Enter your username and password to login to %s." $domain]
     }
     ttk::label $wbox.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength 300 -justify left -text $str
@@ -152,7 +152,7 @@ proc ::Login::Dlg {} {
     pack  $frmid  -side top -fill both -expand 1
 	
     # Option menu for selecting user profile.
-    ttk::label $frmid.lpop -text "[mc Profile]:" -anchor e
+    ttk::label $frmid.lpop -text [mc "Profile"]: -anchor e
     set wpopup $frmid.popup
 
     set menuVar [::Profiles::GetSelectedName]
@@ -161,22 +161,22 @@ proc ::Login::Dlg {} {
        -command [namespace code ProfileCmd]
     
     # Depending on 'config(login,style)' not all get mapped.
-    ttk::label $frmid.ljid -text "[mc {Contact ID}]:" -anchor e
+    ttk::label $frmid.ljid -text [mc "Contact ID"]: -anchor e
     ttk::entry $frmid.ejid -width 22    \
       -textvariable [namespace current]::jid
-    ttk::label $frmid.lserv -text "[mc Server]:" -anchor e
+    ttk::label $frmid.lserv -text [mc "Server"]: -anchor e
     ttk::entry $frmid.eserv -width 22    \
       -textvariable [namespace current]::server -validate key  \
       -validatecommand {::Jabber::ValidateDomainStr %S}
-    ttk::label $frmid.luser -text "[mc Username]:" -anchor e
+    ttk::label $frmid.luser -text [mc "Username"]: -anchor e
     ttk::entry $frmid.euser -width 22   \
       -textvariable [namespace current]::username -validate key  \
       -validatecommand {::Jabber::ValidateUsernameStrEsc %S}
-    ttk::label $frmid.lpass -text "[mc Password]:" -anchor e
+    ttk::label $frmid.lpass -text [mc "Password"]: -anchor e
     ttk::entry $frmid.epass -width 22   \
       -textvariable [namespace current]::password -show {*} -validate key \
       -validatecommand {::Jabber::ValidatePasswordStr %S}
-    ttk::label $frmid.lres -text "[mc Resource]:" -anchor e
+    ttk::label $frmid.lres -text [mc "Resource"]: -anchor e
     ttk::entry $frmid.eres -width 22   \
       -textvariable [namespace current]::resource -validate key  \
       -validatecommand {::Jabber::ValidateResourceStr %S}
@@ -216,8 +216,8 @@ proc ::Login::Dlg {} {
     set widgets(password)  $frmid.epass
     set widgets(resource)  $frmid.eres
     
-    ::balloonhelp::balloonforwindow $frmid.ejid [mc tooltip-contactid]
-    ::balloonhelp::balloonforwindow $frmid.epass [mc registration-password]
+    ::balloonhelp::balloonforwindow $frmid.ejid [mc "Chat address"]
+    ::balloonhelp::balloonforwindow $frmid.epass [mc "Password or secret"]
     
     ::JUI::DnDXmppBindTarget $frmid.ejid
 
@@ -228,16 +228,18 @@ proc ::Login::Dlg {} {
 	if {0} {
 	    ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
 	      -compound left -image [::UI::GetIcon mactriangleclosed] \
-	      -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
+	      -text [mc "More"]... -command [list [namespace current]::MoreOpts $w]
 	} elseif {0} {
 	    ttk::button $wtri -style Small.Plain -padding {6 1} \
 	      -compound left -image [::UI::GetIcon closeAqua] \
-	      -text "[mc More]..." -command [list [namespace current]::MoreOpts $w]
+	      -text [mc "More"]... -command [list [namespace current]::MoreOpts $w]
 	} else {
 	    set morevar 0
+	    set msg "  "
+	    append msg [mc "More"]...
 	    ttk::checkbutton $wtri -style ArrowText.TCheckbutton \
 	      -onvalue 0 -offvalue 1 -variable [namespace current]::morevar \
-	      -text "  [mc More]..." -command [list [namespace current]::MoreOpts $w]
+	      -text $msg -command [list [namespace current]::MoreOpts $w]
 	}
 	pack $wtri -side top -anchor w
 	
@@ -258,11 +260,11 @@ proc ::Login::Dlg {} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Login] \
+    ttk::button $frbot.btok -text [mc "Login"] \
       -default active -command [namespace current]::DoLogin
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::DoCancel $w]
-    ttk::button $frbot.btprof -text "[mc {Edit Profiles}]..." \
+    ttk::button $frbot.btprof -text [mc "Edit Profiles"]... \
       -command [namespace current]::Profiles
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -384,8 +386,10 @@ proc ::Login::MoreOpts {w} {
     variable morevar
 
     pack $wfrmore -side top -fill x -padx 2
+    set msg "  "
+    set append [mc "Less"]...
     $wtri configure -command [list [namespace current]::LessOpts $w] \
-      -text "  [mc Less]..."   
+      -text $msg  
 }
 
 proc ::Login::LessOpts {w} {
@@ -397,8 +401,10 @@ proc ::Login::LessOpts {w} {
     update idletasks
     
     pack forget $wfrmore
+    set msg "  "
+    append msg [mc "More"]...
     $wtri configure -command [list [namespace current]::MoreOpts $w] \
-      -text "  [mc More]..."   
+      -text $msg 
     after 100 [list wm geometry $w {}]
 }
 
@@ -480,8 +486,8 @@ proc ::Login::DoLogin {} {
 	upvar 0 $name var
 	if {![string length $var]} {
 	    set mcname [mc [string totitle $name]]
-	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
-	      -message [mc jamessnamemissing $mcname]
+	    ::UI::MessageBox -icon error -title [mc "Error"] -type ok \
+	      -message [mc "The %s is missing or is too short!" $mcname]
 	    if {$name eq "password"} {
 		focus $widgets(password)
 	    } else {
@@ -508,8 +514,8 @@ proc ::Login::DoLogin {} {
 		}
 	    }
 	} err]} {
-	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
-	      -message [mc jamessillegalchar $name $var]
+	    ::UI::MessageBox -icon error -title [mc "Error"] -type ok \
+	      -message [mc "Illegal character(s) in %s: %s!" $name $var]
 	    return
 	}
     }
@@ -517,7 +523,7 @@ proc ::Login::DoLogin {} {
     # Verify http url if any.
     if {0 && [info exists moreOpts(http)] && $moreOpts(http)} {
 	if {![::Utils::IsWellformedUrl $moreOpts(httpurl)]} {
-	    ::UI::MessageBox -icon error -title [mc Error] -type ok \
+	    ::UI::MessageBox -icon error -title [mc "Error"] -type ok \
 	      -message "The url \"$moreOpts(httpurl)\" is invalid."
 	    return
 	}
@@ -561,14 +567,14 @@ proc ::Login::DoLogin {} {
 
 	    # If we have a new bare JID we ask the user to make a new profile.
 	    set ans [tk_messageBox -title "" -type yesno -icon question \
-	      -message [mc jamessloginnewprof]]
+	      -message [mc "The Contact ID differs from your profile. Do you want to save a new profile?"]]
 	    if {$ans eq "yes"} {
 		set mbar [::JUI::GetMainMenu]
 		::UI::MenubarDisableBut $mbar edit
 		
-		set ans [ui::megaentry -label "[mc {Profile Name}]:" -icon "" \
+		set ans [ui::megaentry -label [mc "Profile Name"]: -icon "" \
 		  -geovariable prefs(winGeom,jprofname) \
-		  -title [mc "Add Profile"] -message [mc prefprofname2]]
+		  -title [mc "Add Profile"] -message [mc "Enter the name for the new profile."]]
 		::UI::MenubarEnableAll $mbar
 
 		if {$ans ne ""} {
@@ -591,7 +597,7 @@ proc ::Login::DoLogin {} {
 	    }
 	    if {$diffs} {
 		set ans [tk_messageBox -title "" -type yesno -icon question \
-		  -message [mc jamesslogindiff]]
+		  -message [mc "Your current login settings differ from your profile settings. Do you want to save them to your profile?"]]
 		if {$ans eq "yes"} {
 		    eval {::Profiles::Set $profile $server $username $password} $opts
 		}	
@@ -650,9 +656,9 @@ proc ::Login::LoginWithProfile {profname} {
 
     if {$password eq ""} {
 	set ujid [jlib::unescapejid $jid]
-	set ans [ui::megaentry -label "[mc Password]:" -icon question \
+	set ans [ui::megaentry -label [mc "Password"]: -icon question \
 	  -geovariable prefs(winGeom,jautologin) -show {*} \
-	  -title [mc Password] -message [mc enterpassword $ujid]]
+	  -title [mc "Password"] -message [mc "Enter the password for your account %s" $ujid]]
 	if {$ans eq ""} {
 	    return
 	}
@@ -696,9 +702,9 @@ proc ::Login::ParseCommandLine {} {
 	    set login 1
 	} else {
 	    set ujid [jlib::unescapejid $jid]
-	    set ans [ui::megaentry -label "[mc Password]:" -icon question \
+	    set ans [ui::megaentry -label [mc "Password"]: -icon question \
 	      -geovariable prefs(winGeom,jautologin) -show {*} \
-	      -title [mc Password] -message [mc enterpassword $ujid]]
+	      -title [mc "Password"] -message [mc "Enter the password for your account %s" $ujid]]
 	    if {$ans ne ""} {
 		set password [ui::megaentrytext $ans]
 		set login 1
@@ -782,7 +788,7 @@ proc ::Login::HighLogin {server username resource password cmd args} {
     set highstate(args)    $args
     set highstate(pending) 1
 
-    ::JUI::SetAppMessage "[mc jawaitresp $server]..."
+    ::JUI::SetAppMessage [mc "Contacted %s. Waiting for response" $server]...
     ::JUI::FixUIWhen "connectinit"
     ::JUI::SetConnectState "connectinit"
         
@@ -821,10 +827,10 @@ proc ::Login::HighLoginCB {token jlibname status {errcode ""} {errmsg ""}} {
 	    # empty
 	}
 	initstream {
-	    ::JUI::SetAppMessage "[mc jawaitxml $state(server)]..."
+	    ::JUI::SetAppMessage [mc "Connected to %s. Initializing the XML stream" $state(server)]...
 	}
 	starttls {
-	    ::JUI::SetAppMessage "[mc jatlsnegot2]..."
+	    ::JUI::SetAppMessage [mc "Negotiating TLS security"]...
 	}
     }
 }
@@ -840,7 +846,7 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
     switch -- $status {
 	ok {
 	    set server [::Jabber::Jlib getserver]
-	    set msg [mc jaauthok2 $server] 
+	    set msg [mc "Authorization to server %s was successful. Downloading contacts..." $server] 
 	    ::JUI::FixUIWhen "connectfin"
 	    ::JUI::SetConnectState "connectfin"
 	    SetLoginStateRunHook
@@ -896,48 +902,74 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	
     switch -glob -- $errcode {
 	connect-failed - network-failure - networkerror {
-	    set str [mc jamessnosocket3 $state(server)]
-	    append str "\n" "[mc Error]: $errmsg"
+	    set str [mc "Cannot connect to %s. Either there are server or network issues, or you misspelled the server's name." $state(server)]
+	    append str "\n"
+	    append str [mc "Error"]
+	    append str ": $errmsg"
 	}
 	timeout {
-	    set str [mc jamesstimeoutserver2 $state(server)]
+	    set str [mc "Server %s did not respond: timeout." $state(server)]
 	}
 	409 {
-	    set msg "[mc {Error code}]: $errcode"
-	    set str [mc jamesslogin409b $msg]
+	    set msg [mc "Error code"]
+	    append msg ": $errcode"
+	    set str [mc "Cannot login because this username is already in use by someone else (%s)." $msg]
 	}
 	starttls-nofeature {
-	    set str [mc starttls-nofeature $state(server)]
+	    set str [mc "The server %s has no support for TLS." $state(server)]
 	}
 	startls-failure - tls-failure {
-	    set str [mc starttls-failure $state(server)]
+	    set str [mc "Cannot negotiate TLS with server %s." $state(server)]
 	}
 	sasl-no-mechanisms {
-	    set str [mc sasl-no-mechanisms]
+	    set str [mc "The server has no support for SASL authentication."]
 	}
 	sasl-protocol-error {
-	    set str [mc sasl-protocol-error]
+	    set str [mc "Cannot authenticate due to internal protocol error."]
 	}
 	xmpp-streams-error* {
 	    set streamstag ""
 	    regexp {xmpp-streams-error-(.+)$} $errcode - streamstag
-	    set str [mc xmpp-streams-error $streamstag]
+	    set str [mc "Stream error received from the server with code: %s" $streamstag]
 	}
 	proxy-failure {
-	    set str [mc jamessproxy-failure2]
-	    append str "\n" "[mc {Error code}]: $errmsg"
+	    set str [mc "The proxy server reported an error."]
+	    append str "\n"
+	    append str [mc "Error code"]
+	    append str ": $errmsg"
 	}
 	default {
 	    
 	    # Identify the xmpp-stanzas.
 	    if {$state(state) eq "authenticate"} {
+
+		# RFC 3929 (XMPP Core): 6.4 SASL Errors (short version)
+		set xmppShort [dict create]
+		dict set xmppShort aborted [mc "The login process was aborted."]
+		dict set xmppShort incorrect-encoding [mc "Protocol error during the login process."]
+		dict set xmppShort invalid-authzid [mc "Protocol error during the login process."]
+		dict set xmppShort invalid-mechanism [mc "Protocol error during the login process."]
+		dict set xmppShort mechanism-too-weak [mc "Protocol error during the login process."]
+		dict set xmppShort not-authorized [mc "Login failed because of unknown account or wrong password."]
+		dict set xmppShort temporary-auth-failure [mc "Protocol error during the login process."]
 		
 		# Added 'bad-auth' which seems to be a ejabberd anachronism.
 		set errcode [string map {bad-auth not-authorized} $errcode]
 		set key xmpp-stanzas-short-$errcode
-		set str [mc $key]
+		set str [dict get $xmppShort $errcode]
 		if {$str eq $key} {
-		    set str [mc xmpp-stanzas-$errcode]
+
+		    # RFC 3929 (XMPP Core): 6.4 SASL Errors (formal version)
+		    set xmppStanzas [dict create]
+		    dict set xmppStanzas aborted "The receiving entity acknowledges an abort element sent by the initiating entity."
+		    dict set xmppStanzas incorrect-encoding "The data provided by the initiating entity could not be processed because the [BASE64] encoding is incorrect."
+		    dict set xmppStanzas invalid-authzid "The authzid provided by the initiating entity is invalid, either because it is incorrectly formatted or because the initiating entity does not have permissions to authorize that ID."
+		    dict set xmppStanzas invalid-mechanism "The initiating entity did not provide a mechanism or requested a mechanism that is not supported by the receiving entity."
+		    dict set xmppStanzas mechanism-too-weak "The mechanism requested by the initiating entity is weaker than server policy permits for that initiating entity."
+		    dict set xmppStanzas not-authorized "The authentication failed because the initiating entity did not provide valid credentials (this includes but is not limited to the case of an unknown username)."
+		    dict set xmppStanzas temporary-auth-failure "The authentication failed because of a temporary error condition within the receiving entity."
+
+		    set str [dict get $xmppStanzas $errcode]
 		}
 		append str " " "($errcode)"
 		if {$errmsg ne ""} {
@@ -971,11 +1003,11 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
     
     # Do only try register new account if authorization failed.
     if {($state(state) eq "authenticate") && $config(login,autoregister)} {
-	append str " " [mc jaregnewwith $state(server)]
+	append str " " [mc "Do you want to register a new account with %s." $state(server)]
 	set type yesno
 	set default no
     }
-    set ans [::UI::MessageBox -icon error -title [mc Error] -type $type \
+    set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type \
       -default $default -message $str]
     if {$ans eq "yes"} {
 	::RegisterEx::New -server $state(server) -autoget 1

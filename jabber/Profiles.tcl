@@ -807,7 +807,7 @@ proc ::Profiles::BuildHook {wtree nbframe} {
     global  config
     
     if {$config(profiles,prefspanel)} {
-	::Preferences::NewTableItem {Jabber {User Profiles}} [mc {User Profiles}]
+	::Preferences::NewTableItem {Jabber {User Profiles}} [mc "User Profiles"]
 	
 	set wpage [$nbframe page {User Profiles}]    
 	BuildPage $wpage
@@ -917,10 +917,10 @@ proc ::Profiles::BuildDialog {} {
     set frbot $w.frall.b
     ttk::frame $frbot -padding [option get . okcancelNoTopPadding {}]
     ttk::button $frbot.btok -style TButton \
-      -text [mc Save]  \
+      -text [mc "Save"]  \
       -default active -command [list [namespace current]::SaveDlg $w]
     ttk::button $frbot.btcancel -style TButton \
-      -text [mc Cancel]  \
+      -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelDlg $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -977,8 +977,8 @@ proc ::Profiles::CancelDlg {w} {
     
     if {$config(profiles,warn-on-cancel)} {
 	if {![FrameUnedited $wdlgpage]} {
-	    set ans [::UI::MessageBox -title [mc Warning] -parent $w \
-	      -icon warning -type yesno -message [mc jamessgeneditwarnclose2]]
+	    set ans [::UI::MessageBox -title [mc "Warning"] -parent $w \
+	      -icon warning -type yesno -message [mc "You changed one or more values. Do you want to save them before closing?"]]
 	    if {$ans eq "yes"} {
 		SaveDlg $w
 		return
@@ -1049,13 +1049,13 @@ proc ::Profiles::FrameWidget {w moreless args} {
     eval {ttk::frame $w -class JProfileFrame} $args
     
     ttk::label $w.msg -style Small.TLabel \
-      -text [mc prefprof2] -wraplength 200 -justify left
+      -text [mc "Edit, add or delete profiles. The selected profile will become the default."] -wraplength 200 -justify left
     grid  $w.msg  -  -sticky ew
     
     set wui $w.u
     ttk::frame $wui
     
-    ttk::label $wui.lpop -text "[mc Profile]:" -anchor e
+    ttk::label $wui.lpop -text [mc "Profile"]: -anchor e
     
     if {0} {
 	set wmenu [eval {
@@ -1075,22 +1075,22 @@ proc ::Profiles::FrameWidget {w moreless args} {
     }
     
     # Depending on 'config(profiles,style)' not all get mapped.
-    ttk::label $wui.ljid -text "[mc {Contact ID}]:" -anchor e
+    ttk::label $wui.ljid -text [mc "Contact ID"]: -anchor e
     ttk::entry $wui.ejid -width $width -textvariable $token\(jid)
-    ttk::label $wui.lserv -text "[mc Server]:" -anchor e
+    ttk::label $wui.lserv -text [mc "Server"]: -anchor e
     ttk::entry $wui.eserv -width $width -textvariable $token\(server) \
       -validate key -validatecommand {::Jabber::ValidateDomainStr %S}
-    ttk::label $wui.luser -text "[mc Username]:" -anchor e
+    ttk::label $wui.luser -text [mc "Username"]: -anchor e
     ttk::entry $wui.euser -width $width -textvariable $token\(username) \
       -validate key -validatecommand {::Jabber::ValidateUsernameStr %S}
-    ttk::label $wui.lpass -text "[mc Password]:" -anchor e
+    ttk::label $wui.lpass -text [mc "Password"]: -anchor e
     ttk::entry $wui.epass -width $width -show {*} \
       -textvariable $token\(password) -validate key \
       -validatecommand {::Jabber::ValidatePasswordStr %S}
-    ttk::label $wui.lres -text "[mc Resource]:" -anchor e
+    ttk::label $wui.lres -text [mc "Resource"]: -anchor e
     ttk::entry $wui.eres -width $width -textvariable $token\(resource) \
       -validate key -validatecommand {::Jabber::ValidateResourceStr %S}
-    ttk::label $wui.lnick -text "[mc Nickname]:" -anchor e
+    ttk::label $wui.lnick -text [mc "Nickname"]: -anchor e
     ttk::entry $wui.enick -width $width -textvariable $token\(nickname)
 
     if {$config(profiles,style) eq "jid"} {
@@ -1115,9 +1115,9 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	set wuserinfofocus $wui.eserv
     }
     
-    ::balloonhelp::balloonforwindow $wui.ejid [mc tooltip-contactid]
-    ::balloonhelp::balloonforwindow $wui.epass [mc registration-password]
-    ::balloonhelp::balloonforwindow $wui.enick [mc registration-nick]
+    ::balloonhelp::balloonforwindow $wui.ejid [mc "Chat address"]
+    ::balloonhelp::balloonforwindow $wui.epass [mc "Password or secret"]
+    ::balloonhelp::balloonforwindow $wui.enick [mc "Familiar name"]
 
     set wbt $w.bt 
     ttk::frame $wbt -padding {0 4 0 6}
@@ -1128,9 +1128,9 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	grid  $wui  -sticky ew
 	grid  $wbt  -sticky ew    
     }
-    ttk::button $wbt.new -text "[mc {Add Profile}]..." \
+    ttk::button $wbt.new -text [mc "Add Profile"]... \
       -command [list [namespace current]::FrameNewCmd $w]
-    ttk::button $wbt.del -text "[mc {Delete Profile}]..." \
+    ttk::button $wbt.del -text [mc "Delete Profile"]... \
       -command [list [namespace current]::FrameDeleteCmd $w]
 
     if {0} {
@@ -1153,16 +1153,18 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	if {0} {
 	    ttk::button $wtri -style Small.Toolbutton -padding {6 1} \
 	      -compound left -image [::UI::GetIcon mactriangleclosed] \
-	      -text "[mc More]..." -command [list [namespace current]::FrameMoreOpts $w]
+	      -text [mc "More"]... -command [list [namespace current]::FrameMoreOpts $w]
 	} elseif {0} {
 	    ttk::button $wtri -style Small.Plain -padding {6 1} \
 	      -compound left -image [::UI::GetIcon closeAqua] \
-	      -text "[mc More]..." -command [list [namespace current]::FrameMoreOpts $w]
+	      -text [mc "More"]... -command [list [namespace current]::FrameMoreOpts $w]
 	} else {
 	    set state(morevar) 0
+	    set msg "  "
+	    append msg [mc "More"]...
 	    ttk::checkbutton $wtri -style ArrowText.TCheckbutton \
 	      -onvalue 0 -offvalue 1 -variable $token\(morevar) \
-	      -text "  [mc More]..." -command [list [namespace current]::FrameMoreOpts $w]
+	      -text $msg -command [list [namespace current]::FrameMoreOpts $w]
 	}
 	pack $wtri -side top -anchor w
     }
@@ -1229,9 +1231,11 @@ proc ::Profiles::FrameMoreOpts {w} {
 
     pack $state(wmore) -side top -fill x -padx 2
     #$state(wtri) configure -command [list [namespace current]::FrameLessOpts $w] \
-    #  -image [::UI::GetIcon openAqua] -text "[mc Less]..."   
+    #  -image [::UI::GetIcon openAqua] -text "[mc "Less"]..." 
+    set msg "  "
+    set append [mc "Less"]...  
     $state(wtri) configure -command [list [namespace current]::FrameLessOpts $w] \
-      -text "  [mc Less]..."   
+      -text $msg
 }
 
 proc ::Profiles::FrameLessOpts {w} {
@@ -1246,9 +1250,11 @@ proc ::Profiles::FrameLessOpts {w} {
     }
     pack forget $state(wmore)
     #$state(wtri) configure -command [list [namespace current]::FrameMoreOpts $w] \
-    #  -image [::UI::GetIcon closeAqua] -text "[mc More]..."   
+    #  -image [::UI::GetIcon closeAqua] -text [mc "More"]...
+    set msg "  "
+    append msg [mc "More"]...
     $state(wtri) configure -command [list [namespace current]::FrameMoreOpts $w] \
-      -text "  [mc More]..."   
+      -text $msg
 }
 
 # Profiles::FrameMakeTmpProfiles --
@@ -1440,7 +1446,7 @@ proc ::Profiles::FrameVerifyNonEmpty {w} {
 	set ejid [jlib::escapejid $state(jid)]
 	if {![jlib::jidvalidate $ejid]} {
 	    ::UI::MessageBox -type ok -icon error  \
-	      -title [mc Error] -message [mc jamessjidinvalid2]
+	      -title [mc "Error"] -message [mc "Invalid Contact ID."]
 	    set ans 0
 	}
     } else {
@@ -1448,7 +1454,7 @@ proc ::Profiles::FrameVerifyNonEmpty {w} {
 	# Check that necessary entries are non-empty, at least.
 	if {($state(server) eq "") || ($state(username) eq "")} {
 	    ::UI::MessageBox -type ok -icon error  \
-	      -title [mc Error] -message [mc messfillserveruser]
+	      -title [mc "Error"] -message [mc "You need to fill in at least the server name and user name."]
 	    set ans 0
 	}
     }
@@ -1518,9 +1524,9 @@ proc ::Profiles::FrameNewCmd {w} {
     set mbar [::JUI::GetMainMenu]
     ::UI::MenubarDisableBut $mbar edit
     
-    set ans [ui::megaentry -label "[mc {Profile Name}]:" -icon "" \
+    set ans [ui::megaentry -label [mc "Profile Name"]: -icon "" \
       -geovariable prefs(winGeom,jprofname) \
-      -title [mc "Add Profile"] -message [mc prefprofname2]]
+      -title [mc "Add Profile"] -message [mc "Enter the name for the new profile."]]
     ::UI::MenubarEnableAll $mbar
 
     if {$ans eq ""} {
@@ -1553,7 +1559,7 @@ proc ::Profiles::FrameNewCmd {w} {
 	if {![::Jabber::IsConnected]} {
 	    update idletasks
 	    set ans [tk_messageBox -icon question -type yesno -parent $w \
-	      -message [mc jamessaskregister]]
+	      -message [mc "Do you want to register a new account?"]]
 	    if {$ans eq "yes"} {
 		
 		# At this stage we shall ask to save any edit states and then
@@ -1566,7 +1572,7 @@ proc ::Profiles::FrameNewCmd {w} {
 		set wtop [winfo toplevel $w]
 		if {![arraysequal current initial]} {
 		    set ans [tk_messageBox -parent $wtop -icon warning \
-		      -type yesno -message [mc jamessgeneditwarnclose2]]
+		      -type yesno -message [mc "You changed one or more values. Do you want to save them before closing?"]]
 		    if {$ans eq "yes"} {
 			SetList [FrameGetProfiles $w]
 		    }
@@ -1591,9 +1597,9 @@ proc ::Profiles::FrameDeleteCmd {w} {
     # The present state may be something that has not been stored yet.
     if {$config(profiles,ask-unregister-on-rm)} {
 	if {[info exists state(prof,$profile,server)]} {
-	    set ans [::UI::MessageBox -title [mc Warning] \
+	    set ans [::UI::MessageBox -title [mc "Warning"] \
 	      -type yesnocancel -icon warning -default no \
-	      -parent [winfo toplevel $w] -message [mc jamessprofaskrem2]]
+	      -parent [winfo toplevel $w] -message [mc "The selected profile will be deleted. Do you also want to delete the account for this profile? This action cannot be undone. Press Cancel to abort deletion of account and profile."]]
 	}
     }
     set delete 0
@@ -1628,10 +1634,13 @@ proc ::Profiles::FrameUnregisterCB {jid jlib status {err ""}} {
     Debug 2 "::Profiles::FrameUnregisterCB status=$status"
     if {$status eq "error"} {
 	lassign $err errcode errmsg
-	set str [mc jamesserrunreg2 [jlib::unescapejid $jid]]
-	append str "\n" "[mc {Error code}]: $errcode\n"
-	append str "[mc Message]: $errmsg"
-	ui::dialog -type ok -icon error -title [mc Error] -message $str
+	set str [mc "Cannot unregister from %s." [jlib::unescapejid $jid]]
+	append str "\n"
+	append str  [mc "Error code"]
+	append str ": $errcode\n"
+	append str [mc "Message"]
+	append str ": $errmsg"
+	ui::dialog -type ok -icon error -title [mc "Error"] -message $str
     }
 }
 
@@ -1767,7 +1776,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::notebook $w -style Small.TNotebook -padding {2 4 2 2}
     
     # Connection page.
-    $w add [ttk::frame $w.con] -text [mc Connection] -sticky news
+    $w add [ttk::frame $w.con] -text [mc "Connection"] -sticky news
 
     set wcon $w.con.f
     ttk::frame $wcon -padding [option get . notebookPageSmallPadding {}]
@@ -1786,7 +1795,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
       -text [mc "Use secure connection"] -variable $token\(secure)  \
       -command [list ::Profiles::NotebookSecCmd $w]
     ttk::button $wse.cert -style Small.TButton \
-      -text "[mc Certificate]..." \
+      -text [mc "Certificate"]... \
       -command [list ::Preferences::Show {General {Network}}]
     ttk::radiobutton $wse.sasl -style Small.TRadiobutton  \
       -text [mc "Use SASL authentication"]  \
@@ -1831,7 +1840,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
       -text [mc "Plain text password"]  \
       -variable $token\(digest) -offvalue 1 -onvalue 0
     ttk::label $wlog.lp -style Small.TLabel \
-      -text "[mc Priority]:"
+      -text [mc "Priority"]:
     spinbox $wlog.sp -font CociSmallFont \
       -textvariable $token\(priority) \
       -width 5 -increment 1 -from -128 -to 127 -validate all  \
@@ -1846,7 +1855,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     grid  $wlog.lp     $wlog.sp
 
     # IP page.
-    $w add [ttk::frame $w.ip] -text [mc Server] -sticky news
+    $w add [ttk::frame $w.ip] -text [mc "Server"] -sticky news
     ttk::frame $w.ip.f -padding [option get . notebookPageSmallPadding {}]
     pack  $w.ip.f  -side top -fill x -anchor [option get . dialogAnchor {}]
     
@@ -1854,9 +1863,9 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     ttk::frame $wip
     pack  $wip  -side top -fill x
     
-    ttk::label $wip.lip -style Small.TLabel -text "[mc Host]:"
+    ttk::label $wip.lip -style Small.TLabel -text [mc "Host"]:
     ttk::entry $wip.eip -font CociSmallFont -textvariable $token\(ip)
-    ttk::label $wip.lport -style Small.TLabel -text "[mc Port]:"
+    ttk::label $wip.lport -style Small.TLabel -text [mc "Port"]:
     ttk::entry $wip.eport -font CociSmallFont \
       -textvariable $token\(port) -width 6 -validate key  \
       -validatecommand {::Register::ValidatePortNumber %S}
@@ -1880,16 +1889,16 @@ proc ::Profiles::NotebookOptionWidget {w token} {
     set wstate(httpproxy) $whttp.bproxy
     
     ttk::checkbutton $whttp.http -style Small.TCheckbutton \
-      -text [mc {Use HTTP transport}] -variable $token\(http)  \
+      -text [mc "Use HTTP transport"] -variable $token\(http)  \
       -command [list ::Profiles::NotebookHttpCmd $w]
 
     ttk::label $whttp.lurl -style Small.TLabel -text "URL:"
     ttk::entry $whttp.eurl -font CociSmallFont -textvariable $token\(httpurl)
-    ttk::button $whttp.bproxy -style Small.TButton -text "[mc Proxy]..." \
+    ttk::button $whttp.bproxy -style Small.TButton -text [mc "Proxy"]... \
       -command [list ::Preferences::Show {General {Network}}]
     if {0} {
 	ttk::label $whttp.lpoll -style Small.TLabel  \
-	  -text [mc {Poll interval (secs)}]
+	  -text [mc "Poll interval (secs)"]
 	spinbox $whttp.spoll -textvariable $token\(minpollsecs) \
 	  -width 3 -state readonly -increment 1 -from 1 -to 120
     }

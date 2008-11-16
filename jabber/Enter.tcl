@@ -114,7 +114,7 @@ proc ::Enter::Build {protocol args} {
     pack $wbox -fill both -expand 1
     
     ttk::label $wbox.msg -style Small.TLabel \
-      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc jamucentermsg2]
+      -padding {0 0 0 6} -wraplength 260 -justify left -text [mc "Select a service, and enter a chatroom and nickname. You can discover the available chatrooms on the selected service. Some chatrooms may require a password."]
     pack $wbox.msg -side top -anchor w
 
     set frmid $wbox.frmid
@@ -125,10 +125,10 @@ proc ::Enter::Build {protocol args} {
     set wbrowse $frmid.browse
     set wbmark  $frmid.bmark
     
-    ttk::label $frmid.lserv -text "[mc Service]:" 
+    ttk::label $frmid.lserv -text [mc "Service"]:
     ttk::::combobox $wserver -width 16 -textvariable $token\(server) \
       -values $services
-    ttk::button $wbrowse -text [mc Discover] \
+    ttk::button $wbrowse -text [mc "Discover"] \
       -command [list [namespace current]::Browse $token]
     ttk::button $wbmark -style Popupbutton  \
       -command [list [namespace current]::BmarkPopup $token]
@@ -159,11 +159,11 @@ proc ::Enter::Build {protocol args} {
     set warrows   $frmid.st.arr
     set wstatus   $frmid.st.stat
     
-    ttk::label $frmid.lroom -text "[mc Chatroom]:"
+    ttk::label $frmid.lroom -text [mc "Chatroom"]:
     ttk::::combobox $wroom -textvariable $token\(roomname)
-    ttk::label $frmid.lnick -text "[mc Nickname]:"
+    ttk::label $frmid.lnick -text [mc "Nickname"]:
     ttk::entry $frmid.enick -textvariable $token\(nickname)
-    ttk::label $frmid.lpass -text "[mc Password]:"
+    ttk::label $frmid.lpass -text [mc "Password"]:
     ttk::entry $frmid.epass -textvariable $token\(password)  \
       -show {*} -validate key -validatecommand {::Jabber::ValidatePasswordStr %S}
    
@@ -183,11 +183,11 @@ proc ::Enter::Build {protocol args} {
     grid  $wbrowse  -padx 10
     grid columnconfigure $frmid 1 -weight 1
 
-    ::balloonhelp::balloonforwindow $wserver [mc tooltip-chatroomservice]
-    ::balloonhelp::balloonforwindow $wbmark [mc Bookmarks]
-    ::balloonhelp::balloonforwindow $wroom [mc tooltip-chatroomselect]
-    ::balloonhelp::balloonforwindow $frmid.enick [mc registration-nick]
-    ::balloonhelp::balloonforwindow $frmid.epass [mc registration-password]
+    ::balloonhelp::balloonforwindow $wserver [mc "Select or manually enter a chatroom service"]
+    ::balloonhelp::balloonforwindow $wbmark [mc "Bookmarks"]
+    ::balloonhelp::balloonforwindow $wroom [mc "Select or manually enter the name of a chatroom"]
+    ::balloonhelp::balloonforwindow $frmid.enick [mc "Familiar name"]
+    ::balloonhelp::balloonforwindow $frmid.epass [mc "Password or secret"]
 
     if {[info exists argsA(-roomjid)]} {
 	jlib::splitjidex $argsA(-roomjid) r state(server) -
@@ -217,9 +217,9 @@ proc ::Enter::Build {protocol args} {
     set frbot $wbox.b
     set wenter  $frbot.btok
     ttk::frame $frbot
-    ttk::button $wenter -text [mc Enter] \
+    ttk::button $wenter -text [mc "Enter"] \
       -default active -command [list [namespace current]::PrepPrepDoEnter $token]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::CancelEnter $token]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -258,7 +258,7 @@ proc ::Enter::Build {protocol args} {
     bind $wserver <<ComboboxSelected>>  \
       [list [namespace current]::ConfigRoomList $token]
 
-    ::balloonhelp::balloonforwindow $wbmark [mc Bookmarks]
+    ::balloonhelp::balloonforwindow $wbmark [mc "Bookmarks"]
 
     set oldFocus [focus]
     if {[info exists argsA(-roomjid)]} {
@@ -399,8 +399,8 @@ proc ::Enter::GetRoomsCB {token browsename type jid subiq args} {
     
     switch -- $type {
 	error {
-	    ::ui::dialog -type ok -icon error -title [mc Error]  \
-	      -message [mc jamessnorooms2 $state(server)]  \
+	    ::ui::dialog -type ok -icon error -title [mc "Error"]  \
+	      -message [mc "Cannot find any chatrooms at %s." $state(server)]  \
 	      -detail [lindex $subiq 1]
 	}
 	result - ok {
@@ -449,8 +449,8 @@ proc ::Enter::FillRoomList {token} {
 	}
     }
     if {![llength $roomL]} {
-	::ui::dialog -type ok -icon error  -title [mc Error] \
-	  -message [mc jamessnorooms2 $state(server)]
+	::ui::dialog -type ok -icon error  -title [mc "Error"] \
+	  -message [mc "Cannot find any chatrooms at %s." $state(server)]
 	return
     }
     
@@ -466,7 +466,7 @@ proc ::Enter::BusyEnterDlgIncr {token {num 1}} {
     incr state(statuscount) $num
     
     if {$state(statuscount) > 0} {
-	set state(status) "[mc {Loading available chatrooms}]..."
+	set state(status) [mc "Loading available chatrooms"]...
 	$state(warrows) start
 	SetState $token disabled
     } else {
@@ -489,8 +489,8 @@ proc ::Enter::PrepPrepDoEnter {token} {
     ::Debug 4 "::Enter::PrepPrepDoEnter"
 
     if {($state(roomname) eq "") || ($state(nickname) eq "")} {
-	::UI::MessageBox -type ok -icon error -title [mc Error] \
-	  -message [mc jamessgchatfields2]
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
+	  -message [mc "Please fill in all fields before entering chatroom."]
     } else {
 	
 	# We need to do the JID escaping here.
@@ -634,8 +634,8 @@ proc ::Enter::MUCCallback {token jlibname xmldata} {
 		    
 		    # Password required.
 		    set ans [::UI::MessageBox -type yesno -icon error \
-		      -title [mc Error]  \
-		      -message [mc jamessenterroomretry2 $roomjid $errmsg]]
+		      -title [mc "Error"]  \
+		      -message [mc "Cannot enter chatroom %s: %s Do you want to retry?" $roomjid $errmsg]]
 		    if {$ans eq "yes"} {
 			set retry 1
 			Build "muc" -roomjid $state(roomjid)  \
@@ -643,10 +643,13 @@ proc ::Enter::MUCCallback {token jlibname xmldata} {
 		    }
 		}
 		default {
-		    set str [mc jamesserrconfgetcre2]
-		    append str "\n" "[mc {Error code}]: $errcode\n"
-		    append str "[mc Message]: $errmsg"
-		    ::UI::MessageBox -type ok -icon error -title [mc Error]  \
+		    set str [mc "Cannot download the configuration form of the chatroom."]
+		    append str "\n"
+		    append str [mc "Error code"]
+		    append str ": $errcode\n"
+		    append str [mc "Message"]
+		    append str ": $errmsg"
+		    ::UI::MessageBox -type ok -icon error -title [mc "Error"]  \
 		      -message $str
 		}
 	    }
@@ -679,15 +682,19 @@ proc ::Enter::GCCallback {token jlibname xmldata} {
 
     if {[string equal $type "error"]} {
 	set ujid [jlib::unescapejid $from]
-	set msg [mc mucErrEnter2 $from]
+	set msg [mc "Cannot enter chatroom %s." $from]
 	set errspec [jlib::getstanzaerrorspec $xmldata]
 	if {[llength $errspec]} {
 	    set errcode [lindex $errspec 0]
 	    set errmsg  [lindex $errspec 1]
-	    append msg "\n[mc {Error code}]: $errcode"
-	    append msg "\n[mc Message]: $errmsg"
+	    append msg "\n"
+	    append msg [mc "Error code"]
+	    append msg ": $errcode"
+	    append msg "\n"
+	    append msg [mc "Message"]
+	    append msg ": $errmsg"
 	}
-	::UI::MessageBox -title [mc Error] -message $msg -icon error
+	::UI::MessageBox -title [mc "Error"] -message $msg -icon error
     } else {
     
 	# Cache groupchat protocol type (muc|conference|gc-1.0).

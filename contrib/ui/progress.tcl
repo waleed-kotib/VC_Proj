@@ -21,7 +21,7 @@ namespace eval ui::progress {
     } else {
 	style configure TProgressFrame.TButton -font DlgSmallFont
     }
-    option add *ProgressWindow.title   [::msgcat::mc Progress]     widgetDefault
+    option add *ProgressWindow.title   [::msgcat::mc "Progress"]     widgetDefault
 
     option add *TProgressFrame.font     DlgDefaultFont             widgetDefault
     option add *TProgressFrame.font2    DlgSmallFont               widgetDefault
@@ -30,7 +30,7 @@ namespace eval ui::progress {
     option add *TProgressFrame.lbl2.wrapLength  300                widgetDefault
     option add *TProgressFrame.lbl3.wrapLength  300                widgetDefault
     option add *TProgressFrame.length   200                        widgetDefault
-    option add *TProgressFrame.text     [::msgcat::mc Progress]    widgetDefault
+    option add *TProgressFrame.text     [::msgcat::mc "Progress"]    widgetDefault
     option add *TProgressFrame*TLabel.justify   left               widgetDefault
     option add *TProgressFrame*TButton.style TProgressFrame.TButton widgetDefault
 
@@ -41,7 +41,7 @@ namespace eval ui::progress {
     option add *ProgressFrame.lbl2.wrapLength  300                 widgetDefault
     option add *ProgressFrame.lbl3.wrapLength  300                 widgetDefault
     option add *ProgressFrame.length    200                        widgetDefault
-    option add *ProgressFrame.text      [::msgcat::mc Progress]    widgetDefault
+    option add *ProgressFrame.text      [::msgcat::mc "Progress"]    widgetDefault
     option add *TProgressFrame*Label.justify   left                widgetDefault
     option add *ProgressFrame*Button.font DlgSmallFont             widgetDefault
 
@@ -313,7 +313,7 @@ snit::widgetadaptor ui::progress::frame {
 	install lbl  using ttk::label  $win.lbl
 	install lbl2 using ttk::label  $win.lbl2
 	install lbl3 using ttk::label  $win.lbl3
-	install bt   using ttk::button $win.bt   -text [::msgcat::mc Cancel]
+	install bt   using ttk::button $win.bt   -text [::msgcat::mc "Cancel"]
 	install prg  using ttk::progressbar $win.prg  \
 	  -orient horizontal -maximum 100
     }
@@ -322,7 +322,7 @@ snit::widgetadaptor ui::progress::frame {
 	install lbl  using label  $win.lbl
 	install lbl2 using label  $win.lbl2
 	install lbl3 using label  $win.lbl3
-	install bt   using button $win.bt   -text [::msgcat::mc Cancel]
+	install bt   using button $win.bt   -text [::msgcat::mc "Cancel]
 	install prg  using ttk::progressbar $win.prg  \
 	  -orient horizontal -maximum 100
     }
@@ -389,7 +389,7 @@ snit::widgetadaptor ui::progress::frame {
 	
 	# Provide default subtext.
 	if {0} {
-	    set str [::msgcat::mc Remaining]
+	    set str [::msgcat::mc "Remaining"]
 	    append str ": "
 	    append str [expr {100 - int($value + 0.5)}]
 	    append str "%"

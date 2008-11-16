@@ -178,7 +178,7 @@ proc ::TPhone::New {w command args} {
     ttk::frame $w.esb
     grid  $w.esb  -sticky ew -pady 2
     
-    ttk::label $subject.lsubject -text "[mc Subject]:"
+    ttk::label $subject.lsubject -text [mc "Subject"]:
     ttk::entry $subject.esubject -textvariable $w\(subject)  \
       -width 18
     grid $subject.lsubject $subject.esubject -padx 2 -pady 2    

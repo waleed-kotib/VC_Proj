@@ -345,11 +345,11 @@ proc ::Speech::BuildPrefsPage {page} {
     ttk::frame $wfr
     pack  $wfr  -side top
     
-    ttk::checkbutton $wfr.speak     -text [mc prefsounsynwb2]  \
+    ttk::checkbutton $wfr.speak     -text [mc "Text-to-speech for whiteboard text"]  \
       -variable [namespace current]::tmpPrefs(speakWBText)
-    ttk::checkbutton $wfr.speakmsg  -text [mc prefsounsynno2]  \
+    ttk::checkbutton $wfr.speakmsg  -text [mc "Text-to-speech for messages"]  \
       -variable [namespace current]::tmpPrefs(speakMsg)
-    ttk::checkbutton $wfr.speakchat -text [mc prefsounsynch2]  \
+    ttk::checkbutton $wfr.speakchat -text [mc "Text-to-speech for chat"]  \
       -variable [namespace current]::tmpPrefs(speakChat)
 
     grid $wfr.speak      -sticky w
@@ -372,8 +372,8 @@ proc ::Speech::BuildPrefsPage {page} {
     ttk::frame $wfvo
     grid  $wfvo  -pady 4
     
-    ttk::label $wfvo.in  -text "[mc prefsounvoin2]:"
-    ttk::label $wfvo.out -text "[mc prefsounvoou2]:" 
+    ttk::label $wfvo.in  -text [mc "Select voice for incoming text"]:
+    ttk::label $wfvo.out -text [mc "Select voice for outgoing write"]:
     ui::combobutton $wfvo.pin \
        -variable [namespace current]::tmpPrefs(voiceOther-$plat) \
        -menulist [ui::optionmenu::menuList $voicelist]

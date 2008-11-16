@@ -266,7 +266,7 @@ proc ::JForms::PlainEntry {token child} {
 	lappend state(wraplengthList) $wlab
     } elseif {$tag eq "registered"} {
 	ttk::label $wlab -style $state(textLabelStyle) \
-	  -text [mc jaregalready2] -justify left
+	  -text [mc "You are already registered with this service. These are your current registration settings."] -justify left
 	grid  $wlab  -columnspan 2 -sticky w -pady 2
 	if {$state(opt,-width)} {
 	    $wlab configure -wraplength $state(opt,-width)
@@ -292,8 +292,25 @@ proc ::JForms::PlainEntry {token child} {
 	if {$tag eq "password"} {
 	    $went configure -show {*}
 	}
+
+	set registration [dict create]
+	dict set registration address [mc "Street portion of a physical or mailing address"]
+	dict set registration city [mc "Locality portion of a physical or mailing address"]
+	dict set registration date [mc "Some date (e.g., birth date, hire date, sign-up date)"]
+	dict set registration email [mc "Email address"]
+	dict set registration first [mc "First name or given name"]
+	dict set registration is-registered [mc "You are already registered with this service. These are your current login settings."]
+	dict set registration last [mc "Last name, surname, or family name"]
+	dict set registration name [mc "Full name"]
+	dict set registration nick [mc "Familiar name"]
+	dict set registration password [mc "Password or secret"]
+	dict set registration phone [mc "Telephone number"]
+	dict set registration state [mc "An administrative region of the nation, such as a state or province"]
+	dict set registration url [mc "URL to personal website"]
+	dict set registration username [mc "Account name associated with the user"]
+	dict set registration zip [mc "Postal code portion of a physical or mailing address"]
 	
-	set help [mc registration-$tag]
+	set help [dict get $registration $tag]
 	if {$help ne "registration-$tag"} {
 	    ::balloonhelp::balloonforwindow $wlab $help
 	    ::balloonhelp::balloonforwindow $went $help
@@ -447,7 +464,7 @@ proc ::JForms::BuildXDataFrame {token} {
     } 
     if {$state(anyrequired)} {
 	set wlab $w.l[incr state(i)]
-	ttk::label $wlab -text [mc jaxformreq]
+	ttk::label $wlab -text [mc "Labels with (*) are required."]
 	grid  $wlab  -sticky w
 	lappend state(wraplengthList) $wlab
     }

@@ -49,7 +49,7 @@ proc ::Multicast::OpenMulticast {wcan} {
     set w $wDlgs(openMulti)[incr uid]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [mc {Open Stream}]
+    wm title $w [mc "Open Stream"]
 
     set shorts [lindex $prefs(shortsMulticastQT) 0]
 
@@ -64,17 +64,17 @@ proc ::Multicast::OpenMulticast {wcan} {
     # Labelled frame.
     set frtot $wbox.fr
     ttk::labelframe $frtot -padding [option get . groupSmallPadding {}] \
-      -text [mc openquicktime]
+      -text [mc "Open QuickTime live stream"]
     pack $frtot -side top -fill both
     
-    ttk::label $frtot.lbltop -text "[mc writeurl]:"
+    ttk::label $frtot.lbltop -text [mc "Write URL or choose from shortcut"]:
     eval {ttk::optionmenu $frtot.optm  \
       [namespace current]::selMulticastName} $shorts
     ttk::label $frtot.lblhttp -text {http://}
     ttk::entry $frtot.entip -width 40  \
       -textvariable [namespace current]::txtvarEntMulticast
     ttk::label $frtot.msg -style Small.TLabel \
-      -wraplength 400 -justify left -text [mc openquicktimeurlmsg]
+      -wraplength 400 -justify left -text [mc "Open a URL which contains a SDP file with extension .mov for a QuickTime realtime live streaming sending. Can be audio (radio) or video (TV). Alternatively, use your web browser to find the SDP file for a live transmission, download it on disk and open it is an ordinary movie."]
 
     grid  $frtot.lbltop   -             $frtot.optm  -padx 2 -pady 2 -sticky w
     grid  $frtot.lblhttp  $frtot.entip  -            -padx 2 -pady 2 -sticky e
@@ -86,13 +86,13 @@ proc ::Multicast::OpenMulticast {wcan} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btconn -text [mc Open] -default active  \
+    ttk::button $frbot.btconn -text [mc "Open"] -default active  \
       -command [list Multicast::OpenMulticastQTStream $wcan $frtot.entip]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list set [namespace current]::finished 0]
     ttk::button $frbot.btedit -text "[mc mEdit]..."   \
       -command [list ::Multicast::DoAddOrEditQTMulticastShort edit $frtot.optm]
-    ttk::button $frbot.btadd -text "[mc Add]..."   \
+    ttk::button $frbot.btadd -text [mc "Add"]...   \
       -command [list ::Multicast::DoAddOrEditQTMulticastShort add $frtot.optm]
     set padx [option get . buttonPadX {}]
     pack  $frbot.btconn  -side right
@@ -194,7 +194,7 @@ proc ::Multicast::OpenMulticastQTStream {wcan wentry} {
     unset -nocomplain port
     if {![regexp -nocase "($proto_)://($domain_)(:($port_))?($path_)$"  \
       $url match protocol domain junk port path]} {
-	::UI::MessageBox -title [mc Error] -message   \
+	::UI::MessageBox -title [mc "Error"] -message   \
 	  "Inconsistent url=$url." -icon error -type ok
 	set finished 0
 	return
@@ -230,12 +230,12 @@ proc ::Multicast::CleanupMulticastQTStream {wtop fid fullName token} {
     # Check errors. 
     if {[info exists state(status)] &&  \
       [string equal $state(status) "timeout"]} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 	  -message "Timout event for url=$state(url)" 
 	return
     } elseif {[info exists state(status)] &&  \
       ![string equal $state(status) "ok"]} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok -message   \
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok -message   \
 	  "Not ok return code from url=$state(url); status=$state(status)"	  
 	return
     }
@@ -243,14 +243,14 @@ proc ::Multicast::CleanupMulticastQTStream {wtop fid fullName token} {
     # The http return status. Must be 2**.
     set httpCode [lindex $state(http) 1]
     if {![regexp "$no_" $httpCode]} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 	  -message "Failed open url=$url. Returned with code: $httpCode."
     }
     
     # Check that type of data is the wanted. Check further.
     if {[info exists state(type)] &&  \
       [string equal $state(type) "video/quicktime"]} {
-	::UI::MessageBox -title [mc Error] -icon error -type ok -message \
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok -message \
 	  "Not correct file type returned from url=$state(url); \
 	  filetype=$state(type); expected video/quicktime."
 	return

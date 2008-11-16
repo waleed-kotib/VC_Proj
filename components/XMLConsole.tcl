@@ -105,9 +105,9 @@ proc ::XMLConsole::Build {} {
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::checkbutton $frbot.c -style Small.TCheckbutton \
       -text [mc "Pretty format"] -variable $token\(pretty)
-    ttk::button $frbot.btok -text [mc OK] -default active \
+    ttk::button $frbot.btok -text [mc "OK"] -default active \
       -command [list destroy $w]
-    ttk::button $frbot.clear -text [mc Clear] \
+    ttk::button $frbot.clear -text [mc "Clear"] \
       -command [namespace code [list Clear $w]]
 
     set padx [option get . buttonPadX {}]

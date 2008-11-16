@@ -58,9 +58,9 @@ proc ::PrefNet::InitPrefsHook { } {
 proc ::PrefNet::BuildPrefsHook {wtree nbframe} {
     
     if {![::Preferences::HaveTableItem General]} {
-	::Preferences::NewTableItem {General} [mc General]
+	::Preferences::NewTableItem {General} [mc "General"]
     }
-    ::Preferences::NewTableItem {General {Network}} [mc Network]
+    ::Preferences::NewTableItem {General {Network}} [mc "Network"]
     set wpage [$nbframe page {Network}]
     BuildTabPage $wpage
 }
@@ -95,19 +95,19 @@ proc ::PrefNet::BuildTabPage {wpage} {
     
     ::Proxy::BuildFrame $nb.proxy
     $nb.proxy configure -padding $padding
-    $nb add $nb.proxy -text [mc Proxy] -sticky news
+    $nb add $nb.proxy -text [mc "Proxy"] -sticky news
     
     ::Proxy::BuildNATFrame $nb.nat
     $nb.nat configure -padding $padding
-    $nb add $nb.nat -text [mc NAT] -sticky news
+    $nb add $nb.nat -text [mc "NAT"] -sticky news
      
     BuildServersFrame $nb.serv
     $nb.serv configure -padding $padding
-    $nb add $nb.serv -text [mc Ports] -sticky news
+    $nb add $nb.serv -text [mc "Ports"] -sticky news
 
     BuildCertFrame $nb.cert
     $nb.cert configure -padding $padding
-    $nb add $nb.cert -text [mc Certificates] -sticky news
+    $nb add $nb.cert -text [mc "Certificates"] -sticky news
 
     return $wpage
 }
@@ -127,9 +127,9 @@ proc ::PrefNet::BuildServersFrame {w} {
     ttk::frame $f
     pack $f -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::label $f.lserv -text "[mc {Built in server}]:"
+    ttk::label $f.lserv -text [mc "Built in server"]:
     ttk::label $f.lhttp -text "HTTP:"
-    ttk::label $f.lbs   -text "[mc {File transfer}]:"
+    ttk::label $f.lbs   -text [mc "File transfer"]:
 
     ttk::entry $f.eserv -width 6 -textvariable  \
       [namespace current]::tmpServPrefs(thisServPort)
@@ -168,13 +168,13 @@ proc ::PrefNet::BuildCertFrame {w} {
     ttk::checkbutton $f.ccert -text [mc "TLS certificate file"] \
       -variable [namespace current]::certs(usecertfile)
     ttk::entry $f.ecert -textvariable [namespace current]::certs(certfile)
-    ttk::button $f.bcert -text "[mc Browse]..." \
+    ttk::button $f.bcert -text [mc "Browse"]... \
       -command [namespace code BrowseCertFile]
     
     ttk::checkbutton $f.ckey -text [mc "TLS private key file"] \
       -variable [namespace current]::certs(usekeyfile)
     ttk::entry $f.ekey -textvariable [namespace current]::certs(keyfile)
-    ttk::button $f.bkey -text "[mc Browse]..." \
+    ttk::button $f.bkey -text [mc "Browse"]... \
       -command [namespace code BrowseKeyFile]    
     
     grid  $f.ccert  -  -sticky w

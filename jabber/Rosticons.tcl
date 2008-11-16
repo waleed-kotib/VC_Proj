@@ -479,7 +479,7 @@ proc ::Rosticons::TBuildPrefsPage {wpage} {
     grid columnconfigure $rbox 0 -weight 1   
         
     set msg $box.msg
-    ttk::label $msg -text [mc jaseliconset2]
+    ttk::label $msg -text [mc "Select iconsets for each group. A deselected group will use the normal iconset."]
 
     grid  $lbox  x  $rbox  -sticky ew
     grid  $msg   -  -      -sticky w -pady 4
@@ -579,11 +579,11 @@ proc ::Rosticons::TPFillTree {T} {
 	if {$type eq "user"} {
 	    set typeName [mc normal]
 	} elseif {$type eq "application"} {
-	    set typeName [mc program-Application]
+	    set typeName [mc "Groups"]
 	} elseif {$type eq "phone"} {
-	    set typeName [mc Phone]
+	    set typeName [mc "Phone"]
 	} elseif {$type eq "smtp"} {
-	    set typeName [mc Email]
+	    set typeName [mc "Email"]
 	} else {
 	    set typeName [::Roster::GetNameFromTrpt $type]
 	}
@@ -601,7 +601,7 @@ proc ::Rosticons::TPFillTree {T} {
 	      -value $name
 	    
 	    if {$name eq "default"} {
-		set str [mc Default]
+		set str [mc "Default"]
 	    } else {
 		set str $name
 	    }
@@ -627,9 +627,9 @@ proc ::Rosticons::PTreeShow {T wysc} {
     set bg [option get $T columnBackground {}]
     set fg [option get $T textColor {}]
    
-    $T column create -tags cKey   -text [mc Key] -expand 1 -squeeze 1  \
+    $T column create -tags cKey   -text [mc "Key"] -expand 1 -squeeze 1  \
       -borderwidth $bd -background $bg -textcolor $fg
-    $T column create -tags cImage -text [mc Icon] -expand 1 -justify center  \
+    $T column create -tags cImage -text [mc "Icon"] -expand 1 -justify center  \
       -borderwidth $bd -background $bg -textcolor $fg
 
     $T element create eText text -lines 1

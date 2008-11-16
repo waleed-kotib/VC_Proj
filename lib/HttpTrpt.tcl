@@ -63,12 +63,12 @@ proc ::HttpTrpt::Get {url fileName args} {
     }
     array set opts $args
     if {[catch {open $fileName w} fd]} {
-	set errstr [mc jamessoobfailopen2 $fileName]
+	set errstr [mc "Cannot open file %s" $fileName]
 	if {$state(-command) != {}} {
 	    uplevel #0 $state(-command) [list $token error $errstr]
 	}
 	if {!$state(-silent)} {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	    ::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 	      -message $errstr
 	}
 	return
@@ -97,12 +97,14 @@ proc ::HttpTrpt::Get {url fileName args} {
 	  -progress [list [namespace current]::Progress $token] \
 	  -command  [list [namespace current]::Cmd $token]
     } httptoken]} {
-	set errmsg [mc httptrpterror2 $state(fileTail) $httptoken]
+	set errmsg [mc "Cannot download the file %s." $state(fileTail)]
+	append errmsg "\n"
+	append errmsg [mc "File transport error: %s" $httptoken]
 	if {$state(-command) != {}} {
  	    uplevel #0 $state(-command) [list $token error $errmsg]
 	}
 	if {!$state(-silent)} {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	    ::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 	      -message $errmsg
 	}
 	return
@@ -128,8 +130,10 @@ proc ::HttpTrpt::Progress {token httptoken total current} {
 	    uplevel #0 $state(-progressmessage) [list $errmsg]
 	}
 	if {!$state(-silent)} {
-	    set str [mc httptrpterror2 $state(fileTail) $errmsg]
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	    set str [mc "Cannot download the file %s." $state(fileTail)]
+	    append str "\n"
+	    append str [mc "File transport error: %s" $errmsg]
+	    ::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 	      -message $str
 	}
 	Free $token
@@ -155,13 +159,15 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
     # Create progress dialog if not exists.
     if {$state(first)} {
 	if {$state(-dialog) && ![winfo exists $w]} {
-	    set str "[mc {Writing file}]: $state(fileTail)"
+	    set str [mc "Writing file"]
+	    append str ": $state(fileTail)"
 	    ui::progress::toplevel $w -text $str \
 	      -menu [::JUI::GetMainMenu]          \
 	      -cancelcommand [list [namespace current]::CancelBt $token]
 	}
 	if {$state(-progressmessage) ne ""} {
-	    set msg "[mc Downloading] \"$state(fileTail)\""
+	    set msg [mc "Downloading"]
+	    append msg " \"$state(fileTail)\""
 	    uplevel #0 $state(-progressmessage) [list $msg]
 	}
 	set state(startmillis) $ms
@@ -172,13 +178,15 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 	# Update the progress window.
 	set timsg [::timing::getmessage $state(timetok) $total]
 	if {$state(-dialog)} {
-	    set msg3 "[mc Rate]: $timsg"	
+	    set msg3 [mc "Rate"]
+	    append msg3 ": $timsg"	
 	    set percent [expr 100.0 * $current/($total + 0.001)]
 	    $w configuredelayed -percent $percent -text2 $msg3
 	    set needupdate 1
 	}
 	if {$state(-progressmessage) != {}} {
-	    set msg "[mc Getting] \"$state(fileTail)\", $timsg"
+	    set msg [mc "Downloading"]
+	    append msg " \"$state(fileTail)\", $timsg"
 	    uplevel #0 $state(-progressmessage) [list $msg]
 	}
 	set state(lastmillis) $ms
@@ -210,38 +218,44 @@ proc ::HttpTrpt::Cmd {token httptoken} {
 
     switch -- $status {
 	timeout {
-	    set etitle [mc Timeout]
-	    set msg [mc jamessoobtimeout2]
+	    set etitle [mc "Timeout"]
+	    set msg [mc "Cannot download file over HTTP: timeout."]
 	    set eicon info
 	}
 	error {
-	    set etitle [mc Error]
-	    set msg [mc httptrpterror2 $state(fileTail) $httperr]
+	    set etitle [mc "Error"]
+	    set msg [mc "Cannot download the file %s." $state(fileTail)]
+	    append msg "\n"
+	    append msg [mc "File transport error: %s" $httpterr]
 	    set eicon error
 	}
 	eof {
-	    set etitle [mc Error]
-	    set msg [mc httptrpteof]
+	    set etitle [mc "Error"]
+	    set msg [mc "The server closed the socket without replying."]
 	    set eicon error
 	}
 	ok {
 	    if {$ncode != 200} {
-		set etitle [mc Error]
+		set etitle [mc "Error"]
 		set txt [httpex::ncodetotext $ncode]
-		set msg [mc httptrptnon200a $state(fileTail)]
-		append msg "\n[mc {Error code}]: $ncode"
-		append msg "\n[mc Message]: $txt"
+		set msg [mc "Cannot download the file %s." $state(fileTail)]
+		append msg "\n"
+		append msg [mc "Error code"]
+		append msg ": $ncode"
+		append msg "\n"
+		append msg [mc "Message"]
+		append msg ": $txt"
 		set eicon error
 		set retstatus error
 	    } else {
 		set show 0
-		set msg [mc httptrptok2 $state(fileTail)]
+		set msg [mc "Download of file %s finished." $state(fileTail)]
 	    }
 	}
 	reset {
 	    # Did this ourself?
 	    set show 0
-	    set msg [mc httptrptreset $state(fileTail)]
+	    set msg [mc "File transport of %s was reset." $state(fileTail)]
 	}
     }
     if {$state(-command) != {}} {

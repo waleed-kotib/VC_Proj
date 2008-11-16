@@ -495,7 +495,7 @@ proc ::Init::SetThisVersion {} {
     # default file, never read.
     set this(vers,major)    0
     set this(vers,minor)   96
-    set this(vers,release)  9
+    set this(vers,release)  11
     
     # NB: The 'minorRelease' number is only used for released versions and not
     #     in cvs or so called daily builds. cvs always have odd 'release'
@@ -729,7 +729,7 @@ proc ::Init::LoadTkPng {} {
     
     # tkpng is required for the gui.
     if {[catch {package require tkpng 0.7}]} {
-	tk_messageBox -icon error -title [::msgcat::mc Error] \
+	tk_messageBox -icon error -title [::msgcat::mc "Error"] \
 	  -message "The tkpng package is required for the GUI"
 	exit
     }
@@ -748,10 +748,10 @@ proc ::Init::LoadPackages {} {
     }
     
     # treectrl is required.
-    ::Splash::SetMsg "[mc splashlook] treectrl..."
+    ::Splash::SetMsg [mc "Looking for %s" treectrl]...
     set ::treectrl_library [file join $this(binLibPath) treectrl]
     if {[catch {package require treectrl 2.2} msg]} {
-	tk_messageBox -icon error -title [::msgcat::mc Error] \
+	tk_messageBox -icon error -title [::msgcat::mc "Error"] \
 	  -message "This application requires the treectrl widget to work! $::errorInfo"
 	exit
     }
@@ -769,7 +769,7 @@ proc ::Init::LoadPackages {} {
 	}
     }
     foreach name $extraPacksArr($this(platform)) {
-	::Splash::SetMsg "[mc splashlook] $name..."
+	::Splash::SetMsg [mc "Looking for %s" $name]...
 	if {![catch {package require $name} msg]} {
 	    set this(package,$name) 1
 	}

@@ -169,12 +169,12 @@ catch {
 # Splash! Need a full update here, at least on Windows.
 package require Splash
 ::Splash::SplashScreen
-::Splash::SetMsg "[mc splashsource]..."
+::Splash::SetMsg [mc "Sourcing Tcl code"]...
 set state(launchStatus) splash
 update
 
 # Make sure we have the extra packages necessary and some optional.
-::Splash::SetMsg "[mc splashhost]..."
+::Splash::SetMsg [mc "Searching for our hostname"]...
 ::Init::SetHostname
 ::Init::LoadPackages
 
@@ -192,7 +192,7 @@ if {[lsearch -exact [ttk::themes] $prefs(tileTheme)] >= 0} {
 
 # The packages are divided into categories depending on their degree
 # of generality.
-::Splash::SetMsg "[mc splashload]..."
+::Splash::SetMsg [mc "Loading Tcl packages"]...
 set state(launchStatus) packages
 
 set packages(generic) {
@@ -255,7 +255,7 @@ switch -- $this(platform) {
 ::UI::InitDlgs
 
 # The Jabber stuff. 
-::Splash::SetMsg "[mc splashsourcejabb]..."
+::Splash::SetMsg [mc "Sourcing Jabber code"]...
 set state(launchStatus) jabber
 package require Jabber
 
@@ -265,7 +265,7 @@ package require Jabber
 # Standard (factory) preferences are set here.
 # These are the hardcoded, application default, values, and can be
 # overridden by the ones in user default file.
-::Splash::SetMsg "[mc splashinit]..."
+::Splash::SetMsg [mc "Initializing"]...
 FactoryDefaults
 ::Jabber::FactoryDefaults
 ::Jabber::LoadWhiteboard
@@ -279,7 +279,7 @@ FactoryDefaults
 ::Component::Load
 
 # Set the user preferences from the preferences file.
-::Splash::SetMsg "[mc splashprefs]..."
+::Splash::SetMsg [mc "Setting preferences"]...
 set state(launchStatus) preferences
 ::Preferences::SetMiscPrefs
 

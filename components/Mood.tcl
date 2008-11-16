@@ -78,6 +78,135 @@ proc ::Mood::Init {} {
 	sleepy      stressed    surprised   thirsty 
 	worried 
     }
+
+    # Mood text strings.
+    variable moodText
+    set moodText [dict create]
+    dict set moodText afraid [mc "Afraid"]
+    dict set moodText amazed [mc "Amazed"]
+    dict set moodText angry [mc "Angry"]
+    dict set moodText annoyed [mc "Annoyed"]
+    dict set moodText anxious [mc "Anxious"]
+    dict set moodText aroused [mc "Aroused"]
+    dict set moodText ashamed [mc "Ashamed"]
+    dict set moodText bored [mc "Bored"]
+    dict set moodText brave [mc "Brave"]
+    dict set moodText calm [mc "Calm"]
+    dict set moodText cold [mc "Cold"]
+    dict set moodText confused [mc "Confused"]
+    dict set moodText contented [mc "Contented"]
+    dict set moodText cranky [mc "Cranky"]
+    dict set moodText curious [mc "Curious"]
+    dict set moodText depressed [mc "Depressed"]
+    dict set moodText disappointed [mc "Disappointed"]
+    dict set moodText disgusted [mc "Disgusted"]
+    dict set moodText distracted [mc "Distracted"]
+    dict set moodText embarrassed [mc "Embarrassed"]
+    dict set moodText excited [mc "Excited"]
+    dict set moodText flirtatious [mc "Flirtatious"]
+    dict set moodText frustrated [mc "Frustrated"]
+    dict set moodText grumpy [mc "Grumpy"]
+    dict set moodText guilty [mc "Guilty"]
+    dict set moodText happy [mc "Happy"]
+    dict set moodText hot [mc "Hot"]
+    dict set moodText humbled [mc "Humbled"]
+    dict set moodText humiliated [mc "Humiliated"]
+    dict set moodText hungry [mc "Hungry"]
+    dict set moodText hurt [mc "Hurt"]
+    dict set moodText impressed [mc "Impressed"]
+    dict set moodText in_awe [mc "In awe"]
+    dict set moodText in_love [mc "In love"]
+    dict set moodText indignant [mc "Indignant"]
+    dict set moodText interested [mc "Interested"]
+    dict set moodText intoxicated [mc "Intoxicated"]
+    dict set moodText invincible [mc "Invincible"]
+    dict set moodText jealous [mc "Jealous"]
+    dict set moodText lonely [mc "Lonely"]
+    dict set moodText mean [mc "Mean"]
+    dict set moodText moody [mc "Moody"]
+    dict set moodText nervous [mc "Nervous"]
+    dict set moodText neutral [mc "Neutral"]
+    dict set moodText offended [mc "Offended"]
+    dict set moodText playful [mc "Playful"]
+    dict set moodText proud [mc "Proud"]
+    dict set moodText relieved [mc "Relieved"]
+    dict set moodText remorseful [mc "Remorseful"]
+    dict set moodText restless [mc "Restless"]
+    dict set moodText sad [mc "Sad"]
+    dict set moodText sarcastic [mc "Sarcastic"]
+    dict set moodText serious [mc "Serious"]
+    dict set moodText shocked [mc "Shocked"]
+    dict set moodText shy [mc "Shy"]
+    dict set moodText sick [mc "Sick"]
+    dict set moodText sleepy [mc "Sleepy"]
+    dict set moodText stressed [mc "Stressed"]
+    dict set moodText surprised [mc "Surprised"]
+    dict set moodText thirsty [mc "Thirsty"]
+    dict set moodText worried [mc "Worried"]
+
+    variable moodTextSmall
+    set moodTextSmall [dict create]
+    dict set moodTextSmall afraid [mc "afraid"]
+    dict set moodTextSmall amazed [mc "amazed"]
+    dict set moodTextSmall angry [mc "angry"]
+    dict set moodTextSmall annoyed [mc "annoyed"]
+    dict set moodTextSmall anxious [mc "anxious"]
+    dict set moodTextSmall aroused [mc "aroused"]
+    dict set moodTextSmall ashamed [mc "ashamed"]
+    dict set moodTextSmall bored [mc "bored"]
+    dict set moodTextSmall brave [mc "brave"]
+    dict set moodTextSmall calm [mc "calm"]
+    dict set moodTextSmall cold [mc "cold"]
+    dict set moodTextSmall confused [mc "confused"]
+    dict set moodTextSmall contented [mc "contented"]
+    dict set moodTextSmall cranky [mc "cranky"]
+    dict set moodTextSmall curious [mc "curious"]
+    dict set moodTextSmall depressed [mc "depressed"]
+    dict set moodTextSmall disappointed [mc "disappointed"]
+    dict set moodTextSmall disgusted [mc "disgusted"]
+    dict set moodTextSmall distracted [mc "distracted"]
+    dict set moodTextSmall embarrassed [mc "embarrassed"]
+    dict set moodTextSmall excited [mc "excited"]
+    dict set moodTextSmall flirtatious [mc "flirtatious"]
+    dict set moodTextSmall frustrated [mc "frustrated"]
+    dict set moodTextSmall grumpy [mc "grumpy"]
+    dict set moodTextSmall guilty [mc "guilty"]
+    dict set moodTextSmall happy [mc "happy"]
+    dict set moodTextSmall hot [mc "hot"]
+    dict set moodTextSmall humbled [mc "humbled"]
+    dict set moodTextSmall humiliated [mc "humiliated"]
+    dict set moodTextSmall hungry [mc "hungry"]
+    dict set moodTextSmall hurt [mc "hurt"]
+    dict set moodTextSmall impressed [mc "impressed"]
+    dict set moodTextSmall in_awe [mc "in awe"]
+    dict set moodTextSmall in_love [mc "in love"]
+    dict set moodTextSmall indignant [mc "indignant"]
+    dict set moodTextSmall interested [mc "interested"]
+    dict set moodTextSmall intoxicated [mc "intoxicated"]
+    dict set moodTextSmall invincible [mc "invincible"]
+    dict set moodTextSmall jealous [mc "jealous"]
+    dict set moodTextSmall lonely [mc "lonely"]
+    dict set moodTextSmall mean [mc "mean"]
+    dict set moodTextSmall moody [mc "moody"]
+    dict set moodTextSmall nervous [mc "nervous"]
+    dict set moodTextSmall neutral [mc "neutral"]
+    dict set moodTextSmall offended [mc "offended"]
+    dict set moodTextSmall playful [mc "playful"]
+    dict set moodTextSmall proud [mc "proud"]
+    dict set moodTextSmall relieved [mc "relieved"]
+    dict set moodTextSmall remorseful [mc "remorseful"]
+    dict set moodTextSmall restless [mc "restless"]
+    dict set moodTextSmall sad [mc "sad"]
+    dict set moodTextSmall sarcastic [mc "sarcastic"]
+    dict set moodTextSmall serious [mc "serious"]
+    dict set moodTextSmall shocked [mc "shocked"]
+    dict set moodTextSmall shy [mc "shy"]
+    dict set moodTextSmall sick [mc "sick"]
+    dict set moodTextSmall sleepy [mc "sleepy"]
+    dict set moodTextSmall stressed [mc "stressed"]
+    dict set moodTextSmall surprised [mc "surprised"]
+    dict set moodTextSmall thirsty [mc "thirsty"]
+    dict set moodTextSmall worried [mc "worried"]
     
     if {$config(mood,showall)} {
 	set moodL $allMoods
@@ -89,7 +218,7 @@ proc ::Mood::Init {} {
     variable sortedLocMoods [list]
     set moodLocL [list]
     foreach mood $moodL {
-	lappend moodLocL [list $mood [mc "m[string totitle $mood]"]]
+	lappend moodLocL [list $mood [dict get $moodText $mood]]
     }
     set moodLocL [lsort -dictionary -index 1 $moodLocL]
     foreach spec $moodLocL {
@@ -103,7 +232,7 @@ proc ::Mood::Init {} {
     lappend subMenu [list radio None ::Mood::MenuCmd {} $opts]
     lappend subMenu {separator}
     foreach mood $sortedLocMoods {
-	set label "m[string totitle $mood]"
+	set label [dict get $moodText $mood]
 	set opts [list -variable ::Mood::menuMoodVar -value $mood]
 	lappend subMenu [list radio $label ::Mood::MenuCmd {} $opts]
     }
@@ -270,21 +399,22 @@ proc ::Mood::CustomMoodDlg {} {
     variable menuMoodVar
     variable moodMessageDlg
     variable moodStateDlg
+    variable moodText
     
     set moodStateDlg $menuMoodVar
     set moodMessageDlg ""
     
-    set w [ui::dialog -message [mc moodPickMsg] -detail [mc moodPickDtl] \
+    set w [ui::dialog -message [mc "Select your mood to show to your contacts."] -detail [mc "Only contacts with compatible software will see your mood."] \
       -buttons {ok cancel remove} -icon info \
       -modal 1 -geovariable ::prefs(winGeom,customMood) \
       -title [mc "Custom Mood"] -command [namespace code CustomCmd]]
     set fr [$w clientframe]
 
     set mDef [list]
-    lappend mDef [list [mc None] -value "-"]
+    lappend mDef [list [mc "None"] -value "-"]
     lappend mDef [list separator]
     foreach mood $sortedLocMoods {
-	set label "m[string totitle $mood]"
+	set label [dict get $moodText $mood]
 	lappend mDef [list [mc $label] -value $mood \
 	  -image [::Theme::FindIconSize 16 mood-$mood]] 
     }
@@ -293,7 +423,7 @@ proc ::Mood::CustomMoodDlg {} {
     ui::optionmenu $fr.cmood -menulist $mDef -direction flush \
       -variable [namespace current]::moodStateDlg
 
-    ttk::label $fr.ltext -text "[mc Message]:"
+    ttk::label $fr.ltext -text [mc "Message"]:
     ttk::entry $fr.etext -textvariable [namespace current]::moodMessageDlg
 
     grid  $fr.lmood    $fr.cmood  -sticky e -pady 2
@@ -341,6 +471,7 @@ proc ::Mood::CustomCmd {w bt} {
 proc ::Mood::Event {jlibname xmldata} {
     variable state
     variable xmlns
+    variable moodTextSmall
         
     # The server MUST set the 'from' address on the notification to the 
     # bare JID (<node@domain.tld>) of the account owner.
@@ -390,7 +521,7 @@ proc ::Mood::Event {jlibname xmldata} {
 		    set msg ""
 		} else {
 		    set mstr [string map {& ""} [mc mMood]]
-		    set msg "$mstr: [mc $mood] $text"
+		    set msg "$mstr: [dict get $moodTextSmall $mood] $text"
 		}
 	    }
 	    ::RosterTree::BalloonRegister mood $from $msg
@@ -420,6 +551,7 @@ proc ::Mood::MPBuild {win} {
     variable mpwin
     variable mpMood
     variable sortedLocMoods
+    variable moodText
 
     set mpwin $win
     ttk::menubutton $win -style SunkenMenubutton \
@@ -430,12 +562,12 @@ proc ::Mood::MPBuild {win} {
     $win configure -menu $m
     $win state {disabled}
     
-    $m add radiobutton -label [mc None] -value "-" \
+    $m add radiobutton -label [mc "None"] -value "-" \
       -variable [namespace current]::mpMood \
       -command [namespace code MPCmd]
     $m add separator
     foreach mood $sortedLocMoods {
-	set label "m[string totitle $mood]"
+	set label [dict get $moodText $mood]
 	$m add radiobutton -label [mc $label] -value $mood \
 	  -image [::Theme::FindIconSize $imsize mood-$mood] \
 	  -variable [namespace current]::mpMood \
@@ -465,14 +597,17 @@ proc ::Mood::MPDisplayMood {mood} {
     variable imsize
     variable mpwin
     variable imblank
+    variable moodTextSmall
     
     set mstr [string map {& ""} [mc mMood]]
     if {$mood eq "-"} {
 	$mpwin configure -image $imblank
-	::balloonhelp::balloonforwindow $mpwin "$mstr: [mc None]"
+	set msg "$mstr: "
+	append msg [mc "None"]
+	::balloonhelp::balloonforwindow $mpwin $msg
     } else {
 	$mpwin configure -image [::Theme::FindIconSize $imsize mood-$mood]	
-        ::balloonhelp::balloonforwindow $mpwin "$mstr: [mc $mood]"
+        ::balloonhelp::balloonforwindow $mpwin "$mstr: [dict get $moodTextSmall $mood]"
     }
 }
 

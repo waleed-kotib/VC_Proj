@@ -322,7 +322,7 @@ proc ::Chat::StartThreadDlg {args} {
 	set imd [::Theme::Find32Icon $w chatDisImage]
 	
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc mChat] -compound left   \
+	  -text [mc "Chat"] -compound left   \
 	  -image [list $im background $imd]
 	pack $w.frall.head -side top -fill both -expand 1
 	
@@ -340,7 +340,7 @@ proc ::Chat::StartThreadDlg {args} {
     pack $frmid -side top -fill both -expand 1
 
     set jidlist [::Jabber::RosterCmd getusers -type available]
-    ttk::label $frmid.luser -text "[mc {Contact ID}]:"  \
+    ttk::label $frmid.luser -text [mc "Contact ID"]:  \
       -anchor e
     ui::comboboxex $frmid.euser -library $jidlist -width 26  \
       -textvariable [namespace current]::user
@@ -353,9 +353,9 @@ proc ::Chat::StartThreadDlg {args} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] \
+    ttk::button $frbot.btok -text [mc "OK"] \
       -default active -command [list [namespace current]::DoStart $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::DoCancel $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -403,8 +403,8 @@ proc ::Chat::DoStart {w} {
     
     set jid [jlib::escapejid $user]
     if {![jlib::jidvalidate $jid]} {
-	set ans [::UI::MessageBox -message [mc jamessbadjid2 $jid] \
-	  -icon error -title [mc Error] -type yesno]
+	set ans [::UI::MessageBox -message [mc "%s is invalid. Do you want to continue anyway?" $jid] \
+	  -icon error -title [mc "Error"] -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
 	}
@@ -678,10 +678,19 @@ proc ::Chat::GotMsg {xmldata} {
         }
     }
 
+    # Composing events
+    set chatcomp [dict create]
+    dict set chatcomp reply [mc "%s is composing a reply"]
+    dict set chatcomp active [mc "%s is on the chat"]
+    dict set chatcomp composing [mc "%s is composing a reply"]
+    dict set chatcomp paused [mc "%s is thinking what to write"]
+    dict set chatcomp inactive [mc "%s has left the chat for a while"]
+    dict set chatcomp gone [mc "%s has closed the chat"]
+
     if {$chatstate(havecs) eq "true" && $config(chat,notify-show)} {
         if { $msgChatState ne "" } {
             $chatstate(wnotifier) configure -image $dlgstate(iconNotifier)
-            set notifyString "chatcomp$msgChatState"
+            set notifyString [dict get $chatcomp $msgChatState]
             set chatstate(notifier) " [mc $notifyString $chatstate(displayname)]"
         }
     } 
@@ -830,7 +839,8 @@ proc ::Chat::InsertMessageText {chattoken xmldata secs inB historyB} {
 	set subjectE [wrapper::getfirstchildwithtag $xmldata "subject"]
 	if {[llength $subjectE]} {
 	    set subject [wrapper::getcdata $subjectE]
-	    set sysstr "[mc Subject]: $subject"
+	    set sysstr [mc "Subject"]
+	    append sysstr ": $subject"
 	    set haveSys 1
 	}
     }    
@@ -1313,7 +1323,7 @@ proc ::Chat::Build {threadID jid} {
     grid columnconfigure $wtop 0 -weight 1
 
     $wtray newbutton send  \
-      -text [mc Send] -image $iconSend   \
+      -text [mc "Send"] -image $iconSend   \
       -disabledimage $iconSendDis    \
       -command [list [namespace current]::Send $dlgtoken]
     $wtray newbutton sendfile \
@@ -1321,25 +1331,25 @@ proc ::Chat::Build {threadID jid} {
       -disabledimage $iconSendFileDis    \
       -command [list [namespace current]::SendFile $dlgtoken]
     $wtray newbutton save  \
-      -text [mc Save] -image $iconSave  \
+      -text [mc "Save"] -image $iconSave  \
       -disabledimage $iconSaveDis    \
       -command [list [namespace current]::Save $dlgtoken]
     $wtray newbutton history  \
-      -text [mc History] -image $iconHistory \
+      -text [mc "History"] -image $iconHistory \
       -disabledimage $iconHistoryDis \
       -command [list [namespace current]::BuildHistory $dlgtoken]
     $wtray newbutton print  \
-      -text [mc Print] -image $iconPrint  \
+      -text [mc "Print"] -image $iconPrint  \
       -disabledimage $iconPrintDis   \
       -command [list [namespace current]::Print $dlgtoken]
     if {[::Jabber::HaveWhiteboard]} {
 	$wtray newbutton whiteboard  \
-	  -text [mc Whiteboard] -image $iconWB  \
+	  -text [mc "Whiteboard"] -image $iconWB  \
 	  -disabledimage $iconWBDis   \
 	  -command [list [namespace current]::Whiteboard $dlgtoken]
     }
     $wtray newbutton invite \
-      -text [mc Invite] -image $iconInvite \
+      -text [mc "Invite"] -image $iconInvite \
       -disabledimage $iconInviteDis  \
       -command [list [namespace current]::InviteCmd $dlgtoken]
     
@@ -1565,7 +1575,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     set pstr [::Roster::GetPresenceAndStatusText $jid]
     
     # D =
-    ttk::label $wtop.l -style Small.TLabel -text "[mc Subject]:" -padding {4 0}
+    ttk::label $wtop.l -style Small.TLabel -text [mc "Subject"]: -padding {4 0}
     ttk::entry $wtop.e -font CociSmallFont -textvariable $chattoken\(subject)
     ttk::frame $wtop.p1 -width 8
     ttk::label $wtop.i  -image $icon
@@ -1586,7 +1596,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
 	bind $wsubject <FocusOut> [list ::Chat::RevokeSubject $chattoken]
     }   
     
-    ::balloonhelp::balloonforwindow $wsubject [mc tooltip-chatsubject]
+    ::balloonhelp::balloonforwindow $wsubject [mc "Enter the subject of the conversation, set by pressing Return"]
     ::balloonhelp::balloonforwindow $wpresimage $pstr
     
     # Notifier label.
@@ -1623,10 +1633,10 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     pack  $wbot.elsys   -side left -fill y -padx 4
     pack  $wnotifier    -side left         -padx 4
     
-    ::balloonhelp::balloonforwindow $wbot.hist [mc jachathist]
-    ::balloonhelp::balloonforwindow $wbot.active [mc jaactiveret]
+    ::balloonhelp::balloonforwindow $wbot.hist [mc "Show or hide the chat history"]
+    ::balloonhelp::balloonforwindow $wbot.active [mc "If checked Return sends message, else use Ctrl/Cmd-Return"]
     ::balloonhelp::balloonforwindow $wsmile [mc "Insert emoticon"]
-    ::balloonhelp::balloonforwindow $wbot.elsys [mc tooltip-togglesysmsg]
+    ::balloonhelp::balloonforwindow $wbot.elsys [mc "Show or hide status changes in chat"]
 
     set wmid        $wthread.m
     set wpane       $wthread.m.pane
@@ -1717,7 +1727,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
 	ActiveCmd $chattoken
     }
 
-    ::balloonhelp::balloonforwindow $wtextsnd [mc tooltip-chatsendtext]
+    ::balloonhelp::balloonforwindow $wtextsnd [mc "Enter your message and press Return or Shift-Return"]
     
     ::hooks::run textSpellableNewHook $wtextsnd
     
@@ -1872,10 +1882,10 @@ proc ::Chat::MenuEditPostHook {wmenu} {
 	upvar 0 $chattoken chatstate
 	
 	set wfind $chatstate(wfind)
-	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
+	::UI::MenuMethod $wmenu entryconfigure mFind -state normal -label [mc "Find"]
 	if {[winfo exists $wfind]} {
-	    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal -label [mc "Find Next"]
+	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal -label [mc "Find Previous"]
 	}
     }
 }
@@ -1947,8 +1957,8 @@ proc ::Chat::DnDXmppDrop {chattoken win data type} {
     }
     set jidL $onlineL
     if {[llength $jidL]} {
-	set ans [tk_messageBox -title [mc Warning] -type yesno \
-	  -message [mc jamesschatinvite]]
+	set ans [tk_messageBox -title [mc "Warning"] -type yesno \
+	  -message [mc "Do you want to invite this contact to a new chatroom?"]]
 	
 	if {$ans eq "yes"} {
 	    set jidL [string map {"," ""} $jidL]
@@ -2084,7 +2094,8 @@ proc ::Chat::SetTitle {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
         
-    set str "[mc mChat]: $chatstate(displayname)"
+    set str [mc "Chat"]
+    append str ": $chatstate(displayname)"
     if {$chatstate(displayname) ne $chatstate(fromjid)} {
 	set ujid [jlib::unescapestr $chatstate(fromjid)]
 	append str " ($ujid)"
@@ -2542,7 +2553,7 @@ proc ::Chat::SetState {chattoken state} {
 	set icon [::Rosticons::ThemeGet user/invisible]
 	$chatstate(wpresimage) configure -image $icon
 	set pstr [::Roster::MapShowToText unavailable]
-	append pstr " - " [mc tooltip-chatoffline]
+	append pstr " - " [mc "You need to be logged in to see the presence of this contact"]
 	::balloonhelp::balloonforwindow $chatstate(wpresimage) $pstr
     }
     set chatstate(state) $state
@@ -2744,7 +2755,7 @@ proc ::Chat::Invite {chattoken args} {
 	InviteSendHistory $chattoken $roomjid
 	
 	# Third Invite the second user
-	set opts [list -reason [mc mucChat2ConfInv] -continue 1]
+	set opts [list -reason [mc "Converting Chat into Conference"] -continue 1]
 	eval {::Jabber::Jlib muc invite $roomjid $chatstate(fromjid)} $opts
 
 	# Third and Invite the third user
@@ -2758,8 +2769,8 @@ proc ::Chat::InviteCreateRoom {roomjidVar} {
 
     set chatservers [::Jabber::Jlib disco getconferences]
     if {0 && $chatservers eq {}} {
-	::UI::MessageBox -icon error -title [mc Error] \
-	  -message [mc jamessnogroupchat2]
+	::UI::MessageBox -icon error -title [mc "Error"] \
+	  -message [mc "Cannot find any chatroom service."]
 	return
     }
     set server [lindex $chatservers 0]
@@ -3057,8 +3068,8 @@ proc ::Chat::Send {dlgtoken} {
     
     # Check that still connected to server.
     if {![::Jabber::IsConnected]} {
-	::UI::MessageBox -type ok -icon error -title [mc Error] \
-	  -message [mc jamessnotconnected2]
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
+	  -message [mc "Cannot send when not logged in."]
 	return
     }
     set chattoken [GetActiveChatToken $dlgtoken]
@@ -3106,8 +3117,8 @@ proc ::Chat::SendText {chattoken text args} {
     set chatstate(jid) $jid
 
     if {![jlib::jidvalidate $jid]} {
-	set ans [::UI::MessageBox -message [mc jamessbadjid2 $jid] \
-	  -icon error -title [mc Error] -type yesno]
+	set ans [::UI::MessageBox -message [mc "%s is invalid. Do you want to continue anyway?" $jid] \
+	  -icon error -title [mc "Error"] -type yesno]
 	if {[string equal $ans "no"]} {
 	    return
 	}
@@ -3196,8 +3207,10 @@ proc ::Chat::TraceJid {dlgtoken name junk1 junk2} {
     upvar 0 $dlgtoken dlgstate
     
     # Call by name.
-    upvar $name locName    
-    wm title $dlgstate(w) "[mc mChat] ($chatstate(fromjid))"
+    upvar $name locName
+    set msg [mc "Chat"]
+    append msg " ($chatstate(fromjid))"
+    wm title $dlgstate(w) $msg
 }
 
 proc ::Chat::SendFile {dlgtoken} {
@@ -3269,7 +3282,7 @@ proc ::Chat::Save {dlgtoken} {
     set wtext $chatstate(wtext)
     
     set fTypes [list [list "Text" {.txt}] [list "XML" {.xml}]]
-    set ans [tk_getSaveFile -title [mc Save] \
+    set ans [tk_getSaveFile -title [mc "Save"] \
       -initialfile "Chat $chatstate(fromjid).txt" -filetypes $fTypes]
     
     if {[string length $ans]} {
@@ -3547,7 +3560,7 @@ proc ::Chat::Close {dlgtoken} {
     set ans "yes"
     if {0} {
 	set ans [::UI::MessageBox -icon info -parent $w -type yesno \
-	  -message [mc jamesschatclose2]]
+	  -message [mc "Do you want to close this chat window and lose the complete conversation?"]]
     }
     if {$ans eq "yes"} {
 	set chattoken [GetActiveChatToken $dlgtoken]
@@ -3687,7 +3700,7 @@ proc ::Chat::XEventRecv {chattoken xmldata} {
 	upvar 0 $dlgtoken dlgstate
 
 	$chatstate(wnotifier) configure -image $dlgstate(iconNotifier)
-	set chatstate(notifier) " [mc chatcompreply $chatstate(displayname)]"
+	set chatstate(notifier) [mc "%s is composing a reply" $chatstate(displayname)]
     } elseif {![llength $composeE] && [llength $idE]} {
 	
 	# 3) Cancellations of message composing
@@ -4202,37 +4215,37 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
  
-    ttk::checkbutton $wc.active -text [mc prefchactret2]  \
+    ttk::checkbutton $wc.active -text [mc "By default use active <Return> to send messages"]  \
       -variable [namespace current]::tmpp(chatActiveRet)
-    ttk::checkbutton $wc.newwin -text [mc prefcushow] \
+    ttk::checkbutton $wc.newwin -text [mc "Show incoming messages in new window"] \
       -variable [namespace current]::tmpp(showMsgNewWin)
-    ttk::checkbutton $wc.normal -text [mc prefchnormal]  \
+    ttk::checkbutton $wc.normal -text [mc "Treat normal messages as chat messages"]  \
       -variable [namespace current]::tmpp(chat,normalAsChat)
 
     ttk::separator $wc.sep -orient horizontal    
 
-    ttk::label $wc.lmb2 -text "[mc prefcu2clk]:"
-    ttk::radiobutton $wc.rb2new -text [mc prefcuopen] \
+    ttk::label $wc.lmb2 -text [mc "Double click message in inbox"]:
+    ttk::radiobutton $wc.rb2new -text [mc "Open message in new window"] \
       -value newwin -variable [namespace current]::tmpp(inbox2click)
     ttk::radiobutton $wc.rb2re   \
-      -text [mc prefcureply] -value reply \
+      -text [mc "Reply to sender"] -value reply \
       -variable [namespace current]::tmpp(inbox2click)
 
     ttk::separator $wc.sep2 -orient horizontal
     
     set whi $wc.hi
     ttk::frame $wc.hi
-    ttk::label $whi.lhist -text "[mc {History length}]:"
+    ttk::label $whi.lhist -text [mc "History length"]:
     spinbox $whi.shist -width 4 -from 0 -increment 5 -to 1000 -state readonly \
       -textvariable [namespace current]::tmpp(chat,histLen)
-    ttk::label $whi.lage -text "[mc {More recent than}]:"
+    ttk::label $whi.lage -text [mc "More recent than"]:
     set mb $whi.mbage
     set menuDef [list                       \
-	[list [mc {Ten seconds}]     -value 10]    \
-	[list [mc {One minute}]      -value 60]    \
-	[list [mc {Ten minutes}]     -value 600]   \
-	[list [mc {One hour}]        -value 3600]  \
-	[list [mc {No restriction}]  -value 0]     \
+	[list [mc "Ten seconds"]     -value 10]    \
+	[list [mc "One minute"]      -value 60]    \
+	[list [mc "Ten minutes"]     -value 600]   \
+	[list [mc "One hour"]        -value 3600]  \
+	[list [mc "No restriction"]  -value 0]     \
     ]
     ui::optionmenu $mb -menulist $menuDef -direction flush \
       -variable [namespace current]::tmpp(chat,histAge)
@@ -4242,18 +4255,18 @@ proc ::Chat::BuildPrefsPage {wpage} {
     grid columnconfigure $whi 1 -weight 1
     grid columnconfigure $whi 3 -minsize [$mb maxwidth]
 
-    ::balloonhelp::balloonforwindow $whi.shist [mc tooltip-historymessages]
+    ::balloonhelp::balloonforwindow $whi.shist [mc "Number of messages to display"]
 
     ttk::separator $wc.sep3 -orient horizontal
 
     set wni $wc.ni
     ttk::frame $wc.ni
-    ttk::label $wni.lni -text "[mc {Local nickname}]:"
+    ttk::label $wni.lni -text [mc "Local nickname"]:
     ttk::entry $wni.eni -textvariable [namespace current]::tmpp(chat,mynick)
 
     grid  $wni.lni  $wni.eni  -sticky w
 
-    ::balloonhelp::balloonforwindow $wni.eni [mc tooltip-localnick]
+    ::balloonhelp::balloonforwindow $wni.eni [mc "Your nickname for local display"]
 
     grid  $wc.active  -sticky w
     grid  $wc.newwin  -sticky w

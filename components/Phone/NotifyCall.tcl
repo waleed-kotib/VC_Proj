@@ -165,11 +165,11 @@ proc ::NotifyCall::Toplevel {w line phoneNumber inout} {
       -closecommand ::NotifyCall::CloseDialer
 
     if { $inout eq "in" } {
-	wm title $w [mc notifyCall]
-	set msgHead [mc inboundCall]:
+	wm title $w [mc "Notify Call"]
+	set msgHead [mc "Inbound Call"]:
     } else {
-	wm title $w [mc outCall]
-	set msgHead [mc outboundCall]:
+	wm title $w [mc "Make Call"]
+	set msgHead [mc "Outbound Call"]:
     }
     
     # Global frame.
@@ -261,9 +261,9 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
     ttk::frame $win.right
 
     if {1} {
-	ttk::button $win.hangup -text [mc callHungUp]  \
+	ttk::button $win.hangup -text [mc "Hung Up"]  \
 	  -command [list [namespace current]::HangUp $win]
-	ttk::button $win.answer -text [mc callAnswer]  \
+	ttk::button $win.answer -text [mc "Answer"]  \
 	  -command [list [namespace current]::Answer $win]
     } else {
 	# Alternative style buttons.
@@ -272,7 +272,7 @@ proc ::NotifyCall::Frame {win line phoneNumber inout} {
 	::TPhone::Button $win.answer call  \
 	  -command [list [namespace current]::Answer $win]
     }
-    ttk::button $win.info -text [mc callInfo]  \
+    ttk::button $win.info -text [mc "Info"]  \
       -command [list [namespace current]::CallInfo $win]
     ttk::frame $win.ava
         
@@ -632,7 +632,8 @@ proc ::NotifyCallSlot::Frame {win inout} {
     set state(cmicrophone)    1
     set state(cspeaker)       1
     set state(time)           "(00:00:00)"
-    set state(caller) [mc "%s is calling..." "Mats"]
+    # The next should be fixed?
+    set state(caller) [mc "%s is calling" "Mats"]...
 
     # The vertical scales need a 100-level rescale!
     set state(microphone) [::Phone::GetInputLevel]
@@ -712,7 +713,7 @@ proc ::NotifyCallSlot::Answer {win} {
     upvar #0 $win state
     
     pack $state(wctrl) -side top -fill x
-
+    # The next should be fixed?
     set state(caller) [mc "%s is on the phone" "Mats"]
     
     $state(wanswer) state {disabled}

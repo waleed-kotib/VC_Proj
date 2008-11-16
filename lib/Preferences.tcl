@@ -171,7 +171,7 @@ proc ::Preferences::Build {args} {
     ::UI::Toplevel $w -class Preferences \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::Preferences::CloseHook
-    wm title $w [mc Preferences]
+    wm title $w [mc "Preferences"]
     wm withdraw $w
     ::UI::SetWindowPosition $w
     
@@ -214,7 +214,7 @@ proc ::Preferences::Build {args} {
     # Fill tree.
     set item [$T item create -button 1 -tags [list {General}]]
     $T item style set $item cTree styText
-    $T item text $item cTree [mc General]
+    $T item text $item cTree [mc "General"]
     $T item lastchild root $item
 
     set item [$T item create -button 1 -tags [list {Jabber}]]
@@ -234,13 +234,13 @@ proc ::Preferences::Build {args} {
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btok -style TButton \
-      -text [mc Save] -default active \
+      -text [mc "Save"] -default active \
       -command ::Preferences::SavePushBt
     ttk::button $frbot.btcancel -style TButton \
-      -text [mc Cancel]  \
+      -text [mc "Cancel"]  \
       -command ::Preferences::Cancel
     ttk::button $frbot.btfactory -style TButton \
-      -text [mc {Factory Settings}]   \
+      -text [mc "Factory Settings"]   \
       -command [list ::Preferences::ResetToFactoryDefaults "40"]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -390,8 +390,8 @@ proc ::Preferences::ResetToFactoryDefaults {maxPriorityNum} {
     Debug 2 "::Preferences::ResetToFactoryDefaults maxPriorityNum=$maxPriorityNum"
     
     # Warn first.
-    set ans [::UI::MessageBox -title [mc Warning] -type yesno -icon warning \
-      -message [mc messfactorydefaults2] -default no]
+    set ans [::UI::MessageBox -title [mc "Warning"] -type yesno -icon warning \
+      -message [mc "Do you really want to reset your customization to factory defaults?"] -default no]
     if {$ans eq "no"} {
 	return
     }
@@ -451,9 +451,9 @@ proc ::Preferences::SavePushBt {} {
     }
 
     if {$needRestart} {
-	set ans [::UI::MessageBox -title [mc Warning]  \
+	set ans [::UI::MessageBox -title [mc "Warning"]  \
 	  -type ok -parent $wDlgs(prefs) -icon info \
-	  -message [mc messprefsrestart2 $prefs(appName)]]
+	  -message {[mc "At least one setting requires a restart of %s." $prefs(appName)]}]
     }
 
     # Save the preference file.
@@ -494,9 +494,9 @@ proc ::Preferences::Cancel {} {
     ::hooks::run prefsCancelHook
     
     if {$changed} {
-	set ans [::UI::MessageBox -title [mc Warning]  \
+	set ans [::UI::MessageBox -title [mc "Warning"]  \
 	  -type yesno -default no -parent $wDlgs(prefs) -icon warning \
-	  -message [mc messprefschanged]]
+	  -message [mc "The preferences have been changed. Do you want to cancel anyway?"]]
 	if {$ans eq "yes"} {
 	    set finished 2
 	}

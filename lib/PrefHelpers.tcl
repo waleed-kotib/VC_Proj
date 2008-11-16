@@ -68,7 +68,7 @@ proc ::PrefHelpers::InitPrefsHook {} {
 proc ::PrefHelpers::BuildPrefsHook {wtree nbframe} {
     
     if {![::Preferences::HaveTableItem General]} {
-	::Preferences::NewTableItem {General} [mc General]
+	::Preferences::NewTableItem {General} [mc "General"]
     }
     ::Preferences::NewTableItem {General Helpers} [mc "Default Applications"]
     set wpage [$nbframe page {Helpers}]
@@ -101,7 +101,7 @@ proc ::PrefHelpers::BuildPage {wpage} {
 	    set tmp(mailClient) "-"
 	}
 	set menuMail [list]
-	foreach {name value} [list [mc Default] "-" GMail gmail] {
+	foreach {name value} [list [mc "Default"] "-" GMail gmail] {
 	    lappend menuMail [list $name -value $value]
 	}
     }
@@ -124,11 +124,11 @@ proc ::PrefHelpers::BuildPage {wpage} {
     
     set f $wc.f
     if {$this(platform) eq "unix"} {
-	ttk::label $f.lbrowser -text "[mc Browser]:"
+	ttk::label $f.lbrowser -text [mc "Browser"]:
 	ui::optionmenu $f.mbrowser -menulist $menuBrowsers \
 	  -variable [namespace current]::tmp(webBrowser)
     }
-    ttk::label $f.lmail -text "[mc {Email client}]:"
+    ttk::label $f.lmail -text [mc "Email client"]:
     ui::optionmenu $f.mmail -menulist $menuMail \
       -variable [namespace current]::tmp(mailClient)
     

@@ -127,7 +127,7 @@ proc ::GetFileIface::GetFile {w sock fileName opts} {
     } token]} {
 	::Debug 2 "\t ::getfile::get failed: $token"
 	set str [::GetFileIface::FormatMessage $gettoken $token]
-	::UI::MessageBox -title [mc {File Transfer Error}]  \
+	::UI::MessageBox -title [mc "File Transfer Error"]  \
 	  -type ok -message $str
 	unset getstate
 	return
@@ -229,8 +229,8 @@ proc ::GetFileIface::GetFileFromServer {w ip port path opts} {
 	  -progress [list [namespace current]::Progress $gettoken] \
 	  -command [list [namespace current]::Command $gettoken]
     } token]} {
-	set msg [mc {File Transfer Error}]
-	::UI::MessageBox -title [mc {File Transfer Error}]  \
+	set msg [mc "File Transfer Error"]
+	::UI::MessageBox -title [mc "File Transfer Error"]  \
 	  -type ok -message $token
 	unset getstate
 	return
@@ -284,7 +284,7 @@ proc ::GetFileIface::Prepare {gettoken fileTail mime opts} {
 	    
 	    # 2: Ask user what to do with it.
 	    set ans [::UI::MessageBox -title [mc "Request To User"] \
-	      -type yesno -default yes -message [mc messaskreceive $fileTail]]
+	      -type yesno -default yes -message [mc "We are about to receive the file %s. Do you want to receive it?" $fileTail]]
 	    if {[string equal $ans "no"]} {
 		return 321
 	    } else {
@@ -398,7 +398,7 @@ proc ::GetFileIface::Command {gettoken token what msg} {
     if {[string equal $what "error"]} {
 	::WB::SetStatusMessage $w $str
 	if {$::config(talkative) >= 1} {
-	    ::UI::MessageBox -title [mc Error] -type ok -message $msg
+	    ::UI::MessageBox -title [mc "Error"] -type ok -message $msg
 	}
 	
 	# Perhaps we should show a broken image here???
@@ -456,7 +456,7 @@ proc ::GetFileIface::FormatMessage {gettoken msg} {
 	}
 	[0-9]* {
 	    set codetext [getfile::ncodetotext $msg]
-	    set msg [mc getnot200 $getstate(fromname) $msg $codetext]
+	    set msg [mc "Received response of the server %s.\n Error code %s\nMessage: %s" $getstate(fromname) $msg $codetext]
 	    set doformat 0
 	}
 	default {
@@ -499,7 +499,8 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
 	# Create the progress window.
 	::Debug 2 "::GetFileIface::UpdateProgress  create ProgWin"
 
-	set str "[mc {Writing file}]: $getstate(filetail)"
+	set str [mc "Writing file"]
+	append str ": $getstate(filetail)"
 	ui::progress::toplevel $getstate(wprog)  \
 	  -text $str -text2 $msg2 -text3 $msg3   \
 	  -menu [::JUI::GetMainMenu]              \

@@ -228,7 +228,7 @@ proc ::JingleIAX::SessionInitiateCB {type subiq args} {
 	
 	# Cleanup!
 	SessionTerminate
-	ui::dialog -icon error -type ok -message [mc phoneFailedCalling] \
+	ui::dialog -icon error -type ok -message [mc "Failed calling %s"] \
 	  -detail $subiq
     }
 }
@@ -572,7 +572,7 @@ proc ::JingleIAX::BuildChatButtonTrayHook {wtray dlgtoken args} {
     set iconCallDis [::Theme::Find32Icon $w callDisImage]
 
     $wtray newbutton call  \
-      -text [mc phoneMakeCall] -image $iconCall  \
+      -text [mc "Call"] -image $iconCall  \
       -disabledimage $iconCallDis   \
       -command [list ::JingleIAX::ChatCall $dlgtoken]
 

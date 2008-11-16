@@ -596,9 +596,9 @@ proc ::FileCache::InitPrefsHook {} {
 proc ::FileCache::BuildPrefsHook {wtree nbframe} {
     
     if {![::Preferences::HaveTableItem Whiteboard]} {
-	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
+	::Preferences::NewTableItem {Whiteboard} [mc "Whiteboard"]
     }
-    ::Preferences::NewTableItem {Whiteboard {File Cache}} [mc {File Cache}]
+    ::Preferences::NewTableItem {Whiteboard {File Cache}} [mc "File Cache"]
 
     set wpage [$nbframe page {File Cache}]    
     BuildPage $wpage
@@ -623,7 +623,7 @@ proc ::FileCache::BuildPage {page} {
     ttk::frame $frca
     pack $frca -fill x -pady 2
     
-    ttk::label $frca.dsk -text "[mc {Disk cache size}]:"
+    ttk::label $frca.dsk -text [mc "Disk cache size"]:
     ttk::entry $frca.emb \
       -width 6 -textvariable [namespace current]::tmpPrefs(mbsize)
     ttk::label $frca.mb -text MB
@@ -632,13 +632,13 @@ proc ::FileCache::BuildPage {page} {
     
     pack  $frca.dsk  $frca.emb  $frca.mb  $frca.bt  -side left
 
-    ::balloonhelp::balloonforwindow $frca.emb [mc preffilecache2]
+    ::balloonhelp::balloonforwindow $frca.emb [mc "Amount of cache to store recent whiteboard files to increase speed."]
 
     if {0} {
 	set frfo $pca.fo
 	pack [ttk::frame $frfo] -pady 2
-	pack [ttk::label $frfo.fo -text "[mc {Cache folder}]:"] -side left
-	pack [ttk::button $frfo.bt -text "[mc {Choose}]..." \
+	pack [ttk::label $frfo.fo -text [mc "Cache folder"]:] -side left
+	pack [ttk::button $frfo.bt -text [mc "Choose"]... \
 	  -command [namespace current]::SetCachePath]  \
 	  -side right 
     }
@@ -649,8 +649,12 @@ proc ::FileCache::BuildPage {page} {
     pack $pwhen -side top -fill x -pady 8
     foreach  \
       val { always       launch              never } \
-      txt { "Always"     "Once per session"  Never } {
-	ttk::radiobutton $pwhen.$val -text [mc $txt]   \
+      txt { Always     "Once per session"  Never } {
+	set Txt [dict create]
+	dict set Val always [mc "Always"]
+	dict set Val launch [mc "Once per session"]
+	dict set Val never [mc "Never"]
+	ttk::radiobutton $pwhen.$val -text [dict get $Val $val]   \
 	  -variable [namespace current]::tmpPrefs(checkCache) -value $val
 	grid $pwhen.$val -sticky w
     }

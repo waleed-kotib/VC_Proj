@@ -603,7 +603,12 @@ proc ::Emoticons::InsertTextLegend {w name args} {
 	$w insert insert "\n"
     }
     
-    $w insert insert "\t[mc Image]\t[mc text]\n"
+    set msg "\t"
+    append msg [mc "Image"]
+    append msg "\t"
+    append msg [mc "Text"]
+    append msg "\n"
+    $w insert insert $msg
     
     # Smileys:
     foreach ind [lsort -dictionary [array names tmpiconsInv $name,*]] {
@@ -638,7 +643,7 @@ proc ::Emoticons::ImportFile {fileName} {
     set tail [file tail $fileName]
     set name [file rootname $tail]
     if {[lsearch [GetAllSets] $name] >= 0} {
-	::UI::MessageBox -icon error -title [mc Error] \
+	::UI::MessageBox -icon error -title [mc "Error"] \
 	  -message "Iconset \"$name\" already exists."
 	return
     }
@@ -647,7 +652,7 @@ proc ::Emoticons::ImportFile {fileName} {
     if {[catch {
 	LoadTmpIconSet $dst
     } err]} {
-	::UI::MessageBox -icon error -title [mc Error] \
+	::UI::MessageBox -icon error -title [mc "Error"] \
 	  -message "Failed loading iconset \"$name\". $err"
 	return
     }
@@ -699,7 +704,7 @@ proc  ::Emoticons::InitPrefsHook {} {
 
 proc ::Emoticons::BuildPrefsHook {wtree nbframe} {
 
-    ::Preferences::NewTableItem {Jabber Emoticons} [mc Emoticons]
+    ::Preferences::NewTableItem {Jabber Emoticons} [mc "Emoticons"]
     
     set wpage [$nbframe page {Emoticons}]    
     BuildPrefsPage $wpage
@@ -725,7 +730,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     pack $wc -side top -fill both -expand 1 \
       -anchor [option get . dialogAnchor {}]
         
-    ttk::label $wc.l -text [mc preficonsel2]
+    ttk::label $wc.l -text [mc "The selected iconset will become the default."]
     pack  $wc.l  -side top -anchor w -pady 4
     
     set wmb $wc.mb    
@@ -733,13 +738,13 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     set menuDef [list]
     foreach name $allSets {
 	if {$name eq "default"} {
-	    lappend menuDef [list [mc Default] -value default]
+	    lappend menuDef [list [mc "Default"] -value default]
 	} else {
 	    lappend menuDef [list $name -value $name]
 	}
     }
     lappend menuDef separator
-    lappend menuDef [list [mc None] -value "-"]
+    lappend menuDef [list [mc "None"] -value "-"]
     ui::optionmenu $wmb -menulist $menuDef -variable [namespace current]::tmpSet \
       -command [namespace code PrefsSetCmd]
     pack $wmb -side top -anchor w
@@ -759,7 +764,7 @@ proc ::Emoticons::BuildPrefsPage {wpage} {
     
     set wpreftext $wfr.t
     
-    ttk::button $wc.imp -text "[mc {Import Iconset}]..." \
+    ttk::button $wc.imp -text [mc "Import Iconset"]... \
       -command [namespace current]::ImportSetToPrefs
     pack $wc.imp -side top -anchor w -pady 4
     
@@ -797,9 +802,11 @@ proc ::Emoticons::PrefsSetCmd {value} {
 		LoadTmpIconSet $state($tmpSet,path)
 	    } err]} {
 		puts "catch LoadTmpIconSet err=$err"
-		set str [mc jamessemoticonfail2 $tmpSet]
-		append str "\n" "[mc Error]: $err"
-		::UI::MessageBox -icon error -title [mc Error] \
+		set str [mc "Cannot load iconset %s." $tmpSet]
+		append str "\n"
+		append str [mc "Error"]
+		append str ": $err"
+		::UI::MessageBox -icon error -title [mc "Error"] \
 		  -message $str -parent [winfo toplevel $wprefpage]
 		set priv(havezip) 0
 		set jprefs(emoticonSet) $priv(defaultSet)
@@ -833,8 +840,8 @@ proc ::Emoticons::ImportFileToPrefs {fileName} {
     set tail [file tail $fileName]
     set name [file rootname $tail]
     if {[lsearch [GetAllSets] $name] >= 0} {
-	::UI::MessageBox -icon error -title [mc Error] \
-	  -message [mc jamessemoticonexists $name] \
+	::UI::MessageBox -icon error -title [mc "Error"] \
+	  -message [mc "Iconset %s already exists." $name] \
 	  -parent [winfo toplevel $wprefpage]
 	return
     }
@@ -843,9 +850,11 @@ proc ::Emoticons::ImportFileToPrefs {fileName} {
     if {[catch {
 	LoadTmpIconSet $dst
     } err]} {
-	set str [mc jamessemoticonfail2 $name]
-	append str "\n" "[mc Error]: $err"
-	::UI::MessageBox -icon error -title [mc Error] \
+	set str [mc "Cannot load iconset %s." $name]
+	append str "\n"
+	append str [mc "Error"]
+	append str ": $err"
+	::UI::MessageBox -icon error -title [mc "Error"] \
 	  -message $str -parent [winfo toplevel $wprefpage]
     } else {
 	if {[winfo exists $wprefmb]} {

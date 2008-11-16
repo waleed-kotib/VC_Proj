@@ -64,10 +64,10 @@ namespace eval ::RosterTree {
     # Head titles.
     variable mcHead
     array set mcHead [list \
-      available     [mc Online]         \
-      unavailable   [mc Offline]        \
-      transport     [mc Transports]     \
-      pending       [mc {Subscription Pending}]]
+      available     [mc "Online"]         \
+      unavailable   [mc "Offline"]        \
+      transport     [mc "Transports"]     \
+      pending       [mc "Subscription Pending"]]
     
     # How should JIDs be formatted before export to DnD?
     # Alternative "xmpp:%s?message"
@@ -800,8 +800,8 @@ proc ::RosterTree::BackgroundImageCmd {} {
 
     # Dialog:
     set typeText [join $typeL ", "]
-    set str [mc jaopenbgimage]
-    set dtl [mc jasuppimagefmts]
+    set str [mc "Select an image file for the background. To remove a background image press Remove and Save."]
+    set dtl [mc "The supported image formats are"]
     append dtl " " $typeText
     append dtl "."
     set mbar [::JUI::GetMainMenu]
@@ -1991,10 +1991,10 @@ proc ::RosterTree::EditMenuPostHook {wmenu} {
     variable wfind
     
     if {[winfo ismapped $T] && [string length [GetStyleFindColumn]]} {
-	::UI::MenuMethod $wmenu entryconfigure mFind -state normal
+	::UI::MenuMethod $wmenu entryconfigure mFind -state normal -label [mc "Find"]
 	if {[winfo exists $wfind]} {
-	    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal -label [mc "Find Next"]
+	    ::UI::MenuMethod $wmenu entryconfigure mFindPrevious -state normal -label [mc "Find Previous"]
 	}
     }
 }

@@ -74,7 +74,7 @@ proc ::PutFileIface::PutFile {w fileName ip optList} {
 	  -progress [list [namespace current]::PutProgress $puttoken] \
 	  -command [list [namespace current]::PutCommand $puttoken]
     } tok]} {
-	::UI::MessageBox -title [mc Error] -type ok -message $tok
+	::UI::MessageBox -title [mc "Error"] -type ok -message $tok
 	unset putstate
     } else {
 	set putstate(token) $tok
@@ -111,7 +111,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 	
 	# Depending on the flavour of the return code do different things.
 	if {$::config(talkative) >= 1} {
-	    ::UI::MessageBox -title [mc Error] -type ok -message $str
+	    ::UI::MessageBox -title [mc "Error"] -type ok -message $str
 	} else {
 	    
 	    # The 'msg' is typically a low level error msg.
@@ -122,7 +122,7 @@ proc ::PutFileIface::PutCommand {puttoken token what msg} {
 		default {
 		    set errmsg "Failed while putting file \"$putstate(filetail)\""
 		    if {$::config(talkative) >= 1} {
-			::UI::MessageBox -title [mc Error] \
+			::UI::MessageBox -title [mc "Error"] \
 			  -type ok -message $errmsg
 		    }
 		    ::WB::SetStatusMessage $w $errmsg
@@ -165,7 +165,7 @@ proc ::PutFileIface::FormatMessage {puttoken msg} {
 	}
 	[0-9]* {
 	    set codetxt [::putfile::ncodetotext $msg]
-	    set msg [mc putnot200 $putstate(fromname) $msg $codetxt]
+	    set msg [mc "The server at %s responded with a code %s: %s" $putstate(fromname) $msg $codetxt]
 	    set doformat 0
 	}
 	default {
@@ -233,7 +233,7 @@ proc ::PutFileIface::PutFileToClient {w s ip relativeFilePath opts} {
 	  -progress ::PutFileIface::PutProgress    \
 	  -command [list ::PutFileIface::PutCommand $w]
     } tok]} {
-	::UI::MessageBox -title [mc {File Transfer Error}] \
+	::UI::MessageBox -title [mc "File Transfer Error"] \
 	  -type ok -message $tok
 	unset putstate
     } else {

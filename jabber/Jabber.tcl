@@ -611,10 +611,13 @@ proc ::Jabber::MessageHandler {jlibname xmldata} {
 	    if {[llength $errspec]} {
 		set errcode [lindex $errspec 0]
 		set errmsg  [lindex $errspec 1]		
-		set str [mc jamesserrsend2 $from]
-		append str "\n" "[mc {Error code}]: $errcode\n"
-		append str "[mc Message]: $errmsg"	
-		ui::dialog -title [mc Error] -message $str -icon error -type ok
+		set str [mc "Cannot send message to %s." $from]
+		append str "\n"
+		append str [mc "Error code"]
+		append str ": $errcode\n"
+		append str [mc "Message"]
+		append str ": $errmsg"	
+		ui::dialog -title [mc "Error"] -message $str -icon error -type ok
 		::Jabber::AddErrorLog $from $str
 	    }
 	}
@@ -710,8 +713,8 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	if {$config(subscribe,trpt-msgbox)} {
 	    set subtype [lindex [split $jidtype /] 1]
 	    set typename [::Roster::GetNameFromTrpt $subtype]
-	    ::ui::dialog -title [mc Info] -icon info -type ok \
-	      -message [mc jamesstrptsubsc $typename]
+	    ::ui::dialog -title [mc "Info"] -icon info -type ok \
+	      -message [mc "Your registered account with the %s service will be put in your roster to work as a transport with this service." $typename]
 	}
     } else {
 	
@@ -762,20 +765,20 @@ proc ::Jabber::UnsubscribeEvent {jlibname xmldata} {
 	
 	# Remove completely from our roster.
 	$jlib roster send_remove $from
-	::ui::dialog -title [mc {Presence Subscription}] \
-	  -icon info -type ok -message [mc jamessunsub2 $from]
+	::ui::dialog -title [mc "Presence Subscription"] \
+	  -icon info -type ok -message [mc "Because %s does not allow you to see his/her presence anymore, he/she is removed." $from]
     } else {
 	
 	$jlib send_presence -to $from -type "unsubscribed"
 	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
-	  -message [mc jamessunsubpres2 $from]	
+	  -message [mc "%s does not allow you to see his/her presence anymore." $from]	
 
 	# If there is any subscription to this jid's presence.
 	if {$subscription eq "both" || $subscription eq "to"} {
 	    
 	    set ans [::UI::MessageBox -title [mc "Presence Subscription"] \
 	      -icon question -type yesno -default yes \
-	      -message [mc jamessunsubask2 $from $from]]
+	      -message [mc "%s does not allow you to see his/her presence anymore. Do you want to remove %s?" $from $from]]
 	    if {$ans eq "yes"} {
 		$jlib roster send_remove $from
 	    }
@@ -808,7 +811,7 @@ proc ::Jabber::UnsubscribedEvent {jlibname xmldata} {
 	
 	# This is never the case. Don't know how to differentiate the two cases?
 	if {$ask eq "subscribe"} {
-	    set msg [mc jamessfailedsubsc2 $from]
+	    set msg [mc "Cannot subscribe to %s's presence. The contact does not allow you to see his/her presence." $from]
 	    set status [$jlib roster getstatus $from]
 	    if {$status ne ""} {
 		append msg " " $status
@@ -823,7 +826,7 @@ proc ::Jabber::UnsubscribedEvent {jlibname xmldata} {
 	}
     } else {		
 	::ui::dialog -title [mc "Presence Subscription"] -icon info -type ok \
-	  -message [mc jamessunsubscribed2 $from]
+	  -message [mc "You cannot see %s's presence anymore." $from]
     }
     return 1
 }
@@ -852,13 +855,16 @@ proc ::Jabber::PresenceHandler {jlibname xmldata} {
 	error {
 	    set errspec [jlib::getstanzaerrorspec $xmldata]
 	    foreach {errcode errmsg} $errspec break
-	    set msg "[mc {Presence Error}]."
-	    append msg "\n" "[mc {Error code}]: $errcode\n"
-	    append msg "[mc Message]: $errmsg"
+	    set msg [mc "Presence Error"].
+	    append msg "\n"
+	    append msg [mc "Error code"]
+	    append msg ": $errcode\n"
+	    append msg [mc "Message"]
+	    append msg ": $errmsg"
 
 	    if {$::config(talkative)} {
 		::ui::dialog -icon error -type ok  \
-		  -title [mc Error] -message $msg
+		  -title [mc "Error"] -message $msg
 	    }
 	    ::Jabber::AddErrorLog $from $msg
 	}
@@ -902,17 +908,17 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    #::Jabber::DoCloseClientConnection
 	    SetClosedState
-	    ui::dialog -icon error -title [mc Error] -type ok \
-	      -message [mc jamessconnbroken]
+	    ui::dialog -icon error -title [mc "Error"] -type ok \
+	      -message [mc "The connection was unexpectedly broken."]
 	}
 	streamerror - xmpp-streams-error* {
 	    DoCloseClientConnection
 	    if {[info exists argsA(-errormsg)]} {
-		set msg [mc jamessfatalerr "$argsA(-errormsg)\n"]
+		set msg [mc "Received a fatal error: %s The connection is closed." "$argsA(-errormsg)\n"]
 	    } else {
-		set msg [mc jamessfatalerr ""]
+		set msg [mc "Received a fatal error: %s The connection is closed." ""]
 	    }
-	    ui::dialog -title [mc Error] -icon error -type ok -message $msg
+	    ui::dialog -title [mc "Error"] -icon error -type ok -message $msg
 	}
 	xmlerror {
 	    
@@ -920,23 +926,23 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    DoCloseClientConnection
 	    if {[info exists argsA(-errormsg)]} {
-		set msg [mc jamessfatalerr "$argsA(-errormsg)\n"]
+		set msg [mc "Received a fatal error: %s The connection is closed." "$argsA(-errormsg)\n"]
 	    } else {
-		set msg [mc jamessfatalerr ""]
+		set msg [mc "Received a fatal error: %s The connection is closed." ""]
 	    }
-	    ui::dialog -title [mc Error] -icon error -type ok -message $msg
+	    ui::dialog -title [mc "Error"] -icon error -type ok -message $msg
 	}
 	networkerror {
 	    
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    #::Jabber::DoCloseClientConnection
 	    SetClosedState
-	    set msg [mc jamessconnbroken]
+	    set msg [mc "The connection was unexpectedly broken."]
 	    if {[info exists argsA(-errormsg)]} {
 		append msg "\n"
 		append msg $argsA(-errormsg)
 	    }
-	    ui::dialog -icon error -title [mc Error] -type ok -message $msg
+	    ui::dialog -icon error -title [mc "Error"] -type ok -message $msg
 	}
     }
     return $ishandled
@@ -998,7 +1004,7 @@ proc ::Jabber::ErrorLogDlg {} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Cancel] -command [list destroy $w]
+    ttk::button $frbot.btok -text [mc "Cancel"] -command [list destroy $w]
     pack  $frbot.btok  -side right
     pack  $frbot       -side bottom -fill x
 
@@ -1479,20 +1485,22 @@ proc ::Jabber::GetLastResult {from silent jlibname type subiq} {
 
     set ujid [jlib::unescapejid $from]
     if {[string equal $type "error"]} {
-	set msg [mc jamesserrlastactive2 $ujid]
-	append msg "\n" "[mc Error]: [lindex $subiq 1]"
+	set msg [mc "Cannot query %s's last activity." $ujid]
+	append msg "\n"
+	append msg [mc "Error"]
+	append msg ": [lindex $subiq 1]"
 	::Jabber::AddErrorLog $from $msg	    
 	if {!$silent} {
-	    ::ui::dialog -title [mc Error] -icon error -type ok \
+	    ::ui::dialog -title [mc "Error"] -icon error -type ok \
 	      -message $msg
 	}
     } else {
 	array set attrArr [wrapper::getattrlist $subiq]
 	if {![info exists attrArr(seconds)]} {
-	    ::ui::dialog -title [mc {Last Activity}] -icon info  \
-	      -type ok -message [mc jamesserrnotimeinfo2 $ujid]
+	    ::ui::dialog -title [mc "Last Activity"] -icon info  \
+	      -type ok -message [mc "Cannot query %s's local time information." $ujid]
 	} else {
-	    ::ui::dialog -title [mc {Last Activity}] -icon info  \
+	    ::ui::dialog -title [mc "Last Activity"] -icon info  \
 	      -type ok -message [GetLastString $from $subiq]
 	}
     }
@@ -1503,14 +1511,15 @@ proc ::Jabber::GetLastString {jid subiq} {
     set ujid [jlib::unescapejid $jid]
     array set attrArr [wrapper::getattrlist $subiq]
     if {![info exists attrArr(seconds)]} {
-	set str [mc jamesserrnotimeinfo2 $ujid]
+	set str [mc "Cannot query %s's local time information." $ujid]
     } elseif {![string is integer -strict $attrArr(seconds)]} {
-	set str [mc jamesserrnotimeinfo2 $ujid]
+	set str [mc "Cannot query %s's local time information." $ujid]
     } else {
 	set secs [expr [clock seconds] - $attrArr(seconds)]
 	set uptime [clock format $secs -format "%a %b %d %H:%M:%S %Y"]
 	if {[wrapper::getcdata $subiq] ne ""} {
-	    set msg "[mc Message]: [wrapper::getcdata $subiq]"
+	    set msg [mc "Message"]
+	    append msg ": [wrapper::getcdata $subiq]"
 	} else {
 	    set msg ""
 	}
@@ -1518,16 +1527,16 @@ proc ::Jabber::GetLastString {jid subiq} {
 	# Time interpreted differently for different jid types.
 	if {$jid ne ""} {
 	    if {[regexp {^[^@]+@[^/]+/.*$} $jid match]} {
-		set msg1 [mc jamesstimeused2 $ujid]
+		set msg1 [mc "Time since client %s was last active" $ujid]
 	    } elseif {[regexp {^.+@[^/]+$} $jid match]} {
-		set msg1 [mc jamesstimeconn2 $ujid]
+		set msg1 [mc "Time since %s was last connected" $ujid]
 	    } else {
-		set msg1 [mc jamesstimeservstart2 $ujid]
+		set msg1 [mc "Time since server %s was started" $ujid]
 	    }
 	} else {
-	    set msg1 "[mc jamessuptime2]: "
+	    set msg1 [mc "The uptime/last activity is"]:
 	}
-	set str "${msg1}: $uptime. $msg"
+	set str " ${msg1}: $uptime. $msg"
     }
     return $str
 }
@@ -1559,14 +1568,16 @@ proc ::Jabber::GetTimeResult {from silent jlibname type subiq} {
 	  "We received an error when quering its time info.\
 	  The error was: [lindex $subiq 1]"	    
 	if {!$silent} {
-	    set str [mc jamesserrtime2 $ujid]
-	    append str "\n" "[mc Error]: [lindex $subiq 1]"
-	    ::ui::dialog -title [mc Error] -icon error -type ok -message $str
+	    set str [mc "Cannot query %s's local time." $ujid]
+	    append str "\n"
+	    append str [mc "Error"]
+	    append str ": [lindex $subiq 1]"
+	    ::ui::dialog -title [mc "Error"] -icon error -type ok -message $str
 	}
     } else {
 	set msg [GetTimeString $subiq]
-	::ui::dialog -title [mc {Local Time}] -icon info -type ok \
-	  -message [mc jamesslocaltime2 $ujid $msg]
+	::ui::dialog -title [mc "Local Time"] -icon info -type ok \
+	  -message [mc "%s's local time is: %s" $ujid $msg]
     }
 }
 
@@ -1654,11 +1665,13 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     
     set ujid [jlib::unescapejid $from]
     if {[string equal $type "error"]} {
-	set str [mc jamesserrvers2 $ujid]
-	append str "\n" "[mc Error]: [lindex $iqchild 1]"
+	set str [mc "Cannot query %s's version." $ujid]
+	append str "\n"
+	append str [mc "Error"]
+	append str ": [lindex $iqchild 1]"
 	::Jabber::AddErrorLog $from $str
 	if {!$silent} {
-	    ::ui::dialog -title [mc Error] -icon error -type ok -message $str
+	    ::ui::dialog -title [mc "Error"] -icon error -type ok -message $str
 	}
 	return
     }
@@ -1666,7 +1679,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     set w .jvers[incr uidvers]
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w [mc Version]
+    wm title $w [mc "Version"]
 
     # Global frame.
     ttk::frame $w.frall
@@ -1677,7 +1690,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	set imd [::Theme::FindIconSize 32 dialog-information-Dis]
 
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc Version] -compound left \
+	  -text [mc "Version"] -compound left \
 	  -image [list $im background $imd]
 	pack $w.frall.head -side top -anchor w
 	
@@ -1691,7 +1704,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     
     ttk::label $wbox.msg  \
       -padding {0 0 0 6} -wraplength 300 -justify left \
-      -text [mc javersinfo $from]
+      -text [mc "Version information for %s." $from]
     pack $wbox.msg -side top -anchor w
 
     set frmid $wbox.frmid
@@ -1711,7 +1724,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
     }
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w]
+    ttk::button $frbot.btok -text [mc "OK"] -command [list destroy $w]
     pack $frbot.btok -side right
     pack $frbot -side top -fill x
 
@@ -1888,7 +1901,7 @@ proc ::Jabber::Passwd::Build {} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox} \
       -closecommand [namespace current]::Close
-    wm title $w [mc {New Password}]
+    wm title $w [mc "New Password"]
     
     # Global frame.
     ttk::frame $w.frall
@@ -1905,13 +1918,13 @@ proc ::Jabber::Passwd::Build {} {
 
     set myjid2 [::Jabber::Jlib myjid2]
 
-    ttk::label $frmid.ll -text [mc janewpass]
+    ttk::label $frmid.ll -text [mc "Set a new password for"]
     ttk::label $frmid.le -text $myjid2
-    ttk::label $frmid.lserv -text "[mc {New password}]:" -anchor e
+    ttk::label $frmid.lserv -text [mc "New password"]: -anchor e
     ttk::entry $frmid.eserv -width 18 -show *  \
       -textvariable [namespace current]::password -validate key  \
       -validatecommand {::Jabber::ValidatePasswordStr %S}
-    ttk::label $frmid.lvalid -text "[mc {Retype password}]:" -anchor e
+    ttk::label $frmid.lvalid -text [mc "Retype password"]: -anchor e
     ttk::entry $frmid.evalid -width 18 -show * \
       -textvariable [namespace current]::validate -validate key  \
       -validatecommand {::Jabber::ValidatePasswordStr %S}
@@ -1925,9 +1938,9 @@ proc ::Jabber::Passwd::Build {} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Save] -default active \
+    ttk::button $frbot.btok -text [mc "Save"] -default active \
       -command [list [namespace current]::Doit $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]   \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]   \
       -command [list [namespace current]::Cancel $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -1976,8 +1989,8 @@ proc ::Jabber::Passwd::Doit {w} {
     ::Debug 2 "::Jabber::Passwd::Doit"
 
     if {![string equal $validate $password]} {
-	::ui::dialog -type ok -icon error -title [mc Error] \
-	  -message [mc messpasswddifferent2]
+	::ui::dialog -type ok -icon error -title [mc "Error"] \
+	  -message [mc "Passwords do not match. Please try again."]
 	return
     }
     set finished 1
@@ -2001,10 +2014,13 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 	set errcode [lindex $theQuery 0]
 	set errmsg [lindex $theQuery 1]
 	
-	set str [mc jamesspasswderr2]
-	append str "\n" "[mc {Error code}]: $errcode\n"
-	append str "[mc Message]: $errmsg\n"
-	::ui::dialog -title [mc Error] -icon error -type ok -message $str
+	set str [mc "Cannot set new password."]
+	append str "\n"
+	append str [mc "Error code"]
+	append str ": $errcode\n"
+	append str [mc "Message"]
+	append str ": $errmsg\n"
+	::ui::dialog -title [mc "Error"] -icon error -type ok -message $str
     } else {
 		
 	# Make sure the new password is stored in our profiles.
@@ -2013,8 +2029,8 @@ proc ::Jabber::Passwd::ResponseProc {jlibName type theQuery} {
 	if {$name ne ""} {
 	    ::Profiles::SetWithKey $name password $password
 	}
-	::ui::dialog -title [mc {New Password}] -icon info -type ok \
-	  -message [mc jamesspasswdok]
+	::ui::dialog -title [mc "New Password"] -icon info -type ok \
+	  -message [mc "Setting new password was successful."]
     }
 }
 
@@ -2075,7 +2091,7 @@ proc ::Jabber::Logout::WithStatus {} {
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox} -class JLogout \
       -closecommand [namespace current]::DoCancel
-    wm title $w [mc {Logout With Message}]
+    wm title $w [mc "Logout With Message"]
     ::UI::SetWindowPosition $w
 
     # Global frame.
@@ -2087,7 +2103,7 @@ proc ::Jabber::Logout::WithStatus {} {
 	set imd  [::Theme::Find32Icon $w connectDisImage]
 
 	ttk::label $w.frall.head -style Headlabel \
-	  -text [mc {Logout With Message}] -compound left \
+	  -text [mc "Logout With Message"] -compound left \
 	  -image [list $im background $imd]
 	pack $w.frall.head -side top -fill both -expand 1
 	
@@ -2104,7 +2120,7 @@ proc ::Jabber::Logout::WithStatus {} {
     ttk::frame $frmid
     pack $frmid -side top -fill both -expand 1
     
-    ttk::label $frmid.lstat -text "[mc Message]:" -anchor e
+    ttk::label $frmid.lstat -text [mc "Message"]: -anchor e
     text $frmid.estat -font TkDefaultFont \
       -width 36 -height 2 -wrap word
     
@@ -2115,9 +2131,9 @@ proc ::Jabber::Logout::WithStatus {} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Logout]  \
+    ttk::button $frbot.btok -text [mc "Logout"]  \
       -default active -command [list [namespace current]::DoLogout $w]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list [namespace current]::DoCancel $w]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {

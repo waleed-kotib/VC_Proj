@@ -220,8 +220,8 @@ proc ::UserActivity::Dlg {} {
     variable xmlns
     variable dialogL
     
-    set w [ui::dialog -message [mc activityPickMsg] \
-      -detail [mc activityPickDtl] -icon info \
+    set w [ui::dialog -message [mc "Set your activity that will be shown to your contacts."] \
+      -detail [mc "Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add a descriptive text."] -icon info \
       -buttons {ok cancel remove} \
       -geovariable ::prefs(winGeom,activity) \
       -title [mc "User Activity"] -command [namespace code DlgCmd]]
@@ -240,20 +240,20 @@ proc ::UserActivity::Dlg {} {
     lappend dialogL $w
 
     set mDef [list]
-    lappend mDef [list [mc None] -value "-"]
+    lappend mDef [list [mc "None"] -value "-"]
     lappend mDef {separator}
     foreach name $allActivities {
 	set dname [string totitle [string map {_ " "} $name]]
 	lappend mDef [list [mc $dname] -value $name \
 	  -image [::Theme::FindIconSize 16 activity-$name]]
     }
-    ttk::label $fr.la -text "[mc General]:"
+    ttk::label $fr.la -text [mc "General"]:
     ui::optionmenu $fr.activity -menulist $mDef -direction flush \
       -variable $token\(activity)
-    ttk::label $fr.ls -text "[mc Specific]:"
+    ttk::label $fr.ls -text [mc "Specific"]:
     ui::optionmenu $fr.specific -direction flush \
       -variable $token\(specific)
-    ttk::label $fr.lt -text "[mc Message]:"
+    ttk::label $fr.lt -text [mc "Message"]:
     ttk::entry $fr.text -textvariable $token\(text)
     ttk::checkbutton $fr.all -text [mc "Show all specific activities"] \
       -variable $token\(all) -command [namespace code [list DlgAll $w]]
@@ -310,20 +310,104 @@ proc ::UserActivity::ConfigSpecificMenu {w activity} {
     variable allSpecific
         
     set fr [$w clientframe]
+
+    # User Activity strings.
+    set activityText [dict create]
+    dict set activityText doing_chores [mc "Doing chores"]
+    dict set activityText buying_groceries [mc "Buying groceries"]
+    dict set activityText cleaning [mc "Cleaning"]
+    dict set activityText cooking [mc "Cooking"]
+    dict set activityText doing_maintenance [mc "Doing maintenance"]
+    dict set activityText doing_the_dishes [mc "Doing the dishes"]
+    dict set activityText doing_the_laundry [mc "Doing the laundry"]
+    dict set activityText gardening [mc "Gardening"]
+    dict set activityText running_an_errand [mc "Running an errand"]
+    dict set activityText walking_the_dog [mc "Walking the dog"]
+
+    dict set activityText drinking [mc "Drinking"]
+    dict set activityText having_a_beer [mc "Having a beer"]
+    dict set activityText having_coffee [mc "Having coffee"]
+    dict set activityText having_tea [mc "Having tea"]
+
+    dict set activityText eating [mc "Eating"]
+    dict set activityText having_a_snack [mc "Having a snack"]
+    dict set activityText having_breakfast [mc "Having breakfast"]
+    dict set activityText having_dinner [mc "Having dinner"]
+    dict set activityText having_lunch [mc "Having lunch"]
+
+    dict set activityText exercising [mc "Exercising"]
+    dict set activityText hiking [mc "Hiking"]
+    dict set activityText jogging [mc "Jogging"]
+    dict set activityText playing_sports [mc "Playing sports"]
+    dict set activityText running [mc "Running"]
+    dict set activityText skiing [mc "Skiing"]
+    dict set activityText swimming [mc "Swimming"]
+    dict set activityText working_out [mc "Working out"]
+
+    dict set activityText grooming [mc "Grooming"]
+    dict set activityText at_the_spa [mc "At the spa"]
+    dict set activityText brushing_teeth [mc "Brushing teeth"]
+    dict set activityText getting_a_haircut [mc "Getting a haircut"]
+    dict set activityText shaving [mc "Shaving"]
+    dict set activityText taking_a_bath [mc "Taking a bath"]
+    dict set activityText taking_a_shower [mc "Taking a shower"]
+
+    dict set activityText having_appointment [mc "Having appointment"]
+
+    dict set activityText inactive [mc "Inactive"]
+    dict set activityText day_off [mc "Day off"]
+    dict set activityText hanging_out [mc "Hanging out"]
+    dict set activityText on_vacation [mc "On vacation"]
+    dict set activityText scheduled_holiday [mc "Scheduled holiday"]
+    dict set activityText sleeping [mc "Sleeping"]
+
+    dict set activityText relaxing [mc "Relaxing"]
+    dict set activityText gaming [mc "Gaming"]
+    dict set activityText going_out [mc "Going out"]
+    dict set activityText partying [mc "Partying"]
+    dict set activityText reading [mc "Reading"]
+    dict set activityText rehearsing [mc "Rehearsing"]
+    dict set activityText shopping [mc "Shopping"]
+    dict set activityText socializing [mc "Socializing"]
+    dict set activityText sunbathing [mc "Sunbathing"]
+    dict set activityText watching_tv [mc "Watching tv"]
+    dict set activityText watching_a_movie [mc "Watching a movie"]
+
+    dict set activityText talking [mc "Talking"]
+    dict set activityText in_real_life [mc "In real life"]
+    dict set activityText on_the_phone [mc "On the phone"]
+    dict set activityText on_video_phone [mc "On video phone"]
+
+    dict set activityText traveling [mc "Traveling"]
+    dict set activityText commuting [mc "Commuting"]
+    dict set activityText cycling [mc "Cycling"]
+    dict set activityText driving [mc "Driving"]
+    dict set activityText in_a_car [mc "In a car"]
+    dict set activityText on_a_bus [mc "On a bus"]
+    dict set activityText on_a_plane [mc "On a plane"]
+    dict set activityText on_a_train [mc "On a train"]
+    dict set activityText on_a_trip [mc "On a trip"]
+    dict set activityText walking [mc "Walking"]
+
+    dict set activityText working [mc "Working"]
+    dict set activityText coding [mc "Coding"]
+    dict set activityText in_a_meeting [mc "In a meeting"]
+    dict set activityText studying [mc "Studying"]
+    dict set activityText writing [mc "Writing"]
     
     set mDef [list]
-    lappend mDef [list [mc None] -value "-"]
+    lappend mDef [list [mc "None"] -value "-"]
     if {$activity ne "-"} {
 	lappend mDef [list separator]
 	if {$state(all)} {
 	    foreach name $allSpecific {
-		set dname [string totitle [string map {_ " "} $name]]
-		lappend mDef [list [mc $dname] -value $name \
+		set dname [dict get $activityText $name]
+		lappend mDef [list $dname -value $name \
 		  -image [::Theme::FindIconSize 16 activity-$name]]
 	    }
 	} else {
 	    foreach name $subActivities($activity) {
-		set dname [string totitle [string map {_ " "} $name]]
+		set dname [dict get $activityText $name]
 		lappend mDef [list [mc $dname] -value $name \
 		  -image [::Theme::FindIconSize 16 activity-$name]]
 	    }
@@ -516,7 +600,8 @@ proc ::UserActivity::Event {jlibname xmldata} {
 		    set msg ""
 		} else {
 		    set dname [string totitle [string map {_ " "} $activity]]
-		    set msg "[mc Activity]: [mc $dname]"
+		    set msg [mc "Activity"]
+		    append msg ": [mc $dname]"
 		    if {$specific ne ""} {
 			set dname [string totitle [string map {_ " "} $specific]]
 			append msg " - [mc $dname]"
@@ -537,7 +622,7 @@ proc ::UserActivity::Event {jlibname xmldata} {
 
 namespace eval ::UserActivity {
     
-    ::MegaPresence::Register activity [mc Activity] [namespace code MPBuild]
+    ::MegaPresence::Register activity [mc "Activity"] [namespace code MPBuild]
     
     variable imsize 16
     variable mpwin "-"
@@ -562,7 +647,7 @@ proc ::UserActivity::MPBuild {win} {
     $win configure -menu $m
     $win state {disabled}
     
-    $m add radiobutton -label [mc None] -value "-" \
+    $m add radiobutton -label [mc "None"] -value "-" \
       -variable [namespace current]::mpActivity \
       -command [namespace code MPCmd]
     $m add separator
@@ -603,11 +688,16 @@ proc ::UserActivity::MPDisplayActivity {activity} {
     
     if {$activity eq "-"} {
 	$mpwin configure -image $imblank
-	::balloonhelp::balloonforwindow $mpwin "[mc Activity]: [mc None]"
+	set msg [mc "Activity"]
+	append msg ": "
+	append msg [mc "None"]
+	::balloonhelp::balloonforwindow $mpwin $msg
     } else {
 	set dname [string totitle [string map {_ " "} $activity]]
 	$mpwin configure -image [::Theme::FindIconSize $imsize activity-$activity]	
-	::balloonhelp::balloonforwindow $mpwin "[mc Activity]: [mc $dname]"
+	set msg [mc "Activity"]
+	append msg ": [mc $dname]"
+	::balloonhelp::balloonforwindow $mpwin $msg
     }
 }
 

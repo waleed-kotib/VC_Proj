@@ -52,8 +52,8 @@ proc ::Mac::MacCarbonPrint::PageSetup {w} {
 	    set cache($w,pageFormat) $pageFormat
 	}
     } else {
-	::UI::MessageBox -icon error -title [mc Error] \
-	  -message [mc messprintnoextension2]
+	::UI::MessageBox -icon error -title [mc "Error"] \
+	  -message [mc "Cannot find necessary Tcl extension."]
     }
 }
 
@@ -74,8 +74,8 @@ proc ::Mac::MacCarbonPrint::PrintCanvas {w} {
 	    eval {maccarbonprint::printcanvas $wcan $printObject}
 	}
     } else {
-	::UI::MessageBox -icon error -title [mc Error] \
-	  -message [mc messprintnoextension2]
+	::UI::MessageBox -icon error -title [mc "Error"] \
+	  -message [mc "Cannot find necessary Tcl extension."]
     }	    
 }
 
@@ -96,8 +96,8 @@ proc ::Mac::MacCarbonPrint::PrintText {wtext args} {
 	    eval {maccarbonprint::easytextprint $wtext $printObject} $args
 	}
     } else {
-	::UI::MessageBox -icon error -title [mc Error] \
-	  -message [mc messprintnoextension2]
+	::UI::MessageBox -icon error -title [mc "Error"] \
+	  -message [mc "Cannot find necessary Tcl extension."]
     }	    
 }
 

@@ -36,7 +36,7 @@ proc ::WDialogs::InfoOnPlugins {} {
     
     # Check first of there are *any* plugins.
     if {[llength [::Plugins::GetAllPackages loaded]] == 0} {
-	::UI::MessageBox -icon info -type ok -message [mc messnoplugs]
+	::UI::MessageBox -icon info -type ok -message [mc "There are no plugins or helper applications identified on this system."]
 	return  
     }
     set w $wDlgs(plugs)
@@ -44,7 +44,7 @@ proc ::WDialogs::InfoOnPlugins {} {
 	return
     }
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [mc Plugins]
+    wm title $w [mc "Plugins"]
     
     # Global frame.
     ttk::frame $w.frall
@@ -57,7 +57,7 @@ proc ::WDialogs::InfoOnPlugins {} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w] \
+    ttk::button $frbot.btok -text [mc "OK"] -command [list destroy $w] \
       -default active
     pack $frbot.btok -side right
     pack $frbot -side bottom -fill x
@@ -119,13 +119,25 @@ proc ::WDialogs::InfoOnPlugins {} {
 	}
 	$wtxt insert end " $plug\n" ttitle
 	$wtxt insert end "\n" tline
-	$wtxt insert end "\t[mc Type]:\t" tkey
+	set msg "\t"
+	append msg [mc "Type"]
+	append msg ":\t"
+	$wtxt insert end $msg tkey
 	$wtxt insert end "[::Plugins::GetTypeDesc $plug]\n" ttxt
-	$wtxt insert end "\t[mc Description]:\t" tkey
+	set msg "\t"
+	append msg [mc "Description"]
+	append msg ":\t"
+	$wtxt insert end $msg tkey
 	$wtxt insert end "[::Plugins::GetDescForPlugin $plug]\n" ttxt
-	$wtxt insert end "\t[mc Version]:\t" tkey
+	set msg "\t"
+	append msg [mc "Version"]
+	append msg ":\t"
+	$wtxt insert end $msg tkey
 	$wtxt insert end "$txtver\n" ttxt
-	$wtxt insert end "\t[mc Extensions]:\t" tkey
+	set msg "\t"
+	append msg [mc "Extensions"]
+	append msg ":\t"
+	$wtxt insert end $msg tkey
 	$wtxt insert end "$txtsuf\n" ttxt
 	$wtxt insert end "\n"
     }
@@ -157,7 +169,7 @@ proc ::WDialogs::ShowInfoServer { } {
     array set boolToYesNo [list 0 [mc no] 1 [mc yes]]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
-    wm title $w [mc Server]
+    wm title $w [mc "Server"]
     
     # Global frame.
     ttk::frame $w.frall
@@ -173,15 +185,15 @@ proc ::WDialogs::ShowInfoServer { } {
     
     option add *$fr.TLabel.style Small.TLabel
     
-    ttk::label $fr.x1 -text "[mc Running]:"
+    ttk::label $fr.x1 -text [mc "Running"]:
     ttk::label $fr.x2 -text $boolToYesNo($state(isServerUp))
     ttk::label $fr.a1 -text "IP:"
-    ttk::label $fr.b1 -text "[mc Host]:"
-    ttk::label $fr.c1 -text "[mc Username]:"
-    ttk::label $fr.d1 -text "[mc Port]:"
-    ttk::label $fr.e1 -text "[mc {Buffering support}]:"
-    ttk::label $fr.f1 -text "[mc {Blocking support}]:"
-    ttk::label $fr.g1 -text "[mc Secured]:"
+    ttk::label $fr.b1 -text [mc "Host"]:
+    ttk::label $fr.c1 -text [mc "Username"]:
+    ttk::label $fr.d1 -text [mc "Port"]:
+    ttk::label $fr.e1 -text [mc "Buffering support"]:
+    ttk::label $fr.f1 -text [mc "Blocking support"]:
+    ttk::label $fr.g1 -text [mc "Secured"]:
 
     if {!$state(isServerUp)} {
 	ttk::label $fr.a2 -text $this(ipnum)
@@ -217,7 +229,7 @@ proc ::WDialogs::ShowInfoServer { } {
     # button part
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc OK] -command [list destroy $w]
+    ttk::button $frbot.btok -text [mc "OK"] -command [list destroy $w]
     pack $frbot.btok -side right
     pack $frbot -side bottom -fill x
 
@@ -242,7 +254,7 @@ proc ::WDialogs::WelcomeCanvas { } {
     } else {
 	set f [file join $this(docsPath) Welcome_en.can]
     }
-    ::WDialogs::Canvas $f -title [mc {Welcome}] -encoding utf-8
+    ::WDialogs::Canvas $f -title [mc "Welcome"] -encoding utf-8
 }
 
 namespace eval ::WDialogs:: {

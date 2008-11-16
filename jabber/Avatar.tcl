@@ -334,7 +334,7 @@ proc ::Avatar::CreateAndVerifyPhoto {fileName nameVar} {
     set ans [VerifyPhotoFile $fileName]
     if {![lindex $ans 0]} {
 	set msg [lindex $ans 1]
-	::UI::MessageBox -message $msg -icon error -title [mc Error]
+	::UI::MessageBox -message $msg -icon error -title [mc "Error"]
 	return 0
     } else {
 	if {[catch {set name [image create photo -file $fileName]}]} {
@@ -362,7 +362,7 @@ proc ::Avatar::VerifyPhotoFile {fileName} {
     if {[lsearch $mimeL $mime] < 0} {
 	set typeL [::Media::GetSupportedTypesForMimeList $mimes]
 	set typeText [join $typeL ", "]
-	set msg [mc jasuppimagefmts]
+	set msg [mc "The supported image formats are"]
 	append msg " " $typeText
 	append msg "."	
 	return [list 0 $msg]
@@ -370,14 +370,14 @@ proc ::Avatar::VerifyPhotoFile {fileName} {
 	
     # Make sure it is an image.
     if {[catch {set tmp [image create photo -file $fileName]}]} {
-	return [list 0 [mc jamessimagecreateerr [file tail $fileName]]]
+	return [list 0 [mc "Cannot create an image from %s." [file tail $fileName]]]
     }
     
     # For the time being we limit sizes to 32, 48, or 64.
     set width  [image width $tmp]
     set height [image height $tmp]
     if {($width != $height) || ([lsearch $sizes $width] < 0)} {
-	set msg [mc jamessavaerrsize [join $sizes {, }]]
+	set msg [mc "The avatar must be square of size %s." [join $sizes {, }]]
 	set ans [list 0 $msg]
     } else {
 	set ans 1

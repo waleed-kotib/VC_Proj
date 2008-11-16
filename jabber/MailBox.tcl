@@ -462,7 +462,7 @@ proc ::MailBox::Build {args} {
       -macclass {document {toolbarButton standardDocument}} \
       -usemacmainmenu 1 -closecommand ::MailBox::CloseHook
 
-    wm title $w [mc Inbox]
+    wm title $w [mc "Inbox"]
 
     set locals(w) $w
 
@@ -496,22 +496,22 @@ proc ::MailBox::Build {args} {
     set locals(wtbar) $wtbar
 
     $wtbar newbutton new  \
-      -text [mc Message] -image $iconNew -disabledimage $iconNewDis  \
+      -text [mc "Message"] -image $iconNew -disabledimage $iconNewDis  \
       -command ::NewMsg::Build
     $wtbar newbutton reply  \
-      -text [mc Reply] -image $iconReply -disabledimage $iconReplyDis  \
+      -text [mc "Reply"] -image $iconReply -disabledimage $iconReplyDis  \
       -command ::MailBox::ReplyTo -state disabled
     $wtbar newbutton forward  \
-      -text [mc Forward] -image $iconForward -disabledimage $iconForwardDis  \
+      -text [mc "Forward"] -image $iconForward -disabledimage $iconForwardDis  \
       -command ::MailBox::ForwardTo -state disabled
     $wtbar newbutton save  \
-      -text [mc Save] -image $iconSave -disabledimage $iconSaveDis  \
+      -text [mc "Save"] -image $iconSave -disabledimage $iconSaveDis  \
       -command ::MailBox::SaveMsg -state disabled
     $wtbar newbutton print  \
-      -text [mc Print] -image $iconPrint -disabledimage $iconPrintDis  \
+      -text [mc "Print"] -image $iconPrint -disabledimage $iconPrintDis  \
       -command ::MailBox::DoPrint -state disabled
     $wtbar newbutton trash  \
-      -text [mc Delete] -image $iconTrash -disabledimage $iconTrashDis  \
+      -text [mc "Delete"] -image $iconTrash -disabledimage $iconTrashDis  \
       -command ::MailBox::TrashMsg -state disabled
     
     ::hooks::run buildMailBoxButtonTrayHook $wtbar
@@ -680,13 +680,13 @@ proc ::MailBox::TreeCtrl {T wysc} {
     $T column create -tags cRead -resize 0 \
       -itembackground $itemBg -button 1 -borderwidth $bd \
       -background $bg -textcolor $fg
-    $T column create -tags cSubject -expand 1 -text [mc Subject] \
+    $T column create -tags cSubject -expand 1 -text [mc "Subject"] \
       -itembackground $itemBg -button 1 -squeeze 1 -borderwidth $bd \
       -background $bg -textcolor $fg
-    $T column create -tags cFrom    -expand 1 -text [mc From]    \
+    $T column create -tags cFrom    -expand 1 -text [mc "From"]    \
       -itembackground $itemBg -button 1 -squeeze 1 -borderwidth $bd  \
       -background $bg -textcolor $fg
-    $T column create -tags cDate    -expand 1 -text [mc Date]    \
+    $T column create -tags cDate    -expand 1 -text [mc "Date"]    \
       -itembackground $itemBg -button 1 -squeeze 1 -arrow up -borderwidth $bd \
       -background $bg  -textcolor $fg
     $T column create -tags cSecs -visible 0
@@ -1176,7 +1176,7 @@ proc ::MailBox::SaveMsg {} {
     set ans [tk_getSaveFile -title [mc "Save Message"] -initialfile $jid2.txt]
     if {[string length $ans]} {
 	if {[catch {open $ans w} fd]} {
-	    ::UI::MessageBox -title {Open Failed} -parent $wtbl -type ok \
+	    ::UI::MessageBox -title [mc "Open Failed"] -parent $wtbl -type ok \
 	      -message "Failed opening file [file tail $ans]: $fd"
 	    return
 	}
@@ -1594,8 +1594,8 @@ proc ::MailBox::SaveMailboxVer1 {} {
     # Work on a temporary file and switch later.
     set tmpFile $this(inboxFile).tmp
     if {[catch {open $tmpFile w} fid]} {
-	::UI::MessageBox -type ok -icon error -title [mc Error] \
-	  -message [mc jamesserrinboxopen2 $tmpFile]
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
+	  -message [mc "Cannot open the inbox file %s when trying to save it." $tmpFile]
 	return
     }
     #fconfigure $fid -encoding utf-8
@@ -1672,8 +1672,8 @@ proc ::MailBox::SaveMailboxVer2 {args} {
     # Work on a temporary file and switch later.
     set tmpFile $this(inboxFile).tmp
     if {[catch {open $tmpFile w} fid]} {
-	::UI::MessageBox -type ok -icon error -title [mc Error] \
-	  -message [mc jamesserrinboxopen2 $tmpFile]
+	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
+	  -message [mc "Cannot open the inbox file %s when trying to save it." $tmpFile]
 	return
     }
     #fconfigure $fid -encoding utf-8
@@ -1779,8 +1779,8 @@ proc ::MailBox::ReadMailboxVer1 {} {
 
     if {[catch {source $this(inboxFile)} msg]} {
 	set tail [file tail $this(inboxFile)]
-	::UI::MessageBox -title [mc Error] -icon error  \
-	  -type ok -message [mc jamesserrinboxread2 $tail $msg]
+	::UI::MessageBox -title [mc "Error"] -icon error  \
+	  -type ok -message [mc "Cannot read the inbox file %s: %s" $tail $msg]
     } else {
 	
 	# The mailbox on file is just a hierarchical list that needs to be
@@ -1813,8 +1813,8 @@ proc ::MailBox::ReadMailboxVer2 {} {
 
     if {[catch {source $this(inboxFile)} msg]} {
 	set tail [file tail $this(inboxFile)]
-	::UI::MessageBox -title [mc Error] -icon error  \
-	  -type ok -message [mc jamesserrinboxread2 $tail $msg]
+	::UI::MessageBox -title [mc "Error"] -icon error  \
+	  -type ok -message [mc "Cannot read the inbox file %s: %s" $tail $msg]
     } else {
 	
 	# Keep the uidmsg in sync for each list in mailbox.
@@ -1952,7 +1952,7 @@ proc ::MailBox::MKOpen {} {
     mk::view layout mailbox.label {view:S label:S}
     
     # The first line must always be the default inbox.
-    mk::set mailbox.label!0 view inbox label [mc Inbox]
+    mk::set mailbox.label!0 view inbox label [mc "Inbox"]
 }
 
 proc ::MailBox::MKAdd {uuid time isread xmldata file} {
@@ -2130,7 +2130,7 @@ proc ::MailBox::MKExportDlg {} {
 	tk_messageBox -message "Metakit is necessary to export as xml file."
 	return
     }
-    set fileName [tk_getSaveFile -title [mc {Save File}] \
+    set fileName [tk_getSaveFile -title [mc "Save File"] \
       -initialfile myinbox.xml -defaultextension .xml \
       -filetypes { {"XML File" {.xml}} }]
     if {[llength $fileName]} {

@@ -442,7 +442,7 @@ proc ::Plugins::CompileAndLoadPackages {} {
 	    
 		# Search for it! Be silent.
 		if {[string equal $plugin($name,type) "internal"]} {
-		    ::Splash::SetMsg "[mc splashlook] $name..."
+		    ::Splash::SetMsg [mc "Looking for %s" $name]...
 		    if {![catch {
 			eval {package require} $plugin($name,pack)
 		    } msg]} {
@@ -1321,9 +1321,9 @@ proc ::Plugins::SetCanvasBinds {wcan oldTool newTool} {
 proc ::Plugins::BuildPrefsHook {wtree nbframe} {
     
     if {![::Preferences::HaveTableItem Whiteboard]} {
-	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
+	::Preferences::NewTableItem {Whiteboard} [mc "Whiteboard"]
     }
-    ::Preferences::NewTableItem {Whiteboard Plugins2} [mc Plugins]
+    ::Preferences::NewTableItem {Whiteboard Plugins2} [mc "Plugins"]
 
     set wpage [$nbframe page Plugins2]
     BuildPrefsPage $wpage
@@ -1343,8 +1343,8 @@ proc ::Plugins::BuildPrefsPage {page} {
     ttk::frame $pbl
     pack  $pbl  -side top -anchor w
     
-    set str [mc prefplugctrl2]
-    append str " " [mc "Requires a restart of" $prefs(appName)] "."
+    set str [mc "Select the plugins you want to be loaded."]
+    append str " " [mc "Requires a restart of %s" $prefs(appName)].
     ttk::label $pbl.lhead -wraplength 300 -justify left \
       -text $str -padding {0 0 0 4}
     pack $pbl.lhead -side top -anchor w
@@ -1362,7 +1362,16 @@ proc ::Plugins::BuildPrefsPage {page} {
 	  -variable [namespace current]::tmpPrefPlugins($plug)
 	grid  $pfr.c$i  -sticky w  -padx 4
 	
-	::balloonhelp::balloonforwindow $pfr.c$i [mc tooltip-$plug]
+	set tooltip [dict create]
+	dict set tooltip snack        [mc "Support for mp3, wav, and a few other audio formats"]
+	dict set tooltip Img          [mc "Support for common image formats"]
+	dict set tooltip tkpng        [mc "Support for PNG images"]
+	dict set tooltip xanim        [mc "Support for several animation, video and audio formats"]
+	dict set tooltip QuickTimeTcl [mc "Support for several animation, image, video and audio formats"]
+	dict set tooltip TextImporter [mc "Import plain text documents"]
+	dict set tooltip HtmlImport   [mc "Import HTML pages"]
+	
+	::balloonhelp::balloonforwindow $pfr.c$i [dict get $tooltip $plug]
 	
 	incr i
     }

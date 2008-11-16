@@ -192,9 +192,9 @@ proc ::SlideShow::BuildPrefsHook {wtree nbframe} {
     variable tmpPrefs
 
     if {![::Preferences::HaveTableItem Whiteboard]} {
-	::Preferences::NewTableItem {Whiteboard} [mc Whiteboard]
+	::Preferences::NewTableItem {Whiteboard} [mc "Whiteboard"]
     }
-    ::Preferences::NewTableItem {Whiteboard {SlideShow}} [mc mSlideShow]
+    ::Preferences::NewTableItem {Whiteboard {SlideShow}} [mc "Slide Show"]
     set wpage [$nbframe page {SlideShow}]    
     
     set wc $wpage.c
@@ -210,7 +210,7 @@ proc ::SlideShow::BuildPrefsHook {wtree nbframe} {
 
     ttk::checkbutton $lfr.ss -text [mc "Show navigation buttons"] \
       -variable [namespace current]::tmpPrefs(slideShow,buttons)
-    ttk::checkbutton $lfr.size -text [mc prefssresize2]  \
+    ttk::checkbutton $lfr.size -text [mc "Resize window to fit slides"]  \
       -variable [namespace current]::tmpPrefs(slideShow,autosize)
  
     grid  $lfr.ss    -sticky w
@@ -425,23 +425,23 @@ proc ::SlideShow::SetMenuState {w} {
     
     set wmenu [::UI::GetMenu $w mSlideShow]
     if {[info exists priv($w,dir)] && [file isdirectory $priv($w,dir)]} {
-	::UI::MenuMethod $wmenu entryconfigure First -state normal
-	::UI::MenuMethod $wmenu entryconfigure Last  -state normal
+	::UI::MenuMethod $wmenu entryconfigure First -state normal -label [mc "First"]
+	::UI::MenuMethod $wmenu entryconfigure Last  -state normal -label [mc "Last"]
 
 	if {[llength $priv(pages)]} {
-	    ::UI::MenuMethod $wmenu entryconfigure Previous -state normal
-	    ::UI::MenuMethod $wmenu entryconfigure Next     -state normal
+	    ::UI::MenuMethod $wmenu entryconfigure Previous -state normal -label [mc "Previous"]
+	    ::UI::MenuMethod $wmenu entryconfigure Next     -state normal -label [mc "Next"]
 	}
 	if {[string equal $priv($w,current) [lindex $priv(pages) 0]]} {
-	    ::UI::MenuMethod $wmenu entryconfigure Previous -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure Previous -state disabled -label [mc "Previous"]
 	} elseif {[string equal $priv($w,current) [lindex $priv(pages) end]]} {
-	    ::UI::MenuMethod $wmenu entryconfigure Next -state disabled
+	    ::UI::MenuMethod $wmenu entryconfigure Next -state disabled -label [mc "Next"]
 	}
     } else {
-	::UI::MenuMethod $wmenu entryconfigure First -state disabled
-	::UI::MenuMethod $wmenu entryconfigure Last  -state disabled
-	::UI::MenuMethod $wmenu entryconfigure Previous -state disabled
-	::UI::MenuMethod $wmenu entryconfigure Next     -state disabled
+	::UI::MenuMethod $wmenu entryconfigure First -state disabled -label [mc "First"]
+	::UI::MenuMethod $wmenu entryconfigure Last  -state disabled -label [mc "Last"]
+	::UI::MenuMethod $wmenu entryconfigure Previous -state disabled -label [mc "Previous"]
+	::UI::MenuMethod $wmenu entryconfigure Next     -state disabled -label [mc "Next"]
     }    
 }
 

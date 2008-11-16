@@ -161,7 +161,7 @@ proc ::Spell::Popup {w x y} {
 		  -command [namespace code [list Cmd $w $s]]
 	    }
 	    $menu add separator
-	    $menu add command -label [mc mAddToDictionary] \
+	    $menu add command -label [mc "Add to Dictionary"] \
 	      -command [namespace code [list AddWord $w]]
 	    set X [expr [winfo rootx $w] + $x]
 	    set Y [expr [winfo rooty $w] + $y]

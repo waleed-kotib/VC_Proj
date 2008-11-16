@@ -1481,7 +1481,7 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
 	    # @@@ Who is that idiot that wrote this code!
 	    # Localized menu label. Special for mAboutCoccinella!
 	    if {$name eq "mAboutCoccinella"} {
-		set locname [mc {About %s} $prefs(appName)]
+		set locname [mc "&About %s" $prefs(appName)]
 	    } else {
 		set locname [mc $name]
 	    }

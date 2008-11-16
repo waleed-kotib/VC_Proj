@@ -71,16 +71,15 @@ proc ::Sounds::Mappings {} {
     ::Debug 2 "::Sounds::Mappings"
     
     variable nameToText 
-    array set nameToText {
-	online          "Contact is online"
-	offline         "Contact is offline"
-	newmsg          "Incoming message"
-	newchatmsg      "Incoming chat"
-	newchatthread   "New chat thread"
-	statchange      "Contact presence change"
-	connected       "Logged in"
-	groupchatpres   "Chatroom presence change"
-    }
+    set nameToText [dict create]
+	dict set nameToText online          [mc "Contact is online"]
+	dict set nameToText offline         [mc "Contact is offline"]
+	dict set nameToText newmsg          [mc "Incoming message"]
+	dict set nameToText newchatmsg      [mc "Incoming chat"]
+	dict set nameToText newchatthread   [mc "New chat thread"]
+	dict set nameToText statchange      [mc "Contact presence change"]
+	dict set nameToText connected       [mc "Logged in"]
+	dict set nameToText groupchatpres   [mc "Chatroom presence change"]
 
     # Map between sound name and file name for default sound set.
     variable soundIndex
@@ -103,7 +102,7 @@ proc ::Sounds::Mappings {} {
 
 proc ::Sounds::GetTextForName {name} {
     variable nameToText 
-    return [mc $nameToText($name)]
+    return [dict get $nameToText $name]
 }
 
 proc  ::Sounds::InitPrefsHook {} {
@@ -494,7 +493,7 @@ proc ::Sounds::BuildPrefsHook {wtree nbframe} {
     variable priv
     
     if {$priv(canPlay)} {
-	::Preferences::NewTableItem {General Sounds} [mc {Sounds}]
+	::Preferences::NewTableItem {General Sounds} [mc "Sounds"]
 	set wpage [$nbframe page {Sounds}]    
 	BuildPrefsPage $wpage
     }
@@ -536,7 +535,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
    
     set fss $wc.fss
     ttk::frame $fss
-    ttk::label $fss.l -text "[mc {Sound set}]:"
+    ttk::label $fss.l -text [mc "Sound set"]:
     ui::combobutton $fss.p -variable [namespace current]::tmpPrefs(soundSet) \
       -menulist [ui::optionmenu::menuList $soundSets]
         
@@ -544,7 +543,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     grid  $fss.p  -sticky ew
     grid columnconfigure $fss 1 -minsize [$fss.p maxwidth]
 
-    ttk::label $wc.lbl -text "[mc prefsounpick2]:"
+    ttk::label $wc.lbl -text [mc "Enable or disable sounds below"]:
 
     set wmid $wc.m
     ttk::frame $wmid
@@ -554,10 +553,9 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     pack  $wc.m    -side top
     
     foreach name $allSounds {
-	set txt $nameToText($name)
-	ttk::checkbutton $wmid.c$name -text [mc $txt]  \
+	ttk::checkbutton $wmid.c$name -text [dict get $nameToText $name]  \
 	  -variable [namespace current]::tmpPrefs($name)
-	ttk::button $wmid.b$name -text [mc Play] \
+	ttk::button $wmid.b$name -text [mc "Play"] \
 	  -command [list [namespace current]::PlayTmpPrefSound $name]
 	grid  $wmid.c$name  $wmid.b$name  -sticky w -padx 4 -pady 1
 	grid  $wmid.b$name  -sticky ew
@@ -565,7 +563,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
 
     set fvol $wc.fvol
     ttk::frame $fvol
-    ttk::label $fvol.l -text "[mc Volume]:"
+    ttk::label $fvol.l -text [mc "Volume"]:
     ttk::scale $fvol.v -orient horizontal -from 0 -to 100 \
       -variable [namespace current]::tmpPrefs(volume) -value $tmpPrefs(volume)
 
@@ -583,7 +581,7 @@ proc ::Sounds::MidiPlayer {} {
     variable tmpPrefs
     
     set title [mc "External Midi Player"]
-    set ans [ui::megaentry -title $title -message [mc prefmidimsg] \
+    set ans [ui::megaentry -title $title -message [mc "Set command to use for playing MIDI sounds. This option is only relevant if you use a sound set with MIDI files."] \
       -label [mc "MIDI command"]: -value $tmpPrefs(midiCmd)]
     if {$ans ne ""} {
 	set tmpPrefs(midiCmd) [ui::megaentrytext $ans]
@@ -632,7 +630,7 @@ proc ::Sounds::SavePrefsHook {} {
     if {!$priv(canPlay)} {
 	return
     }
-    if {[string equal $tmpPrefs(soundSet) [mc Default]]} {
+    if {[string equal $tmpPrefs(soundSet) [mc "Default"]]} {
 	set tmpPrefs(soundSet) ""
     }
     if {![string equal $tmpPrefs(soundSet) $sprefs(soundSet)]} {
@@ -672,7 +670,7 @@ proc ::Sounds::CancelPrefsHook {} {
 	    ::Preferences::HasChanged
 	}
     }
-    if {[string equal $tmpPrefs(soundSet) [mc Default]]} {
+    if {[string equal $tmpPrefs(soundSet) [mc "Default"]]} {
 	set tmpPrefs(soundSet) ""
     }
     if {![string equal $sprefs(soundSet) $tmpPrefs(soundSet)]} {
@@ -692,7 +690,7 @@ proc ::Sounds::UserDefaultsHook {} {
 	set tmpPrefs($name) $sprefs($name)
     }
     if {[string equal $sprefs(soundSet) ""]} {
-	set tmpPrefs(soundSet) [mc Default]
+	set tmpPrefs(soundSet) [mc "Default"]
     } else {
 	set tmpPrefs(soundSet) $sprefs(soundSet)
     }

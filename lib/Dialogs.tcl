@@ -100,7 +100,7 @@ proc ::Dialogs::UnixPrintLpr {w wtoprint} {
     
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} -closecommand ::Dialogs::UnixPrintLprClose
-    wm title $w [mc Print]
+    wm title $w [mc "Print"]
     
     # Global frame.
     ttk::frame $w.frall
@@ -112,11 +112,11 @@ proc ::Dialogs::UnixPrintLpr {w wtoprint} {
 
     set frtot $wbox.f
     ttk::labelframe $frtot -padding [option get . groupSmallPadding {}] \
-      -text [mc Print]
+      -text [mc "Print"]
     pack $frtot -side top
         
     ttk::label $frtot.msg -style Small.TLabel \
-      -wraplength 300 -justify left -text [mc printunixcmd]
+      -wraplength 300 -justify left -text [mc "Shell print command, edit if desired"]
     ttk::entry $frtot.entcmd -width 20   \
       -textvariable [namespace current]::psCmd
 
@@ -126,9 +126,9 @@ proc ::Dialogs::UnixPrintLpr {w wtoprint} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Print] -default active  \
+    ttk::button $frbot.btok -text [mc "Print"] -default active  \
       -command [list set [namespace current]::finishedPrint 1]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list set [namespace current]::finishedPrint 0]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -158,14 +158,14 @@ proc ::Dialogs::UnixPrintLpr {w wtoprint} {
 		if {[catch {eval exec $psCmd <<    \
 		  {[eval $wtoprint postscript $prefs(postscriptOpts)]}} msg]} {
 		    ::UI::MessageBox -message "Error when printing: $msg" \
-		      -title [mc Error] -icon error -type ok
+		      -title [mc "Error"] -icon error -type ok
 		}
 	    }
 	    Text {
 		if {[catch {eval exec $psCmd <<    \
 		  {[$wtoprint get 1.0 end]}} msg]} {
 		    ::UI::MessageBox -message "Error when printing: $msg" \
-		      -title [mc Error] -icon error -type ok
+		      -title [mc "Error"] -icon error -type ok
 		}
 	    }
 	}
@@ -335,9 +335,9 @@ proc ::PSPageSetup::PSPageSetup {w} {
     # Button part.
     set frbot $wbox.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
-    ttk::button $frbot.btok -text [mc Save] -default active  \
+    ttk::button $frbot.btok -text [mc "Save"] -default active  \
       -command [list [namespace current]::PushBtSave]
-    ttk::button $frbot.btcancel -text [mc Cancel]  \
+    ttk::button $frbot.btcancel -text [mc "Cancel"]  \
       -command [list set [namespace current]::finished 0]
     set padx [option get . buttonPadX {}]
     if {[option get . okcancelButtonOrder {}] eq "cancelok"} {
@@ -408,7 +408,7 @@ proc ::PSPageSetup::PushBtSave {  } {
 		if {![regexp "^${num_}$" $txtvarEnt($optName)]} {
 		    
 		    # Not a valid number.
-		    ::UI::MessageBox -icon error -type ok -title [mc Error] \
+		    ::UI::MessageBox -icon error -type ok -title [mc "Error"] \
 		      -message "Error: not a valid number for $optName" 		      
 		    return
 		}
@@ -466,7 +466,7 @@ proc ::Dialogs::AboutQuickTimeTcl {} {
     if {[tk windowingsystem] eq "aqua"} {
 	wm transient $w
     }
-    wm title $w [mc mAboutQuickTimeTcl]
+    wm title $w [mc "About QuickTimeTcl"]
     
     pack [movie $w.m -file $fakeQTSampleFile]
     set theSize [$w.m size]

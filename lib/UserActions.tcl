@@ -41,8 +41,8 @@ proc ::UserActions::DoPrintCanvas {wcan} {
 	}
 	windows {
 	    if {!$this(package,printer)} {
-		::UI::MessageBox -icon error -title [mc Error] \
-		  -message [mc messprintnoextension2]
+		::UI::MessageBox -icon error -title [mc "Error"] \
+		  -message [mc "Cannot find necessary Tcl extension."]
 	    } else {
 		::Windows::Printer::Print $wcan
 	    }
@@ -69,8 +69,8 @@ proc ::UserActions::DoPrintText {wtext args} {
 	}
 	windows {
 	    if {!$this(package,printer)} {
-		::UI::MessageBox -icon error -title [mc Error] \
-		  -message [mc messprintnoextension2]
+		::UI::MessageBox -icon error -title [mc "Error"] \
+		  -message [mc "Cannot find necessary Tcl extension."]
 	    } else {
 		::Windows::Printer::DoPrintText $wtext
 	    }
@@ -90,8 +90,8 @@ proc ::UserActions::PageSetup {w} {
 	}
 	windows {
 	    if {!$this(package,printer)} {
-		::UI::MessageBox -icon error -title [mc Error] \
-		  -message [mc messprintnoextension2]
+		::UI::MessageBox -icon error -title [mc "Error"] \
+		  -message [mc "Cannot find necessary Tcl extension."]
 	    } else {
 		::Windows::Printer::PageSetup
 	    }
@@ -132,8 +132,8 @@ proc ::UserActions::DoQuit {args} {
     }
     array set argsArr $args
     if {$argsArr(-warning)} {
-	set ans [::UI::MessageBox -title [mc Quit?] -type yesno -icon warning \
-	  -default yes -message [mc messdoquit?]]
+	set ans [::UI::MessageBox -title [mc "Quit"] -type yesno -icon warning \
+	  -default yes -message [mc "Do you actually want to quit?"]]
 	if {$ans eq "no"} {
 	    return 0
 	}

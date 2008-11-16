@@ -71,12 +71,12 @@ proc ::Import::ImportImageOrMovieDlg {wcan} {
 	set opts [list -coords [::CanvasUtils::NewImportAnchor $wcan]]	
 	set errMsg [::Import::DoImport $wcan $opts -file $fileName]
 	if {$errMsg ne ""} {
-	    ::UI::MessageBox -title [mc Error] -icon error -type ok \
+	    ::UI::MessageBox -title [mc "Error"] -icon error -type ok \
 	      -message "Failed importing: $errMsg"
 	}
     } else {
-	::UI::MessageBox -title [mc Error] -icon error -type ok \
-	  -message [mc messfailmimeimp2 $mime]
+	::UI::MessageBox -title [mc "Error"] -icon error -type ok \
+	  -message [mc "Cannot find importer for the MIME type %s" $mime]
     }
 }
 
@@ -884,7 +884,8 @@ proc ::Import::ObjectProgress {token size bytes} {
     set ms [clock clicks -milliseconds]
     
     if {[expr $ms - $state(last)] > $prefs(progUpdateMillis)} {
-	set tmsg [::timing::getmessage $token $total]	
+	set tmsg [::timing::getmessage $token $total]
+
 	set msg [mc progress-Receiving $state(tail) $tmsg]
 	::WB::SetStatusMessage $w $msg
 	set state(last) $ms
@@ -900,6 +901,7 @@ proc ::Import::ObjectCommand {token status {err ""}} {
 
     switch -- $status {
 	ok {
+	    # What is this string for? Delete?
 	    set msg [mc progress-Receiving $state(tail) "Final"]
 	    ::WB::SetStatusMessage $w $msg
 	    
@@ -1164,7 +1166,9 @@ proc ::Import::HttpGetQuickTimeTcl {w url opts args} {
 
     # This one shall return almost immediately.
     if {[catch {movie $wmovie -url $url -loadcommand $callback} msg]} {
-	::UI::MessageBox -icon error -type ok -message "[mc Error]: $msg"
+	set str [mc "Error"]
+	append str ": $msg"
+	::UI::MessageBox -icon error -type ok -message $str
 	catch {destroy $wfr}
 	return
     }
@@ -1196,7 +1200,7 @@ proc ::Import::QuickTimeTclCallback {gettoken wmovie msg {err {}}} {
 		append msg " $err"
 	    }
 	    ::WB::SetStatusMessage $w ""
-	    ::UI::MessageBox -icon error -title [mc Error] -type ok -message $msg
+	    ::UI::MessageBox -icon error -title [mc "Error"] -type ok -message $msg
 	    unset getstate
 	    return
 	}
@@ -1299,7 +1303,9 @@ proc ::Import::XanimQuerySize {fileName} {
 	# Check version number.
 	if {[regexp "Rev +($ver_)" $res match ver]} {
 	    if {$ver < 2.7} {
-		puts stderr "[mc Error]: xanim must have at least version 2.7"
+		set msg [mc "Error"]
+		append msg ": xanim must have at least version 2.7"
+		puts stderr $msg
 		return {}
 	    }
 	}
@@ -1790,14 +1796,14 @@ proc ::Import::SaveImageAsFile {wcan id} {
 	set ext [file extension $origFile]
 	set initFile Untitled${ext}
 	set fileName [tk_getSaveFile -defaultextension $ext   \
-	  -title [mc {Save As}] -initialfile $initFile]
+	  -title [mc "Save As"] -initialfile $initFile]
 	if {$fileName ne ""} {
 	    file copy $origFile $fileName
 	}
     } else {
 	set initFile Untitled.gif
 	set fileName [tk_getSaveFile -defaultextension gif   \
-	  -title [mc {Save As GIF}] -initialfile $initFile]
+	  -title [mc "Save As GIF"] -initialfile $initFile]
 	if {$fileName ne ""} {
 	    $imageName write $fileName -format gif
 	}
@@ -2000,7 +2006,7 @@ proc ::Import::ReloadImage {w id} {
     set coords [$wcan coords $id]
         
     if {![info exists optsArr(-url)]} {
-	::UI::MessageBox -icon error -title [mc Error] -type ok -message \
+	::UI::MessageBox -icon error -title [mc "Error"] -type ok -message \
 	  "No url found for the file \"$fileTail\" with MIME type $mime"
 	return
     }
@@ -2021,7 +2027,7 @@ proc ::Import::ReloadImage {w id} {
 
 	# Display a broken image to indicate for the user.
 	eval {NewBrokenImage $wcan $coords} $opts
-	::UI::MessageBox -icon error -title [mc Error] -type ok \
+	::UI::MessageBox -icon error -title [mc "Error"] -type ok \
 	  -message "Failed loading \"$optsArr(-url)\": $errMsg"
     }
 }

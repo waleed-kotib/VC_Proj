@@ -86,11 +86,11 @@ proc ::Totd::Build {} {
     ttk::checkbutton $frbot.c -style Small.TCheckbutton \
       -text [mc "Show tips on startup"] \
       -variable [namespace current]::opts(show)
-    ttk::button $frbot.btok -text [mc OK] -default active \
+    ttk::button $frbot.btok -text [mc "OK"] -default active \
       -command [list destroy $w]
-    ttk::button $frbot.next -text [mc Next] \
+    ttk::button $frbot.next -text [mc "Next"] \
       -command [namespace code [list Navigate 1]]
-    ttk::button $frbot.prev -text [mc Previous] \
+    ttk::button $frbot.prev -text [mc "Previous"] \
       -command [namespace code [list Navigate -1]]
     pack $frbot.btok $frbot.next $frbot.prev -side right -padx 4
     pack $frbot.c -side left

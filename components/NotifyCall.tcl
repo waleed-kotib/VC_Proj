@@ -82,7 +82,7 @@ proc ::NotifyCall::BuildDialer {w phoneNumber } {
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand ::NotifyCall::CloseDialer
 
-    wm title $w [mc notifyCall]
+    wm title $w [mc "Notify Call"]
 
     ::UI::SetWindowPosition $w
 
@@ -90,8 +90,10 @@ proc ::NotifyCall::BuildDialer {w phoneNumber } {
     # Global frame.
     ttk::frame $w.f
     pack  $w.f  -fill x
-				 
-    ttk::label $w.f.head -style Headlabel -text "[mc {inboundCall}]: $phoneNumber"
+
+    set msg [mc "Inbound Call"]
+    append msg ": $phoneNumber"
+    ttk::label $w.f.head -style Headlabel -text $msg
     pack  $w.f.head  -side top -fill both -expand 1
 
     ttk::separator $w.f.s -orient horizontal
@@ -105,15 +107,15 @@ proc ::NotifyCall::BuildDialer {w phoneNumber } {
     ttk::frame $box
     pack $box -side bottom -fill x
     
-#    ttk::label $box.l -text "[mc phoneNumber]:"
+#    ttk::label $box.l -text [mc "Number"]:
 #    ttk::entry $box.e -textvariable [namespace current]::phoneNumber  \
 #      -width 18
 
 
-    ttk::button $box.hungup -text [mc callHungUp]  \
+    ttk::button $box.hungup -text [mc "Hung Up"]  \
       -command [list [namespace current]::HungUp $w ]
 
-    ttk::button $box.vm  -text [mc callVM]  \
+    ttk::button $box.vm  -text [mc "Call VM?"]  \
       -command [list [namespace current]::HungUp $w ]
 
 #    grid  $box.l  $box.e  $box.dial -padx 1 -pady 4

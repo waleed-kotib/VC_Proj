@@ -338,7 +338,9 @@ proc ::ttk::dialog::file::Create {win class} {
 	set image [option get $data(cfgMenu) image Image]
 	set selimage [option get $data(cfgMenu) selectImage Image]
 
-	$data(cfgMenu) add cascade -label " [::msgcat::mc Sorting]" \
+	set msg " "
+	append msg [::msgcat::mc "Sorting"]
+	$data(cfgMenu) add cascade -label $msg \
 	  -menu $data(sortMenu) -image $image -compound left
 	$data(cfgMenu) add separator
 	$data(cfgMenu) add radiobutton -label [::msgcat::mc "Short View"] \
@@ -383,7 +385,7 @@ proc ::ttk::dialog::file::Create {win class} {
 		-command [list ::ttk::dialog::file::setopt $win \
 			-sort ::ttk::dialog::file::sort]
 	$data(sortMenu) add separator
-	$data(sortMenu) add checkbutton -label [::msgcat::mc Reverse] \
+	$data(sortMenu) add checkbutton -label [::msgcat::mc "Reverse"] \
 		-image $image -selectimage $selimage -compound left \
 		-variable ::ttk::dialog::file::reverse -indicatoron 0 \
 		-command [list ::ttk::dialog::file::setopt $win \
@@ -415,16 +417,16 @@ proc ::ttk::dialog::file::Create {win class} {
 	#     and file types field.
 	#
 	set f2 [ttk::frame $w.f2]
-	ttk::label $f2.lab1 -text "[::msgcat::mc Location]:" -anchor w
+	ttk::label $f2.lab1 -text [::msgcat::mc "Location"]: -anchor w
 	set data(location) [ttk::combobox $f2.loc]
 	$data(location) configure \
 		-textvariable ::ttk::dialog::file::${dataName}(selectFile)
-	set data(typeMenuLab) [ttk::label $f2.lab2 -text "[::msgcat::mc Filter]:" -anchor w]
+	set data(typeMenuLab) [ttk::label $f2.lab2 -text [::msgcat::mc "Filter"]: -anchor w]
 	set data(typeMenuBtn) [ttk::combobox $f2.filter]
-	set data(okBtn) [ttk::button $f2.ok -text [::msgcat::mc OK] \
+	set data(okBtn) [ttk::button $f2.ok -text [::msgcat::mc "OK"] \
 	  -default active -width -8 \
 		-command [list ::ttk::dialog::file::Done $win]]
-	set data(cancelBtn) [ttk::button $f2.cancel -text [::msgcat::mc Cancel] \
+	set data(cancelBtn) [ttk::button $f2.cancel -text [::msgcat::mc "Cancel"] \
 		-width -8 \
 		-command [list ::ttk::dialog::file::Cancel $win]]
 
@@ -482,17 +484,17 @@ proc ::ttk::dialog::file::Create {win class} {
 	ttk::frame $data(long).f
 	set data(fileHdr) [frame $data(long).f.f]
 	ttk::label $data(fileHdr).l0 -style Toolbutton -anchor w \
-	  -text [::msgcat::mc Name]
+	  -text [::msgcat::mc "Name"]
 	ttk::label $data(fileHdr).l1 -style Toolbutton -anchor w \
-	  -text [::msgcat::mc Size]
+	  -text [::msgcat::mc "Size"]
 	ttk::label $data(fileHdr).l2 -style Toolbutton -anchor w \
-	  -text [::msgcat::mc Date]
+	  -text [::msgcat::mc "Date"]
 	ttk::label $data(fileHdr).l3 -style Toolbutton -anchor w \
-	  -text [::msgcat::mc Permissions]
+	  -text [::msgcat::mc "Permissions"]
 	ttk::label $data(fileHdr).l4 -style Toolbutton -anchor w \
-	  -text [::msgcat::mc Owner]
+	  -text [::msgcat::mc "Owner"]
 	ttk::label $data(fileHdr).l5 -style Toolbutton -anchor w \
-	  -text [::msgcat::mc Group]
+	  -text [::msgcat::mc "Group"]
 	ttk::separator $data(fileHdr).s1 -orient vertical
 	ttk::separator $data(fileHdr).s2 -orient vertical
 	ttk::separator $data(fileHdr).s3 -orient vertical
@@ -1044,11 +1046,11 @@ proc ::ttk::dialog::file::NewDirCmd {win} {
 		-validatecommand [list ::ttk::dialog::file::NewDirVCmd $w %P]
 	ttk::separator $w.sep
 	set f [ttk::frame $w.buttons]
-	ttk::button $f.clear -text [::msgcat::mc Clear] -takefocus 0 \
+	ttk::button $f.clear -text [::msgcat::mc "Clear"] -takefocus 0 \
 		-command [list $w.box delete 0 end]
-	ttk::button $f.ok -text [::msgcat::mc OK] -default active \
+	ttk::button $f.ok -text [::msgcat::mc "OK"] -default active \
 		-command [list ::ttk::dialog::file::NewDirExit $win 1]
-	ttk::button $f.cancel -text [::msgcat::mc Cancel] \
+	ttk::button $f.cancel -text [::msgcat::mc "Cancel"] \
 		-command [list ::ttk::dialog::file::NewDirExit $win]
 	grid $f.clear $f.ok $f.cancel -padx 4 -pady {0 10} -sticky we
 	grid columnconfigure $f {0 1 2} -uniform 1
@@ -1124,16 +1126,15 @@ proc ::ttk::dialog::file::Done {w} {
 
 	if {[file exists $path]} {
 		if {[string equal $data(type) save]} {
-		    set str {File "%s" already exists. Do you want to overwrite it?}
 			set reply [ttk::messageBox -icon warning -type yesno \
-			  -parent $w -message [::msgcat::mc $str $path]]
+			  -parent $w -message [::msgcat::mc "File %s already exists. Do you want to overwrite it?" $path]]
 			if {[string equal $reply "no"]} {return}
 		}
 	} else {
 		if {[string equal $data(type) open]} {
-		    set str {File "%s" does not exist.}
+		    set str {}
 			ttk::messageBox -icon warning -type ok -parent $w \
-			  -message [::msgcat::mc $str $path]
+			  -message [::msgcat::mc "File %s does not exist." $path]
 			return
 		}
 	}
@@ -1152,9 +1153,8 @@ proc ::ttk::dialog::file::chdir {w} {
 	if {[file isdirectory $dir]} {
 		ChangeDir $w $dir
 	} else {
-	    set str {Cannot change to the directory "%s". Permission denied.}
 		ttk::messageBox -type ok -parent $w \
-			-message [::msgcat::mc $str $data(selectPath)]
+			-message [::msgcat::mc "Cannot change to the directory %s. Permission denied." $data(selectPath)]
 			-icon warning
 	}
 	return -code break
@@ -1423,7 +1423,7 @@ proc ::ttk::dialog::file::treeCreate {w} {
 	set font [list $fontinfo(-family) -14]
 	destroy $f2.f.dummy
 	ttk::label $f2.f.title -anchor w -style Toolbutton \
-	  -text [::msgcat::mc Folder]
+	  -text [::msgcat::mc "Folder"]
 	set data(text) [text $f2.f.text -width 48 -height 16 -font $font \
 		-tabs 20 -wrap none -highlightthickness 0 -bd 0 -cursor "" \
 		-spacing1 1 -spacing3 1 -exportselection 0 \
@@ -1440,9 +1440,9 @@ proc ::ttk::dialog::file::treeCreate {w} {
 	pack $f2.f -fill both -expand 1 -padx 8 -pady 4
 
 	set f3 [ttk::frame $w.f3]
-	ttk::button $f3.ok -text [::msgcat::mc OK] -default active \
+	ttk::button $f3.ok -text [::msgcat::mc "OK"] -default active \
 		-command [list ::ttk::dialog::file::TreeDone $w]
-	ttk::button $f3.cancel -text [::msgcat::mc Cancel] \
+	ttk::button $f3.cancel -text [::msgcat::mc "Cancel"] \
 		-command [list ::ttk::dialog::file::Cancel $w]
 	grid x $f3.ok $f3.cancel -sticky ew -padx {4 8} -pady 8
 	grid columnconfigure $f3 {1 2} -uniform buttons -minsize 80

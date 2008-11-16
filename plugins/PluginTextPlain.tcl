@@ -219,10 +219,10 @@ proc ::TextImporter::Clicked {id} {
     
     # Button part.
     set frbot [frame ${win}.f.frbot -borderwidth 0]
-    pack [button $frbot.btset -text [mc {Save As}] \
+    pack [button $frbot.btset -text [mc "Save As"] \
       -command [list [namespace current]::SaveAs $id]]  \
       -side right -padx 5 -pady 5
-    pack [button $frbot.btcancel -text [mc Close]  \
+    pack [button $frbot.btcancel -text [mc "Close"]  \
       -command [list destroy $win]] \
       -side right -padx 5 -pady 5
     pack $frbot -side bottom -fill both -expand 1 -padx 8 -pady 6
@@ -251,7 +251,7 @@ proc ::TextImporter::SaveAs {id} {
 	return
     }
     if {[catch {file copy $locals(id2file,$id) $ans} err]} {
-	::UI::MessageBox -type ok -title [mc Error] -icon error -message \
+	::UI::MessageBox -type ok -title [mc "Error"] -icon error -message \
 	  "Failed copying file: $err"
 	return
     }
