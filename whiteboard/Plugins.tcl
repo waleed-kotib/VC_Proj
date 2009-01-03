@@ -1370,6 +1370,7 @@ proc ::Plugins::BuildPrefsPage {page} {
 	dict set tooltip QuickTimeTcl [mc "Support for several animation, image, video and audio formats"]
 	dict set tooltip TextImporter [mc "Import plain text documents"]
 	dict set tooltip HtmlImport   [mc "Import HTML pages"]
+	dict set tooltip ItclApplets  [mc "Import Itcl applets"]
 	
 	::balloonhelp::balloonforwindow $pfr.c$i [dict get $tooltip $plug]
 	
