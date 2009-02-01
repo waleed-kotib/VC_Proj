@@ -886,7 +886,8 @@ proc ::Import::ObjectProgress {token size bytes} {
     if {[expr $ms - $state(last)] > $prefs(progUpdateMillis)} {
 	set tmsg [::timing::getmessage $token $total]
 
-	set msg [mc progress-Receiving $state(tail) $tmsg]
+	# see commit 1870, string needed, translation, code: progress-Receiving
+	set msg ["%s , %s" $state(tail) $tmsg]
 	::WB::SetStatusMessage $w $msg
 	set state(last) $ms
     }
@@ -902,7 +903,9 @@ proc ::Import::ObjectCommand {token status {err ""}} {
     switch -- $status {
 	ok {
 	    # What is this string for? Delete?
-	    set msg [mc progress-Receiving $state(tail) "Final"]
+	    # see above, string needed, translation, code: progress-Receiving
+	    set msg ["%s , %s" $state(tail) "Final"]
+	    #set msg [mc progress-Receiving $state(tail) "Final"]
 	    ::WB::SetStatusMessage $w $msg
 	    
 	    # Add to the lists of known files.

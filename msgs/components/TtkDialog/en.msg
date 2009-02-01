@@ -25,7 +25,7 @@ namespace eval ::ttk::dialog::file {
     
     ::msgcat::mcset en {File %s already exists. Do you want to overwrite it?}
     ::msgcat::mcset en {File %s does not exist.}
-    ::msgcat::mcset en {Cannot change to the directory "%s". Permission denied.}
+    ::msgcat::mcset en {Cannot change to the directory %s. Permission denied.}
 }
 
 

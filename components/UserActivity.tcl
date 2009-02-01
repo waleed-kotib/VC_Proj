@@ -49,7 +49,7 @@ proc ::UserActivity::Init {} {
     set xmlns(node_config)     "http://jabber.org/protocol/pubsub#node_config"
 
     variable menuDef
-    set menuDef [list command mActivity... ::UserActivity::Dlg {} {}]
+    set menuDef [list command mActivity... {[mc "Acti&vity"]...} ::UserActivity::Dlg {} {}]
     
     variable subActivities
     set subActivities(doing_chores) {
@@ -660,7 +660,7 @@ proc ::UserActivity::MPBuild {win} {
 	  -command [namespace code MPCmd] -compound left
     }    
     $m add separator
-    $m add command -label [mc mCustomActivity...] -command [namespace code Dlg]
+    $m add command -label [mc "Custom Activity"]... -command [namespace code Dlg]
     set mpActivity "-"
     return
 }

@@ -44,7 +44,7 @@ proc ::Geolocation::Init {} {
     set xmlns(node_config)   "http://jabber.org/protocol/pubsub#node_config"
 
     variable menuDef
-    set menuDef [list command mLocation... ::Geolocation::Dlg {} {}]
+    set menuDef [list command mLocation... {[mc "Locat&ion"]...} ::Geolocation::Dlg {} {}]
     
     # These help strings are for the message catalogs.
     variable help
@@ -80,7 +80,7 @@ proc ::Geolocation::Init {} {
     set	taglabel(lat)         [mc "Latitude"]
     set	taglabel(locality)    [mc "Locality"]
     set	taglabel(lon)         [mc "Longitude"]
-    set	taglabel(postalcode)  [mc "Postalcode"]
+    set	taglabel(postalcode)  [mc "Postal code"]
     set	taglabel(region)      [mc "Region"]
     set	taglabel(room)        [mc "Room"]
     set	taglabel(street)      [mc "Street"]
@@ -178,7 +178,6 @@ proc ::Geolocation::Dlg {} {
 	grid  $fr.l$name  $fr.e$name  -sticky e -pady 2
 	grid $fr.e$name -sticky ew
 	
-	variable $location
 	set location [dict create]
 	dict set location alt [mc "Altitude in meters above or below sea level"]
 	dict set location lon [mc "Longitude in decimal degrees East"]
@@ -367,7 +366,7 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
 	return
     }
     
-    $wnb add [ttk::frame $wnb.geo] -text [mc "Geo"] -sticky news
+    $wnb add [ttk::frame $wnb.geo] -text [mc "Location"] -sticky news
 
     set wpage $wnb.geo.f
     ttk::frame $wpage -padding [option get . notebookPagePadding {}]

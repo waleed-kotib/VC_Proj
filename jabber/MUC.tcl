@@ -1550,9 +1550,9 @@ proc ::MUC::RoomConfigResult {roomjid jlibname type subiq} {
 proc ::MUC::SetNick {roomjid} {
     variable locals
         
-    set title [mc "Set New Nickname"]
-    set msg   [mc "Select a new nickname"]
-    set ans [ui::megaentry -label [mc "New Nickname"]: -icon question \
+    set title "Set New Nickname"
+    set msg   "Select a new nickname"
+    set ans [ui::megaentry -label "New Nickname": -icon question \
       -geovariable prefs(winGeom,jmucnick) -title $title -message $msg]
 	
     if {$ans ne ""} {

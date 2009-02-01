@@ -39,13 +39,13 @@ proc ::SlideShow::Load { } {
     ::Debug 2 "::SlideShow::Load"
     
     set menuspec \
-      {cascade     mSlideShow       {}                           {} {} {
-	{command   mOpenFolder...   {::SlideShow::PickFolder $w} {} {}}
+      {cascade     mSlideShow       {[mc "Slide Show"]} {}                           {} {} {
+	{command   mOpenFolder...   {[mc "&Open Folder"]...} {::SlideShow::PickFolder $w} {} {}}
 	{separator}
-	{command   {Previous}       {::SlideShow::Previous $w}   {} {}}
-	{command   {Next}           {::SlideShow::Next $w}       {} {}}
-	{command   {First}          {::SlideShow::First $w}      {} {}}
-	{command   {Last}           {::SlideShow::Last $w}       {} {}}
+	{command   {Previous}       {[mc "Previous"]} {::SlideShow::Previous $w}   {} {}}
+	{command   {Next}           {[mc "Next"]} {::SlideShow::Next $w}       {} {}}
+	{command   {First}          {[mc "First"]} {::SlideShow::First $w}      {} {}}
+	{command   {Last}           {[mc "Last"]} {::SlideShow::Last $w}       {} {}}
       }
     }
 

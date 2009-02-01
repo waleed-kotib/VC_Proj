@@ -39,7 +39,7 @@ proc ::MeBeam::Init {} {
 	::hooks::register menuChatActionPostHook  ::MeBeam::ChatMenuPostHook
     }
     if {$config(mebeam,menu-roster)} {
-	set mDef [list command "Invite MeBeam" {::MeBeam::RosterCmd $jid3}]
+	set mDef [list command "Invite MeBeam" {[mc "Invite MeBeam"]} {::MeBeam::RosterCmd $jid3}]
 	set mType {"Invite MeBeam" {user available}}
 	::Roster::RegisterPopupEntry $mDef $mType    
     }    

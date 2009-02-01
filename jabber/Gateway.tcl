@@ -48,17 +48,17 @@ namespace eval ::Gateway {
     # These go into the message catalog.
     variable shortName
     set shortName [dict create]
-	dict set shortName aim         [mc "AIM"]
-	dict set shortName gadu-gadu   [mc "Gadu-Gadu"]
-	dict set shortName icq         [mc "ICQ"]
-	dict set shortName irc         [mc "IRC"]
-	dict set shortName jabber      [mc "Jabber"]
-	dict set shortName msn         [mc "MSN"]
-	dict set shortName qq          [mc "QQ"]
+	dict set shortName aim         "AIM"
+	dict set shortName gadu-gadu   "Gadu-Gadu"
+	dict set shortName icq         "ICQ"
+	dict set shortName irc         "IRC"
+	dict set shortName jabber      "XMPP"
+	dict set shortName msn         "MSN"
+	dict set shortName qq          "QQ"
 	dict set shortName smtp        [mc "Email"]
-	dict set shortName tlen        [mc "Tlen"]
-	dict set shortName xmpp        [mc "Jabber"]
-	dict set shortName yahoo       [mc "Yahoo"]
+	dict set shortName tlen        "Tlen"
+	dict set shortName xmpp        "XMPP"
+	dict set shortName yahoo       "Yahoo"
     
     # Default prompts and descriptions.
     variable promptText
@@ -71,7 +71,7 @@ namespace eval ::Gateway {
     dict set promptText smtp       [mc "Email Address"]
     dict set promptText qq         [mc "QQ Number"]
     dict set promptText tlen       [mc "Tlen Address"]
-    dict set promptText xmpp       [mc "Jabber ID"]
+    dict set promptText xmpp       [mc "IM Address"]
     dict set promptText yahoo      [mc "Yahoo ID"]
     
     # Each gateway must transform its "prompt" (user ID) to a JID.

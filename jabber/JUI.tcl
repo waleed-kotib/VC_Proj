@@ -140,55 +140,55 @@ proc ::JUI::Init {} {
     variable inited
             
     set mDefsFile {
-	{command   mNewAccount...      {::RegisterEx::OnMenu}     {}}
-	{command   mRemoveAccount...   {::Register::OnMenuRemove} {}}	
-	{command   mNewPassword...     {::Jabber::Passwd::OnMenu} {}}
-	{command   mSetupAssistant...  {::SetupAss::SetupAss}     {}}
+	{command   mNewAccount...      {[mc "&New Account"]...} {::RegisterEx::OnMenu}     {}}
+	{command   mRemoveAccount...   {[mc "&Remove Account"]...} {::Register::OnMenuRemove} {}}	
+	{command   mNewPassword...     {[mc "New P&assword"]...} {::Jabber::Passwd::OnMenu} {}}
+	{command   mSetupAssistant...  {[mc "&Setup Assistant"]...} {::SetupAss::SetupAss}     {}}
 	{separator}
-	{command   mEditProfiles...    {::Profiles::BuildDialog}  {}}
-	{command   mEditBC...          {::VCard::OnMenu}          {}}
+	{command   mEditProfiles...    {[mc "&Edit Profiles"]...} {::Profiles::BuildDialog}  {}}
+	{command   mEditBC...          {[mc "Edit &Business Card"]...} {::VCard::OnMenu}          {}}
 	{separator}
-	{cascade   mImport             {}                         {} {} {
-	    {command  mIconSet...      {::Emoticons::ImportSet}   {}}
-	    {command  mBC...           {::VCard::Import}          {}}
+	{cascade   mImport             {[mc "Import"]} {}                         {} {} {
+	    {command  mIconSet...      {[mc "Icon &Set"]...} {::Emoticons::ImportSet}   {}}
+	    {command  mBC...           {[mc "&Business Card"]...} {::VCard::Import}          {}}
 	}}
-	{cascade   mExport             {}                         {} {} {
-	    {command  mContacts...     {::Roster::ExportRoster}   {}}
-	    {command  mInbox...        {::MailBox::MKExportDlg}   {}}
-	    {command  mBC...           {::VCard::OnMenuExport}    {}}
+	{cascade   mExport             {[mc "Export"]} {}                         {} {} {
+	    {command  mContacts...     {[mc "&Contacts"]...} {::Roster::ExportRoster}   {}}
+	    {command  mInbox...        {[mc "&Inbox"]...} {::MailBox::MKExportDlg}   {}}
+	    {command  mBC...           {[mc "&Business Card"]...} {::VCard::OnMenuExport}    {}}
 	}}
 	{separator}
-	{command   mQuit               {::UserActions::DoQuit}    Q}
+	{command   mQuit               {[mc "&Quit"]} {::UserActions::DoQuit}    Q}
     }
     if {[tk windowingsystem] eq "aqua"} {
-	set mDefsClose [list {command   mCloseWindow  {::UI::CloseWindowEvent}  W}]
+	set mDefsClose [list {command   mCloseWindow  {[mc "&Close Window"]} {::UI::CloseWindowEvent}  W}]
 	set menuDefs(rost,file) [concat $mDefsClose {separator} $mDefsFile]
     } else {    
-	set mDefsPrefs [list {command   mPreferences...  {::Preferences::Build}  {}}]
+	set mDefsPrefs [list {command   mPreferences...  {[mc "&Preferences"]...} {::Preferences::Build}  {}}]
 	set menuDefs(rost,file) [concat $mDefsPrefs {separator} $mDefsFile]
     }
         
     set menuDefs(rost,action) {    
-	{command     mLogin...      {::Jabber::OnMenuLogInOut}        L}
-	{command     mLogoutWith... {::Jabber::Logout::OnMenuStatus}  {}}
+	{command     mLogin...      {[mc "Login"]...} {::Jabber::OnMenuLogInOut}        L}
+	{command     mLogoutWith... {[mc "Logout With Message"]...} {::Jabber::Logout::OnMenuStatus}  {}}
 	{separator}
-	{command     mMessage...    {::NewMsg::OnMenu}                M}
-	{command     mChat...       {::Chat::OnMenu}                  T}
-	{cascade     mStatus        {}                                {} {} {}}
+	{command     mMessage...    {[mc "&Message"]...} {::NewMsg::OnMenu}                M}
+	{command     mChat...       {[mc "Cha&t"]...} {::Chat::OnMenu}                  T}
+	{cascade     mStatus        {[mc "Status"]} {}                                {} {} {}}
 	{separator}
-	{command     mSearch...     {::Search::OnMenu}                {}}
-	{command     mAddContact... {::JUser::OnMenu}                 U}
-	{cascade     mRegister...   {}                                {} {} {}}
-	{command     mDiscoverServer... {::Disco::OnMenuAddServer}    D}
+	{command     mSearch...     {[mc "&Search"]...} {::Search::OnMenu}                {}}
+	{command     mAddContact... {[mc "&Add Contact"]...} {::JUser::OnMenu}                 U}
+	{cascade     mRegister...   {[mc "Re&gister"]...} {}                                {} {} {}}
+	{command     mDiscoverServer... {[mc "&Discover Server"]...} {::Disco::OnMenuAddServer}    D}
 	{separator}
-	{command     mEnterRoom...  {::GroupChat::OnMenuEnter}        R}
-	{command     mCreateRoom... {::GroupChat::OnMenuCreate}       {}}
-	{command     mEditBookmarks... {::GroupChat::OnMenuBookmark}     {}}
+	{command     mEnterRoom...  {[mc "Enter Chat&room"]...} {::GroupChat::OnMenuEnter}        R}
+	{command     mCreateRoom... {[mc "&Create Chatroom"]...} {::GroupChat::OnMenuCreate}       {}}
+	{command     mEditBookmarks... {[mc "Edit &Bookmarks"]...} {::GroupChat::OnMenuBookmark}     {}}
     }
 
     if {[::Jabber::HaveWhiteboard]} {
 	set mWhiteboard \
-	  {command   mWhiteboard  {::JWB::OnMenuNewWhiteboard}  N}
+	  {command   mWhiteboard  {[mc "&Whiteboard"]...} {::JWB::OnMenuNewWhiteboard}  N}
 	set idx [lsearch $menuDefs(rost,action) *mChat...*]
 	incr idx
 	set menuDefs(rost,action) \
@@ -196,61 +196,61 @@ proc ::JUI::Init {} {
     }
     
     set mDefsInfo {    
-	{command     mPlugins       {::Component::Dlg}              {}}
-	{checkbutton mInbox...      {::MailBox::OnMenu}               I \
+	{command     mPlugins       {[mc "Plu&gins"]} {::Component::Dlg}              {}}
+	{checkbutton mInbox...      {[mc "&Inbox"]...} {::MailBox::OnMenu}               I \
 	  {-variable ::JUI::state(mailbox,visible)}}
-	{cascade     mFontSize      {}                              {} {} {
-	    {radio   mNormal        {::Theme::FontConfigSize  0}    {}
+	{cascade     mFontSize      {[mc "Font Size"]} {}                              {} {} {
+	    {radio   mNormal        {[mc "Normal"]} {::Theme::FontConfigSize  0}    {}
 	    {-variable prefs(fontSizePlus) -value 0}}
-	    {radio   mLargerFont    {::Theme::FontConfigSize +1}    {}
+	    {radio   mLargerFont    {[mc "Larger"]} {::Theme::FontConfigSize +1}    {}
 	    {-variable prefs(fontSizePlus) -value 1}}
-	    {radio   mLargeFont     {::Theme::FontConfigSize +2}    {}
+	    {radio   mLargeFont     {[mc "Large"]} {::Theme::FontConfigSize +2}    {}
 	    {-variable prefs(fontSizePlus) -value 2}}
-	    {radio   mHugeFont      {::Theme::FontConfigSize +6}    {}
+	    {radio   mHugeFont      {[mc "Huge"]} {::Theme::FontConfigSize +6}    {}
 	    {-variable prefs(fontSizePlus) -value 6}}
 	} }
-	{cascade     mShow          {}                              {} {} {
-	    {check   mToolbar       {::JUI::OnMenuToggleToolbar}    {} 
+	{cascade     mShow          {[mc "Show"]} {}                              {} {} {
+	    {check   mToolbar       {[mc "Tool&bar"]} {::JUI::OnMenuToggleToolbar}    {} 
 	    {-variable ::JUI::state(show,toolbar)}}
-	    {check   mTabs          {::JUI::OnMenuToggleNotebook}   {} 
+	    {check   mTabs          {[mc "&Tabs"]} {::JUI::OnMenuToggleNotebook}   {} 
 	    {-variable ::JUI::state(show,notebook)}}
 	} }
-	{cascade     mControlPanel  {}                              {} {} {}}
+	{cascade     mControlPanel  {[mc "Control Panel"]} {}                              {} {} {}}
 	{separator {}}
-	{command     mErrorLog      {::Jabber::ErrorLogDlg}         {}}
-	{checkbutton mDebug         {::Jabber::DebugCmd}            {} \
+	{command     mErrorLog      {[mc "&Error Log"]...} {::Jabber::ErrorLogDlg}         {}}
+	{checkbutton mDebug         {[mc "&Debug"]} {::Jabber::DebugCmd}            {} \
 	  {-variable ::Jabber::jstate(debugCmd)}}
-	{command     mBugReport...  {::JUI::OpenBugURL}             {}}
+	{command     mBugReport...  {[mc "&Report Bug"]...} {::JUI::OpenBugURL}             {}}
 	{separator {}}
-	{command     mCoccinellaHome... {::JUI::OpenCoccinellaURL}  {}}
+	{command     mCoccinellaHome... {[mc "&Home Page"]...} {::JUI::OpenCoccinellaURL}  {}}
     }
     if {$config(ui,main,toy-status)} {
 	# NB: this may depend on our initial state if open or closed.
-	set m {command  mShowControlPanel  {::JUI::ToyStatusCmd}  {Shift-O}}
+	set m {command  mShowControlPanel  {[mc "Show Control Panel"]} {::JUI::ToyStatusCmd}  {Shift-O}}
 	set idx [lsearch -index 1 $mDefsInfo mControlPanel]
 	set mDefsInfo [linsert $mDefsInfo $idx $m]
     }
     if {[tk windowingsystem] eq "aqua"} {
 	set menuDefs(rost,info) $mDefsInfo
     } else {
-	set mAbout {command  mAboutCoccinella  {::Splash::SplashScreen}  {}}
+	set mAbout {command  mAboutCoccinella  {[mc "&About %s" $prefs(appName)]} {::Splash::SplashScreen}  {}}
 	set idx [lsearch -index 1 $mDefsInfo mCoccinellaHome...]
 	set menuDefs(rost,info) [linsert $mDefsInfo $idx $mAbout]
     }
     
     set menuDefs(rost,edit) {    
-	{command   mUndo             {::UI::UndoEvent}          Z}
-	{command   mRedo             {::UI::RedoEvent}          Shift-Z}
+	{command   mUndo             {[mc "&Undo"]} {::UI::UndoEvent}          Z}
+	{command   mRedo             {[mc "Re&do"]} {::UI::RedoEvent}          Shift-Z}
 	{separator}
-	{command   mCut              {::UI::CutEvent}           X}
-	{command   mCopy             {::UI::CopyEvent}          C}
-	{command   mPaste            {::UI::PasteEvent}         V}
+	{command   mCut              {[mc "Cu&t"]} {::UI::CutEvent}           X}
+	{command   mCopy             {[mc "&Copy"]} {::UI::CopyEvent}          C}
+	{command   mPaste            {[mc "&Paste"]} {::UI::PasteEvent}         V}
 	{separator}
-	{command   mAll              {::UI::OnMenuAll}          A}
+	{command   mAll              {[mc "All"]} {::UI::OnMenuAll}          A}
 	{separator}
-	{command   mFind             {::UI::OnMenuFind}         F}
-	{command   mFindNext         {::UI::OnMenuFindAgain}    G}
-	{command   mFindPrevious     {::UI::OnMenuFindPrevious} Shift-G}
+	{command   mFind             {[mc "Find"]} {::UI::OnMenuFind}         F}
+	{command   mFindNext         {[mc "Find Next"]} {::UI::OnMenuFindAgain}    G}
+	{command   mFindPrevious     {[mc "Find Previous"]} {::UI::OnMenuFindPrevious} Shift-G}
     }
     
     # We should do this for all menus eventaully.
@@ -573,7 +573,7 @@ proc ::JUI::BuildCombiBox {w} {
     } elseif {$config(ui,status,menu) eq "dynamic"} {
 	::Status::ExMainButton $w.bst ::Jabber::jstate(show+status)
     }
-    ttk::label $w.nick -style Small.TLabel -text [mc mNotAvailable] -anchor w
+    ttk::label $w.nick -style Small.TLabel -text [mc "Not Available"] -anchor w
     ttk::combobox $w.combo -style Small.TCombobox -font CociSmallFont \
       -values $combiBox(statusL) \
       -textvariable [namespace current]::combiBox(status)
@@ -594,13 +594,13 @@ proc ::JUI::BuildCombiBox {w} {
     grid columnconfigure $w 2 -weight 1
     
     ::balloonhelp::balloonforwindow $w.nick  [mc "Displays your Contact ID or nickname"]
-    ::balloonhelp::balloonforwindow $w.combo [mc "Set your presence message"]
+    ::balloonhelp::balloonforwindow $w.combo [mc "Set your status message"]
     
     set combiBox(w) $w
     set combiBox(wnick)  $w.nick
     set combiBox(wenick) $w.enick
     set combiBox(wcombo) $w.combo  
-    set combiBox(status) [mc "Set your presence message"]
+    set combiBox(status) [mc "Set your status message"]
     set combiBox(statusSet) 0
     
     return $w
@@ -642,7 +642,7 @@ proc ::JUI::CombiBoxLogoutHook {} {
     }
     destroy $combiBox(wenick)
     bind $combiBox(wnick) <Button-1> {}
-    $combiBox(wnick) configure -text [mc mNotAvailable]
+    $combiBox(wnick) configure -text [mc "Not Available"]
     set combiBox(nick) ""
     
     # Leave the previous JID/nick?
@@ -1232,7 +1232,7 @@ proc ::JUI::BuildToolbar {w wtbar} {
       -image $iconAddUser -disabledimage $iconAddUserDis  \
       -command ::JUser::NewDlg -state disabled \
       -balloontext [mc "Add Contact"]
-    $wtbar newbutton chat -text [mc mChat] \
+    $wtbar newbutton chat -text [mc "Chat"] \
       -image $iconChat -disabledimage $iconChatDis  \
       -command ::Chat::OnToolButton -state disabled
 
@@ -1251,6 +1251,13 @@ proc ::JUI::BuildMenu {name} {
     set w     $jwapp(w)
     set wmenu $jwapp(wmenu)
     
+    set lname [dict create]
+    dict set lname file   [mc "&File"]
+    dict set lname action [mc "&Action"]
+    dict set lname info   [mc "&Info"]
+    dict set lname edit   [mc "&Edit"]
+    set str [dict get $lname $name]
+
     array set mLabel $menuBarDef
     set menuMerged $menuDefs(rost,$name)
     if {[info exists extraMenuDefs(rost,$name)]} {
@@ -1258,7 +1265,7 @@ proc ::JUI::BuildMenu {name} {
 	    linsert $menuMerged $menuDefsInsertInd(rost,$name)
 	} $extraMenuDefs(rost,$name)]
     }
-    ::UI::NewMenu $w $wmenu.$name  $mLabel($name)  $menuMerged
+    ::UI::NewMenu $w $wmenu.$name  $mLabel($name)  $str  $menuMerged
 }
 
 proc ::JUI::SetToolbarButtonState {name state} {

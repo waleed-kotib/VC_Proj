@@ -49,7 +49,7 @@ proc ::AutoUpdate::Init {} {
     ::hooks::register prefsInitHook   ::AutoUpdate::InitPrefsHook
     ::hooks::register launchFinalHook ::AutoUpdate::LaunchHook
 
-    set menuDef {command  mUpdateCheck  {::AutoUpdate::Get -silent 0}  {}}
+    set menuDef {command  mUpdateCheck  {[mc "&Update Check"]} {::AutoUpdate::Get -silent 0}  {}}
     ::JUI::RegisterMenuEntry info $menuDef
 
     component::register AutoUpdate

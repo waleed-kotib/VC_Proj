@@ -64,7 +64,7 @@ namespace eval ::Status {
     array set mapShowTextToMLabel {
 	available       mAvailable
 	away            mAway
-	chat            mChat
+	chat            Chat
 	dnd             mDoNotDisturb
 	xa              mExtendedAway
 	invisible       mInvisible
@@ -253,7 +253,7 @@ proc ::Status::BuildGenericMenu {mt varName args} {
 	}
     }
     $mt add separator
-    $mt add command -label [mc mAttachMessage] \
+    $mt add command -label [mc "Attach Message"]... \
       -command [concat ::Status::SetWithMessage $varName $args]
 }
 
@@ -271,7 +271,7 @@ proc ::Status::MenuSetState {w which state} {
 	foreach name [array names mapShowTextToElem] {
 	    $m entryconfigure [$m index $name] -state $state
 	}
-	$m entryconfigure [$m index [mc mAttachMessage]] -state $state
+	$m entryconfigure [$m index [mc "Attach Message"]...] -state $state
     } else {
 	$m entryconfigure [$m index $mapShowElemToText($which)] -state normal
     }
@@ -332,7 +332,7 @@ proc ::Status::BuildMenuDef { } {
 	}
     }
     lappend statMenuDef {separator}  \
-      {command mAttachMessage {::Status::SetWithMessage ::Jabber::jstate(show)} {}}
+      {command mAttachMessage {[mc "Attach Message"]...} {::Status::SetWithMessage ::Jabber::jstate(show)} {}}
     
     return $statMenuDef
 }

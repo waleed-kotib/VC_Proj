@@ -243,19 +243,19 @@ proc ::WDialogs::ShowInfoServer { } {
 # WDialogs::WelcomeCanvas --
 # 
 #       Is it the first time it is launched, then show the welcome canvas.
-
-proc ::WDialogs::WelcomeCanvas { } {
-    global  this
-    
-    set systemLocale [lindex [split $this(systemLocale) _] 0]
-    set floc [file join $this(docsPath) Welcome_${systemLocale}.can]
-    if {[file exists $floc]} {
-	set f $floc
-    } else {
-	set f [file join $this(docsPath) Welcome_en.can]
-    }
-    ::WDialogs::Canvas $f -title [mc "Welcome"] -encoding utf-8
-}
+# DELETE CODE??? TODO
+#proc ::WDialogs::WelcomeCanvas { } {
+#    global  this
+#    
+#    set systemLocale [lindex [split $this(systemLocale) _] 0]
+#    set floc [file join $this(docsPath) Welcome_${systemLocale}.can]
+#    if {[file exists $floc]} {
+#	set f $floc
+#    } else {
+#	set f [file join $this(docsPath) Welcome_en.can]
+#    }
+#    ::WDialogs::Canvas $f -title [mc "Welcome"] -encoding utf-8
+#}
 
 namespace eval ::WDialogs:: {
     

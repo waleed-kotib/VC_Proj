@@ -69,29 +69,29 @@ proc ::AddressBook::NewPage {} {
     variable popMenuDef
 
     set popMenuDef(addressbook,def) {
-	mCall     phone {::AddressBook::DialExtension $phone}
-        separator      {}          {}
-        mNewAB         phone       {::AddressBook::NewAddressbookDlg}
-        mModifyAB      phone       {::AddressBook::ModifyAddressbookDlg $phone}
-        mRemoveAB      phone       {::AddressBook::RemoveAddressbookDlg $phone}
+	mCall     phone  {[mc "&Call"]...}               {::AddressBook::DialExtension $phone}
+        separator {}     {}                              {}
+        mNewAB    phone  {[mc "New"]}                    {::AddressBook::NewAddressbookDlg}
+        mModifyAB phone  {[mc "Modify"]}                 {::AddressBook::ModifyAddressbookDlg $phone}
+        mRemoveAB phone  {[mc "Remove"]}                 {::AddressBook::RemoveAddressbookDlg $phone}
     }
 
     set popMenuDef(log,def) {
-	mRedial   phone {::AddressBook::DialExtension $phone}
-        separator     {}          {}
-        mToAB         phone       {::AddressBook::NewAddressbookDlg $phone}
+	mRedial   phone   {[mc "&Call"]...}               {::AddressBook::DialExtension $phone}
+        separator {}      {}                              {}
+        mToAB     phone   {[mc "Add to Address Book"]...} {::AddressBook::NewAddressbookDlg $phone}
     }
 
     set popMenuDef(call) {
-	mCall     phone {::AddressBook::DialExtension $phone}
+	mCall     phone   {[mc "&Call"]...}               {::AddressBook::DialExtension $phone}
     }
     
     set popMenuDef(redial) {
-	mRedial   phone {::AddressBook::DialExtension $phone}
+	mRedial   phone   {[mc "Redial"]}                 {::AddressBook::DialExtension $phone}
     }
     
     set popMenuDef(forward) {
-	mForward  phone {::AddressBook::TransferExtension $phone}
+	mForward  phone   {[mc "Forward Call"]}           {::AddressBook::TransferExtension $phone}
     }
     
     set wnb [::JUI::GetNotebook]
@@ -256,10 +256,10 @@ proc ::AddressBook::Popup {w v x y} {
         set popMenu $popMenuDef(log,def)
     }
 
-    foreach {item type cmd} $popMenu {
+    foreach {item type locname cmd} $popMenu {
         if {[string index $cmd 0] == "@"} {
             set mt [menu ${m}.sub${i} -tearoff 0]
-            set locname [mc $item]
+            set locname [eval concat $locname]
             $m add cascade -label $locname -menu $mt -state disabled
             eval [string range $cmd 1 end] $mt
             incr i
@@ -269,7 +269,7 @@ proc ::AddressBook::Popup {w v x y} {
         } else {
             # Substitute the phone arguments. Preserve list structure!
             set cmd [eval list $cmd]
-            set locname [mc $item]
+            set locname [eval concat $locname]
             $m add command -label $locname -command [list after 40 $cmd]  \
               -state disabled
         }

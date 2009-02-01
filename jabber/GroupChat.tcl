@@ -213,18 +213,18 @@ proc ::GroupChat::InitMenus {} {
 
     variable popMenuDefs
     set mDefs {
-	{command   mMessage...      {::NewMsg::Build -to $jid}    }
-	{command   mChat...         {::Chat::StartThread $jid}    }
-	{command   mSendFile...     {::FTrans::Send $jid}         }
-	{command   mBusinessCard... {::UserInfo::Get $jid}        }	
-	{command   mEditNick        {::GroupChat::TreeEditUserStart $chattoken $jid} }
-	{check     mIgnore          {::GroupChat::Ignore $chattoken $jid} {
+	{command   mMessage...      {[mc "&Message"]...}            {::NewMsg::Build -to $jid}    }
+	{command   mChat...         {[mc "Cha&t"]...}               {::Chat::StartThread $jid}    }
+	{command   mSendFile...     {[mc "Send &File"]...}          {::FTrans::Send $jid}         }
+	{command   mBusinessCard... {[mc "View &Business Card"]...} {::UserInfo::Get $jid}        }	
+	{command   mEditNick        {[mc "&Edit Nickname"]}         {::GroupChat::TreeEditUserStart $chattoken $jid} }
+	{check     mIgnore          {[mc "&Ignore"]}                {::GroupChat::Ignore $chattoken $jid} {
 	    -variable $chattoken\(ignore,$jid)
 	}}
     }
     if {[::Jabber::HaveWhiteboard]} {
 	set mDefs [linsert $mDefs 4 \
-	  {command   mWhiteboard    {::JWB::NewWhiteboardTo $jid} }]
+	  {command   mWhiteboard    {[mc "&Whiteboard"]...}         {::JWB::NewWhiteboardTo $jid} }]
 
     }
     set popMenuDefs(groupchat,def) $mDefs
@@ -3705,7 +3705,7 @@ proc ::GroupChat::BuildPageConf {page} {
 	lappend menuDef [list $name]
     }
     lappend menuDef separator
-    lappend menuDef [list [mc "Custom"] -value custom]
+    lappend menuDef [list [mc "Custom Colors"] -value custom]
     set size [option get $wc schemeSize {}]
 
     set wcols $wc.cols
@@ -3759,7 +3759,7 @@ proc ::GroupChat::PrefsCustomCol {win n} {
 	set name [$win cget -image]
 	lassign [$name get 1 1] r g b
 	set present [format "#%02x%02x%02x" $r $g $b]
-	set col [tk_chooseColor -initialcolor $present -title [mc "Choose color"]]
+	set col [tk_chooseColor -initialcolor $present -title [mc "Choose Color"]]
 	if {$col ne ""} {
 	    $name blank
 	    set data [$name data -background $col]

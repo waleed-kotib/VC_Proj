@@ -58,7 +58,7 @@ proc ::JingleIAX::Init {} {
     variable popMenuDef
     variable popMenuType
     set popMenuDef(call) {
-	command  mCall {::JingleIAX::SessionInitiate $jid3}
+	command  mCall {[mc "&Call"]...} {::JingleIAX::SessionInitiate $jid3}
     }
     set popMenuType(call) {
 	mCall  {user avaliable}

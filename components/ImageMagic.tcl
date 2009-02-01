@@ -57,9 +57,9 @@ proc ::ImageMagic::Init {} {
 	# 'type' 'label' 'command' 'opts' {subspec}
 	# where subspec defines a cascade menu recursively
 	set menuspec [list \
-	    command [mc "Take Snapshot"] {::ImageMagic::ImportWindowSnapShot $w} {} {} \
+	    command mSnapshot [mc "Take &Snapshot"] {::ImageMagic::ImportWindowSnapShot $w} {} {} \
 	]
-      ::WB::RegisterNewMenu addon [mc mPlugins] $menuspec
+      ::WB::RegisterNewMenu addon [mc "Plu&gins"] $menuspec
     }
 }
 
@@ -101,7 +101,7 @@ proc ::ImageMagic::BuildDialog {w} {
     
     ::UI::Toplevel $w -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document closeBox}
-    wm title $w {Take Snapshot}
+    wm title $w [mc "Take Snapshot"]
     set finished -1
     
     # Global frame.
