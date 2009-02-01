@@ -182,19 +182,19 @@ proc ::Taskbar::InitHook {} {
     set STAT [::Roster::GetMyPresenceIcon]
     
     set menuDef {
-	{cascade  mStatus           {}                      {-image @STAT -compound left}}
-	{command  mMinimize         ::Taskbar::HideMain                  }
-	{command  mMessage...       ::NewMsg::Build         {-image @MSG -compound left}}
-	{command  mPreferences...   ::Taskbar::Prefs        {-image @SET -compound left}}
-	{command  mAddContact...    ::JUser::NewDlg  {-image @ADD -compound left}}
-	{cascade  mInfo  {
-	    {command  mAboutCoccinella    ::Splash::SplashScreen  {-image @COCI -compound left}}
-	    {command  mCoccinellaHome...  ::JUI::OpenCoccinellaURL}
-	    {command  mBugReport...       ::JUI::OpenBugURL       }
+	{cascade  mStatus           {[mc "Status"]} {}                      {-image @STAT -compound left}}
+	{command  mMinimize         {[mc "Mi&nimize"]} ::Taskbar::HideMain                  }
+	{command  mMessage...       {[mc "&Message"]...} ::NewMsg::Build         {-image @MSG -compound left}}
+	{command  mPreferences...   {[mc "&Preferences"]...} ::Taskbar::Prefs        {-image @SET -compound left}}
+	{command  mAddContact...    {[mc "&Add Contact"]...} ::JUser::NewDlg  {-image @ADD -compound left}}
+	{cascade  mInfo  {[mc "&Info"]} {
+	    {command  mAboutCoccinella    {[mc "&About Coccinella"]} ::Splash::SplashScreen  {-image @COCI -compound left}}
+	    {command  mCoccinellaHome...  {[mc "&Home Page"]...} ::JUI::OpenCoccinellaURL}
+	    {command  mBugReport...       {[mc "&Report Bug"]...} ::JUI::OpenBugURL       }
 	    } {-image @INFO -compound left}
 	}
 	{separator}
-	{command  mQuit             ::UserActions::DoQuit  {-image @EXIT -compound left}}
+	{command  mQuit             {[mc "&Quit"]} ::UserActions::DoQuit  {-image @EXIT -compound left}}
     }
     set menuDef [string map [list  \
       @STAT $STAT  @COCI $COCI  @ADD $ADD  @INFO $INFO  @SET $SET  \

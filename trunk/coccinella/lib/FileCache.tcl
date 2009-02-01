@@ -637,8 +637,8 @@ proc ::FileCache::BuildPage {page} {
     if {0} {
 	set frfo $pca.fo
 	pack [ttk::frame $frfo] -pady 2
-	pack [ttk::label $frfo.fo -text [mc "Cache folder"]:] -side left
-	pack [ttk::button $frfo.bt -text [mc "Choose"]... \
+	pack [ttk::label $frfo.fo -text "Cache folder":] -side left
+	pack [ttk::button $frfo.bt -text "Choose"... \
 	  -command [namespace current]::SetCachePath]  \
 	  -side right 
     }

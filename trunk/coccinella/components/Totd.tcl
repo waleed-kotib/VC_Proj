@@ -17,7 +17,7 @@ namespace eval ::Totd {
 proc ::Totd::Init {} {
         
     set mDef {
-	command  mTotd...  ::Totd::Build  {} {}
+	command  mTotd...  {[mc "Useful Tips"]...} {::Totd::Build}  {} {}
     }
     ::JUI::RegisterMenuEntry info $mDef
         

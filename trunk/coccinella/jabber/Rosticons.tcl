@@ -577,7 +577,7 @@ proc ::Rosticons::TPFillTree {T} {
 	}
 
 	if {$type eq "user"} {
-	    set typeName [mc normal]
+	    set typeName [mc "Standard"]
 	} elseif {$type eq "application"} {
 	    set typeName [mc "Groups"]
 	} elseif {$type eq "phone"} {

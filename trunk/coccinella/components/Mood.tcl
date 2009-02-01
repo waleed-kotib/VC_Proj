@@ -226,19 +226,20 @@ proc ::Mood::Init {} {
     }
     
     variable menuDef
-    set menuDef [list cascade mMood {} {} {} {}]
+    # bug: this should be M&ood but this does not work!
+    set menuDef [list cascade mMood {[mc "Mood"]...} {} {} {} {}]
     set subMenu [list]
     set opts [list -variable ::Mood::menuMoodVar -value "-"]
-    lappend subMenu [list radio None ::Mood::MenuCmd {} $opts]
+    lappend subMenu [list radio None {[mc "None"]} ::Mood::MenuCmd {} $opts]
     lappend subMenu {separator}
     foreach mood $sortedLocMoods {
 	set label [dict get $moodText $mood]
 	set opts [list -variable ::Mood::menuMoodVar -value $mood]
-	lappend subMenu [list radio $label ::Mood::MenuCmd {} $opts]
+	lappend subMenu [list radio $mood $label ::Mood::MenuCmd {} $opts]
     }
     lappend subMenu {separator}
-    lappend subMenu [list command mCustomMood... ::Mood::CustomMoodDlg {} {}]
-    lset menuDef 5 $subMenu
+    lappend subMenu [list command mCustomMood... {[mc "&Custom Mood"]...} ::Mood::CustomMoodDlg {} {}]
+    lset menuDef 6 $subMenu
     
     variable menuMoodVar
     set menuMoodVar "-"
@@ -418,7 +419,7 @@ proc ::Mood::CustomMoodDlg {} {
 	lappend mDef [list [mc $label] -value $mood \
 	  -image [::Theme::FindIconSize 16 mood-$mood]] 
     }
-    set label "[string map {& ""} [mc mMood]]:"
+    set label "[string map {& ""} [mc Mood]]:"
     ttk::label $fr.lmood -text $label     
     ui::optionmenu $fr.cmood -menulist $mDef -direction flush \
       -variable [namespace current]::moodStateDlg
@@ -520,7 +521,7 @@ proc ::Mood::Event {jlibname xmldata} {
 		if {$mood eq ""} {
 		    set msg ""
 		} else {
-		    set mstr [string map {& ""} [mc mMood]]
+		    set mstr [string map {& ""} [mc "Mood"]]
 		    set msg "$mstr: [dict get $moodTextSmall $mood] $text"
 		}
 	    }
@@ -535,7 +536,7 @@ proc ::Mood::Event {jlibname xmldata} {
 
 namespace eval ::Mood {
     
-    set label [string map {& ""} [mc mMood]]
+    set label [string map {& ""} [mc "Mood"]]
     ::MegaPresence::Register mood $label [namespace code MPBuild]
     
     variable imsize 16
@@ -574,7 +575,7 @@ proc ::Mood::MPBuild {win} {
 	  -command [namespace code MPCmd] -compound left
     }    
     $m add separator
-    $m add command -label [string map {& ""} [mc mCustomMood...]] \
+    $m add command -label [string map {& ""} [mc "&Custom Mood"]...] \
       -command [namespace code CustomMoodDlg]
     set mpMood "-"
     return
@@ -599,7 +600,7 @@ proc ::Mood::MPDisplayMood {mood} {
     variable imblank
     variable moodTextSmall
     
-    set mstr [string map {& ""} [mc mMood]]
+    set mstr [string map {& ""} [mc "Mood"]]
     if {$mood eq "-"} {
 	$mpwin configure -image $imblank
 	set msg "$mstr: "

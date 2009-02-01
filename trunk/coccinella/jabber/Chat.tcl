@@ -310,7 +310,7 @@ proc ::Chat::StartThreadDlg {args} {
     
     ::UI::Toplevel $w -class StartChat  \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox}
-    wm title $w [mc mChat]
+    wm title $w [mc "Chat"]
     ::UI::SetWindowPosition $w
        
     # Global frame.
@@ -4193,7 +4193,7 @@ proc ::Chat::InitPrefsHook {} {
 
 proc ::Chat::BuildPrefsHook {wtree nbframe} {
     
-    ::Preferences::NewTableItem {Jabber Chat} [mc mChat]
+    ::Preferences::NewTableItem {Jabber Chat} [mc "Chat"]
     
     set wpage [$nbframe page {Chat}]    
     ::Chat::BuildPrefsPage $wpage

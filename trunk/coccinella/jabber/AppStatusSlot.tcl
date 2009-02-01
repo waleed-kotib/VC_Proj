@@ -84,7 +84,7 @@ proc ::AppStatusSlot::Build {w} {
     set priv(box)    $w.box
     set priv(arrows) $w.box.a
     set priv(show)   0
-    set priv(status) [mc mNotAvailable]
+    set priv(status) [mc "Not Available"]
 
     foreach m [::JUI::SlotGetAllMenus] {
 	$m add checkbutton -label $label \
@@ -182,8 +182,7 @@ proc ::AppStatusSlot::EventPresence {jid presence args} {
     if {[::Jabber::Jlib roster isitem $jid2]} {
 	set str [::Roster::GetPresenceAndStatusText $jid]
 	set dname [::Roster::GetDisplayName $jid2]
-	# is mc needed Mats?
-	set msg [mc "%s: %s" $dname $str]
+	set msg "$dname : $str"
 	set priv(status) $msg
     }
 }

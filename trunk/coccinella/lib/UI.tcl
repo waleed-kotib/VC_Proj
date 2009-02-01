@@ -1392,7 +1392,7 @@ proc ::UI::GetPrefixedToplevels {wprefix} {
 # Results:
 #       $wmenu
 
-proc ::UI::NewMenu {w wmenu label menuSpec args} {    
+proc ::UI::NewMenu {w wmenu label lname menuSpec args} {    
     variable mapWmenuToWtop
     variable cachedMenuSpec
     
@@ -1400,7 +1400,7 @@ proc ::UI::NewMenu {w wmenu label menuSpec args} {
     set cachedMenuSpec($w,$wmenu) $menuSpec
     set mapWmenuToWtop($wmenu)    $w
 
-    eval {BuildMenu $w $wmenu $label $menuSpec} $args
+    eval {BuildMenu $w $wmenu $label $lname $menuSpec} $args
 }
 
 # UI::BuildMenu --
@@ -1419,7 +1419,7 @@ proc ::UI::NewMenu {w wmenu label menuSpec args} {
 # Results:
 #       $wmenu
 
-proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
+proc ::UI::BuildMenu {w wmenu mLabel lname menuDef args} {
     global  this wDlgs prefs
 
     variable menuKeyToIndex
@@ -1454,21 +1454,22 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
 
     # A trick to make this work for popup menus, which do not have a Menu parent.
     if {!$exists && [string equal [winfo class $wparent] "Menu"]} {
-	set locname [mc $mLabel]
-	set ampersand [string first & $locname]
+	set lname [eval concat $lname]
+	set ampersand [string first & $lname]
 	set mopts [list]
 	if {$ampersand != -1} {
-	    regsub -all & $locname "" locname
+	    regsub -all & $lname "" lname
 	    lappend mopts -underline $ampersand
 	}
-	eval {$wparent add cascade -label $locname -menu $m} $mopts
+	eval {$wparent add cascade -label $lname -menu $m} $mopts
     }
     
     # If we don't have a menubar, for instance, if embedded toplevel.
     # Only for the toplevel menubar.
     if {[string equal $wparent ".menu"] &&  \
       [string equal [winfo class $wparent] "Frame"]} {
-	label ${wmenu}la -text [mc $mLabel]
+	# label ${wmenu}la -text $locname
+	label ${wmenu}la -text $lname
 	pack  ${wmenu}la -side left -padx 4
 	bind  ${wmenu}la <Button-1> [list ::UI::DoTopMenuPopup %W $wmenu]
     }
@@ -1476,20 +1477,15 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
     set mod [string map {Control Ctrl} $this(modkey)]
     set i 0
     foreach line $menuDef {
-	foreach {type name cmd accel mopts subdef} $line {
+	foreach {type name lname cmd accel mopts subdef} $line {
 	    
-	    # @@@ Who is that idiot that wrote this code!
-	    # Localized menu label. Special for mAboutCoccinella!
-	    if {$name eq "mAboutCoccinella"} {
-		set locname [mc "&About %s" $prefs(appName)]
-	    } else {
-		set locname [mc $name]
-	    }
+	    set lname [eval concat $lname]
+
 	    set menuKeyToIndex($wmenu,$name) $i
 	    set menuNameToWmenu($w,$mLabel,$name) $wmenu
-	    set ampersand [string first & $locname]
+	    set ampersand [string first & $lname]
 	    if {$ampersand != -1} {
-		regsub -all & $locname "" locname
+		regsub -all & $lname "" lname
 		lappend mopts -underline $ampersand
 	    }
 	    if {[string match "sep*" $type]} {
@@ -1503,7 +1499,7 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
 		set wsubmenu $wmenu.$mt
 		set cachedMenuSpec($w,$wsubmenu) $subdef
 		set mapWmenuToWtop($wsubmenu) $w
-		eval {BuildMenu $w $wsubmenu $name $subdef} $args
+		eval {BuildMenu $w $wsubmenu $name $lname $subdef} $args
 		
 		# Explicitly set any disabled state of cascade.
 		MenuMethod $m entryconfigure $name
@@ -1519,7 +1515,7 @@ proc ::UI::BuildMenu {w wmenu mLabel menuDef args} {
 		if {[string length $accel]} {
 		    lappend mopts -accelerator $mod+$accel
 		}
-		eval {$m add $type -label $locname -command $cmd} $mopts 
+		eval {$m add $type -label $lname -command $cmd} $mopts 
 	    }
 	}
 	incr i
@@ -1624,7 +1620,7 @@ proc ::UI::SetMenubarAcceleratorBinds {w wmenubar} {
 	    
 	    # {type name cmd accel mopts subdef} $line
 	    # Cut, Copy & Paste handled by widgets internally!
-	    set accel [lindex $line 3]
+	    set accel [lindex $line 4]
 	    if {[string length $accel] && ![regexp {(X|C|V)} $accel]} {
 		set name [lindex $line 1]
 		set mind $menuKeyToIndex($wmenu,$name)
@@ -1634,7 +1630,7 @@ proc ::UI::SetMenubarAcceleratorBinds {w wmenubar} {
 		if {$prefix eq "Shift-"} {
 		    set key [string toupper $key]
 		}
-		bind $w <$this(modkey)-$prefix$key> [lindex $line 2]
+		bind $w <$this(modkey)-$prefix$key> [lindex $line 3]
 	    }
 	}
     }
@@ -1656,7 +1652,7 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenu} {
     variable menuKeyToIndex
     
     foreach line $cachedMenuSpec($w,$wmenu) {
-	set accel [lindex $line 3]
+	set accel [lindex $line 4]
 	if {[string length $accel]} {
 	    set name [lindex $line 1]
 	    set mind $menuKeyToIndex($wmenu,$name)
@@ -1666,7 +1662,7 @@ proc ::UI::SetMenuAcceleratorBinds {w wmenu} {
 	    if {$prefix eq "Shift-"} {
 		set key [string toupper $key]
 	    }
-	    bind $w <$this(modkey)-$prefix$key> [lindex $line 2]
+	    bind $w <$this(modkey)-$prefix$key> [lindex $line 3]
 	}
     }
 }
@@ -1684,10 +1680,10 @@ proc ::UI::RegisterAccelerator {key cmd} {
     lappend regAccelerators [list $key $cmd]
 }
 
-proc ::UI::BuildAppleMenu {w wmenuapple state} {
+proc ::UI::BuildAppleMenu {w wmenuapple lname state} {
     variable menuDefs
     
-    NewMenu $w $wmenuapple {} $menuDefs(main,apple) $state
+    NewMenu $w $wmenuapple {} $menuDefs(main,apple) $lname $state
     
     if {[tk windowingsystem] eq "aqua"} {
 	proc ::tk::mac::ShowPreferences {} {

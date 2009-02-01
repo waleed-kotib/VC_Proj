@@ -151,36 +151,36 @@ proc ::Disco::InitMenus {} {
     variable popMenuDefs
 
     set mDefs {
-	{command    mMessage...         {::NewMsg::Build -to $jid} }
-	{command    mChat...            {::Chat::StartThread $jid} }
-	{command    mEnterRoom...       {
+	{command    mMessage...         {[mc "&Message"]...} {::NewMsg::Build -to $jid} }
+	{command    mChat...            {[mc "Cha&t"]...} {::Chat::StartThread $jid} }
+	{command    mEnterRoom...       {[mc "Enter Chat&room"]...} {
 	    ::GroupChat::EnterOrCreate enter -roomjid $jid -autoget 1
 	} }
-	{command    mCreateRoom...      {
+	{command    mCreateRoom...      {[mc "&Create Chatroom"]...} {
 	    ::GroupChat::EnterOrCreate create -server $jid
 	} }
 	{separator}
-	{command    mBusinessCard...    {::UserInfo::Get $jid $node} }
+	{command    mBusinessCard...    {[mc "View &Business Card"]...} {::UserInfo::Get $jid $node} }
 	{separator}
-	{command    mSearch...          {
+	{command    mSearch...          {[mc "&Search"]...} {
 	    ::Search::Build -server $jid -autoget 1
 	} }
-	{command    mRegister...        {
+	{command    mRegister...        {[mc "Re&gister"]...} {
 	    ::GenRegister::NewDlg -server $jid -autoget 1
 	} }
-	{command    mUnregister         {::Register::Remove $jid} }
+	{command    mUnregister         {[mc "&Unregister"]} {::Register::Remove $jid} }
 	{separator}
-	{cascade    mShow               {
-	    {command mBackgroundImage...  {::Disco::BackgroundImageCmd}}
+	{cascade    mShow               {[mc "Show"]} {
+	    {command mBackgroundImage...  {[mc "&Background Image"]...} {::Disco::BackgroundImageCmd}}
 	} }
-	{command    mRefresh            {::Disco::Refresh $vstruct} }
-	{command    mDiscoverServer...  {::Disco::AddServerDlg}     }
-	{command    mRemoveListing      {::Disco::RemoveListing $jid}}
-	{cascade    mAdHocCommands      {}                          }
+	{command    mRefresh            {[mc "Refresh"]} {::Disco::Refresh $vstruct} }
+	{command    mDiscoverServer...  {[mc "&Discover Server"]...} {::Disco::AddServerDlg}     }
+	{command    mRemoveListing      {[mc "Remove &Listing"]} {::Disco::RemoveListing $jid}}
+	{cascade    mAdHocCommands      {[mc "C&ommands"]} {}                          }
     }
     if {[::Jabber::HaveWhiteboard]} {
 	set mDefs [linsert $mDefs 2 \
-	  {command    mWhiteboard    {::JWB::NewWhiteboardTo $jid} }]
+	  {command    mWhiteboard    {[mc "&Whiteboard"]...} {::JWB::NewWhiteboardTo $jid} }]
 
     }
     set popMenuDefs(disco,def) $mDefs

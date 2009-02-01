@@ -150,20 +150,20 @@ proc ::JWB::InitUI { } {
     #     Aqua: handled in apple menu
     #     Else: handled in main window
     set menuDefsFile {
-	{command   mNewWindow             {::JWB::OnMenuNewWhiteboard}  N}
-	{command   mOpenFile...           {::WB::OnMenuOpenCanvas}      O}
-	{command   mImportImage/Movie...  {::WB::OnMenuImport}          I}
-	{command   mOpenStream...         {::WB::OnMenuOpenURL}         {}}
+	{command   mNewWindow             {[mc "New &Window"]} {::JWB::OnMenuNewWhiteboard}  N}
+	{command   mOpenFile...           {[mc "&Open File"]...} {::WB::OnMenuOpenCanvas}      O}
+	{command   mImportImage/Movie...  {[mc "&Import Image/Movie"]...} {::WB::OnMenuImport}          I}
+	{command   mOpenStream...         {[mc "Open St&ream"]...} {::WB::OnMenuOpenURL}         {}}
 	{separator}
-	{command   mStopTrans             {::JWB::Stop $w}              {}}
+	{command   mStopTrans             {[mc "Stop &Transactions"]} {::JWB::Stop $w}              {}}
 	{separator}
-	{command   mCloseWindow           {::UI::CloseWindowEvent}      W}
-	{command   mSave                  {::WB::OnMenuSaveCanvas}      S}
-	{command   mSaveAs                {::WB::OnMenuSaveAs}          {}}
-	{command   mSaveAsItem            {::WB::OnMenuSaveAsItem}      {}}
+	{command   mCloseWindow           {[mc "&Close Window"]} {::UI::CloseWindowEvent}      W}
+	{command   mSave                  {[mc "&Save"]...} {::WB::OnMenuSaveCanvas}      S}
+	{command   mSaveAs                {[mc "Save &As"]...} {::WB::OnMenuSaveAs}          {}}
+	{command   mSaveAsItem            {[mc "Sa&ve As Item"]...} {::WB::OnMenuSaveAsItem}      {}}
 	{separator}
-	{command   mPageSetup             {::WB::OnMenuPageSetup}       {}}
-	{command   mPrint...              {::WB::OnMenuPrintCanvas}     P}
+	{command   mPageSetup             {[mc "Page Set&up"]...} {::WB::OnMenuPageSetup}       {}}
+	{command   mPrint...              {[mc "&Print"]...} {::WB::OnMenuPrintCanvas}     P}
     }
     if {[expr ![catch {package require QuickTimeTcl}]]} {
 	package require Multicast
@@ -650,8 +650,6 @@ proc ::JWB::CloseHook {w} {
 	default {
 	    set wcan [::WB::GetCanvasFromWtop $w]
 	    if {[::CanvasFile::IsUnsaved $wcan]} {
-		set str [mc "Do you want to save edits in a file?"]
-		set dtl [mc "Edits will be lost unless you save them."]
 		set ans [::UI::MessageBox -parent $w -icon question \
 		  -type yesnocancel \
 		  -message [mc "This whiteboard document has been changed."] -detail [mc "Do you want to save the changes?"]]

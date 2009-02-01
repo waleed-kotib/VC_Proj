@@ -58,15 +58,17 @@ proc ::AMenu::Build {m menuDef args} {
     bind $m <Destroy> {+::AMenu::Free %W }
     
     foreach line $menuDef {
-	lassign $line op name cmd opts
+	# "lname" is new in here!
+	lassign $line op name lname cmd opts
 	
 	if {[tk windowingsystem] eq "aqua"} {
 	    set idx [lsearch $opts -image]
 	    if {$idx >= 0} {
 		set opts [lreplace $opts $idx [expr {$idx+1}]]
 	    }
-	}	
-	set lname [mc $name]
+	}
+
+	set lname [eval concat $lname]
 	set opts [eval list $opts]
 
 	# Parse any "&" in name to -underline.
@@ -155,6 +157,7 @@ proc ::AMenu::EntryConfigure {m mLabel args} {
     if {[info exists argsA(-label)]} {
 	set name $argsA(-label)
 	set lname [mc $name]
+	#set lname [eval concat $lname] WEGDOEN??
 	set ampersand [string first & $lname]
 	if {$ampersand != -1} {
 	    regsub -all & $lname "" lname

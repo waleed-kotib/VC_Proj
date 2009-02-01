@@ -454,8 +454,8 @@ proc ::VCard::Pages {nbframe etoken type} {
     pack  $pbh  -side top -anchor [option get . dialogAnchor {}]
         
     foreach {name tag} {
-        Address           adr_home_street
-        Address           adr_home_extadd
+        "Address 1"       adr_home_street
+        "Address 2"       adr_home_extadd
         City              adr_home_locality
         Region            adr_home_region
         "Postal code"     adr_home_pcode
@@ -463,11 +463,6 @@ proc ::VCard::Pages {nbframe etoken type} {
         "Tel (voice)"     tel_voice_home
         "Tel (fax)"       tel_fax_home
     } {
-	if {$tag eq "adr_home_street"} {
-	    append name " 1"
-	} elseif {$tag eq "adr_home_extadd"} {
-	    append name " 2"
-	}
 	ttk::label $pbh.l$tag -text "[mc $name]:"
 	ttk::entry $pbh.e$tag -width 28 -textvariable $etoken\($tag)
         grid  $pbh.l$tag  $pbh.e$tag -sticky e -pady 2

@@ -365,7 +365,7 @@ proc ::NotifyCall::SetTalkingState {win} {
 proc ::NotifyCall::CloseDialer {w} {
     
     set msg [mc "Do you want to hang up?"]
-    set ans [tk_messageBox -icon question -type yesno -message [mc $msg]]
+    set ans [tk_messageBox -icon question -type yesno -message $msg]
     if {$ans eq "no"} {
 	return stop
     } else {
@@ -793,7 +793,7 @@ proc ::NotifyCallSlot::Close {w} {
     variable slot
     
     set msg [mc "Do you want to hang up?"]
-    set ans [tk_messageBox -icon question -type yesno -message [mc $msg]]
+    set ans [tk_messageBox -icon question -type yesno -message $msg]
     if {$ans eq "yes"} {
 	HangUp $slot(frame)
     }

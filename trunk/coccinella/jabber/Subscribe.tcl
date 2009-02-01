@@ -613,8 +613,9 @@ proc ::Subscribe::ResProc {type queryE} {
 
 namespace eval ::SubscribeAuto {
     
-    ui::dialog button accept -text [mc "Accept"]
-    ui::dialog button reject -text [mc "Reject"]
+    # Remove these lines?
+    #ui::dialog button accept -text [mc "Accept"]
+    #ui::dialog button reject -text [mc "Reject"]
 
     # We have different queues for ask/auto-accept/auto-reject (timers).
     variable queue
@@ -1440,7 +1441,7 @@ proc ::Subscribed::ExecQueue {} {
 	    FancyDlg
 	} else {
 	    # This string is not in catalog by default.
-	    set str [mc "The following contacts can see your presence"]
+	    #set str [mc "The following contacts can see your presence"]
 	    ::ui::dialog $w -title [mc "Presence Subscription"] -icon info \
 	      -type ok -message [mc "%s contacts want to see your presence. Select those who may see your presence."]
 	}

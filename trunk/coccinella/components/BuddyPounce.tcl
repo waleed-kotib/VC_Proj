@@ -45,7 +45,7 @@ proc ::BuddyPounce::Init {} {
     
     # Register popmenu entry.
     set menuDef {
-	command mContactActions... {::BuddyPounce::Build $clicked $jidL $group}
+	command mContactActions... {[mc "&Contact Actions"]...} {::BuddyPounce::Build $clicked $jidL $group}
     }
     set menuType {
 	mContactActions... {group user}

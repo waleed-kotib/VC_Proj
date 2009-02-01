@@ -74,7 +74,7 @@ proc ::Multicast::OpenMulticast {wcan} {
     ttk::entry $frtot.entip -width 40  \
       -textvariable [namespace current]::txtvarEntMulticast
     ttk::label $frtot.msg -style Small.TLabel \
-      -wraplength 400 -justify left -text [mc "Open a URL which contains a SDP file with extension .mov for a QuickTime realtime live streaming sending. Can be audio (radio) or video (TV). Alternatively, use your web browser to find the SDP file for a live transmission, download it on disk and open it is an ordinary movie."]
+      -wraplength 400 -justify left -text "Open a URL which contains a SDP file with extension .mov for a QuickTime realtime live streaming sending. Can be audio (radio) or video (TV). Alternatively, use your web browser to find the SDP file for a live transmission, download it on disk and open it is an ordinary movie."
 
     grid  $frtot.lbltop   -             $frtot.optm  -padx 2 -pady 2 -sticky w
     grid  $frtot.lblhttp  $frtot.entip  -            -padx 2 -pady 2 -sticky e

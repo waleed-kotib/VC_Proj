@@ -52,11 +52,11 @@ proc ::Spell::Init {} {
     
     component::register Spell
 
-    set menuDef {checkbutton mCheckSpell      {::Spell::OnMenu}  {} \
+    set menuDef {checkbutton mCheckSpell      {[mc "Check Spelling"]} {::Spell::OnMenu}  {} \
       {-variable ::Spell::state(on)}}
     ::JUI::RegisterMenuEntry info $menuDef
     if {$speller eq "aspell"} {
-	set menuDef {cascade mDictionaries      {}  {} }
+	set menuDef {cascade mDictionaries      {[mc "Dictionaries"]} {}  {} }
 	::JUI::RegisterMenuEntry info $menuDef
     }
 

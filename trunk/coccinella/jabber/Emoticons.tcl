@@ -593,9 +593,15 @@ proc ::Emoticons::InsertTextLegend {w name args} {
     $w delete 1.0 end
     
     # Meta data:
+    set metadata [dict create]
+    dict set metadata author      [mc "Author"]
+    dict set metadata description [mc "Description"]
+    dict set metadata home        [mc "Home"]
+    dict set metadata name        [mc "Name"]
+    dict set metadata version     [mc "Version"]
     foreach ind [array names meta $name,*] {
 	set key [string map [list "$name," ""] $ind]
-	$w insert insert "[mc [string totitle $key]]:\t" tmeta
+	$w insert insert "[dict get $metadata $key]:\t" tmeta
 	foreach val $meta($ind) {
 	    $w insert insert "$val, " tmeta
 	}

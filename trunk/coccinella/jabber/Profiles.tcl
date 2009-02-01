@@ -807,7 +807,7 @@ proc ::Profiles::BuildHook {wtree nbframe} {
     global  config
     
     if {$config(profiles,prefspanel)} {
-	::Preferences::NewTableItem {Jabber {User Profiles}} [mc "User Profiles"]
+	::Preferences::NewTableItem {Jabber {User Profiles}} [mc "Accounts"]
 	
 	set wpage [$nbframe page {User Profiles}]    
 	BuildPage $wpage
@@ -1898,7 +1898,7 @@ proc ::Profiles::NotebookOptionWidget {w token} {
       -command [list ::Preferences::Show {General {Network}}]
     if {0} {
 	ttk::label $whttp.lpoll -style Small.TLabel  \
-	  -text [mc "Poll interval (secs)"]
+	  -text "Poll interval (secs)"
 	spinbox $whttp.spoll -textvariable $token\(minpollsecs) \
 	  -width 3 -state readonly -increment 1 -from 1 -to 120
     }

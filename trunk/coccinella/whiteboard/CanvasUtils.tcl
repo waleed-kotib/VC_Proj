@@ -87,128 +87,134 @@ proc ::CanvasUtils::Init { } {
     variable menuDefs
     
     set menuDefs(pop,thickness)  \
-      {cascade     mThickness     {}                                 {} {} {
-	{radio   1 {::CanvasUtils::ItemConfigure $wcan $id -width 1}    {} \
+      {cascade     mThickness     {[mc "Thickness"]} {}                                 {} {} {
+	{radio   1 {1} {::CanvasUtils::ItemConfigure $wcan $id -width 1}    {} \
 	  {-variable ::CanvasUtils::popupVars(-width)}}
-	{radio   2 {::CanvasUtils::ItemConfigure $wcan $id -width 2}    {} \
+	{radio   2 {2} {::CanvasUtils::ItemConfigure $wcan $id -width 2}    {} \
 	  {-variable ::CanvasUtils::popupVars(-width)}}
-	{radio   4 {::CanvasUtils::ItemConfigure $wcan $id -width 4}    {} \
+	{radio   4 {4} {::CanvasUtils::ItemConfigure $wcan $id -width 4}    {} \
 	  {-variable ::CanvasUtils::popupVars(-width)}}
-	{radio   6 {::CanvasUtils::ItemConfigure $wcan $id -width 6}    {} \
+	{radio   6 {6} {::CanvasUtils::ItemConfigure $wcan $id -width 6}    {} \
 	  {-variable ::CanvasUtils::popupVars(-width)}}}
     }
     set menuDefs(pop,brushthickness)  \
-      {cascade     mBrushThickness  {}                               {} {} {
-	{radio   8 {::CanvasUtils::ItemConfigure $wcan $id -width 8}    {} \
+      {cascade     mBrushThickness  {[mc "Brush Thickness"]} {}                               {} {} {
+	{radio   8 {8} {::CanvasUtils::ItemConfigure $wcan $id -width 8}    {} \
 	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}
-	{radio  10 {::CanvasUtils::ItemConfigure $wcan $id -width 10}   {} \
+	{radio  10 {10} {::CanvasUtils::ItemConfigure $wcan $id -width 10}   {} \
 	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}
-	{radio  12 {::CanvasUtils::ItemConfigure $wcan $id -width 12}   {} \
+	{radio  12 {12} {::CanvasUtils::ItemConfigure $wcan $id -width 12}   {} \
 	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}
-	{radio  14 {::CanvasUtils::ItemConfigure $wcan $id -width 14}   {} \
+	{radio  14 {14} {::CanvasUtils::ItemConfigure $wcan $id -width 14}   {} \
 	  {-variable ::CanvasUtils::popupVars(-brushwidth)}}}
     }
     set menuDefs(pop,arcs)  \
-      {cascade   mArcs      {}                                       {} {} {
-	{radio   mPieslice  {::CanvasUtils::ItemConfigure $wcan $id -style pieslice} {} \
+      {cascade   mArcs      {[mc "Arcs"]} {}                                       {} {} {
+	{radio   mPieslice  {[mc "Pieslice"]} {::CanvasUtils::ItemConfigure $wcan $id -style pieslice} {} \
 	  {-value pieslice -variable ::CanvasUtils::popupVars(-arc)}}
-	{radio   mChord     {::CanvasUtils::ItemConfigure $wcan $id -style chord}    {} \
+	{radio   mChord     {[mc "Chord"]} {::CanvasUtils::ItemConfigure $wcan $id -style chord}    {} \
 	  {-value chord -variable ::CanvasUtils::popupVars(-arc)}}
-	{radio   mArc       {::CanvasUtils::ItemConfigure $wcan $id -style arc}      {} \
+	{radio   mArc       {[mc "Arc"]} {::CanvasUtils::ItemConfigure $wcan $id -style arc}      {} \
 	  {-value arc -variable ::CanvasUtils::popupVars(-arc)}}}
     }
     set menuDefs(pop,color)  \
-      {command   mColor...     {::CanvasUtils::SetItemColorDialog $wcan $id -fill}   {}}
+      {command   mColor...     {[mc "Color"]...} {::CanvasUtils::SetItemColorDialog $wcan $id -fill}   {}}
     set menuDefs(pop,fillcolor)  \
-      {command   mFillColor... {::CanvasUtils::SetItemColorDialog $wcan $id -fill}   {}}
+      {command   mFillColor... {[mc "Fill Color"]...} {::CanvasUtils::SetItemColorDialog $wcan $id -fill}   {}}
     set menuDefs(pop,outline)  \
-      {command   mOutlineColor {::CanvasUtils::SetItemColorDialog $wcan $id -outline} {}}
+      {command   mOutlineColor {[mc "Outline Color"]...} {::CanvasUtils::SetItemColorDialog $wcan $id -outline} {}}
     set menuDefs(pop,inspect)  \
-      {command   mEditItem...  {::ItemInspector::ItemInspector $wcan $id}   {}}
+      {command   mEditItem...  {[mc "&Edit Item"]...} {::ItemInspector::ItemInspector $wcan $id}   {}}
     set menuDefs(pop,inspectqt)  \
-      {command   mEditItem...  {::ItemInspector::Movie $wcan $winfr}        {}}
+      {command   mEditItem...  {[mc "&Edit Item"]...} {::ItemInspector::Movie $wcan $winfr}        {}}
     set menuDefs(pop,saveimageas)  \
-      {command   mSaveImageAs  {::Import::SaveImageAsFile $wcan $id}        {}}
+      {command   mSaveImageAs  {[mc "Save Image As"]...} {::Import::SaveImageAsFile $wcan $id}        {}}
     set menuDefs(pop,imagelarger)  \
-      {command   mImageLarger  {::Import::ResizeImage $wcan 2 $id auto}     {}}
+      {command   mImageLarger  {[mc "Image Larger"]} {::Import::ResizeImage $wcan 2 $id auto}     {}}
     set menuDefs(pop,imagesmaller)  \
-      {command   mImageSmaller {::Import::ResizeImage $wcan -2 $id auto}    {}}
+      {command   mImageSmaller {[mc "Image Smaller"]} {::Import::ResizeImage $wcan -2 $id auto}    {}}
     set menuDefs(pop,exportimage)  \
-      {command   mExportImage...  {::Import::ExportImageAsFile $wcan $id}     {}}
+      {command   mExportImage...  {[mc "Export Image"]...} {::Import::ExportImageAsFile $wcan $id}     {}}
     set menuDefs(pop,exportmovie)  \
-      {command   mExportMovie...  {::Import::ExportMovie $w $winfr}   {}}
+      {command   mExportMovie...  {[mc "Export Movie"]...} {::Import::ExportMovie $w $winfr}   {}}
     set menuDefs(pop,syncplay)  \
-      {checkbutton  mSyncPlayback {::Import::SyncPlay $w $winfr}   {} {} \
+      {checkbutton  mSyncPlayback {[mc "Sync Playback"]} {::Import::SyncPlay $w $winfr}   {} {} \
 	{-variable ::CanvasUtils::popupVars(-syncplay)}}
     set menuDefs(pop,shot)  \
-      {command   mTakeSnapShot  {::Import::TakeShot $w $winfr}   {}}
+      {command   mTakeSnapShot  {[mc "Take &Snapshot"]} {::Import::TakeShot $w $winfr}   {}}
     set menuDefs(pop,timecode)  \
-	{checkbutton  mTimeCode {::Import::TimeCode $w $winfr}   {} {} \
+	{checkbutton  mTimeCode {[mc "Timecode"]} {::Import::TimeCode $w $winfr}   {} {} \
 	  {-variable ::CanvasUtils::popupVars(-timecode)}}
     set menuDefs(pop,inspectbroken)  \
-      {command   mEditItem...  {::ItemInspector::Broken $wcan $id}         {}}
+      {command   mEditItem...  {[mc "&Edit Item"]...} {::ItemInspector::Broken $wcan $id}         {}}
     set menuDefs(pop,reloadimage)  \
-      {command   mReloadImage  {::Import::ReloadImage $w $id}     {}}
+      {command   mReloadImage  {[mc "Reload Image"]} {::Import::ReloadImage $w $id}     {}}
     set menuDefs(pop,smoothness)  \
-      {cascade     mLineSmoothness   {}                                    {} {} {
-	{radio None {::CanvasUtils::ItemConfigure $wcan $id -smooth 0 -splinesteps  0} {} \
+      {cascade     mLineSmoothness   {[mc "Line Smoothness"]} {}                                    {} {} {
+	{radio None {[mc "None"]} {::CanvasUtils::ItemConfigure $wcan $id -smooth 0 -splinesteps  0} {} \
 	  {-value 0 -variable ::CanvasUtils::popupVars(-smooth)}}
-	{radio 2    {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps  2} {} \
+	{radio 2    {2} {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps  2} {} \
 	  {-value 2 -variable ::CanvasUtils::popupVars(-smooth)}}
-	{radio 4    {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps  4} {} \
+	{radio 4    {4} {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps  4} {} \
 	  {-value 4 -variable ::CanvasUtils::popupVars(-smooth)}}
-	{radio 6    {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps  6} {} \
+	{radio 6    {6} {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps  6} {} \
 	  {-value 6 -variable ::CanvasUtils::popupVars(-smooth)}}
-	{radio 10   {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps 10} {} \
+	{radio 10   {10} {::CanvasUtils::ItemConfigure $wcan $id -smooth 1 -splinesteps 10} {} \
 	  {-value 10 -variable ::CanvasUtils::popupVars(-smooth)}}}
     }
     set menuDefs(pop,smooth)  \
-      {checkbutton mLineSmoothness   {::CanvasUtils::ItemSmooth $wcan $id}     {} \
+      {checkbutton mLineSmoothness   {[mc "Line Smoothness"]} {::CanvasUtils::ItemSmooth $wcan $id}     {} \
       {-variable ::CanvasUtils::popupVars(-smooth) -offvalue 0 -onvalue 1}}
     set menuDefs(pop,straighten)  \
-      {command     mStraighten       {::CanvasUtils::ItemStraighten $wcan $id}   {} {}}
+      {command     mStraighten       {[mc "Straighten"]} {::CanvasUtils::ItemStraighten $wcan $id}   {} {}}
     set menuDefs(pop,font)  \
-      {cascade     mFont             {}                                      {} {} {}}
+      {cascade     mFont             {[mc "Font"]} {}                                      {} {} {}}
     set menuDefs(pop,fontsize)  \
-      {cascade     mSize             {}                                {} {} {
-	{radio   1  {::CanvasUtils::SetTextItemFontSize $wcan $id 1}   {} \
+      {cascade     mSize             {[mc "Size"]} {}                                {} {} {
+	{radio   1  {1} {::CanvasUtils::SetTextItemFontSize $wcan $id 1}   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
-	{radio   2  {::CanvasUtils::SetTextItemFontSize $wcan $id 2}   {} \
+	{radio   2  {2} {::CanvasUtils::SetTextItemFontSize $wcan $id 2}   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
-	{radio   3  {::CanvasUtils::SetTextItemFontSize $wcan $id 3}   {} \
+	{radio   3  {3} {::CanvasUtils::SetTextItemFontSize $wcan $id 3}   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
-	{radio   4  {::CanvasUtils::SetTextItemFontSize $wcan $id 4}   {} \
+	{radio   4  {4} {::CanvasUtils::SetTextItemFontSize $wcan $id 4}   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
-	{radio   5  {::CanvasUtils::SetTextItemFontSize $wcan $id 5}   {} \
+	{radio   5  {5} {::CanvasUtils::SetTextItemFontSize $wcan $id 5}   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}
-	{radio   6  {::CanvasUtils::SetTextItemFontSize $wcan $id 6}   {} \
+	{radio   6  {6} {::CanvasUtils::SetTextItemFontSize $wcan $id 6}   {} \
 	  {-variable ::CanvasUtils::popupVars(-fontsize)}}}
     }
     set menuDefs(pop,fontweight)  \
-      {cascade     mWeight           {}                                     {} {} {
-	{radio   mNormal {::CanvasUtils::SetTextItemFontWeight $wcan $id normal}   {} \
+      {cascade     mWeight           {[mc "Weight"]} {}                                     {} {} {
+	{radio   mNormal {[mc "Normal"]} {::CanvasUtils::SetTextItemFontWeight $wcan $id normal}   {} \
 	  {-value normal -variable ::CanvasUtils::popupVars(-fontweight)}}
-	{radio   mBold {::CanvasUtils::SetTextItemFontWeight $wcan $id bold}    {} \
+	{radio   mBold {[mc "Bold"]} {::CanvasUtils::SetTextItemFontWeight $wcan $id bold}    {} \
 	  {-value bold   -variable ::CanvasUtils::popupVars(-fontweight)}}
-	{radio   mItalic {::CanvasUtils::SetTextItemFontWeight $wcan $id italic}   {} \
+	{radio   mItalic {[mc "Italic"]} {::CanvasUtils::SetTextItemFontWeight $wcan $id italic}   {} \
 	  {-value italic -variable ::CanvasUtils::popupVars(-fontweight)}}}
     }	
     set menuDefs(pop,speechbubble)  \
-      {command   mAddSpeechBubble  {::CanvasDraw::MakeSpeechBubble $wcan $id}   {}}
+      {command   mAddSpeechBubble  {[mc "Add Speech Bubble"]} {::CanvasDraw::MakeSpeechBubble $wcan $id}   {}}
     
     # Dashes need a special build process.
     set dashList {}
     foreach dash [lsort -decreasing [array names ::WB::dashFull2Short]] {
 	set dashval $::WB::dashFull2Short($dash)
+	set lname [dict create]
+	dict set lname none        [mc "None"]
+	dict set lname dotted      [mc "Dotted"]
+	dict set lname dashed      [mc "Dashed"]
+	dict set lname dash-dotted [mc "Dash-dotted"]
+	set str [dict get $lname $dash]
 	if {[string equal " " $dashval]} {
 	    set dopts {-value { } -variable ::CanvasUtils::popupVars(-dash)}
 	} else {
 	    set dopts [format {-value %s -variable ::CanvasUtils::popupVars(-dash)} $dashval]
 	}
-	lappend dashList [list radio $dash {} {} $dopts]
+	lappend dashList [list radio $dash $str {} {} $dopts]
     }
     set menuDefs(pop,dash)  \
-      [list cascade   mDash          {}     {} {} $dashList]
+      [list cascade   mDash          {[mc "Dash"]} {}     {} {} $dashList]
     
     # Now assemble menus from the individual entries above. List of which entries where.
     array set menuArr {
@@ -1403,7 +1409,7 @@ proc ::CanvasUtils::DoItemPopup {wcan x y} {
     set m .popup${type}
     catch {destroy $m}
     if {![winfo exists $m]} {
-	::UI::NewMenu $w $m {} $menuDefs(pop,$type) -id $id -wcan $wcan
+	::UI::NewMenu $w $m {} {} $menuDefs(pop,$type) -id $id -wcan $wcan
 	if {[string equal $type "text"]} {
 	    BuildCanvasPopupFontMenu $wcan $m.mfont $id $prefs(canvasFonts)
 	}
@@ -1488,7 +1494,7 @@ proc ::CanvasUtils::DoLockedPopup {wcan x y} {
     set m .popup${type}
     catch {destroy $m}
     if {![winfo exists $m]} {
-	::UI::NewMenu $w $m {} $menuDefs(pop,$type) -id $id -wcan $wcan
+	::UI::NewMenu $w $m {} {} $menuDefs(pop,$type) -id $id -wcan $wcan
 	update idletasks
     }
     

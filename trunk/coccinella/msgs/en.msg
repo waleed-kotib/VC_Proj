@@ -29,7 +29,6 @@
 ::msgcat::mcset en Abort
 ::msgcat::mcset en Action
 ::msgcat::mcset en Add
-::msgcat::mcset en Address
 ::msgcat::mcset en Admin
 ::msgcat::mcset en admin
 ::msgcat::mcset en Affiliation
@@ -263,163 +262,233 @@
 ::msgcat::mcset en invisible
 ::msgcat::mcset en chat
 
-# TODO
-# All menu labels; concateneted and prepended with 'm' for the database key.
-::msgcat::mcset en mAboutCoccinella      {&About Coccinella}
-::msgcat::mcset en mAction               {&Action}
+# All menu labels
+::msgcat::mcset en {&About Coccinella}
+::msgcat::mcset en {&About %s}
+::msgcat::mcset en {&Action}
 ::msgcat::mcset en {Add to Dictionary}
-::msgcat::mcset en mAdHocCommands        {C&ommands}
-::msgcat::mcset en mAddContact...        {&Add Contact...}
-::msgcat::mcset en mAddSpeechBubble      {Add Speech Bubble}
-::msgcat::mcset en mAll                  {All}
-::msgcat::mcset en mArc                  {Arc}
-::msgcat::mcset en mArcs                 {Arcs}
-::msgcat::mcset en mAttachMessage        {Attach Message...}
+::msgcat::mcset en {Address 1}
+::msgcat::mcset en {Address 2}
+::msgcat::mcset en {C&ommands}
+::msgcat::mcset en {&Add Contact}
+::msgcat::mcset en {Add Speech Bubble}
+::msgcat::mcset en {All}
+::msgcat::mcset en {Arc}
+::msgcat::mcset en {Arcs}
+::msgcat::mcset en {Attach Message}
 ::msgcat::mcset en {Available}
 ::msgcat::mcset en {Away}
-::msgcat::mcset en mBackgroundColor...   {Background Color...}
+::msgcat::mcset en {Background Color}
 ::msgcat::mcset en {Background Image}
-::msgcat::mcset en mBackgroundImage...   {&Background Image...}
-::msgcat::mcset en mBold                 {Bold}
-::msgcat::mcset en mBrushThickness       {Brush Thickness}
-::msgcat::mcset en mBugReport...         {&Report Bug...}
-::msgcat::mcset en mBusinessCard...      {View &Business Card...}
-::msgcat::mcset en {&Business Card...}
-::msgcat::mcset en mCall                 {&Call...}
+::msgcat::mcset en {&Background Image}
+::msgcat::mcset en {Brush Thickness}
+::msgcat::mcset en {&Report Bug}
+::msgcat::mcset en {View &Business Card}
+::msgcat::mcset en {&Business Card}
+::msgcat::mcset en {&Call}
 ::msgcat::mcset en {Chat}
-::msgcat::mcset en mChat...              {Cha&t...}
-::msgcat::mcset en mChord                {Chord}
+::msgcat::mcset en {Cha&t}
+::msgcat::mcset en {Chord}
 ::msgcat::mcset en {Clear Menu}
 ::msgcat::mcset en {&Close Window}
-::msgcat::mcset en mCoccinellaHome...    {&Home Page...}
-::msgcat::mcset en mColor...             {Color...}
-::msgcat::mcset en mContacts...          {&Contacts...}
-::msgcat::mcset en mControlPanel         {Control Panel}
+::msgcat::mcset en {&Home Page}
+::msgcat::mcset en {&Contacts}
+::msgcat::mcset en {Control Panel}
 ::msgcat::mcset en {&Copy}
-::msgcat::mcset en {&Create Chatroom...}
+::msgcat::mcset en {&Create Chatroom}
 ::msgcat::mcset en {Cu&t}
-::msgcat::mcset en mDebug                {&Debug}
-::msgcat::mcset en mDecreasing           {&Decreasing}
-::msgcat::mcset en mDictionaries         {Dictionaries}
-::msgcat::mcset en {&Discover Server...}
+::msgcat::mcset en {&Debug}
+::msgcat::mcset en {&Decreasing}
+::msgcat::mcset en {Dictionaries}
+::msgcat::mcset en {&Discover Server}
 ::msgcat::mcset en {Do Not Disturb}
 ::msgcat::mcset en {&Edit}
-::msgcat::mcset en {Edit &Bookmarks...}
-::msgcat::mcset en {Edit &Business Card...}
-::msgcat::mcset en mEditContact...       {&Edit Contact...}
-::msgcat::mcset en {&Edit Item...}
-::msgcat::mcset en mEditNick             {&Edit Nickname}
-::msgcat::mcset en {&Edit Profiles...}
-::msgcat::mcset en {Enter Chat&room...}
-::msgcat::mcset en mErrorLog             {&Error Log...}
-::msgcat::mcset en mExport               {Export}
-::msgcat::mcset en mExportImage...       {Export Image...}
-::msgcat::mcset en mExportMovie...       {Export Movie...}
+::msgcat::mcset en {Edit &Bookmarks}
+::msgcat::mcset en {Edit &Business Card}
+::msgcat::mcset en {&Edit Contact}
+::msgcat::mcset en {&Edit Item}
+::msgcat::mcset en {&Edit Nickname}
+::msgcat::mcset en {&Edit Profiles}
+::msgcat::mcset en {Enter Chat&room}
+::msgcat::mcset en {&Error Log}
+::msgcat::mcset en {Export Image}
+::msgcat::mcset en {Export Movie}
 ::msgcat::mcset en {Extended Away}
-::msgcat::mcset en mFile                 {&File}
-::msgcat::mcset en mFill                 {Fill}
-::msgcat::mcset en mFillColor...         {Fill Color...}
+::msgcat::mcset en {&File}
+::msgcat::mcset en {Fill Color}
 ::msgcat::mcset en {Find}
 ::msgcat::mcset en {Find Next}
 ::msgcat::mcset en {Find Previous}
 ::msgcat::mcset en {Flip}
-::msgcat::mcset en mFont                 {Font}
-::msgcat::mcset en mFontSize             {Font Size}
-::msgcat::mcset en mGrid                 {Grid}
+::msgcat::mcset en {Font}
+::msgcat::mcset en {Font Size}
+::msgcat::mcset en {Grid}
 ::msgcat::mcset en {Hide Control Panel}
-::msgcat::mcset en mHistory...           {&History...}
-::msgcat::mcset en mHorizontal           {Horizontal}
-::msgcat::mcset en mHugeFont             {Huge}
-::msgcat::mcset en mIconSet...           {Icon &Set...}
-::msgcat::mcset en mIgnore               {&Ignore}
+::msgcat::mcset en {&History}
+::msgcat::mcset en {Horizontal}
+::msgcat::mcset en {Huge}
+::msgcat::mcset en {Icon &Set}
+::msgcat::mcset en {&Ignore}
 ::msgcat::mcset en {Image Larger}
 ::msgcat::mcset en {Image Smaller}
-::msgcat::mcset en mImport               {Import}
-::msgcat::mcset en mImportImage/Movie... {&Import Image/Movie...}
-::msgcat::mcset en mInbox...             {&Inbox...}
-::msgcat::mcset en mIncreasing           {&Increasing}
-::msgcat::mcset en mInfo                 {&Info}
+::msgcat::mcset en {&Import Image/Movie}
+::msgcat::mcset en {&Inbox}
+::msgcat::mcset en {&Increasing}
+::msgcat::mcset en {&Info}
 ::msgcat::mcset en {Invisible}
-::msgcat::mcset en mItalic               {Italic}
-::msgcat::mcset en mJiveCall             {Call}
-::msgcat::mcset en mJiveForward          {Forward Call}
-::msgcat::mcset en mLargeFont            {Large}
+::msgcat::mcset en {Forward Call}
+::msgcat::mcset en {Large}
 ::msgcat::mcset en {Larger}
-::msgcat::mcset en mLargerFont           {Larger}
-::msgcat::mcset en mLastLogin/Activity   {Last Login/Activity}
-::msgcat::mcset en mLibrary              {&Library}
-::msgcat::mcset en mLineSmoothness       {Line Smoothness}
-::msgcat::mcset en mLocalTime            {Local Time...}
+::msgcat::mcset en {Last Login/Activity}
+::msgcat::mcset en {&Library}
+::msgcat::mcset en {Line Smoothness}
 ::msgcat::mcset en {Login to %s}
-::msgcat::mcset en mLoginTrpt            {Login to Transport}
+::msgcat::mcset en {Login to Transport}
 ::msgcat::mcset en {Logout from %s}
-::msgcat::mcset en mLogoutTrpt           {Logout from Transport}
+::msgcat::mcset en {Logout from Transport}
 ::msgcat::mcset en {&Lower}
 ::msgcat::mcset en {&Message}
 ::msgcat::mcset en {Mi&nimize}
 ::msgcat::mcset en {&New Account}
-::msgcat::mcset en mNewWindow            {New &Window}
-::msgcat::mcset en mNormal               {Normal}
+::msgcat::mcset en {New &Window}
 ::msgcat::mcset en {Not Available}
-::msgcat::mcset en mOffline              {&Offline}
-::msgcat::mcset en mOpenFile...          {&Open File...}
-::msgcat::mcset en mOpenFolder...        {&Open Folder...}
+::msgcat::mcset en {&Offline}
+::msgcat::mcset en {&Open File}
+::msgcat::mcset en {&Open Folder}
 ::msgcat::mcset en {Open St&ream}
-::msgcat::mcset en mOutlineColor         {Outline Color}
-::msgcat::mcset en mPageSetup            {Page Set&up...}
+::msgcat::mcset en {Outline Color}
+::msgcat::mcset en {Page Set&up}
 ::msgcat::mcset en {New P&assword}
 ::msgcat::mcset en {&Paste}
-::msgcat::mcset en mPieslice             {Pieslice}
-::msgcat::mcset en mPlugins              {Plu&gins}
-::msgcat::mcset en mPreferences          {&Preferences}
-::msgcat::mcset en mPreferences...       {&Preferences...}
-::msgcat::mcset en mPrint...             {&Print...}
-::msgcat::mcset en mQuit                 {&Quit}
+::msgcat::mcset en {Pieslice}
+::msgcat::mcset en {Plu&gins}
+::msgcat::mcset en {&Preferences}
+::msgcat::mcset en {&Print}
+::msgcat::mcset en {&Quit}
 ::msgcat::mcset en {&Raise}
 ::msgcat::mcset en {Re&do}
 ::msgcat::mcset en {Refresh}
 ::msgcat::mcset en {Re&gister}
 ::msgcat::mcset en {&Remove Account}
-::msgcat::mcset en mRemoveContact        {&Remove Contact...}
-::msgcat::mcset en mRemoveListing        {Remove &Listing}
+::msgcat::mcset en {&Remove Contact}
+::msgcat::mcset en {Remove &Listing}
 ::msgcat::mcset en {&Restore}
-::msgcat::mcset en mSave		 {&Save...}
-::msgcat::mcset en mSaveAs               {Save &As...}
-::msgcat::mcset en mSaveAsItem           {Save As Item...}
-::msgcat::mcset en mSaveCanvas           {&Save...}
-::msgcat::mcset en mSaveImageAs          {Save Image As...}
+::msgcat::mcset en {&Save}
+::msgcat::mcset en {Save &As}
+::msgcat::mcset en {Sa&ve As Item}
+::msgcat::mcset en {Save Image As}
 ::msgcat::mcset en {&Search}
 ::msgcat::mcset en {Select &All}
-::msgcat::mcset en mSendFile...          {Send &File...}
-::msgcat::mcset en mServer               {&Server}
+::msgcat::mcset en {Send &File}
+::msgcat::mcset en {&Server}
 ::msgcat::mcset en {&Setup Assistant}
-::msgcat::mcset en mShiftConstrain       {Shift Constrain}
+::msgcat::mcset en {Shift Constrain}
 ::msgcat::mcset en {Show}
 ::msgcat::mcset en {Show Control Panel}
-::msgcat::mcset en mSize                 {Size}
 ::msgcat::mcset en {Slide Show}
 ::msgcat::mcset en {Smaller}
-::msgcat::mcset en mSort                 {Sort}
-::msgcat::mcset en mCheckSpell           {Check Spelling}
-::msgcat::mcset en mStopTrans            {Stop &Transactions}
-::msgcat::mcset en mStraighten           {Straighten}
-::msgcat::mcset en mStyle                {Style}
-::msgcat::mcset en mSyncPlayback         {Sync Playback}
-::msgcat::mcset en mTabs                 {&Tabs}
-::msgcat::mcset en mTakeSnapShot         {Take &Snapshot}
-::msgcat::mcset en mThickness            {Thickness}
-::msgcat::mcset en mTimeCode             {Timecode}
-::msgcat::mcset en mTo45degrees          {To 45 degrees}
-::msgcat::mcset en mTo90degrees          {To 90 degrees}
-::msgcat::mcset en mToolbar              {Tool&bar}
-::msgcat::mcset en mTransports           {&Transports}
+::msgcat::mcset en {Sort}
+::msgcat::mcset en {Check Spelling}
+::msgcat::mcset en {Stop &Transactions}
+::msgcat::mcset en {Straighten}
+::msgcat::mcset en {Style}
+::msgcat::mcset en {Sync Playback}
+::msgcat::mcset en {&Tabs}
+::msgcat::mcset en {Take &Snapshot}
+::msgcat::mcset en {Thickness}
+::msgcat::mcset en {Timecode}
+::msgcat::mcset en {To 45 degrees}
+::msgcat::mcset en {To 90 degrees}
+::msgcat::mcset en {Tool&bar}
+::msgcat::mcset en {&Transports}
 ::msgcat::mcset en {&Undo}
-::msgcat::mcset en mUnregister           {&Unregister}
-::msgcat::mcset en mUpdateCheck          {&Update Check}
-::msgcat::mcset en mVersion              {Version}
-::msgcat::mcset en mVertical             {Vertical}
-::msgcat::mcset en mWeight               {Weight}
-::msgcat::mcset en mWhiteboard           {&Whiteboard...}
+::msgcat::mcset en {&Unregister}
+::msgcat::mcset en {&Update Check}
+::msgcat::mcset en {Vertical}
+::msgcat::mcset en {Weight}
+::msgcat::mcset en {&Whiteboard}
+
+# TEMP TODO
+namespace eval ::ttk::dialog::file {   
+    ::msgcat::mcset en Permissions
+    ::msgcat::mcset en Folder
+    ::msgcat::mcset en Sorting
+    ::msgcat::mcset en Reverse
+    
+    ::msgcat::mcset en {Short View}
+    ::msgcat::mcset en {Detailed View}
+    ::msgcat::mcset en {Show Hidden Files}
+    ::msgcat::mcset en {Separate Folders}
+    ::msgcat::mcset en {By Name}
+    ::msgcat::mcset en {By Date}
+    ::msgcat::mcset en {By Size}
+    ::msgcat::mcset en {Folders First}
+    ::msgcat::mcset en {New Folder}
+    ::msgcat::mcset en {Create new folder in}
+    
+    ::msgcat::mcset en {File %s already exists. Do you want to overwrite it?}
+    ::msgcat::mcset en {File %s does not exist.}
+    ::msgcat::mcset en {Cannot change to the directory %s. Permission denied.}
+}
+namespace eval ::Totd {   
+    ::msgcat::mcset en "Useful Tips"
+    ::msgcat::mcset en "Show tips on startup"
+    
+}
+::msgcat::mcset en {%s is calling}
+::msgcat::mcset en {%s is on the phone}
+::msgcat::mcset en {Add to Address Book}
+::msgcat::mcset en {Allow}
+::msgcat::mcset en {Answer call}
+::msgcat::mcset en {Browse}
+::msgcat::mcset en {Add Shortcut}
+::msgcat::mcset en {Call Notification}
+::msgcat::mcset en {Certificate}
+::msgcat::mcset en {Certificates}
+::msgcat::mcset en {Edit Shortcut}
+::msgcat::mcset en {Edit Shortcuts}
+::msgcat::mcset en {Hangup call}
+::msgcat::mcset en {Message from %s, %s}
+::msgcat::mcset en {NAT}
+::msgcat::mcset en {Set your status message}
+::msgcat::mcset en {Displays your Contact ID or nickname}
+::msgcat::mcset en {Show all specific activities}
+::msgcat::mcset en {TLS certificate file}
+::msgcat::mcset en {TLS private key file}
+::msgcat::mcset en {The connection is secure}
+::msgcat::mcset en {The connection is medium secure}
+::msgcat::mcset en {The connection is insecure}
+::msgcat::mcset en {Today}
+::msgcat::mcset en {Transport}
+::msgcat::mcset en {Transport Details}
+::msgcat::mcset en {Underline}
+::msgcat::mcset en {Unknown}
+::msgcat::mcset en {Write URL or choose from shortcut}
+::msgcat::mcset en {XML Console}
+::msgcat::mcset en {Cannot obtain registration information.}
+::msgcat::mcset en {Choose Color}
+::msgcat::mcset en {Custom Colors}
+::msgcat::mcset en {Error Log (noncriticals)}
+::msgcat::mcset en {Extend}
+::msgcat::mcset en {Ignore}
+::msgcat::mcset en {Image Files}
+::msgcat::mcset en {Import HTML pages}
+::msgcat::mcset en {Import Itcl applets}
+::msgcat::mcset en {Import Image/Movie}
+::msgcat::mcset en {Import plain text documents}
+::msgcat::mcset en {Invite MeBeam}
+::msgcat::mcset en {New chat with %s}
+::msgcat::mcset en {Open Image}
+::msgcat::mcset en {Open QuickTime live stream}
+::msgcat::mcset en {Pause}
+::msgcat::mcset en {Pretty format}
+::msgcat::mcset en {Accounts}
+::msgcat::mcset en {Redial}
+::msgcat::mcset en {Reload Image}
+::msgcat::mcset en {Request To User}
+::msgcat::mcset en {Reset}
+::msgcat::mcset en {Retry}
+::msgcat::mcset en {Standard}
 
 
 # Short texts only. Use english text as database key.
@@ -444,7 +513,6 @@
 ::msgcat::mcset en {Buffering support}
 ::msgcat::mcset en {Built in server}
 ::msgcat::mcset en {Business Card: %s}
-::msgcat::mcset en {Cache folder}
 ::msgcat::mcset en {Changes since previous release}
 ::msgcat::mcset en {Chat system}
 ::msgcat::mcset en {Chat window}
@@ -498,6 +566,7 @@
 ::msgcat::mcset en {Forwarded message}
 ::msgcat::mcset en {Full Name}
 ::msgcat::mcset en {Hide all on system tray click}
+::msgcat::mcset en {Hide all on taskbar click}
 ::msgcat::mcset en {History length}
 ::msgcat::mcset en {Import Iconset}
 ::msgcat::mcset en {Incoming Message}
@@ -641,7 +710,7 @@
 ::msgcat::mcset en {Email Address}
 ::msgcat::mcset en {QQ Number}
 ::msgcat::mcset en {Tlen Address}
-::msgcat::mcset en {Jabber ID}
+::msgcat::mcset en {IM Address}
 ::msgcat::mcset en {Yahoo ID}
 
 # Time intervals.
@@ -1040,10 +1109,8 @@
 ::msgcat::mcset en {Phone number}
 ::msgcat::mcset en {Modify address book}
 
-# TODO
-::msgcat::mcset en mNewAB		{New}
-::msgcat::mcset en mModifyAB		{Modify}
-::msgcat::mcset en mRemoveAB		{Remove}
+::msgcat::mcset en {New}
+::msgcat::mcset en {Modify}
 
 ::msgcat::mcset en {Make Call}
 ::msgcat::mcset en {Notify Call}
@@ -1055,9 +1122,7 @@
 
 # IAX Phone
 # Note to translators: these strings are not yet activated
-if {0} {
-    ::msgcat::mcset en Codecs
-    ::msgcat::mcset en Devices
+if {1} {
     ::msgcat::mcset en Filters
     ::msgcat::mcset en {IAX Phone}
     ::msgcat::mcset en {IAX Account}
@@ -1097,7 +1162,7 @@ if {0} {
 # }
 # bug: this should be M&ood..., but this does not work!
 # TODO
-::msgcat::mcset en mMood            Mood
+::msgcat::mcset en Mood
 
 ::msgcat::mcset en Afraid
 ::msgcat::mcset en Amazed
@@ -1231,7 +1296,7 @@ if {0} {
 ::msgcat::mcset en {Custom Mood}
 
 # TODO
-::msgcat::mcset en mCustomMood...       {&Custom Mood...}
+::msgcat::mcset en {&Custom Mood}
 
 ::msgcat::mcset en {Select your mood to show to your contacts.}
 ::msgcat::mcset en {Only contacts with compatible software will see your mood.}
@@ -1263,8 +1328,8 @@ if {0} {
 ::msgcat::mcset en Activity
 
 # TODO
-::msgcat::mcset en mActivity...       {Acti&vity...}
-::msgcat::mcset en mCustomActivity... {Custom Activity...}
+::msgcat::mcset en {Acti&vity}
+::msgcat::mcset en {Custom Activity}
 
 ::msgcat::mcset en {Traveling}
 ::msgcat::mcset en {Commuting}
@@ -1355,7 +1420,7 @@ if {0} {
 ::msgcat::mcset en {Location}
 
 # TODO
-::msgcat::mcset en mLocation...		{Locat&ion...}
+::msgcat::mcset en {Locat&ion}
 
 ::msgcat::mcset en {Set your location that will be shown to your contacts.}
 ::msgcat::mcset en {Enter your location details below. At least you should set latitude and longitude.}
@@ -1393,8 +1458,7 @@ if {0} {
 ::msgcat::mcset en {%s just started a chat!}
 
 ::msgcat::mcset en {Send message with subject}
-# TODO
-::msgcat::mcset en mContactActions...   {&Contact Actions...}
+::msgcat::mcset en {&Contact Actions}
 
 # Image magic:
 ::msgcat::mcset en {Click on a window or drag a rectangular area to import a snapshot into the current whiteboard.}

@@ -640,7 +640,7 @@ proc ::JUser::EditUserDlg {jid} {
     
     set istransport [::Roster::IsTransport $jid]
     if {$istransport} {
-	set title [mc "Transport Info"]
+	set title [mc "Transport Details"]
     } else {
 	set title [mc "Edit Contact"]
     }

@@ -65,7 +65,7 @@ proc ::MicroBlog::SlotBuild {w} {
     ttk::frame $box
     pack $box -fill x -expand 1
 
-    ttk::label $box.l -text [mc "Micro Blog"]:
+    ttk::label $box.l -text "Micro-blog":
     ttk::entry $box.e -textvariable [namespace current]::slot(text)
     
     grid  $box.l  $box.e
@@ -80,7 +80,7 @@ proc ::MicroBlog::SlotBuild {w} {
     bind $box   <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
     bind $box.l <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
     bind $box.e <<ButtonPopup>> [list [namespace current]::SlotPopup $w %x %y]
-    ::balloonhelp::balloonforwindow $box  [mc "Enter your blog post here and press Return"]
+    ::balloonhelp::balloonforwindow $box  "Enter your blog post here and press Return"
 
     set slot(w)     $w
     set slot(box)   $w.box
@@ -91,7 +91,7 @@ proc ::MicroBlog::SlotBuild {w} {
     # Add menu.    
     # This isn't the right way!
     foreach m [::JUI::SlotGetAllMenus] {
-	$m add checkbutton -label [mc "Micro Blog"] \
+	$m add checkbutton -label "Micro-blog" \
 	  -variable [namespace current]::slot(show) \
 	  -command [namespace code SlotCmd]
     }

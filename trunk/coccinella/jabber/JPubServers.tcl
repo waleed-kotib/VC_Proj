@@ -53,7 +53,7 @@ proc ::JPubServers::Build {w {command ""}} {
     upvar #0 $w state
 
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1
-    wm title $w [mc "Servers"]
+    wm title $w "Servers"
     
     # Global frame.
     ttk::frame $w.frall
@@ -84,7 +84,7 @@ proc ::JPubServers::Build {w {command ""}} {
     # List of servers.
     ttk::label $wbox.msg  \
       -padding {0 0 0 6} -wraplength 300 -justify left \
-      -text [mc "List of open XMPP servers"]:
+      -text "List of open XMPP servers":
     pack $wbox.msg -side top -anchor w
 
     set wtbfr $wbox.wtbfr

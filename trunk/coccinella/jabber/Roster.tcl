@@ -115,33 +115,33 @@ proc ::Roster::InitMenus {} {
 
     # Template for the roster popup menu.
     variable popMenuDefs
-      
+
     # Standard popup menu.
     set mDefs {
-	{command     mChat...         {::Chat::StartThreadJIDList $jidL} }
-	{command     mMessage...      {::NewMsg::Build -to $jid -tolist $jid2L} }
-	{command     mSendFile...     {::FTrans::SendJIDList $jidL} }
+	{command     mChat...         {[mc "Cha&t"]...} {::Chat::StartThreadJIDList $jidL} }
+	{command     mMessage...      {[mc "&Message"]...} {::NewMsg::Build -to $jid -tolist $jid2L} }
+	{command     mSendFile...     {[mc "Send &File"]...} {::FTrans::SendJIDList $jidL} }
 	{separator}
-	{command     mHistory...      {::Chat::HistoryForJIDList $jidL} }
-	{command     mBusinessCard... {::UserInfo::GetJIDList $jid2L} }
-	{command     mAddContact...   {::JUser::NewDlg} }
-	{command     mEditContact...  {::JUser::EditJIDList $jid2L} }
-	{command     mRemoveContact   {::Roster::RemoveJIDList $jidL} }
+	{command     mHistory...      {[mc "&History"]...} {::Chat::HistoryForJIDList $jidL} }
+	{command     mBusinessCard... {[mc "View &Business Card"]...} {::UserInfo::GetJIDList $jid2L} }
+	{command     mAddContact...   {[mc "&Add Contact"]...} {::JUser::NewDlg} }
+	{command     mEditContact...  {[mc "&Edit Contact"]...} {::JUser::EditJIDList $jid2L} }
+	{command     mRemoveContact   {[mc "&Remove Contact"]...} {::Roster::RemoveJIDList $jidL} }
 	{separator}
-	{cascade     mStyle           {@::Roster::StyleMenu} }
-	{cascade     mShow            {
-	    {check     mOffline       {::Roster::ShowOffline}    {-variable ::jprefs(rost,showOffline)} }
-	    {check     mDoNotDisturb  {::Roster::ShowDnD}        {-variable ::jprefs(rost,show-dnd)} }
-	    {check     mAway          {::Roster::ShowAway}       {-variable ::jprefs(rost,show-away)} }
-	    {check     mExtendedAway  {::Roster::ShowXAway}      {-variable ::jprefs(rost,show-xa)} }
-	    {check     mTransports    {::Roster::ShowTransports} {-variable ::jprefs(rost,showTrpts)} }
-	    {command   mBackgroundImage...  {::Roster::BackgroundImage} }
+	{cascade     mStyle           {[mc "Style"]} {@::Roster::StyleMenu} }
+	{cascade     mShow            {[mc "Show"]} {
+	    {check     mOffline       {[mc "&Offline"]} {::Roster::ShowOffline}    {-variable ::jprefs(rost,showOffline)} }
+	    {check     mDoNotDisturb  {[mc "Do Not Disturb"]} {::Roster::ShowDnD}        {-variable ::jprefs(rost,show-dnd)} }
+	    {check     mAway          {[mc "Away"]} {::Roster::ShowAway}       {-variable ::jprefs(rost,show-away)} }
+	    {check     mExtendedAway  {[mc "Extended Away"]} {::Roster::ShowXAway}      {-variable ::jprefs(rost,show-xa)} }
+	    {check     mTransports    {[mc "&Transports"]} {::Roster::ShowTransports} {-variable ::jprefs(rost,showTrpts)} }
+	    {command   mBackgroundImage...  {[mc "&Background Image"]...} {::Roster::BackgroundImage} }
 	} }
-	{cascade     mSort            {
-	    {radio     mIncreasing    {::Roster::Sort}  {-variable ::jprefs(rost,sort) -value -increasing} }
-	    {radio     mDecreasing    {::Roster::Sort}  {-variable ::jprefs(rost,sort) -value -decreasing} }
+	{cascade     mSort            {[mc "Sort"]} {
+	    {radio     mIncreasing    {[mc "&Increasing"]} {::Roster::Sort}  {-variable ::jprefs(rost,sort) -value -increasing} }
+	    {radio     mDecreasing    {[mc "&Decreasing"]} {::Roster::Sort}  {-variable ::jprefs(rost,sort) -value -decreasing} }
 	} }
-	{command     mRefresh         {::Roster::Refresh} }
+	{command     mRefresh         {[mc "Refresh"]} {::Roster::Refresh} }
     }
     set mTypes {
 	{mMessage...      {user}                }
@@ -169,7 +169,7 @@ proc ::Roster::InitMenus {} {
 	{mRefresh         {}                    }
     }
     if {[::Jabber::HaveWhiteboard]} {
-	set mWBDef  {command   mWhiteboard   {::JWB::NewWhiteboardTo $jid3}}
+	set mWBDef  {command   mWhiteboard   {[mc "Send File"]...} {::JWB::NewWhiteboardTo $jid3}}
 	set mWBType {mWhiteboard    {wb available}        }
 	
 	# Insert whiteboard menu *after* mSendFile.
@@ -183,16 +183,16 @@ proc ::Roster::InitMenus {} {
     
     # Transports popup menu.
     set mDefs {
-	{command     mLastLogin/Activity  {::Jabber::GetLast $jid} }
-	{command     mBusinessCard...     {::VCard::Fetch other $jid} }
-	{command     mAddContact...       {::JUser::NewDlg -transportjid $jid3} }
-	{command     mEditContact...      {::JUser::EditDlg $jid} }
-	{command     mVersion             {::Jabber::GetVersion $jid3} }
-	{command     mLoginTrpt           {::Roster::LoginTrpt $jid3} }
-	{command     mLogoutTrpt          {::Roster::LogoutTrpt $jid3} }
+	{command     mLastLogin/Activity  {[mc "Last Login/Activity"]} {::Jabber::GetLast $jid} }
+	{command     mBusinessCard...     {[mc "View &Business Card"]...} {::VCard::Fetch other $jid} }
+	{command     mAddContact...       {[mc "&Add Contact"]...} {::JUser::NewDlg -transportjid $jid3} }
+	{command     mEditContact...      {[mc "&Edit Contact"]...} {::JUser::EditDlg $jid} }
+	{command     mVersion             {[mc "Version"]} {::Jabber::GetVersion $jid3} }
+	{command     mLoginTrpt           {[mc "Login to Transport"]} {::Roster::LoginTrpt $jid3} }
+	{command     mLogoutTrpt          {[mc "Logout from Transport"]} {::Roster::LogoutTrpt $jid3} }
 	{separator}
-	{command     mUnregister          {::Roster::Unregister $jid3} }
-	{command     mRefresh             {::Roster::Refresh} }
+	{command     mUnregister          {[mc "&Unregister"]} {::Roster::Unregister $jid3} }
+	{command     mRefresh             {[mc "Refresh"]} {::Roster::Refresh} }
     }  
     set mTypes {
 	{mLastLogin/Activity  {trpt}                }
@@ -637,10 +637,11 @@ proc ::Roster::PostMenuCmd {m mType clicked jidL presL} {
 	if {[string equal $state "disabled"]} {
 	    $m entryconfigure $midx -state disabled
 	}
-	if {[llength $subType]} {
-	    set mt [$m entrycget $midx -menu]
-	    PostMenuCmd $mt $subType $clicked $jidL $presL
-	}
+	#I had to remove this as there is a bug that breaks everything if this is enabled...any idea how to solve this?
+	#if {[llength $subType]} {
+	#    set mt [$m entrycget $midx -menu]
+	#    PostMenuCmd $mt $subType $clicked $jidL $presL
+	#}
     }
     ::hooks::run rosterPostCommandHook $m $jidL $clicked $presL  
 }

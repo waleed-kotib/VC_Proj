@@ -66,10 +66,10 @@ proc ::JivePhone::Init {} {
     variable popMenuDef
     variable popMenuType
     set popMenuDef(call) {
-	command  mJiveCall {::JivePhone::DialJID $jid "DIAL"}
+	command  mJiveCall {[mc "Call"]} {::JivePhone::DialJID $jid "DIAL"}
     }
     set popMenuDef(forward) {
-	command  mJiveForward {::JivePhone::DialJID $jid "FORWARD"}
+	command  mJiveForward {[mc "Forward Call"]} {::JivePhone::DialJID $jid "FORWARD"}
     }
     set popMenuType(call) {
 	mJiveCall {user available}
@@ -80,7 +80,7 @@ proc ::JivePhone::Init {} {
 
     variable menuDef
     set menuDef  \
-      {command  mJiveCall     {::JivePhone::DoDial "DIAL"}    {}}
+      {command  mJiveCall     {[mc "Call"]} {::JivePhone::DoDial "DIAL"}    {}}
 
 
     #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
@@ -88,11 +88,11 @@ proc ::JivePhone::Init {} {
     variable abline [list]
 
     set popMenuDef(addressbook) {
-        mJiveCall      jid       {::JivePhone::DialExtension $jid "DIAL"}
-        separator      {}        {}
-        mNewAB         jid       {::JivePhone::NewAddressbookDlg}
-        mModifyAB      jid       {::JivePhone::ModifyAddressbookDlg  $jid}
-        mRemoveAB      jid       {::JivePhone::RemoveAddressbookDlg  $jid}
+        mJiveCall      jid       {[mc "Call"]}   {::JivePhone::DialExtension $jid "DIAL"}
+        separator      {}        {}              {}
+        mNewAB         jid       {[mc "New"]}    {::JivePhone::NewAddressbookDlg}
+        mModifyAB      jid       {[mc "Modify"]} {::JivePhone::ModifyAddressbookDlg  $jid}
+        mRemoveAB      jid       {[mc "Remove"]} {::JivePhone::RemoveAddressbookDlg  $jid}
     }
 
 
@@ -775,10 +775,10 @@ proc ::JivePhone::Popup {w v x y} {
     catch {destroy $m}
     menu $m -tearoff 0
 
-    foreach {item type cmd} $popMenuDef(addressbook) {
+    foreach {item type lname cmd} $popMenuDef(addressbook) {
         if {[string index $cmd 0] == "@"} {
             set mt [menu ${m}.sub${i} -tearoff 0]
-            set locname [mc $item]
+            set locname [eval concat $lname]
             $m add cascade -label $locname -menu $mt -state disabled
             eval [string range $cmd 1 end] $mt
             incr i
@@ -789,7 +789,7 @@ proc ::JivePhone::Popup {w v x y} {
 
             # Substitute the jid arguments. Preserve list structure!
             set cmd [eval list $cmd]
-            set locname [mc $item]
+            set locname [eval concat $lname]
             $m add command -label $locname -command [list after 40 $cmd]  \
               -state disabled
         }
