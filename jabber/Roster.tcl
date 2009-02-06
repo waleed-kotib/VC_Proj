@@ -1216,7 +1216,7 @@ proc ::Roster::ShowTransports {} {
 #--- Transport utilities -------------------------------------------------------
 
 # @@@ These should eventually move to Gateway!
-
+# TODO
 namespace eval ::Roster:: {
     
     # name description ...
@@ -1236,8 +1236,8 @@ namespace eval ::Roster:: {
 	qq          "QQ"
     }
     variable trptToName {
-	jabber      "Jabber"
-	xmpp        "Jabber"
+	jabber      "XMPP"
+	xmpp        "XMPP"
 	icq         "ICQ"
 	aim         "AIM"
 	msn         "MSN"
@@ -1251,7 +1251,7 @@ namespace eval ::Roster:: {
 	qq          "QQ"
     }
     variable nameToTrpt {
-	"Jabber"           xmpp
+	"XMPP"             xmpp
 	"ICQ"              icq
 	"AIM"              aim
 	"MSN"              msn
@@ -1384,8 +1384,8 @@ proc ::Roster::GetTransportSpecXMPP {} {
     # Disco doesn't return he server. Make sure it's first.
     set name [GetNameFromTrpt xmpp]
     set xname "$name ("
-    set xname [mc "Default"]
-    set xname ")"
+    append xname [mc "Default"]
+    append xname ")"
     set server [::Jabber::Jlib getserver]
     set xmppSpec [list [list $server xmpp $xname]]
     

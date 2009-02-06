@@ -324,8 +324,14 @@ proc ::JUI::Build {w} {
     set jwapp(wmenu) $wmenu
     menu $wmenu -tearoff 0
 
+#set menuDefs(main,apple) {
+#      {command   mAboutCoccinella    {[mc "About Coccinella"]}   {::Splash::SplashScreen}   {}}
+#      {command   mAboutQuickTimeTcl  {[mc "About QuickTimeTcl"]} {::Dialogs::AboutQuickTimeTcl} {}}
+#}
+
     if {([tk windowingsystem] eq "aqua") && $prefs(haveMenus)} {
-	::UI::BuildAppleMenu $w $wmenu.apple normal
+#	::UI::NewMenu $w $wmenu.apple  mAboutCoccinella  blabla  $menuDefs(main,apple)
+::UI::BuildAppleMenu $w $wmenu.apple normal
     }    
     foreach {name mLabel} $menuBarDef {
 	BuildMenu $name
