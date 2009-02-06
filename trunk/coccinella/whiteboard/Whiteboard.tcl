@@ -3024,7 +3024,7 @@ proc ::WB::MakeItemMenuDef {dir} {
 	    set submdef [MakeItemMenuDef $f]
 	    set name [file tail $f]
 	    if {[llength $submdef]} {
-		lappend mdef [list cascade $name {} {} {} $submdef]
+		lappend mdef [list cascade $name $name {} {} {} $submdef]
 	    }
 	} elseif {[string equal [file extension $f] ".can"]} {
 	    set name [file rootname [file tail $f]]
@@ -3032,7 +3032,7 @@ proc ::WB::MakeItemMenuDef {dir} {
 
 	    # Important to protect any $ since we do 'subst'.
 	    lappend cmd [string map {$ \\$} $f]
-	    lappend mdef [list command $name $cmd {}]
+	    lappend mdef [list command $name $name $cmd {}]
 	}
     }
     return $mdef
@@ -3050,7 +3050,7 @@ proc ::WB::BuildItemsMenu {w m} {
     }
     $m delete 0 end
  
-    AddItemsMenu $w $m $this(itemPath)
+    AddItemsMenu $w $m $m $this(itemPath)
     if {[HaveAnyCanFiles $this(altItemPath)]} {
 	$m add separator
 	AddItemsMenu $w $m $this(altItemPath)

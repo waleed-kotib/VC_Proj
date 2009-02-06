@@ -485,9 +485,9 @@ proc ::UI::InitMenuDefs {} {
     #      {{type name cmd accelerator opts} {{...} {...} ...}}
 
     set menuDefs(main,info,aboutwhiteboard)  \
-      {command   mAboutCoccinella    {::Splash::SplashScreen}   {}}
+      {command   mAboutCoccinella    {[mc "About %s" $prefs(appName)]} {::Splash::SplashScreen}   {}}
     set menuDefs(main,info,aboutquicktimetcl)  \
-      {command   mAboutQuickTimeTcl  {::Dialogs::AboutQuickTimeTcl} {}}
+      {command   mAboutQuickTimeTcl  {[mc "About %s" QuickTimeTcl]} {::Dialogs::AboutQuickTimeTcl} {}}
 
     # Mac only.
     set menuDefs(main,apple) [list $menuDefs(main,info,aboutwhiteboard)]
@@ -1680,10 +1680,10 @@ proc ::UI::RegisterAccelerator {key cmd} {
     lappend regAccelerators [list $key $cmd]
 }
 
-proc ::UI::BuildAppleMenu {w wmenuapple lname state} {
+proc ::UI::BuildAppleMenu {w wmenuapple state} {
     variable menuDefs
     
-    NewMenu $w $wmenuapple {} $menuDefs(main,apple) $lname $state
+    NewMenu $w $wmenuapple  {}  $state  $menuDefs(main,apple)
     
     if {[tk windowingsystem] eq "aqua"} {
 	proc ::tk::mac::ShowPreferences {} {
