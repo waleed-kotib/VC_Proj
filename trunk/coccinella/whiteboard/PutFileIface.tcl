@@ -173,7 +173,19 @@ proc ::PutFileIface::FormatMessage {puttoken msg} {
 	}
     }    
     if {$doformat} {
-	set str [eval {mc put${msg}} $pars]
+	set putfile [dict create]
+	dict set putfile contacting [mc "Contacting %s. Waiting for response"...]
+	dict set putfile eoferr [mc "Connection to %s failed: received an eof."]
+	dict set putfile connerr [mc "Connection to %s failed."]
+	dict set putfile negotiate [mc "Contacted %s. Negotiating"...]
+	dict set putfile readerr [mc "Cannot read server response from %s."]
+	dict set putfile unknownprot [mc "The server at %s did not respond with a well formed protocol."]
+	dict set putfile starts [mc "%s accepted file %s. Initiating file transfer"...]
+	dict set putfile ended [mc "Transfer to %s ended prematurely."]
+	dict set putfile finished [mc "Finished uploading file %s to %s."]
+	dict set putfile neterr [mc "Cannot upload to %s: network error."]
+
+	set str [dict putfile $lmsg $pars]
     } else {
 	set str $msg
     }

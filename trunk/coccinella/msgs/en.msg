@@ -1062,35 +1062,27 @@ namespace eval ::Totd {
 ::msgcat::mcset en {%s has left the chat for a while}
 ::msgcat::mcset en {%s has closed the chat}
 
-# TODO
 # Get file
 # Note to translators: these strings are marked EOL (EndOfLife) since the file transfer protocol will be changed.
-::msgcat::mcset en getcontacting   {Contacting %s. Waiting for response...}
-::msgcat::mcset en geteoferr       {Connection to %s failed: received an eof.}
-::msgcat::mcset en getconnerr	   {Connection to %s failed.}
-::msgcat::mcset en getnegotiate    {Contacted %s. Negotiating...}
-::msgcat::mcset en getreaderr      {Cannot read server response from %s.}
-::msgcat::mcset en getunknownprot  {The server at %s did not respond with a well formed protocol.}
+::msgcat::mcset en {Contacting %s. Waiting for response}
+::msgcat::mcset en {Connection to %s failed: received an eof.}
+::msgcat::mcset en {Connection to %s failed.}
+::msgcat::mcset en {Contacted %s. Negotiating}
+::msgcat::mcset en {Cannot read server response from %s.}
+::msgcat::mcset en {The server at %s did not respond with a well formed protocol.}
 ::msgcat::mcset en {Received response of the server %s.\n Error code %s\nMessage: %s}
-::msgcat::mcset en getstarts	   {%s accepted file %s. Initiating file transfer...}
-::msgcat::mcset en getended	   {Transfer from %s ended prematurely.}
-::msgcat::mcset en getfinished	   {Finished downloading file %s from %s.}
-::msgcat::mcset en getneterr	   {Cannot download from %s: network error.}
+::msgcat::mcset en {%s accepted file %s. Initiating file transfer}
+::msgcat::mcset en {Transfer from %s ended prematurely.}
+::msgcat::mcset en {Finished downloading file %s from %s.}
+::msgcat::mcset en {Cannot download from %s: network error.}
 
-# TODO
 # Put file
 # Note to translators: these strings are marked EOL (EndOfLife) since the file transfer protocol will be changed.
-::msgcat::mcset en putcontacting   {Contacting %s. Waiting for response...}
-::msgcat::mcset en puteoferr       {Connection to %s failed: received an eof.}
-::msgcat::mcset en putconnerr	    {Connection to %s failed.}
-::msgcat::mcset en putnegotiate    {Client contacted: %s; negotiating...}
-::msgcat::mcset en putreaderr      {Error reading server response from %s.}
-::msgcat::mcset en putunknownprot  {The server at %s did not respond with a well formed protocol.}
 ::msgcat::mcset en {The server at %s responded with a code %s: %s}
-::msgcat::mcset en putstarts	    {Client at %s accepted file %s. Starts transfer...}
-::msgcat::mcset en putended	    {Transfer to %s ended prematurely.}
-::msgcat::mcset en putfinished	    {Finished putting file %s to %s.}
-::msgcat::mcset en putneterr	    {Network error when putting to %s.}
+::msgcat::mcset en {Transfer to %s ended prematurely.}
+::msgcat::mcset en {Finished uploading file %s to %s.}
+::msgcat::mcset en {Cannot upload to %s: network error.}
+
 
 # These are specific for phones (VoIP)
 ::msgcat::mcset en {Call}

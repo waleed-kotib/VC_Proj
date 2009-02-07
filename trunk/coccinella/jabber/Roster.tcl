@@ -169,7 +169,7 @@ proc ::Roster::InitMenus {} {
 	{mRefresh         {}                    }
     }
     if {[::Jabber::HaveWhiteboard]} {
-	set mWBDef  {command   mWhiteboard   {[mc "Send File"]...} {::JWB::NewWhiteboardTo $jid3}}
+	set mWBDef  {command   mWhiteboard   {[mc "&Whiteboard"]...} {::JWB::NewWhiteboardTo $jid3}}
 	set mWBType {mWhiteboard    {wb available}        }
 	
 	# Insert whiteboard menu *after* mSendFile.

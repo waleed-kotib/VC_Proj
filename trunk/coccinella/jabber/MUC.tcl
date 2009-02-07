@@ -986,7 +986,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     
     ttk::button $wbtadd -text [mc "Add"] \
       -command [list [namespace current]::EditListDoAdd $token]
-    ttk::button $wbtedit -text [mc "&Edit"] \
+    ttk::button $wbtedit -text [mc "Edit"] \
       -command [list [namespace current]::EditListDoEdit $token]
     ttk::button $wbtrm -text [mc "Remove"] \
       -command [list [namespace current]::EditListDoRemove $token]
