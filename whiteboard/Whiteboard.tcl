@@ -3050,7 +3050,7 @@ proc ::WB::BuildItemsMenu {w m} {
     }
     $m delete 0 end
  
-    AddItemsMenu $w $m $m $this(itemPath)
+    AddItemsMenu $w $m $this(itemPath)
     if {[HaveAnyCanFiles $this(altItemPath)]} {
 	$m add separator
 	AddItemsMenu $w $m $this(altItemPath)
