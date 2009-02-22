@@ -49,6 +49,7 @@ proc ::AutoUpdate::Init {} {
     ::hooks::register prefsInitHook   ::AutoUpdate::InitPrefsHook
     ::hooks::register launchFinalHook ::AutoUpdate::LaunchHook
 
+    # TRANSLATORS: checking for new versions of Coccinella; see Info menu
     set menuDef {command  mUpdateCheck  {[mc "&Update Check"]} {::AutoUpdate::Get -silent 0}  {}}
     ::JUI::RegisterMenuEntry info $menuDef
 

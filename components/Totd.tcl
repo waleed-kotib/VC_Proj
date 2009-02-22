@@ -17,6 +17,7 @@ namespace eval ::Totd {
 proc ::Totd::Init {} {
         
     set mDef {
+	# TRANSLATORS; For future startup tips dialog
 	command  mTotd...  {[mc "Useful Tips"]...} {::Totd::Build}  {} {}
     }
     ::JUI::RegisterMenuEntry info $mDef
