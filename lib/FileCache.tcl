@@ -598,6 +598,7 @@ proc ::FileCache::BuildPrefsHook {wtree nbframe} {
     if {![::Preferences::HaveTableItem Whiteboard]} {
 	::Preferences::NewTableItem {Whiteboard} [mc "Whiteboard"]
     }
+    # TRANSLATORS: see preferences, whiteboard cache settings
     ::Preferences::NewTableItem {Whiteboard {File Cache}} [mc "File Cache"]
 
     set wpage [$nbframe page {File Cache}]    
