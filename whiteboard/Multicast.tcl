@@ -49,6 +49,7 @@ proc ::Multicast::OpenMulticast {wcan} {
     set w $wDlgs(openMulti)[incr uid]
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox}
+    # TRANSLATORS: old whiteboard feature
     wm title $w [mc "Open Stream"]
 
     set shorts [lindex $prefs(shortsMulticastQT) 0]
