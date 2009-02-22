@@ -362,6 +362,7 @@ proc ::Avatar::VerifyPhotoFile {fileName} {
     if {[lsearch $mimeL $mime] < 0} {
 	set typeL [::Media::GetSupportedTypesForMimeList $mimes]
 	set typeText [join $typeL ", "]
+	# TRANSLATORS; first Control Panel, then Avatar, then Open, then putting an asterisk (*) in the filter field, pressing return and trying to open a non-image file
 	set msg [mc "The supported image formats are"]
 	append msg " " $typeText
 	append msg "."	

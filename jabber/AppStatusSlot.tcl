@@ -60,6 +60,7 @@ proc ::AppStatusSlot::Build {w} {
 	  -command [namespace code [list Close $w]]
 	pack $w.close -side right -anchor n	
 
+	# TRANSLATORS; balloon mouse over texts in control panel (menu at the bottom of the main window) for arrow and close button
 	::balloonhelp::balloonforwindow $w.arrow [mc "Right click to open menu"]
         ::balloonhelp::balloonforwindow $w.close [mc "Close Slot"]
     }    

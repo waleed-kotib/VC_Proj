@@ -134,13 +134,17 @@ proc ::Login::Dlg {} {
     pack  $wbox  -fill both -expand 1
 
     if {$config(login,style) eq "jid"} {
+	# TRANSLATORS; see login dialog
 	set str [mc "Enter your account as user@example.org, or choose a profile. You should already have an account."]
     } elseif {$config(login,style) eq "jidpure"} {
+	# TRANSLATORS; login dialog, but not default; this is a config option
 	set str [mc "Enter your Contact ID as user@example.org. You should already have an account with this server."]
     } elseif {$config(login,style) eq "parts"} {
-	set str [mc "Write Jabber server ip number or name, or choose from the popup menu. You should already have an account with this server."]
+	# TRANSLATORS; login dialog, but not default; this is a config option
+	set str [mc "Write XMPP server IP number or name, or choose from the popup menu. You should already have an account with this server."]
     } elseif {$config(login,style) eq "username"} {
 	set domain [::Profiles::Get [::Profiles::GetSelectedName] domain]
+	# TRANSLATORS; login dialog, but not default; this is a config option
 	set str [mc "Enter your username and password to login to %s." $domain]
     }
     ttk::label $wbox.msg -style Small.TLabel \

@@ -192,7 +192,7 @@ proc ::SetupAss::SetupAss {} {
     set p4 [$su newpage "register" -headtext [mc "New Account"]]
     ttk::frame $p4.fr -padding [option get . notebookPagePadding {}]
     ttk::label $p4.fr.msg1 -style Small.TLabel \
-      -wraplength 260 -justify left -text [mc "Click on the button below to create a new account. You must be connected to with the Internet. Pay attention to a possible firewall!"]
+      -wraplength 260 -justify left -text [mc "Click on the button below to create a new account. You must be connected to the Internet. Pay attention to a possible firewall!"]
     ttk::button $p4.fr.btreg -text [mc "New Account"]...  \
       -command [namespace current]::DoRegister
 

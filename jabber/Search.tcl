@@ -111,6 +111,7 @@ proc ::Search::Build {args} {
     ttk::frame $wright
     pack $wright -side right -expand 1 -fill both
     
+    # TRANSLATORS: see Actions menu in the main window, and then Search
     ttk::label $wleft.msg -style Small.TLabel \
       -padding {0 0 0 6} -wraplength $wraplength -justify left \
       -text [mc "Search contacts with the selected service. A new search form will empty the previous one."]
@@ -306,7 +307,7 @@ proc ::Search::Get {w} {
     # Verify.
     if {$state(server) eq ""} {
 	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
-	  -message [mc "Please enter or select first a server."]
+	  -message [mc "Please first enter or select a server."]
 	return
     }	
     $state(wservice) state {disabled}

@@ -258,6 +258,7 @@ proc ::Subscribe::NewDlg {jid args} {
     set str [mc "May %s see your presence?" $name]
     if {!$havesubsc && $config(subscribe,show-nick-group)} {
 	append str " "
+	# TRANSLATORS: shown in subscription request dialog when someone tries to add the user to his or her list
 	append str [mc "Entering a nickname and group is optional, and for your personal use only."]
     }
     ttk::label $wbox.msg -style Small.TLabel \
@@ -272,6 +273,7 @@ proc ::Subscribe::NewDlg {jid args} {
 	
 	#set secs [expr {$config(subscribe,accept-after)/1000}]
 	set secs $jprefs(subsc,timer-secs)
+	# TRANSLATORS: shown in subscription request dialog if auto-accept and the timer option are both enabled in the preferences
 	set msg [mc "Subscription request will be accepted in: %s secs." $secs]
 	ttk::label $wbox.accept -style Small.TLabel \
 	  -text $msg -wraplength 200 -justify left
@@ -292,6 +294,7 @@ proc ::Subscribe::NewDlg {jid args} {
 
 	#set secs [expr {$config(subscribe,reject-after)/1000}]
 	set secs $jprefs(subsc,timer-secs)
+	# TRANSLATORS: shown in subscription request dialog if auto-rejept and the timer option are both enabled in the preferences
 	set msg [mc "Subscription request will be rejected in: %s secs." $secs]
 	ttk::label $wbox.reject -style Small.TLabel \
 	  -text $msg -wraplength 200 -justify left

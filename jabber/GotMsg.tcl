@@ -205,6 +205,7 @@ proc ::GotMsg::Build {} {
     # Toplevel with class GotMsg.
     ::UI::Toplevel $w -class GotMsg \
       -usemacmainmenu 1 -macstyle documentProc -closecommand ::GotMsg::CloseHook
+    # TRANSLATORS; Window title of popup dialog when receiving a message (instead of a chat message!)
     wm title $w [mc "Incoming Message"]
     
     set bg [option get . backgroundGeneral {}]

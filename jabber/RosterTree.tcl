@@ -800,6 +800,7 @@ proc ::RosterTree::BackgroundImageCmd {} {
 
     # Dialog:
     set typeText [join $typeL ", "]
+    # TRANSLATORS: to set background image in services or contacts tab
     set str [mc "Select an image file for the background. To remove a background image press Remove and Save."]
     set dtl [mc "The supported image formats are"]
     append dtl " " $typeText

@@ -184,10 +184,14 @@ namespace eval ::GroupChat {
     # Not used.
     variable show2String
     set show2String(available)   [mc "available"]
+    # TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a short moment
     set show2String(away)        [mc "away"]
     set show2String(chat)        [mc "chat"]
+    # TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
     set show2String(dnd)         [mc "do not disturb"]
+    # TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a longer period 
     set show2String(xa)          [mc "extended away"]
+    # TRANSLATORS; presence state when the user is available, but not visible as available to her or his contacts
     set show2String(invisible)   [mc "invisible"]
     set show2String(unavailable) [mc "not available"]
 
@@ -909,7 +913,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
 	
     set wbtsend $wbot.btok
 
-    ::balloonhelp::balloonforwindow $wgroup.active [mc "If checked Return sends message, else use Ctrl/Cmd-Return"]
+    ::balloonhelp::balloonforwindow $wgroup.active [mc "If checked, Return sends message, else use Ctrl/Cmd-Return"]
     ::balloonhelp::balloonforwindow $wgroup.bmark  [mc "Bookmark this chatroom"]
     ::balloonhelp::balloonforwindow $wgroup.elsys  [mc "Show or hide status changes in chat"]
 
@@ -917,6 +921,7 @@ proc ::GroupChat::BuildRoomWidget {dlgtoken wroom roomjid} {
     ttk::frame $wtop
     pack $wtop -side top -fill x
 
+    # TRANSLATORS; subject of a chatroom discussion with multiple people
     ttk::label $wtop.btp -style Small.TLabel -text [mc "Topic"]:
     ttk::entry $wtop.etp -font CociSmallFont -textvariable $chattoken\(subject)
     
@@ -3709,6 +3714,7 @@ proc ::GroupChat::BuildPageConf {page} {
     set size [option get $wc schemeSize {}]
 
     set wcols $wc.cols
+    # TRANSLATORS; in preferences; use different colors for different chatroom participants
     ttk::checkbutton $wc.col -text [mc "Enable nickname coloring"] \
       -variable [namespace current]::tmpJPrefs(gchat,useScheme)	\
       -command [namespace code [list PrefsSchemeCmd $wcols.mb]]

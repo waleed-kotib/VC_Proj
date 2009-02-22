@@ -151,6 +151,7 @@ proc ::Disco::InitMenus {} {
     variable popMenuDefs
 
     set mDefs {
+	# TRANSLATORS; menu item for sending normal message (no chat!)
 	{command    mMessage...         {[mc "&Message"]...} {::NewMsg::Build -to $jid} }
 	{command    mChat...            {[mc "Cha&t"]...} {::Chat::StartThread $jid} }
 	{command    mEnterRoom...       {[mc "Enter Chat&room"]...} {
@@ -171,9 +172,12 @@ proc ::Disco::InitMenus {} {
 	{command    mUnregister         {[mc "&Unregister"]} {::Register::Remove $jid} }
 	{separator}
 	{cascade    mShow               {[mc "Show"]} {
+	    # TRANSLATORS; to set the background image in the main window
 	    {command mBackgroundImage...  {[mc "&Background Image"]...} {::Disco::BackgroundImageCmd}}
 	} }
+	# TRANSLATORS; refresh the listed items
 	{command    mRefresh            {[mc "Refresh"]} {::Disco::Refresh $vstruct} }
+	# TRANSLATORS; look for available services on a server
 	{command    mDiscoverServer...  {[mc "&Discover Server"]...} {::Disco::AddServerDlg}     }
 	{command    mRemoveListing      {[mc "Remove &Listing"]} {::Disco::RemoveListing $jid}}
 	{cascade    mAdHocCommands      {[mc "C&ommands"]} {}                          }

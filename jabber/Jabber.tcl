@@ -714,7 +714,7 @@ proc ::Jabber::SubscribeEvent {jlibname xmldata} {
 	    set subtype [lindex [split $jidtype /] 1]
 	    set typename [::Roster::GetNameFromTrpt $subtype]
 	    ::ui::dialog -title [mc "Info"] -icon info -type ok \
-	      -message [mc "Your registered account with the %s service will be put in your roster to work as a transport with this service." $typename]
+	      -message [mc "Your registered account with the %s service will be put in your list of contacts to work as a transport with this service." $typename]
 	}
     } else {
 	

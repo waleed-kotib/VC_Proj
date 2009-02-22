@@ -429,6 +429,7 @@ proc ::Rosticons::VerifyAndLoad {} {
 
 proc ::Rosticons::BuildPrefsHook {wtree nbframe} {
     
+    # TRANSLATORS: themes for the contact icons (different presence state icons); see preferences
     ::Preferences::NewTableItem {Jabber "Theme Rosticons"} [mc "Contact Icons"]
     
     set wpage [$nbframe page "Theme Rosticons"]    

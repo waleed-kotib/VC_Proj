@@ -72,6 +72,7 @@ proc ::Register::Remove {{jid {}}} {
 	}
     }
     if {$login} {
+	# TRANSLATORS: See File in the main window, and then Remove Account...
 	set ans [::UI::MessageBox -icon warning -title [mc "Remove Account"] \
 	  -type yesno -default no -message [mc "Do you really want to remove your account? This process cannot be undone."]]
 	if {$ans eq "yes"} {
@@ -580,7 +581,7 @@ proc ::RegisterEx::Get {token} {
     # Verify.
     if {$state(-server) eq ""} {
 	::UI::MessageBox -type ok -icon error -title [mc "Error"] \
-	  -message [mc "Please enter or select first a server."]
+	  -message [mc "Please first enter or select a server."]
 	return
     }	
     # This is just to check the validity!
@@ -1252,7 +1253,7 @@ proc ::GenRegister::Get {token} {
     # Verify.
     if {[string length $state(server)] == 0} {
 	::UI::MessageBox -title [mc "Error"] -type ok -icon error  \
-	  -message [mc "Please enter or select first a server."]
+	  -message [mc "Please first enter or select a server."]
 	return
     }	
     if {[winfo exists $state(wcomboserver)]} {
