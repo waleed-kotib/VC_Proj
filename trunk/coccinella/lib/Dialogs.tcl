@@ -114,7 +114,8 @@ proc ::Dialogs::UnixPrintLpr {w wtoprint} {
     ttk::labelframe $frtot -padding [option get . groupSmallPadding {}] \
       -text [mc "Print"]
     pack $frtot -side top
-        
+    
+    # TRANSLATORS: shown on Linux when trying to print
     ttk::label $frtot.msg -style Small.TLabel \
       -wraplength 300 -justify left -text [mc "Shell print command, edit if desired"]
     ttk::entry $frtot.entcmd -width 20   \
@@ -466,7 +467,7 @@ proc ::Dialogs::AboutQuickTimeTcl {} {
     if {[tk windowingsystem] eq "aqua"} {
 	wm transient $w
     }
-    wm title $w [mc "About QuickTimeTcl"]
+    wm title $w [mc "About %s" QuickTimeTcl]
     
     pack [movie $w.m -file $fakeQTSampleFile]
     set theSize [$w.m size]

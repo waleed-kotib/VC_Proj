@@ -77,6 +77,7 @@ proc ::EditShortcuts::EditShortcuts {w nameOfShortcutList} {
     ::UI::Toplevel $w -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
       -closecommand ::EditShortcuts::CloseCmd
+    # TRANSLATORS: some old whiteboard feature
     wm title $w [mc "Edit Shortcuts"]
 
     # Global frame.

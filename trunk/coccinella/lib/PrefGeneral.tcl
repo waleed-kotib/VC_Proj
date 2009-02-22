@@ -58,6 +58,7 @@ proc ::PrefGeneral::BuildPrefsHook {wtree nbframe} {
     ttk::frame $wc.d
     ttk::label $wd.l -text [mc "Settings"]
     ttk::separator $wd.s -orient horizontal
+    # TRANSLATORS: USB stick feature
     if {$config(prefs,sameDrive)} {
 	ttk::checkbutton $wd.c -text [mc "Store preferences on same drive as program"] \
 	  -variable [namespace current]::tmpPrefs(prefsSameDrive)
