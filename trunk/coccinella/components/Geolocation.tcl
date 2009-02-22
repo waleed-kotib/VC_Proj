@@ -44,6 +44,7 @@ proc ::Geolocation::Init {} {
     set xmlns(node_config)   "http://jabber.org/protocol/pubsub#node_config"
 
     variable menuDef
+    # TRANSLATORS: geographical location of the user ( http://xmpp.org/extensions/xep-0080.html#format ); see Action menu when logged in to a server with PEP support
     set menuDef [list command mLocation... {[mc "Locat&ion"]...} ::Geolocation::Dlg {} {}]
     
     # These help strings are for the message catalogs.

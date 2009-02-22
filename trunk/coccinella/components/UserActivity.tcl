@@ -49,6 +49,7 @@ proc ::UserActivity::Init {} {
     set xmlns(node_config)     "http://jabber.org/protocol/pubsub#node_config"
 
     variable menuDef
+    # TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
     set menuDef [list command mActivity... {[mc "Acti&vity"]...} ::UserActivity::Dlg {} {}]
     
     variable subActivities

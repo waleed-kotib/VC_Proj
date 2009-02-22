@@ -82,66 +82,128 @@ proc ::Mood::Init {} {
     # Mood text strings.
     variable moodText
     set moodText [dict create]
+    # TRANSLATORS: Moods, more information at http://xmpp.org/extensions/xep-0107.html#moods
+    # TRANSLATORS: Impressed with fear or apprehension; in fear; apprehensive.
     dict set moodText afraid [mc "Afraid"]
+    # TRANSLATORS: Astonished; confounded with fear, surprise or wonder.
     dict set moodText amazed [mc "Amazed"]
+    # TRANSLATORS: Displaying or feeling anger, i.e., a strong feeling of displeasure, hostility or antagonism towards someone or something, usually combined with an urge to harm.
     dict set moodText angry [mc "Angry"]
+    # TRANSLATORS: To be disturbed or irritated, especially by continued or repeated acts.
     dict set moodText annoyed [mc "Annoyed"]
+    # TRANSLATORS: Full of anxiety or disquietude; greatly concerned or solicitous, esp. respecting something future or unknown; being in painful suspense.
     dict set moodText anxious [mc "Anxious"]
+    # TRANSLATORS: To be stimulated in one's feelings, especially to be sexually stimulated.
     dict set moodText aroused [mc "Aroused"]
+    # TRANSLATORS: Feeling shame or guilt.
     dict set moodText ashamed [mc "Ashamed"]
+    # TRANSLATORS: Suffering from boredom; uninterested, without attention.
     dict set moodText bored [mc "Bored"]
+    # TRANSLATORS: Strong in the face of fear; courageous.
     dict set moodText brave [mc "Brave"]
+    # TRANSLATORS: Peaceful, quiet.
     dict set moodText calm [mc "Calm"]
+    # TRANSLATORS: Feeling the sensation of coldness, especially to the point of discomfort.
     dict set moodText cold [mc "Cold"]
+    # TRANSLATORS: Chaotic, jumbled or muddled.
     dict set moodText confused [mc "Confused"]
+    # TRANSLATORS: Pleased at the satisfaction of a want or desire; satisfied.
     dict set moodText contented [mc "Contented"]
+    # TRANSLATORS: Grouchy, irritable; easily upset.
     dict set moodText cranky [mc "Cranky"]
+    # TRANSLATORS: Inquisitive; tending to ask questions, investigate, or explore.
     dict set moodText curious [mc "Curious"]
+    # TRANSLATORS: Severely despondent and unhappy.
     dict set moodText depressed [mc "Depressed"]
+    # TRANSLATORS: Defeated of expectation or hope; let down.
     dict set moodText disappointed [mc "Disappointed"]
+    # TRANSLATORS: Filled with disgust; irritated and out of patience.
     dict set moodText disgusted [mc "Disgusted"]
+    # TRANSLATORS: Having one's attention diverted; preoccupied.
     dict set moodText distracted [mc "Distracted"]
+    # TRANSLATORS: Having a feeling of shameful discomfort.
     dict set moodText embarrassed [mc "Embarrassed"]
+    # TRANSLATORS: Having great enthusiasm.
     dict set moodText excited [mc "Excited"]
+    # TRANSLATORS: In the mood for flirting.
     dict set moodText flirtatious [mc "Flirtatious"]
+    # TRANSLATORS: Suffering from frustration; dissatisfied, agitated, or discontented because one is unable to perform an action or fulfill a desire.
     dict set moodText frustrated [mc "Frustrated"]
+    # TRANSLATORS: Unhappy and irritable.
     dict set moodText grumpy [mc "Grumpy"]
+    # TRANSLATORS: Feeling responsible for wrongdoing; feeling blameworthy.
     dict set moodText guilty [mc "Guilty"]
+    # TRANSLATORS: Experiencing the effect of favourable fortune; having the feeling arising from the consciousness of well-being or of enjoyment; enjoying good of any kind, as peace, tranquillity, comfort; contented; joyous.
     dict set moodText happy [mc "Happy"]
+    # TRANSLATORS: Feeling the sensation of heat, especially to the point of discomfort.
     dict set moodText hot [mc "Hot"]
+    # TRANSLATORS: Having or showing a modest or low estimate of one's own importance; feeling lowered in dignity or importance.
     dict set moodText humbled [mc "Humbled"]
+    # TRANSLATORS: Feeling deprived of dignity or self-respect.
     dict set moodText humiliated [mc "Humiliated"]
+    # TRANSLATORS: Having a physical need for food.
     dict set moodText hungry [mc "Hungry"]
+    # TRANSLATORS: Wounded, injured, or pained, whether physically or emotionally.
     dict set moodText hurt [mc "Hurt"]
+    # TRANSLATORS: Favourably affected by something or someone.
     dict set moodText impressed [mc "Impressed"]
+    # TRANSLATORS: Feeling amazement at something or someone; or feeling a combination of fear and reverence.
     dict set moodText in_awe [mc "In awe"]
+    # TRANSLATORS: Feeling strong affection, care, liking, or attraction.
     dict set moodText in_love [mc "In love"]
+    # TRANSLATORS: Showing anger or indignation, especially at something unjust or wrong.
     dict set moodText indignant [mc "Indignant"]
+    # TRANSLATORS: Showing great attention to something or someone; having or showing interest.
     dict set moodText interested [mc "Interested"]
+    # TRANSLATORS: Under the influence of alcohol; drunk.
     dict set moodText intoxicated [mc "Intoxicated"]
+    # TRANSLATORS: Feeling as if one cannot be defeated, overcome or denied.
     dict set moodText invincible [mc "Invincible"]
+    # TRANSLATORS: Fearful of being replaced in position or affection.
     dict set moodText jealous [mc "Jealous"]
+    # TRANSLATORS: Feeling isolated, empty, or abandoned.
     dict set moodText lonely [mc "Lonely"]
+    # TRANSLATORS: Causing or intending to cause intentional harm; bearing ill will towards another; cruel; malicious.
     dict set moodText mean [mc "Mean"]
+    # TRANSLATORS: Given to sudden or frequent changes of mind or feeling; temperamental.
     dict set moodText moody [mc "Moody"]
+    # TRANSLATORS: Easily agitated or alarmed; apprehensive or anxious.
     dict set moodText nervous [mc "Nervous"]
+    # TRANSLATORS: Not having a strong mood or emotional state.
     dict set moodText neutral [mc "Neutral"]
+    # TRANSLATORS: Feeling emotionally hurt, displeased, or insulted. 
     dict set moodText offended [mc "Offended"]
+    # TRANSLATORS: Interested in play; fun, recreational, unserious, lighthearted; joking, silly.
     dict set moodText playful [mc "Playful"]
+    # TRANSLATORS: Feeling a sense of one's own worth or accomplishment.
     dict set moodText proud [mc "Proud"]
+    # TRANSLATORS: Feeling uplifted because of the removal of stress or discomfort.
     dict set moodText relieved [mc "Relieved"]
+    # TRANSLATORS: Feeling regret or sadness for doing something wrong.
     dict set moodText remorseful [mc "Remorseful"]
+    # TRANSLATORS: Without rest; unable to be still or quiet; uneasy; continually moving.
     dict set moodText restless [mc "Restless"]
+    # TRANSLATORS: Feeling sorrow; sorrowful, mournful.
     dict set moodText sad [mc "Sad"]
+    # TRANSLATORS: Mocking and ironical.
     dict set moodText sarcastic [mc "Sarcastic"]
+    # TRANSLATORS: Without humor or expression of happiness; grave in manner or disposition; earnest; thoughtful; solemn.
     dict set moodText serious [mc "Serious"]
+    # TRANSLATORS: Surprised, startled, confused, or taken aback.
     dict set moodText shocked [mc "Shocked"]
+    # TRANSLATORS: Feeling easily frightened or scared; timid; reserved or coy.
     dict set moodText shy [mc "Shy"]
+    # TRANSLATORS: Feeling in poor health; ill.
     dict set moodText sick [mc "Sick"]
+    # TRANSLATORS: Feeling the need for sleep.
     dict set moodText sleepy [mc "Sleepy"]
+    # TRANSLATORS: Suffering emotional pressure.
     dict set moodText stressed [mc "Stressed"]
+    # TRANSLATORS: Experiencing a feeling caused by something unexpected.
     dict set moodText surprised [mc "Surprised"]
+    # TRANSLATORS: Feeling the need to drink.
     dict set moodText thirsty [mc "Thirsty"]
+    # TRANSLATORS: Thinking about unpleasant things that have happened or that might happen; feeling afraid and unhappy.
     dict set moodText worried [mc "Worried"]
 
     variable moodTextSmall

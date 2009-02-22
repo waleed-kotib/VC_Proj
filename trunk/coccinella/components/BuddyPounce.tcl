@@ -44,6 +44,7 @@ proc ::BuddyPounce::Init {} {
     ::hooks::register prefsInitHook            ::BuddyPounce::InitPrefsHook
     
     # Register popmenu entry.
+    # TRANSLATORS: actions to be execute on an event related to a contact (buddy pounces); see right-mouse click menu in the main window
     set menuDef {
 	command mContactActions... {[mc "&Contact Actions"]...} {::BuddyPounce::Build $clicked $jidL $group}
     }

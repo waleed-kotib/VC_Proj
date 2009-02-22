@@ -277,6 +277,7 @@ proc ::Speech::BuildPrefsHook {wtree nbframe} {
     variable sprefs
     
     if {$sprefs(haveSpeech)} {
+	# TRANSLATORS; Only on Mac OS X and Windows in preferences.
 	::Preferences::NewTableItem {General {Speech}} [mc "Text-to-Speech"]
 
 	set wpage [$nbframe page {Speech}]    

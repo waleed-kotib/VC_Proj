@@ -92,6 +92,7 @@ proc ::XMLConsole::Build {} {
       -usemacmainmenu 1 -macstyle documentProc \
       -macclass {document {closeBox resizable}} \
       -closecommand [namespace code Close]
+    # TRANSLATORS; hidden XML console: Control + Shift + D (or Command + Shift + D on Mac OS X)
     wm title $w [mc "XML Console"]
 
     ttk::frame $w.frall

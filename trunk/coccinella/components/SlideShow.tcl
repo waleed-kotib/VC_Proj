@@ -37,7 +37,8 @@ proc ::SlideShow::Load { } {
     }
 
     ::Debug 2 "::SlideShow::Load"
-    
+
+    # TRANSLATORS; whiteboard slide show menu
     set menuspec \
       {cascade     mSlideShow       {[mc "Slide Show"]} {}                           {} {} {
 	{command   mOpenFolder...   {[mc "&Open Folder"]...} {::SlideShow::PickFolder $w} {} {}}

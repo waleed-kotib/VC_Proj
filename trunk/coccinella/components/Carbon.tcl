@@ -145,6 +145,7 @@ proc ::Carbon::InitPrefsHook {} {
 
 proc ::Carbon::BuildPrefsHook {wtree nbframe} {
     
+    # TRANSLATORS: automatic logout when computer is put in sleep mode and relogin on wakeup; in preferences dialog (Mac OS X only!)
     ::Preferences::NewTableItem {Jabber Sleep} [mc "Sleep"]
     
     set wpage [$nbframe page Sleep]    

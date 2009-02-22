@@ -72,6 +72,7 @@ proc ::Sounds::Mappings {} {
     
     variable nameToText 
     set nameToText [dict create]
+	# TRANSLATORS; Sound settings in preferences
 	dict set nameToText online          [mc "Contact is online"]
 	dict set nameToText offline         [mc "Contact is offline"]
 	dict set nameToText newmsg          [mc "Incoming message"]

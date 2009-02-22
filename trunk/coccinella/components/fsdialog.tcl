@@ -339,6 +339,7 @@ proc ::ttk::dialog::file::Create {win class} {
 	set selimage [option get $data(cfgMenu) selectImage Image]
 
 	set msg " "
+	# TRANSLATORS: strings of open file dialog; e.g. click "Whiteboard..." and then "Open File..."
 	append msg [::msgcat::mc "Sorting"]
 	$data(cfgMenu) add cascade -label $msg \
 	  -menu $data(sortMenu) -image $image -compound left

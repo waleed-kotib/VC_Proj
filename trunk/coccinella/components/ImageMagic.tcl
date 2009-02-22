@@ -56,6 +56,7 @@ proc ::ImageMagic::Init {} {
 	
 	# 'type' 'label' 'command' 'opts' {subspec}
 	# where subspec defines a cascade menu recursively
+	# TRANSLATORS: see Plugins menu in whiteboard
 	set menuspec [list \
 	    command mSnapshot [mc "Take &Snapshot"] {::ImageMagic::ImportWindowSnapShot $w} {} {} \
 	]
