@@ -448,6 +448,7 @@ proc ::ttoolbar::Popup {w x y} {
     
     set [namespace current]::menutmp $options(-compound)
     
+    # TRANSLATORS; right-click menu of the toolbars
     $m add radiobutton -label [::msgcat::mc "Show Text and Icon"] \
       -command [list $w configure -compound both] \
       -variable [namespace current]::menutmp  \
