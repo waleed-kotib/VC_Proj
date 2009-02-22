@@ -132,6 +132,7 @@ proc ::MUC::Invite {roomjid args} {
     ::UI::Toplevel $w -class JMUCInvite \
       -usemacmainmenu 1 -macstyle documentProc -macclass {document closeBox} \
       -closecommand [list [namespace current]::InviteCloseCmd $w]
+    # TRANSLATORS: strings related to Multi-User Chat (MUC) chatrooms
     wm title $w [mc "Invite Contact"]
 
     # State variable to collect instance specific variables.

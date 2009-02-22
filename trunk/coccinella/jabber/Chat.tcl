@@ -403,6 +403,7 @@ proc ::Chat::DoStart {w} {
     
     set jid [jlib::escapejid $user]
     if {![jlib::jidvalidate $jid]} {
+	# TRANSLATORS; Control + T (or Command + T on Mac OS X), then enter @ and proceed
 	set ans [::UI::MessageBox -message [mc "%s is invalid. Do you want to continue anyway?" $jid] \
 	  -icon error -title [mc "Error"] -type yesno]
 	if {[string equal $ans "no"]} {
@@ -680,6 +681,7 @@ proc ::Chat::GotMsg {xmldata} {
 
     # Composing events
     set chatcomp [dict create]
+    # TRANSLATORS; composing events in chat window
     dict set chatcomp reply [mc "%s is composing a reply"]
     dict set chatcomp active [mc "%s is on the chat"]
     dict set chatcomp composing [mc "%s is composing a reply"]
@@ -1334,6 +1336,7 @@ proc ::Chat::Build {threadID jid} {
       -text [mc "Save"] -image $iconSave  \
       -disabledimage $iconSaveDis    \
       -command [list [namespace current]::Save $dlgtoken]
+    # TRANSLATORS; history of past chat conversations
     $wtray newbutton history  \
       -text [mc "History"] -image $iconHistory \
       -disabledimage $iconHistoryDis \
@@ -1596,6 +1599,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
 	bind $wsubject <FocusOut> [list ::Chat::RevokeSubject $chattoken]
     }   
     
+    # TRANSLATORS; balloon mouse over texts in chat dialog
     ::balloonhelp::balloonforwindow $wsubject [mc "Enter the subject of the conversation, set by pressing Return"]
     ::balloonhelp::balloonforwindow $wpresimage $pstr
     
@@ -1634,7 +1638,7 @@ proc ::Chat::BuildThread {dlgtoken wthread threadID from} {
     pack  $wnotifier    -side left         -padx 4
     
     ::balloonhelp::balloonforwindow $wbot.hist [mc "Show or hide the chat history"]
-    ::balloonhelp::balloonforwindow $wbot.active [mc "If checked Return sends message, else use Ctrl/Cmd-Return"]
+    ::balloonhelp::balloonforwindow $wbot.active [mc "If checked, Return sends message, else use Ctrl/Cmd-Return"]
     ::balloonhelp::balloonforwindow $wsmile [mc "Insert emoticon"]
     ::balloonhelp::balloonforwindow $wbot.elsys [mc "Show or hide status changes in chat"]
 
@@ -1882,6 +1886,7 @@ proc ::Chat::MenuEditPostHook {wmenu} {
 	upvar 0 $chattoken chatstate
 	
 	set wfind $chatstate(wfind)
+	# TRANSLATORS; Control + F (or Command + F on Mac OS X)
 	::UI::MenuMethod $wmenu entryconfigure mFind -state normal -label [mc "Find"]
 	if {[winfo exists $wfind]} {
 	    ::UI::MenuMethod $wmenu entryconfigure mFindNext -state normal -label [mc "Find Next"]
@@ -4215,6 +4220,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
     pack $wc -side top -anchor [option get . dialogAnchor {}]
  
+    # TRANSLATORS; see Chat settings in preferences
     ttk::checkbutton $wc.active -text [mc "By default use active <Return> to send messages"]  \
       -variable [namespace current]::tmpp(chatActiveRet)
     ttk::checkbutton $wc.newwin -text [mc "Show incoming messages in new window"] \
@@ -4261,6 +4267,7 @@ proc ::Chat::BuildPrefsPage {wpage} {
 
     set wni $wc.ni
     ttk::frame $wc.ni
+    # TRANSLATORS; the user's name that is showed in the in the user's chat dialog, but not on the screen of the remote contact
     ttk::label $wni.lni -text [mc "Local nickname"]:
     ttk::entry $wni.eni -textvariable [namespace current]::tmpp(chat,mynick)
 

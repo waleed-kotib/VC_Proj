@@ -594,6 +594,7 @@ proc ::Emoticons::InsertTextLegend {w name args} {
     
     # Meta data:
     set metadata [dict create]
+    # TRANSLATORS; see Emoticons in preferences
     dict set metadata author      [mc "Author"]
     dict set metadata description [mc "Description"]
     dict set metadata home        [mc "Home"]

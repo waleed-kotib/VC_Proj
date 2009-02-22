@@ -857,6 +857,7 @@ proc ::Status::ExCustomDlg {varName args} {
 	set im [::Rosticons::ThemeGet user/$show]
 	lappend menuDef [list $mapShowElemToText($show) -value $show -image $im]
     }
+    # TRANSLATORS: custom status dialog; Control + B (or Command + B on Mac OS X)
     ui::dialog $w -type okcancel -message [mc "Select a presence state and optionally enter a message."] \
       -detail [mc "The most frequent combinations are easily reachable as menu entries."] -icon info  \
       -command ::Status::ExCustomDlgCmd -geovariable prefs(winGeom,$w)  \

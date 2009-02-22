@@ -245,6 +245,7 @@ proc ::AutoAway::Active {} {
 
 proc ::AutoAway::BuildPrefsHook {wtree nbframe} {
 	
+    # TRANSLATORS; see preferences
     ::Preferences::NewTableItem {Jabber {Auto Away}} [mc "Auto Away"]
     
     # Auto Away page -------------------------------------------------------
@@ -339,6 +340,7 @@ proc ::AutoAway::BuildPage {page} {
     ttk::label $waa.llo -text [mc "Message"]:
     ttk::entry $waa.elomsg -font CociSmallFont -width 32  \
       -textvariable [namespace current]::tmpp(logoutmsg)
+    # TRANSLATORS; Relogin when the user starts working again on the computer
     ttk::checkbutton $waa.cli -text [mc "Relogin on activity"] \
       -variable [namespace current]::tmpp(aalogin)
 
@@ -354,6 +356,7 @@ proc ::AutoAway::BuildPage {page} {
     grid columnconfigure $waa 0 -minsize 32
     grid columnconfigure $waa 2 -weight 1
 
+    # TRANSLATORS; feature not yet enabled by default in the interface. It means the user will be seen as away for most people except for the open chat tabs
     if {$config(aa,on-hidden-tabs)} {
 	ttk::checkbutton $waa.htabs -text [mc "Apply auto-away on hidden chat tabs"] \
 	  -variable [namespace current]::tmpp(aa,on-hidden-tabs)
@@ -365,6 +368,7 @@ proc ::AutoAway::BuildPage {page} {
     
     if {$config(aa,busy-chats)} {
 	set varName [namespace current]::tmpp(aa,busy-chats)
+	# TRANSLATORS; this preference option automatically sets the user's presence to Do Not Disturb when he or she is chatting with too much contacts at the same moment (this number is configurable). There also is a delay until the presence is automatically changed back to the previous presence state when the number of active chats is down again.
 	ttk::checkbutton $waa.cbusy -text [mc "Do Not Disturb when (active chat sessions)"]: \
 	  -variable $varName \
 	  -command [namespace code [list SetEntryState [list $waa.ebusy $waa.mbusy] $varName]]

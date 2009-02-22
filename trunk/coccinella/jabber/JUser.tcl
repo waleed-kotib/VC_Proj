@@ -764,6 +764,7 @@ proc ::JUser::EditUserDlg {jid} {
 
 	# Presence subscription.
 	set subDescr [dict create]
+	# TRANSLATORS; these strings are balloon mouse over tooltips in the edit contact dialog
 	dict set subDescr both [mc "Both you and your contact can see eachother's presence."]
 	dict set subDescr from [mc "You cannot see your contact's presence, but your contact can see yours."]
 	dict set subDescr none [mc "Both you and your contact cannot see eachother's presence."]

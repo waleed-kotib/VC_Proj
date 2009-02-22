@@ -138,7 +138,8 @@ proc ::JUI::Init {} {
     # Menu definitions for the Roster/services window.
     variable menuDefs
     variable inited
-            
+          
+    # TRANSLATORS; main window File menu entries  
     set mDefsFile {
 	{command   mNewAccount...      {[mc "&New Account"]...} {::RegisterEx::OnMenu}     {}}
 	{command   mRemoveAccount...   {[mc "&Remove Account"]...} {::Register::OnMenuRemove} {}}	
@@ -167,8 +168,9 @@ proc ::JUI::Init {} {
 	set mDefsPrefs [list {command   mPreferences...  {[mc "&Preferences"]...} {::Preferences::Build}  {}}]
 	set menuDefs(rost,file) [concat $mDefsPrefs {separator} $mDefsFile]
     }
-        
-    set menuDefs(rost,action) {    
+
+    # TRANSLATORS; main window Action menu entries
+    set menuDefs(rost,action) {
 	{command     mLogin...      {[mc "Login"]...} {::Jabber::OnMenuLogInOut}        L}
 	{command     mLogoutWith... {[mc "Logout With Message"]...} {::Jabber::Logout::OnMenuStatus}  {}}
 	{separator}
@@ -194,8 +196,9 @@ proc ::JUI::Init {} {
 	set menuDefs(rost,action) \
 	  [linsert $menuDefs(rost,action) $idx $mWhiteboard]
     }
-    
-    set mDefsInfo {    
+
+    # TRANSLATORS; main window Info menu entry
+    set mDefsInfo {
 	{command     mPlugins       {[mc "Plu&gins"]} {::Component::Dlg}              {}}
 	{checkbutton mInbox...      {[mc "&Inbox"]...} {::MailBox::OnMenu}               I \
 	  {-variable ::JUI::state(mailbox,visible)}}
@@ -238,6 +241,7 @@ proc ::JUI::Init {} {
 	set menuDefs(rost,info) [linsert $mDefsInfo $idx $mAbout]
     }
     
+    # TRANSLATORS; main window Edit menu entries (only on Mac OS X)
     set menuDefs(rost,edit) {    
 	{command   mUndo             {[mc "&Undo"]} {::UI::UndoEvent}          Z}
 	{command   mRedo             {[mc "Re&do"]} {::UI::RedoEvent}          Shift-Z}
@@ -522,6 +526,7 @@ proc ::JUI::BuildStatusMB {win} {
     ttk::menubutton $win -style SunkenMenubutton \
       -textvariable ::Jabber::jstate($infoType)
 
+    # TRANSLATORS; right mouse click menu (on arrow) in control panel (bottom of main window): status info slot
     dict set msgD mejid    [mc "Own Contact ID"]
     dict set msgD mejidres [mc "Own Full Contact ID"]
     dict set msgD server   [mc "Server"]
@@ -1523,6 +1528,7 @@ proc ::JUI::SetSecurityIcons {} {
 	set cert 0
 	set w $jwapp(w)
 	if {$sasl && $tls && $cert} {
+	    # TRANSLATORS; code for these strings is not finished
 	    set str [mc "The connection is secure"]
 	    set image [::Theme::Find16Icon $w secureHighImage]
 	    set any 1

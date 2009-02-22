@@ -434,6 +434,7 @@ proc ::UserInfo::NotesPage {token} {
     
     set wnb $priv(wnb)
 
+    # TRANSLATORS: in the business card dialog, there can be made notes about each contact
     $wnb add [ttk::frame $wnb.not] -text [mc "Notes"] -sticky news
 
     set wpage $wnb.not.f

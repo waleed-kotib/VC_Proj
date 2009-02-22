@@ -106,6 +106,7 @@ proc ::JPrefs::InitPrefsHook { } {
 
 proc ::JPrefs::BuildPrefsHook {wtree nbframe} {
         
+    # TRANSLATORS; see preferences
     ::Preferences::NewTableItem {Jabber Appearance} [mc "Appearance"]
     ::Preferences::NewTableItem {Jabber Customization} [mc "Customization"]
      	    

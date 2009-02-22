@@ -1153,6 +1153,7 @@ proc ::History::InsertText {w} {
 	if {!$havehisthead && ($msg(-type) eq "chat")} {
 	    if {$msg(-thread) ne $prevthread} {
 		set when [clock format $secs -format "%A %B %e, %Y"]
+		# TRANSLATORS; this string shows when a new conversation thread has been started
 		set str [mc "Thread started"]
 		append str " $when\n"
 		$wtext insert end $str histhead

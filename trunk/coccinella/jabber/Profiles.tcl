@@ -977,8 +977,10 @@ proc ::Profiles::CancelDlg {w} {
     
     if {$config(profiles,warn-on-cancel)} {
 	if {![FrameUnedited $wdlgpage]} {
+	    # TRANSLATORS: string shown if you change anything in an existing account profile in the login dialog
+	    set msg [mc "You changed one or more values. Do you want to save them before closing?"]
 	    set ans [::UI::MessageBox -title [mc "Warning"] -parent $w \
-	      -icon warning -type yesno -message [mc "You changed one or more values. Do you want to save them before closing?"]]
+	      -icon warning -type yesno -message $msg]
 	    if {$ans eq "yes"} {
 		SaveDlg $w
 		return
@@ -1048,6 +1050,7 @@ proc ::Profiles::FrameWidget {w moreless args} {
         
     eval {ttk::frame $w -class JProfileFrame} $args
     
+    # TRANSLATORS: See File in the main window, and then Edit Profiles...
     ttk::label $w.msg -style Small.TLabel \
       -text [mc "Edit, add or delete profiles. The selected profile will become the default."] -wraplength 200 -justify left
     grid  $w.msg  -  -sticky ew

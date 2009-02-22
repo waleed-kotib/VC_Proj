@@ -63,15 +63,17 @@ namespace eval ::Gateway {
     # Default prompts and descriptions.
     variable promptText
     set promptText [dict create]
-    dict set promptText aim        [mc "Screen Name"]
-    dict set promptText gadu-gadu  [mc "Gadu-Gadu Number"]
-    dict set promptText icq        [mc "ICQ Number"]
+    # TRANSLATORS; AOL AIM address
+    dict set promptText aim        [mc "Screen name"]
+    dict set promptText gadu-gadu  [mc "Gadu-Gadu number"]
+    # TRANSLATORS; also known as UIN
+    dict set promptText icq        [mc "ICQ number"]
     dict set promptText irc        [mc "IRC"]
     dict set promptText msn        [mc "MSN Address"]
-    dict set promptText smtp       [mc "Email Address"]
-    dict set promptText qq         [mc "QQ Number"]
-    dict set promptText tlen       [mc "Tlen Address"]
-    dict set promptText xmpp       [mc "IM Address"]
+    dict set promptText smtp       [mc "Email address"]
+    dict set promptText qq         [mc "QQ number"]
+    dict set promptText tlen       [mc "Tlen address"]
+    dict set promptText xmpp       [mc "Chat address"]
     dict set promptText yahoo      [mc "Yahoo ID"]
     
     # Each gateway must transform its "prompt" (user ID) to a JID.

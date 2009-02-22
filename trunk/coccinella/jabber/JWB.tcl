@@ -149,6 +149,7 @@ proc ::JWB::InitUI { } {
     # We don't want a Quit button here:
     #     Aqua: handled in apple menu
     #     Else: handled in main window
+    # TRANSLATORS; File menu entries in the whiteboard window
     set menuDefsFile {
 	{command   mNewWindow             {[mc "New &Window"]} {::JWB::OnMenuNewWhiteboard}  N}
 	{command   mOpenFile...           {[mc "&Open File"]...} {::WB::OnMenuOpenCanvas}      O}
