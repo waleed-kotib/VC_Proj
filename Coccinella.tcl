@@ -169,6 +169,7 @@ catch {
 # Splash! Need a full update here, at least on Windows.
 package require Splash
 ::Splash::SplashScreen
+# TRANSLATORS: splash screen strings; shown at startup
 ::Splash::SetMsg [mc "Sourcing Tcl code"]...
 set state(launchStatus) splash
 update

@@ -509,19 +509,20 @@ proc ::Utils::LanguageMenubutton {w varName args} {
     
     # Add entries here for new message catalogs.
     array set code2Name {
-	cs {Čeština}
-	da {Dansk}
-	nl {Nederlands}
-	en {English}
-	fr {Français}
-	de {Deutsch}
-	it {Italiano}
-	ko {한국어}
-	pl {Polski}
-	pt {Português}
-	ru {русский}
-	es {Castellano}
-	sv {Svenska}
+	cs    {Čeština}
+	da    {Dansk}
+	de    {Deutsch}
+	en    {English}
+	es    {Castellano}
+	fr    {Français}
+	it    {Italiano}
+	ko    {한국어}
+	nl    {Nederlands}
+	pl    {Polski}
+	pt    {Português}
+	ru    {русский}
+	sv    {Svenska}
+	zh_cn {简化字}
     }
     set langs [list]
     foreach f [glob -nocomplain -tails -directory $this(msgcatPath) *.msg] {

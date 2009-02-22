@@ -201,6 +201,7 @@ proc ::wizard::wizard {w args} {
     }
     
     # Build.
+    # TRANSLATORS; see File menu in main window
     ttk::label $widgets(head) -style Headlabel \
       -text [mc "Setup Assistant"] -image $options(-image) -compound left
     ttk::separator $w.div1
