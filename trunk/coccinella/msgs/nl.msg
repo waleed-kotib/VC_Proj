@@ -1,4 +1,4 @@
-set ::msgcat::header "Project-Id-Version: nl\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-02-11 21:15+0100\nPO-Revision-Date: 2009-02-22 22:22+0100\nLast-Translator: Sander Devrieze <sander at sanderdevrieze.net>\nLanguage-Team: Dutch\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\nX-Poedit-Language: Dutch\n"
+set ::msgcat::header "Project-Id-Version: nl\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-02-23 00:30+0100\nPO-Revision-Date: 2009-02-22 22:22+0100\nLast-Translator: Sander Devrieze <sander at sanderdevrieze.net>\nLanguage-Team: Dutch\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\nX-Poedit-Language: Dutch\n"
 ::msgcat::mcset nl "Sourcing Tcl code" "Tcl-code wordt geladen"
 ::msgcat::mcset nl "Searching for our hostname" "Hostnaam wordt gedetecteerd"
 ::msgcat::mcset nl "Loading Tcl packages" "Tcl-pakketten worden geladen"

@@ -1,0 +1,7230 @@
+# translation of es.po to Spanish
+# Spanish translations for Coccinella package.
+# Copyright (C) 2009 The Coccinella Project
+# This file is distributed under the same license as the Coccinella package.
+#
+# Néstor Díaz <n3storm at grupoikusnet.com>, 2004.
+# Antonio F. Cano <antonio at grupoikusnet.com>, 2006.
+# Agustin Vericat <agustin at grupoikusnet.com>, 2006.
+# César Alcalde <lambda512 at gmail.com>, 2008.
+msgid ""
+msgstr ""
+"Project-Id-Version: es\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
+"POT-Creation-Date: 2009-02-23 00:30+0100\n"
+"PO-Revision-Date: 2009-02-21 15:01\n"
+"Last-Translator: César Alcalde <lambda512 at gmail.com>\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms:  nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: Spanish\n"
+
+#. TRANSLATORS: splash screen strings; shown at startup
+#: ../Coccinella.tcl:173
+#, fuzzy
+msgid "Sourcing Tcl code"
+msgstr "Cargando el código fuente Tcl..."
+
+#: ../Coccinella.tcl:178
+#, fuzzy
+msgid "Searching for our hostname"
+msgstr "Buscando un dominio..."
+
+#: ../Coccinella.tcl:196
+#, fuzzy
+msgid "Loading Tcl packages"
+msgstr "Cargando los paquetes Tcl..."
+
+#: ../Coccinella.tcl:259
+#, fuzzy
+msgid "Sourcing Jabber code"
+msgstr "Cargando los recursos de Jabber..."
+
+#: ../Coccinella.tcl:269
+#, fuzzy
+msgid "Initializing"
+msgstr "Iniciando..."
+
+#: ../Coccinella.tcl:283
+#, fuzzy
+msgid "Setting preferences"
+msgstr "Cargando y aplicando las preferencias..."
+
+#. TRANSLATORS: checking for new versions of Coccinella; see Info menu
+#: ../components/AutoUpdate.tcl:53
+#, fuzzy
+msgid "&Update Check"
+msgstr "Comprobar actualizaciones"
+
+#: ../components/AutoUpdate.tcl:122 ../components/ImageMagic.tcl:77
+#: ../components/ImageMagic.tcl:93 ../components/JivePhone.tcl:612
+#: ../jabber/Adhoc.tcl:143 ../jabber/Adhoc.tcl:383 ../jabber/Avatar.tcl:337
+#: ../jabber/Chat.tcl:408 ../jabber/Chat.tcl:2777 ../jabber/Chat.tcl:3076
+#: ../jabber/Chat.tcl:3126 ../jabber/Create.tcl:314 ../jabber/Create.tcl:319
+#: ../jabber/Create.tcl:324 ../jabber/Create.tcl:332 ../jabber/Create.tcl:429
+#: ../jabber/Create.tcl:471 ../jabber/Create.tcl:515 ../jabber/Create.tcl:549
+#: ../jabber/Create.tcl:580 ../jabber/Create.tcl:759 ../jabber/Disco.tcl:1784
+#: ../jabber/Disco.tcl:1807 ../jabber/Emoticons.tcl:653
+#: ../jabber/Emoticons.tcl:662 ../jabber/Emoticons.tcl:814
+#: ../jabber/Emoticons.tcl:816 ../jabber/Emoticons.tcl:850
+#: ../jabber/Emoticons.tcl:862 ../jabber/Emoticons.tcl:864
+#: ../jabber/Enter.tcl:402 ../jabber/Enter.tcl:452 ../jabber/Enter.tcl:492
+#: ../jabber/Enter.tcl:637 ../jabber/Enter.tcl:652 ../jabber/Enter.tcl:697
+#: ../jabber/FTrans.tcl:371 ../jabber/FTrans.tcl:407 ../jabber/FTrans.tcl:442
+#: ../jabber/FTrans.tcl:447 ../jabber/FTrans.tcl:458 ../jabber/FTrans.tcl:509
+#: ../jabber/FTrans.tcl:541 ../jabber/FTrans.tcl:680 ../jabber/FTrans.tcl:682
+#: ../jabber/FTrans.tcl:693 ../jabber/GroupChat.tcl:364
+#: ../jabber/GroupChat.tcl:2709 ../jabber/GroupChat.tcl:2711
+#: ../jabber/GroupChat.tcl:2719 ../jabber/GroupChat.tcl:3505
+#: ../jabber/JUser.tcl:295 ../jabber/JUser.tcl:303 ../jabber/JUser.tcl:322
+#: ../jabber/JUser.tcl:388 ../jabber/JUser.tcl:412 ../jabber/JWB.tcl:2052
+#: ../jabber/JWB.tcl:2057 ../jabber/Jabber.tcl:620 ../jabber/Jabber.tcl:867
+#: ../jabber/Jabber.tcl:911 ../jabber/Jabber.tcl:921 ../jabber/Jabber.tcl:933
+#: ../jabber/Jabber.tcl:945 ../jabber/Jabber.tcl:1490
+#: ../jabber/Jabber.tcl:1494 ../jabber/Jabber.tcl:1573
+#: ../jabber/Jabber.tcl:1575 ../jabber/Jabber.tcl:1670
+#: ../jabber/Jabber.tcl:1674 ../jabber/Jabber.tcl:1992
+#: ../jabber/Jabber.tcl:2023 ../jabber/Login.tcl:493 ../jabber/Login.tcl:521
+#: ../jabber/Login.tcl:530 ../jabber/Login.tcl:911 ../jabber/Login.tcl:1014
+#: ../jabber/MUC.tcl:318 ../jabber/MUC.tcl:321 ../jabber/MUC.tcl:1162
+#: ../jabber/MUC.tcl:1247 ../jabber/MUC.tcl:1356 ../jabber/MUC.tcl:1514
+#: ../jabber/MUC.tcl:1541 ../jabber/MUC.tcl:1717 ../jabber/MUC.tcl:1719
+#: ../jabber/MUC.tcl:1740 ../jabber/MUC.tcl:1742 ../jabber/MailBox.tcl:1597
+#: ../jabber/MailBox.tcl:1675 ../jabber/MailBox.tcl:1782
+#: ../jabber/MailBox.tcl:1816 ../jabber/NewMsg.tcl:888
+#: ../jabber/NewMsg.tcl:924 ../jabber/Profiles.tcl:1452
+#: ../jabber/Profiles.tcl:1460 ../jabber/Profiles.tcl:1646
+#: ../jabber/Register.tcl:124 ../jabber/Register.tcl:583
+#: ../jabber/Register.tcl:589 ../jabber/Register.tcl:664
+#: ../jabber/Register.tcl:833 ../jabber/Register.tcl:893
+#: ../jabber/Register.tcl:898 ../jabber/Register.tcl:901
+#: ../jabber/Register.tcl:970 ../jabber/Register.tcl:1255
+#: ../jabber/Register.tcl:1293 ../jabber/Register.tcl:1358
+#: ../jabber/Register.tcl:1542 ../jabber/Search.tcl:258
+#: ../jabber/Search.tcl:309 ../jabber/Search.tcl:353 ../jabber/Search.tcl:430
+#: ../jabber/Search.tcl:771 ../jabber/SetupAss.tcl:306
+#: ../jabber/SetupAss.tcl:310 ../jabber/SetupAss.tcl:319
+#: ../jabber/UserInfo.tcl:197 ../jabber/UserInfo.tcl:244
+#: ../jabber/UserInfo.tcl:276 ../jabber/UserInfo.tcl:305
+#: ../jabber/UserInfo.tcl:515 ../jabber/VCard.tcl:104 ../jabber/VCard.tcl:106
+#: ../jabber/VCard.tcl:785 ../jabber/VCard.tcl:845 ../jabber/VCard.tcl:847
+#: ../jabber/VCard.tcl:893 ../jabber/VCard.tcl:914 ../lib/Dialogs.tcl:162
+#: ../lib/Dialogs.tcl:169 ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71
+#: ../lib/HttpTrpt.tcl:107 ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226
+#: ../lib/HttpTrpt.tcl:233 ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78
+#: ../lib/Init.tcl:732 ../lib/Init.tcl:754 ../lib/MacintoshUtils.tcl:55
+#: ../lib/MacintoshUtils.tcl:77 ../lib/MacintoshUtils.tcl:99
+#: ../lib/PrefUtils.tcl:91 ../lib/PrefUtils.tcl:217 ../lib/TheServer.tcl:65
+#: ../lib/UserActions.tcl:44 ../lib/UserActions.tcl:72
+#: ../lib/UserActions.tcl:93 ../lib/Utils.tcl:379 ../lib/WindowsUtils.tcl:61
+#: ../lib/WindowsUtils.tcl:109 ../lib/WindowsUtils.tcl:151
+#: ../plugins/HtmlImport.tcl:284 ../plugins/PluginTextPlain.tcl:254
+#: ../plugins/WinImport.tcl:283 ../whiteboard/CanvasCmd.tcl:448
+#: ../whiteboard/CanvasCmd.tcl:456 ../whiteboard/CanvasFile.tcl:51
+#: ../whiteboard/CanvasFile.tcl:72 ../whiteboard/CanvasFile.tcl:501
+#: ../whiteboard/CanvasFile.tcl:736 ../whiteboard/CanvasFile.tcl:767
+#: ../whiteboard/CanvasFile.tcl:842 ../whiteboard/FilePrefs.tcl:586
+#: ../whiteboard/GetFileIface.tcl:401 ../whiteboard/Import.tcl:74
+#: ../whiteboard/Import.tcl:78 ../whiteboard/Import.tcl:1172
+#: ../whiteboard/Import.tcl:1206 ../whiteboard/Import.tcl:1309
+#: ../whiteboard/Import.tcl:2012 ../whiteboard/Import.tcl:2033
+#: ../whiteboard/Multicast.tcl:198 ../whiteboard/Multicast.tcl:234
+#: ../whiteboard/Multicast.tcl:239 ../whiteboard/Multicast.tcl:247
+#: ../whiteboard/Multicast.tcl:254 ../whiteboard/PutFileIface.tcl:77
+#: ../whiteboard/PutFileIface.tcl:114 ../whiteboard/PutFileIface.tcl:125
+#: ../whiteboard/WBPrefs.tcl:300 ../whiteboard/Whiteboard.tcl:3270
+#: ../whiteboard/Whiteboard.tcl:3276
+#, fuzzy
+msgid "Error"
+msgstr "Error"
+
+#: ../components/AutoUpdate.tcl:123
+#, fuzzy, tcl-format
+msgid "Cannot connect to server %s to download update details: %s"
+msgstr ""
+"No se pudo conectar al servidor %s para descargar los detalles de la "
+"actualización: %s"
+
+#: ../components/AutoUpdate.tcl:176
+#, fuzzy
+msgid "Update Check"
+msgstr "Comprobar actualizaciones"
+
+#: ../components/AutoUpdate.tcl:177
+#, fuzzy, tcl-format
+msgid "You already have the latest version available (%s)."
+msgstr "Usted ya tiene la última versión(%s)"
+
+#: ../components/AutoUpdate.tcl:199
+#, fuzzy
+msgid "New Version"
+msgstr "Nueva versión"
+
+#: ../components/AutoUpdate.tcl:248
+#, fuzzy
+msgid "Changes since previous release"
+msgstr "Cambios desde la versión anterior"
+
+#: ../components/AutoUpdate.tcl:258
+#, fuzzy
+msgid "Automatically check for updates"
+msgstr "Buscar actualizaciones automáticamente"
+
+#: ../components/AutoUpdate.tcl:265 ../jabber/Search.tcl:1173
+#: ../plugins/PluginTextPlain.tcl:225
+#, fuzzy
+msgid "Close"
+msgstr "Cerrar"
+
+#: ../components/BuddyPounce.tcl:49
+#, fuzzy
+msgid "&Contact Actions"
+msgstr "&Contacto"
+
+#: ../components/BuddyPounce.tcl:153
+#, fuzzy, tcl-format
+msgid ""
+"Set a specific action for events related to %s. Select events using the tabs "
+"below."
+msgstr ""
+"Establezca acciones para eventos relacionados con %s. Seleccione los eventos "
+"usando las pestañas de abajo."
+
+#: ../components/BuddyPounce.tcl:154 ../components/BuddyPounce.tcl:162
+#: ../components/BuddyPounce.tcl:168 ../components/BuddyPounce.tcl:206
+#, fuzzy
+msgid "Contact Actions"
+msgstr "Acciones con los contactos"
+
+#: ../components/BuddyPounce.tcl:161
+#, fuzzy, tcl-format
+msgid ""
+"Set a specific action for events related to any contact belonging to the "
+"group %s. Select events using the tabs below."
+msgstr ""
+"Establezca acciones para eventos relacionados con cualquier contacto del "
+"grupo %s. Seleccione los eventos usando las pestañas de abajo."
+
+#: ../components/BuddyPounce.tcl:167
+#, fuzzy
+msgid ""
+"Set a specific action for events related to any contact in your contact "
+"list. Select events using the tabs below."
+msgstr ""
+"Establezca acciones para eventos relacionados con cualquier contacto de su "
+"lista de contactos. Seleccione los eventos usando las pestañas de abajo."
+
+#: ../components/BuddyPounce.tcl:170
+#, fuzzy
+msgid "Any"
+msgstr "Cualquier"
+
+#: ../components/BuddyPounce.tcl:187 ../components/BuddyPounce.tcl:188
+#: ../components/BuddyPounce.tcl:621 ../components/Mood.tcl:295
+#: ../components/Mood.tcl:477 ../components/Mood.tcl:628
+#: ../components/Mood.tcl:669 ../components/UserActivity.tcl:244
+#: ../components/UserActivity.tcl:400 ../components/UserActivity.tcl:651
+#: ../components/UserActivity.tcl:694 ../jabber/Emoticons.tcl:754
+#: ../jabber/GroupChat.tcl:172 ../jabber/JUser.tcl:110 ../jabber/JUser.tcl:345
+#: ../jabber/Subscribe.tcl:325 ../jabber/Subscribe.tcl:570
+#: ../jabber/Subscribe.tcl:1283 ../jabber/Subscribe.tcl:1326
+#: ../whiteboard/CanvasUtils.tcl:154 ../whiteboard/CanvasUtils.tcl:204
+#: ../whiteboard/FilePrefs.tcl:436 ../whiteboard/FilePrefs.tcl:437
+#: ../whiteboard/FilePrefs.tcl:445 ../whiteboard/FilePrefs.tcl:446
+#: ../whiteboard/FilePrefs.tcl:514 ../whiteboard/FilePrefs.tcl:593
+#: ../whiteboard/ItemInspector.tcl:212 ../whiteboard/Whiteboard.tcl:501
+#: ../whiteboard/Whiteboard.tcl:530
+#, fuzzy
+msgid "None"
+msgstr "Ninguno"
+
+#: ../components/BuddyPounce.tcl:234
+#, fuzzy
+msgid "Show popup"
+msgstr "Mostrar ventana emergente"
+
+#: ../components/BuddyPounce.tcl:237
+#, fuzzy
+msgid "Play sound"
+msgstr "Reproducir sonido"
+
+#: ../components/BuddyPounce.tcl:242
+#, fuzzy
+msgid "Start chat"
+msgstr "Comenzar chat"
+
+#: ../components/BuddyPounce.tcl:250
+#, fuzzy
+msgid "Send message with subject"
+msgstr "Envia un mensaje con asunto"
+
+#: ../components/BuddyPounce.tcl:258 ../components/Carbon.tcl:184
+#: ../components/Growl.tcl:71 ../components/Growl.tcl:74
+#: ../components/Growl.tcl:93 ../components/Growl.tcl:106
+#: ../components/Mood.tcl:489 ../components/UserActivity.tcl:257
+#: ../jabber/AutoAway.tcl:294 ../jabber/AutoAway.tcl:317
+#: ../jabber/AutoAway.tcl:340 ../jabber/AutoAway.tcl:378
+#: ../jabber/Create.tcl:427 ../jabber/Create.tcl:469 ../jabber/Create.tcl:547
+#: ../jabber/Create.tcl:756 ../jabber/Enter.tcl:650 ../jabber/Enter.tcl:694
+#: ../jabber/FTrans.tcl:505 ../jabber/FTrans.tcl:537 ../jabber/JUser.tcl:386
+#: ../jabber/Jabber.tcl:618 ../jabber/Jabber.tcl:862 ../jabber/Jabber.tcl:1521
+#: ../jabber/Jabber.tcl:2021 ../jabber/Jabber.tcl:2123 ../jabber/MUC.tcl:189
+#: ../jabber/MUC.tcl:365 ../jabber/MUC.tcl:811 ../jabber/MUC.tcl:840
+#: ../jabber/MUC.tcl:1618 ../jabber/MailBox.tcl:499 ../jabber/NewMsg.tcl:232
+#: ../jabber/Profiles.tcl:1644 ../jabber/Register.tcl:122
+#: ../jabber/Register.tcl:662 ../jabber/Register.tcl:1291
+#: ../jabber/Register.tcl:1356 ../jabber/Register.tcl:1540
+#: ../jabber/Search.tcl:351 ../jabber/Search.tcl:419 ../jabber/Search.tcl:427
+#: ../jabber/Status.tcl:876 ../lib/HttpTrpt.tcl:246
+#, fuzzy
+msgid "Message"
+msgstr "Mensaje"
+
+#: ../components/BuddyPounce.tcl:288 ../components/ImageMagic.tcl:143
+#: ../components/Totd.tcl:90 ../components/XMLConsole.tcl:109
+#: ../components/fsdialog.tcl:427 ../components/fsdialog.tcl:1052
+#: ../components/fsdialog.tcl:1444 ../contrib/ui/dialog.tcl:242
+#: ../contrib/ui/fontselector.tcl:147 ../jabber/Chat.tcl:356
+#: ../jabber/Jabber.tcl:1727 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
+#: ../jabber/MUC.tcl:1439 ../jabber/MUC.tcl:1632 ../jabber/Status.tcl:428
+#: ../jabber/Subscribe.tcl:1107 ../lib/Component.tcl:80
+#: ../whiteboard/ItemInspector.tcl:991 ../whiteboard/WDialogs.tcl:60
+#: ../whiteboard/WDialogs.tcl:232
+#, fuzzy
+msgid "OK"
+msgstr "OK"
+
+#: ../components/BuddyPounce.tcl:290 ../components/ImageMagic.tcl:145
+#: ../components/JivePhone.tcl:905 ../components/JivePhone.tcl:987
+#: ../components/Phone/Phone.tcl:432 ../components/fsdialog.tcl:430
+#: ../components/fsdialog.tcl:1054 ../components/fsdialog.tcl:1446
+#: ../contrib/ui/dialog.tcl:243 ../contrib/ui/fontselector.tcl:149
+#: ../contrib/ui/progress.tcl:316 ../contrib/wizard.tcl:227
+#: ../jabber/Adhoc.tcl:201 ../jabber/Adhoc.tcl:396 ../jabber/Chat.tcl:358
+#: ../jabber/Create.tcl:151 ../jabber/Create.tcl:670 ../jabber/Disco.tcl:1509
+#: ../jabber/Disco.tcl:1678 ../jabber/Enter.tcl:222 ../jabber/FTrans.tcl:220
+#: ../jabber/History.tcl:989 ../jabber/JUser.tcl:230 ../jabber/JUser.tcl:802
+#: ../jabber/Jabber.tcl:1007 ../jabber/Jabber.tcl:1943
+#: ../jabber/Jabber.tcl:2136 ../jabber/Login.tcl:269 ../jabber/MUC.tcl:204
+#: ../jabber/MUC.tcl:462 ../jabber/MUC.tcl:1011 ../jabber/MUC.tcl:1441
+#: ../jabber/MUC.tcl:1634 ../jabber/Profiles.tcl:923
+#: ../jabber/Register.tcl:329 ../jabber/Register.tcl:1172
+#: ../jabber/Register.tcl:1485 ../jabber/Search.tcl:131
+#: ../jabber/Status.tcl:430 ../jabber/UserInfo.tcl:377 ../jabber/VCard.tcl:250
+#: ../jabber/VCard.tcl:260 ../lib/Bookmarks.tcl:125 ../lib/Component.tcl:82
+#: ../lib/Dialogs.tcl:132 ../lib/Dialogs.tcl:341 ../lib/EditDialogs.tcl:143
+#: ../lib/EditDialogs.tcl:332 ../lib/Preferences.tcl:240
+#: ../whiteboard/FilePrefs.tcl:529 ../whiteboard/ItemInspector.tcl:507
+#: ../whiteboard/ItemInspector.tcl:868 ../whiteboard/Multicast.tcl:92
+#, fuzzy
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: ../components/BuddyPounce.tcl:292
+#, fuzzy
+msgid "Disable All"
+msgstr "Desactivar Todos"
+
+#: ../components/BuddyPounce.tcl:562
+#, fuzzy, tcl-format
+msgid "%s just went online!"
+msgstr "%s acaba de entrar!"
+
+#: ../components/BuddyPounce.tcl:563
+#, fuzzy, tcl-format
+msgid "%s just went offline!"
+msgstr "%s acaba de salir!"
+
+#: ../components/BuddyPounce.tcl:564
+#, fuzzy, tcl-format
+msgid "%s just sent you a message!"
+msgstr "%s te acaba de enviar un mensaje!"
+
+#: ../components/BuddyPounce.tcl:565
+#, fuzzy, tcl-format
+msgid "%s just started a chat!"
+msgstr "%s acaba de hablarte!"
+
+#: ../components/BuddyPounce.tcl:591
+#, fuzzy
+msgid "Auto Reply"
+msgstr "Autoresponder"
+
+#. TRANSLATORS: automatic logout when computer is put in sleep mode and relogin on wakeup; in preferences dialog (Mac OS X only!)
+#: ../components/Carbon.tcl:149 ../components/Carbon.tcl:170
+#, fuzzy
+msgid "Sleep"
+msgstr "Sleep"
+
+#: ../components/Carbon.tcl:182
+#, fuzzy
+msgid "Logout on sleep"
+msgstr "Desconectar al suspender"
+
+#: ../components/Carbon.tcl:187
+#, fuzzy
+msgid "Relogin on wakeup"
+msgstr "Reconectar al salir de suspension"
+
+#. TRANSLATORS: geographical location of the user ( http://xmpp.org/extensions/xep-0080.html#format ); see Action menu when logged in to a server with PEP support
+#: ../components/Geolocation.tcl:48
+#, fuzzy
+msgid "Locat&ion"
+msgstr "Ub&icación"
+
+#: ../components/Geolocation.tcl:72
+#, fuzzy
+msgid "Altitude"
+msgstr "Altitud"
+
+#: ../components/Geolocation.tcl:73
+#, fuzzy
+msgid "Named Area"
+msgstr "Nombre de la zona"
+
+#: ../components/Geolocation.tcl:74
+#, fuzzy
+msgid "GPS Bearing"
+msgstr "Orientación GPS"
+
+#: ../components/Geolocation.tcl:75
+#, fuzzy
+msgid "Building"
+msgstr "Edificio"
+
+#: ../components/Geolocation.tcl:76 ../jabber/VCard.tcl:507
+#, fuzzy
+msgid "Country"
+msgstr "País"
+
+#: ../components/Geolocation.tcl:77
+#, fuzzy
+msgid "GPS Datum"
+msgstr "Datos GPS"
+
+#: ../components/Geolocation.tcl:78 ../jabber/Emoticons.tcl:599
+#: ../jabber/FTrans.tcl:204 ../jabber/FTrans.tcl:570 ../jabber/OOB.tcl:96
+#: ../jabber/VCard.tcl:328 ../whiteboard/WDialogs.tcl:128
+#, fuzzy
+msgid "Description"
+msgstr "Descripción"
+
+#: ../components/Geolocation.tcl:79
+#, fuzzy
+msgid "GPS Error"
+msgstr "Error del GPS"
+
+#: ../components/Geolocation.tcl:80
+#, fuzzy
+msgid "Floor"
+msgstr "Planta"
+
+#: ../components/Geolocation.tcl:81
+#, fuzzy
+msgid "Latitude"
+msgstr "Latitud"
+
+#: ../components/Geolocation.tcl:82
+#, fuzzy
+msgid "Locality"
+msgstr "Localidad"
+
+#: ../components/Geolocation.tcl:83
+#, fuzzy
+msgid "Longitude"
+msgstr "Longitud"
+
+#: ../components/Geolocation.tcl:84 ../jabber/VCard.tcl:506
+#, fuzzy
+msgid "Postal code"
+msgstr "Código Postal"
+
+#: ../components/Geolocation.tcl:85 ../jabber/VCard.tcl:505
+#, fuzzy
+msgid "Region"
+msgstr "Región"
+
+#: ../components/Geolocation.tcl:86
+#, fuzzy
+msgid "Room"
+msgstr "Sala"
+
+#: ../components/Geolocation.tcl:87
+#, fuzzy
+msgid "Street"
+msgstr "Calle"
+
+#: ../components/Geolocation.tcl:88 ../jabber/Emoticons.tcl:616
+#: ../whiteboard/FilePrefs.tcl:473 ../whiteboard/ItemInspector.tcl:372
+#, fuzzy
+msgid "Text"
+msgstr "Texto"
+
+#: ../components/Geolocation.tcl:89
+#, fuzzy
+msgid "Timestamp"
+msgstr "Hora"
+
+#: ../components/Geolocation.tcl:105 ../components/JivePhone.tcl:95
+#: ../jabber/AvatarMB.tcl:583 ../jabber/MUC.tcl:992 ../lib/EditDialogs.tcl:122
+#: ../whiteboard/WBPrefs.tcl:191
+#, fuzzy
+msgid "Remove"
+msgstr "Borrar"
+
+#: ../components/Geolocation.tcl:157
+#, fuzzy
+msgid "Set your location that will be shown to your contacts."
+msgstr "Introduzca la ubicación que se mostrará a sus contactos."
+
+#: ../components/Geolocation.tcl:158
+#, fuzzy
+msgid ""
+"Enter your location details below. At least you should set latitude and "
+"longitude."
+msgstr ""
+"Introduzca su ubicación debajo. Al menos debería introducir su latitud y "
+"longitud."
+
+#: ../components/Geolocation.tcl:161 ../components/Geolocation.tcl:370
+#: ../components/fsdialog.tcl:421 ../jabber/GroupChat.tcl:3477
+#, fuzzy
+msgid "Location"
+msgstr "Ubicación"
+
+#: ../components/Geolocation.tcl:183
+#, fuzzy
+msgid "Altitude in meters above or below sea level"
+msgstr "Altitud en metros sobre el nivel del mar"
+
+#: ../components/Geolocation.tcl:184
+#, fuzzy
+msgid "Longitude in decimal degrees East"
+msgstr "Longitud en grados decimales Este"
+
+#: ../components/Geolocation.tcl:185
+#, fuzzy
+msgid "Latitude in decimal degrees North"
+msgstr "Latitud en grados decimales"
+
+#: ../components/Geolocation.tcl:186
+#, fuzzy
+msgid "The nation where the user is located"
+msgstr "El pais donde se encuentra el usuario"
+
+#: ../components/Geolocation.tcl:200
+#, fuzzy
+msgid "Synchronize with Google Earth"
+msgstr "Sincronizar con Google Earth"
+
+#: ../components/Geolocation.tcl:376
+#, fuzzy
+msgid "This is location data for"
+msgstr "La información del lugar para"
+
+#: ../components/Growl.tcl:162 ../components/taskbar/Taskbar.tcl:185
+#: ../jabber/JUI.tcl:179 ../jabber/JUI.tcl:533 ../jabber/JUI.tcl:1835
+#: ../jabber/JUI.tcl:1855 ../jabber/MegaPresence.tcl:96
+#: ../jabber/StatusSlot.tcl:35
+#, fuzzy
+msgid "Status"
+msgstr "Estado"
+
+#: ../components/Growl.tcl:170 ../jabber/FTrans.tcl:574 ../jabber/OOB.tcl:114
+#, fuzzy
+msgid "Receive File"
+msgstr "Recibir archivo"
+
+#: ../components/Growl.tcl:172 ../components/Growl.tcl:178
+#: ../components/Notifier.tcl:133 ../jabber/FTrans.tcl:565
+#: ../jabber/OOB.tcl:92
+#, fuzzy
+msgid "File"
+msgstr "Archivo"
+
+#: ../components/Growl.tcl:174 ../components/Notifier.tcl:135
+#: ../components/fsdialog.tcl:490 ../jabber/FTrans.tcl:567
+#: ../whiteboard/CanvasUtils.tcl:173 ../whiteboard/Whiteboard.tcl:555
+msgid "Size"
+msgstr ""
+
+#: ../components/Growl.tcl:177 ../components/Notifier.tcl:138
+#: ../jabber/FTrans.tcl:573 ../jabber/OOB.tcl:113
+#, fuzzy, tcl-format
+msgid "%s wants to send you this file: %s Do you want to receive this file?"
+msgstr "%s desea enviarle este archivo: %s ¿Desea recibirlo?"
+
+#: ../components/Growl.tcl:186
+#, fuzzy
+msgid "Ring, ring"
+msgstr "Ring, ring ..."
+
+#: ../components/Growl.tcl:187
+#, fuzzy, tcl-format
+msgid "Phone is ringing from %s"
+msgstr "Teléfono esta"
+
+#: ../components/Growl.tcl:188 ../components/JivePhone.tcl:480
+#: ../components/Phone/Phone.tcl:382 ../components/Phone/Phone.tcl:413
+#: ../jabber/Rosticons.tcl:585
+#, fuzzy
+msgid "Phone"
+msgstr "Teléfono"
+
+#: ../components/Growl.tcl:196
+#, fuzzy
+msgid "Mood change"
+msgstr "Cambio de estado de animo"
+
+#: ../components/Growl.tcl:200
+#, fuzzy
+msgid "is"
+msgstr "esta"
+
+#: ../components/Growl.tcl:202
+#, fuzzy
+msgid "because"
+msgstr "porque"
+
+#: ../components/Growl.tcl:205
+#, fuzzy
+msgid "retracted mood"
+msgstr "retracted mood"
+
+#: ../components/Growl.tcl:207 ../components/Mood.tcl:292
+#: ../components/Mood.tcl:484 ../components/Mood.tcl:586
+#: ../components/Mood.tcl:601 ../components/Mood.tcl:665
+#, fuzzy
+msgid "Mood"
+msgstr "Estado de animo"
+
+#. TRANSLATORS: see Plugins menu in whiteboard
+#: ../components/ImageMagic.tcl:61 ../whiteboard/CanvasUtils.tcl:144
+#, fuzzy
+msgid "Take &Snapshot"
+msgstr "Coger captura"
+
+#: ../components/ImageMagic.tcl:63 ../jabber/JUI.tcl:202
+#: ../whiteboard/Whiteboard.tcl:590
+#, fuzzy
+msgid "Plu&gins"
+msgstr "Plugins"
+
+#: ../components/ImageMagic.tcl:105
+#, fuzzy
+msgid "Take Snapshot"
+msgstr "Capturar la pantalla"
+
+#: ../components/ImageMagic.tcl:118
+#, fuzzy
+msgid ""
+"Click on a window or drag a rectangular area to import a snapshot into the "
+"current whiteboard."
+msgstr ""
+"Haga click en una ventana o seleccione un area rectangular para hacer una "
+"captura de pantalla e importarla a la pizarra."
+
+#: ../components/ImageMagic.tcl:183
+#, fuzzy, tcl-format
+msgid "Dangerous in-box path name: %s"
+msgstr "Dangerous in-box path name: %s"
+
+#: ../components/ImageMagic.tcl:195
+#, fuzzy, tcl-format
+msgid "Click OK to remove files: %s"
+msgstr "Haga click en OK para borrar los ficheros: %s"
+
+#: ../components/JivePhone.tcl:69 ../components/JivePhone.tcl:83
+#: ../components/JivePhone.tcl:91 ../components/JivePhone.tcl:250
+#: ../components/JivePhone.tcl:361 ../components/JivePhone.tcl:1106
+#: ../components/Phone/IAX/JingleIax.tcl:575
+msgid "Call"
+msgstr ""
+
+#: ../components/JivePhone.tcl:72
+#, fuzzy
+msgid "Forward Call"
+msgstr "Desviar la llamada actual a..."
+
+#: ../components/JivePhone.tcl:93
+#, fuzzy
+msgid "New"
+msgstr "Nuevo"
+
+#: ../components/JivePhone.tcl:94
+#, fuzzy
+msgid "Modify"
+msgstr "Modificar"
+
+#: ../components/JivePhone.tcl:341
+msgid "Unknown"
+msgstr ""
+
+#: ../components/JivePhone.tcl:354
+#, fuzzy
+msgid "Forward current call to"
+msgstr "Desviar la llamada actual a..."
+
+#: ../components/JivePhone.tcl:468
+#, fuzzy
+msgid "Call to"
+msgstr "Llamar a..."
+
+#: ../components/JivePhone.tcl:470 ../components/Phone/Phone.tcl:404
+#, fuzzy
+msgid "Forward to"
+msgstr "Desviar a..."
+
+#: ../components/JivePhone.tcl:494 ../components/Phone/Phone.tcl:427
+#, fuzzy
+msgid "Number"
+msgstr "Numero"
+
+#: ../components/JivePhone.tcl:497 ../components/Phone/Phone.tcl:430
+#, fuzzy
+msgid "Dial"
+msgstr "Marcar"
+
+#: ../components/JivePhone.tcl:613 ../components/Phone/IAX/JingleIax.tcl:231
+#, fuzzy, tcl-format
+msgid "Failed calling %s"
+msgstr "No se pudo llamar a %s"
+
+#: ../components/JivePhone.tcl:629
+#, fuzzy
+msgid "Address Book"
+msgstr "Marcado rapido"
+
+#: ../components/JivePhone.tcl:865 ../components/JivePhone.tcl:881
+#, fuzzy
+msgid "New address book"
+msgstr "Nuevo telefono de marcado rapido"
+
+#: ../components/JivePhone.tcl:888 ../components/JivePhone.tcl:970
+#: ../components/fsdialog.tcl:488 ../jabber/Emoticons.tcl:601
+#: ../jabber/Search.tcl:934 ../jabber/UserInfo.tcl:206
+msgid "Name"
+msgstr ""
+
+#: ../components/JivePhone.tcl:891 ../components/JivePhone.tcl:973
+#, fuzzy
+msgid "Phone number"
+msgstr "Numero de telefono"
+
+#: ../components/JivePhone.tcl:903 ../components/JivePhone.tcl:985
+#: ../jabber/Create.tcl:668 ../jabber/Enter.tcl:220
+#, fuzzy
+msgid "Enter"
+msgstr "Entrar"
+
+#: ../components/JivePhone.tcl:947 ../components/JivePhone.tcl:963
+#, fuzzy
+msgid "Modify address book"
+msgstr "Modificar telefono de marcado rapido"
+
+#. TRANSLATORS: check http://www.mebeam.com/
+#: ../components/MeBeam.tcl:43
+#, fuzzy
+msgid "Invite MeBeam"
+msgstr "Invitar"
+
+#: ../components/MeBeam.tcl:127
+#, fuzzy
+msgid "Please join me for video chat on"
+msgstr "libre para charlar"
+
+#. TRANSLATORS: Moods, more information at http://xmpp.org/extensions/xep-0107.html#moods
+#. TRANSLATORS: Impressed with fear or apprehension; in fear; apprehensive.
+#: ../components/Mood.tcl:87
+#, fuzzy
+msgid "Afraid"
+msgstr "Preocupado"
+
+#. TRANSLATORS: Astonished; confounded with fear, surprise or wonder.
+#: ../components/Mood.tcl:89
+#, fuzzy
+msgid "Amazed"
+msgstr "Maravillado"
+
+#. TRANSLATORS: Displaying or feeling anger, i.e., a strong feeling of displeasure, hostility or antagonism towards someone or something, usually combined with an urge to harm.
+#: ../components/Mood.tcl:91
+#, fuzzy
+msgid "Angry"
+msgstr "Furioso"
+
+#. TRANSLATORS: To be disturbed or irritated, especially by continued or repeated acts.
+#: ../components/Mood.tcl:93
+#, fuzzy
+msgid "Annoyed"
+msgstr "Enfadado"
+
+#. TRANSLATORS: Full of anxiety or disquietude; greatly concerned or solicitous, esp. respecting something future or unknown; being in painful suspense.
+#: ../components/Mood.tcl:95
+#, fuzzy
+msgid "Anxious"
+msgstr "Ansioso"
+
+#. TRANSLATORS: To be stimulated in one's feelings, especially to be sexually stimulated.
+#: ../components/Mood.tcl:97
+#, fuzzy
+msgid "Aroused"
+msgstr "Despierto"
+
+#. TRANSLATORS: Feeling shame or guilt.
+#: ../components/Mood.tcl:99
+#, fuzzy
+msgid "Ashamed"
+msgstr "Avergonzado"
+
+#. TRANSLATORS: Suffering from boredom; uninterested, without attention.
+#: ../components/Mood.tcl:101
+#, fuzzy
+msgid "Bored"
+msgstr "Aburrido"
+
+#. TRANSLATORS: Strong in the face of fear; courageous.
+#: ../components/Mood.tcl:103
+#, fuzzy
+msgid "Brave"
+msgstr "Valiente"
+
+#. TRANSLATORS: Peaceful, quiet.
+#: ../components/Mood.tcl:105
+#, fuzzy
+msgid "Calm"
+msgstr "Tranquilo"
+
+#. TRANSLATORS: Feeling the sensation of coldness, especially to the point of discomfort.
+#: ../components/Mood.tcl:107
+#, fuzzy
+msgid "Cold"
+msgstr "Frío"
+
+#. TRANSLATORS: Chaotic, jumbled or muddled.
+#: ../components/Mood.tcl:109
+#, fuzzy
+msgid "Confused"
+msgstr "Confundido"
+
+#. TRANSLATORS: Pleased at the satisfaction of a want or desire; satisfied.
+#: ../components/Mood.tcl:111
+#, fuzzy
+msgid "Contented"
+msgstr "Contento"
+
+#. TRANSLATORS: Grouchy, irritable; easily upset.
+#: ../components/Mood.tcl:113
+#, fuzzy
+msgid "Cranky"
+msgstr "Irritable"
+
+#. TRANSLATORS: Inquisitive; tending to ask questions, investigate, or explore.
+#: ../components/Mood.tcl:115
+#, fuzzy
+msgid "Curious"
+msgstr "Curioso"
+
+#. TRANSLATORS: Severely despondent and unhappy.
+#: ../components/Mood.tcl:117
+#, fuzzy
+msgid "Depressed"
+msgstr "Deprimido"
+
+#. TRANSLATORS: Defeated of expectation or hope; let down.
+#: ../components/Mood.tcl:119
+#, fuzzy
+msgid "Disappointed"
+msgstr "Decepcionado"
+
+#. TRANSLATORS: Filled with disgust; irritated and out of patience.
+#: ../components/Mood.tcl:121
+#, fuzzy
+msgid "Disgusted"
+msgstr "Disgustado"
+
+#. TRANSLATORS: Having one's attention diverted; preoccupied.
+#: ../components/Mood.tcl:123
+#, fuzzy
+msgid "Distracted"
+msgstr "Distraído"
+
+#. TRANSLATORS: Having a feeling of shameful discomfort.
+#: ../components/Mood.tcl:125
+#, fuzzy
+msgid "Embarrassed"
+msgstr "Avergonzado"
+
+#. TRANSLATORS: Having great enthusiasm.
+#: ../components/Mood.tcl:127
+#, fuzzy
+msgid "Excited"
+msgstr "Excitado"
+
+#. TRANSLATORS: In the mood for flirting.
+#: ../components/Mood.tcl:129
+#, fuzzy
+msgid "Flirtatious"
+msgstr "Coqueto"
+
+#. TRANSLATORS: Suffering from frustration; dissatisfied, agitated, or discontented because one is unable to perform an action or fulfill a desire.
+#: ../components/Mood.tcl:131
+#, fuzzy
+msgid "Frustrated"
+msgstr "Frustrado"
+
+#. TRANSLATORS: Unhappy and irritable.
+#: ../components/Mood.tcl:133
+#, fuzzy
+msgid "Grumpy"
+msgstr "Malhumorado"
+
+#. TRANSLATORS: Feeling responsible for wrongdoing; feeling blameworthy.
+#: ../components/Mood.tcl:135
+#, fuzzy
+msgid "Guilty"
+msgstr "Culpable"
+
+#. TRANSLATORS: Experiencing the effect of favourable fortune; having the feeling arising from the consciousness of well-being or of enjoyment; enjoying good of any kind, as peace, tranquillity, comfort; contented; joyous.
+#: ../components/Mood.tcl:137
+#, fuzzy
+msgid "Happy"
+msgstr "Feliz"
+
+#. TRANSLATORS: Feeling the sensation of heat, especially to the point of discomfort.
+#: ../components/Mood.tcl:139
+#, fuzzy
+msgid "Hot"
+msgstr "Caliente"
+
+#. TRANSLATORS: Having or showing a modest or low estimate of one's own importance; feeling lowered in dignity or importance.
+#: ../components/Mood.tcl:141
+#, fuzzy
+msgid "Humbled"
+msgstr "Humilde"
+
+#. TRANSLATORS: Feeling deprived of dignity or self-respect.
+#: ../components/Mood.tcl:143
+#, fuzzy
+msgid "Humiliated"
+msgstr "Humillado"
+
+#. TRANSLATORS: Having a physical need for food.
+#: ../components/Mood.tcl:145
+#, fuzzy
+msgid "Hungry"
+msgstr "Hambriento"
+
+#. TRANSLATORS: Wounded, injured, or pained, whether physically or emotionally.
+#: ../components/Mood.tcl:147
+#, fuzzy
+msgid "Hurt"
+msgstr "Herido"
+
+#. TRANSLATORS: Favourably affected by something or someone.
+#: ../components/Mood.tcl:149
+#, fuzzy
+msgid "Impressed"
+msgstr "Impresionado"
+
+#. TRANSLATORS: Feeling amazement at something or someone; or feeling a combination of fear and reverence.
+#: ../components/Mood.tcl:151
+#, fuzzy
+msgid "In awe"
+msgstr "Atónito"
+
+#. TRANSLATORS: Feeling strong affection, care, liking, or attraction.
+#: ../components/Mood.tcl:153
+#, fuzzy
+msgid "In love"
+msgstr "Enamorado"
+
+#. TRANSLATORS: Showing anger or indignation, especially at something unjust or wrong.
+#: ../components/Mood.tcl:155
+#, fuzzy
+msgid "Indignant"
+msgstr "Indignado"
+
+#. TRANSLATORS: Showing great attention to something or someone; having or showing interest.
+#: ../components/Mood.tcl:157
+#, fuzzy
+msgid "Interested"
+msgstr "Interesado"
+
+#. TRANSLATORS: Under the influence of alcohol; drunk.
+#: ../components/Mood.tcl:159
+#, fuzzy
+msgid "Intoxicated"
+msgstr "Intoxicado"
+
+#. TRANSLATORS: Feeling as if one cannot be defeated, overcome or denied.
+#: ../components/Mood.tcl:161
+#, fuzzy
+msgid "Invincible"
+msgstr "Invencible"
+
+#. TRANSLATORS: Fearful of being replaced in position or affection.
+#: ../components/Mood.tcl:163
+#, fuzzy
+msgid "Jealous"
+msgstr "Celoso"
+
+#. TRANSLATORS: Feeling isolated, empty, or abandoned.
+#: ../components/Mood.tcl:165
+#, fuzzy
+msgid "Lonely"
+msgstr "Solitario"
+
+#. TRANSLATORS: Causing or intending to cause intentional harm; bearing ill will towards another; cruel; malicious.
+#: ../components/Mood.tcl:167
+#, fuzzy
+msgid "Mean"
+msgstr "Mezquino"
+
+#. TRANSLATORS: Given to sudden or frequent changes of mind or feeling; temperamental.
+#: ../components/Mood.tcl:169
+#, fuzzy
+msgid "Moody"
+msgstr "Temperamental"
+
+#. TRANSLATORS: Easily agitated or alarmed; apprehensive or anxious.
+#: ../components/Mood.tcl:171
+#, fuzzy
+msgid "Nervous"
+msgstr "Nervioso"
+
+#. TRANSLATORS: Not having a strong mood or emotional state.
+#: ../components/Mood.tcl:173
+#, fuzzy
+msgid "Neutral"
+msgstr "Neutral"
+
+#. TRANSLATORS: Feeling emotionally hurt, displeased, or insulted.
+#: ../components/Mood.tcl:175
+#, fuzzy
+msgid "Offended"
+msgstr "Ofendido"
+
+#. TRANSLATORS: Interested in play; fun, recreational, unserious, lighthearted; joking, silly.
+#: ../components/Mood.tcl:177
+#, fuzzy
+msgid "Playful"
+msgstr "Juguetón"
+
+#. TRANSLATORS: Feeling a sense of one's own worth or accomplishment.
+#: ../components/Mood.tcl:179
+#, fuzzy
+msgid "Proud"
+msgstr "Orgulloso"
+
+#. TRANSLATORS: Feeling uplifted because of the removal of stress or discomfort.
+#: ../components/Mood.tcl:181
+#, fuzzy
+msgid "Relieved"
+msgstr "Aliviado"
+
+#. TRANSLATORS: Feeling regret or sadness for doing something wrong.
+#: ../components/Mood.tcl:183
+#, fuzzy
+msgid "Remorseful"
+msgstr "Arrepentido"
+
+#. TRANSLATORS: Without rest; unable to be still or quiet; uneasy; continually moving.
+#: ../components/Mood.tcl:185
+#, fuzzy
+msgid "Restless"
+msgstr "Cansado"
+
+#. TRANSLATORS: Feeling sorrow; sorrowful, mournful.
+#: ../components/Mood.tcl:187
+#, fuzzy
+msgid "Sad"
+msgstr "Triste"
+
+#. TRANSLATORS: Mocking and ironical.
+#: ../components/Mood.tcl:189
+#, fuzzy
+msgid "Sarcastic"
+msgstr "Sarcástico"
+
+#. TRANSLATORS: Without humor or expression of happiness; grave in manner or disposition; earnest; thoughtful; solemn.
+#: ../components/Mood.tcl:191
+#, fuzzy
+msgid "Serious"
+msgstr "Serio"
+
+#. TRANSLATORS: Surprised, startled, confused, or taken aback.
+#: ../components/Mood.tcl:193
+#, fuzzy
+msgid "Shocked"
+msgstr "Estupefacto"
+
+#. TRANSLATORS: Feeling easily frightened or scared; timid; reserved or coy.
+#: ../components/Mood.tcl:195
+#, fuzzy
+msgid "Shy"
+msgstr "Tímido"
+
+#. TRANSLATORS: Feeling in poor health; ill.
+#: ../components/Mood.tcl:197
+#, fuzzy
+msgid "Sick"
+msgstr "Enfermo"
+
+#. TRANSLATORS: Feeling the need for sleep.
+#: ../components/Mood.tcl:199
+#, fuzzy
+msgid "Sleepy"
+msgstr "Adormilado"
+
+#. TRANSLATORS: Suffering emotional pressure.
+#: ../components/Mood.tcl:201
+#, fuzzy
+msgid "Stressed"
+msgstr "Estresado"
+
+#. TRANSLATORS: Experiencing a feeling caused by something unexpected.
+#: ../components/Mood.tcl:203
+#, fuzzy
+msgid "Surprised"
+msgstr "Sorprendido"
+
+#. TRANSLATORS: Feeling the need to drink.
+#: ../components/Mood.tcl:205
+#, fuzzy
+msgid "Thirsty"
+msgstr "Sediento"
+
+#. TRANSLATORS: Thinking about unpleasant things that have happened or that might happen; feeling afraid and unhappy.
+#: ../components/Mood.tcl:207
+#, fuzzy
+msgid "Worried"
+msgstr "Preocupado"
+
+#: ../components/Mood.tcl:211
+#, fuzzy
+msgid "afraid"
+msgstr "preocupado"
+
+#: ../components/Mood.tcl:212
+#, fuzzy
+msgid "amazed"
+msgstr "maravillado"
+
+#: ../components/Mood.tcl:213
+#, fuzzy
+msgid "angry"
+msgstr "furioso"
+
+#: ../components/Mood.tcl:214
+#, fuzzy
+msgid "annoyed"
+msgstr "enfadado"
+
+#: ../components/Mood.tcl:215
+#, fuzzy
+msgid "anxious"
+msgstr "ansioso"
+
+#: ../components/Mood.tcl:216
+#, fuzzy
+msgid "aroused"
+msgstr "despierto"
+
+#: ../components/Mood.tcl:217
+#, fuzzy
+msgid "ashamed"
+msgstr "avergonzado"
+
+#: ../components/Mood.tcl:218
+#, fuzzy
+msgid "bored"
+msgstr "aburrido"
+
+#: ../components/Mood.tcl:219
+#, fuzzy
+msgid "brave"
+msgstr "valiente"
+
+#: ../components/Mood.tcl:220
+#, fuzzy
+msgid "calm"
+msgstr "tranquilo"
+
+#: ../components/Mood.tcl:221
+#, fuzzy
+msgid "cold"
+msgstr "frío"
+
+#: ../components/Mood.tcl:222
+#, fuzzy
+msgid "confused"
+msgstr "confundido"
+
+#: ../components/Mood.tcl:223
+#, fuzzy
+msgid "contented"
+msgstr "contento"
+
+#: ../components/Mood.tcl:224
+#, fuzzy
+msgid "cranky"
+msgstr "irritable"
+
+#: ../components/Mood.tcl:225
+#, fuzzy
+msgid "curious"
+msgstr "curioso"
+
+#: ../components/Mood.tcl:226
+#, fuzzy
+msgid "depressed"
+msgstr "deprimido"
+
+#: ../components/Mood.tcl:227
+#, fuzzy
+msgid "disappointed"
+msgstr "decepcionado"
+
+#: ../components/Mood.tcl:228
+#, fuzzy
+msgid "disgusted"
+msgstr "disgustado"
+
+#: ../components/Mood.tcl:229
+#, fuzzy
+msgid "distracted"
+msgstr "distraído"
+
+#: ../components/Mood.tcl:230
+#, fuzzy
+msgid "embarrassed"
+msgstr "avergonzado"
+
+#: ../components/Mood.tcl:231
+#, fuzzy
+msgid "excited"
+msgstr "excitado"
+
+#: ../components/Mood.tcl:232
+#, fuzzy
+msgid "flirtatious"
+msgstr "coqueto"
+
+#: ../components/Mood.tcl:233
+#, fuzzy
+msgid "frustrated"
+msgstr "frustrado"
+
+#: ../components/Mood.tcl:234
+#, fuzzy
+msgid "grumpy"
+msgstr "malhumorado"
+
+#: ../components/Mood.tcl:235
+#, fuzzy
+msgid "guilty"
+msgstr "culpable"
+
+#: ../components/Mood.tcl:236
+#, fuzzy
+msgid "happy"
+msgstr "feliz"
+
+#: ../components/Mood.tcl:237
+#, fuzzy
+msgid "hot"
+msgstr "caliente"
+
+#: ../components/Mood.tcl:238
+#, fuzzy
+msgid "humbled"
+msgstr "humilde"
+
+#: ../components/Mood.tcl:239
+#, fuzzy
+msgid "humiliated"
+msgstr "humillado"
+
+#: ../components/Mood.tcl:240
+#, fuzzy
+msgid "hungry"
+msgstr "hambriento"
+
+#: ../components/Mood.tcl:241
+#, fuzzy
+msgid "hurt"
+msgstr "herido"
+
+#: ../components/Mood.tcl:242
+#, fuzzy
+msgid "impressed"
+msgstr "impresionado"
+
+#: ../components/Mood.tcl:243
+#, fuzzy
+msgid "in awe"
+msgstr "atónito"
+
+#: ../components/Mood.tcl:244
+#, fuzzy
+msgid "in love"
+msgstr "enamorado"
+
+#: ../components/Mood.tcl:245
+#, fuzzy
+msgid "indignant"
+msgstr "indignado"
+
+#: ../components/Mood.tcl:246
+#, fuzzy
+msgid "interested"
+msgstr "interesado"
+
+#: ../components/Mood.tcl:247
+#, fuzzy
+msgid "intoxicated"
+msgstr "intoxicado"
+
+#: ../components/Mood.tcl:248
+#, fuzzy
+msgid "invincible"
+msgstr "invencible"
+
+#: ../components/Mood.tcl:249
+#, fuzzy
+msgid "jealous"
+msgstr "celoso"
+
+#: ../components/Mood.tcl:250
+#, fuzzy
+msgid "lonely"
+msgstr "solitario"
+
+#: ../components/Mood.tcl:251
+#, fuzzy
+msgid "mean"
+msgstr "mezquino"
+
+#: ../components/Mood.tcl:252
+#, fuzzy
+msgid "moody"
+msgstr "temperamental"
+
+#: ../components/Mood.tcl:253
+#, fuzzy
+msgid "nervous"
+msgstr "nervioso"
+
+#: ../components/Mood.tcl:254
+#, fuzzy
+msgid "neutral"
+msgstr "neutral"
+
+#: ../components/Mood.tcl:255
+#, fuzzy
+msgid "offended"
+msgstr "ofendido"
+
+#: ../components/Mood.tcl:256
+#, fuzzy
+msgid "playful"
+msgstr "juguetón"
+
+#: ../components/Mood.tcl:257
+#, fuzzy
+msgid "proud"
+msgstr "orgulloso"
+
+#: ../components/Mood.tcl:258
+#, fuzzy
+msgid "relieved"
+msgstr "aliviado"
+
+#: ../components/Mood.tcl:259
+#, fuzzy
+msgid "remorseful"
+msgstr "arrepentido"
+
+#: ../components/Mood.tcl:260
+#, fuzzy
+msgid "restless"
+msgstr "vansado"
+
+#: ../components/Mood.tcl:261
+#, fuzzy
+msgid "sad"
+msgstr "triste"
+
+#: ../components/Mood.tcl:262
+#, fuzzy
+msgid "sarcastic"
+msgstr "sarcastico"
+
+#: ../components/Mood.tcl:263
+#, fuzzy
+msgid "serious"
+msgstr "serio"
+
+#: ../components/Mood.tcl:264
+#, fuzzy
+msgid "shocked"
+msgstr "estupefacto"
+
+#: ../components/Mood.tcl:265
+#, fuzzy
+msgid "shy"
+msgstr "tímido"
+
+#: ../components/Mood.tcl:266
+#, fuzzy
+msgid "sick"
+msgstr "enfermo"
+
+#: ../components/Mood.tcl:267
+#, fuzzy
+msgid "sleepy"
+msgstr "agotado"
+
+#: ../components/Mood.tcl:268
+#, fuzzy
+msgid "stressed"
+msgstr "estresado"
+
+#: ../components/Mood.tcl:269
+#, fuzzy
+msgid "surprised"
+msgstr "sorprendido"
+
+#: ../components/Mood.tcl:270
+#, fuzzy
+msgid "thirsty"
+msgstr "sediento"
+
+#: ../components/Mood.tcl:271
+#, fuzzy
+msgid "worried"
+msgstr "preocupado"
+
+#: ../components/Mood.tcl:303 ../components/Mood.tcl:640
+#, fuzzy
+msgid "&Custom Mood"
+msgstr "Estado de animo"
+
+#: ../components/Mood.tcl:470
+#, fuzzy
+msgid "Only contacts with compatible software will see your mood."
+msgstr ""
+"Solamente los contactos que usen un software compatible podrán ver la "
+"información del estado de ánimo."
+
+#: ../components/Mood.tcl:470
+#, fuzzy
+msgid "Select your mood to show to your contacts."
+msgstr "Seleccione el estado de ánimo que desea mostrar a sus contactos."
+
+#: ../components/Mood.tcl:473
+#, fuzzy
+msgid "Custom Mood"
+msgstr "Estado de ánimo personalizado..."
+
+#: ../components/NotifyCall.tcl:85 ../components/Phone/NotifyCall.tcl:168
+#, fuzzy
+msgid "Notify Call"
+msgstr "Llamada entrante"
+
+#: ../components/NotifyCall.tcl:94 ../components/Phone/NotifyCall.tcl:169
+#, fuzzy
+msgid "Inbound Call"
+msgstr "Le esta llamando"
+
+#: ../components/NotifyCall.tcl:115 ../components/Phone/NotifyCall.tcl:264
+#, fuzzy
+msgid "Hung Up"
+msgstr "Terminar llamada"
+
+#: ../components/NotifyCall.tcl:118
+#, fuzzy
+msgid "Call VM?"
+msgstr "Desviar a buzon de voz"
+
+#: ../components/ParseURI.tcl:220 ../jabber/Login.tcl:665
+#: ../jabber/Login.tcl:711
+#, fuzzy, tcl-format
+msgid "Enter the password for your account %s"
+msgstr "Introducir la contraseña para la cuenta %s"
+
+#: ../components/ParseURI.tcl:391
+#, fuzzy, tcl-format
+msgid "Please enter your desired nickname for the chatroom %s"
+msgstr "Por favor, introduzca el apodo que desee esar en la sala %s"
+
+#: ../components/ParseURI.tcl:392 ../components/ParseURI.tcl:396
+#: ../jabber/Create.tcl:111 ../jabber/Create.tcl:636 ../jabber/Enter.tcl:164
+#: ../jabber/GroupChat.tcl:3478 ../jabber/JUser.tcl:182
+#: ../jabber/JUser.tcl:730 ../jabber/MUC.tcl:478 ../jabber/Profiles.tcl:1096
+#: ../jabber/Subscribe.tcl:322 ../jabber/Subscribe.tcl:1285
+#: ../jabber/VCard.tcl:307
+#, fuzzy
+msgid "Nickname"
+msgstr "Apodo"
+
+#: ../components/ParseURI.tcl:559 ../jabber/FTrans.tcl:594
+#: ../jabber/MailBox.tcl:2133 ../jabber/OOB.tcl:133
+#, fuzzy
+msgid "Save File"
+msgstr "Guardar el archivo"
+
+#: ../components/Phone/IAX/JingleIax.tcl:61
+#, fuzzy
+msgid "&Call"
+msgstr "Llamar a..."
+
+#: ../components/Phone/NotifyCall.tcl:171
+#, fuzzy
+msgid "Make Call"
+msgstr "Llamando a"
+
+#: ../components/Phone/NotifyCall.tcl:172
+#, fuzzy
+msgid "Outbound Call"
+msgstr "Esta llamando a"
+
+#: ../components/Phone/NotifyCall.tcl:266
+#, fuzzy
+msgid "Answer"
+msgstr "Aceptar llamada"
+
+#: ../components/Phone/NotifyCall.tcl:275 ../jabber/JUser.tcl:593
+#: ../jabber/Jabber.tcl:716 ../jabber/Subscribe.tcl:447
+#: ../jabber/Subscribe.tcl:467 ../jabber/Subscribe.tcl:667
+#: ../jabber/Subscribe.tcl:700 ../jabber/Subscribe.tcl:779
+#: ../jabber/Subscribe.tcl:826 ../jabber/Subscribe.tcl:892
+#, fuzzy
+msgid "Info"
+msgstr "Información"
+
+#: ../components/Phone/NotifyCall.tcl:367
+#: ../components/Phone/NotifyCall.tcl:795
+#, fuzzy
+msgid "Do you want to hang up?"
+msgstr "Quieres colgar?"
+
+#: ../components/Phone/NotifyCall.tcl:574
+msgid "Call Notification"
+msgstr ""
+
+#: ../components/Phone/NotifyCall.tcl:605 ../jabber/AppStatusSlot.tcl:65
+#: ../jabber/MegaPresence.tcl:81 ../jabber/Search.tcl:901
+#: ../jabber/StatusSlot.tcl:63
+#, fuzzy
+msgid "Close Slot"
+msgstr "Cerrar Slot"
+
+#: ../components/Phone/NotifyCall.tcl:636
+#, fuzzy, tcl-format
+msgid "%s is calling"
+msgstr "esta"
+
+#: ../components/Phone/NotifyCall.tcl:663
+#, fuzzy
+msgid "Answer call"
+msgstr "Aceptar llamada"
+
+#: ../components/Phone/NotifyCall.tcl:664
+msgid "Hangup call"
+msgstr ""
+
+#: ../components/Phone/NotifyCall.tcl:717
+#, fuzzy, tcl-format
+msgid "%s is on the phone"
+msgstr "esta"
+
+#. TRANSLATORS; whiteboard slide show menu
+#: ../components/SlideShow.tcl:43 ../components/SlideShow.tcl:198
+#, fuzzy
+msgid "Slide Show"
+msgstr "Pase de diapositivas"
+
+#: ../components/SlideShow.tcl:44
+#, fuzzy
+msgid "&Open Folder"
+msgstr "&Abrir carpeta..."
+
+#: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:433
+#: ../components/SlideShow.tcl:437 ../components/SlideShow.tcl:444
+#: ../components/Totd.tcl:94 ../contrib/wizard.tcl:224 ../jabber/Adhoc.tcl:209
+#, fuzzy
+msgid "Previous"
+msgstr "Anterior"
+
+#: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:434
+#: ../components/SlideShow.tcl:439 ../components/SlideShow.tcl:445
+#: ../components/Totd.tcl:92 ../contrib/wizard.tcl:219
+#: ../contrib/wizard.tcl:586 ../jabber/Adhoc.tcl:207 ../jabber/GotMsg.tcl:225
+#: ../jabber/Register.tcl:327 ../jabber/Register.tcl:1168
+#: ../lib/TSearch.tcl:81 ../lib/WSearch.tcl:72
+#, fuzzy
+msgid "Next"
+msgstr "Siguiente"
+
+#: ../components/SlideShow.tcl:48 ../components/SlideShow.tcl:429
+#: ../components/SlideShow.tcl:442 ../whiteboard/ItemInspector.tcl:213
+#, fuzzy
+msgid "First"
+msgstr "Primero"
+
+#: ../components/SlideShow.tcl:49 ../components/SlideShow.tcl:430
+#: ../components/SlideShow.tcl:443 ../whiteboard/ItemInspector.tcl:214
+#, fuzzy
+msgid "Last"
+msgstr "Último"
+
+#: ../components/SlideShow.tcl:196 ../jabber/Chat.tcl:1350
+#: ../jabber/GroupChat.tcl:676 ../lib/FileCache.tcl:599
+#: ../whiteboard/FilePrefs.tcl:77 ../whiteboard/Plugins.tcl:1324
+#: ../whiteboard/WBPrefs.tcl:74
+#, fuzzy
+msgid "Whiteboard"
+msgstr "Pizarra"
+
+#: ../components/SlideShow.tcl:212
+#, fuzzy
+msgid "Show navigation buttons"
+msgstr "Mostrar los botones de navegación"
+
+#: ../components/SlideShow.tcl:214
+#, fuzzy
+msgid "Resize window to fit slides"
+msgstr "Redimensionar la ventapa al tamaño de las diapositivas"
+
+#: ../components/SlideShow.tcl:282 ../lib/FileCache.tcl:667
+#: ../whiteboard/GetFileIface.tcl:292
+#, fuzzy
+msgid "Open Folder"
+msgstr "Abrir carpeta"
+
+#. TRANSLATORS; Sound settings in preferences
+#: ../components/Sounds.tcl:76
+#, fuzzy
+msgid "Contact is online"
+msgstr "Contacto está conectado"
+
+#: ../components/Sounds.tcl:77
+#, fuzzy
+msgid "Contact is offline"
+msgstr "Contacto está desconectado"
+
+#: ../components/Sounds.tcl:78
+#, fuzzy
+msgid "Incoming message"
+msgstr "Mensaje entrante"
+
+#: ../components/Sounds.tcl:79
+#, fuzzy
+msgid "Incoming chat"
+msgstr "Chat entrante"
+
+#: ../components/Sounds.tcl:80
+#, fuzzy
+msgid "New chat thread"
+msgstr "Nuevo chat"
+
+#: ../components/Sounds.tcl:81
+#, fuzzy
+msgid "Contact presence change"
+msgstr "El estado del Contacto ha cambiado"
+
+#: ../components/Sounds.tcl:82
+#, fuzzy
+msgid "Logged in"
+msgstr "Conectado"
+
+#: ../components/Sounds.tcl:83
+#, fuzzy
+msgid "Chatroom presence change"
+msgstr "Cambiar el estado en una sala"
+
+#: ../components/Sounds.tcl:497
+#, fuzzy
+msgid "Sounds"
+msgstr "Sonidos"
+
+#: ../components/Sounds.tcl:528
+#, fuzzy
+msgid "Alert sounds"
+msgstr "Sonidos de alerta"
+
+#: ../components/Sounds.tcl:539
+#, fuzzy
+msgid "Sound set"
+msgstr "Conjunto de sonidos"
+
+#: ../components/Sounds.tcl:547
+#, fuzzy
+msgid "Enable or disable sounds below"
+msgstr "Activar o desactivar sonidos"
+
+#: ../components/Sounds.tcl:559
+#, fuzzy
+msgid "Play"
+msgstr "Escuchar"
+
+#: ../components/Sounds.tcl:567
+#, fuzzy
+msgid "Volume"
+msgstr "Volume"
+
+#: ../components/Sounds.tcl:575
+#, fuzzy
+msgid "MIDI Player"
+msgstr "Reproductor MIDI"
+
+#: ../components/Sounds.tcl:584
+#, fuzzy
+msgid "External Midi Player"
+msgstr "Programa para escuchar Midi"
+
+#: ../components/Sounds.tcl:585
+#, fuzzy
+msgid ""
+"Set command to use for playing MIDI sounds. This option is only relevant if "
+"you use a sound set with MIDI files."
+msgstr ""
+"Comando para reproducir sonidos MIDI. Solo es relevante si usa un conjunto "
+"de sonidos con archivos MIDI."
+
+#: ../components/Sounds.tcl:586
+#, fuzzy
+msgid "MIDI command"
+msgstr "Comando MIDI"
+
+#: ../components/Sounds.tcl:634 ../components/Sounds.tcl:674
+#: ../components/Sounds.tcl:694 ../contrib/ui/fontselector.tcl:151
+#: ../contrib/ui/openimage.tcl:97 ../jabber/Emoticons.tcl:748
+#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1387
+#: ../jabber/Rosticons.tcl:605 ../jabber/SetupAss.tcl:116
+#: ../lib/PrefHelpers.tcl:104 ../whiteboard/WBPrefs.tcl:120
+#: ../whiteboard/WBPrefs.tcl:123 ../whiteboard/WBPrefs.tcl:196
+#, fuzzy
+msgid "Default"
+msgstr "Por defecto"
+
+#. TRANSLATORS; Only on Mac OS X and Windows in preferences.
+#: ../components/Speech.tcl:281 ../components/Speech.tcl:337
+#, fuzzy
+msgid "Text-to-Speech"
+msgstr "Texto-a-Voz"
+
+#: ../components/Speech.tcl:349
+#, fuzzy
+msgid "Text-to-speech for whiteboard text"
+msgstr "Texto-a-voz en el texto de la pizarra"
+
+#: ../components/Speech.tcl:351
+#, fuzzy
+msgid "Text-to-speech for messages"
+msgstr "Texto-a-voz en mensajes"
+
+#: ../components/Speech.tcl:353
+#, fuzzy
+msgid "Text-to-speech for chat"
+msgstr "Texto-a-voz en chat"
+
+#: ../components/Speech.tcl:376
+#, fuzzy
+msgid "Select voice for incoming text"
+msgstr "Seleccione voz para los mensajes entrantes"
+
+#: ../components/Speech.tcl:377
+#, fuzzy
+msgid "Select voice for outgoing write"
+msgstr "Seleccione voz para los menajes salientes"
+
+#: ../components/Spell.tcl:55
+#, fuzzy
+msgid "Check Spelling"
+msgstr "Revisar ortografía"
+
+#: ../components/Spell.tcl:59
+#, fuzzy
+msgid "Dictionaries"
+msgstr "Diccionarios"
+
+#: ../components/Spell.tcl:164
+#, fuzzy
+msgid "Add to Dictionary"
+msgstr "Añadir al Diccionario"
+
+#. TRANSLATORS; For future startup tips dialog
+#: ../components/Totd.tcl:21 ../components/Totd.tcl:73
+msgid "Useful Tips"
+msgstr ""
+
+#: ../components/Totd.tcl:88
+#, fuzzy
+msgid "Show tips on startup"
+msgstr "Visualizacion"
+
+#. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
+#: ../components/UserActivity.tcl:53
+#, fuzzy
+msgid "Acti&vity"
+msgstr "Acti&vidad"
+
+#: ../components/UserActivity.tcl:224
+#, fuzzy
+msgid "Set your activity that will be shown to your contacts."
+msgstr "Introduzca la actividad que se mostrará a sus contactos."
+
+#: ../components/UserActivity.tcl:225
+#, fuzzy
+msgid ""
+"Select from the first button your general activity, and optionally, your "
+"specific actvity from the second button. You may also add a descriptive text."
+msgstr ""
+"Seleccione en el primer botón la actividad general, y opcionalmente, la "
+"actividad específica en el segundo botón. También puede añadir una "
+"descripción."
+
+#: ../components/UserActivity.tcl:228
+#, fuzzy
+msgid "User Activity"
+msgstr "Actividad del usuario"
+
+#: ../components/UserActivity.tcl:251 ../jabber/VCard.tcl:287
+#: ../lib/PrefHelpers.tcl:71 ../lib/PrefNet.tcl:61 ../lib/Preferences.tcl:217
+#, fuzzy
+msgid "General"
+msgstr "General"
+
+#: ../components/UserActivity.tcl:254
+#, fuzzy
+msgid "Specific"
+msgstr "Especifico"
+
+#: ../components/UserActivity.tcl:259
+#, fuzzy
+msgid "Show all specific activities"
+msgstr "Visualizacion"
+
+#: ../components/UserActivity.tcl:317
+#, fuzzy
+msgid "Doing chores"
+msgstr "Haciendo labores domésticas"
+
+#: ../components/UserActivity.tcl:318
+#, fuzzy
+msgid "Buying groceries"
+msgstr "Comprando comida"
+
+#: ../components/UserActivity.tcl:319
+#, fuzzy
+msgid "Cleaning"
+msgstr "Limpiando"
+
+#: ../components/UserActivity.tcl:320
+#, fuzzy
+msgid "Cooking"
+msgstr "Cocinando"
+
+#: ../components/UserActivity.tcl:321
+#, fuzzy
+msgid "Doing maintenance"
+msgstr "Haciendo labores de mantenimiento"
+
+#: ../components/UserActivity.tcl:322
+#, fuzzy
+msgid "Doing the dishes"
+msgstr "Fregando los platos"
+
+#: ../components/UserActivity.tcl:323
+#, fuzzy
+msgid "Doing the laundry"
+msgstr "Haciendo la colada"
+
+#: ../components/UserActivity.tcl:324
+#, fuzzy
+msgid "Gardening"
+msgstr "Cuidando el jardín"
+
+#: ../components/UserActivity.tcl:325
+#, fuzzy
+msgid "Running an errand"
+msgstr "Haciendo un recado"
+
+#: ../components/UserActivity.tcl:326
+#, fuzzy
+msgid "Walking the dog"
+msgstr "Paseando al perro"
+
+#: ../components/UserActivity.tcl:328
+#, fuzzy
+msgid "Drinking"
+msgstr "Bebiendo"
+
+#: ../components/UserActivity.tcl:329
+#, fuzzy
+msgid "Having a beer"
+msgstr "Tomando una cerveza"
+
+#: ../components/UserActivity.tcl:330
+#, fuzzy
+msgid "Having coffee"
+msgstr "Tomando un café"
+
+#: ../components/UserActivity.tcl:331
+#, fuzzy
+msgid "Having tea"
+msgstr "Tomando té"
+
+#: ../components/UserActivity.tcl:333
+#, fuzzy
+msgid "Eating"
+msgstr "Comiendo"
+
+#: ../components/UserActivity.tcl:334
+#, fuzzy
+msgid "Having a snack"
+msgstr "Tomando un aperitivo"
+
+#: ../components/UserActivity.tcl:335
+#, fuzzy
+msgid "Having breakfast"
+msgstr "Desayunando"
+
+#: ../components/UserActivity.tcl:336
+#, fuzzy
+msgid "Having dinner"
+msgstr "Cenando"
+
+#: ../components/UserActivity.tcl:337
+#, fuzzy
+msgid "Having lunch"
+msgstr "Almorzando"
+
+#: ../components/UserActivity.tcl:339
+#, fuzzy
+msgid "Exercising"
+msgstr "Haciendo ejercicio"
+
+#: ../components/UserActivity.tcl:340
+#, fuzzy
+msgid "Hiking"
+msgstr "Haciendo senderismo"
+
+#: ../components/UserActivity.tcl:341
+#, fuzzy
+msgid "Jogging"
+msgstr "Haciendo Footing"
+
+#: ../components/UserActivity.tcl:342
+#, fuzzy
+msgid "Playing sports"
+msgstr "Haciendo deporte"
+
+#: ../components/UserActivity.tcl:343 ../whiteboard/WDialogs.tcl:188
+#, fuzzy
+msgid "Running"
+msgstr "Corriendo"
+
+#: ../components/UserActivity.tcl:344
+#, fuzzy
+msgid "Skiing"
+msgstr "Esquiando"
+
+#: ../components/UserActivity.tcl:345
+#, fuzzy
+msgid "Swimming"
+msgstr "Nadando"
+
+#: ../components/UserActivity.tcl:346
+#, fuzzy
+msgid "Working out"
+msgstr "Working out"
+
+#: ../components/UserActivity.tcl:348
+#, fuzzy
+msgid "Grooming"
+msgstr "Arreglándome"
+
+#: ../components/UserActivity.tcl:349
+#, fuzzy
+msgid "At the spa"
+msgstr "En el spa"
+
+#: ../components/UserActivity.tcl:350
+#, fuzzy
+msgid "Brushing teeth"
+msgstr "Lavandome los dientes"
+
+#: ../components/UserActivity.tcl:351
+#, fuzzy
+msgid "Getting a haircut"
+msgstr "Cortándome el pelo"
+
+#: ../components/UserActivity.tcl:352
+#, fuzzy
+msgid "Shaving"
+msgstr "Afeitándome"
+
+#: ../components/UserActivity.tcl:353
+#, fuzzy
+msgid "Taking a bath"
+msgstr "Bañándome"
+
+#: ../components/UserActivity.tcl:354
+#, fuzzy
+msgid "Taking a shower"
+msgstr "Duchándome"
+
+#: ../components/UserActivity.tcl:356
+#, fuzzy
+msgid "Having appointment"
+msgstr "En una cita"
+
+#: ../components/UserActivity.tcl:358
+#, fuzzy
+msgid "Inactive"
+msgstr "Inactivo"
+
+#: ../components/UserActivity.tcl:359
+#, fuzzy
+msgid "Day off"
+msgstr "Día libre"
+
+#: ../components/UserActivity.tcl:360
+#, fuzzy
+msgid "Hanging out"
+msgstr "Pasando el rato"
+
+#: ../components/UserActivity.tcl:361
+#, fuzzy
+msgid "On vacation"
+msgstr "De vacaciones"
+
+#: ../components/UserActivity.tcl:362
+#, fuzzy
+msgid "Scheduled holiday"
+msgstr "Vacadiones programadas"
+
+#: ../components/UserActivity.tcl:363
+#, fuzzy
+msgid "Sleeping"
+msgstr "Durmiendo"
+
+#: ../components/UserActivity.tcl:365
+#, fuzzy
+msgid "Relaxing"
+msgstr "Relajándome"
+
+#: ../components/UserActivity.tcl:366
+#, fuzzy
+msgid "Gaming"
+msgstr "Jugando"
+
+#: ../components/UserActivity.tcl:367
+#, fuzzy
+msgid "Going out"
+msgstr "Saliendo por ahí"
+
+#: ../components/UserActivity.tcl:368
+#, fuzzy
+msgid "Partying"
+msgstr "De fiesta"
+
+#: ../components/UserActivity.tcl:369
+#, fuzzy
+msgid "Reading"
+msgstr "Leyendo"
+
+#: ../components/UserActivity.tcl:370
+#, fuzzy
+msgid "Rehearsing"
+msgstr "Ensayando"
+
+#: ../components/UserActivity.tcl:371
+#, fuzzy
+msgid "Shopping"
+msgstr "De compras"
+
+#: ../components/UserActivity.tcl:372
+#, fuzzy
+msgid "Socializing"
+msgstr "Haciendo vida social"
+
+#: ../components/UserActivity.tcl:373
+#, fuzzy
+msgid "Sunbathing"
+msgstr "Tomando el sol"
+
+#: ../components/UserActivity.tcl:374
+#, fuzzy
+msgid "Watching tv"
+msgstr "Viendo la tele"
+
+#: ../components/UserActivity.tcl:375
+#, fuzzy
+msgid "Watching a movie"
+msgstr "Viendo una película"
+
+#: ../components/UserActivity.tcl:377
+#, fuzzy
+msgid "Talking"
+msgstr "Hablando"
+
+#: ../components/UserActivity.tcl:378
+#, fuzzy
+msgid "In real life"
+msgstr "En la vida real"
+
+#: ../components/UserActivity.tcl:379
+#, fuzzy
+msgid "On the phone"
+msgstr "Por teléfono"
+
+#: ../components/UserActivity.tcl:380
+#, fuzzy
+msgid "On video phone"
+msgstr "Por videoconferencia"
+
+#: ../components/UserActivity.tcl:382
+#, fuzzy
+msgid "Traveling"
+msgstr "Viajando"
+
+#: ../components/UserActivity.tcl:383
+#, fuzzy
+msgid "Commuting"
+msgstr "Yendo a trabajar"
+
+#: ../components/UserActivity.tcl:384
+#, fuzzy
+msgid "Cycling"
+msgstr "En bici"
+
+#: ../components/UserActivity.tcl:385
+#, fuzzy
+msgid "Driving"
+msgstr "Conduciendo"
+
+#: ../components/UserActivity.tcl:386
+#, fuzzy
+msgid "In a car"
+msgstr "En un coche"
+
+#: ../components/UserActivity.tcl:387
+#, fuzzy
+msgid "On a bus"
+msgstr "En un autobús"
+
+#: ../components/UserActivity.tcl:388
+#, fuzzy
+msgid "On a plane"
+msgstr "En un avión"
+
+#: ../components/UserActivity.tcl:389
+#, fuzzy
+msgid "On a train"
+msgstr "En un tren"
+
+#: ../components/UserActivity.tcl:390
+#, fuzzy
+msgid "On a trip"
+msgstr "En una excursión"
+
+#: ../components/UserActivity.tcl:391
+#, fuzzy
+msgid "Walking"
+msgstr "Caminando"
+
+#: ../components/UserActivity.tcl:393
+#, fuzzy
+msgid "Working"
+msgstr "Trabajando"
+
+#: ../components/UserActivity.tcl:394
+#, fuzzy
+msgid "Coding"
+msgstr "Programando"
+
+#: ../components/UserActivity.tcl:395
+#, fuzzy
+msgid "In a meeting"
+msgstr "En una reunión"
+
+#: ../components/UserActivity.tcl:396
+#, fuzzy
+msgid "Studying"
+msgstr "Estudiando"
+
+#: ../components/UserActivity.tcl:397
+#, fuzzy
+msgid "Writing"
+msgstr "Escribiendo"
+
+#: ../components/UserActivity.tcl:604 ../components/UserActivity.tcl:626
+#: ../components/UserActivity.tcl:692 ../components/UserActivity.tcl:699
+#, fuzzy
+msgid "Activity"
+msgstr "Actividad"
+
+#: ../components/UserActivity.tcl:664
+#, fuzzy
+msgid "Custom Activity"
+msgstr "Actividad"
+
+#. TRANSLATORS; hidden XML console: Control + Shift + D (or Command + Shift + D on Mac OS X)
+#: ../components/XMLConsole.tcl:96
+msgid "XML Console"
+msgstr ""
+
+#: ../components/XMLConsole.tcl:108
+msgid "Pretty format"
+msgstr ""
+
+#: ../components/XMLConsole.tcl:111 ../components/fsdialog.tcl:1050
+#: ../contrib/ui/openimage.tcl:95 ../jabber/History.tcl:991
+#: ../whiteboard/Whiteboard.tcl:450 ../whiteboard/Whiteboard.tcl:2933
+#: ../whiteboard/Whiteboard.tcl:2935
+#, fuzzy
+msgid "Clear"
+msgstr "Limpiar"
+
+#. TRANSLATORS: strings of open file dialog; e.g. click "Whiteboard..." and then "Open File..."
+#: ../components/fsdialog.tcl:343
+msgid "Sorting"
+msgstr ""
+
+#: ../components/fsdialog.tcl:347
+msgid "Short View"
+msgstr ""
+
+#: ../components/fsdialog.tcl:353
+msgid "Detailed View"
+msgstr ""
+
+#: ../components/fsdialog.tcl:360
+#, fuzzy
+msgid "Show Hidden Files"
+msgstr "Visualizacion"
+
+#: ../components/fsdialog.tcl:365
+msgid "Separate Folders"
+msgstr ""
+
+#: ../components/fsdialog.tcl:370
+msgid "By Name"
+msgstr ""
+
+#: ../components/fsdialog.tcl:376
+msgid "By Date"
+msgstr ""
+
+#: ../components/fsdialog.tcl:382
+msgid "By Size"
+msgstr ""
+
+#: ../components/fsdialog.tcl:389
+msgid "Reverse"
+msgstr ""
+
+#: ../components/fsdialog.tcl:394
+#, fuzzy
+msgid "Folders First"
+msgstr "Primero"
+
+#: ../components/fsdialog.tcl:425
+msgid "Filter"
+msgstr ""
+
+#: ../components/fsdialog.tcl:492 ../jabber/History.tcl:952
+#: ../jabber/MailBox.tcl:689 ../jabber/NewMsg.tcl:446
+msgid "Date"
+msgstr ""
+
+#: ../components/fsdialog.tcl:494
+msgid "Permissions"
+msgstr ""
+
+#: ../components/fsdialog.tcl:496 ../jabber/MUC.tcl:516
+#, fuzzy
+msgid "Owner"
+msgstr "Propietario"
+
+#: ../components/fsdialog.tcl:498 ../jabber/JUser.tcl:184
+#: ../jabber/JUser.tcl:740 ../jabber/Subscribe.tcl:324
+#: ../jabber/Subscribe.tcl:1287
+msgid "Group"
+msgstr ""
+
+#: ../components/fsdialog.tcl:1040
+#, fuzzy
+msgid "New Folder"
+msgstr "Nuevo"
+
+#: ../components/fsdialog.tcl:1045
+#, fuzzy
+msgid "Create new folder in"
+msgstr "Crear"
+
+#: ../components/fsdialog.tcl:1131
+#, fuzzy, tcl-format
+msgid "File %s already exists. Do you want to overwrite it?"
+msgstr "Archivo?"
+
+#: ../components/fsdialog.tcl:1138
+#, fuzzy, tcl-format
+msgid "File %s does not exist."
+msgstr "Archivo."
+
+#: ../components/fsdialog.tcl:1158
+#, tcl-format
+msgid "Cannot change to the directory %s. Permission denied."
+msgstr ""
+
+#: ../components/fsdialog.tcl:1361 ../plugins/PluginTextPlain.tcl:222
+#: ../whiteboard/Import.tcl:1802
+#, fuzzy
+msgid "Save As"
+msgstr "Guardar como"
+
+#: ../components/fsdialog.tcl:1363 ../jabber/AvatarMB.tcl:567
+#: ../whiteboard/Multicast.tcl:90
+#, fuzzy
+msgid "Open"
+msgstr "Abrir"
+
+#: ../components/fsdialog.tcl:1427
+msgid "Folder"
+msgstr ""
+
+#: ../components/taskbar/Taskbar.tcl:186 ../components/taskbar/Taskbar.tcl:374
+#, fuzzy
+msgid "Mi&nimize"
+msgstr "Mi&nimizar"
+
+#. TRANSLATORS; menu item for sending normal message (no chat!)
+#: ../components/taskbar/Taskbar.tcl:187 ../jabber/Disco.tcl:155
+#: ../jabber/GroupChat.tcl:220 ../jabber/JUI.tcl:177 ../jabber/JUI.tcl:1833
+#: ../jabber/JUI.tcl:1853 ../jabber/Roster.tcl:122
+#, fuzzy
+msgid "&Message"
+msgstr "&Mensaje..."
+
+#: ../components/taskbar/Taskbar.tcl:188 ../jabber/JUI.tcl:168
+#: ../whiteboard/Whiteboard.tcl:579 ../whiteboard/Whiteboard.tcl:2208
+#: ../whiteboard/Whiteboard.tcl:2285
+#, fuzzy
+msgid "&Preferences"
+msgstr "&Preferencias"
+
+#: ../components/taskbar/Taskbar.tcl:189 ../jabber/JUI.tcl:182
+#: ../jabber/JUI.tcl:1832 ../jabber/JUI.tcl:1852 ../jabber/Roster.tcl:127
+#: ../jabber/Roster.tcl:188
+#, fuzzy
+msgid "&Add Contact"
+msgstr "&Añadir contacto..."
+
+#: ../components/taskbar/Taskbar.tcl:190 ../jabber/JUI.tcl:1268
+#: ../whiteboard/Whiteboard.tcl:2209 ../whiteboard/Whiteboard.tcl:2287
+#, fuzzy
+msgid "&Info"
+msgstr "Información"
+
+#: ../components/taskbar/Taskbar.tcl:191
+#, fuzzy
+msgid "&About Coccinella"
+msgstr "Acerca de Coccinella..."
+
+#: ../components/taskbar/Taskbar.tcl:192 ../jabber/JUI.tcl:228
+#, fuzzy
+msgid "&Home Page"
+msgstr "&Página principal..."
+
+#: ../components/taskbar/Taskbar.tcl:193 ../jabber/JUI.tcl:226
+#, fuzzy
+msgid "&Report Bug"
+msgstr "&Informar de un error..."
+
+#: ../components/taskbar/Taskbar.tcl:197 ../jabber/JUI.tcl:162
+#: ../whiteboard/Whiteboard.tcl:432 ../whiteboard/Whiteboard.tcl:610
+#, fuzzy
+msgid "&Quit"
+msgstr "&Abandonar"
+
+#: ../components/taskbar/Taskbar.tcl:380
+#, fuzzy
+msgid "&Restore"
+msgstr "&Restaurar"
+
+#: ../components/taskbar/Taskbar.tcl:484
+#, fuzzy
+msgid "Start minimized in taskbar"
+msgstr "Comenzar minimizado en la barra de tareas"
+
+#: ../components/taskbar/Taskbar.tcl:485
+msgid "Hide all on taskbar click"
+msgstr ""
+
+#: ../components/taskbar/Taskbar.tcl:488
+#, fuzzy
+msgid "Start minimized in system tray"
+msgstr "Comenzar minimizado en la bandeja de sistema"
+
+#: ../components/taskbar/Taskbar.tcl:489
+#, fuzzy
+msgid "Hide all on system tray click"
+msgstr "Ocultar todo al hacer click en la bandeja de sistema"
+
+#. TRANSLATORS; right-click menu of the toolbars
+#: ../contrib/ttoolbar.tcl:452
+#, fuzzy
+msgid "Show Text and Icon"
+msgstr "Mostrar texto e iconos"
+
+#: ../contrib/ttoolbar.tcl:456
+#, fuzzy
+msgid "Show Text"
+msgstr "Mostrar texto"
+
+#: ../contrib/ttoolbar.tcl:460
+#, fuzzy
+msgid "Show Icon"
+msgstr "Mostrar Icono"
+
+#: ../contrib/ui/dialog.tcl:244 ../jabber/Subscribe.tcl:351
+#, fuzzy
+msgid "Yes"
+msgstr "Sí"
+
+#: ../contrib/ui/dialog.tcl:245 ../jabber/Subscribe.tcl:353
+#, fuzzy
+msgid "No"
+msgstr "No"
+
+#: ../contrib/ui/dialog.tcl:246
+msgid "Retry"
+msgstr ""
+
+#: ../contrib/ui/dialog.tcl:247
+#, fuzzy
+msgid "Abort"
+msgstr "Cancelar"
+
+#: ../contrib/ui/dialog.tcl:248
+msgid "Ignore"
+msgstr ""
+
+#: ../contrib/ui/fontselector.tcl:20 ../jabber/JPrefs.tcl:193
+#, fuzzy
+msgid "Select Font"
+msgstr "Elegir fuente"
+
+#: ../contrib/ui/fontselector.tcl:114 ../whiteboard/ItemInspector.tcl:365
+#: ../whiteboard/ItemInspector.tcl:377
+#, fuzzy
+msgid "Font size"
+msgstr "Tamaño de fuente"
+
+#: ../contrib/ui/fontselector.tcl:124 ../whiteboard/ItemInspector.tcl:366
+#: ../whiteboard/ItemInspector.tcl:378
+#, fuzzy
+msgid "Font weight"
+msgstr "Grosor de la fuente"
+
+#: ../contrib/ui/openimage.tcl:62
+#, fuzzy
+msgid "Image Files"
+msgstr "Imagen"
+
+#: ../contrib/ui/openimage.tcl:93 ../contrib/ui/openimage.tcl:151
+#, fuzzy
+msgid "Open Image"
+msgstr "Abrir Imagen"
+
+#: ../contrib/ui/progress.tcl:24 ../contrib/ui/progress.tcl:33
+#: ../contrib/ui/progress.tcl:44
+#, fuzzy
+msgid "Progress"
+msgstr "Progreso"
+
+#: ../contrib/ui/progress.tcl:392
+#, fuzzy
+msgid "Remaining"
+msgstr "Restante"
+
+#. TRANSLATORS; see File menu in main window
+#: ../contrib/wizard.tcl:206 ../jabber/SetupAss.tcl:81
+#: ../jabber/SetupAss.tcl:98 ../jabber/SetupAss.tcl:342
+#, fuzzy
+msgid "Setup Assistant"
+msgstr "Asistente de configuración"
+
+#: ../contrib/wizard.tcl:583 ../jabber/Adhoc.tcl:425
+#, fuzzy
+msgid "Finish"
+msgstr "Terminar"
+
+#. TRANSLATORS; balloon mouse over texts in control panel (menu at the bottom of the main window) for arrow and close button
+#: ../jabber/AppStatusSlot.tcl:64 ../jabber/MegaPresence.tcl:80
+#: ../jabber/Search.tcl:900 ../jabber/StatusSlot.tcl:62
+#, fuzzy
+msgid "Right click to open menu"
+msgstr "Haz click con el botón derecho para abrir el menú contextual"
+
+#: ../jabber/AppStatusSlot.tcl:80
+#, fuzzy
+msgid "Application Status"
+msgstr "Estado de la Aplicación"
+
+#: ../jabber/AppStatusSlot.tcl:88 ../jabber/JUI.tcl:587 ../jabber/JUI.tcl:656
+#: ../jabber/Roster.tcl:87 ../jabber/Roster.tcl:95 ../jabber/Status.tcl:42
+#: ../jabber/Status.tcl:50
+#, fuzzy
+msgid "Not Available"
+msgstr "No disponible"
+
+#: ../jabber/AppStatusSlot.tcl:158
+#, fuzzy, tcl-format
+msgid "Message from %s, %s"
+msgstr "Mensaje"
+
+#: ../jabber/AppStatusSlot.tcl:170
+#, fuzzy, tcl-format
+msgid "New chat with %s"
+msgstr "Nuevo libre para charlar"
+
+#. TRANSLATORS; see preferences
+#: ../jabber/AutoAway.tcl:249 ../jabber/AutoAway.tcl:272
+#, fuzzy
+msgid "Auto Away"
+msgstr "Ausencia automática"
+
+#: ../jabber/AutoAway.tcl:284
+#, fuzzy
+msgid "Away after"
+msgstr "Ausente después de"
+
+#: ../jabber/AutoAway.tcl:286 ../jabber/AutoAway.tcl:309
+#: ../jabber/AutoAway.tcl:332
+#, fuzzy
+msgid "Minutes"
+msgstr "Minutos"
+
+#: ../jabber/AutoAway.tcl:307
+#, fuzzy
+msgid "Extended Away after"
+msgstr "No disponible después de"
+
+#: ../jabber/AutoAway.tcl:330
+#, fuzzy
+msgid "Logout after"
+msgstr "Desconectar despues de"
+
+#. TRANSLATORS; Relogin when the user starts working again on the computer
+#: ../jabber/AutoAway.tcl:344
+#, fuzzy
+msgid "Relogin on activity"
+msgstr "Reconectar si hay actividad"
+
+#: ../jabber/AutoAway.tcl:361
+#, fuzzy
+msgid "Apply auto-away on hidden chat tabs"
+msgstr "Apply auto-away on hidden chat tabs"
+
+#: ../jabber/AutoAway.tcl:366
+#, fuzzy
+msgid ""
+"If activated then directed auto-away presence will be sent to users on "
+"hidden chat tabs"
+msgstr ""
+"Si se activa, los usuarios en las pestañas de charla ocultas le verán auto-"
+"ausente"
+
+#. TRANSLATORS; this preference option automatically sets the user's presence to Do Not Disturb when he or she is chatting with too much contacts at the same moment (this number is configurable). There also is a delay until the presence is automatically changed back to the previous presence state when the number of active chats is down again.
+#: ../jabber/AutoAway.tcl:372
+#, fuzzy
+msgid "Do Not Disturb when (active chat sessions)"
+msgstr "No molestar cuando (numero de conversaciones)"
+
+#: ../jabber/AutoAway.tcl:389
+#, fuzzy
+msgid ""
+"When you have <number> or more active chat sessions, presence state will be "
+"automatically changed to Do Not Disturb."
+msgstr ""
+"Cuando tiene <número> o más charlas activas, su estado cambiará "
+"automaticamente a No molestar."
+
+#. TRANSLATORS; first Control Panel, then Avatar, then Open, then putting an asterisk (*) in the filter field, pressing return and trying to open a non-image file
+#: ../jabber/Avatar.tcl:366 ../jabber/Disco.tcl:874
+#: ../jabber/RosterTree.tcl:805
+#, fuzzy
+msgid "The supported image formats are"
+msgstr "Los formatos de imágen soportados son"
+
+#: ../jabber/Avatar.tcl:374
+#, fuzzy, tcl-format
+msgid "Cannot create an image from %s."
+msgstr "No se pudo crear una imagen de %s."
+
+#: ../jabber/Avatar.tcl:381
+#, fuzzy, tcl-format
+msgid "The avatar must be square of size %s."
+msgstr "El avatar debe ser un cuadrado de tamaño %s."
+
+#: ../jabber/AvatarMB.tcl:523
+#, fuzzy
+msgid "Recent Avatars"
+msgstr "Avatares recientes"
+
+#: ../jabber/AvatarMB.tcl:573 ../jabber/MUC.tcl:990
+#: ../whiteboard/Multicast.tcl:94
+#, fuzzy
+msgid "Edit"
+msgstr "Editar"
+
+#: ../jabber/AvatarMB.tcl:578
+#, fuzzy
+msgid "Clear Menu"
+msgstr "Limpiar Menu"
+
+#: ../jabber/AvatarMB.tcl:741 ../jabber/VCard.tcl:412 ../jabber/VCard.tcl:645
+#, fuzzy
+msgid "Select Avatar"
+msgstr "Seleccionar Avatar"
+
+#: ../jabber/Chat.tcl:313 ../jabber/Chat.tcl:325 ../jabber/Chat.tcl:2102
+#: ../jabber/Chat.tcl:3216 ../jabber/Chat.tcl:4201 ../jabber/JUI.tcl:1246
+#: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
+#: ../jabber/Status.tcl:46
+msgid "Chat"
+msgstr ""
+
+#: ../jabber/Chat.tcl:343 ../jabber/JUser.tcl:180 ../jabber/JWB.tcl:450
+#: ../jabber/Login.tcl:168 ../jabber/MUC.tcl:242 ../jabber/Profiles.tcl:1081
+#: ../jabber/Subscribe.tcl:1087 ../jabber/VCard.tcl:309
+#, fuzzy
+msgid "Contact ID"
+msgstr "Identificador Jabber"
+
+#. TRANSLATORS; Control + T (or Command + T on Mac OS X), then enter @ and proceed
+#: ../jabber/Chat.tcl:407 ../jabber/Chat.tcl:3125 ../jabber/Disco.tcl:1783
+#: ../jabber/MUC.tcl:1248
+#, fuzzy, tcl-format
+msgid "%s is invalid. Do you want to continue anyway?"
+msgstr "%s es inválido. ¿Desea continuar de todas formas?"
+
+#. TRANSLATORS; composing events in chat window
+#: ../jabber/Chat.tcl:685 ../jabber/Chat.tcl:687 ../jabber/Chat.tcl:3708
+#, fuzzy, tcl-format
+msgid "%s is composing a reply"
+msgstr "%s le está respondiendo."
+
+#: ../jabber/Chat.tcl:686
+#, fuzzy, tcl-format
+msgid "%s is on the chat"
+msgstr "%s tiene la conversación abierta"
+
+#: ../jabber/Chat.tcl:688
+#, fuzzy, tcl-format
+msgid "%s is thinking what to write"
+msgstr "%s está pensando lo que escribe"
+
+#: ../jabber/Chat.tcl:689
+#, fuzzy, tcl-format
+msgid "%s has left the chat for a while"
+msgstr "%s abandonó temporalmente la conversación"
+
+#: ../jabber/Chat.tcl:690
+#, fuzzy, tcl-format
+msgid "%s has closed the chat"
+msgstr "%s ha cerrado la conversación"
+
+#: ../jabber/Chat.tcl:844 ../jabber/Chat.tcl:1581 ../jabber/GotMsg.tcl:261
+#: ../jabber/GroupChat.tcl:2364 ../jabber/History.tcl:801
+#: ../jabber/MailBox.tcl:683 ../jabber/NewMsg.tcl:367 ../jabber/NewMsg.tcl:450
+#, fuzzy
+msgid "Subject"
+msgstr "Asunto"
+
+#: ../jabber/Chat.tcl:1328 ../jabber/FTrans.tcl:218
+#: ../jabber/GroupChat.tcl:657 ../jabber/GroupChat.tcl:862
+#: ../jabber/NewMsg.tcl:302
+#, fuzzy
+msgid "Send"
+msgstr "Enviar"
+
+#: ../jabber/Chat.tcl:1332 ../jabber/FTrans.tcl:38 ../jabber/FTrans.tcl:182
+#, fuzzy
+msgid "Send File"
+msgstr "Enviar Archivo"
+
+#: ../jabber/Chat.tcl:1336 ../jabber/Chat.tcl:3290 ../jabber/GroupChat.tcl:660
+#: ../jabber/GroupChat.tcl:3182 ../jabber/History.tcl:995
+#: ../jabber/History.tcl:1348 ../jabber/JUser.tcl:800
+#: ../jabber/Jabber.tcl:1941 ../jabber/MailBox.tcl:508
+#: ../jabber/NewMsg.tcl:309 ../jabber/Profiles.tcl:920
+#: ../jabber/UserInfo.tcl:375 ../jabber/VCard.tcl:248 ../lib/Bookmarks.tcl:122
+#: ../lib/Dialogs.tcl:339 ../lib/EditDialogs.tcl:140
+#: ../lib/EditDialogs.tcl:284 ../lib/Preferences.tcl:237
+#: ../whiteboard/CanvasFile.tcl:686 ../whiteboard/FilePrefs.tcl:526
+#: ../whiteboard/ItemInspector.tcl:505 ../whiteboard/ItemInspector.tcl:866
+#, fuzzy
+msgid "Save"
+msgstr "Guardar"
+
+#. TRANSLATORS; history of past chat conversations
+#: ../jabber/Chat.tcl:1341 ../jabber/GroupChat.tcl:663
+#: ../jabber/History.tcl:948
+#, fuzzy
+msgid "History"
+msgstr "Historial"
+
+#: ../jabber/Chat.tcl:1345 ../jabber/GroupChat.tcl:672
+#: ../jabber/History.tcl:993 ../jabber/MailBox.tcl:511
+#: ../jabber/NewMsg.tcl:312 ../lib/Dialogs.tcl:103 ../lib/Dialogs.tcl:115
+#: ../lib/Dialogs.tcl:130
+#, fuzzy
+msgid "Print"
+msgstr "Imprimir"
+
+#: ../jabber/Chat.tcl:1355 ../jabber/GroupChat.tcl:479
+#: ../jabber/GroupChat.tcl:666
+#, fuzzy
+msgid "Invite"
+msgstr "Invitar"
+
+#. TRANSLATORS; balloon mouse over texts in chat dialog
+#: ../jabber/Chat.tcl:1603
+#, fuzzy
+msgid "Enter the subject of the conversation, set by pressing Return"
+msgstr "Introduzca el asunto de la conversación y pulse Return"
+
+#: ../jabber/Chat.tcl:1640
+#, fuzzy
+msgid "Show or hide the chat history"
+msgstr "Muestra u oculta el historial del chat"
+
+#: ../jabber/Chat.tcl:1641 ../jabber/GroupChat.tcl:916
+msgid "If checked, Return sends message, else use Ctrl/Cmd-Return"
+msgstr ""
+
+#: ../jabber/Chat.tcl:1642 ../jabber/NewMsg.tcl:375
+#, fuzzy
+msgid "Insert emoticon"
+msgstr "Insertar emoticono"
+
+#: ../jabber/Chat.tcl:1643 ../jabber/GroupChat.tcl:918
+#, fuzzy
+msgid "Show or hide status changes in chat"
+msgstr "Mostrar u ocultar los cambios de estado en la charla"
+
+#: ../jabber/Chat.tcl:1734
+#, fuzzy
+msgid "Enter your message and press Return or Shift-Return"
+msgstr "Introduzca su mensaje y pulse Return o Mayúsculas-Return"
+
+#. TRANSLATORS; Control + F (or Command + F on Mac OS X)
+#: ../jabber/Chat.tcl:1890 ../jabber/GroupChat.tcl:1169
+#: ../jabber/History.tcl:1074 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
+#: ../jabber/RosterTree.tcl:1995
+#, fuzzy
+msgid "Find"
+msgstr "Buscar"
+
+#: ../jabber/Chat.tcl:1892 ../jabber/GroupChat.tcl:1171
+#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
+#: ../jabber/RosterTree.tcl:1997
+#, fuzzy
+msgid "Find Next"
+msgstr "Buscar siguiente"
+
+#: ../jabber/Chat.tcl:1893 ../jabber/GroupChat.tcl:1172
+#: ../jabber/History.tcl:1078 ../jabber/JUI.tcl:257 ../jabber/JUI.tcl:1789
+#: ../jabber/RosterTree.tcl:1998
+#, fuzzy
+msgid "Find Previous"
+msgstr "Buscar anterior"
+
+#: ../jabber/Chat.tcl:1965 ../jabber/Create.tcl:723 ../jabber/NewMsg.tcl:1066
+#: ../jabber/NewMsg.tcl:1097 ../jabber/Profiles.tcl:982
+#: ../jabber/Profiles.tcl:1603 ../jabber/Register.tcl:84
+#: ../lib/EditDialogs.tcl:226 ../lib/Preferences.tcl:393
+#: ../lib/Preferences.tcl:454 ../lib/Preferences.tcl:497
+#: ../whiteboard/CanvasFile.tcl:548
+#, fuzzy
+msgid "Warning"
+msgstr "Atención"
+
+#: ../jabber/Chat.tcl:1966
+#, fuzzy
+msgid "Do you want to invite this contact to a new chatroom?"
+msgstr "¿Desea invitar a este contacto a una nueva chatroom?"
+
+#: ../jabber/Chat.tcl:2239 ../jabber/GroupChat.tcl:1238
+#, fuzzy
+msgid "Close tab"
+msgstr "Cerrar pestaña"
+
+#: ../jabber/Chat.tcl:2561
+#, fuzzy
+msgid "You need to be logged in to see the presence of this contact"
+msgstr "Necesita estar conectado para ver el estado de este contacto"
+
+#: ../jabber/Chat.tcl:2763
+#, fuzzy
+msgid "Converting Chat into Conference"
+msgstr "Convirtiendo Chat en Conferencia"
+
+#: ../jabber/Chat.tcl:2778 ../jabber/Create.tcl:314 ../jabber/Create.tcl:581
+#: ../jabber/GroupChat.tcl:365
+#, fuzzy
+msgid "Cannot find any chatroom service."
+msgstr "No se pudo encontrar ningún servicio de salas."
+
+#: ../jabber/Chat.tcl:3077 ../jabber/GroupChat.tcl:2720
+#: ../jabber/NewMsg.tcl:888
+#, fuzzy
+msgid "Cannot send when not logged in."
+msgstr "No puede enviar cuando no se encuentra conectado."
+
+#: ../jabber/Chat.tcl:3568
+#, fuzzy
+msgid ""
+"Do you want to close this chat window and lose the complete conversation?"
+msgstr "¿Desea cerrar esta ventana de chat y perder la conversación?"
+
+#. TRANSLATORS; see Chat settings in preferences
+#: ../jabber/Chat.tcl:4224
+#, fuzzy
+msgid "By default use active <Return> to send messages"
+msgstr "Usar la tecla <Return> (Enter) por defecto para enviar mensajes"
+
+#: ../jabber/Chat.tcl:4226
+#, fuzzy
+msgid "Show incoming messages in new window"
+msgstr "Mostrar los mensajes en una nueva ventana"
+
+#: ../jabber/Chat.tcl:4228
+#, fuzzy
+msgid "Treat normal messages as chat messages"
+msgstr "Tratar los mensajes normales como mensajes de chat"
+
+#: ../jabber/Chat.tcl:4233
+#, fuzzy
+msgid "Double click message in inbox"
+msgstr "Mensaje del doble-clic en el diálogo de los mensajes : "
+
+#: ../jabber/Chat.tcl:4234
+#, fuzzy
+msgid "Open message in new window"
+msgstr "Abrir el mensaje en una nueva ventana"
+
+#: ../jabber/Chat.tcl:4237
+#, fuzzy
+msgid "Reply to sender"
+msgstr "Responder al remitente"
+
+#: ../jabber/Chat.tcl:4244
+#, fuzzy
+msgid "History length"
+msgstr "Tamaño del historial"
+
+#: ../jabber/Chat.tcl:4247
+#, fuzzy
+msgid "More recent than"
+msgstr "Más reciente que"
+
+#: ../jabber/Chat.tcl:4250
+#, fuzzy
+msgid "Ten seconds"
+msgstr "Diez segundos"
+
+#: ../jabber/Chat.tcl:4251
+#, fuzzy
+msgid "One minute"
+msgstr "Un minuto"
+
+#: ../jabber/Chat.tcl:4252
+#, fuzzy
+msgid "Ten minutes"
+msgstr "Diez minutos"
+
+#: ../jabber/Chat.tcl:4253
+#, fuzzy
+msgid "One hour"
+msgstr "Una hora"
+
+#: ../jabber/Chat.tcl:4254
+#, fuzzy
+msgid "No restriction"
+msgstr "Sin restricciones"
+
+#: ../jabber/Chat.tcl:4264
+#, fuzzy
+msgid "Number of messages to display"
+msgstr "Número de mensajes a mostrar"
+
+#. TRANSLATORS; the user's name that is showed in the in the user's chat dialog, but not on the screen of the remote contact
+#: ../jabber/Chat.tcl:4271
+#, fuzzy
+msgid "Local nickname"
+msgstr "Apodo Local"
+
+#: ../jabber/Chat.tcl:4276
+#, fuzzy
+msgid "Your nickname for local display"
+msgstr "Su apodo para mostrar localmente"
+
+#: ../jabber/Create.tcl:57
+#, fuzzy
+msgid "Create Chatroom"
+msgstr "Crear Chatroom"
+
+#: ../jabber/Create.tcl:81 ../jabber/GroupChat.tcl:196
+#: ../whiteboard/WDialogs.tcl:202 ../whiteboard/WDialogs.tcl:203
+#: ../whiteboard/WDialogs.tcl:204 ../whiteboard/WDialogs.tcl:205
+#: ../whiteboard/WDialogs.tcl:213 ../whiteboard/WDialogs.tcl:214
+#, fuzzy
+msgid "not available"
+msgstr "desconectado"
+
+#: ../jabber/Create.tcl:96
+#, fuzzy
+msgid ""
+"Select a service, and enter a chatroom and nickname. Optionally, you can "
+"configure the chatroom."
+msgstr ""
+"Seleccione el servicio, e introduzca la sala y el apodo. Opcionalmente, "
+"podrá configurar la sala."
+
+#: ../jabber/Create.tcl:105 ../jabber/Create.tcl:627 ../jabber/Enter.tcl:128
+#: ../jabber/Register.tcl:1124 ../jabber/Register.tcl:1451
+#: ../jabber/Search.tcl:154 ../jabber/UserInfo.tcl:477
+#, fuzzy
+msgid "Service"
+msgstr "Servicio"
+
+#: ../jabber/Create.tcl:108 ../jabber/Create.tcl:632 ../jabber/Enter.tcl:162
+#: ../jabber/GroupChat.tcl:1547 ../jabber/GroupChat.tcl:1550
+#: ../jabber/GroupChat.tcl:3477 ../jabber/GroupChat.tcl:3679
+#, fuzzy
+msgid "Chatroom"
+msgstr "Sala"
+
+#: ../jabber/Create.tcl:122 ../jabber/Enter.tcl:186
+#, fuzzy
+msgid "Select or manually enter a chatroom service"
+msgstr "Seleccione o introduzca el servicio de salas"
+
+#: ../jabber/Create.tcl:123 ../jabber/Enter.tcl:188
+#, fuzzy
+msgid "Select or manually enter the name of a chatroom"
+msgstr "Seleccione o introduzca el nombre de una sala"
+
+#: ../jabber/Create.tcl:124 ../jabber/Enter.tcl:189
+#: ../jabber/GroupChat.tcl:3755 ../jabber/JForms.tcl:305
+#: ../jabber/JUser.tcl:200 ../jabber/Profiles.tcl:1123
+#: ../jabber/Register.tcl:716 ../jabber/VCard.tcl:323
+#, fuzzy
+msgid "Familiar name"
+msgstr "Alias del usuario"
+
+#: ../jabber/Create.tcl:147 ../jabber/GroupChat.tcl:669
+#, fuzzy
+msgid "Configure"
+msgstr "Configurar"
+
+#: ../jabber/Create.tcl:149
+#, fuzzy
+msgid "Create"
+msgstr "Crear"
+
+#: ../jabber/Create.tcl:319
+#, fuzzy
+msgid "You must provide a chatroom name."
+msgstr "Debe indicar el nombre de la sala."
+
+#: ../jabber/Create.tcl:324
+#, fuzzy
+msgid "You must provide a nickname."
+msgstr "Debe de introducir un nombre de usuario."
+
+#: ../jabber/Create.tcl:332 ../jabber/Create.tcl:515 ../jabber/JUser.tcl:294
+#: ../jabber/Profiles.tcl:1452
+#, fuzzy
+msgid "Invalid Contact ID."
+msgstr "Identificador de contacto inválido."
+
+#: ../jabber/Create.tcl:337
+#, fuzzy
+msgid "Downloading configuration form"
+msgstr "Descargando formulario e configuración"
+
+#: ../jabber/Create.tcl:423 ../jabber/Create.tcl:465 ../jabber/Enter.tcl:646
+#, fuzzy
+msgid "Cannot download the configuration form of the chatroom."
+msgstr "No se pudo descargar el formulario de configuración de la sala."
+
+#: ../jabber/Create.tcl:425 ../jabber/Create.tcl:467 ../jabber/Create.tcl:545
+#: ../jabber/Create.tcl:753 ../jabber/Enter.tcl:648 ../jabber/Enter.tcl:691
+#: ../jabber/FTrans.tcl:502 ../jabber/FTrans.tcl:534 ../jabber/JUser.tcl:384
+#: ../jabber/Jabber.tcl:616 ../jabber/Jabber.tcl:860 ../jabber/Jabber.tcl:2019
+#: ../jabber/Login.tcl:918 ../jabber/Login.tcl:942 ../jabber/Profiles.tcl:1642
+#: ../jabber/Register.tcl:120 ../jabber/Register.tcl:660
+#: ../jabber/Register.tcl:1289 ../jabber/Register.tcl:1354
+#: ../jabber/Register.tcl:1538 ../jabber/Search.tcl:349
+#: ../jabber/Search.tcl:424 ../lib/HttpTrpt.tcl:243
+#, fuzzy
+msgid "Error code"
+msgstr "Código de error"
+
+#: ../jabber/Create.tcl:433 ../jabber/Register.tcl:1223
+#, fuzzy
+msgid "Waiting for Get to be pressed"
+msgstr "Haga click en Recibir cuando esté listo"
+
+#: ../jabber/Create.tcl:543
+#, fuzzy, tcl-format
+msgid "Cannot enter/create chatroom %s."
+msgstr "No se pudo entrar/conectar a la sala %s."
+
+#: ../jabber/Create.tcl:594
+#, fuzzy
+msgid "Enter/Create Chatroom"
+msgstr "Entrar/Crear Chatroom"
+
+#: ../jabber/Create.tcl:624
+#, fuzzy
+msgid "Select a chatroom service, a chatroom, and a nickname."
+msgstr ""
+"Elija un grupo de chat y un nombre de sala, también puede usar un alias."
+
+#: ../jabber/Create.tcl:724 ../jabber/Enter.tcl:493
+#, fuzzy
+msgid "Please fill in all fields before entering chatroom."
+msgstr "Por favor, rellene todos los campos antes de entrar en la sala."
+
+#: ../jabber/Create.tcl:747 ../jabber/Enter.tcl:685
+#, fuzzy, tcl-format
+msgid "Cannot enter chatroom %s."
+msgstr "No se pudo entrar en la sala %s."
+
+#: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:178
+#: ../jabber/JUI.tcl:1834 ../jabber/JUI.tcl:1854 ../jabber/Roster.tcl:121
+msgid "Cha&t"
+msgstr ""
+
+#: ../jabber/Disco.tcl:157 ../jabber/JUI.tcl:186 ../jabber/JUI.tcl:1836
+#: ../jabber/JUI.tcl:1856
+#, fuzzy
+msgid "Enter Chat&room"
+msgstr "Entrar sa&la..."
+
+#: ../jabber/Disco.tcl:160 ../jabber/JUI.tcl:187 ../jabber/JUI.tcl:1837
+#: ../jabber/JUI.tcl:1857
+#, fuzzy
+msgid "&Create Chatroom"
+msgstr "&Crear una sala..."
+
+#: ../jabber/Disco.tcl:164 ../jabber/GroupChat.tcl:223
+#: ../jabber/Roster.tcl:126 ../jabber/Roster.tcl:187
+#, fuzzy
+msgid "View &Business Card"
+msgstr "Ver &Tarjeta de visita..."
+
+#: ../jabber/Disco.tcl:166 ../jabber/JUI.tcl:181 ../jabber/JUI.tcl:1831
+#: ../jabber/JUI.tcl:1851
+#, fuzzy
+msgid "&Search"
+msgstr "Busca&r..."
+
+#: ../jabber/Disco.tcl:169 ../jabber/JUI.tcl:183 ../jabber/JUI.tcl:1827
+#: ../jabber/JUI.tcl:1842
+#, fuzzy
+msgid "Re&gister"
+msgstr "Registrar..."
+
+#: ../jabber/Disco.tcl:172 ../jabber/Roster.tcl:194
+#, fuzzy
+msgid "&Unregister"
+msgstr "Desregistrarse"
+
+#: ../jabber/Disco.tcl:174 ../jabber/JUI.tcl:215 ../jabber/JUI.tcl:1912
+#: ../jabber/JUI.tcl:1926 ../jabber/Roster.tcl:132
+#, fuzzy
+msgid "Show"
+msgstr "Visualizacion"
+
+#. TRANSLATORS; to set the background image in the main window
+#: ../jabber/Disco.tcl:176 ../jabber/Roster.tcl:138
+#, fuzzy
+msgid "&Background Image"
+msgstr "Imagen"
+
+#. TRANSLATORS; refresh the listed items
+#: ../jabber/Disco.tcl:179 ../jabber/MUC.tcl:484 ../jabber/Roster.tcl:144
+#: ../jabber/Roster.tcl:195
+#, fuzzy
+msgid "Refresh"
+msgstr "Refrescar"
+
+#. TRANSLATORS; look for available services on a server
+#: ../jabber/Disco.tcl:181 ../jabber/JUI.tcl:184 ../jabber/JUI.tcl:1839
+#: ../jabber/JUI.tcl:1859
+#, fuzzy
+msgid "&Discover Server"
+msgstr "&Buscar servidores..."
+
+#: ../jabber/Disco.tcl:182
+#, fuzzy
+msgid "Remove &Listing"
+msgstr "Eliminar listado"
+
+#: ../jabber/Disco.tcl:183
+#, fuzzy
+msgid "C&ommands"
+msgstr "Comandos Ad-Hoc"
+
+#: ../jabber/Disco.tcl:187 ../jabber/GroupChat.tcl:231 ../jabber/JUI.tcl:193
+#: ../jabber/Roster.tcl:172
+#, fuzzy
+msgid "&Whiteboard"
+msgstr "Pizarra..."
+
+#: ../jabber/Disco.tcl:789
+#, fuzzy
+msgid "Services"
+msgstr "Servicios"
+
+#. TRANSLATORS: to set background image in services or contacts tab
+#: ../jabber/Disco.tcl:873 ../jabber/RosterTree.tcl:804
+#, fuzzy
+msgid ""
+"Select an image file for the background. To remove a background image press "
+"Remove and Save."
+msgstr ""
+"Seleccione una imagen para el fondo. Para borrarla, pulse Limpiar y OK."
+
+#: ../jabber/Disco.tcl:881 ../jabber/RosterTree.tcl:812
+#, fuzzy
+msgid "Background Image"
+msgstr "Imagen"
+
+#: ../jabber/Disco.tcl:1491 ../jabber/Disco.tcl:1676 ../jabber/Enter.tcl:131
+#: ../jabber/MUC.tcl:1616 ../jabber/UserInfo.tcl:163
+#, fuzzy
+msgid "Discover"
+msgstr "Descubrir"
+
+#: ../jabber/Disco.tcl:1622 ../jabber/Disco.tcl:1637
+#, fuzzy
+msgid "Discover Server"
+msgstr "Descubrir Servidor"
+
+#: ../jabber/Disco.tcl:1650
+#, fuzzy
+msgid "Enter a server to discover and use its services."
+msgstr ""
+"Añada el servidor a descubrir para usar sus salas y el resto de sus "
+"servicios."
+
+#: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:532 ../jabber/Login.tcl:171
+#: ../jabber/Profiles.tcl:1083 ../jabber/Profiles.tcl:1861
+#: ../jabber/Register.tcl:274 ../jabber/SetupAss.tcl:137
+#: ../jabber/SetupAss.tcl:165 ../jabber/StatusSlot.tcl:34
+#: ../whiteboard/WDialogs.tcl:172
+#, fuzzy
+msgid "Server"
+msgstr "Servidor"
+
+#: ../jabber/Disco.tcl:1665
+#, fuzzy
+msgid "Discover permanently"
+msgstr "Descubrir permanentemente"
+
+#. TRANSLATORS; see Emoticons in preferences
+#: ../jabber/Emoticons.tcl:598
+#, fuzzy
+msgid "Author"
+msgstr "Autor"
+
+#: ../jabber/Emoticons.tcl:600 ../jabber/VCard.tcl:450
+#, fuzzy
+msgid "Home"
+msgstr "Inicio"
+
+#: ../jabber/Emoticons.tcl:602 ../jabber/Jabber.tcl:1682
+#: ../jabber/Jabber.tcl:1693 ../jabber/Roster.tcl:190
+#: ../jabber/UserInfo.tcl:193 ../jabber/UserInfo.tcl:202
+#: ../jabber/UserInfo.tcl:207 ../whiteboard/WDialogs.tcl:133
+#, fuzzy
+msgid "Version"
+msgstr "Versión"
+
+#: ../jabber/Emoticons.tcl:614 ../whiteboard/ItemInspector.tcl:367
+#, fuzzy
+msgid "Image"
+msgstr "Imagen"
+
+#: ../jabber/Emoticons.tcl:638 ../jabber/Emoticons.tcl:834
+#, fuzzy
+msgid "Iconset Archive"
+msgstr "Archivo de Iconos"
+
+#: ../jabber/Emoticons.tcl:640 ../jabber/Emoticons.tcl:774
+#: ../jabber/Emoticons.tcl:836
+#, fuzzy
+msgid "Import Iconset"
+msgstr "Importar Iconos"
+
+#: ../jabber/Emoticons.tcl:714
+#, fuzzy
+msgid "Emoticons"
+msgstr "Emoticonos"
+
+#: ../jabber/Emoticons.tcl:740
+#, fuzzy
+msgid "The selected iconset will become the default."
+msgstr "El conjunto de iconos seleccionado se convertirá en el predeterminado."
+
+#: ../jabber/Emoticons.tcl:812 ../jabber/Emoticons.tcl:860
+#, fuzzy, tcl-format
+msgid "Cannot load iconset %s."
+msgstr "No se pudo cargar el conjunto de iconos %s."
+
+#: ../jabber/Emoticons.tcl:851
+#, fuzzy, tcl-format
+msgid "Iconset %s already exists."
+msgstr "El conjunto de iconos %s ya existe."
+
+#: ../jabber/Enter.tcl:78
+#, fuzzy
+msgid "Enter Chatroom"
+msgstr "Entrar en Chatroom"
+
+#: ../jabber/Enter.tcl:117
+#, fuzzy
+msgid ""
+"Select a service, and enter a chatroom and nickname. You can discover the "
+"available chatrooms on the selected service. Some chatrooms may require a "
+"password."
+msgstr ""
+"Seleccione el servicio, e introduzca la sala y el apodo. Puede descubrir las "
+"salas disponibles en el servicio seleccionado. Algunas salas pueden pedir "
+"contraseña."
+
+#: ../jabber/Enter.tcl:166 ../jabber/GroupChat.tcl:3478
+#: ../jabber/Login.tcl:179 ../jabber/Login.tcl:663 ../jabber/Login.tcl:665
+#: ../jabber/Login.tcl:709 ../jabber/Login.tcl:711 ../jabber/Profiles.tcl:1089
+#: ../jabber/Register.tcl:1458 ../jabber/SetupAss.tcl:168 ../lib/Proxy.tcl:211
+#, fuzzy
+msgid "Password"
+msgstr "Contraseña"
+
+#: ../jabber/Enter.tcl:187 ../jabber/Enter.tcl:261
+#, fuzzy
+msgid "Bookmarks"
+msgstr "Favoritos"
+
+#: ../jabber/Enter.tcl:190 ../jabber/JForms.tcl:306 ../jabber/Login.tcl:224
+#: ../jabber/Profiles.tcl:1122 ../jabber/Register.tcl:717
+#, fuzzy
+msgid "Password or secret"
+msgstr "Contrasena del usuario"
+
+#: ../jabber/Enter.tcl:403 ../jabber/Enter.tcl:453
+#, fuzzy, tcl-format
+msgid "Cannot find any chatrooms at %s."
+msgstr "No se pudieron encontrar salas en %s."
+
+#: ../jabber/Enter.tcl:469
+#, fuzzy
+msgid "Loading available chatrooms"
+msgstr "Cargando las salas (chatroom) disponibles"
+
+#: ../jabber/Enter.tcl:638
+#, fuzzy, tcl-format
+msgid "Cannot enter chatroom %s: %s Do you want to retry?"
+msgstr "No se pudo entrar en la sala %s: %s ¿Desea reintentar?"
+
+#: ../jabber/FTrans.tcl:195
+#, fuzzy, tcl-format
+msgid "Send a file to %s. A description is optional."
+msgstr "Enviar un fichero a %s. La descripción es opcional."
+
+#: ../jabber/FTrans.tcl:201 ../jabber/FTrans.tcl:284
+#, fuzzy
+msgid "Select File"
+msgstr "Selecionar Archivo"
+
+#: ../jabber/FTrans.tcl:372 ../jabber/FTrans.tcl:408 ../jabber/FTrans.tcl:459
+#, fuzzy, tcl-format
+msgid "%s does not support file transfer."
+msgstr "%s no soporta transferencia de ficheros."
+
+#: ../jabber/FTrans.tcl:379
+#, fuzzy
+msgid "Waiting for disco result"
+msgstr "Esperando resultado"
+
+#: ../jabber/FTrans.tcl:442
+#, fuzzy
+msgid "You must select a file to send."
+msgstr "Debe seleccionar el fichero a enviar."
+
+#: ../jabber/FTrans.tcl:447
+#, fuzzy
+msgid "The selected file does not exist. Select a new one."
+msgstr "El archivo seleccionado no existe. Seleccione uno nuevo."
+
+#: ../jabber/FTrans.tcl:497 ../jabber/FTrans.tcl:529
+#, fuzzy, tcl-format
+msgid "%s did not accepted the file %s."
+msgstr "%s no aceptó el fichero %s."
+
+#: ../jabber/FTrans.tcl:500 ../jabber/FTrans.tcl:532
+#, fuzzy, tcl-format
+msgid "Cannot send the file %s to %s."
+msgstr "No se pudo enviar el fichero %s a %s."
+
+#: ../jabber/FTrans.tcl:513 ../jabber/FTrans.tcl:543
+#, fuzzy
+msgid "File Transfer"
+msgstr "Transferencia de archivos"
+
+#: ../jabber/FTrans.tcl:514 ../jabber/FTrans.tcl:544
+#, fuzzy, tcl-format
+msgid "File transfer of %s to %s was successful."
+msgstr "Transferencia de %s a %s realizada."
+
+#: ../jabber/FTrans.tcl:654 ../lib/HttpTrpt.tcl:181
+#, fuzzy
+msgid "Rate"
+msgstr "Valorar"
+
+#: ../jabber/FTrans.tcl:658 ../lib/HttpTrpt.tcl:162
+#: ../whiteboard/GetFileIface.tcl:514
+#, fuzzy
+msgid "Writing file"
+msgstr "Guardar archivo"
+
+#: ../jabber/FTrans.tcl:678
+#, fuzzy, tcl-format
+msgid "Cannot download file %s from %s."
+msgstr "No se pudo descargar el fichero %s de %s."
+
+#: ../jabber/FTrans.tcl:694
+#, fuzzy
+msgid "The MD5 checksums did not match. The file may be corrupt."
+msgstr "El hash MD5 no coincide. El archivo puee estar corrupto."
+
+#: ../jabber/Gateway.tcl:58 ../jabber/Rosticons.tcl:587
+#: ../jabber/Search.tcl:936 ../jabber/VCard.tcl:308
+#, fuzzy
+msgid "Email"
+msgstr "Correo electronico"
+
+#. TRANSLATORS; AOL AIM address
+#: ../jabber/Gateway.tcl:67
+msgid "Screen name"
+msgstr ""
+
+#: ../jabber/Gateway.tcl:68
+msgid "Gadu-Gadu number"
+msgstr ""
+
+#. TRANSLATORS; also known as UIN
+#: ../jabber/Gateway.tcl:70
+msgid "ICQ number"
+msgstr ""
+
+#: ../jabber/Gateway.tcl:71
+#, fuzzy
+msgid "IRC"
+msgstr "IRC"
+
+#: ../jabber/Gateway.tcl:72
+#, fuzzy
+msgid "MSN Address"
+msgstr "Dirección MSN"
+
+#: ../jabber/Gateway.tcl:73 ../jabber/JForms.tcl:300
+#: ../jabber/Register.tcl:711 ../jabber/VCard.tcl:324
+#, fuzzy
+msgid "Email address"
+msgstr "Correo electronico  del usuario"
+
+#: ../jabber/Gateway.tcl:74
+msgid "QQ number"
+msgstr ""
+
+#: ../jabber/Gateway.tcl:75
+msgid "Tlen address"
+msgstr ""
+
+#: ../jabber/Gateway.tcl:76 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
+#: ../jabber/Profiles.tcl:1121 ../jabber/VCard.tcl:322
+#, fuzzy
+msgid "Chat address"
+msgstr "Identificador de usuario"
+
+#: ../jabber/Gateway.tcl:77
+#, fuzzy
+msgid "Yahoo ID"
+msgstr "Yahoo ID"
+
+#. TRANSLATORS; Window title of popup dialog when receiving a message (instead of a chat message!)
+#: ../jabber/GotMsg.tcl:209
+#, fuzzy
+msgid "Incoming Message"
+msgstr "Mensaje entrante"
+
+#: ../jabber/GotMsg.tcl:227 ../jabber/MailBox.tcl:505
+#, fuzzy
+msgid "Forward"
+msgstr "Avanzar"
+
+#: ../jabber/GotMsg.tcl:229 ../jabber/MailBox.tcl:502
+#, fuzzy
+msgid "Reply"
+msgstr "Responder"
+
+#: ../jabber/GotMsg.tcl:239
+#, fuzzy
+msgid "Show incoming messages in this window"
+msgstr "Mostrar los mensajes entrantes en esta ventana"
+
+#: ../jabber/GotMsg.tcl:251 ../jabber/MailBox.tcl:686 ../jabber/NewMsg.tcl:442
+#, fuzzy
+msgid "From"
+msgstr "De"
+
+#: ../jabber/GroupChat.tcl:171
+#, fuzzy
+msgid "Moderators"
+msgstr "Moderadores"
+
+#: ../jabber/GroupChat.tcl:173
+#, fuzzy
+msgid "Participants"
+msgstr "Participantes"
+
+#: ../jabber/GroupChat.tcl:174
+#, fuzzy
+msgid "Visitors"
+msgstr "Visitantes"
+
+#: ../jabber/GroupChat.tcl:186
+#, fuzzy
+msgid "available"
+msgstr "disponible"
+
+#. TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a short moment
+#: ../jabber/GroupChat.tcl:188
+#, fuzzy
+msgid "away"
+msgstr "ausente"
+
+#: ../jabber/GroupChat.tcl:189
+#, fuzzy
+msgid "chat"
+msgstr "libre para charlar"
+
+#. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
+#: ../jabber/GroupChat.tcl:191
+#, fuzzy
+msgid "do not disturb"
+msgstr "no molestar"
+
+#. TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a longer period
+#: ../jabber/GroupChat.tcl:193
+#, fuzzy
+msgid "extended away"
+msgstr "no disponible"
+
+#. TRANSLATORS; presence state when the user is available, but not visible as available to her or his contacts
+#: ../jabber/GroupChat.tcl:195
+#, fuzzy
+msgid "invisible"
+msgstr "invisible"
+
+#: ../jabber/GroupChat.tcl:222 ../jabber/Roster.tcl:123
+#, fuzzy
+msgid "Send &File"
+msgstr "Enviar un archivo..."
+
+#: ../jabber/GroupChat.tcl:224
+#, fuzzy
+msgid "&Edit Nickname"
+msgstr "Editar apodo"
+
+#: ../jabber/GroupChat.tcl:225
+#, fuzzy
+msgid "&Ignore"
+msgstr "Ignorar"
+
+#: ../jabber/GroupChat.tcl:477
+#, fuzzy, tcl-format
+msgid "%s invited you to %s. Do you want to enter this chatroom?"
+msgstr "%s le ha invitado a %s. ¿Desea entrar a esta sala?"
+
+#: ../jabber/GroupChat.tcl:917
+#, fuzzy
+msgid "Bookmark this chatroom"
+msgstr "Recordar esta sala"
+
+#. TRANSLATORS; subject of a chatroom discussion with multiple people
+#: ../jabber/GroupChat.tcl:925
+#, fuzzy
+msgid "Topic"
+msgstr "Tema"
+
+#: ../jabber/GroupChat.tcl:1507
+#, fuzzy
+msgid "You logged out and exited the chatroom"
+msgstr "Se ha desconectado y ha salido de la sala"
+
+#: ../jabber/GroupChat.tcl:2536
+#, fuzzy, tcl-format
+msgid "Do you want to exit the chatroom %s?"
+msgstr "¿Desea salir de la sala %s?"
+
+#: ../jabber/GroupChat.tcl:2707 ../jabber/MUC.tcl:1715 ../jabber/MUC.tcl:1738
+#, fuzzy, tcl-format
+msgid "Cannot interact with the chatroom %s."
+msgstr "No se pudo interactuar con la sala %s."
+
+#: ../jabber/GroupChat.tcl:3479
+#, fuzzy
+msgid "Auto Join"
+msgstr "Unirse de forma automática"
+
+#: ../jabber/GroupChat.tcl:3704
+#, fuzzy
+msgid "Synchronize chatroom presence with global presence"
+msgstr "Sincronizar el estado en la sala con el estado global"
+
+#: ../jabber/GroupChat.tcl:3713
+msgid "Custom Colors"
+msgstr ""
+
+#. TRANSLATORS; in preferences; use different colors for different chatroom participants
+#: ../jabber/GroupChat.tcl:3718
+#, fuzzy
+msgid "Enable nickname coloring"
+msgstr "Activar coloreado de apodos"
+
+#: ../jabber/GroupChat.tcl:3748
+#, fuzzy
+msgid "Default nickname"
+msgstr "Apodo por defecto"
+
+#: ../jabber/GroupChat.tcl:3768
+#, fuzzy
+msgid "Choose Color"
+msgstr "Color"
+
+#. TRANSLATORS; this string shows when a new conversation thread has been started
+#: ../jabber/History.tcl:841 ../jabber/History.tcl:1157
+#, fuzzy
+msgid "Thread started"
+msgstr "Hilo empezado"
+
+#: ../jabber/History.tcl:854
+#, fuzzy
+msgid "You entered the chatroom"
+msgstr "Ha entrado en la sala"
+
+#: ../jabber/History.tcl:860
+#, fuzzy
+msgid "Exit chatroom"
+msgstr "Salir"
+
+#: ../jabber/History.tcl:1039
+#, fuzzy
+msgid "No registered history for"
+msgstr "No hay historia guardada de"
+
+#: ../jabber/JForms.tcl:269
+#, fuzzy
+msgid ""
+"You are already registered with this service. These are your current "
+"registration settings."
+msgstr ""
+"Ya se encuentra registrado en este servicio. Estos son sus datos de registro."
+
+#: ../jabber/JForms.tcl:297 ../jabber/Register.tcl:708
+#, fuzzy
+msgid "Street portion of a physical or mailing address"
+msgstr "Direccion"
+
+#: ../jabber/JForms.tcl:298 ../jabber/Register.tcl:709
+#, fuzzy
+msgid "Locality portion of a physical or mailing address"
+msgstr "Ciudad"
+
+#: ../jabber/JForms.tcl:299 ../jabber/Register.tcl:710
+#, fuzzy
+msgid "Some date (e.g., birth date, hire date, sign-up date)"
+msgstr "Alguna fecha (ej., nacimiento, boda, alta en el servicio)"
+
+#: ../jabber/JForms.tcl:301 ../jabber/Register.tcl:712
+#, fuzzy
+msgid "First name or given name"
+msgstr "Primer apellido  del usuario"
+
+#: ../jabber/JForms.tcl:302 ../jabber/Register.tcl:713
+#: ../jabber/Register.tcl:796
+#, fuzzy
+msgid ""
+"You are already registered with this service. These are your current login "
+"settings."
+msgstr ""
+"Ha sido registrado en este servicio. Estas son las opciones actuales de su "
+"cuenta."
+
+#: ../jabber/JForms.tcl:303 ../jabber/Register.tcl:714
+#, fuzzy
+msgid "Last name, surname, or family name"
+msgstr "Segundo apellido, del usuario"
+
+#: ../jabber/JForms.tcl:304 ../jabber/Register.tcl:715
+#, fuzzy
+msgid "Full name"
+msgstr "Nombre del usuario"
+
+#: ../jabber/JForms.tcl:307 ../jabber/Register.tcl:718
+#, fuzzy
+msgid "Telephone number"
+msgstr "Telefono"
+
+#: ../jabber/JForms.tcl:308 ../jabber/Register.tcl:719
+#, fuzzy
+msgid "An administrative region of the nation, such as a state or province"
+msgstr "Provincia"
+
+#: ../jabber/JForms.tcl:309 ../jabber/Register.tcl:720 ../jabber/VCard.tcl:389
+#, fuzzy
+msgid "URL to personal website"
+msgstr "Pagina Web"
+
+#: ../jabber/JForms.tcl:310 ../jabber/Register.tcl:721
+#, fuzzy
+msgid "Account name associated with the user"
+msgstr "Nombre de la cuenta asociada con el usuario"
+
+#: ../jabber/JForms.tcl:311 ../jabber/Register.tcl:722
+#, fuzzy
+msgid "Postal code portion of a physical or mailing address"
+msgstr "Codigo Postal"
+
+#: ../jabber/JForms.tcl:467
+#, fuzzy
+msgid "Labels with (*) are required."
+msgstr "Las etiquetas con (*) son obligatorias"
+
+#. TRANSLATORS; see preferences
+#: ../jabber/JPrefs.tcl:110 ../jabber/JPrefs.tcl:177
+#, fuzzy
+msgid "Appearance"
+msgstr "Apariencia"
+
+#: ../jabber/JPrefs.tcl:111 ../jabber/JPrefs.tcl:289
+#, fuzzy
+msgid "Customization"
+msgstr "Personalizar"
+
+#: ../jabber/JPrefs.tcl:188
+#, fuzzy
+msgid "Use tabbed interface"
+msgstr "Usar interfaz con pestañas"
+
+#: ../jabber/JPrefs.tcl:192
+#, fuzzy
+msgid "Chat window"
+msgstr "Ventana de chat"
+
+#: ../jabber/JPrefs.tcl:196
+#, fuzzy
+msgid "Theme"
+msgstr "Tema"
+
+#: ../jabber/JPrefs.tcl:202 ../jabber/SetupAss.tcl:127
+#: ../lib/PrefGeneral.tcl:105 ../lib/PrefGeneral.tcl:117
+#: ../whiteboard/Plugins.tcl:1347
+#, tcl-format
+msgid "Requires a restart of %s"
+msgstr ""
+
+#: ../jabber/JPrefs.tcl:208
+#, fuzzy
+msgid "Skin"
+msgstr "Skin"
+
+#: ../jabber/JPrefs.tcl:234
+#, fuzzy
+msgid "Windows opacity"
+msgstr "Opacidad de la ventana"
+
+#: ../jabber/JPrefs.tcl:300
+#, fuzzy
+msgid "Save message inbox between sessions"
+msgstr "Guardar el buzón entre sesiones"
+
+#: ../jabber/JPrefs.tcl:302
+#, fuzzy, tcl-format
+msgid "Login on %s startup"
+msgstr "Conectarse al comenzar %s"
+
+#: ../jabber/JPrefs.tcl:304
+#, fuzzy
+msgid "Remember open windows between sessions"
+msgstr "Recordar las ventanas abiertas entre sesiones"
+
+#: ../jabber/JPrefs.tcl:307
+#, fuzzy
+msgid "Show notifier window"
+msgstr "Mostrar ventana de notificación"
+
+#: ../jabber/JUI.tcl:144 ../jabber/JUI.tcl:1722 ../jabber/JUI.tcl:1726
+#: ../jabber/JUI.tcl:1738 ../jabber/JUI.tcl:1741
+#, fuzzy
+msgid "&New Account"
+msgstr "Nueva cuenta..."
+
+#: ../jabber/JUI.tcl:145 ../jabber/JUI.tcl:1727 ../jabber/JUI.tcl:1746
+#, fuzzy
+msgid "&Remove Account"
+msgstr "&Eliminar cuenta..."
+
+#: ../jabber/JUI.tcl:146 ../jabber/JUI.tcl:1728 ../jabber/JUI.tcl:1743
+#, fuzzy
+msgid "New P&assword"
+msgstr "Nuevo P&assword..."
+
+#: ../jabber/JUI.tcl:147 ../jabber/JUI.tcl:1723 ../jabber/JUI.tcl:1729
+#: ../jabber/JUI.tcl:1744
+#, fuzzy
+msgid "&Setup Assistant"
+msgstr "&Asistente de configuración"
+
+#: ../jabber/JUI.tcl:149 ../jabber/JUI.tcl:1730 ../jabber/JUI.tcl:1737
+#: ../jabber/JUI.tcl:1740
+#, fuzzy
+msgid "&Edit Profiles"
+msgstr "&Editar Perfiles..."
+
+#: ../jabber/JUI.tcl:150 ../jabber/JUI.tcl:1731 ../jabber/JUI.tcl:1745
+#, fuzzy
+msgid "Edit &Business Card"
+msgstr "Editar &Tarjeta de visita..."
+
+#: ../jabber/JUI.tcl:152 ../whiteboard/WBPrefs.tcl:185
+#, fuzzy
+msgid "Import"
+msgstr "Importar"
+
+#: ../jabber/JUI.tcl:153
+#, fuzzy
+msgid "Icon &Set"
+msgstr "&Conjunto de iconos..."
+
+#: ../jabber/JUI.tcl:154 ../jabber/JUI.tcl:159 ../jabber/JUI.tcl:1711
+#: ../jabber/JUI.tcl:1714 ../jabber/JUI.tcl:1733 ../jabber/RosterTree.tcl:1981
+#: ../jabber/UserInfo.tcl:584 ../jabber/VCard.tcl:800
+#, fuzzy
+msgid "&Business Card"
+msgstr "&Tarjeta de visita..."
+
+#: ../jabber/JUI.tcl:156 ../jabber/UserInfo.tcl:387 ../jabber/VCard.tcl:264
+#, fuzzy
+msgid "Export"
+msgstr "Exportar"
+
+#: ../jabber/JUI.tcl:157
+#, fuzzy
+msgid "&Contacts"
+msgstr "&Contactos..."
+
+#: ../jabber/JUI.tcl:158 ../jabber/JUI.tcl:203
+#, fuzzy
+msgid "&Inbox"
+msgstr "&Buzón de entrada..."
+
+#: ../jabber/JUI.tcl:165 ../jabber/JUI.tcl:1702 ../jabber/JUI.tcl:1705
+#: ../jabber/JWB.tcl:161 ../whiteboard/Whiteboard.tcl:424
+#: ../whiteboard/Whiteboard.tcl:608
+#, fuzzy
+msgid "&Close Window"
+msgstr "&Cerrar la ventana"
+
+#: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1230 ../jabber/JUI.tcl:1845
+#: ../jabber/JUI.tcl:1848 ../jabber/JUI.tcl:2005 ../jabber/Login.tcl:111
+#: ../jabber/Login.tcl:124 ../jabber/Login.tcl:267 ../jabber/Profiles.tcl:1832
+#, fuzzy
+msgid "Login"
+msgstr "Conectarse"
+
+#: ../jabber/JUI.tcl:175 ../jabber/JUI.tcl:1830 ../jabber/JUI.tcl:1850
+#: ../jabber/Jabber.tcl:2094 ../jabber/Jabber.tcl:2106
+#, fuzzy
+msgid "Logout With Message"
+msgstr "Desconectarse con el mensaje"
+
+#: ../jabber/JUI.tcl:188 ../jabber/JUI.tcl:1838 ../jabber/JUI.tcl:1858
+#, fuzzy
+msgid "Edit &Bookmarks"
+msgstr "Editar favoritos"
+
+#: ../jabber/JUI.tcl:205
+#, fuzzy
+msgid "Font Size"
+msgstr "Tamaño de la fuente"
+
+#: ../jabber/JUI.tcl:206 ../whiteboard/CanvasUtils.tcl:189
+#: ../whiteboard/ItemInspector.tcl:242 ../whiteboard/Whiteboard.tcl:571
+#, fuzzy
+msgid "Normal"
+msgstr "Normal"
+
+#: ../jabber/JUI.tcl:208 ../whiteboard/Whiteboard.tcl:457
+#: ../whiteboard/Whiteboard.tcl:2943 ../whiteboard/Whiteboard.tcl:2965
+#: ../whiteboard/Whiteboard.tcl:2968
+#, fuzzy
+msgid "Larger"
+msgstr "Mas grande"
+
+#: ../jabber/JUI.tcl:210
+#, fuzzy
+msgid "Large"
+msgstr "Grande"
+
+#: ../jabber/JUI.tcl:212
+#, fuzzy
+msgid "Huge"
+msgstr "Enorme"
+
+#: ../jabber/JUI.tcl:216
+#, fuzzy
+msgid "Tool&bar"
+msgstr "Barra de herramientas"
+
+#: ../jabber/JUI.tcl:218
+#, fuzzy
+msgid "&Tabs"
+msgstr "&Pestañas"
+
+#: ../jabber/JUI.tcl:221
+#, fuzzy
+msgid "Control Panel"
+msgstr "Panel de Control"
+
+#: ../jabber/JUI.tcl:223
+#, fuzzy
+msgid "&Error Log"
+msgstr "Mensajes de error..."
+
+#: ../jabber/JUI.tcl:224
+#, fuzzy
+msgid "&Debug"
+msgstr "Depurar"
+
+#: ../jabber/JUI.tcl:232 ../jabber/JUI.tcl:827 ../jabber/JUI.tcl:999
+#: ../jabber/JUI.tcl:1936
+#, fuzzy
+msgid "Show Control Panel"
+msgstr "Show Control Panel"
+
+#: ../jabber/JUI.tcl:239 ../whiteboard/Whiteboard.tcl:414
+#: ../whiteboard/Whiteboard.tcl:416
+#, tcl-format
+msgid "&About %s"
+msgstr ""
+
+#: ../jabber/JUI.tcl:246 ../jabber/JUI.tcl:1769 ../jabber/JUI.tcl:1778
+#: ../whiteboard/Whiteboard.tcl:443 ../whiteboard/Whiteboard.tcl:2897
+#: ../whiteboard/Whiteboard.tcl:2899
+#, fuzzy
+msgid "&Undo"
+msgstr "Deshacer"
+
+#: ../jabber/JUI.tcl:247 ../jabber/JUI.tcl:1770 ../jabber/JUI.tcl:1780
+#: ../whiteboard/Whiteboard.tcl:444 ../whiteboard/Whiteboard.tcl:2902
+#: ../whiteboard/Whiteboard.tcl:2904
+#, fuzzy
+msgid "Re&do"
+msgstr "Rehacer"
+
+#: ../jabber/JUI.tcl:249 ../whiteboard/Whiteboard.tcl:446
+#: ../whiteboard/Whiteboard.tcl:613 ../whiteboard/Whiteboard.tcl:2910
+#: ../whiteboard/Whiteboard.tcl:2912 ../whiteboard/Whiteboard.tcl:2916
+#: ../whiteboard/Whiteboard.tcl:2919
+#, fuzzy
+msgid "Cu&t"
+msgstr "Cortar"
+
+#: ../jabber/JUI.tcl:250 ../whiteboard/Whiteboard.tcl:447
+#: ../whiteboard/Whiteboard.tcl:614 ../whiteboard/Whiteboard.tcl:2914
+#: ../whiteboard/Whiteboard.tcl:2917 ../whiteboard/Whiteboard.tcl:2920
+#, fuzzy
+msgid "&Copy"
+msgstr "&Copiar"
+
+#: ../jabber/JUI.tcl:251 ../whiteboard/Whiteboard.tcl:448
+#: ../whiteboard/Whiteboard.tcl:615 ../whiteboard/Whiteboard.tcl:2923
+#: ../whiteboard/Whiteboard.tcl:2925 ../whiteboard/Whiteboard.tcl:2927
+#, fuzzy
+msgid "&Paste"
+msgstr "Pegar"
+
+#: ../jabber/JUI.tcl:253 ../jabber/JUI.tcl:1768 ../jabber/JUI.tcl:1776
+#: ../jabber/JUI.tcl:1783 ../jabber/Subscribe.tcl:1091
+#, fuzzy
+msgid "All"
+msgstr "Todos"
+
+#: ../jabber/JUI.tcl:486 ../jabber/Roster.tcl:1574
+#, fuzzy
+msgid "Contacts"
+msgstr "Contactos"
+
+#. TRANSLATORS; right mouse click menu (on arrow) in control panel (bottom of main window): status info slot
+#: ../jabber/JUI.tcl:530 ../jabber/StatusSlot.tcl:32
+#, fuzzy
+msgid "Own Contact ID"
+msgstr "Identificador Jabber"
+
+#: ../jabber/JUI.tcl:531 ../jabber/StatusSlot.tcl:33
+#, fuzzy
+msgid "Own Full Contact ID"
+msgstr "Identificador Jabber completo"
+
+#: ../jabber/JUI.tcl:607
+#, fuzzy
+msgid "Displays your Contact ID or nickname"
+msgstr "Contacto"
+
+#: ../jabber/JUI.tcl:608 ../jabber/JUI.tcl:614
+msgid "Set your status message"
+msgstr ""
+
+#: ../jabber/JUI.tcl:993 ../jabber/JUI.tcl:1933
+#, fuzzy
+msgid "Hide Control Panel"
+msgstr "Ocultar el Panel de Control"
+
+#: ../jabber/JUI.tcl:1234 ../jabber/JUI.tcl:1238 ../jabber/MailBox.tcl:465
+#: ../jabber/MailBox.tcl:1955
+#, fuzzy
+msgid "Inbox"
+msgstr "Mensajes"
+
+#: ../jabber/JUI.tcl:1242
+#, fuzzy
+msgid "Contact"
+msgstr "Contacto"
+
+#: ../jabber/JUI.tcl:1245 ../jabber/JUser.tcl:101 ../jabber/JUser.tcl:152
+#, fuzzy
+msgid "Add Contact"
+msgstr "Añadir contacto"
+
+#: ../jabber/JUI.tcl:1266 ../whiteboard/Whiteboard.tcl:2207
+#, fuzzy
+msgid "&File"
+msgstr "Archivo"
+
+#: ../jabber/JUI.tcl:1267
+#, fuzzy
+msgid "&Action"
+msgstr "Acción"
+
+#: ../jabber/JUI.tcl:1269 ../lib/EditDialogs.tcl:126
+#: ../whiteboard/Whiteboard.tcl:2210
+#, fuzzy
+msgid "&Edit"
+msgstr "Editar"
+
+#. TRANSLATORS; code for these strings is not finished
+#: ../jabber/JUI.tcl:1532
+#, fuzzy
+msgid "The connection is secure"
+msgstr "esta"
+
+#: ../jabber/JUI.tcl:1536
+#, fuzzy
+msgid "The connection is medium secure"
+msgstr "esta"
+
+#: ../jabber/JUI.tcl:1540
+#, fuzzy
+msgid "The connection is insecure"
+msgstr "esta"
+
+#: ../jabber/JUI.tcl:1582
+#, fuzzy
+msgid "Logged out"
+msgstr "Desconectado"
+
+#: ../jabber/JUI.tcl:1824 ../jabber/JUI.tcl:1829 ../jabber/JUI.tcl:1995
+#: ../jabber/Jabber.tcl:2134
+#, fuzzy
+msgid "Logout"
+msgstr "Desconectarse"
+
+#: ../jabber/JUI.tcl:1986
+#, fuzzy
+msgid "Stop"
+msgstr "Parar"
+
+#: ../jabber/JUser.tcl:163
+#, fuzzy
+msgid ""
+"Select the chat system and contact ID of the contact you would like to add."
+msgstr ""
+"Seleccione el sistema de mensajeria y el identificador del contacto que "
+"desee añadir."
+
+#: ../jabber/JUser.tcl:165
+#, fuzzy
+msgid "Nickname and group are optional and can be set or changed later."
+msgstr "El apodo y el grupo son opcionales y se pueden cambiar después."
+
+#: ../jabber/JUser.tcl:177
+#, fuzzy
+msgid "Chat system"
+msgstr "Sistema de mensajería"
+
+#: ../jabber/JUser.tcl:201
+#, fuzzy
+msgid "Group to which this contact should belong to"
+msgstr "Grupo al que este contacto debería pertenecer"
+
+#: ../jabber/JUser.tcl:228 ../jabber/MUC.tcl:988 ../lib/EditDialogs.tcl:119
+#: ../lib/EditDialogs.tcl:279 ../whiteboard/Multicast.tcl:96
+#, fuzzy
+msgid "Add"
+msgstr "Añadir"
+
+#: ../jabber/JUser.tcl:302 ../jabber/Search.tcl:257 ../jabber/Search.tcl:770
+#, fuzzy, tcl-format
+msgid "%s is already in your list. Do you want to continue anyway?"
+msgstr "%s ya está en su lista. ¿Desea continuar de todas formas?"
+
+#: ../jabber/JUser.tcl:323 ../jabber/JUser.tcl:477 ../jabber/JUser.tcl:534
+#, fuzzy, tcl-format
+msgid ""
+"To add a contact from a chat system without open federation, you need an "
+"account on this closed system, plus you need to register this account with "
+"the corresponding transport (%s). Do you want to do this now?"
+msgstr ""
+"Para añadir un contacto de un sistema de mensajería que no este federado "
+"necesita una cuenta en ese sistema, y registrarla en la correspondiente "
+"pasarela (%s) ¿Desea hacerlo ahora?"
+
+#: ../jabber/JUser.tcl:382
+#, fuzzy, tcl-format
+msgid "Cannot set %s's nickname or group."
+msgstr "No se pudo cambiar el nombre o grupo de %s."
+
+#: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:700
+#, fuzzy, tcl-format
+msgid ""
+"This is your own account at %s that acts as a service that transports "
+"messages to that IM system. It needs to be in your list. You have a "
+"subscription for %s: %s."
+msgstr ""
+"Esta es su propia cuenta en %s que actúa como un servicio que transporta los "
+"mensajes a ese sistema de menajería. Debe estar en su lista.. Tienes "
+"subscripción de %s: %s."
+
+#: ../jabber/JUser.tcl:643
+msgid "Transport Details"
+msgstr ""
+
+#: ../jabber/JUser.tcl:645
+#, fuzzy
+msgid "Edit Contact"
+msgstr "Editar Contacto"
+
+#: ../jabber/JUser.tcl:702
+#, fuzzy, tcl-format
+msgid ""
+"Edit nickname and group of %s. You also can request or remove presence "
+"subscription."
+msgstr ""
+"Edite el apodo y el grupo de %s. Tambien puede pedir o eliminar la "
+"subscripción de estado."
+
+#: ../jabber/JUser.tcl:755
+#, fuzzy
+msgid "Request presence subscription"
+msgstr "Pedir subscripción de estado"
+
+#: ../jabber/JUser.tcl:760
+#, fuzzy
+msgid "Remove presence subscription"
+msgstr "Borrar subscripción de estado"
+
+#. TRANSLATORS; these strings are balloon mouse over tooltips in the edit contact dialog
+#: ../jabber/JUser.tcl:768
+#, fuzzy
+msgid "Both you and your contact can see eachother's presence."
+msgstr "El contacto y usted pueden ver mutuamente su estado."
+
+#: ../jabber/JUser.tcl:769
+#, fuzzy
+msgid "You cannot see your contact's presence, but your contact can see yours."
+msgstr "No puede ver el estado de su contacto, pero él puede ver el suyo."
+
+#: ../jabber/JUser.tcl:770
+#, fuzzy
+msgid "Both you and your contact cannot see eachother's presence."
+msgstr "Ni su contacto ni usted pueden ver el estado del otro."
+
+#: ../jabber/JUser.tcl:771 ../jabber/Roster.tcl:1617
+#, fuzzy
+msgid "You can see your contact's presence, but your contact can't see yours."
+msgstr "Puede ver el estado de su contacto, pero él no puede ver el suyo."
+
+#: ../jabber/JUser.tcl:818 ../jabber/Subscribe.tcl:332
+#: ../jabber/Subscribe.tcl:368 ../jabber/Subscribe.tcl:1302
+#: ../jabber/Subscribe.tcl:1562
+#, fuzzy
+msgid "View business card"
+msgstr "Ver tarjeta de visita"
+
+#: ../jabber/JWB.tcl:154 ../whiteboard/Whiteboard.tcl:607
+#, fuzzy
+msgid "New &Window"
+msgstr "Nueva &Ventana"
+
+#: ../jabber/JWB.tcl:155 ../whiteboard/Whiteboard.tcl:422
+#, fuzzy
+msgid "&Open File"
+msgstr "&Abrir archivo..."
+
+#: ../jabber/JWB.tcl:156 ../whiteboard/Whiteboard.tcl:420
+#, fuzzy
+msgid "&Import Image/Movie"
+msgstr "&Importar una imagen o película..."
+
+#: ../jabber/JWB.tcl:157 ../whiteboard/Whiteboard.tcl:421
+#: ../whiteboard/Whiteboard.tcl:2774
+#, fuzzy
+msgid "Open St&ream"
+msgstr "Abrir &Flujo..."
+
+#: ../jabber/JWB.tcl:159
+#, fuzzy
+msgid "Stop &Transactions"
+msgstr "Parar &Transaciones"
+
+#: ../jabber/JWB.tcl:162 ../whiteboard/Whiteboard.tcl:425
+#, fuzzy
+msgid "&Save"
+msgstr "&Guardar..."
+
+#: ../jabber/JWB.tcl:163 ../whiteboard/Whiteboard.tcl:426
+#, fuzzy
+msgid "Save &As"
+msgstr "G&uardar como..."
+
+#: ../jabber/JWB.tcl:164 ../whiteboard/Whiteboard.tcl:427
+#, fuzzy
+msgid "Sa&ve As Item"
+msgstr "Guardar como objeto..."
+
+#: ../jabber/JWB.tcl:166 ../whiteboard/Whiteboard.tcl:429
+#, fuzzy
+msgid "Page Set&up"
+msgstr "&Propiedades de la página..."
+
+#: ../jabber/JWB.tcl:167 ../whiteboard/Whiteboard.tcl:430
+#, fuzzy
+msgid "&Print"
+msgstr "Im&primir..."
+
+#: ../jabber/JWB.tcl:332 ../jabber/JWB.tcl:334
+#, tcl-format
+msgid "Chat With %s"
+msgstr ""
+
+#: ../jabber/JWB.tcl:454
+#, fuzzy
+msgid "Send Live"
+msgstr "Enviar en directo"
+
+#: ../jabber/JWB.tcl:631 ../jabber/JWB.tcl:646
+#, fuzzy
+msgid "Do you want to close this whiteboard and lose the complete session?"
+msgstr "¿Desea cerrar esta pizarra y perder la sesión completa?"
+
+#: ../jabber/JWB.tcl:656
+#, fuzzy
+msgid "Do you want to save the changes?"
+msgstr "¿Desea guardar los cambios?"
+
+#: ../jabber/JWB.tcl:656
+#, fuzzy
+msgid "This whiteboard document has been changed."
+msgstr "El contenido de la pizarra ha cambiado."
+
+#: ../jabber/JWB.tcl:815
+#, fuzzy
+msgid ""
+"This contact is not online anymore and the message is therefore not sent."
+msgstr "Este contacto ya no está conectado, el mensaje no se envió."
+
+#: ../jabber/JWB.tcl:977
+#, fuzzy, tcl-format
+msgid ""
+"%s is not online. If your message contains any images or other multimedia, "
+"your contact will not see them unless you are online while he/she reads your "
+"message. Do you want to send it anyway?"
+msgstr ""
+"%s no esta conectado. Si su mensaje contieme imágenes u otro cotenido "
+"multimedia, su contacto no lo vera a menos que usted este conectado cuando "
+"el/ella lea su mensaje. ¿Desea enviarlo de todos modos?"
+
+#: ../jabber/JWB.tcl:986 ../jabber/JWB.tcl:2080
+#, fuzzy
+msgid ""
+"Invalid Contact ID. You need to enter a valid one at the bottom (e.g. "
+"user@example.org)."
+msgstr ""
+"Identificador de contacto inválido. Debe introducir un identificador válido "
+"en la parte de abajo de la ventana (por ejemplo username@jabber.org)."
+
+#: ../jabber/JWB.tcl:1522 ../whiteboard/GetFileIface.tcl:286
+msgid "Request To User"
+msgstr ""
+
+#: ../jabber/JWB.tcl:1523 ../whiteboard/GetFileIface.tcl:287
+#, fuzzy, tcl-format
+msgid "We are about to receive the file %s. Do you want to receive it?"
+msgstr "A punto de recibir %s, acepta la recepción?"
+
+#: ../jabber/JWB.tcl:2058 ../whiteboard/Import.tcl:79
+#: ../whiteboard/Whiteboard.tcl:3277
+#, fuzzy, tcl-format
+msgid "Cannot find importer for the MIME type %s"
+msgstr "No se pudo encontrar un filtro de importación para el tipo MIME %s"
+
+#: ../jabber/Jabber.tcl:614
+#, fuzzy, tcl-format
+msgid "Cannot send message to %s."
+msgstr "No se pudo enviar el mensaje a %s."
+
+#: ../jabber/Jabber.tcl:717
+#, tcl-format
+msgid ""
+"Your registered account with the %s service will be put in your list of "
+"contacts to work as a transport with this service."
+msgstr ""
+
+#: ../jabber/Jabber.tcl:768 ../jabber/Jabber.tcl:773 ../jabber/Jabber.tcl:779
+#: ../jabber/Jabber.tcl:828 ../jabber/Subscribe.tcl:210
+#: ../jabber/Subscribe.tcl:243 ../jabber/Subscribe.tcl:996
+#: ../jabber/Subscribe.tcl:1015 ../jabber/Subscribe.tcl:1411
+#: ../jabber/Subscribe.tcl:1439 ../jabber/Subscribe.tcl:1448
+#: ../jabber/Subscribe.tcl:1492 ../jabber/Subscribe.tcl:1600
+#: ../jabber/Subscribe.tcl:1620
+#, fuzzy
+msgid "Presence Subscription"
+msgstr "Subscripción al estado"
+
+#: ../jabber/Jabber.tcl:769
+#, fuzzy, tcl-format
+msgid ""
+"Because %s does not allow you to see his/her presence anymore, he/she is "
+"removed."
+msgstr "Debido a que %s ya no le permite ver su estado, será borrado."
+
+#: ../jabber/Jabber.tcl:774
+#, fuzzy, tcl-format
+msgid "%s does not allow you to see his/her presence anymore."
+msgstr "%s ya no le permite ver su estado."
+
+#: ../jabber/Jabber.tcl:781
+#, fuzzy, tcl-format
+msgid ""
+"%s does not allow you to see his/her presence anymore. Do you want to remove "
+"%s?"
+msgstr "%s ya no le permite ver su estado. ¿Desea borrar %s?"
+
+#: ../jabber/Jabber.tcl:814
+#, fuzzy, tcl-format
+msgid ""
+"Cannot subscribe to %s's presence. The contact does not allow you to see his/"
+"her presence."
+msgstr ""
+"No se pudo subscribir al estado de %s. El contacto no le permite ver su "
+"estado."
+
+#: ../jabber/Jabber.tcl:819
+#, fuzzy
+msgid "Subscription Failed"
+msgstr "Fallo de registro"
+
+#: ../jabber/Jabber.tcl:829
+#, fuzzy, tcl-format
+msgid "You cannot see %s's presence anymore."
+msgstr "Ya no puede ver el estado de %s."
+
+#: ../jabber/Jabber.tcl:858
+#, fuzzy
+msgid "Presence Error"
+msgstr "Error de estado"
+
+#: ../jabber/Jabber.tcl:912 ../jabber/Jabber.tcl:940
+#, fuzzy
+msgid "The connection was unexpectedly broken."
+msgstr "La conexión se ha interrumpido inesperadamente"
+
+#: ../jabber/Jabber.tcl:917 ../jabber/Jabber.tcl:919 ../jabber/Jabber.tcl:929
+#: ../jabber/Jabber.tcl:931
+#, fuzzy, tcl-format
+msgid "Received a fatal error: %s The connection is closed."
+msgstr "Se recibió un error fatal: %s La conexión se ha cerrado."
+
+#: ../jabber/Jabber.tcl:994
+#, fuzzy
+msgid "Error Log (noncriticals)"
+msgstr "Error"
+
+#: ../jabber/Jabber.tcl:1488 ../jabber/UserInfo.tcl:242
+#, fuzzy, tcl-format
+msgid "Cannot query %s's last activity."
+msgstr "No se pudo consultar la última actividad de %s."
+
+#: ../jabber/Jabber.tcl:1500 ../jabber/Jabber.tcl:1503
+#: ../jabber/UserInfo.tcl:240
+#, fuzzy
+msgid "Last Activity"
+msgstr "Última actividad"
+
+#: ../jabber/Jabber.tcl:1501 ../jabber/Jabber.tcl:1514
+#: ../jabber/Jabber.tcl:1516
+#, fuzzy, tcl-format
+msgid "Cannot query %s's local time information."
+msgstr "No se pudo consultar la información horaria de %s."
+
+#: ../jabber/Jabber.tcl:1530
+#, fuzzy, tcl-format
+msgid "Time since client %s was last active"
+msgstr "Tiempo desde que el cliente %s estuvo activo por última vez"
+
+#: ../jabber/Jabber.tcl:1532
+#, fuzzy, tcl-format
+msgid "Time since %s was last connected"
+msgstr "Tiempo desde que %s estuvo conectado por última vez"
+
+#: ../jabber/Jabber.tcl:1534
+#, fuzzy, tcl-format
+msgid "Time since server %s was started"
+msgstr "Tiempo desde que el servidor %s se inició"
+
+#: ../jabber/Jabber.tcl:1537
+#, fuzzy
+msgid "The uptime/last activity is"
+msgstr "El uptime/última actividad es"
+
+#: ../jabber/Jabber.tcl:1571 ../jabber/UserInfo.tcl:274
+#: ../jabber/UserInfo.tcl:304
+#, fuzzy, tcl-format
+msgid "Cannot query %s's local time."
+msgstr "No se pudo consultar la hora de %s."
+
+#: ../jabber/Jabber.tcl:1579 ../jabber/UserInfo.tcl:272
+#: ../jabber/UserInfo.tcl:302
+#, fuzzy
+msgid "Local Time"
+msgstr "Hora local"
+
+#: ../jabber/Jabber.tcl:1580 ../jabber/UserInfo.tcl:282
+#: ../jabber/UserInfo.tcl:311
+#, fuzzy, tcl-format
+msgid "%s's local time is: %s"
+msgstr "La hora local de %s es: %s"
+
+#: ../jabber/Jabber.tcl:1668 ../jabber/UserInfo.tcl:195
+#, fuzzy, tcl-format
+msgid "Cannot query %s's version."
+msgstr "No se pudo consultar la versión de %s."
+
+#: ../jabber/Jabber.tcl:1707
+#, fuzzy, tcl-format
+msgid "Version information for %s."
+msgstr "Información de la versión de %s"
+
+#: ../jabber/Jabber.tcl:1904 ../jabber/Jabber.tcl:2032
+#, fuzzy
+msgid "New Password"
+msgstr "Nueva contraseña"
+
+#: ../jabber/Jabber.tcl:1921
+#, fuzzy
+msgid "Set a new password for"
+msgstr "Elegir la contraseña para : "
+
+#: ../jabber/Jabber.tcl:1923
+#, fuzzy
+msgid "New password"
+msgstr "Nueva contraseña"
+
+#: ../jabber/Jabber.tcl:1927 ../jabber/Register.tcl:746
+#: ../jabber/SetupAss.tcl:169
+#, fuzzy
+msgid "Retype password"
+msgstr "Reescribir contraseña"
+
+#: ../jabber/Jabber.tcl:1993 ../jabber/Register.tcl:834
+#: ../jabber/SetupAss.tcl:311
+#, fuzzy
+msgid "Passwords do not match. Please try again."
+msgstr "Los passwords no coinciden. Por favor, inténtelo de nuevo."
+
+#: ../jabber/Jabber.tcl:2017
+#, fuzzy
+msgid "Cannot set new password."
+msgstr "No se pudo cambiar la contraseña."
+
+#: ../jabber/Jabber.tcl:2033
+#, fuzzy
+msgid "Setting new password was successful."
+msgstr "La nueva contraseña ha sido registrada."
+
+#. TRANSLATORS; see login dialog
+#: ../jabber/Login.tcl:138
+#, fuzzy
+msgid ""
+"Enter your account as user@example.org, or choose a profile. You should "
+"already have an account."
+msgstr ""
+"Introduzca su cuenta como user@example.org, o escoja un perfil. Debería "
+"tener una cuenta en este servidor."
+
+#. TRANSLATORS; login dialog, but not default; this is a config option
+#: ../jabber/Login.tcl:141
+#, fuzzy
+msgid ""
+"Enter your Contact ID as user@example.org. You should already have an "
+"account with this server."
+msgstr ""
+"Introduzca su Identificador Jabber (ejemplo@example.org). Debería tener una "
+"cuenta en este servidor."
+
+#. TRANSLATORS; login dialog, but not default; this is a config option
+#: ../jabber/Login.tcl:144
+msgid ""
+"Write XMPP server IP number or name, or choose from the popup menu. You "
+"should already have an account with this server."
+msgstr ""
+
+#. TRANSLATORS; login dialog, but not default; this is a config option
+#: ../jabber/Login.tcl:148
+#, fuzzy, tcl-format
+msgid "Enter your username and password to login to %s."
+msgstr "Introduzca su usuario y password para entrar en %s."
+
+#: ../jabber/Login.tcl:159 ../jabber/Profiles.tcl:1061
+#, fuzzy
+msgid "Profile"
+msgstr "Perfil"
+
+#: ../jabber/Login.tcl:175 ../jabber/Profiles.tcl:1086
+#: ../jabber/Register.tcl:1454 ../jabber/Search.tcl:935
+#: ../jabber/SetupAss.tcl:167 ../lib/Proxy.tcl:209
+#: ../whiteboard/WDialogs.tcl:192
+#, fuzzy
+msgid "Username"
+msgstr "Nombre de usuario"
+
+#: ../jabber/Login.tcl:183 ../jabber/Profiles.tcl:1093
+#, fuzzy
+msgid "Resource"
+msgstr "Recursos"
+
+#: ../jabber/Login.tcl:235 ../jabber/Login.tcl:239 ../jabber/Login.tcl:243
+#: ../jabber/Login.tcl:409 ../jabber/Profiles.tcl:1159
+#: ../jabber/Profiles.tcl:1163 ../jabber/Profiles.tcl:1167
+#: ../jabber/Profiles.tcl:1258 ../jabber/Register.tcl:293
+#: ../jabber/Register.tcl:297 ../jabber/Register.tcl:301
+#: ../jabber/Register.tcl:541
+#, fuzzy
+msgid "More"
+msgstr "Más"
+
+#: ../jabber/Login.tcl:271 ../jabber/Profiles.tcl:891
+#: ../jabber/Profiles.tcl:903
+#, fuzzy
+msgid "Edit Profiles"
+msgstr "Editar Perfiles"
+
+#: ../jabber/Login.tcl:394 ../jabber/Profiles.tcl:1239
+#: ../jabber/Register.tcl:530
+#, fuzzy
+msgid "Less"
+msgstr "Menos"
+
+#: ../jabber/Login.tcl:494
+#, fuzzy, tcl-format
+msgid "The %s is missing or is too short!"
+msgstr "%s falta o es demasiado corto!"
+
+#: ../jabber/Login.tcl:522 ../jabber/Register.tcl:590
+#, fuzzy, tcl-format
+msgid "Illegal character(s) in %s: %s!"
+msgstr "El/los carácter/es no válido/s en %s son : %s !"
+
+#: ../jabber/Login.tcl:574
+#, fuzzy
+msgid ""
+"The Contact ID differs from your profile. Do you want to save a new profile?"
+msgstr ""
+"El Identificador Jabber es diferente del de su perfil. ¿Desea guardar un "
+"nuevo perfil?"
+
+#: ../jabber/Login.tcl:579 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1530
+#, fuzzy
+msgid "Profile Name"
+msgstr "Nombre del perfil"
+
+#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1134
+#: ../jabber/Profiles.tcl:1532
+#, fuzzy
+msgid "Add Profile"
+msgstr "Añadir perfil"
+
+#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1532
+#, fuzzy
+msgid "Enter the name for the new profile."
+msgstr "Introduzca el nombre para el nuevo perfil."
+
+#: ../jabber/Login.tcl:604
+#, fuzzy
+msgid ""
+"Your current login settings differ from your profile settings. Do you want "
+"to save them to your profile?"
+msgstr ""
+"Sus datos de conexión son diferentes de los almacenados en su perfil. ¿Desea "
+"guardarlos en su perfil?"
+
+#: ../jabber/Login.tcl:795
+#, fuzzy, tcl-format
+msgid "Contacted %s. Waiting for response"
+msgstr "%s contactado, en espera de una respuesta"
+
+#: ../jabber/Login.tcl:834
+#, fuzzy, tcl-format
+msgid "Connected to %s. Initializing the XML stream"
+msgstr "Conectado a %s. Iniciando la conversación XML..."
+
+#: ../jabber/Login.tcl:837
+#, fuzzy
+msgid "Negotiating TLS security"
+msgstr "Negociando capa de seguridad TLS"
+
+#: ../jabber/Login.tcl:853
+#, fuzzy, tcl-format
+msgid "Authorization to server %s was successful. Downloading contacts..."
+msgstr ""
+"La autenticación con el servidor %s fue completada con éxito. Descargando "
+"contactos..."
+
+#: ../jabber/Login.tcl:909
+#, fuzzy, tcl-format
+msgid ""
+"Cannot connect to %s. Either there are server or network issues, or you "
+"misspelled the server's name."
+msgstr ""
+"No se pudo conectar a %s. Existen problemas un el servidor o con la "
+"conexión, o escribió incorrectamente el nombre del servidor."
+
+#: ../jabber/Login.tcl:915
+#, fuzzy, tcl-format
+msgid "Server %s did not respond: timeout."
+msgstr "El servidor %s no responde: tiempo agotado."
+
+#: ../jabber/Login.tcl:920
+#, fuzzy, tcl-format
+msgid ""
+"Cannot login because this username is already in use by someone else (%s)."
+msgstr ""
+"No se pudo conectar debido a que este nombre de usuario lo está usando otra "
+"persona (%s)."
+
+#: ../jabber/Login.tcl:923
+#, fuzzy, tcl-format
+msgid "The server %s has no support for TLS."
+msgstr "El servidor %s no soporta TLS."
+
+#: ../jabber/Login.tcl:926
+#, fuzzy, tcl-format
+msgid "Cannot negotiate TLS with server %s."
+msgstr "Error durante la conexion TLS con el servidor %s."
+
+#: ../jabber/Login.tcl:929
+#, fuzzy
+msgid "The server has no support for SASL authentication."
+msgstr "El servidor no soporta la autenticacion via SASL."
+
+#: ../jabber/Login.tcl:932
+#, fuzzy
+msgid "Cannot authenticate due to internal protocol error."
+msgstr "La autenticación ha fallado debido a un error en el protocolo."
+
+#: ../jabber/Login.tcl:937
+#, fuzzy, tcl-format
+msgid "Stream error received from the server with code: %s"
+msgstr "Se ha recibido un error del servidor con el codigo: %s"
+
+#: ../jabber/Login.tcl:940
+#, fuzzy
+msgid "The proxy server reported an error."
+msgstr "El servidor proxy devolvió un error."
+
+#: ../jabber/Login.tcl:952 ../jabber/Register.tcl:961
+#, fuzzy
+msgid "The login process was aborted."
+msgstr "El proceso de autenticacion ha sido cancelado."
+
+#: ../jabber/Login.tcl:953 ../jabber/Login.tcl:954 ../jabber/Login.tcl:955
+#: ../jabber/Login.tcl:956 ../jabber/Login.tcl:958 ../jabber/Register.tcl:962
+#: ../jabber/Register.tcl:963 ../jabber/Register.tcl:964
+#: ../jabber/Register.tcl:965 ../jabber/Register.tcl:967
+msgid "Protocol error during the login process."
+msgstr ""
+
+#: ../jabber/Login.tcl:957 ../jabber/Register.tcl:966
+#, fuzzy
+msgid "Login failed because of unknown account or wrong password."
+msgstr ""
+"Fallo la autenticacion porque el usuario o la contrasena es incorrecta."
+
+#: ../jabber/Login.tcl:1010
+#, fuzzy, tcl-format
+msgid "Do you want to register a new account with %s."
+msgstr "Desea registrar una cuenta nueva en %s."
+
+#. TRANSLATORS: strings related to Multi-User Chat (MUC) chatrooms
+#: ../jabber/MUC.tcl:136 ../jabber/MUC.tcl:164
+#, fuzzy
+msgid "Invite Contact"
+msgstr "Invitar Contacto"
+
+#: ../jabber/MUC.tcl:176
+#, fuzzy, tcl-format
+msgid "Invite contact to chatroom %s."
+msgstr "Invitar a un contacto a la sala %s."
+
+#: ../jabber/MUC.tcl:314
+#, fuzzy, tcl-format
+msgid "Cannot invite %s to %s."
+msgstr "No se pudo invitar a %s a %s."
+
+#: ../jabber/MUC.tcl:362
+#, fuzzy, tcl-format
+msgid "%s invites you to join chatroom %s."
+msgstr "%s le invita a entrar en la sala %s."
+
+#: ../jabber/MUC.tcl:369
+#, fuzzy, tcl-format
+msgid "The password %s is needed for entry."
+msgstr "La contraseña para entrar es %s."
+
+#: ../jabber/MUC.tcl:372
+#, fuzzy
+msgid "Do you want to join right away?"
+msgstr "¿Esta seguro de querer entrar?"
+
+#: ../jabber/MUC.tcl:373
+#, fuzzy
+msgid "Invitation"
+msgstr "Invitation"
+
+#: ../jabber/MUC.tcl:427 ../jabber/MUC.tcl:440 ../jabber/MUC.tcl:552
+#: ../jabber/MUC.tcl:1423
+#, fuzzy
+msgid "Configure Chatroom"
+msgstr "Configurar sala"
+
+#: ../jabber/MUC.tcl:478
+#, fuzzy
+msgid "Affiliation"
+msgstr "Afiliación"
+
+#: ../jabber/MUC.tcl:478
+#, fuzzy
+msgid "Role"
+msgstr "Rol"
+
+#: ../jabber/MUC.tcl:508
+#, fuzzy
+msgid "Grant"
+msgstr "Dar permisos"
+
+#: ../jabber/MUC.tcl:512
+#, fuzzy
+msgid "Voice"
+msgstr "Voz"
+
+#: ../jabber/MUC.tcl:513
+#, fuzzy
+msgid "Member"
+msgstr "Miembro"
+
+#: ../jabber/MUC.tcl:514
+#, fuzzy
+msgid "Moderator"
+msgstr "Moderador"
+
+#: ../jabber/MUC.tcl:515
+#, fuzzy
+msgid "Admin"
+msgstr "Administrador"
+
+#: ../jabber/MUC.tcl:527
+#, fuzzy
+msgid "Revoke"
+msgstr "Quitar permisos"
+
+#: ../jabber/MUC.tcl:548 ../jabber/MUC.tcl:809
+#, fuzzy
+msgid "Kick Participant"
+msgstr "Echar al participante"
+
+#: ../jabber/MUC.tcl:550
+#, fuzzy
+msgid "Ban Participant"
+msgstr "Prohibir la entrada al participante"
+
+#: ../jabber/MUC.tcl:554 ../jabber/MUC.tcl:1591
+#, fuzzy
+msgid "Destroy Chatroom"
+msgstr "Destruir Sala"
+
+#: ../jabber/MUC.tcl:564
+#, fuzzy
+msgid "Edit Lists"
+msgstr "Editar Listas"
+
+#: ../jabber/MUC.tcl:810
+#, fuzzy, tcl-format
+msgid "Kick %s from the chatroom %s."
+msgstr "Expulsar a %s de la sala %s."
+
+#: ../jabber/MUC.tcl:839
+#, fuzzy, tcl-format
+msgid "Ban %s from the chatroom %s."
+msgstr "Banear a %s de la sala %s."
+
+#: ../jabber/MUC.tcl:879
+#, fuzzy
+msgid "Edit the voice list"
+msgstr "Editar la lista de miembros con voz"
+
+#: ../jabber/MUC.tcl:880
+#, fuzzy
+msgid "Edit the ban list"
+msgstr "Editar la lista de miembros expulsados"
+
+#: ../jabber/MUC.tcl:881
+#, fuzzy
+msgid "Edit the member list"
+msgstr "Editar la lista de miembros"
+
+#: ../jabber/MUC.tcl:882
+#, fuzzy
+msgid "Edit the moderator list"
+msgstr "Editar la lista de moderadores"
+
+#: ../jabber/MUC.tcl:883
+#, fuzzy
+msgid "Edit the admin list"
+msgstr "Editar la lista de administradores"
+
+#: ../jabber/MUC.tcl:884
+#, fuzzy
+msgid "Edit the owner list"
+msgstr "Editar la lista de propietarios"
+
+#: ../jabber/MUC.tcl:1014
+msgid "Reset"
+msgstr ""
+
+#: ../jabber/MUC.tcl:1357
+#, fuzzy
+msgid "Not yet implemented."
+msgstr "Aún no implementado."
+
+#: ../jabber/MUC.tcl:1605
+#, fuzzy, tcl-format
+msgid ""
+"Do you want to destroy the chatroom %s? Optionally, you can point present "
+"chatroom participants to an alternative chatroom and tell why the chatroom "
+"is destroyed."
+msgstr ""
+"¿Desea eliminar la sala %s? Opcionalmente, puede señalar a los usuarios "
+"actuales la razón e indicarles una sala alternativa."
+
+#: ../jabber/MUC.tcl:1614
+#, fuzzy
+msgid "Alternative chatroom"
+msgstr "Sala alternativa"
+
+#: ../jabber/MailBox.tcl:514 ../lib/Bookmarks.tcl:129
+#: ../whiteboard/FilePrefs.tcl:144
+#, fuzzy
+msgid "Delete"
+msgstr "Eliminar"
+
+#: ../jabber/MailBox.tcl:1176 ../jabber/NewMsg.tcl:1008
+#: ../jabber/NewMsg.tcl:1101
+#, fuzzy
+msgid "Save Message"
+msgstr "Guardar el mensaje"
+
+#: ../jabber/MailBox.tcl:1179
+#, fuzzy
+msgid "Open Failed"
+msgstr "Fallo al abrir"
+
+#: ../jabber/MailBox.tcl:1598 ../jabber/MailBox.tcl:1676
+#, fuzzy, tcl-format
+msgid "Cannot open the inbox file %s when trying to save it."
+msgstr "No se pudo abrir el fichero entrante %s cuando se intentaba guardarlo."
+
+#: ../jabber/MailBox.tcl:1783 ../jabber/MailBox.tcl:1817
+#, fuzzy, tcl-format
+msgid "Cannot read the inbox file %s: %s"
+msgstr "No se pudo leer el fichero entrante %s: %s"
+
+#: ../jabber/MegaPresence.tcl:102 ../jabber/MegaPresence.tcl:111
+#: ../jabber/VCard.tcl:411
+#, fuzzy
+msgid "Avatar"
+msgstr "Avatar"
+
+#: ../jabber/MegaPresence.tcl:150
+#, fuzzy
+msgid "Presence Control"
+msgstr "Panel de Estado"
+
+#: ../jabber/NewMsg.tcl:305
+#, fuzzy
+msgid "Quote"
+msgstr "Citar"
+
+#: ../jabber/NewMsg.tcl:439
+#, fuzzy
+msgid "Forwarded message"
+msgstr "Mensaje Reenviado"
+
+#: ../jabber/NewMsg.tcl:901
+#, fuzzy, tcl-format
+msgid "Contact ID %s is invalid. Do you want to skip it and send to the rest?"
+msgstr ""
+"El identificador del contacto %s es invalido. ¿Desea omitirlo y enviar al "
+"resto?"
+
+#: ../jabber/NewMsg.tcl:904
+#, fuzzy, tcl-format
+msgid "Invalid Contact ID: %s. Please correct and resend."
+msgstr ""
+"Identificador de contacto inválido: %s. Por favor, corríjalo y reenvíe."
+
+#: ../jabber/NewMsg.tcl:925
+#, fuzzy
+msgid "You need to fill in at least one valid address."
+msgstr "Debe rellenar al menos una dirección correcta."
+
+#: ../jabber/NewMsg.tcl:984
+#, fuzzy, tcl-format
+msgid "On %s, %s %s wrote:"
+msgstr "En %s, %s %s escribió:"
+
+#: ../jabber/NewMsg.tcl:1068
+#, fuzzy
+msgid "There are unsaved messages. Do you still want to quit?"
+msgstr "Hay mensajes sin guardar. ¿Está seguro de querer cerrar?"
+
+#: ../jabber/NewMsg.tcl:1099
+#, fuzzy
+msgid "Do you want to save this message before closing?"
+msgstr "¿Desea guardar el mensaje?"
+
+#: ../jabber/Profiles.tcl:810
+msgid "Accounts"
+msgstr ""
+
+#. TRANSLATORS: string shown if you change anything in an existing account profile in the login dialog
+#: ../jabber/Profiles.tcl:981 ../jabber/Profiles.tcl:1578
+#, fuzzy
+msgid ""
+"You changed one or more values. Do you want to save them before closing?"
+msgstr ""
+"Ha modificado uno o más valores. ¿Desea guardar estos cambios antes de "
+"cerrar?"
+
+#. TRANSLATORS: See File in the main window, and then Edit Profiles...
+#: ../jabber/Profiles.tcl:1055
+#, fuzzy
+msgid ""
+"Edit, add or delete profiles. The selected profile will become the default."
+msgstr ""
+"Editar, anadir o borrar perfiles. El perfil seleccionado se convertirá en el "
+"predeterminado."
+
+#: ../jabber/Profiles.tcl:1136
+#, fuzzy
+msgid "Delete Profile"
+msgstr "Eliminar perfil"
+
+#: ../jabber/Profiles.tcl:1460
+#, fuzzy
+msgid "You need to fill in at least the server name and user name."
+msgstr "Debe al menos introducir el nombre de usuario y el servidor"
+
+#: ../jabber/Profiles.tcl:1565
+#, fuzzy
+msgid "Do you want to register a new account?"
+msgstr "¿Desea registrar una nueva cuenta?"
+
+#: ../jabber/Profiles.tcl:1605
+#, fuzzy
+msgid ""
+"The selected profile will be deleted. Do you also want to delete the account "
+"for this profile? This action cannot be undone. Press Cancel to abort "
+"deletion of account and profile."
+msgstr ""
+"El perfil seleccionado será borrado. ¿Desea también eliminar la cuenta de "
+"este perfil? Esta acción no se puede deshacer. Pulse cancelar para no "
+"eliminar ni la cuenta ni el perfil."
+
+#: ../jabber/Profiles.tcl:1640 ../jabber/Register.tcl:118
+#, fuzzy, tcl-format
+msgid "Cannot unregister from %s."
+msgstr "No se pudo desregistrar de %s."
+
+#: ../jabber/Profiles.tcl:1782
+#, fuzzy
+msgid "Connection"
+msgstr "Conexión"
+
+#: ../jabber/Profiles.tcl:1798
+#, fuzzy
+msgid "Use secure connection"
+msgstr "Usar una conexión segura"
+
+#: ../jabber/Profiles.tcl:1801
+msgid "Certificate"
+msgstr ""
+
+#: ../jabber/Profiles.tcl:1804
+#, fuzzy
+msgid "Use SASL authentication"
+msgstr "Usar autenticación SASL"
+
+#: ../jabber/Profiles.tcl:1807
+#, fuzzy
+msgid "Use TLS and SASL"
+msgstr "Usar TLS y SASL"
+
+#: ../jabber/Profiles.tcl:1810
+#, fuzzy
+msgid "Use TLS on separate port (old)"
+msgstr "Usar TLS en un puerto aparte (antigüo)"
+
+#: ../jabber/Profiles.tcl:1813
+#, fuzzy
+msgid "Use compression"
+msgstr "Usar compresión"
+
+#: ../jabber/Profiles.tcl:1843
+#, fuzzy
+msgid "Plain text password"
+msgstr "Contraseña en texto plano"
+
+#: ../jabber/Profiles.tcl:1846
+#, fuzzy
+msgid "Priority"
+msgstr "Prioridad"
+
+#: ../jabber/Profiles.tcl:1853
+#, fuzzy
+msgid "Login as invisible"
+msgstr "Conectarse con el estado Invisible"
+
+#: ../jabber/Profiles.tcl:1869 ../lib/Proxy.tcl:204
+#: ../whiteboard/WDialogs.tcl:191
+#, fuzzy
+msgid "Host"
+msgstr "Host"
+
+#: ../jabber/Profiles.tcl:1871 ../lib/Proxy.tcl:206
+#: ../whiteboard/WDialogs.tcl:193
+#, fuzzy
+msgid "Port"
+msgstr "Puerto"
+
+#: ../jabber/Profiles.tcl:1895
+#, fuzzy
+msgid "Use HTTP transport"
+msgstr "Usar transporte HTTP"
+
+#: ../jabber/Profiles.tcl:1900 ../lib/PrefNet.tcl:98 ../lib/Proxy.tcl:144
+#, fuzzy
+msgid "Proxy"
+msgstr "Proxy"
+
+#. TRANSLATORS: See File in the main window, and then Remove Account...
+#: ../jabber/Register.tcl:76
+#, fuzzy
+msgid "Remove Account"
+msgstr "Eliminar cuenta"
+
+#: ../jabber/Register.tcl:77
+#, fuzzy
+msgid ""
+"Do you really want to remove your account? This process cannot be undone."
+msgstr "¿Realmente desea eliminar su cuenta? Esta acción no se puede deshacer."
+
+#: ../jabber/Register.tcl:85
+#, fuzzy
+msgid ""
+"You are about to unregister a transport with a number of dependent contacts. "
+"Do you want to remove these contacts as well (Yes), keep them (No), or "
+"cancel everything (Cancel)?"
+msgstr ""
+"Va a desregistrarse de un transporte con contactos que dependen de él. "
+"¿Desea borrarlos (Si), mantenerlos (No), o cancelar todo (Cancelar)."
+
+#: ../jabber/Register.tcl:133
+#, fuzzy
+msgid "Unregister"
+msgstr "Desregistrarse"
+
+#: ../jabber/Register.tcl:134
+#, fuzzy, tcl-format
+msgid "You are unregistered from %s."
+msgstr "No se ha desregistrado de %s."
+
+#: ../jabber/Register.tcl:233 ../jabber/Register.tcl:248
+#: ../jabber/SetupAss.tcl:192 ../jabber/SetupAss.tcl:196
+#, fuzzy
+msgid "New Account"
+msgstr "Nuevo usuario"
+
+#: ../jabber/Register.tcl:260
+#, fuzzy, tcl-format
+msgid ""
+"Register with the service %s. You may need to press the Next button to "
+"retrieve the registration instructions."
+msgstr ""
+"Registrarse en el servicio %s. Puede que necesite pulsar Siguiente para "
+"obtener las instrucciones de registro."
+
+#: ../jabber/Register.tcl:262
+#, fuzzy
+msgid ""
+"Select a server from the list or manually enter one. Then press Next to "
+"retrieve the registration instructions. Follow the instructions and hit "
+"Register."
+msgstr ""
+"Seleccione un servidor de la lista, o introduzca uno. A continiación pulse "
+"Siguiente, siga las intrucciones y pulse Registrarse"
+
+#: ../jabber/Register.tcl:584 ../jabber/Register.tcl:1256
+#: ../jabber/Search.tcl:310
+#, fuzzy
+msgid "Please first enter or select a server."
+msgstr "Primero."
+
+#: ../jabber/Register.tcl:594 ../jabber/Register.tcl:1263
+#: ../jabber/Search.tcl:315
+#, fuzzy
+msgid "Waiting for server response"
+msgstr "Esperando de la respuesta del servidor..."
+
+#: ../jabber/Register.tcl:658 ../jabber/Register.tcl:1287
+msgid "Cannot obtain registration information."
+msgstr ""
+
+#: ../jabber/Register.tcl:670 ../jabber/Register.tcl:1039
+#: ../jabber/Register.tcl:1076 ../jabber/Register.tcl:1088
+#: ../jabber/Register.tcl:1170 ../jabber/Register.tcl:1418
+#: ../jabber/Register.tcl:1430 ../jabber/Register.tcl:1483
+#, fuzzy
+msgid "Register"
+msgstr "Registrarse"
+
+#: ../jabber/Register.tcl:792 ../jabber/SetupAss.tcl:177
+#, fuzzy
+msgid "Save password"
+msgstr "Guardar contraseña"
+
+#: ../jabber/Register.tcl:891
+#, fuzzy
+msgid ""
+"The registration failed because this username is already in use by someone "
+"else."
+msgstr ""
+"El registro falló porque este nombre de usuario esta siendo usado por otra "
+"persona."
+
+#: ../jabber/Register.tcl:896
+#, fuzzy
+msgid "The registration failed."
+msgstr "El registro falló."
+
+#: ../jabber/Register.tcl:924
+#, fuzzy, tcl-format
+msgid ""
+"The registration with %s was successful. Now you just need to Login using "
+"the same username and password."
+msgstr ""
+"El registro en %s fue completado con éxito. Ahora debe conectar uando el "
+"mismo nombre de usuario y contraseña."
+
+#: ../jabber/Register.tcl:954
+#, fuzzy, tcl-format
+msgid "You are now registered and automatically logged in as %s"
+msgstr "Usted está ahora identificado y automáticamente conectado como %s"
+
+#: ../jabber/Register.tcl:1119 ../jabber/Register.tcl:1442
+#, fuzzy
+msgid "Select a service and press Next"
+msgstr "Seleccione un servicio y pulse Siguiente"
+
+#: ../jabber/Register.tcl:1352 ../jabber/Register.tcl:1536
+#, fuzzy, tcl-format
+msgid "Cannot register with service %s."
+msgstr "No se pudo registrar en el servicio %s."
+
+#: ../jabber/Register.tcl:1361 ../jabber/Register.tcl:1544
+#, fuzzy, tcl-format
+msgid "Registration with service %s was successful."
+msgstr "El registro en el servicio %s se completo con éxito."
+
+#: ../jabber/Roster.tcl:81 ../jabber/Roster.tcl:89 ../jabber/Status.tcl:36
+#: ../jabber/Status.tcl:44
+#, fuzzy
+msgid "Available"
+msgstr "Disponible"
+
+#: ../jabber/Roster.tcl:82 ../jabber/Roster.tcl:90 ../jabber/Roster.tcl:135
+#: ../jabber/Status.tcl:37 ../jabber/Status.tcl:45
+#, fuzzy
+msgid "Away"
+msgstr "Ausente"
+
+#: ../jabber/Roster.tcl:84 ../jabber/Roster.tcl:92 ../jabber/Roster.tcl:134
+#: ../jabber/Status.tcl:39 ../jabber/Status.tcl:47
+#, fuzzy
+msgid "Do Not Disturb"
+msgstr "No molestar"
+
+#: ../jabber/Roster.tcl:85 ../jabber/Roster.tcl:93 ../jabber/Roster.tcl:136
+#: ../jabber/Status.tcl:40 ../jabber/Status.tcl:48
+#, fuzzy
+msgid "Extended Away"
+msgstr "No disponible"
+
+#: ../jabber/Roster.tcl:86 ../jabber/Roster.tcl:94 ../jabber/Status.tcl:41
+#: ../jabber/Status.tcl:49
+#, fuzzy
+msgid "Invisible"
+msgstr "Invisible"
+
+#: ../jabber/Roster.tcl:125
+#, fuzzy
+msgid "&History"
+msgstr "&Historial..."
+
+#: ../jabber/Roster.tcl:128 ../jabber/Roster.tcl:189
+#, fuzzy
+msgid "&Edit Contact"
+msgstr "&Editar Contacto..."
+
+#: ../jabber/Roster.tcl:129
+#, fuzzy
+msgid "&Remove Contact"
+msgstr "Borrar el contacto..."
+
+#: ../jabber/Roster.tcl:131 ../whiteboard/ItemInspector.tcl:375
+#, fuzzy
+msgid "Style"
+msgstr "Estilo de vista"
+
+#: ../jabber/Roster.tcl:133
+#, fuzzy
+msgid "&Offline"
+msgstr "Desconectado"
+
+#: ../jabber/Roster.tcl:137
+#, fuzzy
+msgid "&Transports"
+msgstr "Transportes de otras redes"
+
+#: ../jabber/Roster.tcl:140
+#, fuzzy
+msgid "Sort"
+msgstr "Ordenar"
+
+#: ../jabber/Roster.tcl:141
+#, fuzzy
+msgid "&Increasing"
+msgstr "Ascendente"
+
+#: ../jabber/Roster.tcl:142
+#, fuzzy
+msgid "&Decreasing"
+msgstr "Descendente"
+
+#: ../jabber/Roster.tcl:186
+#, fuzzy
+msgid "Last Login/Activity"
+msgstr "Última conexión/actividad"
+
+#: ../jabber/Roster.tcl:191
+#, fuzzy
+msgid "Login to Transport"
+msgstr "Conectarse a un servidor de transporte"
+
+#: ../jabber/Roster.tcl:192
+#, fuzzy
+msgid "Logout from Transport"
+msgstr "Desconectarse de un servidor de transporte"
+
+#: ../jabber/Roster.tcl:394 ../jabber/Roster.tcl:405
+#, fuzzy
+msgid "Remove Contact"
+msgstr "Eliminar Contacto"
+
+#: ../jabber/Roster.tcl:395 ../jabber/Roster.tcl:406
+#, fuzzy
+msgid ""
+"Do you really want to remove this contact? This action cannot be undone."
+msgstr ""
+"¿Realmente desea borrar a este contacto? Esta acción no se puede deshacer."
+
+#: ../jabber/Roster.tcl:598
+#, fuzzy, tcl-format
+msgid "Login to %s"
+msgstr "Conectarse a %s"
+
+#: ../jabber/Roster.tcl:601
+#, fuzzy, tcl-format
+msgid "Logout from %s"
+msgstr "Desconectarse de %s"
+
+#: ../jabber/Roster.tcl:829
+#, fuzzy
+msgid "The roster is up to date"
+msgstr "La lista de contactos está al día"
+
+#: ../jabber/Roster.tcl:1397
+msgid "Transport"
+msgstr ""
+
+#: ../jabber/Roster.tcl:1595
+#, fuzzy
+msgid "Remove contact without presence subscription"
+msgstr "Borrar contactos sin subscripción de estado"
+
+#: ../jabber/Roster.tcl:1597
+#, fuzzy
+msgid "Clear list of contacts on logout"
+msgstr "Limpiar lista de contactos al desconectar"
+
+#: ../jabber/Roster.tcl:1599
+#, fuzzy
+msgid "Chat on double-click instead of message"
+msgstr "Abrir chat al hacer doble click en vez de un mensaje"
+
+#: ../jabber/Roster.tcl:1602
+#, fuzzy
+msgid "Show offline users"
+msgstr "Mostrar usuarios desconectados"
+
+#: ../jabber/Roster.tcl:1604
+#, fuzzy
+msgid "Show transports"
+msgstr "Mostrar transportes"
+
+#: ../jabber/Roster.tcl:1606
+#, fuzzy
+msgid "Show contacts without any subscription"
+msgstr "Ver contactos sin subscripción de estado"
+
+#: ../jabber/RosterTree.tcl:67
+#, fuzzy
+msgid "Online"
+msgstr "Conectado"
+
+#: ../jabber/RosterTree.tcl:68
+#, fuzzy
+msgid "Offline"
+msgstr "Desconectado"
+
+#: ../jabber/RosterTree.tcl:69
+#, fuzzy
+msgid "Transports"
+msgstr "Pasarela"
+
+#: ../jabber/RosterTree.tcl:70
+#, fuzzy
+msgid "Subscription Pending"
+msgstr "Registro pendiente"
+
+#. TRANSLATORS: themes for the contact icons (different presence state icons); see preferences
+#: ../jabber/Rosticons.tcl:433
+#, fuzzy
+msgid "Contact Icons"
+msgstr "Iconos de los contactos"
+
+#: ../jabber/Rosticons.tcl:483
+#, fuzzy
+msgid ""
+"Select iconsets for each group. A deselected group will use the normal "
+"iconset."
+msgstr ""
+"Seleccione el conjunto de iconos para cada grupo. Un grupo no seleccionado "
+"usará el conjunto de iconos predeterminado."
+
+#: ../jabber/Rosticons.tcl:581
+msgid "Standard"
+msgstr ""
+
+#: ../jabber/Rosticons.tcl:583
+msgid "Groups"
+msgstr ""
+
+#: ../jabber/Rosticons.tcl:631
+#, fuzzy
+msgid "Key"
+msgstr "Clave"
+
+#: ../jabber/Rosticons.tcl:633
+#, fuzzy
+msgid "Icon"
+msgstr "Icono"
+
+#: ../jabber/Search.tcl:88 ../jabber/Search.tcl:129 ../jabber/Search.tcl:1149
+#: ../lib/TSearch.tcl:76 ../lib/WSearch.tcl:68
+#, fuzzy
+msgid "Search"
+msgstr "Buscar"
+
+#: ../jabber/Search.tcl:117
+#, fuzzy
+msgid ""
+"Search contacts with the selected service. A new search form will empty the "
+"previous one."
+msgstr ""
+"Buscar contactos en el servicio seleccionado. Un nuevo formulario sustituirá "
+"al anterior."
+
+#: ../jabber/Search.tcl:155
+#, fuzzy
+msgid "New Form"
+msgstr "Nuevo Formulario"
+
+#: ../jabber/Search.tcl:203 ../jabber/Search.tcl:321 ../jabber/Search.tcl:544
+#, fuzzy
+msgid "Search results"
+msgstr "Buscar resultados"
+
+#: ../jabber/Search.tcl:347
+#, fuzzy
+msgid "Cannot obtain search form."
+msgstr "No se pudo obtener el formulario de busqueda."
+
+#: ../jabber/Search.tcl:417
+#, fuzzy
+msgid "There was an invalid field. Please correct it."
+msgstr "Hay un campo inválido. Por favor, corríjalo."
+
+#: ../jabber/Search.tcl:422
+#, fuzzy
+msgid "Cannot search."
+msgstr "No se pudo buscar."
+
+#: ../jabber/Search.tcl:929 ../jabber/Search.tcl:945 ../jabber/Search.tcl:1022
+#, fuzzy
+msgid "Search People"
+msgstr "Buscar Gente"
+
+#: ../jabber/Search.tcl:933
+#, fuzzy
+msgid "Full Name"
+msgstr "Nombre completo"
+
+#: ../jabber/SetupAss.tcl:101
+#, fuzzy, tcl-format
+msgid ""
+"This setup assistant will help you to configure the most important settings "
+"to get started with %s."
+msgstr ""
+"Este asistente le ayudará a realizar la configuración necesaria para "
+"conenzar con %s."
+
+#: ../jabber/SetupAss.tcl:103
+#, fuzzy
+msgid "Any time you can press Previous to go back. Press Next to proceed."
+msgstr ""
+"En cualquier momento puede presionar Anterior para retroceder. Pulse "
+"Siguiente para continuar."
+
+#: ../jabber/SetupAss.tcl:111 ../lib/PrefGeneral.tcl:103
+#, fuzzy
+msgid "Language"
+msgstr "Idioma"
+
+#: ../jabber/SetupAss.tcl:114
+#, fuzzy
+msgid "Choose your language"
+msgstr "Elija su idioma"
+
+#: ../jabber/SetupAss.tcl:131
+#, fuzzy
+msgid "Select Server"
+msgstr "Seleccionar Servidor"
+
+#: ../jabber/SetupAss.tcl:135 ../jabber/SetupAss.tcl:320
+#, fuzzy
+msgid ""
+"Select or enter a server you wish to have your account on. If you already "
+"have an account, use the server of this account."
+msgstr ""
+"Seleccione o introduzca el servidor en el que desea tener la cuenta. Si ya "
+"tiene una cuenta, seleccione el servidor de su cuenta."
+
+#: ../jabber/SetupAss.tcl:160
+#, fuzzy
+msgid "Username & Password"
+msgstr "Nombre y contraseña"
+
+#: ../jabber/SetupAss.tcl:164
+#, fuzzy
+msgid ""
+"Enter your username and password. If the chosen username is already in use "
+"by someone else, you will not be able to register."
+msgstr ""
+"Introduzca su nombre de usuario y contraseña. Si el nombre de usuario "
+"elegido ya lo está utilizando otro usuario, no podrá registrarlo."
+
+#: ../jabber/SetupAss.tcl:195
+msgid ""
+"Click on the button below to create a new account. You must be connected to "
+"the Internet. Pay attention to a possible firewall!"
+msgstr ""
+
+#: ../jabber/SetupAss.tcl:207
+#, fuzzy
+msgid "Finished"
+msgstr "Terminado"
+
+#: ../jabber/SetupAss.tcl:210
+#, fuzzy
+msgid "That's all. Also, be nice to the bug and his friends ;-)"
+msgstr "Esto es todo. ;-)"
+
+#: ../jabber/SetupAss.tcl:307
+#, fuzzy
+msgid "Be sure to fill in all entries before you continue."
+msgstr "Verifique que ha rellenado todos los campos antes de continuar"
+
+#: ../jabber/SetupAss.tcl:342
+#, fuzzy
+msgid ""
+"Are you sure you want to close the setup assistant? You may start it any "
+"time later from the menu."
+msgstr ""
+"¿Está seguro de querer cerrar el asistente de configuración? Puede volverlo "
+"a ejecutar posteriormente desde el menú"
+
+#: ../jabber/Status.tcl:256 ../jabber/Status.tcl:274 ../jabber/Status.tcl:335
+#, fuzzy
+msgid "Attach Message"
+msgstr "Adjuntar mensaje..."
+
+#: ../jabber/Status.tcl:386
+#, fuzzy
+msgid "Set Status"
+msgstr "Elegir estado"
+
+#: ../jabber/Status.tcl:400
+#, fuzzy
+msgid "My Status"
+msgstr "Mi estado"
+
+#: ../jabber/Status.tcl:413
+#, fuzzy
+msgid "Status message"
+msgstr "Mensaje de estado"
+
+#: ../jabber/Status.tcl:756 ../jabber/Status.tcl:864
+#, fuzzy
+msgid "Custom Status"
+msgstr "Estado personalizado"
+
+#. TRANSLATORS: custom status dialog; Control + B (or Command + B on Mac OS X)
+#: ../jabber/Status.tcl:861
+#, fuzzy
+msgid "Select a presence state and optionally enter a message."
+msgstr "Seleccione su estado y opcionalmente introduzca un mensaje."
+
+#: ../jabber/Status.tcl:862
+#, fuzzy
+msgid "The most frequent combinations are easily reachable as menu entries."
+msgstr ""
+"Las combinaciones más frecuentes están accesibles fácilmente como entradas "
+"en el menú."
+
+#: ../jabber/StatusSlot.tcl:84
+#, fuzzy
+msgid "Status Info"
+msgstr "Status Info"
+
+#: ../jabber/Subscribe.tcl:258
+#, fuzzy, tcl-format
+msgid "May %s see your presence?"
+msgstr "¿Debe %s poder ver su estado?"
+
+#. TRANSLATORS: shown in subscription request dialog when someone tries to add the user to his or her list
+#: ../jabber/Subscribe.tcl:262
+#, fuzzy
+msgid ""
+"Entering a nickname and group is optional, and for your personal use only."
+msgstr ""
+"Introducir el apodo y grupo es opcional, y será solo para su uso personal."
+
+#. TRANSLATORS: shown in subscription request dialog if auto-accept and the timer option are both enabled in the preferences
+#: ../jabber/Subscribe.tcl:277 ../jabber/Subscribe.tcl:450
+#: ../jabber/Subscribe.tcl:812 ../jabber/Subscribe.tcl:828
+#: ../jabber/Subscribe.tcl:1037 ../jabber/Subscribe.tcl:1145
+#, fuzzy, tcl-format
+msgid "Subscription request will be accepted in: %s secs."
+msgstr "La petición de subscripción será aceptada en: %s segundos."
+
+#: ../jabber/Subscribe.tcl:280 ../jabber/Subscribe.tcl:301
+#: ../jabber/Subscribe.tcl:1040 ../jabber/Subscribe.tcl:1060
+msgid "Pause"
+msgstr ""
+
+#. TRANSLATORS: shown in subscription request dialog if auto-rejept and the timer option are both enabled in the preferences
+#: ../jabber/Subscribe.tcl:298 ../jabber/Subscribe.tcl:470
+#: ../jabber/Subscribe.tcl:878 ../jabber/Subscribe.tcl:894
+#: ../jabber/Subscribe.tcl:1057 ../jabber/Subscribe.tcl:1162
+#, fuzzy, tcl-format
+msgid "Subscription request will be rejected in: %s secs."
+msgstr "La petición de subscripción será rechazada en: %s segundos."
+
+#: ../jabber/Subscribe.tcl:446 ../jabber/Subscribe.tcl:666
+#: ../jabber/Subscribe.tcl:825
+#, fuzzy, tcl-format
+msgid "%s can see your presence."
+msgstr "%s puede ver su estado."
+
+#: ../jabber/Subscribe.tcl:466 ../jabber/Subscribe.tcl:699
+#: ../jabber/Subscribe.tcl:891
+#, fuzzy, tcl-format
+msgid "%s cannot see your presence."
+msgstr "%s no puede ver su estado."
+
+#: ../jabber/Subscribe.tcl:1030 ../jabber/Subscribe.tcl:1220
+#: ../jabber/Subscribe.tcl:1449
+#, fuzzy, tcl-format
+msgid ""
+"%s contacts want to see your presence. Select those who may see your "
+"presence."
+msgstr ""
+"%s contactos quieren ver su estado. Seleccione aquellos que desee que vean "
+"su estado."
+
+#: ../jabber/Subscribe.tcl:1086
+msgid "Allow"
+msgstr ""
+
+#: ../jabber/Subscribe.tcl:1412 ../jabber/Subscribe.tcl:1440
+#, fuzzy, tcl-format
+msgid "%s allows you to see his/her presence."
+msgstr "%s le autoriza a ver su estado."
+
+#: ../jabber/Subscribe.tcl:1491 ../jabber/Subscribe.tcl:1538
+#, fuzzy, tcl-format
+msgid "%s additional contacts can see your presence."
+msgstr "%s contactos adicionales pueden ver su estado."
+
+#: ../jabber/Subscribe.tcl:1633
+#, fuzzy
+msgid "If someone wants to see my presence and"
+msgstr "Si alguien quiere ver mi estado y"
+
+#: ../jabber/Subscribe.tcl:1634
+#, fuzzy
+msgid "is not in my list"
+msgstr "no está en mi lista"
+
+#: ../jabber/Subscribe.tcl:1635
+#, fuzzy
+msgid "is in my list"
+msgstr "está en mi lista"
+
+#: ../jabber/Subscribe.tcl:1638 ../whiteboard/FilePrefs.tcl:492
+#, fuzzy
+msgid "Always ask"
+msgstr "Pregunta siempre"
+
+#: ../jabber/Subscribe.tcl:1639
+#, fuzzy
+msgid "Auto-accept"
+msgstr "Aceptar automáticamente"
+
+#: ../jabber/Subscribe.tcl:1640
+#, fuzzy
+msgid "Auto-reject"
+msgstr "Rechazar automáticamente"
+
+#: ../jabber/Subscribe.tcl:1663
+#, fuzzy
+msgid "If auto-accept/reject show dialog with timer"
+msgstr "Si auto-acepta/rechaza, mostrar un diálogo con temporizador"
+
+#: ../jabber/Subscribe.tcl:1666
+#, fuzzy
+msgid "The dialog is closed after (Seconds)"
+msgstr "El diálogo se cierra despues de (Segundos)"
+
+#: ../jabber/Subscribe.tcl:1686
+#, fuzzy
+msgid "Put contacts who add me to their list in"
+msgstr "Poner a los contactos que me añaden a su lista en"
+
+#: ../jabber/Subscribe.tcl:1689
+#, fuzzy
+msgid "Default group"
+msgstr "Grupo por defecto"
+
+#: ../jabber/UserInfo.tcl:135 ../jabber/VCard.tcl:82
+#, fuzzy, tcl-format
+msgid "Downloading business card from %s"
+msgstr "Descargando la tarjeta de visita de %s"
+
+#: ../jabber/UserInfo.tcl:208
+#, fuzzy
+msgid "Operating system"
+msgstr "Sistema Operativo"
+
+#: ../jabber/UserInfo.tcl:331 ../jabber/VCard.tcl:102 ../jabber/VCard.tcl:844
+#, fuzzy
+msgid "Cannot download business card."
+msgstr "No se pudo descagar la tarjeta de visita."
+
+#: ../jabber/UserInfo.tcl:353 ../jabber/VCard.tcl:227
+#, tcl-format
+msgid "Business Card: %s"
+msgstr ""
+
+#. TRANSLATORS: in the business card dialog, there can be made notes about each contact
+#: ../jabber/UserInfo.tcl:438
+#, fuzzy
+msgid "Notes"
+msgstr "Notas"
+
+#: ../jabber/UserInfo.tcl:444
+#, fuzzy
+msgid "Add your personal notes about this contact."
+msgstr "Añada sus notas personales sobre este contacto."
+
+#: ../jabber/UserInfo.tcl:475
+#, fuzzy
+msgid "Client"
+msgstr "Cliente"
+
+#: ../jabber/VCard.tcl:111
+#, fuzzy
+msgid "Business card downloaded."
+msgstr "Tarjeta de visita descargada."
+
+#: ../jabber/VCard.tcl:224
+#, fuzzy
+msgid "Edit Business Card"
+msgstr "Editar Tarjeta de Visita"
+
+#: ../jabber/VCard.tcl:294
+#, fuzzy
+msgid "First name"
+msgstr "Nombre de pila"
+
+#: ../jabber/VCard.tcl:295
+#, fuzzy
+msgid "Middle"
+msgstr "Medio"
+
+#: ../jabber/VCard.tcl:296
+#, fuzzy
+msgid "Last name"
+msgstr "Nombre"
+
+#: ../jabber/VCard.tcl:345
+#, fuzzy
+msgid "Personal"
+msgstr "Personal"
+
+#: ../jabber/VCard.tcl:362
+#, fuzzy
+msgid "Website"
+msgstr "Sitio Web"
+
+#: ../jabber/VCard.tcl:363
+#, fuzzy
+msgid "Occupation"
+msgstr "Profesión"
+
+#: ../jabber/VCard.tcl:364
+#, fuzzy
+msgid "Birthday"
+msgstr "Cumpleaños"
+
+#: ../jabber/VCard.tcl:385
+#, fuzzy
+msgid "Format: mm/dd/yyyy"
+msgstr "Formato: mm/dd/yyyy"
+
+#: ../jabber/VCard.tcl:395
+#, fuzzy
+msgid "Email addresses"
+msgstr "Direcciones de email"
+
+#: ../jabber/VCard.tcl:414
+#, fuzzy
+msgid "Remove Avatar"
+msgstr "Eliminar Avatar"
+
+#: ../jabber/VCard.tcl:473
+#, fuzzy
+msgid "Work"
+msgstr "Trabajo"
+
+#: ../jabber/VCard.tcl:499
+#, fuzzy
+msgid "Company"
+msgstr "Compañía"
+
+#: ../jabber/VCard.tcl:500
+#, fuzzy
+msgid "Department"
+msgstr "Departamento"
+
+#: ../jabber/VCard.tcl:501
+#, fuzzy
+msgid "Title"
+msgstr "Título"
+
+#: ../jabber/VCard.tcl:502
+#, fuzzy
+msgid "Address 1"
+msgstr "Dirección"
+
+#: ../jabber/VCard.tcl:503
+#, fuzzy
+msgid "Address 2"
+msgstr "Dirección"
+
+#: ../jabber/VCard.tcl:504
+#, fuzzy
+msgid "City"
+msgstr "Ciudad"
+
+#: ../jabber/VCard.tcl:508
+#, fuzzy
+msgid "Tel (voice)"
+msgstr "Teléfono"
+
+#: ../jabber/VCard.tcl:509
+#, fuzzy
+msgid "Tel (fax)"
+msgstr "Fax"
+
+#: ../jabber/VCard.tcl:890
+#, fuzzy
+msgid "Open Business Card"
+msgstr "Abrir Tarjeta de Visita"
+
+#: ../lib/Bookmarks.tcl:32
+#, fuzzy
+msgid "Edit Bookmarks"
+msgstr "Editar Marcadores"
+
+#: ../lib/Bookmarks.tcl:127 ../lib/Bookmarks.tcl:172
+#, fuzzy
+msgid "New Bookmark"
+msgstr "Nuevo favorito"
+
+#: ../lib/Component.tcl:59 ../whiteboard/WDialogs.tcl:39
+#, fuzzy
+msgid "There are no plugins or helper applications identified on this system."
+msgstr "No se han detectado plugins o aplicaciones auxiliares en el sistema"
+
+#: ../lib/Component.tcl:68 ../whiteboard/Plugins.tcl:1326
+#: ../whiteboard/WDialogs.tcl:47
+#, fuzzy
+msgid "Plugins"
+msgstr "Plugins"
+
+#. TRANSLATORS: shown on Linux when trying to print
+#: ../lib/Dialogs.tcl:120
+#, fuzzy
+msgid "Shell print command, edit if desired"
+msgstr "Comando para imprimir, puede cambiarlo si es necesario"
+
+#: ../lib/Dialogs.tcl:470 ../lib/Splash.tcl:83 ../lib/UI.tcl:488
+#: ../lib/UI.tcl:490
+#, fuzzy, tcl-format
+msgid "About %s"
+msgstr "Acerca de %s"
+
+#. TRANSLATORS: some old whiteboard feature
+#: ../lib/EditDialogs.tcl:81 ../lib/EditDialogs.tcl:93
+#, fuzzy
+msgid "Edit Shortcuts"
+msgstr "Editar Atajos"
+
+#: ../lib/EditDialogs.tcl:226
+#, fuzzy
+msgid "Warning: you have edited the shortcuts. Don't you want to save them?"
+msgstr "Atención : ha modificado los atajos de teclado. ¿Desea guardarlos?"
+
+#: ../lib/EditDialogs.tcl:276
+#, fuzzy
+msgid "Add Shortcut"
+msgstr "Añadir Atajo"
+
+#: ../lib/EditDialogs.tcl:277
+#, fuzzy
+msgid "New shortcut"
+msgstr "Nuevo atajo"
+
+#: ../lib/EditDialogs.tcl:278 ../lib/EditDialogs.tcl:283
+#, fuzzy
+msgid "Complete ip number or name"
+msgstr "Completar la dirección IP o el nombre"
+
+#: ../lib/EditDialogs.tcl:281
+#, fuzzy
+msgid "Edit Shortcut"
+msgstr "Editar Atajo"
+
+#: ../lib/EditDialogs.tcl:282
+#, fuzzy
+msgid "Shortcut"
+msgstr "Atajo"
+
+#. TRANSLATORS: see preferences, whiteboard cache settings
+#: ../lib/FileCache.tcl:602
+#, fuzzy
+msgid "File Cache"
+msgstr "Caché"
+
+#: ../lib/FileCache.tcl:627
+#, fuzzy
+msgid "Disk cache size"
+msgstr "Tamaño en disco del cache"
+
+#: ../lib/FileCache.tcl:631
+#, fuzzy
+msgid "Clear Cache"
+msgstr "Limpiar Cache"
+
+#: ../lib/FileCache.tcl:636
+#, fuzzy
+msgid "Amount of cache to store recent whiteboard files to increase speed."
+msgstr "Cantidad de caché destinada a guardar archivos de pizarra recientes."
+
+#: ../lib/FileCache.tcl:648
+#, fuzzy
+msgid "Synchronise cache"
+msgstr "Sincronizar cache"
+
+#: ../lib/FileCache.tcl:655
+#, fuzzy
+msgid "Always"
+msgstr "Siempre"
+
+#: ../lib/FileCache.tcl:656
+#, fuzzy
+msgid "Once per session"
+msgstr "Una vez por sesión"
+
+#: ../lib/FileCache.tcl:657
+#, fuzzy
+msgid "Never"
+msgstr "Nunca"
+
+#: ../lib/HttpTrpt.tcl:66
+#, fuzzy, tcl-format
+msgid "Cannot open file %s"
+msgstr "No se pudo abrir el fichero %s"
+
+#: ../lib/HttpTrpt.tcl:100 ../lib/HttpTrpt.tcl:133 ../lib/HttpTrpt.tcl:227
+#: ../lib/HttpTrpt.tcl:241
+#, fuzzy, tcl-format
+msgid "Cannot download the file %s."
+msgstr "No puedo descargar el archivo %s."
+
+#: ../lib/HttpTrpt.tcl:102 ../lib/HttpTrpt.tcl:135 ../lib/HttpTrpt.tcl:229
+#, fuzzy, tcl-format
+msgid "File transport error: %s"
+msgstr "Archivo"
+
+#: ../lib/HttpTrpt.tcl:169 ../lib/HttpTrpt.tcl:188
+#, fuzzy
+msgid "Downloading"
+msgstr "Descargar"
+
+#: ../lib/HttpTrpt.tcl:221
+#, fuzzy
+msgid "Timeout"
+msgstr "Tiempo agotado"
+
+#: ../lib/HttpTrpt.tcl:222
+#, fuzzy
+msgid "Cannot download file over HTTP: timeout."
+msgstr "No se pudo descargar el archivo vía HTTP: tiempo agotado."
+
+#: ../lib/HttpTrpt.tcl:234
+#, fuzzy
+msgid "The server closed the socket without replying."
+msgstr "El servidor ha terminado la conexión sin respuesta."
+
+#: ../lib/HttpTrpt.tcl:252
+#, fuzzy, tcl-format
+msgid "Download of file %s finished."
+msgstr "Descarga del archivo %s finalizada."
+
+#: ../lib/HttpTrpt.tcl:258
+#, fuzzy, tcl-format
+msgid "File transport of %s was reset."
+msgstr "La transferencia del archivo %s ha sido reiniciada"
+
+#: ../lib/Httpd.tcl:79
+#, fuzzy, tcl-format
+msgid "Cannot start the internal HTTP server: %s"
+msgstr "No se pudo iniciar el servidor HTTP interno: %s"
+
+#: ../lib/Init.tcl:751 ../lib/Init.tcl:772 ../lib/Media.tcl:179
+#: ../whiteboard/Plugins.tcl:445
+#, fuzzy, tcl-format
+msgid "Looking for %s"
+msgstr "Buscando"
+
+#: ../lib/MacintoshUtils.tcl:56 ../lib/MacintoshUtils.tcl:78
+#: ../lib/MacintoshUtils.tcl:100 ../lib/UserActions.tcl:45
+#: ../lib/UserActions.tcl:73 ../lib/UserActions.tcl:94
+#, fuzzy
+msgid "Cannot find necessary Tcl extension."
+msgstr "No se pudo encontrar la extensión Tcl necesaria."
+
+#: ../lib/PrefGeneral.tcl:59
+#, fuzzy
+msgid "Settings"
+msgstr "Opciones"
+
+#: ../lib/PrefGeneral.tcl:63
+#, fuzzy
+msgid "Store preferences on same drive as program"
+msgstr ""
+"Guardar las preferencias en el mismo disco donde se encuentra el programa"
+
+#: ../lib/PrefGeneral.tcl:66
+#, fuzzy
+msgid "Store preferences in same folder as program"
+msgstr ""
+"Guardar las preferencias en el mismo directorio donde se encuentra el "
+"programa"
+
+#: ../lib/PrefGeneral.tcl:129
+#, fuzzy
+msgid ""
+"You have chosen to store your preferences on the same drive as the "
+"application. If this drive is not a removable device your personal settings "
+"could be visible. Do you want to continue?"
+msgstr "esta?"
+
+#: ../lib/PrefGeneral.tcl:144 ../lib/PrefGeneral.tcl:168
+#, fuzzy, tcl-format
+msgid ""
+"You have chosen to store your preferences in the default location. If you "
+"remove or move your personal settings at %s, the preferences in the default "
+"location will be used the next time you start %s. Do you want to remove the "
+"old preferences?"
+msgstr ""
+"Ha escogido guardar sus preferencias en el directorio predeterminado. Si "
+"borra o mueve sus preferencias de %s, las preferencias del directorio "
+"predeterminado seran usadas la próxima vez que inicie %s. ¿Desea eliminar "
+"las preferencias antigüas?"
+
+#: ../lib/PrefHelpers.tcl:73 ../lib/PrefHelpers.tcl:116
+#, fuzzy
+msgid "Default Applications"
+msgstr "Aplicaciones por defecto"
+
+#: ../lib/PrefHelpers.tcl:127
+#, fuzzy
+msgid "Browser"
+msgstr "Navegador"
+
+#: ../lib/PrefHelpers.tcl:131
+#, fuzzy
+msgid "Email client"
+msgstr "Cliente de email"
+
+#: ../lib/PrefNet.tcl:63
+#, fuzzy
+msgid "Network"
+msgstr "Red"
+
+#: ../lib/PrefNet.tcl:102
+msgid "NAT"
+msgstr ""
+
+#: ../lib/PrefNet.tcl:106
+#, fuzzy
+msgid "Ports"
+msgstr "Puertos"
+
+#: ../lib/PrefNet.tcl:110
+msgid "Certificates"
+msgstr ""
+
+#: ../lib/PrefNet.tcl:130
+#, fuzzy
+msgid "Built in server"
+msgstr "Servidor embebido"
+
+#: ../lib/PrefNet.tcl:132
+#, fuzzy
+msgid "File transfer"
+msgstr "Envío de archivo"
+
+#: ../lib/PrefNet.tcl:168 ../lib/PrefNet.tcl:194
+msgid "TLS certificate file"
+msgstr ""
+
+#: ../lib/PrefNet.tcl:171 ../lib/PrefNet.tcl:177
+msgid "Browse"
+msgstr ""
+
+#: ../lib/PrefNet.tcl:174 ../lib/PrefNet.tcl:203
+msgid "TLS private key file"
+msgstr ""
+
+#: ../lib/PrefUtils.tcl:218
+#, fuzzy, tcl-format
+msgid "Cannot open file %s."
+msgstr "No se puede abrir el fichero %s."
+
+#: ../lib/Preferences.tcl:174
+#, fuzzy
+msgid "Preferences"
+msgstr "Preferences"
+
+#: ../lib/Preferences.tcl:243
+#, fuzzy
+msgid "Factory Settings"
+msgstr "Propiedades por defecto"
+
+#: ../lib/Preferences.tcl:394
+#, fuzzy
+msgid "Do you really want to reset your customization to factory defaults?"
+msgstr "¿Realmente desea reiniciar los valores a la configuración por defecto?"
+
+#: ../lib/Preferences.tcl:456
+#, fuzzy, tcl-format
+msgid "At least one setting requires a restart of %s."
+msgstr "Al menos una opción requiere reiniciar %s."
+
+#: ../lib/Preferences.tcl:499
+#, fuzzy
+msgid "The preferences have been changed. Do you want to cancel anyway?"
+msgstr "Las preferencias han cambiado, ¿desea cancelar de todas maneras?"
+
+#: ../lib/Proxy.tcl:152
+#, fuzzy
+msgid "NAT Address"
+msgstr "Dirección NAT"
+
+#: ../lib/Proxy.tcl:196
+#, fuzzy
+msgid ""
+"Usage of this HTTP proxy settings is determined by each profile's settings. "
+"File transfers will not work if you use an HTTP proxy."
+msgstr ""
+"El uso de la configuración del proxy HTTP esta determinado por la "
+"configuración de cada perfil. Las transferencias de ficheros no funcionarán "
+"si usa un proxy HTTP."
+
+#: ../lib/Proxy.tcl:197
+#, fuzzy
+msgid "Use proxy"
+msgstr "Usar proxy"
+
+#: ../lib/Proxy.tcl:200 ../whiteboard/FilePrefs.tcl:462
+#: ../whiteboard/ItemInspector.tcl:289 ../whiteboard/WDialogs.tcl:123
+#, fuzzy
+msgid "Type"
+msgstr "Tipo"
+
+#: ../lib/Proxy.tcl:216
+#, fuzzy
+msgid "Exclude addresses (* as wildcard)."
+msgstr "Excluir direcciones (* como comodin)"
+
+#: ../lib/Proxy.tcl:267
+#, fuzzy
+msgid "Use the following external address"
+msgstr "Usar la dirección externa"
+
+#: ../lib/Proxy.tcl:273
+#, fuzzy
+msgid "Detect"
+msgstr "Detectar"
+
+#: ../lib/TheServer.tcl:64
+#, fuzzy
+msgid "Cannot start server socket. Perhaps you are not connected."
+msgstr "No se pudo iniciar el socket del servidor. Quizás no está conectado."
+
+#: ../lib/Types.tcl:577
+#, fuzzy
+msgid "World Application"
+msgstr "World Application"
+
+#: ../lib/Types.tcl:578
+#, fuzzy
+msgid "QuickDraw 3D Metafile"
+msgstr "QuickDraw 3D Metafile"
+
+#: ../lib/Types.tcl:579
+#, fuzzy
+msgid "Tcl File"
+msgstr "Tcl File"
+
+#: ../lib/Types.tcl:580
+#, fuzzy
+msgid "Itcl File"
+msgstr "Itcl File"
+
+#: ../lib/Types.tcl:581
+#, fuzzy
+msgid "Session Description Protocol"
+msgstr "Session Description Protocol"
+
+#: ../lib/Types.tcl:582
+#, fuzzy
+msgid "Adobe Flash Media"
+msgstr "Adobe Flash Media"
+
+#: ../lib/Types.tcl:583
+#, fuzzy
+msgid "Mac Binary"
+msgstr "Mac Binary"
+
+#: ../lib/Types.tcl:584
+#, fuzzy
+msgid "VTK 3D"
+msgstr "VTK 3D"
+
+#: ../lib/Types.tcl:585
+#, fuzzy
+msgid "Generic File"
+msgstr "Generic File"
+
+#: ../lib/Types.tcl:586
+#, fuzzy
+msgid "PDF Document"
+msgstr "Documento PDF"
+
+#: ../lib/Types.tcl:587
+#, fuzzy
+msgid "PostScript Document"
+msgstr "Documento PostScript"
+
+#: ../lib/Types.tcl:588 ../lib/Types.tcl:617
+#, fuzzy
+msgid "RTF Document"
+msgstr "RTF Document"
+
+#: ../lib/Types.tcl:589
+#, fuzzy
+msgid "JavaScript File"
+msgstr "JavaScript File"
+
+#: ../lib/Types.tcl:590
+#, fuzzy
+msgid "TeX File"
+msgstr "TeX File"
+
+#: ../lib/Types.tcl:591
+#, fuzzy
+msgid "Archive Tar"
+msgstr "Archive Tar"
+
+#: ../lib/Types.tcl:592
+#, fuzzy
+msgid "Abi Word Document"
+msgstr "Abi Word Document"
+
+#: ../lib/Types.tcl:593
+#, fuzzy
+msgid "Microsoft Excel Spreadsheet"
+msgstr "Microsoft Excel Spreadsheet"
+
+#: ../lib/Types.tcl:594
+#, fuzzy
+msgid "Microsoft PowerPoint Presentation"
+msgstr "Microsoft PowerPoint Presentation"
+
+#: ../lib/Types.tcl:595
+#, fuzzy
+msgid "Microsoft Word Document"
+msgstr "Microsoft Word Document"
+
+#: ../lib/Types.tcl:596
+#, fuzzy
+msgid "MPEG Audio"
+msgstr "MPEG Audio"
+
+#: ../lib/Types.tcl:597
+#, fuzzy
+msgid "AIFF/Amiga Audio"
+msgstr "AIFF/Amiga Audio"
+
+#: ../lib/Types.tcl:598
+#, fuzzy
+msgid "ULAW (Sun) Audio"
+msgstr "ULAW (Sun) Audio"
+
+#: ../lib/Types.tcl:599
+#, fuzzy
+msgid "Streaming Audio"
+msgstr "Streaming Audio"
+
+#: ../lib/Types.tcl:600
+#, fuzzy
+msgid "WAV Audio"
+msgstr "WAV Audio"
+
+#: ../lib/Types.tcl:601
+#, fuzzy
+msgid "QCP Audio"
+msgstr "QCP Audio"
+
+#: ../lib/Types.tcl:602
+#, fuzzy
+msgid "MIDI Audio"
+msgstr "MIDI Audio"
+
+#: ../lib/Types.tcl:603
+#, fuzzy
+msgid "BMP Image"
+msgstr "BMP Image"
+
+#: ../lib/Types.tcl:604
+#, fuzzy
+msgid "FlashPix Image"
+msgstr "FlashPix Image"
+
+#: ../lib/Types.tcl:605
+#, fuzzy
+msgid "GIF Image"
+msgstr "GIF Image"
+
+#: ../lib/Types.tcl:606
+#, fuzzy
+msgid "JPEG Image"
+msgstr "JPEG Image"
+
+#: ../lib/Types.tcl:607
+#, fuzzy
+msgid "Macpaint Image"
+msgstr "Macpaint Image"
+
+#: ../lib/Types.tcl:608
+#, fuzzy
+msgid "Adobe Photoshop Image"
+msgstr "Adobe Photoshop Image"
+
+#: ../lib/Types.tcl:609
+#, fuzzy
+msgid "PNG Image"
+msgstr "PNG Image"
+
+#: ../lib/Types.tcl:610
+#, fuzzy
+msgid "PICT Image"
+msgstr "PICT Image"
+
+#: ../lib/Types.tcl:611
+#, fuzzy
+msgid "SGI Image"
+msgstr "SGI Image"
+
+#: ../lib/Types.tcl:612
+#, fuzzy
+msgid "Truevision Targa Image"
+msgstr "Truevision Targa Image"
+
+#: ../lib/Types.tcl:613
+#, fuzzy
+msgid "TIFF Image"
+msgstr "TIFF Image"
+
+#: ../lib/Types.tcl:614
+#, fuzzy
+msgid "X PixMap Image"
+msgstr "X PixMap Image"
+
+#: ../lib/Types.tcl:615
+#, fuzzy
+msgid "Plain Text Document"
+msgstr "Documento de texto plano"
+
+#: ../lib/Types.tcl:616
+#, fuzzy
+msgid "XML Document"
+msgstr "XML Document"
+
+#: ../lib/Types.tcl:618
+#, fuzzy
+msgid "HTML Document"
+msgstr "HTML Document"
+
+#: ../lib/Types.tcl:619
+#, fuzzy
+msgid "Cascading Style Sheet"
+msgstr "Cascading Style Sheet"
+
+#: ../lib/Types.tcl:620
+#, fuzzy
+msgid "QuickTime Video"
+msgstr "QuickTime Video"
+
+#: ../lib/Types.tcl:621
+#, fuzzy
+msgid "MPEG-4 Video"
+msgstr "MPEG-4 Video"
+
+#: ../lib/Types.tcl:622
+#, fuzzy
+msgid "DV Video"
+msgstr "DV Video"
+
+#: ../lib/Types.tcl:623
+#, fuzzy
+msgid "MPEG Video"
+msgstr "MPEG Video"
+
+#: ../lib/Types.tcl:624
+#, fuzzy
+msgid "Microsoft AVI Video"
+msgstr "Microsoft AVI Video"
+
+#: ../lib/Types.tcl:625
+#, fuzzy
+msgid "Autodesk's FLIC File"
+msgstr "Autodesk's FLIC File"
+
+#: ../lib/UserActions.tcl:135
+msgid "Quit"
+msgstr ""
+
+#: ../lib/UserActions.tcl:136
+#, fuzzy
+msgid "Do you actually want to quit?"
+msgstr "¿Está seguro de que quiere salir?"
+
+#: ../whiteboard/CanvasCmd.tcl:447 ../whiteboard/CanvasFile.tcl:737
+#: ../whiteboard/CanvasFile.tcl:768
+#, fuzzy, tcl-format
+msgid "Cannot write to %s: %s"
+msgstr "No se pudo escribir en %s: %s"
+
+#: ../whiteboard/CanvasCmd.tcl:455 ../whiteboard/CanvasFile.tcl:52
+#: ../whiteboard/CanvasFile.tcl:71 ../whiteboard/CanvasFile.tcl:500
+#: ../whiteboard/CanvasFile.tcl:843
+#, fuzzy, tcl-format
+msgid "Cannot read %s: %s"
+msgstr "No se pudo leer %s: %s"
+
+#: ../whiteboard/CanvasDraw.tcl:1353
+#, fuzzy
+msgid "Arc tool, click and drag"
+msgstr "Arco (hacer click-mover)"
+
+#: ../whiteboard/CanvasDraw.tcl:1462 ../whiteboard/CanvasDraw.tcl:1519
+#: ../whiteboard/Whiteboard.tcl:87
+#, fuzzy
+msgid "Arc tool, click to set center, spacebar to cancel"
+msgstr "Arco (click: definir centro, <espace>: terminar)"
+
+#: ../whiteboard/CanvasFile.tcl:549
+#, fuzzy
+msgid "Opening a whiteboard file clears the current whiteboard!"
+msgstr "¡Abrir un fichero de pizarra borra la pizarra actual!"
+
+#: ../whiteboard/CanvasFile.tcl:554
+#, fuzzy
+msgid "Open File"
+msgstr "Abrir Archivo"
+
+#: ../whiteboard/CanvasFile.tcl:758
+#, fuzzy
+msgid "Save Canvas Item"
+msgstr "Guardar Elemento Canvas"
+
+#: ../whiteboard/CanvasUtils.tcl:90 ../whiteboard/Whiteboard.tcl:475
+#, fuzzy
+msgid "Thickness"
+msgstr "Grosor de la línea"
+
+#: ../whiteboard/CanvasUtils.tcl:101 ../whiteboard/Whiteboard.tcl:486
+#, fuzzy
+msgid "Brush Thickness"
+msgstr "Grosor de la brocha"
+
+#: ../whiteboard/CanvasUtils.tcl:112 ../whiteboard/Whiteboard.tcl:516
+#, fuzzy
+msgid "Arcs"
+msgstr "Arcos"
+
+#: ../whiteboard/CanvasUtils.tcl:113 ../whiteboard/ItemInspector.tcl:230
+#: ../whiteboard/Whiteboard.tcl:517
+#, fuzzy
+msgid "Pieslice"
+msgstr "Tartas"
+
+#: ../whiteboard/CanvasUtils.tcl:115 ../whiteboard/ItemInspector.tcl:231
+#: ../whiteboard/Whiteboard.tcl:519
+#, fuzzy
+msgid "Chord"
+msgstr "Cuerda"
+
+#: ../whiteboard/CanvasUtils.tcl:117 ../whiteboard/ItemInspector.tcl:232
+#: ../whiteboard/Whiteboard.tcl:521
+#, fuzzy
+msgid "Arc"
+msgstr "Arco"
+
+#: ../whiteboard/CanvasUtils.tcl:121 ../whiteboard/CanvasUtils.tcl:1607
+#, fuzzy
+msgid "Color"
+msgstr "Color"
+
+#: ../whiteboard/CanvasUtils.tcl:123
+#, fuzzy
+msgid "Fill Color"
+msgstr "Color de relleno..."
+
+#: ../whiteboard/CanvasUtils.tcl:125
+#, fuzzy
+msgid "Outline Color"
+msgstr "Color del borde"
+
+#: ../whiteboard/CanvasUtils.tcl:127 ../whiteboard/CanvasUtils.tcl:129
+#: ../whiteboard/CanvasUtils.tcl:149 ../whiteboard/Whiteboard.tcl:452
+#: ../whiteboard/Whiteboard.tcl:2940 ../whiteboard/Whiteboard.tcl:2949
+#, fuzzy
+msgid "&Edit Item"
+msgstr "&Editar Elemento..."
+
+#: ../whiteboard/CanvasUtils.tcl:131
+#, fuzzy
+msgid "Save Image As"
+msgstr "Guardar la &imagen como..."
+
+#: ../whiteboard/CanvasUtils.tcl:133 ../whiteboard/Whiteboard.tcl:463
+#: ../whiteboard/Whiteboard.tcl:2946 ../whiteboard/Whiteboard.tcl:2958
+#: ../whiteboard/Whiteboard.tcl:2961
+#, fuzzy
+msgid "Image Larger"
+msgstr "Agrandar la imagen"
+
+#: ../whiteboard/CanvasUtils.tcl:135 ../whiteboard/Whiteboard.tcl:464
+#: ../whiteboard/Whiteboard.tcl:2947 ../whiteboard/Whiteboard.tcl:2959
+#: ../whiteboard/Whiteboard.tcl:2962
+#, fuzzy
+msgid "Image Smaller"
+msgstr "Reducir la imagen"
+
+#: ../whiteboard/CanvasUtils.tcl:137
+#, fuzzy
+msgid "Export Image"
+msgstr "Exportar Imagen..."
+
+#: ../whiteboard/CanvasUtils.tcl:139
+#, fuzzy
+msgid "Export Movie"
+msgstr "Exportar video..."
+
+#: ../whiteboard/CanvasUtils.tcl:141
+#, fuzzy
+msgid "Sync Playback"
+msgstr "Lectura sincronizada"
+
+#: ../whiteboard/CanvasUtils.tcl:146
+#, fuzzy
+msgid "Timecode"
+msgstr "Codificacion horaria"
+
+#: ../whiteboard/CanvasUtils.tcl:151
+#, fuzzy
+msgid "Reload Image"
+msgstr "Imagen"
+
+#: ../whiteboard/CanvasUtils.tcl:153 ../whiteboard/CanvasUtils.tcl:166
+#: ../whiteboard/Whiteboard.tcl:500 ../whiteboard/Whiteboard.tcl:513
+#, fuzzy
+msgid "Line Smoothness"
+msgstr "Suavizado de la línea"
+
+#: ../whiteboard/CanvasUtils.tcl:169
+#, fuzzy
+msgid "Straighten"
+msgstr "Enderezar"
+
+#: ../whiteboard/CanvasUtils.tcl:171 ../whiteboard/Whiteboard.tcl:553
+#, fuzzy
+msgid "Font"
+msgstr "Fuente"
+
+#: ../whiteboard/CanvasUtils.tcl:188 ../whiteboard/Whiteboard.tcl:570
+#, fuzzy
+msgid "Weight"
+msgstr "Estilo del texto"
+
+#: ../whiteboard/CanvasUtils.tcl:191 ../whiteboard/ItemInspector.tcl:243
+#: ../whiteboard/Whiteboard.tcl:573
+#, fuzzy
+msgid "Bold"
+msgstr "Negrita"
+
+#: ../whiteboard/CanvasUtils.tcl:193 ../whiteboard/ItemInspector.tcl:244
+#: ../whiteboard/Whiteboard.tcl:575
+#, fuzzy
+msgid "Italic"
+msgstr "Italica"
+
+#: ../whiteboard/CanvasUtils.tcl:197
+#, fuzzy
+msgid "Add Speech Bubble"
+msgstr "Añadir un bocadillo"
+
+#: ../whiteboard/CanvasUtils.tcl:205 ../whiteboard/ItemInspector.tcl:221
+#: ../whiteboard/Whiteboard.tcl:531
+#, fuzzy
+msgid "Dotted"
+msgstr "Punteado"
+
+#: ../whiteboard/CanvasUtils.tcl:206 ../whiteboard/ItemInspector.tcl:223
+#: ../whiteboard/Whiteboard.tcl:532
+#, fuzzy
+msgid "Dashed"
+msgstr "Guiones"
+
+#: ../whiteboard/CanvasUtils.tcl:207 ../whiteboard/ItemInspector.tcl:222
+#: ../whiteboard/Whiteboard.tcl:533
+#, fuzzy
+msgid "Dash-dotted"
+msgstr "Guiones-puntos"
+
+#: ../whiteboard/CanvasUtils.tcl:217 ../whiteboard/CanvasUtils.tcl:1431
+#: ../whiteboard/ItemInspector.tcl:362 ../whiteboard/Whiteboard.tcl:543
+#: ../whiteboard/Whiteboard.tcl:2539
+#, fuzzy
+msgid "Dash"
+msgstr "Estilo de línea"
+
+#: ../whiteboard/FilePrefs.tcl:79
+#, fuzzy
+msgid "File Types"
+msgstr "Tipos de Fichero"
+
+#: ../whiteboard/FilePrefs.tcl:146
+#, fuzzy
+msgid "Edit File Type"
+msgstr "Editar Tipo de Fichero"
+
+#: ../whiteboard/FilePrefs.tcl:148
+#, fuzzy
+msgid "Add File Type"
+msgstr "Añadir tipo de archivo"
+
+#: ../whiteboard/FilePrefs.tcl:176
+#, fuzzy
+msgid "File Type"
+msgstr "Tipo de Fichero"
+
+#: ../whiteboard/FilePrefs.tcl:179 ../whiteboard/FilePrefs.tcl:484
+#, fuzzy
+msgid "Open with"
+msgstr "Abrir con"
+
+#: ../whiteboard/FilePrefs.tcl:405
+#, fuzzy
+msgid "Add/Edit File Type"
+msgstr "Añadir/Editar tipo de archivo"
+
+#: ../whiteboard/FilePrefs.tcl:465
+#, fuzzy
+msgid "MIME type"
+msgstr "Tipo MIME"
+
+#: ../whiteboard/FilePrefs.tcl:468 ../whiteboard/WDialogs.tcl:138
+#, fuzzy
+msgid "Extensions"
+msgstr "Extensiones"
+
+#: ../whiteboard/FilePrefs.tcl:472
+#, fuzzy
+msgid "Encoding"
+msgstr "Codificar"
+
+#: ../whiteboard/FilePrefs.tcl:475
+#, fuzzy
+msgid "Binary"
+msgstr "Binario"
+
+#: ../whiteboard/FilePrefs.tcl:478
+#, fuzzy
+msgid "Action"
+msgstr "Acción"
+
+#: ../whiteboard/FilePrefs.tcl:479
+#, fuzzy
+msgid "Reject file"
+msgstr "Rechazar archivo"
+
+#: ../whiteboard/FilePrefs.tcl:481
+#, fuzzy
+msgid "Save to disk"
+msgstr "Guardar en disco"
+
+#: ../whiteboard/FilePrefs.tcl:587
+#, fuzzy
+msgid "One or more fields are missing. Try again or cancel."
+msgstr "Uno o más campos faltan, comenzar o cancelar"
+
+#: ../whiteboard/GetFileIface.tcl:130 ../whiteboard/GetFileIface.tcl:232
+#: ../whiteboard/GetFileIface.tcl:233 ../whiteboard/PutFileIface.tcl:248
+#, fuzzy
+msgid "File Transfer Error"
+msgstr "Error en la transferencia"
+
+#: ../whiteboard/GetFileIface.tcl:459
+#, fuzzy, tcl-format
+msgid ""
+"Received response of the server %s.\n"
+" Error code %s\n"
+"Message: %s"
+msgstr ""
+"\n"
+" Error"
+
+#: ../whiteboard/GetFileIface.tcl:468 ../whiteboard/PutFileIface.tcl:177
+#, fuzzy, tcl-format
+msgid "Contacting %s. Waiting for response"
+msgstr "Contacto de %s. Esperando una respuesta..."
+
+#: ../whiteboard/GetFileIface.tcl:469 ../whiteboard/PutFileIface.tcl:178
+#, fuzzy, tcl-format
+msgid "Connection to %s failed: received an eof."
+msgstr "La conexión a %s ha fallado : recibido un EOF."
+
+#: ../whiteboard/GetFileIface.tcl:470 ../whiteboard/PutFileIface.tcl:179
+#, fuzzy, tcl-format
+msgid "Connection to %s failed."
+msgstr "La conexión a %s ha fallado."
+
+#: ../whiteboard/GetFileIface.tcl:471 ../whiteboard/PutFileIface.tcl:180
+#, fuzzy, tcl-format
+msgid "Contacted %s. Negotiating"
+msgstr "Cliente contactado : %s ; negociación en curso..."
+
+#: ../whiteboard/GetFileIface.tcl:472 ../whiteboard/PutFileIface.tcl:181
+#, fuzzy, tcl-format
+msgid "Cannot read server response from %s."
+msgstr "Error de respuesta del servidor %s."
+
+#: ../whiteboard/GetFileIface.tcl:473 ../whiteboard/PutFileIface.tcl:182
+#, fuzzy, tcl-format
+msgid "The server at %s did not respond with a well formed protocol."
+msgstr "El servidor %s no responde usando protocolo correcto."
+
+#: ../whiteboard/GetFileIface.tcl:474 ../whiteboard/PutFileIface.tcl:183
+#, fuzzy, tcl-format
+msgid "%s accepted file %s. Initiating file transfer"
+msgstr "El cliente %s ha aceptado el archivo %s. Comienza del transferencia..."
+
+#: ../whiteboard/GetFileIface.tcl:475
+#, fuzzy, tcl-format
+msgid "Transfer from %s ended prematurely."
+msgstr "La transferencia de %s ha terminado inesperadamente."
+
+#: ../whiteboard/GetFileIface.tcl:476
+#, fuzzy, tcl-format
+msgid "Finished downloading file %s from %s."
+msgstr "El archivo %s de %s ha sido recibido."
+
+#: ../whiteboard/GetFileIface.tcl:477
+#, fuzzy, tcl-format
+msgid "Cannot download from %s: network error."
+msgstr "Error de transferencia durante la recepción de %s."
+
+#: ../whiteboard/Import.tcl:59
+#, fuzzy
+msgid "Import Image/Movie"
+msgstr "Importar Imagen"
+
+#: ../whiteboard/Import.tcl:1809
+#, fuzzy
+msgid "Save As GIF"
+msgstr "Guardar como GIF"
+
+#: ../whiteboard/ItemInspector.tcl:193
+#, fuzzy
+msgid "Edit Item"
+msgstr "Editar el objeto"
+
+#: ../whiteboard/ItemInspector.tcl:211 ../whiteboard/ItemInspector.tcl:363
+#: ../whiteboard/Whiteboard.tcl:497
+#, fuzzy
+msgid "Fill"
+msgstr "Rellenar"
+
+#: ../whiteboard/ItemInspector.tcl:215
+#, fuzzy
+msgid "Both"
+msgstr "Ambos"
+
+#: ../whiteboard/ItemInspector.tcl:216
+#, fuzzy
+msgid "Butt"
+msgstr "Cabo"
+
+#: ../whiteboard/ItemInspector.tcl:217
+#, fuzzy
+msgid "Projecting"
+msgstr "Projectando"
+
+#: ../whiteboard/ItemInspector.tcl:218
+#, fuzzy
+msgid "Round"
+msgstr "Círculo"
+
+#: ../whiteboard/ItemInspector.tcl:219
+#, fuzzy
+msgid "Bevel"
+msgstr "Bisel"
+
+#: ../whiteboard/ItemInspector.tcl:220
+#, fuzzy
+msgid "Miter"
+msgstr "Mitra"
+
+#: ../whiteboard/ItemInspector.tcl:224 ../whiteboard/ItemInspector.tcl:831
+#, fuzzy
+msgid "False"
+msgstr "Falso"
+
+#: ../whiteboard/ItemInspector.tcl:225 ../whiteboard/ItemInspector.tcl:831
+#, fuzzy
+msgid "True"
+msgstr "Verdadero"
+
+#: ../whiteboard/ItemInspector.tcl:226
+#, fuzzy
+msgid "Gray 75%"
+msgstr "Gris 75%"
+
+#: ../whiteboard/ItemInspector.tcl:227
+#, fuzzy
+msgid "Gray 50%"
+msgstr "Gris 50%"
+
+#: ../whiteboard/ItemInspector.tcl:228
+#, fuzzy
+msgid "Gray 25%"
+msgstr "Gris 25%"
+
+#: ../whiteboard/ItemInspector.tcl:229
+#, fuzzy
+msgid "Gray 12%"
+msgstr "Gris 12%"
+
+#: ../whiteboard/ItemInspector.tcl:233
+#, fuzzy
+msgid "N"
+msgstr "N"
+
+#: ../whiteboard/ItemInspector.tcl:234
+#, fuzzy
+msgid "NE"
+msgstr "NE"
+
+#: ../whiteboard/ItemInspector.tcl:235
+#, fuzzy
+msgid "E"
+msgstr "E"
+
+#: ../whiteboard/ItemInspector.tcl:236
+msgid "SE"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:237
+#, fuzzy
+msgid "S"
+msgstr "S"
+
+#: ../whiteboard/ItemInspector.tcl:238
+#, fuzzy
+msgid "SW"
+msgstr "SW"
+
+#: ../whiteboard/ItemInspector.tcl:239
+#, fuzzy
+msgid "W"
+msgstr "W"
+
+#: ../whiteboard/ItemInspector.tcl:240
+#, fuzzy
+msgid "NW"
+msgstr "NW"
+
+#: ../whiteboard/ItemInspector.tcl:241
+#, fuzzy
+msgid "Center"
+msgstr "Centrado"
+
+#: ../whiteboard/ItemInspector.tcl:245
+#, fuzzy
+msgid "Left"
+msgstr "Izquierda"
+
+#: ../whiteboard/ItemInspector.tcl:246
+#, fuzzy
+msgid "Right"
+msgstr "Derecha"
+
+#: ../whiteboard/ItemInspector.tcl:247
+#, fuzzy
+msgid "Transparent"
+msgstr "Transparente"
+
+#: ../whiteboard/ItemInspector.tcl:305
+#, fuzzy
+msgid "Coordinates"
+msgstr "Coordenadas"
+
+#: ../whiteboard/ItemInspector.tcl:358
+#, fuzzy
+msgid "Arrow"
+msgstr "Flecha"
+
+#: ../whiteboard/ItemInspector.tcl:359
+#, fuzzy
+msgid "Arrow shape"
+msgstr "Forma de Flecha"
+
+#: ../whiteboard/ItemInspector.tcl:360
+#, fuzzy
+msgid "Cap style"
+msgstr "Estilo Mayúsculas"
+
+#: ../whiteboard/ItemInspector.tcl:361
+#, fuzzy
+msgid "Join style"
+msgstr "Estilo de la unión"
+
+#: ../whiteboard/ItemInspector.tcl:364
+#, fuzzy
+msgid "Font familiy"
+msgstr "Familia de la fuente"
+
+#: ../whiteboard/ItemInspector.tcl:368
+msgid "Underline"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:369
+#, fuzzy
+msgid "Smooth"
+msgstr "Suavizado"
+
+#: ../whiteboard/ItemInspector.tcl:370
+#, fuzzy
+msgid "Stipple"
+msgstr "Punteado"
+
+#: ../whiteboard/ItemInspector.tcl:371
+#, fuzzy
+msgid "Tags"
+msgstr "Marcas"
+
+#: ../whiteboard/ItemInspector.tcl:373 ../whiteboard/WBPrefs.tcl:108
+#, fuzzy
+msgid "Width"
+msgstr "Anchura"
+
+#: ../whiteboard/ItemInspector.tcl:374 ../whiteboard/ItemInspector.tcl:381
+#, fuzzy
+msgid "Outline stipple"
+msgstr "Punteado de la linea exterior"
+
+#: ../whiteboard/ItemInspector.tcl:376
+#, fuzzy
+msgid "Anchor"
+msgstr "Ancla"
+
+#: ../whiteboard/ItemInspector.tcl:379
+#, fuzzy
+msgid "Justify"
+msgstr "Justificar"
+
+#: ../whiteboard/ItemInspector.tcl:380
+#, fuzzy
+msgid "Outline"
+msgstr "Linea exterior"
+
+#: ../whiteboard/ItemInspector.tcl:382
+msgid "Extend"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:491
+#, fuzzy
+msgid "Lock this item from being edited"
+msgstr "Proteger este elemento para no ser editado"
+
+#: ../whiteboard/ItemInspector.tcl:957
+#, fuzzy
+msgid "Broken Image"
+msgstr "Imagen rota"
+
+#. TRANSLATORS: old whiteboard feature
+#: ../whiteboard/Multicast.tcl:53
+#, fuzzy
+msgid "Open Stream"
+msgstr "Abrir streaming"
+
+#: ../whiteboard/Multicast.tcl:68
+#, fuzzy
+msgid "Open QuickTime live stream"
+msgstr "Abrir"
+
+#: ../whiteboard/Multicast.tcl:71
+msgid "Write URL or choose from shortcut"
+msgstr ""
+
+#: ../whiteboard/Multicast.tcl:78
+#, fuzzy
+msgid ""
+"Open a URL which contains a SDP file with extension .mov for a QuickTime "
+"realtime live streaming sending. Can be audio (radio) or video (TV). "
+"Alternatively, use your web browser to find the SDP file for a live "
+"transmission, download it on disk and open it is an ordinary movie."
+msgstr "Abrir esta."
+
+#: ../whiteboard/Plugins.tcl:1346
+#, fuzzy
+msgid "Select the plugins you want to be loaded."
+msgstr "Seleccione los plugions que desea cargar."
+
+#: ../whiteboard/Plugins.tcl:1366
+#, fuzzy
+msgid "Support for mp3, wav, and a few other audio formats"
+msgstr "Soporte para mp3, wav, y algunos formatos de sonido más"
+
+#: ../whiteboard/Plugins.tcl:1367
+#, fuzzy
+msgid "Support for common image formats"
+msgstr "Soporte para formatos de imagen comunes"
+
+#: ../whiteboard/Plugins.tcl:1368
+#, fuzzy
+msgid "Support for PNG images"
+msgstr "Soporte para imágenes PNG"
+
+#: ../whiteboard/Plugins.tcl:1369
+#, fuzzy
+msgid "Support for several animation, video and audio formats"
+msgstr "Soporte para varios formatos de animación, video y audio"
+
+#: ../whiteboard/Plugins.tcl:1370
+#, fuzzy
+msgid "Support for several animation, image, video and audio formats"
+msgstr "Soporte para varios formatos de animación, video y audio"
+
+#: ../whiteboard/Plugins.tcl:1371
+#, fuzzy
+msgid "Import plain text documents"
+msgstr "Importar Texto"
+
+#: ../whiteboard/Plugins.tcl:1372
+#, fuzzy
+msgid "Import HTML pages"
+msgstr "Importar"
+
+#: ../whiteboard/Plugins.tcl:1373
+#, fuzzy
+msgid "Import Itcl applets"
+msgstr "Importar"
+
+#: ../whiteboard/PutFileIface.tcl:168
+#, tcl-format
+msgid "The server at %s responded with a code %s: %s"
+msgstr ""
+
+#: ../whiteboard/PutFileIface.tcl:184
+#, tcl-format
+msgid "Transfer to %s ended prematurely."
+msgstr ""
+
+#: ../whiteboard/PutFileIface.tcl:185
+#, fuzzy, tcl-format
+msgid "Finished uploading file %s to %s."
+msgstr "Terminado."
+
+#: ../whiteboard/PutFileIface.tcl:186
+#, tcl-format
+msgid "Cannot upload to %s: network error."
+msgstr ""
+
+#: ../whiteboard/WBPrefs.tcl:76
+#, fuzzy
+msgid "Fonts"
+msgstr "Tipografía"
+
+#: ../whiteboard/WBPrefs.tcl:111
+#, fuzzy
+msgid "Height"
+msgstr "Altura"
+
+#: ../whiteboard/WBPrefs.tcl:127
+#, fuzzy
+msgid "Smooth freehand strokes"
+msgstr "Suavizar lineas dibujadas a mano alzada"
+
+#: ../whiteboard/WBPrefs.tcl:129
+#, fuzzy
+msgid "Create new item for each line of text"
+msgstr "Crear un nuevo item por cada línea de texto"
+
+#: ../whiteboard/WBPrefs.tcl:131
+#, fuzzy
+msgid "Only edit local whiteboard items"
+msgstr "Solo editar elemetos locales en la pizarra"
+
+#: ../whiteboard/WBPrefs.tcl:136
+#, fuzzy
+msgid "Items created by others cannot be edited when enabled"
+msgstr "Si se activa no podrá editar elementos creados por otros"
+
+#: ../whiteboard/WBPrefs.tcl:155
+#, fuzzy
+msgid "System"
+msgstr "Sistema"
+
+#: ../whiteboard/WBPrefs.tcl:212
+#, fuzzy
+msgid ""
+"Warning: by importing any other fonts than the standard three ones (Times, "
+"Helvetica or Courier), you must be confident that all remote clients also "
+"have this font installed on their system."
+msgstr ""
+"Atención: cuando añada otras fuentes además de las fuentes estándar (Times, "
+"Helvetica o Courier), Aseguresé que ha instalado también estas últimas."
+
+#: ../whiteboard/WBPrefs.tcl:299
+#, fuzzy
+msgid "The standard fonts, Times, Helvetica, and Courier, may not be removed."
+msgstr ""
+"Las fuentes standard Times, Helvetica y Courier no pueden ser eliminadas"
+
+#: ../whiteboard/WDialogs.tcl:169
+#, fuzzy
+msgid "no"
+msgstr "no"
+
+#: ../whiteboard/WDialogs.tcl:169
+#, fuzzy
+msgid "yes"
+msgstr "sí"
+
+#: ../whiteboard/WDialogs.tcl:194
+#, fuzzy
+msgid "Buffering support"
+msgstr "Buffering support"
+
+#: ../whiteboard/WDialogs.tcl:195
+#, fuzzy
+msgid "Blocking support"
+msgstr "Soporte de bloqueo"
+
+#: ../whiteboard/WDialogs.tcl:196
+#, fuzzy
+msgid "Secured"
+msgstr "Seguro"
+
+#: ../whiteboard/Whiteboard.tcl:76 ../whiteboard/Whiteboard.tcl:1665
+#, fuzzy
+msgid ""
+"Point tool, click to mark, double click to inspect, right click to popup"
+msgstr ""
+"Puntero (click : seleccionar, doble click: inspeccionar, click derecho: "
+"popup)"
+
+#: ../whiteboard/Whiteboard.tcl:77
+#, fuzzy
+msgid "Move tool"
+msgstr "Mover"
+
+#: ../whiteboard/Whiteboard.tcl:78
+#, fuzzy
+msgid "Line tool"
+msgstr "Linea"
+
+#: ../whiteboard/Whiteboard.tcl:79
+#, fuzzy
+msgid "Arrow tool"
+msgstr "Flecha"
+
+#: ../whiteboard/Whiteboard.tcl:80
+#, fuzzy
+msgid "Rectangle tool"
+msgstr "Rectángulo"
+
+#: ../whiteboard/Whiteboard.tcl:81
+#, fuzzy
+msgid "Oval tool"
+msgstr "Elipse"
+
+#: ../whiteboard/Whiteboard.tcl:82
+#, fuzzy
+msgid "Click to delete"
+msgstr "Haga click para borrar"
+
+#: ../whiteboard/Whiteboard.tcl:83
+#, fuzzy
+msgid "Pen tool"
+msgstr "Pintura"
+
+#: ../whiteboard/Whiteboard.tcl:84
+#, fuzzy
+msgid "Brush tool"
+msgstr "Brocha"
+
+#: ../whiteboard/Whiteboard.tcl:85
+#, fuzzy
+msgid "Paint tool, shift-click for transparency"
+msgstr "Relleno (+ <shift>: transparente)"
+
+#: ../whiteboard/Whiteboard.tcl:86
+#, fuzzy
+msgid "Polygon tool, spacebar to cancel"
+msgstr "Polígono (<espacio>: terminar)"
+
+#: ../whiteboard/Whiteboard.tcl:88
+#, fuzzy
+msgid "Rotate tool, select item first"
+msgstr "Rotar (debe tener seleccionados los objetos)"
+
+#: ../whiteboard/Whiteboard.tcl:89
+#, fuzzy
+msgid "Text tool"
+msgstr "Texto"
+
+#: ../whiteboard/Whiteboard.tcl:449 ../whiteboard/Whiteboard.tcl:2931
+#, fuzzy
+msgid "Select &All"
+msgstr "Selecionar &todo"
+
+#: ../whiteboard/Whiteboard.tcl:454 ../whiteboard/Whiteboard.tcl:2941
+#: ../whiteboard/Whiteboard.tcl:2950
+#, fuzzy
+msgid "&Raise"
+msgstr "Elevar"
+
+#: ../whiteboard/Whiteboard.tcl:455 ../whiteboard/Whiteboard.tcl:2942
+#: ../whiteboard/Whiteboard.tcl:2951
+#, fuzzy
+msgid "&Lower"
+msgstr "Bajar"
+
+#: ../whiteboard/Whiteboard.tcl:458 ../whiteboard/Whiteboard.tcl:2944
+#: ../whiteboard/Whiteboard.tcl:2966 ../whiteboard/Whiteboard.tcl:2969
+#, fuzzy
+msgid "Smaller"
+msgstr "Reducir"
+
+#: ../whiteboard/Whiteboard.tcl:459 ../whiteboard/Whiteboard.tcl:2945
+#: ../whiteboard/Whiteboard.tcl:2953 ../whiteboard/Whiteboard.tcl:2955
+#, fuzzy
+msgid "Flip"
+msgstr "Reflejar"
+
+#: ../whiteboard/Whiteboard.tcl:460
+#, fuzzy
+msgid "Horizontal"
+msgstr "Horizontal"
+
+#: ../whiteboard/Whiteboard.tcl:461
+#, fuzzy
+msgid "Vertical"
+msgstr "Vertical"
+
+#: ../whiteboard/Whiteboard.tcl:470
+#, fuzzy
+msgid "Background Color"
+msgstr "Color de fondo..."
+
+#: ../whiteboard/Whiteboard.tcl:472
+#, fuzzy
+msgid "Grid"
+msgstr "Rejilla"
+
+#: ../whiteboard/Whiteboard.tcl:546
+#, fuzzy
+msgid "Shift Constrain"
+msgstr "Girar"
+
+#: ../whiteboard/Whiteboard.tcl:547
+#, fuzzy
+msgid "To 90 degrees"
+msgstr "Girar 90 grados"
+
+#: ../whiteboard/Whiteboard.tcl:549
+#, fuzzy
+msgid "To 45 degrees"
+msgstr "Girar 45 grados"
+
+#: ../whiteboard/Whiteboard.tcl:589
+#, fuzzy
+msgid "&Server"
+msgstr "&Servidor"
+
+#: ../whiteboard/Whiteboard.tcl:1662 ../whiteboard/Whiteboard.tcl:2452
+#, fuzzy
+msgid "Point tool, click to mark, double click to inspect, press to popup"
+msgstr "Puntero (click : seleccionar, doble click: inspeccionar, pulse: popup)"
+
+#: ../whiteboard/Whiteboard.tcl:2211 ../whiteboard/Whiteboard.tcl:2286
+#, fuzzy
+msgid "&Library"
+msgstr "Biblioteca"
