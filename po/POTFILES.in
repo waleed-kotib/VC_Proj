@@ -1,0 +1,136 @@
+#  POTFILES.in ---
+#  
+#      List of source files containing translatable strings. The xgettext
+#      tool will use this list to extract all strings.
+#   
+#   Copyright (c) 2009  Sander Devrieze
+#  
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#   
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#   
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Encoding for the template.pot file
+#[encoding: UTF-8]
+
+# List of files containing strings that need translation
+../Coccinella.tcl
+../components/AutoUpdate.tcl
+../components/BuddyPounce.tcl
+../components/Carbon.tcl
+../components/fsdialog.tcl
+../components/Geolocation.tcl
+../components/Growl.tcl
+../components/ImageMagic.tcl
+../components/JivePhone.tcl
+../components/MeBeam.tcl
+../components/Mood.tcl
+../components/Notifier.tcl
+../components/NotifyCall.tcl
+../components/ParseURI.tcl
+../components/Phone/NotifyCall.tcl
+../components/Phone/Phone.tcl
+../components/Phone/IAX/JingleIax.tcl
+../components/SlideShow.tcl
+../components/Sounds.tcl
+../components/Speech.tcl
+../components/Spell.tcl
+../components/taskbar/Taskbar.tcl
+../components/Totd.tcl
+../components/UserActivity.tcl
+../components/XMLConsole.tcl
+../contrib/ttoolbar.tcl
+../contrib/ui/dialog.tcl
+../contrib/ui/fontselector.tcl
+../contrib/ui/openimage.tcl
+../contrib/ui/progress.tcl
+../contrib/wizard.tcl
+../jabber/Adhoc.tcl
+../jabber/AppStatusSlot.tcl
+../jabber/AutoAway.tcl
+../jabber/Avatar.tcl
+../jabber/AvatarMB.tcl
+../jabber/Chat.tcl
+../jabber/Create.tcl
+../jabber/Disco.tcl
+../jabber/Emoticons.tcl
+../jabber/Enter.tcl
+../jabber/FTrans.tcl
+../jabber/Gateway.tcl
+../jabber/GotMsg.tcl
+../jabber/GroupChat.tcl
+../jabber/History.tcl
+../jabber/Jabber.tcl
+../jabber/JForms.tcl
+../jabber/JPrefs.tcl
+../jabber/JUI.tcl
+../jabber/JUser.tcl
+../jabber/JWB.tcl
+../jabber/Login.tcl
+../jabber/MailBox.tcl
+../jabber/MegaPresence.tcl
+../jabber/MUC.tcl
+../jabber/NewMsg.tcl
+../jabber/OOB.tcl
+../jabber/Profiles.tcl
+../jabber/Register.tcl
+../jabber/Roster.tcl
+../jabber/RosterTree.tcl
+../jabber/Rosticons.tcl
+../jabber/Search.tcl
+../jabber/SetupAss.tcl
+../jabber/Status.tcl
+../jabber/StatusSlot.tcl
+../jabber/Subscribe.tcl
+../jabber/UserInfo.tcl
+../jabber/VCard.tcl
+../lib/Bookmarks.tcl
+../lib/Component.tcl
+../lib/Dialogs.tcl
+../lib/EditDialogs.tcl
+../lib/FileCache.tcl
+../lib/Httpd.tcl
+../lib/HttpTrpt.tcl
+../lib/Init.tcl
+../lib/MacintoshUtils.tcl
+../lib/Media.tcl
+../lib/Preferences.tcl
+../lib/PrefGeneral.tcl
+../lib/PrefHelpers.tcl
+../lib/PrefNet.tcl
+../lib/PrefUtils.tcl
+../lib/Proxy.tcl
+../lib/Splash.tcl
+../lib/TheServer.tcl
+../lib/TSearch.tcl
+../lib/Types.tcl
+../lib/UI.tcl
+../lib/UserActions.tcl
+../lib/Utils.tcl
+../lib/WindowsUtils.tcl
+../lib/WSearch.tcl
+../plugins/HtmlImport.tcl
+../plugins/PluginTextPlain.tcl
+../plugins/WinImport.tcl
+../whiteboard/CanvasCmd.tcl
+../whiteboard/CanvasDraw.tcl
+../whiteboard/CanvasFile.tcl
+../whiteboard/CanvasUtils.tcl
+../whiteboard/FilePrefs.tcl
+../whiteboard/GetFileIface.tcl
+../whiteboard/Import.tcl
+../whiteboard/ItemInspector.tcl
+../whiteboard/Multicast.tcl
+../whiteboard/Plugins.tcl
+../whiteboard/PutFileIface.tcl
+../whiteboard/WBPrefs.tcl
+../whiteboard/WDialogs.tcl
+../whiteboard/Whiteboard.tcl
