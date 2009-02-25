@@ -158,15 +158,14 @@ proc ::JUI::Init {} {
 	    {command  mInbox...        {[mc "&Inbox"]...} {::MailBox::MKExportDlg}   {}}
 	    {command  mBC...           {[mc "&Business Card"]...} {::VCard::OnMenuExport}    {}}
 	}}
-	{separator}
-	{command   mQuit               {[mc "&Quit"]} {::UserActions::DoQuit}    Q}
     }
     if {[tk windowingsystem] eq "aqua"} {
 	set mDefsClose [list {command   mCloseWindow  {[mc "&Close Window"]} {::UI::CloseWindowEvent}  W}]
 	set menuDefs(rost,file) [concat $mDefsClose {separator} $mDefsFile]
     } else {    
 	set mDefsPrefs [list {command   mPreferences...  {[mc "&Preferences"]...} {::Preferences::Build}  {}}]
-	set menuDefs(rost,file) [concat $mDefsPrefs {separator} $mDefsFile]
+	set mDefsQuit [list {separator} {command   mQuit               {[mc "&Quit"]} {::UserActions::DoQuit}    Q}]
+	set menuDefs(rost,file) [concat $mDefsPrefs {separator} $mDefsFile $mDefsQuit]
     }
 
     # TRANSLATORS; main window Action menu entries
