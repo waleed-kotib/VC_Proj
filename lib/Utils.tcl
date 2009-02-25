@@ -522,7 +522,7 @@ proc ::Utils::LanguageMenubutton {w varName args} {
 	pt    {Português}
 	ru    {русский}
 	sv    {Svenska}
-	zh_cn {简化字}
+	zh_cn {简体中文}
     }
     set langs [list]
     foreach f [glob -nocomplain -tails -directory $this(msgcatPath) *.msg] {
