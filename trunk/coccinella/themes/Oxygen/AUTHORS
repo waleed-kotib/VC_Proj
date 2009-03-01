@@ -1,52 +1,34 @@
-Most icons are made by the Oxygen Team (KDE): http://www.kde.org/
+Coccinella's Oxygen Icon Theme
 
-Some icons are created by Sander Devrieze and may be based on existing Oxygen icons: draw-arrow, inbox-unread, mail-quote, notify-typig, user-chat
+Most icons were taken from KDE revision 933217 of the Oxygen Icon Theme created by The Oxygen Team (credits at the bottom).
 
-hi icons from Kolourpaint (draw-oval, draw-rect, draw-line, draw-poly) are made by Nuno Pinheiro and Danny Allen.
-
-draw-arc is stolen from Gimp and slightly changed (Thank You!).
-
+Icons created by Sander Devrieze (some are based on original Oxygen Icon Theme icons): draw-arrow, inbox-unread, mail-quote, notify-typing, user-chat.
+Icons created by Nuno Pinheiro and Danny Allen (hicolor icon set of Kolourpaint): draw-oval, draw-rect, draw-line, draw-poly.
+draw-arc, colorSelSwap and colorSelBW are stolen from Gimp and slightly changed (Thank You!).
 mood-* icons, activity-* icons, *tlen* icons and maybe a few others are from the Gajim project: http://gajim.org/
 
-A few icons and other graphics elements may come from the Crystal icon set
-by Everaldo and are Copyrighted. They are used in The Coccinella by a
-granted permission, see below. I'm most grateful for their permission
-to use these amzing icons. Many Thanks!
+All icons are (re)licensed as GPLv3
 
-------------------
+--------------------------------------------------------
 
-Dear Mats,
+Oxygen Icon Theme has been developed by The Oxygen Team.
 
-Thanks for having contacted us. My name is Ana and I'm customer service
-supervisor at Yellowicon.com and Everaldo.com. We are glad you appreciate
-our work. You are welcome to use our Crystal icons as long as your
-intentions are not commercial. The use of these icons is allowed only for
-non commercial meaning. The intent of this Icon packages are to contribute
-with educational institutions and for this reason we request the non
-commercial use only! We also would like to ask you insert a link to
-www.everaldo.com as way of given the appropriate credits to the artist. If
-however, your intentions are commercial we would be glad to offer the option
-of buying one of our Stock Icons solutions (www.iconbase.com). Please fell
-free to contact us with any doubt you may have.
+Art Directors:
+David Vignoni <david@oxygen-icons.org>
+Nuno F. Pinheiro <nuno@oxygen-icons.org>
+David J. Miller <miller@oxygen-icons.org>
 
-Thanks once again for you contact. 
+Naming Coordinator:
+Jakob Petsovits <jpetso@gmx.at>
+Designers:David J. Miller <miller@oxygen-icons.org>
+David Vignoni <david@oxygen-icons.org>
+Johann Ollivier Lapeyre <johann@oxygen-icons.org>
+Kenneth Wimer <ken@oxygen-icons.org>
+Nuno F. Pinheiro <nuno@oxygen-icons.org>
+Riccardo Iaconelli <riccardo@oxygen-icons.org>
 
-Ana Carolina d'Arrigo
-CSS
-www.yellowicon.com
-www.iconbase.com
-www.everaldo.com
-
--------------------
-
-Hi
-
-Thank you for contact me.
-No problem for your use.
-Just include the credits and a link to www.everaldo.com and
-www.yellowicon.com
-
-Best regards
-Everaldo
-
-
+Thanks to:
+Lee Olson: Contributed drawing used in application-x-bittorent icon.
+Marco Aurélio "Coré": Improved audio-input-microphone icon.
+Matthias Kretz: Contributed "audio-input-line" device icon.
+Mauricio Piacentini <piacentini@kde.org> : game icons mashup.

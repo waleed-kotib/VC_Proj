@@ -1371,6 +1371,7 @@ proc ::Plugins::BuildPrefsPage {page} {
 	dict set tooltip TextImporter [mc "Import plain text documents"]
 	dict set tooltip HtmlImport   [mc "Import HTML pages"]
 	dict set tooltip ItclApplets  [mc "Import Itcl applets"]
+	dict set tooltip WinImport    [mc "Import documents on Windows"]
 	
 	::balloonhelp::balloonforwindow $pfr.c$i [dict get $tooltip $plug]
 	
