@@ -518,13 +518,13 @@ proc ::Roster::DoPopup {jidL groupL x y} {
 	    append str " ("
 	    append str [mc "Default"]
 	    append str ")"
-	    lappend mSub [list command $str [list ::Chat::StartThread $jid2]]
+	    lappend mSub [list command test $str [list ::Chat::StartThread $jid2]]
 	    lappend mSub [list separator]
 	    foreach res $resOnL {
 		set xjid $jid2/$res
-		lappend mSub [list command $xjid [list ::Chat::StartThread $xjid]]
+		lappend mSub [list command $xjid $xjid [list ::Chat::StartThread $xjid]]
 	    }
-	    set mChatM [list cascade mChat... $mSub]
+	    set mChatM [list cascade mChat... {[mc "Cha&t"]} $mSub]
 	    set mDef [lreplace $mDef $idx $idx $mChatM]
 	}
     }

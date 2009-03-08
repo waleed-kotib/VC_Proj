@@ -29,18 +29,18 @@ namespace eval ::Search {
 
     variable popMenuDefs    
     set popMenuDefs {
-	{command    mAddContact...      {::JUser::NewDlg -jid $jid} }
-	{command    mMessage...         {::NewMsg::Build -to $jid} }	
-	{command    mChat...            {::Chat::StartThread $jid} }	
-	{command    mBusinessCard...    {::VCard::Fetch other $jid} }	
+	{command    mAddContact...      {[mc "&Add Contact"]...}        {::JUser::NewDlg -jid $jid} }
+	{command    mMessage...         {[mc "&Message"]...}            {::NewMsg::Build -to $jid} }	
+	{command    mChat...            {[mc "Cha&t"]...}               {::Chat::StartThread $jid} }	
+	{command    mBusinessCard...    {[mc "View &Business Card"]...} {::VCard::Fetch other $jid} }	
     }
     
     variable popMenuExDefs    
     set popMenuExDefs {
-	{command    mAddContact...      {::JUser::MultiAdd $jidL} }
-	{command    mMessage...         {::NewMsg::Build -to $jid -tolist $jidL} }	
-	{command    mChat...            {::Chat::StartThread $jid} }	
-	{command    mBusinessCard...    {::UserInfo::GetJIDList $jidL} }	
+	{command    mAddContact...      {[mc "&Add Contact"]...}        {::JUser::MultiAdd $jidL} }
+	{command    mMessage...         {[mc "&Message"]...}            {::NewMsg::Build -to $jid -tolist $jidL} }	
+	{command    mChat...            {[mc "Cha&t"]...}               {::Chat::StartThread $jid} }	
+	{command    mBusinessCard...    {[mc "View &Business Card"]...} {::UserInfo::GetJIDList $jidL} }	
     }
 }
 
