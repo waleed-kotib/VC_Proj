@@ -5,7 +5,8 @@ Most icons were taken from KDE revision 933217 of the Oxygen Icon Theme created 
 Icons created by Sander Devrieze (some are based on original Oxygen Icon Theme icons): draw-arrow, inbox-unread, mail-quote, notify-typing, user-chat.
 Icons created by Nuno Pinheiro and Danny Allen (hicolor icon set of Kolourpaint): draw-oval, draw-rect, draw-line, draw-poly.
 draw-arc, colorSelSwap and colorSelBW are stolen from Gimp and slightly changed (Thank You!).
-mood-* icons, activity-* icons, *tlen* icons and maybe a few others are from the Gajim project: http://gajim.org/
+mood-* icons, activity-* icons, *tlen*, protocol-mrim icons and maybe a few others are from the Gajim project: http://gajim.org/
+protocol-facebook is created by Jakub Szypulka for the pidgin-facebookchat project: http://code.google.com/p/pidgin-facebookchat/
 
 All icons are (re)licensed as GPLv3
 
