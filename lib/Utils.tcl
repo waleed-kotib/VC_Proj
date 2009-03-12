@@ -506,7 +506,6 @@ proc ::Utils::ImageFromData {data {mime ""}} {
 
 proc ::Utils::LanguageMenubutton {w varName args} {
     global  this prefs
-    
     # Add entries here for new message catalogs.
     array set code2Name {
 	cs    {Čeština}

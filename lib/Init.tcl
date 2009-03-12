@@ -636,17 +636,8 @@ proc ::Init::Msgcat {} {
 	::msgcat::mclocale en
     }
     
-    # Seems to be needed for tclkits?
-    if {$lang eq "ru"} {
-	switch -- [tk windowingsystem] {
-	    win32 {
-		catch {encoding system cp1251}
-	    }
-	    x11 {
-		catch {encoding system koi8-r}
-	    }
-	}
-    }
+    # Windows is not utf-8 by default
+    encoding system utf-8
     
     # Test here if you want a particular message catalog (en, nl, de, fr, sv,...).
     #::msgcat::mclocale pl
