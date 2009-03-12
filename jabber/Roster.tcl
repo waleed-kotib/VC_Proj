@@ -1226,11 +1226,15 @@ namespace eval ::Roster:: {
 	xmpp        "Jabber ID"
 	icq         "ICQ (number)"
 	aim         "AIM"
+	facebook    "Facebook IM"
+	mrim        "Mail.ru IM"
 	msn         "MSN"
+	myspaceim   "MySpace IM"
 	yahoo       "Yahoo"
 	irc         "IRC"
 	x-gadugadu  "Gadu-Gadu"
 	gadu-gadu   "Gadu-Gadu"
+	sametime    "Sametime"
 	tlen        "Tlen"
 	x-tlen      "Tlen"
 	qq          "QQ"
@@ -1240,12 +1244,16 @@ namespace eval ::Roster:: {
 	xmpp        "XMPP"
 	icq         "ICQ"
 	aim         "AIM"
+	facebook    "Facebook IM"
+	mrim        "Mail.ru IM"
 	msn         "MSN"
+	myspaceim   "MySpace IM"
 	yahoo       "Yahoo"
 	irc         "IRC"
 	gadugadu    "Gadu-Gadu"
 	gadu-gadu   "Gadu-Gadu"
 	x-gadugadu  "Gadu-Gadu"
+	sametime    "Sametime"
 	tlen        "Tlen"
 	x-tlen      "Tlen"
 	qq          "QQ"
@@ -1254,11 +1262,15 @@ namespace eval ::Roster:: {
 	"XMPP"             xmpp
 	"ICQ"              icq
 	"AIM"              aim
+	"Facebook IM"      facebook
+	"Mail.ru Im"       mrim
 	"MSN"              msn
+	"MySpace IM"       myspaceim
 	"Yahoo"            yahoo
 	"IRC"              irc
 	"Gadu-Gadu"        x-gadugadu
 	"Gadu-Gadu"        gadu-gadu
+	"Sametime"         sametime
 	"Tlen"             tlen
 	"QQ"               qq
     }

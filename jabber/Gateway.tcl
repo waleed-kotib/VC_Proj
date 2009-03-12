@@ -49,12 +49,17 @@ namespace eval ::Gateway {
     variable shortName
     set shortName [dict create]
 	dict set shortName aim         "AIM"
+	dict set shortName facebook    "Facebook IM"
 	dict set shortName gadu-gadu   "Gadu-Gadu"
 	dict set shortName icq         "ICQ"
 	dict set shortName irc         "IRC"
 	dict set shortName jabber      "XMPP"
+	dict set shortName mrim        "Mail.ru IM"
 	dict set shortName msn         "MSN"
+	dict set shortName myspaceim   "MySpace IM"
 	dict set shortName qq          "QQ"
+	dict set shortName sametime    "Sametime"
+	dict set shortName sms         "SMS"
 	dict set shortName smtp        [mc "Email"]
 	dict set shortName tlen        "Tlen"
 	dict set shortName xmpp        "XMPP"
@@ -65,11 +70,18 @@ namespace eval ::Gateway {
     set promptText [dict create]
     # TRANSLATORS; AOL AIM address
     dict set promptText aim        [mc "Screen name"]
+    # TODO
+    dict set promptText facebook  "Facebook friend"
     dict set promptText gadu-gadu  [mc "Gadu-Gadu number"]
     # TRANSLATORS; also known as UIN
     dict set promptText icq        [mc "ICQ number"]
     dict set promptText irc        [mc "IRC"]
+    dict set promptText mrim       [mc "Email address"]
     dict set promptText msn        [mc "MSN Address"]
+    # TODO
+    dict set promptText myspaceim  "MySpace IM address"
+    dict set promptText sametime   "Sametime address"
+    dict set promptText sms        [mc "Phone number"]
     dict set promptText smtp       [mc "Email address"]
     dict set promptText qq         [mc "QQ number"]
     dict set promptText tlen       [mc "Tlen address"]
@@ -79,13 +91,15 @@ namespace eval ::Gateway {
     # Each gateway must transform its "prompt" (user ID) to a JID.
     # These templates provides such a mapping. 
     # Must substitute %s with gateway's JID. Note verbatim "%" as "%%".
-    variable template
+    variable template 
+    # TODO: sms, facebook, sametime, qq, gadu-gadu, tlen?
     array set template {
 	aim         userName@%s
 	icq         screenNumber@%s
 	jabber      userName@%s
+	mrim        userName%%mail.ru@%s
 	msn         userName%%hotmail.com@%s
-	smtp        userName%%emailserver@%s
+	smtp        userName%%email.com@%s
 	tlen        userName@%s
 	xmpp        userName@%s
 	yahoo       userName@%s
