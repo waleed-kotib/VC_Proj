@@ -1,7 +1,8 @@
-if {[catch {package require Tcl 8.4}]} return
-
-if {[info tclversion] == 8.4} {
-    package ifneeded treectrl 2.2.3 [list load [file join $dir libtreectrl2.2.so] treectrl]
-} elseif {[info tclversion] == 8.5} {
-    package ifneeded treectrl 2.2.6 [list load [file join $dir 8.5 libtreectrl2.2.so] treectrl]    
+if {[catch {package require Tcl 8.5}]} return
+set script ""
+if {![info exists ::env(TREECTRL_LIBRARY)]
+    && [file exists [file join $dir treectrl.tcl]]} {
+    append script "set ::treectrl_library \"$dir\"\n"
 }
+append script "load \"[file join $dir libtreectrl2.2.so]\" treectrl"
+package ifneeded treectrl 2.2.8 $script
