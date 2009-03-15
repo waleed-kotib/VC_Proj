@@ -1,5 +1,5 @@
 package ifneeded zlibtcl 1.2.3  [list load [file join $dir libzlibtcl1.2.3.so]]
-package ifneeded pngtcl 1.2.6  [list load [file join $dir libpngtcl1.2.6.so]]
+#package ifneeded pngtcl 1.2.6  [list load [file join $dir libpngtcl1.2.6.so]]
 package ifneeded tifftcl 3.6.1  [list load [file join $dir libtifftcl3.6.1.so]]
 package ifneeded jpegtcl 1.0  [list load [file join $dir libjpegtcl1.0.so]]
 # -*- tcl -*- Tcl package index file
@@ -31,7 +31,7 @@ package ifneeded Img 1.3 {
     package require img::xpm
     package require img::ps
     package require img::jpeg
-    package require img::png
+#    package require img::png
     package require img::tiff
     package require img::bmp
     package require img::ppm
@@ -46,7 +46,7 @@ package ifneeded img::ico 1.3  [list load [file join $dir libtkimgico1.3.so]]
 package ifneeded img::jpeg 1.3  [list load [file join $dir libtkimgjpeg1.3.so]]
 package ifneeded img::pcx 1.3  [list load [file join $dir libtkimgpcx1.3.so]]
 package ifneeded img::pixmap 1.3  [list load [file join $dir libtkimgpixmap1.3.so]]
-package ifneeded img::png 1.3  [list load [file join $dir libtkimgpng1.3.so]]
+#package ifneeded img::png 1.3  [list load [file join $dir libtkimgpng1.3.so]]
 package ifneeded img::ppm 1.3  [list load [file join $dir libtkimgppm1.3.so]]
 package ifneeded img::ps 1.3  [list load [file join $dir libtkimgps1.3.so]]
 package ifneeded img::sgi 1.3  [list load [file join $dir libtkimgsgi1.3.so]]
