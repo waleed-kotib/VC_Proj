@@ -5,6 +5,14 @@
 
 Not to mention all bugfixes and rewrites.
 
+Coccinella-0.96.12 (20090318)
+
+ o switch to gettext for translations
+ o encoding issues should be fixed in binary distributions
+ o removed unused libraries for smaller download
+ o improved transport integration
+ o clarifying credits and fixing possible license issues
+
 Coccinella-0.96.10 (20080924)
 
  o optimized program startup to be faster
@@ -147,7 +155,7 @@ Coccinella-0.95.12 (20060616):
  o added fast bytestreams protocol (Psi)
  o added stun support to get NAT external address.
  o added jingle library support
- o test version of iaxclient/jingle for voip (JEP-0166 and 0179)
+ o test version of iaxclient/jingle for voip (JEP-0166 and JEP-0179)
  o chat state notification (JEP-0085)
  o new Qt theme on linux (KDE)
 
