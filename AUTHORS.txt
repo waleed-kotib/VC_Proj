@@ -27,7 +27,7 @@ Patches:
   Antonio F. Cano <antonio at grupoikusnet.com>
 
 Founder and former maintainer:
-  Mats Bentsson [http://coccinella.im/mats-bengtsson]
+  Mats Bengtsson [http://coccinella.im/mats-bengtsson]
 
 Maintainer:
   Sander Devrieze <sander at sanderdevrieze.net>
