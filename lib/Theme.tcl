@@ -532,9 +532,9 @@ proc ::Theme::MakeIconFromPaths {spec name paths} {
 	    }
 	    if {[file exists $f]} {
 		if {$name ne ""} {
-		    set image [image create photo $name -file $f -format "png -alpha 0.5 -gamma 5"]
+		    set image [image create photo $name -file $f -format $fmt]
 		} else {
-		    set image [image create photo -file $f -format "png -alpha 0.1"]
+		    set image [image create photo -file $f -format $fmt]
 		}
 		set found 1
 		break
