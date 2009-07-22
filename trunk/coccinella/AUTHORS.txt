@@ -15,7 +15,9 @@ Translations:
                           Bart Van Hove <bartvanhove at skynet.be>
   Polish:                 Zbigniew Baniewski <zb at ispid.com.pl>
   Portuguese:             Paulo Oliveira <paulo.ferraz.oliveira at gmail.com>
-  Rusian:                 Alexander Balezin <gescheit at list.ru>
+  Rusian:                 Rain <rain at jabberworld.info> <<linuxoid.rain at gmail.com>
+                          JabberWorld.info team (review: h31, vlas, cyam)
+                          Alexander Balezin <gescheit at list.ru>
   Swedish:                Mats Bengtsson [http://coccinella.im/mats-bengtsson]
   Simplified Chinese:     Jinhua Lv <lvjinhua at gmail.com>
                           Zhenzhen Wang ming luo <roli1235 at gmail.com>
@@ -27,7 +29,7 @@ Patches:
   Antonio F. Cano <antonio at grupoikusnet.com>
 
 Founder and former maintainer:
-  Mats Bengtsson [http://coccinella.im/mats-bengtsson]
+  Mats Bentsson [http://coccinella.im/mats-bengtsson]
 
 Maintainer:
   Sander Devrieze <sander at sanderdevrieze.net>
