@@ -391,7 +391,7 @@ proc ::Login::MoreOpts {w} {
 
     pack $wfrmore -side top -fill x -padx 2
     set msg "  "
-    set append [mc "Less"]...
+    append msg [mc "Less"]...
     $wtri configure -command [list [namespace current]::LessOpts $w] \
       -text $msg  
 }

@@ -527,7 +527,7 @@ proc ::RegisterEx::MoreOpts {token} {
       
     grid  $state(wfmore)  -  -  -sticky ew
     set msg "  "
-    set append [mc "Less"]...
+    append msg [mc "Less"]...
     $state(wtri) configure -text $msg \
       -command [list [namespace current]::LessOpts $token]
 }
