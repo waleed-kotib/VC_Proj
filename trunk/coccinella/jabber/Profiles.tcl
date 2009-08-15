@@ -1236,7 +1236,7 @@ proc ::Profiles::FrameMoreOpts {w} {
     #$state(wtri) configure -command [list [namespace current]::FrameLessOpts $w] \
     #  -image [::UI::GetIcon openAqua] -text "[mc "Less"]..." 
     set msg "  "
-    set append [mc "Less"]...  
+    append msg [mc "Less"]...  
     $state(wtri) configure -command [list [namespace current]::FrameLessOpts $w] \
       -text $msg
 }
