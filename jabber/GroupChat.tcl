@@ -186,7 +186,7 @@ namespace eval ::GroupChat {
     set show2String(available)   [mc "available"]
     # TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a short moment
     set show2String(away)        [mc "away"]
-    set show2String(chat)        [mc "chat"]
+    set show2String(chat)        [mc "free for chat"]
     # TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
     set show2String(dnd)         [mc "do not disturb"]
     # TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a longer period 

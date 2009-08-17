@@ -35,7 +35,7 @@ namespace eval ::Status {
     array set mapShowTextToElem [list  \
       [mc "Available"]       available  \
       [mc "Away"]            away       \
-      [mc "Chat"]            chat       \
+      [mc "Free For Chat"]            chat       \
       [mc "Do Not Disturb"]    dnd        \
       [mc "Extended Away"]    xa         \
       [mc "Invisible"]       invisible  \
@@ -43,7 +43,7 @@ namespace eval ::Status {
     array set mapShowElemToText [list     \
       available       [mc "Available"]     \
       away            [mc "Away"]          \
-      chat            [mc "Chat"]          \
+      chat            [mc "Free For Chat"]          \
       dnd             [mc "Do Not Disturb"]  \
       xa              [mc "Extended Away"]  \
       invisible       [mc "Invisible"]     \

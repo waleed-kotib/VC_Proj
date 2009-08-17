@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sv\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-02-23 00:30+0100\n"
+"POT-Creation-Date: 2009-08-17 08:04+0200\n"
 "PO-Revision-Date: 2009-02-21 15:25\n"
 "Last-Translator: Mats Bengtsson\n"
 "Language-Team: Swedish\n"
@@ -62,10 +62,10 @@ msgstr "&Uppdaterings koll"
 #: ../jabber/Create.tcl:324 ../jabber/Create.tcl:332 ../jabber/Create.tcl:429
 #: ../jabber/Create.tcl:471 ../jabber/Create.tcl:515 ../jabber/Create.tcl:549
 #: ../jabber/Create.tcl:580 ../jabber/Create.tcl:759 ../jabber/Disco.tcl:1784
-#: ../jabber/Disco.tcl:1807 ../jabber/Emoticons.tcl:653
-#: ../jabber/Emoticons.tcl:662 ../jabber/Emoticons.tcl:814
-#: ../jabber/Emoticons.tcl:816 ../jabber/Emoticons.tcl:850
-#: ../jabber/Emoticons.tcl:862 ../jabber/Emoticons.tcl:864
+#: ../jabber/Disco.tcl:1807 ../jabber/Emoticons.tcl:654
+#: ../jabber/Emoticons.tcl:663 ../jabber/Emoticons.tcl:815
+#: ../jabber/Emoticons.tcl:817 ../jabber/Emoticons.tcl:851
+#: ../jabber/Emoticons.tcl:863 ../jabber/Emoticons.tcl:865
 #: ../jabber/Enter.tcl:402 ../jabber/Enter.tcl:452 ../jabber/Enter.tcl:492
 #: ../jabber/Enter.tcl:637 ../jabber/Enter.tcl:652 ../jabber/Enter.tcl:697
 #: ../jabber/FTrans.tcl:371 ../jabber/FTrans.tcl:407 ../jabber/FTrans.tcl:442
@@ -110,7 +110,7 @@ msgstr "&Uppdaterings koll"
 #: ../lib/Dialogs.tcl:169 ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71
 #: ../lib/HttpTrpt.tcl:107 ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226
 #: ../lib/HttpTrpt.tcl:233 ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78
-#: ../lib/Init.tcl:732 ../lib/Init.tcl:754 ../lib/MacintoshUtils.tcl:55
+#: ../lib/Init.tcl:723 ../lib/Init.tcl:745 ../lib/MacintoshUtils.tcl:55
 #: ../lib/MacintoshUtils.tcl:77 ../lib/MacintoshUtils.tcl:99
 #: ../lib/PrefUtils.tcl:91 ../lib/PrefUtils.tcl:217 ../lib/TheServer.tcl:65
 #: ../lib/UserActions.tcl:44 ../lib/UserActions.tcl:72
@@ -220,7 +220,7 @@ msgstr "Any"
 #: ../components/Mood.tcl:477 ../components/Mood.tcl:628
 #: ../components/Mood.tcl:669 ../components/UserActivity.tcl:244
 #: ../components/UserActivity.tcl:400 ../components/UserActivity.tcl:651
-#: ../components/UserActivity.tcl:694 ../jabber/Emoticons.tcl:754
+#: ../components/UserActivity.tcl:694 ../jabber/Emoticons.tcl:755
 #: ../jabber/GroupChat.tcl:172 ../jabber/JUser.tcl:110 ../jabber/JUser.tcl:345
 #: ../jabber/Subscribe.tcl:325 ../jabber/Subscribe.tcl:570
 #: ../jabber/Subscribe.tcl:1283 ../jabber/Subscribe.tcl:1326
@@ -439,7 +439,7 @@ msgstr ""
 msgid "Street"
 msgstr ""
 
-#: ../components/Geolocation.tcl:88 ../jabber/Emoticons.tcl:616
+#: ../components/Geolocation.tcl:88 ../jabber/Emoticons.tcl:617
 #: ../whiteboard/FilePrefs.tcl:473 ../whiteboard/ItemInspector.tcl:372
 #, fuzzy
 msgid "Text"
@@ -507,8 +507,8 @@ msgid "This is location data for"
 msgstr "This is location data for"
 
 #: ../components/Growl.tcl:162 ../components/taskbar/Taskbar.tcl:185
-#: ../jabber/JUI.tcl:179 ../jabber/JUI.tcl:533 ../jabber/JUI.tcl:1835
-#: ../jabber/JUI.tcl:1855 ../jabber/MegaPresence.tcl:96
+#: ../jabber/JUI.tcl:178 ../jabber/JUI.tcl:532 ../jabber/JUI.tcl:1834
+#: ../jabber/JUI.tcl:1854 ../jabber/MegaPresence.tcl:96
 #: ../jabber/StatusSlot.tcl:35
 #, fuzzy
 msgid "Status"
@@ -556,27 +556,332 @@ msgstr "Telefon är"
 msgid "Phone"
 msgstr "Telefon"
 
-#: ../components/Growl.tcl:196
+#: ../components/Growl.tcl:197 ../components/Mood.tcl:211
+#, fuzzy
+msgid "afraid"
+msgstr "rädd"
+
+#: ../components/Growl.tcl:198 ../components/Mood.tcl:212
+#, fuzzy
+msgid "amazed"
+msgstr "förvånad"
+
+#: ../components/Growl.tcl:199 ../components/Mood.tcl:213
+#, fuzzy
+msgid "angry"
+msgstr "arg"
+
+#: ../components/Growl.tcl:200 ../components/Mood.tcl:214
+#, fuzzy
+msgid "annoyed"
+msgstr "irriterad"
+
+#: ../components/Growl.tcl:201 ../components/Mood.tcl:215
+#, fuzzy
+msgid "anxious"
+msgstr "orolig"
+
+#: ../components/Growl.tcl:202 ../components/Mood.tcl:216
+#, fuzzy
+msgid "aroused"
+msgstr "aroused"
+
+#: ../components/Growl.tcl:203 ../components/Mood.tcl:217
+#, fuzzy
+msgid "ashamed"
+msgstr "skamful"
+
+#: ../components/Growl.tcl:204 ../components/Mood.tcl:218
+#, fuzzy
+msgid "bored"
+msgstr "uttråkad"
+
+#: ../components/Growl.tcl:205 ../components/Mood.tcl:219
+#, fuzzy
+msgid "brave"
+msgstr "modig"
+
+#: ../components/Growl.tcl:206 ../components/Mood.tcl:220
+#, fuzzy
+msgid "calm"
+msgstr "lugn"
+
+#: ../components/Growl.tcl:207 ../components/Mood.tcl:221
+#, fuzzy
+msgid "cold"
+msgstr "frusen"
+
+#: ../components/Growl.tcl:208 ../components/Mood.tcl:222
+#, fuzzy
+msgid "confused"
+msgstr "förvirrad"
+
+#: ../components/Growl.tcl:209 ../components/Mood.tcl:223
+#, fuzzy
+msgid "contented"
+msgstr "contended"
+
+#: ../components/Growl.tcl:210 ../components/Mood.tcl:224
+#, fuzzy
+msgid "cranky"
+msgstr "cranky"
+
+#: ../components/Growl.tcl:211 ../components/Mood.tcl:225
+#, fuzzy
+msgid "curious"
+msgstr "nyfiken"
+
+#: ../components/Growl.tcl:212 ../components/Mood.tcl:226
+#, fuzzy
+msgid "depressed"
+msgstr "deprimerad"
+
+#: ../components/Growl.tcl:213 ../components/Mood.tcl:227
+#, fuzzy
+msgid "disappointed"
+msgstr "besviken"
+
+#: ../components/Growl.tcl:214 ../components/Mood.tcl:228
+#, fuzzy
+msgid "disgusted"
+msgstr "disgusted"
+
+#: ../components/Growl.tcl:215 ../components/Mood.tcl:229
+#, fuzzy
+msgid "distracted"
+msgstr "distraherad"
+
+#: ../components/Growl.tcl:216 ../components/Mood.tcl:230
+#, fuzzy
+msgid "embarrassed"
+msgstr "skäms"
+
+#: ../components/Growl.tcl:217 ../components/Mood.tcl:231
+#, fuzzy
+msgid "excited"
+msgstr "upprymd"
+
+#: ../components/Growl.tcl:218 ../components/Mood.tcl:232
+#, fuzzy
+msgid "flirtatious"
+msgstr "flirtig"
+
+#: ../components/Growl.tcl:219 ../components/Mood.tcl:233
+#, fuzzy
+msgid "frustrated"
+msgstr "frustrerad"
+
+#: ../components/Growl.tcl:220 ../components/Mood.tcl:234
+#, fuzzy
+msgid "grumpy"
+msgstr "grumpy"
+
+#: ../components/Growl.tcl:221 ../components/Mood.tcl:235
+#, fuzzy
+msgid "guilty"
+msgstr "skyldig"
+
+#: ../components/Growl.tcl:222 ../components/Mood.tcl:236
+#, fuzzy
+msgid "happy"
+msgstr "lycklig"
+
+#: ../components/Growl.tcl:223 ../components/Mood.tcl:237
+#, fuzzy
+msgid "hot"
+msgstr "varm"
+
+#: ../components/Growl.tcl:224 ../components/Mood.tcl:238
+#, fuzzy
+msgid "humbled"
+msgstr "ödmjuk"
+
+#: ../components/Growl.tcl:225 ../components/Mood.tcl:239
+#, fuzzy
+msgid "humiliated"
+msgstr "förödmjukad"
+
+#: ../components/Growl.tcl:226 ../components/Mood.tcl:240
+#, fuzzy
+msgid "hungry"
+msgstr "hungrig"
+
+#: ../components/Growl.tcl:227 ../components/Mood.tcl:241
+#, fuzzy
+msgid "hurt"
+msgstr "sårad"
+
+#: ../components/Growl.tcl:228 ../components/Mood.tcl:242
+#, fuzzy
+msgid "impressed"
+msgstr "imponerad"
+
+#: ../components/Growl.tcl:229 ../components/Mood.tcl:243
+#, fuzzy
+msgid "in awe"
+msgstr "in awe"
+
+#: ../components/Growl.tcl:230 ../components/Mood.tcl:244
+#, fuzzy
+msgid "in love"
+msgstr "kär"
+
+#: ../components/Growl.tcl:231 ../components/Mood.tcl:245
+#, fuzzy
+msgid "indignant"
+msgstr "indignerad"
+
+#: ../components/Growl.tcl:232 ../components/Mood.tcl:246
+#, fuzzy
+msgid "interested"
+msgstr "intresserad"
+
+#: ../components/Growl.tcl:233 ../components/Mood.tcl:247
+#, fuzzy
+msgid "intoxicated"
+msgstr "förgiftad"
+
+#: ../components/Growl.tcl:234 ../components/Mood.tcl:248
+#, fuzzy
+msgid "invincible"
+msgstr "oövervinnerlig"
+
+#: ../components/Growl.tcl:235 ../components/Mood.tcl:249
+#, fuzzy
+msgid "jealous"
+msgstr "svartsjuk"
+
+#: ../components/Growl.tcl:236 ../components/Mood.tcl:250
+#, fuzzy
+msgid "lonely"
+msgstr "ensam"
+
+#: ../components/Growl.tcl:237 ../components/Mood.tcl:251
+#, fuzzy
+msgid "mean"
+msgstr "snål"
+
+#: ../components/Growl.tcl:238 ../components/Mood.tcl:252
+#, fuzzy
+msgid "moody"
+msgstr "moody"
+
+#: ../components/Growl.tcl:239 ../components/Mood.tcl:253
+#, fuzzy
+msgid "nervous"
+msgstr "nervös"
+
+#: ../components/Growl.tcl:240 ../components/Mood.tcl:254
+#, fuzzy
+msgid "neutral"
+msgstr "neutral"
+
+#: ../components/Growl.tcl:241 ../components/Mood.tcl:255
+#, fuzzy
+msgid "offended"
+msgstr "förolämpad"
+
+#: ../components/Growl.tcl:242 ../components/Mood.tcl:256
+#, fuzzy
+msgid "playful"
+msgstr "lekfull"
+
+#: ../components/Growl.tcl:243 ../components/Mood.tcl:257
+#, fuzzy
+msgid "proud"
+msgstr "stolt"
+
+#: ../components/Growl.tcl:244 ../components/Mood.tcl:258
+#, fuzzy
+msgid "relieved"
+msgstr "lättad"
+
+#: ../components/Growl.tcl:245 ../components/Mood.tcl:259
+#, fuzzy
+msgid "remorseful"
+msgstr "ångerfull"
+
+#: ../components/Growl.tcl:246 ../components/Mood.tcl:260
+#, fuzzy
+msgid "restless"
+msgstr "restless"
+
+#: ../components/Growl.tcl:247 ../components/Mood.tcl:261
+#, fuzzy
+msgid "sad"
+msgstr "ledsen"
+
+#: ../components/Growl.tcl:248 ../components/Mood.tcl:262
+#, fuzzy
+msgid "sarcastic"
+msgstr "sarkastisk"
+
+#: ../components/Growl.tcl:249 ../components/Mood.tcl:263
+#, fuzzy
+msgid "serious"
+msgstr "allvarlig"
+
+#: ../components/Growl.tcl:250 ../components/Mood.tcl:264
+#, fuzzy
+msgid "shocked"
+msgstr "chockad"
+
+#: ../components/Growl.tcl:251 ../components/Mood.tcl:265
+#, fuzzy
+msgid "shy"
+msgstr "blyg"
+
+#: ../components/Growl.tcl:252 ../components/Mood.tcl:266
+#, fuzzy
+msgid "sick"
+msgstr "sjuk"
+
+#: ../components/Growl.tcl:253 ../components/Mood.tcl:267
+#, fuzzy
+msgid "sleepy"
+msgstr "sömnig"
+
+#: ../components/Growl.tcl:254 ../components/Mood.tcl:268
+#, fuzzy
+msgid "stressed"
+msgstr "stressad"
+
+#: ../components/Growl.tcl:255 ../components/Mood.tcl:269
+#, fuzzy
+msgid "surprised"
+msgstr "förvånad"
+
+#: ../components/Growl.tcl:256 ../components/Mood.tcl:270
+#, fuzzy
+msgid "thirsty"
+msgstr "törstig"
+
+#: ../components/Growl.tcl:257 ../components/Mood.tcl:271
+#, fuzzy
+msgid "worried"
+msgstr "bekymrad"
+
+#: ../components/Growl.tcl:259
 #, fuzzy
 msgid "Mood change"
 msgstr "Humörändring"
 
-#: ../components/Growl.tcl:200
+#: ../components/Growl.tcl:264
 #, fuzzy
 msgid "is"
 msgstr "är"
 
-#: ../components/Growl.tcl:202
+#: ../components/Growl.tcl:268
 #, fuzzy
 msgid "because"
 msgstr "därför"
 
-#: ../components/Growl.tcl:205
+#: ../components/Growl.tcl:271
 #, fuzzy
 msgid "retracted mood"
 msgstr "tog tillbaka humör"
 
-#: ../components/Growl.tcl:207 ../components/Mood.tcl:292
+#: ../components/Growl.tcl:273 ../components/Mood.tcl:292
 #: ../components/Mood.tcl:484 ../components/Mood.tcl:586
 #: ../components/Mood.tcl:601 ../components/Mood.tcl:665
 #, fuzzy
@@ -589,7 +894,7 @@ msgstr "Humör"
 msgid "Take &Snapshot"
 msgstr "Tag bild"
 
-#: ../components/ImageMagic.tcl:63 ../jabber/JUI.tcl:202
+#: ../components/ImageMagic.tcl:63 ../jabber/JUI.tcl:201
 #: ../whiteboard/Whiteboard.tcl:590
 #, fuzzy
 msgid "Plu&gins"
@@ -693,6 +998,7 @@ msgid "Name"
 msgstr "Name"
 
 #: ../components/JivePhone.tcl:891 ../components/JivePhone.tcl:973
+#: ../jabber/Gateway.tcl:84
 #, fuzzy
 msgid "Phone number"
 msgstr "Telefonnummer"
@@ -1086,311 +1392,6 @@ msgstr "Törstig"
 msgid "Worried"
 msgstr "Bekymrad"
 
-#: ../components/Mood.tcl:211
-#, fuzzy
-msgid "afraid"
-msgstr "rädd"
-
-#: ../components/Mood.tcl:212
-#, fuzzy
-msgid "amazed"
-msgstr "förvånad"
-
-#: ../components/Mood.tcl:213
-#, fuzzy
-msgid "angry"
-msgstr "arg"
-
-#: ../components/Mood.tcl:214
-#, fuzzy
-msgid "annoyed"
-msgstr "irriterad"
-
-#: ../components/Mood.tcl:215
-#, fuzzy
-msgid "anxious"
-msgstr "orolig"
-
-#: ../components/Mood.tcl:216
-#, fuzzy
-msgid "aroused"
-msgstr "aroused"
-
-#: ../components/Mood.tcl:217
-#, fuzzy
-msgid "ashamed"
-msgstr "skamful"
-
-#: ../components/Mood.tcl:218
-#, fuzzy
-msgid "bored"
-msgstr "uttråkad"
-
-#: ../components/Mood.tcl:219
-#, fuzzy
-msgid "brave"
-msgstr "modig"
-
-#: ../components/Mood.tcl:220
-#, fuzzy
-msgid "calm"
-msgstr "lugn"
-
-#: ../components/Mood.tcl:221
-#, fuzzy
-msgid "cold"
-msgstr "frusen"
-
-#: ../components/Mood.tcl:222
-#, fuzzy
-msgid "confused"
-msgstr "förvirrad"
-
-#: ../components/Mood.tcl:223
-#, fuzzy
-msgid "contented"
-msgstr "contended"
-
-#: ../components/Mood.tcl:224
-#, fuzzy
-msgid "cranky"
-msgstr "cranky"
-
-#: ../components/Mood.tcl:225
-#, fuzzy
-msgid "curious"
-msgstr "nyfiken"
-
-#: ../components/Mood.tcl:226
-#, fuzzy
-msgid "depressed"
-msgstr "deprimerad"
-
-#: ../components/Mood.tcl:227
-#, fuzzy
-msgid "disappointed"
-msgstr "besviken"
-
-#: ../components/Mood.tcl:228
-#, fuzzy
-msgid "disgusted"
-msgstr "disgusted"
-
-#: ../components/Mood.tcl:229
-#, fuzzy
-msgid "distracted"
-msgstr "distraherad"
-
-#: ../components/Mood.tcl:230
-#, fuzzy
-msgid "embarrassed"
-msgstr "skäms"
-
-#: ../components/Mood.tcl:231
-#, fuzzy
-msgid "excited"
-msgstr "upprymd"
-
-#: ../components/Mood.tcl:232
-#, fuzzy
-msgid "flirtatious"
-msgstr "flirtig"
-
-#: ../components/Mood.tcl:233
-#, fuzzy
-msgid "frustrated"
-msgstr "frustrerad"
-
-#: ../components/Mood.tcl:234
-#, fuzzy
-msgid "grumpy"
-msgstr "grumpy"
-
-#: ../components/Mood.tcl:235
-#, fuzzy
-msgid "guilty"
-msgstr "skyldig"
-
-#: ../components/Mood.tcl:236
-#, fuzzy
-msgid "happy"
-msgstr "lycklig"
-
-#: ../components/Mood.tcl:237
-#, fuzzy
-msgid "hot"
-msgstr "varm"
-
-#: ../components/Mood.tcl:238
-#, fuzzy
-msgid "humbled"
-msgstr "ödmjuk"
-
-#: ../components/Mood.tcl:239
-#, fuzzy
-msgid "humiliated"
-msgstr "förödmjukad"
-
-#: ../components/Mood.tcl:240
-#, fuzzy
-msgid "hungry"
-msgstr "hungrig"
-
-#: ../components/Mood.tcl:241
-#, fuzzy
-msgid "hurt"
-msgstr "sårad"
-
-#: ../components/Mood.tcl:242
-#, fuzzy
-msgid "impressed"
-msgstr "imponerad"
-
-#: ../components/Mood.tcl:243
-#, fuzzy
-msgid "in awe"
-msgstr "in awe"
-
-#: ../components/Mood.tcl:244
-#, fuzzy
-msgid "in love"
-msgstr "kär"
-
-#: ../components/Mood.tcl:245
-#, fuzzy
-msgid "indignant"
-msgstr "indignerad"
-
-#: ../components/Mood.tcl:246
-#, fuzzy
-msgid "interested"
-msgstr "intresserad"
-
-#: ../components/Mood.tcl:247
-#, fuzzy
-msgid "intoxicated"
-msgstr "förgiftad"
-
-#: ../components/Mood.tcl:248
-#, fuzzy
-msgid "invincible"
-msgstr "oövervinnerlig"
-
-#: ../components/Mood.tcl:249
-#, fuzzy
-msgid "jealous"
-msgstr "svartsjuk"
-
-#: ../components/Mood.tcl:250
-#, fuzzy
-msgid "lonely"
-msgstr "ensam"
-
-#: ../components/Mood.tcl:251
-#, fuzzy
-msgid "mean"
-msgstr "snål"
-
-#: ../components/Mood.tcl:252
-#, fuzzy
-msgid "moody"
-msgstr "moody"
-
-#: ../components/Mood.tcl:253
-#, fuzzy
-msgid "nervous"
-msgstr "nervös"
-
-#: ../components/Mood.tcl:254
-#, fuzzy
-msgid "neutral"
-msgstr "neutral"
-
-#: ../components/Mood.tcl:255
-#, fuzzy
-msgid "offended"
-msgstr "förolämpad"
-
-#: ../components/Mood.tcl:256
-#, fuzzy
-msgid "playful"
-msgstr "lekfull"
-
-#: ../components/Mood.tcl:257
-#, fuzzy
-msgid "proud"
-msgstr "stolt"
-
-#: ../components/Mood.tcl:258
-#, fuzzy
-msgid "relieved"
-msgstr "lättad"
-
-#: ../components/Mood.tcl:259
-#, fuzzy
-msgid "remorseful"
-msgstr "ångerfull"
-
-#: ../components/Mood.tcl:260
-#, fuzzy
-msgid "restless"
-msgstr "restless"
-
-#: ../components/Mood.tcl:261
-#, fuzzy
-msgid "sad"
-msgstr "ledsen"
-
-#: ../components/Mood.tcl:262
-#, fuzzy
-msgid "sarcastic"
-msgstr "sarkastisk"
-
-#: ../components/Mood.tcl:263
-#, fuzzy
-msgid "serious"
-msgstr "allvarlig"
-
-#: ../components/Mood.tcl:264
-#, fuzzy
-msgid "shocked"
-msgstr "chockad"
-
-#: ../components/Mood.tcl:265
-#, fuzzy
-msgid "shy"
-msgstr "blyg"
-
-#: ../components/Mood.tcl:266
-#, fuzzy
-msgid "sick"
-msgstr "sjuk"
-
-#: ../components/Mood.tcl:267
-#, fuzzy
-msgid "sleepy"
-msgstr "sömnig"
-
-#: ../components/Mood.tcl:268
-#, fuzzy
-msgid "stressed"
-msgstr "stressad"
-
-#: ../components/Mood.tcl:269
-#, fuzzy
-msgid "surprised"
-msgstr "förvånad"
-
-#: ../components/Mood.tcl:270
-#, fuzzy
-msgid "thirsty"
-msgstr "törstig"
-
-#: ../components/Mood.tcl:271
-#, fuzzy
-msgid "worried"
-msgstr "bekymrad"
-
 #: ../components/Mood.tcl:303 ../components/Mood.tcl:640
 #, fuzzy
 msgid "&Custom Mood"
@@ -1524,7 +1525,7 @@ msgid "%s is on the phone"
 msgstr "är"
 
 #. TRANSLATORS; whiteboard slide show menu
-#: ../components/SlideShow.tcl:43 ../components/SlideShow.tcl:198
+#: ../components/SlideShow.tcl:43 ../components/SlideShow.tcl:123
 #, fuzzy
 msgid "Slide Show"
 msgstr "Bildvisning"
@@ -1534,15 +1535,15 @@ msgstr "Bildvisning"
 msgid "&Open Folder"
 msgstr "Öppna mapp..."
 
-#: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:433
-#: ../components/SlideShow.tcl:437 ../components/SlideShow.tcl:444
+#: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:358
+#: ../components/SlideShow.tcl:362 ../components/SlideShow.tcl:369
 #: ../components/Totd.tcl:94 ../contrib/wizard.tcl:224 ../jabber/Adhoc.tcl:209
 #, fuzzy
 msgid "Previous"
 msgstr "Förra"
 
-#: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:434
-#: ../components/SlideShow.tcl:439 ../components/SlideShow.tcl:445
+#: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:359
+#: ../components/SlideShow.tcl:364 ../components/SlideShow.tcl:370
 #: ../components/Totd.tcl:92 ../contrib/wizard.tcl:219
 #: ../contrib/wizard.tcl:586 ../jabber/Adhoc.tcl:207 ../jabber/GotMsg.tcl:225
 #: ../jabber/Register.tcl:327 ../jabber/Register.tcl:1168
@@ -1551,19 +1552,19 @@ msgstr "Förra"
 msgid "Next"
 msgstr "Nästa"
 
-#: ../components/SlideShow.tcl:48 ../components/SlideShow.tcl:429
-#: ../components/SlideShow.tcl:442 ../whiteboard/ItemInspector.tcl:213
+#: ../components/SlideShow.tcl:48 ../components/SlideShow.tcl:354
+#: ../components/SlideShow.tcl:367 ../whiteboard/ItemInspector.tcl:213
 #, fuzzy
 msgid "First"
 msgstr "Första"
 
-#: ../components/SlideShow.tcl:49 ../components/SlideShow.tcl:430
-#: ../components/SlideShow.tcl:443 ../whiteboard/ItemInspector.tcl:214
+#: ../components/SlideShow.tcl:49 ../components/SlideShow.tcl:355
+#: ../components/SlideShow.tcl:368 ../whiteboard/ItemInspector.tcl:214
 #, fuzzy
 msgid "Last"
 msgstr "Sista"
 
-#: ../components/SlideShow.tcl:196 ../jabber/Chat.tcl:1350
+#: ../components/SlideShow.tcl:121 ../jabber/Chat.tcl:1350
 #: ../jabber/GroupChat.tcl:676 ../lib/FileCache.tcl:599
 #: ../whiteboard/FilePrefs.tcl:77 ../whiteboard/Plugins.tcl:1324
 #: ../whiteboard/WBPrefs.tcl:74
@@ -1571,17 +1572,17 @@ msgstr "Sista"
 msgid "Whiteboard"
 msgstr "Skrivtavla"
 
-#: ../components/SlideShow.tcl:212
+#: ../components/SlideShow.tcl:137
 #, fuzzy
 msgid "Show navigation buttons"
 msgstr "Välj navigationsknappar"
 
-#: ../components/SlideShow.tcl:214
+#: ../components/SlideShow.tcl:139
 #, fuzzy
 msgid "Resize window to fit slides"
 msgstr "Anpassa fönsterstorleken till bildvisningen"
 
-#: ../components/SlideShow.tcl:282 ../lib/FileCache.tcl:667
+#: ../components/SlideShow.tcl:207 ../lib/FileCache.tcl:667
 #: ../whiteboard/GetFileIface.tcl:292
 #, fuzzy
 msgid "Open Folder"
@@ -1684,8 +1685,8 @@ msgstr "MIDI kommando"
 
 #: ../components/Sounds.tcl:634 ../components/Sounds.tcl:674
 #: ../components/Sounds.tcl:694 ../contrib/ui/fontselector.tcl:151
-#: ../contrib/ui/openimage.tcl:97 ../jabber/Emoticons.tcl:748
-#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1387
+#: ../contrib/ui/openimage.tcl:97 ../jabber/Emoticons.tcl:749
+#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1399
 #: ../jabber/Rosticons.tcl:605 ../jabber/SetupAss.tcl:116
 #: ../lib/PrefHelpers.tcl:104 ../whiteboard/WBPrefs.tcl:120
 #: ../whiteboard/WBPrefs.tcl:123 ../whiteboard/WBPrefs.tcl:196
@@ -2161,8 +2162,9 @@ msgstr "Mappar först"
 msgid "Filter"
 msgstr "Filter"
 
-#: ../components/fsdialog.tcl:492 ../jabber/History.tcl:952
-#: ../jabber/MailBox.tcl:689 ../jabber/NewMsg.tcl:446
+#: ../components/fsdialog.tcl:492 ../jabber/Emoticons.tcl:603
+#: ../jabber/History.tcl:952 ../jabber/MailBox.tcl:689
+#: ../jabber/NewMsg.tcl:446
 #, fuzzy
 msgid "Date"
 msgstr "Datum"
@@ -2233,27 +2235,28 @@ msgstr "Minimera"
 
 #. TRANSLATORS; menu item for sending normal message (no chat!)
 #: ../components/taskbar/Taskbar.tcl:187 ../jabber/Disco.tcl:155
-#: ../jabber/GroupChat.tcl:220 ../jabber/JUI.tcl:177 ../jabber/JUI.tcl:1833
-#: ../jabber/JUI.tcl:1853 ../jabber/Roster.tcl:122
+#: ../jabber/GroupChat.tcl:220 ../jabber/JUI.tcl:176 ../jabber/JUI.tcl:1832
+#: ../jabber/JUI.tcl:1852 ../jabber/Roster.tcl:122 ../jabber/Search.tcl:33
+#: ../jabber/Search.tcl:41
 #, fuzzy
 msgid "&Message"
 msgstr "Meddelande..."
 
-#: ../components/taskbar/Taskbar.tcl:188 ../jabber/JUI.tcl:168
+#: ../components/taskbar/Taskbar.tcl:188 ../jabber/JUI.tcl:166
 #: ../whiteboard/Whiteboard.tcl:579 ../whiteboard/Whiteboard.tcl:2208
 #: ../whiteboard/Whiteboard.tcl:2285
 #, fuzzy
 msgid "&Preferences"
 msgstr "Inställningar"
 
-#: ../components/taskbar/Taskbar.tcl:189 ../jabber/JUI.tcl:182
-#: ../jabber/JUI.tcl:1832 ../jabber/JUI.tcl:1852 ../jabber/Roster.tcl:127
-#: ../jabber/Roster.tcl:188
+#: ../components/taskbar/Taskbar.tcl:189 ../jabber/JUI.tcl:181
+#: ../jabber/JUI.tcl:1831 ../jabber/JUI.tcl:1851 ../jabber/Roster.tcl:127
+#: ../jabber/Roster.tcl:188 ../jabber/Search.tcl:32 ../jabber/Search.tcl:40
 #, fuzzy
 msgid "&Add Contact"
 msgstr "Lägg till kontakt..."
 
-#: ../components/taskbar/Taskbar.tcl:190 ../jabber/JUI.tcl:1268
+#: ../components/taskbar/Taskbar.tcl:190 ../jabber/JUI.tcl:1267
 #: ../whiteboard/Whiteboard.tcl:2209 ../whiteboard/Whiteboard.tcl:2287
 #, fuzzy
 msgid "&Info"
@@ -2264,17 +2267,17 @@ msgstr "Info"
 msgid "&About Coccinella"
 msgstr "Om Coccinella..."
 
-#: ../components/taskbar/Taskbar.tcl:192 ../jabber/JUI.tcl:228
+#: ../components/taskbar/Taskbar.tcl:192 ../jabber/JUI.tcl:227
 #, fuzzy
 msgid "&Home Page"
 msgstr "Hemsida..."
 
-#: ../components/taskbar/Taskbar.tcl:193 ../jabber/JUI.tcl:226
+#: ../components/taskbar/Taskbar.tcl:193 ../jabber/JUI.tcl:225
 #, fuzzy
 msgid "&Report Bug"
 msgstr "Rapportera Bugg..."
 
-#: ../components/taskbar/Taskbar.tcl:197 ../jabber/JUI.tcl:162
+#: ../components/taskbar/Taskbar.tcl:197 ../jabber/JUI.tcl:167
 #: ../whiteboard/Whiteboard.tcl:432 ../whiteboard/Whiteboard.tcl:610
 #, fuzzy
 msgid "&Quit"
@@ -2405,7 +2408,7 @@ msgstr "Right click to open menu"
 msgid "Application Status"
 msgstr "Application Status"
 
-#: ../jabber/AppStatusSlot.tcl:88 ../jabber/JUI.tcl:587 ../jabber/JUI.tcl:656
+#: ../jabber/AppStatusSlot.tcl:88 ../jabber/JUI.tcl:586 ../jabber/JUI.tcl:655
 #: ../jabber/Roster.tcl:87 ../jabber/Roster.tcl:95 ../jabber/Status.tcl:42
 #: ../jabber/Status.tcl:50
 #, fuzzy
@@ -2523,9 +2526,7 @@ msgid "Select Avatar"
 msgstr "Välj avatar"
 
 #: ../jabber/Chat.tcl:313 ../jabber/Chat.tcl:325 ../jabber/Chat.tcl:2102
-#: ../jabber/Chat.tcl:3216 ../jabber/Chat.tcl:4201 ../jabber/JUI.tcl:1246
-#: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
-#: ../jabber/Status.tcl:46
+#: ../jabber/Chat.tcl:3216 ../jabber/Chat.tcl:4201 ../jabber/JUI.tcl:1245
 msgid "Chat"
 msgstr ""
 
@@ -2655,21 +2656,21 @@ msgstr "Enter your message and press Return or Shift-Return"
 
 #. TRANSLATORS; Control + F (or Command + F on Mac OS X)
 #: ../jabber/Chat.tcl:1890 ../jabber/GroupChat.tcl:1169
-#: ../jabber/History.tcl:1074 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
+#: ../jabber/History.tcl:1074 ../jabber/JUI.tcl:254 ../jabber/JUI.tcl:1786
 #: ../jabber/RosterTree.tcl:1995
 #, fuzzy
 msgid "Find"
 msgstr "Sök"
 
 #: ../jabber/Chat.tcl:1892 ../jabber/GroupChat.tcl:1171
-#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
+#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
 #: ../jabber/RosterTree.tcl:1997
 #, fuzzy
 msgid "Find Next"
 msgstr "Sök nästa"
 
 #: ../jabber/Chat.tcl:1893 ../jabber/GroupChat.tcl:1172
-#: ../jabber/History.tcl:1078 ../jabber/JUI.tcl:257 ../jabber/JUI.tcl:1789
+#: ../jabber/History.tcl:1078 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
 #: ../jabber/RosterTree.tcl:1998
 #, fuzzy
 msgid "Find Previous"
@@ -2938,37 +2939,39 @@ msgstr "Var vänlig att fyll i samtliga fält innan går in i chattrum."
 msgid "Cannot enter chatroom %s."
 msgstr "Kan inte komma in i chattrum %s."
 
-#: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:178
-#: ../jabber/JUI.tcl:1834 ../jabber/JUI.tcl:1854 ../jabber/Roster.tcl:121
+#: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:177
+#: ../jabber/JUI.tcl:1833 ../jabber/JUI.tcl:1853 ../jabber/Roster.tcl:121
+#: ../jabber/Roster.tcl:527 ../jabber/Search.tcl:34 ../jabber/Search.tcl:42
 msgid "Cha&t"
 msgstr ""
 
-#: ../jabber/Disco.tcl:157 ../jabber/JUI.tcl:186 ../jabber/JUI.tcl:1836
-#: ../jabber/JUI.tcl:1856
+#: ../jabber/Disco.tcl:157 ../jabber/JUI.tcl:185 ../jabber/JUI.tcl:1835
+#: ../jabber/JUI.tcl:1855
 #, fuzzy
 msgid "Enter Chat&room"
 msgstr "Gå in i chattrum..."
 
-#: ../jabber/Disco.tcl:160 ../jabber/JUI.tcl:187 ../jabber/JUI.tcl:1837
-#: ../jabber/JUI.tcl:1857
+#: ../jabber/Disco.tcl:160 ../jabber/JUI.tcl:186 ../jabber/JUI.tcl:1836
+#: ../jabber/JUI.tcl:1856
 #, fuzzy
 msgid "&Create Chatroom"
 msgstr "Skapa chattrum..."
 
 #: ../jabber/Disco.tcl:164 ../jabber/GroupChat.tcl:223
-#: ../jabber/Roster.tcl:126 ../jabber/Roster.tcl:187
+#: ../jabber/Roster.tcl:126 ../jabber/Roster.tcl:187 ../jabber/Search.tcl:35
+#: ../jabber/Search.tcl:43
 #, fuzzy
 msgid "View &Business Card"
 msgstr "Visa visitkort..."
 
-#: ../jabber/Disco.tcl:166 ../jabber/JUI.tcl:181 ../jabber/JUI.tcl:1831
-#: ../jabber/JUI.tcl:1851
+#: ../jabber/Disco.tcl:166 ../jabber/JUI.tcl:180 ../jabber/JUI.tcl:1830
+#: ../jabber/JUI.tcl:1850
 #, fuzzy
 msgid "&Search"
 msgstr "Leta..."
 
-#: ../jabber/Disco.tcl:169 ../jabber/JUI.tcl:183 ../jabber/JUI.tcl:1827
-#: ../jabber/JUI.tcl:1842
+#: ../jabber/Disco.tcl:169 ../jabber/JUI.tcl:182 ../jabber/JUI.tcl:1826
+#: ../jabber/JUI.tcl:1841
 #, fuzzy
 msgid "Re&gister"
 msgstr "Registrera..."
@@ -2978,8 +2981,8 @@ msgstr "Registrera..."
 msgid "&Unregister"
 msgstr "Avregistrera"
 
-#: ../jabber/Disco.tcl:174 ../jabber/JUI.tcl:215 ../jabber/JUI.tcl:1912
-#: ../jabber/JUI.tcl:1926 ../jabber/Roster.tcl:132
+#: ../jabber/Disco.tcl:174 ../jabber/JUI.tcl:214 ../jabber/JUI.tcl:1911
+#: ../jabber/JUI.tcl:1925 ../jabber/Roster.tcl:132
 #, fuzzy
 msgid "Show"
 msgstr "Visa"
@@ -2998,8 +3001,8 @@ msgid "Refresh"
 msgstr "Uppdatera"
 
 #. TRANSLATORS; look for available services on a server
-#: ../jabber/Disco.tcl:181 ../jabber/JUI.tcl:184 ../jabber/JUI.tcl:1839
-#: ../jabber/JUI.tcl:1859
+#: ../jabber/Disco.tcl:181 ../jabber/JUI.tcl:183 ../jabber/JUI.tcl:1838
+#: ../jabber/JUI.tcl:1858
 #, fuzzy
 msgid "&Discover Server"
 msgstr "Undersök server..."
@@ -3014,7 +3017,7 @@ msgstr "Tag bort lista"
 msgid "C&ommands"
 msgstr "Ad-hoc kommando"
 
-#: ../jabber/Disco.tcl:187 ../jabber/GroupChat.tcl:231 ../jabber/JUI.tcl:193
+#: ../jabber/Disco.tcl:187 ../jabber/GroupChat.tcl:231 ../jabber/JUI.tcl:192
 #: ../jabber/Roster.tcl:172
 #, fuzzy
 msgid "&Whiteboard"
@@ -3058,7 +3061,7 @@ msgstr ""
 "Lägg till en server att upptäcka (disco) och att utnyttja dess chattrum och "
 "andra tjänster."
 
-#: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:532 ../jabber/Login.tcl:171
+#: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:531 ../jabber/Login.tcl:171
 #: ../jabber/Profiles.tcl:1083 ../jabber/Profiles.tcl:1861
 #: ../jabber/Register.tcl:274 ../jabber/SetupAss.tcl:137
 #: ../jabber/SetupAss.tcl:165 ../jabber/StatusSlot.tcl:34
@@ -3091,38 +3094,38 @@ msgstr "Hemma"
 msgid "Version"
 msgstr "Version"
 
-#: ../jabber/Emoticons.tcl:614 ../whiteboard/ItemInspector.tcl:367
+#: ../jabber/Emoticons.tcl:615 ../whiteboard/ItemInspector.tcl:367
 #, fuzzy
 msgid "Image"
 msgstr "Bild"
 
-#: ../jabber/Emoticons.tcl:638 ../jabber/Emoticons.tcl:834
+#: ../jabber/Emoticons.tcl:639 ../jabber/Emoticons.tcl:835
 #, fuzzy
 msgid "Iconset Archive"
 msgstr "Smileyset arkiv"
 
-#: ../jabber/Emoticons.tcl:640 ../jabber/Emoticons.tcl:774
-#: ../jabber/Emoticons.tcl:836
+#: ../jabber/Emoticons.tcl:641 ../jabber/Emoticons.tcl:775
+#: ../jabber/Emoticons.tcl:837
 #, fuzzy
 msgid "Import Iconset"
 msgstr "Importera smileysamling"
 
-#: ../jabber/Emoticons.tcl:714
+#: ../jabber/Emoticons.tcl:715
 #, fuzzy
 msgid "Emoticons"
 msgstr "Smileys"
 
-#: ../jabber/Emoticons.tcl:740
+#: ../jabber/Emoticons.tcl:741
 #, fuzzy
 msgid "The selected iconset will become the default."
 msgstr "Den valda ikonsamlingen kommer att bli standardvalet."
 
-#: ../jabber/Emoticons.tcl:812 ../jabber/Emoticons.tcl:860
+#: ../jabber/Emoticons.tcl:813 ../jabber/Emoticons.tcl:861
 #, fuzzy, tcl-format
 msgid "Cannot load iconset %s."
 msgstr "Kan inte läsa ikonsamling %s."
 
-#: ../jabber/Emoticons.tcl:851
+#: ../jabber/Emoticons.tcl:852
 #, fuzzy, tcl-format
 msgid "Iconset %s already exists."
 msgstr "Ikonsamling %s finns redan."
@@ -3248,57 +3251,57 @@ msgstr "Kan inte hämta fil %s från %s."
 msgid "The MD5 checksums did not match. The file may be corrupt."
 msgstr "MD5 checksumman stämde ej. Filen kan vara trasig."
 
-#: ../jabber/Gateway.tcl:58 ../jabber/Rosticons.tcl:587
+#: ../jabber/Gateway.tcl:63 ../jabber/Rosticons.tcl:587
 #: ../jabber/Search.tcl:936 ../jabber/VCard.tcl:308
 #, fuzzy
 msgid "Email"
 msgstr "E-post"
 
 #. TRANSLATORS; AOL AIM address
-#: ../jabber/Gateway.tcl:67
+#: ../jabber/Gateway.tcl:72
 msgid "Screen name"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:68
+#: ../jabber/Gateway.tcl:75
 msgid "Gadu-Gadu number"
 msgstr ""
 
 #. TRANSLATORS; also known as UIN
-#: ../jabber/Gateway.tcl:70
+#: ../jabber/Gateway.tcl:77
 msgid "ICQ number"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:71
+#: ../jabber/Gateway.tcl:78
 #, fuzzy
 msgid "IRC"
 msgstr "IRC"
 
-#: ../jabber/Gateway.tcl:72
-#, fuzzy
-msgid "MSN Address"
-msgstr "MSN Address"
-
-#: ../jabber/Gateway.tcl:73 ../jabber/JForms.tcl:300
+#: ../jabber/Gateway.tcl:79 ../jabber/Gateway.tcl:85 ../jabber/JForms.tcl:300
 #: ../jabber/Register.tcl:711 ../jabber/VCard.tcl:324
 #, fuzzy
 msgid "Email address"
 msgstr "Användarens e-post adress"
 
-#: ../jabber/Gateway.tcl:74
+#: ../jabber/Gateway.tcl:80
+#, fuzzy
+msgid "MSN Address"
+msgstr "MSN Address"
+
+#: ../jabber/Gateway.tcl:86
 msgid "QQ number"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:75
+#: ../jabber/Gateway.tcl:87
 msgid "Tlen address"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:76 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
+#: ../jabber/Gateway.tcl:88 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
 #: ../jabber/Profiles.tcl:1121 ../jabber/VCard.tcl:322
 #, fuzzy
 msgid "Chat address"
 msgstr "Chatt adress"
 
-#: ../jabber/Gateway.tcl:77
+#: ../jabber/Gateway.tcl:89
 #, fuzzy
 msgid "Yahoo ID"
 msgstr "Yahoo ID"
@@ -3357,8 +3360,8 @@ msgstr "borta"
 
 #: ../jabber/GroupChat.tcl:189
 #, fuzzy
-msgid "chat"
-msgstr "chatta"
+msgid "free for chat"
+msgstr "Text-till-tal för chatt"
 
 #. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
 #: ../jabber/GroupChat.tcl:191
@@ -3617,35 +3620,35 @@ msgstr "Kom ihåg öppna fönster mellan sessionerna"
 msgid "Show notifier window"
 msgstr "Show notifier window"
 
-#: ../jabber/JUI.tcl:144 ../jabber/JUI.tcl:1722 ../jabber/JUI.tcl:1726
-#: ../jabber/JUI.tcl:1738 ../jabber/JUI.tcl:1741
+#: ../jabber/JUI.tcl:144 ../jabber/JUI.tcl:1721 ../jabber/JUI.tcl:1725
+#: ../jabber/JUI.tcl:1737 ../jabber/JUI.tcl:1740
 #, fuzzy
 msgid "&New Account"
 msgstr "Nytt konto..."
 
-#: ../jabber/JUI.tcl:145 ../jabber/JUI.tcl:1727 ../jabber/JUI.tcl:1746
+#: ../jabber/JUI.tcl:145 ../jabber/JUI.tcl:1726 ../jabber/JUI.tcl:1745
 #, fuzzy
 msgid "&Remove Account"
 msgstr "Radera konto..."
 
-#: ../jabber/JUI.tcl:146 ../jabber/JUI.tcl:1728 ../jabber/JUI.tcl:1743
+#: ../jabber/JUI.tcl:146 ../jabber/JUI.tcl:1727 ../jabber/JUI.tcl:1742
 #, fuzzy
 msgid "New P&assword"
 msgstr "Nytt lösenord..."
 
-#: ../jabber/JUI.tcl:147 ../jabber/JUI.tcl:1723 ../jabber/JUI.tcl:1729
-#: ../jabber/JUI.tcl:1744
+#: ../jabber/JUI.tcl:147 ../jabber/JUI.tcl:1722 ../jabber/JUI.tcl:1728
+#: ../jabber/JUI.tcl:1743
 #, fuzzy
 msgid "&Setup Assistant"
 msgstr "Inställningsassistent..."
 
-#: ../jabber/JUI.tcl:149 ../jabber/JUI.tcl:1730 ../jabber/JUI.tcl:1737
-#: ../jabber/JUI.tcl:1740
+#: ../jabber/JUI.tcl:149 ../jabber/JUI.tcl:1729 ../jabber/JUI.tcl:1736
+#: ../jabber/JUI.tcl:1739
 #, fuzzy
 msgid "&Edit Profiles"
 msgstr "Redigera profiler..."
 
-#: ../jabber/JUI.tcl:150 ../jabber/JUI.tcl:1731 ../jabber/JUI.tcl:1745
+#: ../jabber/JUI.tcl:150 ../jabber/JUI.tcl:1730 ../jabber/JUI.tcl:1744
 #, fuzzy
 msgid "Edit &Business Card"
 msgstr "Redigera visitkort..."
@@ -3660,8 +3663,8 @@ msgstr "Importera"
 msgid "Icon &Set"
 msgstr "Ikonsamling..."
 
-#: ../jabber/JUI.tcl:154 ../jabber/JUI.tcl:159 ../jabber/JUI.tcl:1711
-#: ../jabber/JUI.tcl:1714 ../jabber/JUI.tcl:1733 ../jabber/RosterTree.tcl:1981
+#: ../jabber/JUI.tcl:154 ../jabber/JUI.tcl:159 ../jabber/JUI.tcl:1710
+#: ../jabber/JUI.tcl:1713 ../jabber/JUI.tcl:1732 ../jabber/RosterTree.tcl:1981
 #: ../jabber/UserInfo.tcl:584 ../jabber/VCard.tcl:800
 #, fuzzy
 msgid "&Business Card"
@@ -3677,116 +3680,116 @@ msgstr "Exportera"
 msgid "&Contacts"
 msgstr "Kontakter..."
 
-#: ../jabber/JUI.tcl:158 ../jabber/JUI.tcl:203
+#: ../jabber/JUI.tcl:158 ../jabber/JUI.tcl:202
 #, fuzzy
 msgid "&Inbox"
 msgstr "Inkorg..."
 
-#: ../jabber/JUI.tcl:165 ../jabber/JUI.tcl:1702 ../jabber/JUI.tcl:1705
+#: ../jabber/JUI.tcl:163 ../jabber/JUI.tcl:1701 ../jabber/JUI.tcl:1704
 #: ../jabber/JWB.tcl:161 ../whiteboard/Whiteboard.tcl:424
 #: ../whiteboard/Whiteboard.tcl:608
 #, fuzzy
 msgid "&Close Window"
 msgstr "Stäng fönster"
 
-#: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1230 ../jabber/JUI.tcl:1845
-#: ../jabber/JUI.tcl:1848 ../jabber/JUI.tcl:2005 ../jabber/Login.tcl:111
+#: ../jabber/JUI.tcl:173 ../jabber/JUI.tcl:1229 ../jabber/JUI.tcl:1844
+#: ../jabber/JUI.tcl:1847 ../jabber/JUI.tcl:2004 ../jabber/Login.tcl:111
 #: ../jabber/Login.tcl:124 ../jabber/Login.tcl:267 ../jabber/Profiles.tcl:1832
 #, fuzzy
 msgid "Login"
 msgstr "Logga in"
 
-#: ../jabber/JUI.tcl:175 ../jabber/JUI.tcl:1830 ../jabber/JUI.tcl:1850
+#: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1829 ../jabber/JUI.tcl:1849
 #: ../jabber/Jabber.tcl:2094 ../jabber/Jabber.tcl:2106
 #, fuzzy
 msgid "Logout With Message"
 msgstr "Logga ut med meddelande"
 
-#: ../jabber/JUI.tcl:188 ../jabber/JUI.tcl:1838 ../jabber/JUI.tcl:1858
+#: ../jabber/JUI.tcl:187 ../jabber/JUI.tcl:1837 ../jabber/JUI.tcl:1857
 #, fuzzy
 msgid "Edit &Bookmarks"
 msgstr "Redigera bokmärken..."
 
-#: ../jabber/JUI.tcl:205
+#: ../jabber/JUI.tcl:204
 #, fuzzy
 msgid "Font Size"
 msgstr "Typsnittsstorlek"
 
-#: ../jabber/JUI.tcl:206 ../whiteboard/CanvasUtils.tcl:189
+#: ../jabber/JUI.tcl:205 ../whiteboard/CanvasUtils.tcl:189
 #: ../whiteboard/ItemInspector.tcl:242 ../whiteboard/Whiteboard.tcl:571
 #, fuzzy
 msgid "Normal"
 msgstr "Normal"
 
-#: ../jabber/JUI.tcl:208 ../whiteboard/Whiteboard.tcl:457
+#: ../jabber/JUI.tcl:207 ../whiteboard/Whiteboard.tcl:457
 #: ../whiteboard/Whiteboard.tcl:2943 ../whiteboard/Whiteboard.tcl:2965
 #: ../whiteboard/Whiteboard.tcl:2968
 #, fuzzy
 msgid "Larger"
 msgstr "Större"
 
-#: ../jabber/JUI.tcl:210
+#: ../jabber/JUI.tcl:209
 #, fuzzy
 msgid "Large"
 msgstr "Stor"
 
-#: ../jabber/JUI.tcl:212
+#: ../jabber/JUI.tcl:211
 #, fuzzy
 msgid "Huge"
 msgstr "Jättestor"
 
-#: ../jabber/JUI.tcl:216
+#: ../jabber/JUI.tcl:215
 #, fuzzy
 msgid "Tool&bar"
 msgstr "Verktygsfält"
 
-#: ../jabber/JUI.tcl:218
+#: ../jabber/JUI.tcl:217
 #, fuzzy
 msgid "&Tabs"
 msgstr "Flikar"
 
-#: ../jabber/JUI.tcl:221
+#: ../jabber/JUI.tcl:220
 #, fuzzy
 msgid "Control Panel"
 msgstr "Control Panel"
 
-#: ../jabber/JUI.tcl:223
+#: ../jabber/JUI.tcl:222
 #, fuzzy
 msgid "&Error Log"
 msgstr "Fellogg..."
 
-#: ../jabber/JUI.tcl:224
+#: ../jabber/JUI.tcl:223
 #, fuzzy
 msgid "&Debug"
 msgstr "Debugga"
 
-#: ../jabber/JUI.tcl:232 ../jabber/JUI.tcl:827 ../jabber/JUI.tcl:999
-#: ../jabber/JUI.tcl:1936
+#: ../jabber/JUI.tcl:231 ../jabber/JUI.tcl:826 ../jabber/JUI.tcl:998
+#: ../jabber/JUI.tcl:1935
 #, fuzzy
 msgid "Show Control Panel"
 msgstr "Show Control Panel"
 
-#: ../jabber/JUI.tcl:239 ../whiteboard/Whiteboard.tcl:414
+#: ../jabber/JUI.tcl:238 ../whiteboard/Whiteboard.tcl:414
 #: ../whiteboard/Whiteboard.tcl:416
 #, tcl-format
 msgid "&About %s"
 msgstr ""
 
-#: ../jabber/JUI.tcl:246 ../jabber/JUI.tcl:1769 ../jabber/JUI.tcl:1778
+#: ../jabber/JUI.tcl:245 ../jabber/JUI.tcl:1768 ../jabber/JUI.tcl:1777
 #: ../whiteboard/Whiteboard.tcl:443 ../whiteboard/Whiteboard.tcl:2897
 #: ../whiteboard/Whiteboard.tcl:2899
 #, fuzzy
 msgid "&Undo"
 msgstr "Ångra"
 
-#: ../jabber/JUI.tcl:247 ../jabber/JUI.tcl:1770 ../jabber/JUI.tcl:1780
+#: ../jabber/JUI.tcl:246 ../jabber/JUI.tcl:1769 ../jabber/JUI.tcl:1779
 #: ../whiteboard/Whiteboard.tcl:444 ../whiteboard/Whiteboard.tcl:2902
 #: ../whiteboard/Whiteboard.tcl:2904
 #, fuzzy
 msgid "Re&do"
 msgstr "Upprepa"
 
-#: ../jabber/JUI.tcl:249 ../whiteboard/Whiteboard.tcl:446
+#: ../jabber/JUI.tcl:248 ../whiteboard/Whiteboard.tcl:446
 #: ../whiteboard/Whiteboard.tcl:613 ../whiteboard/Whiteboard.tcl:2910
 #: ../whiteboard/Whiteboard.tcl:2912 ../whiteboard/Whiteboard.tcl:2916
 #: ../whiteboard/Whiteboard.tcl:2919
@@ -3794,116 +3797,116 @@ msgstr "Upprepa"
 msgid "Cu&t"
 msgstr "Klipp ut"
 
-#: ../jabber/JUI.tcl:250 ../whiteboard/Whiteboard.tcl:447
+#: ../jabber/JUI.tcl:249 ../whiteboard/Whiteboard.tcl:447
 #: ../whiteboard/Whiteboard.tcl:614 ../whiteboard/Whiteboard.tcl:2914
 #: ../whiteboard/Whiteboard.tcl:2917 ../whiteboard/Whiteboard.tcl:2920
 #, fuzzy
 msgid "&Copy"
 msgstr "Kopiera"
 
-#: ../jabber/JUI.tcl:251 ../whiteboard/Whiteboard.tcl:448
+#: ../jabber/JUI.tcl:250 ../whiteboard/Whiteboard.tcl:448
 #: ../whiteboard/Whiteboard.tcl:615 ../whiteboard/Whiteboard.tcl:2923
 #: ../whiteboard/Whiteboard.tcl:2925 ../whiteboard/Whiteboard.tcl:2927
 #, fuzzy
 msgid "&Paste"
 msgstr "Klistra in"
 
-#: ../jabber/JUI.tcl:253 ../jabber/JUI.tcl:1768 ../jabber/JUI.tcl:1776
-#: ../jabber/JUI.tcl:1783 ../jabber/Subscribe.tcl:1091
+#: ../jabber/JUI.tcl:252 ../jabber/JUI.tcl:1767 ../jabber/JUI.tcl:1775
+#: ../jabber/JUI.tcl:1782 ../jabber/Subscribe.tcl:1091
 #, fuzzy
 msgid "All"
 msgstr "All"
 
-#: ../jabber/JUI.tcl:486 ../jabber/Roster.tcl:1574
+#: ../jabber/JUI.tcl:485 ../jabber/Roster.tcl:1586
 #, fuzzy
 msgid "Contacts"
 msgstr "Kontakter"
 
 #. TRANSLATORS; right mouse click menu (on arrow) in control panel (bottom of main window): status info slot
-#: ../jabber/JUI.tcl:530 ../jabber/StatusSlot.tcl:32
+#: ../jabber/JUI.tcl:529 ../jabber/StatusSlot.tcl:32
 #, fuzzy
 msgid "Own Contact ID"
 msgstr "Own Contact ID"
 
-#: ../jabber/JUI.tcl:531 ../jabber/StatusSlot.tcl:33
+#: ../jabber/JUI.tcl:530 ../jabber/StatusSlot.tcl:33
 #, fuzzy
 msgid "Own Full Contact ID"
 msgstr "Own Full Contact ID"
 
-#: ../jabber/JUI.tcl:607
+#: ../jabber/JUI.tcl:606
 #, fuzzy
 msgid "Displays your Contact ID or nickname"
 msgstr "Kontakt"
 
-#: ../jabber/JUI.tcl:608 ../jabber/JUI.tcl:614
+#: ../jabber/JUI.tcl:607 ../jabber/JUI.tcl:613
 msgid "Set your status message"
 msgstr ""
 
-#: ../jabber/JUI.tcl:993 ../jabber/JUI.tcl:1933
+#: ../jabber/JUI.tcl:992 ../jabber/JUI.tcl:1932
 #, fuzzy
 msgid "Hide Control Panel"
 msgstr "Hide Control Panel"
 
-#: ../jabber/JUI.tcl:1234 ../jabber/JUI.tcl:1238 ../jabber/MailBox.tcl:465
+#: ../jabber/JUI.tcl:1233 ../jabber/JUI.tcl:1237 ../jabber/MailBox.tcl:465
 #: ../jabber/MailBox.tcl:1955
 #, fuzzy
 msgid "Inbox"
 msgstr "Inkorg"
 
-#: ../jabber/JUI.tcl:1242
+#: ../jabber/JUI.tcl:1241
 #, fuzzy
 msgid "Contact"
 msgstr "Kontakt"
 
-#: ../jabber/JUI.tcl:1245 ../jabber/JUser.tcl:101 ../jabber/JUser.tcl:152
+#: ../jabber/JUI.tcl:1244 ../jabber/JUser.tcl:101 ../jabber/JUser.tcl:152
 #, fuzzy
 msgid "Add Contact"
 msgstr "Lägg till kontakt"
 
-#: ../jabber/JUI.tcl:1266 ../whiteboard/Whiteboard.tcl:2207
+#: ../jabber/JUI.tcl:1265 ../whiteboard/Whiteboard.tcl:2207
 #, fuzzy
 msgid "&File"
 msgstr "Arkiv"
 
-#: ../jabber/JUI.tcl:1267
+#: ../jabber/JUI.tcl:1266
 #, fuzzy
 msgid "&Action"
 msgstr "Utför"
 
-#: ../jabber/JUI.tcl:1269 ../lib/EditDialogs.tcl:126
+#: ../jabber/JUI.tcl:1268 ../lib/EditDialogs.tcl:126
 #: ../whiteboard/Whiteboard.tcl:2210
 #, fuzzy
 msgid "&Edit"
 msgstr "Redigera"
 
 #. TRANSLATORS; code for these strings is not finished
-#: ../jabber/JUI.tcl:1532
+#: ../jabber/JUI.tcl:1531
 #, fuzzy
 msgid "The connection is secure"
 msgstr "är"
 
-#: ../jabber/JUI.tcl:1536
+#: ../jabber/JUI.tcl:1535
 #, fuzzy
 msgid "The connection is medium secure"
 msgstr "är"
 
-#: ../jabber/JUI.tcl:1540
+#: ../jabber/JUI.tcl:1539
 #, fuzzy
 msgid "The connection is insecure"
 msgstr "är"
 
-#: ../jabber/JUI.tcl:1582
+#: ../jabber/JUI.tcl:1581
 #, fuzzy
 msgid "Logged out"
 msgstr "Utloggad"
 
-#: ../jabber/JUI.tcl:1824 ../jabber/JUI.tcl:1829 ../jabber/JUI.tcl:1995
+#: ../jabber/JUI.tcl:1823 ../jabber/JUI.tcl:1828 ../jabber/JUI.tcl:1994
 #: ../jabber/Jabber.tcl:2134
 #, fuzzy
 msgid "Logout"
 msgstr "Logga ut"
 
-#: ../jabber/JUI.tcl:1986
+#: ../jabber/JUI.tcl:1985
 #, fuzzy
 msgid "Stop"
 msgstr "Stopp"
@@ -4011,7 +4014,7 @@ msgstr "Du ser ej dina kontakters närvaro men de kan se din."
 msgid "Both you and your contact cannot see eachother's presence."
 msgstr "Varken du eller dina kontakter ser varandras närvaro."
 
-#: ../jabber/JUser.tcl:771 ../jabber/Roster.tcl:1617
+#: ../jabber/JUser.tcl:771 ../jabber/Roster.tcl:1629
 #, fuzzy
 msgid "You can see your contact's presence, but your contact can't see yours."
 msgstr "Du ser dina kontakters närvaro men de ser inte din."
@@ -5045,6 +5048,11 @@ msgstr "Tillgänglig"
 msgid "Away"
 msgstr "Borta"
 
+#: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
+#: ../jabber/Status.tcl:46
+msgid "Free For Chat"
+msgstr ""
+
 #: ../jabber/Roster.tcl:84 ../jabber/Roster.tcl:92 ../jabber/Roster.tcl:134
 #: ../jabber/Status.tcl:39 ../jabber/Status.tcl:47
 #, fuzzy
@@ -5150,36 +5158,36 @@ msgstr "Logga ut från %s"
 msgid "The roster is up to date"
 msgstr "Rostern är uppdaterad"
 
-#: ../jabber/Roster.tcl:1397
+#: ../jabber/Roster.tcl:1409
 msgid "Transport"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1595
+#: ../jabber/Roster.tcl:1607
 #, fuzzy
 msgid "Remove contact without presence subscription"
 msgstr "Tag bort kontakter utan någon prenumeration"
 
-#: ../jabber/Roster.tcl:1597
+#: ../jabber/Roster.tcl:1609
 #, fuzzy
 msgid "Clear list of contacts on logout"
 msgstr "Radera kontaktlistan när loggar ut"
 
-#: ../jabber/Roster.tcl:1599
+#: ../jabber/Roster.tcl:1611
 #, fuzzy
 msgid "Chat on double-click instead of message"
 msgstr "Chatta när dubbelklickar istället för att skicka meddelenaden"
 
-#: ../jabber/Roster.tcl:1602
+#: ../jabber/Roster.tcl:1614
 #, fuzzy
 msgid "Show offline users"
 msgstr "Visa utloggade kontakter"
 
-#: ../jabber/Roster.tcl:1604
+#: ../jabber/Roster.tcl:1616
 #, fuzzy
 msgid "Show transports"
 msgstr "Visa transporter"
 
-#: ../jabber/Roster.tcl:1606
+#: ../jabber/Roster.tcl:1618
 #, fuzzy
 msgid "Show contacts without any subscription"
 msgstr "Visa kontakter utan någon prenumeration"
@@ -5844,7 +5852,7 @@ msgstr "Hämtningen av %s återställdes"
 msgid "Cannot start the internal HTTP server: %s"
 msgstr "Kan ej starta den interna HTTP servern: %s"
 
-#: ../lib/Init.tcl:751 ../lib/Init.tcl:772 ../lib/Media.tcl:179
+#: ../lib/Init.tcl:742 ../lib/Init.tcl:763 ../lib/Media.tcl:179
 #: ../whiteboard/Plugins.tcl:445
 #, fuzzy, tcl-format
 msgid "Looking for %s"
@@ -6906,6 +6914,10 @@ msgstr "Importera"
 msgid "Import Itcl applets"
 msgstr "Importera"
 
+#: ../whiteboard/Plugins.tcl:1374
+msgid "Import documents on Windows"
+msgstr ""
+
 #: ../whiteboard/PutFileIface.tcl:168
 #, tcl-format
 msgid "The server at %s responded with a code %s: %s"
@@ -7149,3 +7161,7 @@ msgstr ""
 #, fuzzy
 msgid "&Library"
 msgstr "Bibliotek"
+
+#, fuzzy
+#~ msgid "chat"
+#~ msgstr "chatta"
