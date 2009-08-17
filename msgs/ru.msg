@@ -1,4 +1,4 @@
-set ::msgcat::header "Project-Id-Version: ru\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-04-12 17:55+0300\nPO-Revision-Date: 2009-04-12 21:55+0300\nLast-Translator: rain <linuxoid.rain@gmail.com>\nLanguage-Team: Russian <ru@li.org>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n\nX-Generator: KBabel 1.11.4\n"
+set ::msgcat::header "Project-Id-Version: ru\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-08-17 08:04+0200\nPO-Revision-Date: 2009-04-12 21:55+0300\nLast-Translator: rain <linuxoid.rain@gmail.com>\nLanguage-Team: Russian <ru@li.org>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n\nX-Generator: KBabel 1.11.4\n"
 ::msgcat::mcset ru "Sourcing Tcl code" "\u0427\u0442\u0435\u043d\u0438\u0435 Tcl-\u043a\u043e\u0434\u0430"
 ::msgcat::mcset ru "Searching for our hostname" "\u041f\u043e\u0438\u0441\u043a \u0438\u043c\u0435\u043d\u0438 \u0445\u043e\u0441\u0442\u0430"
 ::msgcat::mcset ru "Loading Tcl packages" "\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 Tcl"
@@ -563,7 +563,6 @@ set ::msgcat::header "Project-Id-Version: ru\nReport-Msgid-Bugs-To: https://bugs
 ::msgcat::mcset ru "Visitors" "\u041f\u043e\u0441\u0435\u0442\u0438\u0442\u0435\u043b\u0438"
 ::msgcat::mcset ru "available" "\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d"
 ::msgcat::mcset ru "away" "\u043e\u0442\u043e\u0448\u0451\u043b"
-::msgcat::mcset ru "chat" "\u0447\u0430\u0442"
 ::msgcat::mcset ru "do not disturb" "\u043d\u0435 \u0431\u0435\u0441\u043f\u043e\u043a\u043e\u0438\u0442\u044c"
 ::msgcat::mcset ru "extended away" "\u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d"
 ::msgcat::mcset ru "invisible" "\u043d\u0435\u0432\u0438\u0434\u0438\u043c\u044b\u0439"
