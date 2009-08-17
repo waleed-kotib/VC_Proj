@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pt\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-08-17 08:04+0200\n"
+"POT-Creation-Date: 2009-08-17 08:46+0200\n"
 "PO-Revision-Date: 2009-03-10 21:09+0000\n"
 "Last-Translator: Paulo Oliveira <paulo.ferraz.oliveira at gmail.com>\n"
 "Language-Team: Portuguese <en@li.org>\n"
@@ -1622,7 +1622,7 @@ msgstr "A fazer jogging"
 msgid "Playing sports"
 msgstr "A fazer desporto"
 
-#: ../components/UserActivity.tcl:343 ../whiteboard/WDialogs.tcl:188
+#: ../components/UserActivity.tcl:343
 msgid "Running"
 msgstr "A correr"
 
@@ -6045,6 +6045,12 @@ msgstr "não"
 #: ../whiteboard/WDialogs.tcl:169
 msgid "yes"
 msgstr "sim"
+
+#: ../whiteboard/WDialogs.tcl:188
+#, fuzzy
+#| msgid "Activity"
+msgid "Activated"
+msgstr "Actividade"
 
 #: ../whiteboard/WDialogs.tcl:194
 msgid "Buffering support"

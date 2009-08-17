@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-08-17 08:04+0200\n"
+"POT-Creation-Date: 2009-08-17 08:46+0200\n"
 "PO-Revision-Date: 2009-02-22 18:04+0100\n"
 "Last-Translator: Hermann J. Beckers <hj.beckers@onlinehome.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
@@ -1627,7 +1627,7 @@ msgstr "Joggen"
 msgid "Playing sports"
 msgstr "Sportausübung"
 
-#: ../components/UserActivity.tcl:343 ../whiteboard/WDialogs.tcl:188
+#: ../components/UserActivity.tcl:343
 msgid "Running"
 msgstr "Laufen"
 
@@ -6075,6 +6075,12 @@ msgstr "nein"
 #: ../whiteboard/WDialogs.tcl:169
 msgid "yes"
 msgstr "ja"
+
+#: ../whiteboard/WDialogs.tcl:188
+#, fuzzy
+#| msgid "Activity"
+msgid "Activated"
+msgstr "Aktivität"
 
 #: ../whiteboard/WDialogs.tcl:194
 msgid "Buffering support"

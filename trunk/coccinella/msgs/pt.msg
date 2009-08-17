@@ -1,4 +1,4 @@
-set ::msgcat::header "Project-Id-Version: pt\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-08-17 08:04+0200\nPO-Revision-Date: 2009-03-10 21:09+0000\nLast-Translator: Paulo Oliveira <paulo.ferraz.oliveira at gmail.com>\nLanguage-Team: Portuguese <en@li.org>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms:  nplurals=2; plural=(n != 1);\n"
+set ::msgcat::header "Project-Id-Version: pt\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-08-17 08:46+0200\nPO-Revision-Date: 2009-03-10 21:09+0000\nLast-Translator: Paulo Oliveira <paulo.ferraz.oliveira at gmail.com>\nLanguage-Team: Portuguese <en@li.org>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms:  nplurals=2; plural=(n != 1);\n"
 ::msgcat::mcset pt "Sourcing Tcl code" "A transformar c\u00f3digo Tcl"
 ::msgcat::mcset pt "Searching for our hostname" "A procurar o nome do nosso anfitri\u00e3o"
 ::msgcat::mcset pt "Loading Tcl packages" "A carregar pacotes Tcl"

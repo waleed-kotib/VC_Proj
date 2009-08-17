@@ -185,7 +185,7 @@ proc ::WDialogs::ShowInfoServer { } {
     
     option add *$fr.TLabel.style Small.TLabel
     
-    ttk::label $fr.x1 -text [mc "Running"]:
+    ttk::label $fr.x1 -text [mc "Activated"]:
     ttk::label $fr.x2 -text $boolToYesNo($state(isServerUp))
     ttk::label $fr.a1 -text "IP:"
     ttk::label $fr.b1 -text [mc "Host"]:
