@@ -245,7 +245,7 @@ proc ::WBPrefs::SelectFontCmd {which} {
 	    set fntName [$wlbsys get $selInd]
 	    if {[llength $fntName]} {
 		$wsamp delete all
-		$wsamp create text 6 24 -anchor w -text {Hello cruel World!}  \
+		$wsamp create text 6 24 -anchor w -text {abcdefghijk ABCDEFGHIJK}  \
 		  -font [list $fntName 36]
 	    }
 	} else {
