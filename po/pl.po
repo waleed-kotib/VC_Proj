@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pl\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-08-17 08:46+0200\n"
+"POT-Creation-Date: 2009-08-17 23:57+0200\n"
 "PO-Revision-Date: 2009-02-21 15:14\n"
 "Last-Translator: Zbigniew Baniewski <zb at ispid.com.pl>\n"
 "Language-Team: Polish\n"
@@ -261,7 +261,7 @@ msgstr "Wiadomość"
 #: ../components/Totd.tcl:90 ../components/XMLConsole.tcl:109
 #: ../components/fsdialog.tcl:427 ../components/fsdialog.tcl:1052
 #: ../components/fsdialog.tcl:1444 ../contrib/ui/dialog.tcl:242
-#: ../contrib/ui/fontselector.tcl:147 ../jabber/Chat.tcl:356
+#: ../contrib/ui/fontselector.tcl:152 ../jabber/Chat.tcl:356
 #: ../jabber/Jabber.tcl:1727 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
 #: ../jabber/MUC.tcl:1439 ../jabber/MUC.tcl:1632 ../jabber/Status.tcl:428
 #: ../jabber/Subscribe.tcl:1107 ../lib/Component.tcl:80
@@ -274,7 +274,7 @@ msgstr "OK"
 #: ../components/JivePhone.tcl:905 ../components/JivePhone.tcl:987
 #: ../components/Phone/Phone.tcl:432 ../components/fsdialog.tcl:430
 #: ../components/fsdialog.tcl:1054 ../components/fsdialog.tcl:1446
-#: ../contrib/ui/dialog.tcl:243 ../contrib/ui/fontselector.tcl:149
+#: ../contrib/ui/dialog.tcl:243 ../contrib/ui/fontselector.tcl:154
 #: ../contrib/ui/progress.tcl:316 ../contrib/wizard.tcl:227
 #: ../jabber/Adhoc.tcl:201 ../jabber/Adhoc.tcl:396 ../jabber/Chat.tcl:358
 #: ../jabber/Create.tcl:151 ../jabber/Create.tcl:670 ../jabber/Disco.tcl:1509
@@ -1444,7 +1444,7 @@ msgid "MIDI command"
 msgstr "polecenie MIDI"
 
 #: ../components/Sounds.tcl:634 ../components/Sounds.tcl:674
-#: ../components/Sounds.tcl:694 ../contrib/ui/fontselector.tcl:151
+#: ../components/Sounds.tcl:694 ../contrib/ui/fontselector.tcl:156
 #: ../contrib/ui/openimage.tcl:97 ../jabber/Emoticons.tcl:749
 #: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1399
 #: ../jabber/Rosticons.tcl:605 ../jabber/SetupAss.tcl:116
@@ -2057,6 +2057,22 @@ msgstr "Rozmiar kroju"
 #: ../whiteboard/ItemInspector.tcl:378
 msgid "Font weight"
 msgstr "Rodzaj kroju"
+
+#: ../contrib/ui/fontselector.tcl:126 ../jabber/JUI.tcl:205
+#: ../whiteboard/CanvasUtils.tcl:189 ../whiteboard/ItemInspector.tcl:242
+#: ../whiteboard/Whiteboard.tcl:571
+msgid "Normal"
+msgstr "Normalne"
+
+#: ../contrib/ui/fontselector.tcl:127 ../whiteboard/CanvasUtils.tcl:191
+#: ../whiteboard/ItemInspector.tcl:243 ../whiteboard/Whiteboard.tcl:573
+msgid "Bold"
+msgstr "Wytłuszczone"
+
+#: ../contrib/ui/fontselector.tcl:128 ../whiteboard/CanvasUtils.tcl:193
+#: ../whiteboard/ItemInspector.tcl:244 ../whiteboard/Whiteboard.tcl:575
+msgid "Italic"
+msgstr "Kursywa"
 
 #: ../contrib/ui/openimage.tcl:62
 msgid "Image Files"
@@ -3210,11 +3226,6 @@ msgstr "Edytuj zakładki..."
 #: ../jabber/JUI.tcl:204
 msgid "Font Size"
 msgstr "Wielkość czcionki"
-
-#: ../jabber/JUI.tcl:205 ../whiteboard/CanvasUtils.tcl:189
-#: ../whiteboard/ItemInspector.tcl:242 ../whiteboard/Whiteboard.tcl:571
-msgid "Normal"
-msgstr "Normalne"
 
 #: ../jabber/JUI.tcl:207 ../whiteboard/Whiteboard.tcl:457
 #: ../whiteboard/Whiteboard.tcl:2943 ../whiteboard/Whiteboard.tcl:2965
@@ -5568,16 +5579,6 @@ msgstr "Czcionka"
 msgid "Weight"
 msgstr "Grubość"
 
-#: ../whiteboard/CanvasUtils.tcl:191 ../whiteboard/ItemInspector.tcl:243
-#: ../whiteboard/Whiteboard.tcl:573
-msgid "Bold"
-msgstr "Wytłuszczone"
-
-#: ../whiteboard/CanvasUtils.tcl:193 ../whiteboard/ItemInspector.tcl:244
-#: ../whiteboard/Whiteboard.tcl:575
-msgid "Italic"
-msgstr "Kursywa"
-
 #: ../whiteboard/CanvasUtils.tcl:197
 msgid "Add Speech Bubble"
 msgstr "Dodaj dymek"
@@ -6188,3 +6189,18 @@ msgstr "Biblioteki"
 
 #~ msgid "chat"
 #~ msgstr "pogawędzę"
+
+#, fuzzy
+#~| msgid "Normal"
+#~ msgid "normal"
+#~ msgstr "Normalne"
+
+#, fuzzy
+#~| msgid "Italic"
+#~ msgid "italic"
+#~ msgstr "Kursywa"
+
+#, fuzzy
+#~| msgid "cold"
+#~ msgid "bold"
+#~ msgstr "zimny"
