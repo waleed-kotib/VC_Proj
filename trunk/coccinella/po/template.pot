@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Coccinella 0.96.11\n"
 "\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-02-23 00:30+0100\n"
+"POT-Creation-Date: 2009-08-17 08:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,10 +55,10 @@ msgstr ""
 #: ../jabber/Create.tcl:324 ../jabber/Create.tcl:332 ../jabber/Create.tcl:429
 #: ../jabber/Create.tcl:471 ../jabber/Create.tcl:515 ../jabber/Create.tcl:549
 #: ../jabber/Create.tcl:580 ../jabber/Create.tcl:759 ../jabber/Disco.tcl:1784
-#: ../jabber/Disco.tcl:1807 ../jabber/Emoticons.tcl:653
-#: ../jabber/Emoticons.tcl:662 ../jabber/Emoticons.tcl:814
-#: ../jabber/Emoticons.tcl:816 ../jabber/Emoticons.tcl:850
-#: ../jabber/Emoticons.tcl:862 ../jabber/Emoticons.tcl:864
+#: ../jabber/Disco.tcl:1807 ../jabber/Emoticons.tcl:654
+#: ../jabber/Emoticons.tcl:663 ../jabber/Emoticons.tcl:815
+#: ../jabber/Emoticons.tcl:817 ../jabber/Emoticons.tcl:851
+#: ../jabber/Emoticons.tcl:863 ../jabber/Emoticons.tcl:865
 #: ../jabber/Enter.tcl:402 ../jabber/Enter.tcl:452 ../jabber/Enter.tcl:492
 #: ../jabber/Enter.tcl:637 ../jabber/Enter.tcl:652 ../jabber/Enter.tcl:697
 #: ../jabber/FTrans.tcl:371 ../jabber/FTrans.tcl:407 ../jabber/FTrans.tcl:442
@@ -103,7 +103,7 @@ msgstr ""
 #: ../lib/Dialogs.tcl:169 ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71
 #: ../lib/HttpTrpt.tcl:107 ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226
 #: ../lib/HttpTrpt.tcl:233 ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78
-#: ../lib/Init.tcl:732 ../lib/Init.tcl:754 ../lib/MacintoshUtils.tcl:55
+#: ../lib/Init.tcl:723 ../lib/Init.tcl:745 ../lib/MacintoshUtils.tcl:55
 #: ../lib/MacintoshUtils.tcl:77 ../lib/MacintoshUtils.tcl:99
 #: ../lib/PrefUtils.tcl:91 ../lib/PrefUtils.tcl:217 ../lib/TheServer.tcl:65
 #: ../lib/UserActions.tcl:44 ../lib/UserActions.tcl:72
@@ -197,7 +197,7 @@ msgstr ""
 #: ../components/Mood.tcl:477 ../components/Mood.tcl:628
 #: ../components/Mood.tcl:669 ../components/UserActivity.tcl:244
 #: ../components/UserActivity.tcl:400 ../components/UserActivity.tcl:651
-#: ../components/UserActivity.tcl:694 ../jabber/Emoticons.tcl:754
+#: ../components/UserActivity.tcl:694 ../jabber/Emoticons.tcl:755
 #: ../jabber/GroupChat.tcl:172 ../jabber/JUser.tcl:110 ../jabber/JUser.tcl:345
 #: ../jabber/Subscribe.tcl:325 ../jabber/Subscribe.tcl:570
 #: ../jabber/Subscribe.tcl:1283 ../jabber/Subscribe.tcl:1326
@@ -397,7 +397,7 @@ msgstr ""
 msgid "Street"
 msgstr ""
 
-#: ../components/Geolocation.tcl:88 ../jabber/Emoticons.tcl:616
+#: ../components/Geolocation.tcl:88 ../jabber/Emoticons.tcl:617
 #: ../whiteboard/FilePrefs.tcl:473 ../whiteboard/ItemInspector.tcl:372
 msgid "Text"
 msgstr ""
@@ -452,8 +452,8 @@ msgid "This is location data for"
 msgstr ""
 
 #: ../components/Growl.tcl:162 ../components/taskbar/Taskbar.tcl:185
-#: ../jabber/JUI.tcl:179 ../jabber/JUI.tcl:533 ../jabber/JUI.tcl:1835
-#: ../jabber/JUI.tcl:1855 ../jabber/MegaPresence.tcl:96
+#: ../jabber/JUI.tcl:178 ../jabber/JUI.tcl:532 ../jabber/JUI.tcl:1834
+#: ../jabber/JUI.tcl:1854 ../jabber/MegaPresence.tcl:96
 #: ../jabber/StatusSlot.tcl:35
 msgid "Status"
 msgstr ""
@@ -495,23 +495,267 @@ msgstr ""
 msgid "Phone"
 msgstr ""
 
-#: ../components/Growl.tcl:196
+#: ../components/Growl.tcl:197 ../components/Mood.tcl:211
+msgid "afraid"
+msgstr ""
+
+#: ../components/Growl.tcl:198 ../components/Mood.tcl:212
+msgid "amazed"
+msgstr ""
+
+#: ../components/Growl.tcl:199 ../components/Mood.tcl:213
+msgid "angry"
+msgstr ""
+
+#: ../components/Growl.tcl:200 ../components/Mood.tcl:214
+msgid "annoyed"
+msgstr ""
+
+#: ../components/Growl.tcl:201 ../components/Mood.tcl:215
+msgid "anxious"
+msgstr ""
+
+#: ../components/Growl.tcl:202 ../components/Mood.tcl:216
+msgid "aroused"
+msgstr ""
+
+#: ../components/Growl.tcl:203 ../components/Mood.tcl:217
+msgid "ashamed"
+msgstr ""
+
+#: ../components/Growl.tcl:204 ../components/Mood.tcl:218
+msgid "bored"
+msgstr ""
+
+#: ../components/Growl.tcl:205 ../components/Mood.tcl:219
+msgid "brave"
+msgstr ""
+
+#: ../components/Growl.tcl:206 ../components/Mood.tcl:220
+msgid "calm"
+msgstr ""
+
+#: ../components/Growl.tcl:207 ../components/Mood.tcl:221
+msgid "cold"
+msgstr ""
+
+#: ../components/Growl.tcl:208 ../components/Mood.tcl:222
+msgid "confused"
+msgstr ""
+
+#: ../components/Growl.tcl:209 ../components/Mood.tcl:223
+msgid "contented"
+msgstr ""
+
+#: ../components/Growl.tcl:210 ../components/Mood.tcl:224
+msgid "cranky"
+msgstr ""
+
+#: ../components/Growl.tcl:211 ../components/Mood.tcl:225
+msgid "curious"
+msgstr ""
+
+#: ../components/Growl.tcl:212 ../components/Mood.tcl:226
+msgid "depressed"
+msgstr ""
+
+#: ../components/Growl.tcl:213 ../components/Mood.tcl:227
+msgid "disappointed"
+msgstr ""
+
+#: ../components/Growl.tcl:214 ../components/Mood.tcl:228
+msgid "disgusted"
+msgstr ""
+
+#: ../components/Growl.tcl:215 ../components/Mood.tcl:229
+msgid "distracted"
+msgstr ""
+
+#: ../components/Growl.tcl:216 ../components/Mood.tcl:230
+msgid "embarrassed"
+msgstr ""
+
+#: ../components/Growl.tcl:217 ../components/Mood.tcl:231
+msgid "excited"
+msgstr ""
+
+#: ../components/Growl.tcl:218 ../components/Mood.tcl:232
+msgid "flirtatious"
+msgstr ""
+
+#: ../components/Growl.tcl:219 ../components/Mood.tcl:233
+msgid "frustrated"
+msgstr ""
+
+#: ../components/Growl.tcl:220 ../components/Mood.tcl:234
+msgid "grumpy"
+msgstr ""
+
+#: ../components/Growl.tcl:221 ../components/Mood.tcl:235
+msgid "guilty"
+msgstr ""
+
+#: ../components/Growl.tcl:222 ../components/Mood.tcl:236
+msgid "happy"
+msgstr ""
+
+#: ../components/Growl.tcl:223 ../components/Mood.tcl:237
+msgid "hot"
+msgstr ""
+
+#: ../components/Growl.tcl:224 ../components/Mood.tcl:238
+msgid "humbled"
+msgstr ""
+
+#: ../components/Growl.tcl:225 ../components/Mood.tcl:239
+msgid "humiliated"
+msgstr ""
+
+#: ../components/Growl.tcl:226 ../components/Mood.tcl:240
+msgid "hungry"
+msgstr ""
+
+#: ../components/Growl.tcl:227 ../components/Mood.tcl:241
+msgid "hurt"
+msgstr ""
+
+#: ../components/Growl.tcl:228 ../components/Mood.tcl:242
+msgid "impressed"
+msgstr ""
+
+#: ../components/Growl.tcl:229 ../components/Mood.tcl:243
+msgid "in awe"
+msgstr ""
+
+#: ../components/Growl.tcl:230 ../components/Mood.tcl:244
+msgid "in love"
+msgstr ""
+
+#: ../components/Growl.tcl:231 ../components/Mood.tcl:245
+msgid "indignant"
+msgstr ""
+
+#: ../components/Growl.tcl:232 ../components/Mood.tcl:246
+msgid "interested"
+msgstr ""
+
+#: ../components/Growl.tcl:233 ../components/Mood.tcl:247
+msgid "intoxicated"
+msgstr ""
+
+#: ../components/Growl.tcl:234 ../components/Mood.tcl:248
+msgid "invincible"
+msgstr ""
+
+#: ../components/Growl.tcl:235 ../components/Mood.tcl:249
+msgid "jealous"
+msgstr ""
+
+#: ../components/Growl.tcl:236 ../components/Mood.tcl:250
+msgid "lonely"
+msgstr ""
+
+#: ../components/Growl.tcl:237 ../components/Mood.tcl:251
+msgid "mean"
+msgstr ""
+
+#: ../components/Growl.tcl:238 ../components/Mood.tcl:252
+msgid "moody"
+msgstr ""
+
+#: ../components/Growl.tcl:239 ../components/Mood.tcl:253
+msgid "nervous"
+msgstr ""
+
+#: ../components/Growl.tcl:240 ../components/Mood.tcl:254
+msgid "neutral"
+msgstr ""
+
+#: ../components/Growl.tcl:241 ../components/Mood.tcl:255
+msgid "offended"
+msgstr ""
+
+#: ../components/Growl.tcl:242 ../components/Mood.tcl:256
+msgid "playful"
+msgstr ""
+
+#: ../components/Growl.tcl:243 ../components/Mood.tcl:257
+msgid "proud"
+msgstr ""
+
+#: ../components/Growl.tcl:244 ../components/Mood.tcl:258
+msgid "relieved"
+msgstr ""
+
+#: ../components/Growl.tcl:245 ../components/Mood.tcl:259
+msgid "remorseful"
+msgstr ""
+
+#: ../components/Growl.tcl:246 ../components/Mood.tcl:260
+msgid "restless"
+msgstr ""
+
+#: ../components/Growl.tcl:247 ../components/Mood.tcl:261
+msgid "sad"
+msgstr ""
+
+#: ../components/Growl.tcl:248 ../components/Mood.tcl:262
+msgid "sarcastic"
+msgstr ""
+
+#: ../components/Growl.tcl:249 ../components/Mood.tcl:263
+msgid "serious"
+msgstr ""
+
+#: ../components/Growl.tcl:250 ../components/Mood.tcl:264
+msgid "shocked"
+msgstr ""
+
+#: ../components/Growl.tcl:251 ../components/Mood.tcl:265
+msgid "shy"
+msgstr ""
+
+#: ../components/Growl.tcl:252 ../components/Mood.tcl:266
+msgid "sick"
+msgstr ""
+
+#: ../components/Growl.tcl:253 ../components/Mood.tcl:267
+msgid "sleepy"
+msgstr ""
+
+#: ../components/Growl.tcl:254 ../components/Mood.tcl:268
+msgid "stressed"
+msgstr ""
+
+#: ../components/Growl.tcl:255 ../components/Mood.tcl:269
+msgid "surprised"
+msgstr ""
+
+#: ../components/Growl.tcl:256 ../components/Mood.tcl:270
+msgid "thirsty"
+msgstr ""
+
+#: ../components/Growl.tcl:257 ../components/Mood.tcl:271
+msgid "worried"
+msgstr ""
+
+#: ../components/Growl.tcl:259
 msgid "Mood change"
 msgstr ""
 
-#: ../components/Growl.tcl:200
+#: ../components/Growl.tcl:264
 msgid "is"
 msgstr ""
 
-#: ../components/Growl.tcl:202
+#: ../components/Growl.tcl:268
 msgid "because"
 msgstr ""
 
-#: ../components/Growl.tcl:205
+#: ../components/Growl.tcl:271
 msgid "retracted mood"
 msgstr ""
 
-#: ../components/Growl.tcl:207 ../components/Mood.tcl:292
+#: ../components/Growl.tcl:273 ../components/Mood.tcl:292
 #: ../components/Mood.tcl:484 ../components/Mood.tcl:586
 #: ../components/Mood.tcl:601 ../components/Mood.tcl:665
 msgid "Mood"
@@ -522,7 +766,7 @@ msgstr ""
 msgid "Take &Snapshot"
 msgstr ""
 
-#: ../components/ImageMagic.tcl:63 ../jabber/JUI.tcl:202
+#: ../components/ImageMagic.tcl:63 ../jabber/JUI.tcl:201
 #: ../whiteboard/Whiteboard.tcl:590
 msgid "Plu&gins"
 msgstr ""
@@ -610,6 +854,7 @@ msgid "Name"
 msgstr ""
 
 #: ../components/JivePhone.tcl:891 ../components/JivePhone.tcl:973
+#: ../jabber/Gateway.tcl:84
 msgid "Phone number"
 msgstr ""
 
@@ -937,250 +1182,6 @@ msgstr ""
 msgid "Worried"
 msgstr ""
 
-#: ../components/Mood.tcl:211
-msgid "afraid"
-msgstr ""
-
-#: ../components/Mood.tcl:212
-msgid "amazed"
-msgstr ""
-
-#: ../components/Mood.tcl:213
-msgid "angry"
-msgstr ""
-
-#: ../components/Mood.tcl:214
-msgid "annoyed"
-msgstr ""
-
-#: ../components/Mood.tcl:215
-msgid "anxious"
-msgstr ""
-
-#: ../components/Mood.tcl:216
-msgid "aroused"
-msgstr ""
-
-#: ../components/Mood.tcl:217
-msgid "ashamed"
-msgstr ""
-
-#: ../components/Mood.tcl:218
-msgid "bored"
-msgstr ""
-
-#: ../components/Mood.tcl:219
-msgid "brave"
-msgstr ""
-
-#: ../components/Mood.tcl:220
-msgid "calm"
-msgstr ""
-
-#: ../components/Mood.tcl:221
-msgid "cold"
-msgstr ""
-
-#: ../components/Mood.tcl:222
-msgid "confused"
-msgstr ""
-
-#: ../components/Mood.tcl:223
-msgid "contented"
-msgstr ""
-
-#: ../components/Mood.tcl:224
-msgid "cranky"
-msgstr ""
-
-#: ../components/Mood.tcl:225
-msgid "curious"
-msgstr ""
-
-#: ../components/Mood.tcl:226
-msgid "depressed"
-msgstr ""
-
-#: ../components/Mood.tcl:227
-msgid "disappointed"
-msgstr ""
-
-#: ../components/Mood.tcl:228
-msgid "disgusted"
-msgstr ""
-
-#: ../components/Mood.tcl:229
-msgid "distracted"
-msgstr ""
-
-#: ../components/Mood.tcl:230
-msgid "embarrassed"
-msgstr ""
-
-#: ../components/Mood.tcl:231
-msgid "excited"
-msgstr ""
-
-#: ../components/Mood.tcl:232
-msgid "flirtatious"
-msgstr ""
-
-#: ../components/Mood.tcl:233
-msgid "frustrated"
-msgstr ""
-
-#: ../components/Mood.tcl:234
-msgid "grumpy"
-msgstr ""
-
-#: ../components/Mood.tcl:235
-msgid "guilty"
-msgstr ""
-
-#: ../components/Mood.tcl:236
-msgid "happy"
-msgstr ""
-
-#: ../components/Mood.tcl:237
-msgid "hot"
-msgstr ""
-
-#: ../components/Mood.tcl:238
-msgid "humbled"
-msgstr ""
-
-#: ../components/Mood.tcl:239
-msgid "humiliated"
-msgstr ""
-
-#: ../components/Mood.tcl:240
-msgid "hungry"
-msgstr ""
-
-#: ../components/Mood.tcl:241
-msgid "hurt"
-msgstr ""
-
-#: ../components/Mood.tcl:242
-msgid "impressed"
-msgstr ""
-
-#: ../components/Mood.tcl:243
-msgid "in awe"
-msgstr ""
-
-#: ../components/Mood.tcl:244
-msgid "in love"
-msgstr ""
-
-#: ../components/Mood.tcl:245
-msgid "indignant"
-msgstr ""
-
-#: ../components/Mood.tcl:246
-msgid "interested"
-msgstr ""
-
-#: ../components/Mood.tcl:247
-msgid "intoxicated"
-msgstr ""
-
-#: ../components/Mood.tcl:248
-msgid "invincible"
-msgstr ""
-
-#: ../components/Mood.tcl:249
-msgid "jealous"
-msgstr ""
-
-#: ../components/Mood.tcl:250
-msgid "lonely"
-msgstr ""
-
-#: ../components/Mood.tcl:251
-msgid "mean"
-msgstr ""
-
-#: ../components/Mood.tcl:252
-msgid "moody"
-msgstr ""
-
-#: ../components/Mood.tcl:253
-msgid "nervous"
-msgstr ""
-
-#: ../components/Mood.tcl:254
-msgid "neutral"
-msgstr ""
-
-#: ../components/Mood.tcl:255
-msgid "offended"
-msgstr ""
-
-#: ../components/Mood.tcl:256
-msgid "playful"
-msgstr ""
-
-#: ../components/Mood.tcl:257
-msgid "proud"
-msgstr ""
-
-#: ../components/Mood.tcl:258
-msgid "relieved"
-msgstr ""
-
-#: ../components/Mood.tcl:259
-msgid "remorseful"
-msgstr ""
-
-#: ../components/Mood.tcl:260
-msgid "restless"
-msgstr ""
-
-#: ../components/Mood.tcl:261
-msgid "sad"
-msgstr ""
-
-#: ../components/Mood.tcl:262
-msgid "sarcastic"
-msgstr ""
-
-#: ../components/Mood.tcl:263
-msgid "serious"
-msgstr ""
-
-#: ../components/Mood.tcl:264
-msgid "shocked"
-msgstr ""
-
-#: ../components/Mood.tcl:265
-msgid "shy"
-msgstr ""
-
-#: ../components/Mood.tcl:266
-msgid "sick"
-msgstr ""
-
-#: ../components/Mood.tcl:267
-msgid "sleepy"
-msgstr ""
-
-#: ../components/Mood.tcl:268
-msgid "stressed"
-msgstr ""
-
-#: ../components/Mood.tcl:269
-msgid "surprised"
-msgstr ""
-
-#: ../components/Mood.tcl:270
-msgid "thirsty"
-msgstr ""
-
-#: ../components/Mood.tcl:271
-msgid "worried"
-msgstr ""
-
 #: ../components/Mood.tcl:303 ../components/Mood.tcl:640
 msgid "&Custom Mood"
 msgstr ""
@@ -1296,7 +1297,7 @@ msgid "%s is on the phone"
 msgstr ""
 
 #. TRANSLATORS; whiteboard slide show menu
-#: ../components/SlideShow.tcl:43 ../components/SlideShow.tcl:198
+#: ../components/SlideShow.tcl:43 ../components/SlideShow.tcl:123
 msgid "Slide Show"
 msgstr ""
 
@@ -1304,14 +1305,14 @@ msgstr ""
 msgid "&Open Folder"
 msgstr ""
 
-#: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:433
-#: ../components/SlideShow.tcl:437 ../components/SlideShow.tcl:444
+#: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:358
+#: ../components/SlideShow.tcl:362 ../components/SlideShow.tcl:369
 #: ../components/Totd.tcl:94 ../contrib/wizard.tcl:224 ../jabber/Adhoc.tcl:209
 msgid "Previous"
 msgstr ""
 
-#: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:434
-#: ../components/SlideShow.tcl:439 ../components/SlideShow.tcl:445
+#: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:359
+#: ../components/SlideShow.tcl:364 ../components/SlideShow.tcl:370
 #: ../components/Totd.tcl:92 ../contrib/wizard.tcl:219
 #: ../contrib/wizard.tcl:586 ../jabber/Adhoc.tcl:207 ../jabber/GotMsg.tcl:225
 #: ../jabber/Register.tcl:327 ../jabber/Register.tcl:1168
@@ -1319,32 +1320,32 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
-#: ../components/SlideShow.tcl:48 ../components/SlideShow.tcl:429
-#: ../components/SlideShow.tcl:442 ../whiteboard/ItemInspector.tcl:213
+#: ../components/SlideShow.tcl:48 ../components/SlideShow.tcl:354
+#: ../components/SlideShow.tcl:367 ../whiteboard/ItemInspector.tcl:213
 msgid "First"
 msgstr ""
 
-#: ../components/SlideShow.tcl:49 ../components/SlideShow.tcl:430
-#: ../components/SlideShow.tcl:443 ../whiteboard/ItemInspector.tcl:214
+#: ../components/SlideShow.tcl:49 ../components/SlideShow.tcl:355
+#: ../components/SlideShow.tcl:368 ../whiteboard/ItemInspector.tcl:214
 msgid "Last"
 msgstr ""
 
-#: ../components/SlideShow.tcl:196 ../jabber/Chat.tcl:1350
+#: ../components/SlideShow.tcl:121 ../jabber/Chat.tcl:1350
 #: ../jabber/GroupChat.tcl:676 ../lib/FileCache.tcl:599
 #: ../whiteboard/FilePrefs.tcl:77 ../whiteboard/Plugins.tcl:1324
 #: ../whiteboard/WBPrefs.tcl:74
 msgid "Whiteboard"
 msgstr ""
 
-#: ../components/SlideShow.tcl:212
+#: ../components/SlideShow.tcl:137
 msgid "Show navigation buttons"
 msgstr ""
 
-#: ../components/SlideShow.tcl:214
+#: ../components/SlideShow.tcl:139
 msgid "Resize window to fit slides"
 msgstr ""
 
-#: ../components/SlideShow.tcl:282 ../lib/FileCache.tcl:667
+#: ../components/SlideShow.tcl:207 ../lib/FileCache.tcl:667
 #: ../whiteboard/GetFileIface.tcl:292
 msgid "Open Folder"
 msgstr ""
@@ -1426,8 +1427,8 @@ msgstr ""
 
 #: ../components/Sounds.tcl:634 ../components/Sounds.tcl:674
 #: ../components/Sounds.tcl:694 ../contrib/ui/fontselector.tcl:151
-#: ../contrib/ui/openimage.tcl:97 ../jabber/Emoticons.tcl:748
-#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1387
+#: ../contrib/ui/openimage.tcl:97 ../jabber/Emoticons.tcl:749
+#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1399
 #: ../jabber/Rosticons.tcl:605 ../jabber/SetupAss.tcl:116
 #: ../lib/PrefHelpers.tcl:104 ../whiteboard/WBPrefs.tcl:120
 #: ../whiteboard/WBPrefs.tcl:123 ../whiteboard/WBPrefs.tcl:196
@@ -1866,8 +1867,9 @@ msgstr ""
 msgid "Filter"
 msgstr ""
 
-#: ../components/fsdialog.tcl:492 ../jabber/History.tcl:952
-#: ../jabber/MailBox.tcl:689 ../jabber/NewMsg.tcl:446
+#: ../components/fsdialog.tcl:492 ../jabber/Emoticons.tcl:603
+#: ../jabber/History.tcl:952 ../jabber/MailBox.tcl:689
+#: ../jabber/NewMsg.tcl:446
 msgid "Date"
 msgstr ""
 
@@ -1928,24 +1930,25 @@ msgstr ""
 
 #. TRANSLATORS; menu item for sending normal message (no chat!)
 #: ../components/taskbar/Taskbar.tcl:187 ../jabber/Disco.tcl:155
-#: ../jabber/GroupChat.tcl:220 ../jabber/JUI.tcl:177 ../jabber/JUI.tcl:1833
-#: ../jabber/JUI.tcl:1853 ../jabber/Roster.tcl:122
+#: ../jabber/GroupChat.tcl:220 ../jabber/JUI.tcl:176 ../jabber/JUI.tcl:1832
+#: ../jabber/JUI.tcl:1852 ../jabber/Roster.tcl:122 ../jabber/Search.tcl:33
+#: ../jabber/Search.tcl:41
 msgid "&Message"
 msgstr ""
 
-#: ../components/taskbar/Taskbar.tcl:188 ../jabber/JUI.tcl:168
+#: ../components/taskbar/Taskbar.tcl:188 ../jabber/JUI.tcl:166
 #: ../whiteboard/Whiteboard.tcl:579 ../whiteboard/Whiteboard.tcl:2208
 #: ../whiteboard/Whiteboard.tcl:2285
 msgid "&Preferences"
 msgstr ""
 
-#: ../components/taskbar/Taskbar.tcl:189 ../jabber/JUI.tcl:182
-#: ../jabber/JUI.tcl:1832 ../jabber/JUI.tcl:1852 ../jabber/Roster.tcl:127
-#: ../jabber/Roster.tcl:188
+#: ../components/taskbar/Taskbar.tcl:189 ../jabber/JUI.tcl:181
+#: ../jabber/JUI.tcl:1831 ../jabber/JUI.tcl:1851 ../jabber/Roster.tcl:127
+#: ../jabber/Roster.tcl:188 ../jabber/Search.tcl:32 ../jabber/Search.tcl:40
 msgid "&Add Contact"
 msgstr ""
 
-#: ../components/taskbar/Taskbar.tcl:190 ../jabber/JUI.tcl:1268
+#: ../components/taskbar/Taskbar.tcl:190 ../jabber/JUI.tcl:1267
 #: ../whiteboard/Whiteboard.tcl:2209 ../whiteboard/Whiteboard.tcl:2287
 msgid "&Info"
 msgstr ""
@@ -1954,15 +1957,15 @@ msgstr ""
 msgid "&About Coccinella"
 msgstr ""
 
-#: ../components/taskbar/Taskbar.tcl:192 ../jabber/JUI.tcl:228
+#: ../components/taskbar/Taskbar.tcl:192 ../jabber/JUI.tcl:227
 msgid "&Home Page"
 msgstr ""
 
-#: ../components/taskbar/Taskbar.tcl:193 ../jabber/JUI.tcl:226
+#: ../components/taskbar/Taskbar.tcl:193 ../jabber/JUI.tcl:225
 msgid "&Report Bug"
 msgstr ""
 
-#: ../components/taskbar/Taskbar.tcl:197 ../jabber/JUI.tcl:162
+#: ../components/taskbar/Taskbar.tcl:197 ../jabber/JUI.tcl:167
 #: ../whiteboard/Whiteboard.tcl:432 ../whiteboard/Whiteboard.tcl:610
 msgid "&Quit"
 msgstr ""
@@ -2071,7 +2074,7 @@ msgstr ""
 msgid "Application Status"
 msgstr ""
 
-#: ../jabber/AppStatusSlot.tcl:88 ../jabber/JUI.tcl:587 ../jabber/JUI.tcl:656
+#: ../jabber/AppStatusSlot.tcl:88 ../jabber/JUI.tcl:586 ../jabber/JUI.tcl:655
 #: ../jabber/Roster.tcl:87 ../jabber/Roster.tcl:95 ../jabber/Status.tcl:42
 #: ../jabber/Status.tcl:50
 msgid "Not Available"
@@ -2169,9 +2172,7 @@ msgid "Select Avatar"
 msgstr ""
 
 #: ../jabber/Chat.tcl:313 ../jabber/Chat.tcl:325 ../jabber/Chat.tcl:2102
-#: ../jabber/Chat.tcl:3216 ../jabber/Chat.tcl:4201 ../jabber/JUI.tcl:1246
-#: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
-#: ../jabber/Status.tcl:46
+#: ../jabber/Chat.tcl:3216 ../jabber/Chat.tcl:4201 ../jabber/JUI.tcl:1245
 msgid "Chat"
 msgstr ""
 
@@ -2288,19 +2289,19 @@ msgstr ""
 
 #. TRANSLATORS; Control + F (or Command + F on Mac OS X)
 #: ../jabber/Chat.tcl:1890 ../jabber/GroupChat.tcl:1169
-#: ../jabber/History.tcl:1074 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
+#: ../jabber/History.tcl:1074 ../jabber/JUI.tcl:254 ../jabber/JUI.tcl:1786
 #: ../jabber/RosterTree.tcl:1995
 msgid "Find"
 msgstr ""
 
 #: ../jabber/Chat.tcl:1892 ../jabber/GroupChat.tcl:1171
-#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
+#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
 #: ../jabber/RosterTree.tcl:1997
 msgid "Find Next"
 msgstr ""
 
 #: ../jabber/Chat.tcl:1893 ../jabber/GroupChat.tcl:1172
-#: ../jabber/History.tcl:1078 ../jabber/JUI.tcl:257 ../jabber/JUI.tcl:1789
+#: ../jabber/History.tcl:1078 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
 #: ../jabber/RosterTree.tcl:1998
 msgid "Find Previous"
 msgstr ""
@@ -2522,33 +2523,35 @@ msgstr ""
 msgid "Cannot enter chatroom %s."
 msgstr ""
 
-#: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:178
-#: ../jabber/JUI.tcl:1834 ../jabber/JUI.tcl:1854 ../jabber/Roster.tcl:121
+#: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:177
+#: ../jabber/JUI.tcl:1833 ../jabber/JUI.tcl:1853 ../jabber/Roster.tcl:121
+#: ../jabber/Roster.tcl:527 ../jabber/Search.tcl:34 ../jabber/Search.tcl:42
 msgid "Cha&t"
 msgstr ""
 
-#: ../jabber/Disco.tcl:157 ../jabber/JUI.tcl:186 ../jabber/JUI.tcl:1836
-#: ../jabber/JUI.tcl:1856
+#: ../jabber/Disco.tcl:157 ../jabber/JUI.tcl:185 ../jabber/JUI.tcl:1835
+#: ../jabber/JUI.tcl:1855
 msgid "Enter Chat&room"
 msgstr ""
 
-#: ../jabber/Disco.tcl:160 ../jabber/JUI.tcl:187 ../jabber/JUI.tcl:1837
-#: ../jabber/JUI.tcl:1857
+#: ../jabber/Disco.tcl:160 ../jabber/JUI.tcl:186 ../jabber/JUI.tcl:1836
+#: ../jabber/JUI.tcl:1856
 msgid "&Create Chatroom"
 msgstr ""
 
 #: ../jabber/Disco.tcl:164 ../jabber/GroupChat.tcl:223
-#: ../jabber/Roster.tcl:126 ../jabber/Roster.tcl:187
+#: ../jabber/Roster.tcl:126 ../jabber/Roster.tcl:187 ../jabber/Search.tcl:35
+#: ../jabber/Search.tcl:43
 msgid "View &Business Card"
 msgstr ""
 
-#: ../jabber/Disco.tcl:166 ../jabber/JUI.tcl:181 ../jabber/JUI.tcl:1831
-#: ../jabber/JUI.tcl:1851
+#: ../jabber/Disco.tcl:166 ../jabber/JUI.tcl:180 ../jabber/JUI.tcl:1830
+#: ../jabber/JUI.tcl:1850
 msgid "&Search"
 msgstr ""
 
-#: ../jabber/Disco.tcl:169 ../jabber/JUI.tcl:183 ../jabber/JUI.tcl:1827
-#: ../jabber/JUI.tcl:1842
+#: ../jabber/Disco.tcl:169 ../jabber/JUI.tcl:182 ../jabber/JUI.tcl:1826
+#: ../jabber/JUI.tcl:1841
 msgid "Re&gister"
 msgstr ""
 
@@ -2556,8 +2559,8 @@ msgstr ""
 msgid "&Unregister"
 msgstr ""
 
-#: ../jabber/Disco.tcl:174 ../jabber/JUI.tcl:215 ../jabber/JUI.tcl:1912
-#: ../jabber/JUI.tcl:1926 ../jabber/Roster.tcl:132
+#: ../jabber/Disco.tcl:174 ../jabber/JUI.tcl:214 ../jabber/JUI.tcl:1911
+#: ../jabber/JUI.tcl:1925 ../jabber/Roster.tcl:132
 msgid "Show"
 msgstr ""
 
@@ -2573,8 +2576,8 @@ msgid "Refresh"
 msgstr ""
 
 #. TRANSLATORS; look for available services on a server
-#: ../jabber/Disco.tcl:181 ../jabber/JUI.tcl:184 ../jabber/JUI.tcl:1839
-#: ../jabber/JUI.tcl:1859
+#: ../jabber/Disco.tcl:181 ../jabber/JUI.tcl:183 ../jabber/JUI.tcl:1838
+#: ../jabber/JUI.tcl:1858
 msgid "&Discover Server"
 msgstr ""
 
@@ -2586,7 +2589,7 @@ msgstr ""
 msgid "C&ommands"
 msgstr ""
 
-#: ../jabber/Disco.tcl:187 ../jabber/GroupChat.tcl:231 ../jabber/JUI.tcl:193
+#: ../jabber/Disco.tcl:187 ../jabber/GroupChat.tcl:231 ../jabber/JUI.tcl:192
 #: ../jabber/Roster.tcl:172
 msgid "&Whiteboard"
 msgstr ""
@@ -2619,7 +2622,7 @@ msgstr ""
 msgid "Enter a server to discover and use its services."
 msgstr ""
 
-#: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:532 ../jabber/Login.tcl:171
+#: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:531 ../jabber/Login.tcl:171
 #: ../jabber/Profiles.tcl:1083 ../jabber/Profiles.tcl:1861
 #: ../jabber/Register.tcl:274 ../jabber/SetupAss.tcl:137
 #: ../jabber/SetupAss.tcl:165 ../jabber/StatusSlot.tcl:34
@@ -2647,33 +2650,33 @@ msgstr ""
 msgid "Version"
 msgstr ""
 
-#: ../jabber/Emoticons.tcl:614 ../whiteboard/ItemInspector.tcl:367
+#: ../jabber/Emoticons.tcl:615 ../whiteboard/ItemInspector.tcl:367
 msgid "Image"
 msgstr ""
 
-#: ../jabber/Emoticons.tcl:638 ../jabber/Emoticons.tcl:834
+#: ../jabber/Emoticons.tcl:639 ../jabber/Emoticons.tcl:835
 msgid "Iconset Archive"
 msgstr ""
 
-#: ../jabber/Emoticons.tcl:640 ../jabber/Emoticons.tcl:774
-#: ../jabber/Emoticons.tcl:836
+#: ../jabber/Emoticons.tcl:641 ../jabber/Emoticons.tcl:775
+#: ../jabber/Emoticons.tcl:837
 msgid "Import Iconset"
 msgstr ""
 
-#: ../jabber/Emoticons.tcl:714
+#: ../jabber/Emoticons.tcl:715
 msgid "Emoticons"
 msgstr ""
 
-#: ../jabber/Emoticons.tcl:740
+#: ../jabber/Emoticons.tcl:741
 msgid "The selected iconset will become the default."
 msgstr ""
 
-#: ../jabber/Emoticons.tcl:812 ../jabber/Emoticons.tcl:860
+#: ../jabber/Emoticons.tcl:813 ../jabber/Emoticons.tcl:861
 #, tcl-format
 msgid "Cannot load iconset %s."
 msgstr ""
 
-#: ../jabber/Emoticons.tcl:851
+#: ../jabber/Emoticons.tcl:852
 #, tcl-format
 msgid "Iconset %s already exists."
 msgstr ""
@@ -2782,52 +2785,52 @@ msgstr ""
 msgid "The MD5 checksums did not match. The file may be corrupt."
 msgstr ""
 
-#: ../jabber/Gateway.tcl:58 ../jabber/Rosticons.tcl:587
+#: ../jabber/Gateway.tcl:63 ../jabber/Rosticons.tcl:587
 #: ../jabber/Search.tcl:936 ../jabber/VCard.tcl:308
 msgid "Email"
 msgstr ""
 
 #. TRANSLATORS; AOL AIM address
-#: ../jabber/Gateway.tcl:67
+#: ../jabber/Gateway.tcl:72
 msgid "Screen name"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:68
+#: ../jabber/Gateway.tcl:75
 msgid "Gadu-Gadu number"
 msgstr ""
 
 #. TRANSLATORS; also known as UIN
-#: ../jabber/Gateway.tcl:70
+#: ../jabber/Gateway.tcl:77
 msgid "ICQ number"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:71
+#: ../jabber/Gateway.tcl:78
 msgid "IRC"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:72
-msgid "MSN Address"
-msgstr ""
-
-#: ../jabber/Gateway.tcl:73 ../jabber/JForms.tcl:300
+#: ../jabber/Gateway.tcl:79 ../jabber/Gateway.tcl:85 ../jabber/JForms.tcl:300
 #: ../jabber/Register.tcl:711 ../jabber/VCard.tcl:324
 msgid "Email address"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:74
+#: ../jabber/Gateway.tcl:80
+msgid "MSN Address"
+msgstr ""
+
+#: ../jabber/Gateway.tcl:86
 msgid "QQ number"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:75
+#: ../jabber/Gateway.tcl:87
 msgid "Tlen address"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:76 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
+#: ../jabber/Gateway.tcl:88 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
 #: ../jabber/Profiles.tcl:1121 ../jabber/VCard.tcl:322
 msgid "Chat address"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:77
+#: ../jabber/Gateway.tcl:89
 msgid "Yahoo ID"
 msgstr ""
 
@@ -2874,7 +2877,7 @@ msgid "away"
 msgstr ""
 
 #: ../jabber/GroupChat.tcl:189
-msgid "chat"
+msgid "free for chat"
 msgstr ""
 
 #. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
@@ -3088,30 +3091,30 @@ msgstr ""
 msgid "Show notifier window"
 msgstr ""
 
-#: ../jabber/JUI.tcl:144 ../jabber/JUI.tcl:1722 ../jabber/JUI.tcl:1726
-#: ../jabber/JUI.tcl:1738 ../jabber/JUI.tcl:1741
+#: ../jabber/JUI.tcl:144 ../jabber/JUI.tcl:1721 ../jabber/JUI.tcl:1725
+#: ../jabber/JUI.tcl:1737 ../jabber/JUI.tcl:1740
 msgid "&New Account"
 msgstr ""
 
-#: ../jabber/JUI.tcl:145 ../jabber/JUI.tcl:1727 ../jabber/JUI.tcl:1746
+#: ../jabber/JUI.tcl:145 ../jabber/JUI.tcl:1726 ../jabber/JUI.tcl:1745
 msgid "&Remove Account"
 msgstr ""
 
-#: ../jabber/JUI.tcl:146 ../jabber/JUI.tcl:1728 ../jabber/JUI.tcl:1743
+#: ../jabber/JUI.tcl:146 ../jabber/JUI.tcl:1727 ../jabber/JUI.tcl:1742
 msgid "New P&assword"
 msgstr ""
 
-#: ../jabber/JUI.tcl:147 ../jabber/JUI.tcl:1723 ../jabber/JUI.tcl:1729
-#: ../jabber/JUI.tcl:1744
+#: ../jabber/JUI.tcl:147 ../jabber/JUI.tcl:1722 ../jabber/JUI.tcl:1728
+#: ../jabber/JUI.tcl:1743
 msgid "&Setup Assistant"
 msgstr ""
 
-#: ../jabber/JUI.tcl:149 ../jabber/JUI.tcl:1730 ../jabber/JUI.tcl:1737
-#: ../jabber/JUI.tcl:1740
+#: ../jabber/JUI.tcl:149 ../jabber/JUI.tcl:1729 ../jabber/JUI.tcl:1736
+#: ../jabber/JUI.tcl:1739
 msgid "&Edit Profiles"
 msgstr ""
 
-#: ../jabber/JUI.tcl:150 ../jabber/JUI.tcl:1731 ../jabber/JUI.tcl:1745
+#: ../jabber/JUI.tcl:150 ../jabber/JUI.tcl:1730 ../jabber/JUI.tcl:1744
 msgid "Edit &Business Card"
 msgstr ""
 
@@ -3123,8 +3126,8 @@ msgstr ""
 msgid "Icon &Set"
 msgstr ""
 
-#: ../jabber/JUI.tcl:154 ../jabber/JUI.tcl:159 ../jabber/JUI.tcl:1711
-#: ../jabber/JUI.tcl:1714 ../jabber/JUI.tcl:1733 ../jabber/RosterTree.tcl:1981
+#: ../jabber/JUI.tcl:154 ../jabber/JUI.tcl:159 ../jabber/JUI.tcl:1710
+#: ../jabber/JUI.tcl:1713 ../jabber/JUI.tcl:1732 ../jabber/RosterTree.tcl:1981
 #: ../jabber/UserInfo.tcl:584 ../jabber/VCard.tcl:800
 msgid "&Business Card"
 msgstr ""
@@ -3137,195 +3140,195 @@ msgstr ""
 msgid "&Contacts"
 msgstr ""
 
-#: ../jabber/JUI.tcl:158 ../jabber/JUI.tcl:203
+#: ../jabber/JUI.tcl:158 ../jabber/JUI.tcl:202
 msgid "&Inbox"
 msgstr ""
 
-#: ../jabber/JUI.tcl:165 ../jabber/JUI.tcl:1702 ../jabber/JUI.tcl:1705
+#: ../jabber/JUI.tcl:163 ../jabber/JUI.tcl:1701 ../jabber/JUI.tcl:1704
 #: ../jabber/JWB.tcl:161 ../whiteboard/Whiteboard.tcl:424
 #: ../whiteboard/Whiteboard.tcl:608
 msgid "&Close Window"
 msgstr ""
 
-#: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1230 ../jabber/JUI.tcl:1845
-#: ../jabber/JUI.tcl:1848 ../jabber/JUI.tcl:2005 ../jabber/Login.tcl:111
+#: ../jabber/JUI.tcl:173 ../jabber/JUI.tcl:1229 ../jabber/JUI.tcl:1844
+#: ../jabber/JUI.tcl:1847 ../jabber/JUI.tcl:2004 ../jabber/Login.tcl:111
 #: ../jabber/Login.tcl:124 ../jabber/Login.tcl:267 ../jabber/Profiles.tcl:1832
 msgid "Login"
 msgstr ""
 
-#: ../jabber/JUI.tcl:175 ../jabber/JUI.tcl:1830 ../jabber/JUI.tcl:1850
+#: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1829 ../jabber/JUI.tcl:1849
 #: ../jabber/Jabber.tcl:2094 ../jabber/Jabber.tcl:2106
 msgid "Logout With Message"
 msgstr ""
 
-#: ../jabber/JUI.tcl:188 ../jabber/JUI.tcl:1838 ../jabber/JUI.tcl:1858
+#: ../jabber/JUI.tcl:187 ../jabber/JUI.tcl:1837 ../jabber/JUI.tcl:1857
 msgid "Edit &Bookmarks"
 msgstr ""
 
-#: ../jabber/JUI.tcl:205
+#: ../jabber/JUI.tcl:204
 msgid "Font Size"
 msgstr ""
 
-#: ../jabber/JUI.tcl:206 ../whiteboard/CanvasUtils.tcl:189
+#: ../jabber/JUI.tcl:205 ../whiteboard/CanvasUtils.tcl:189
 #: ../whiteboard/ItemInspector.tcl:242 ../whiteboard/Whiteboard.tcl:571
 msgid "Normal"
 msgstr ""
 
-#: ../jabber/JUI.tcl:208 ../whiteboard/Whiteboard.tcl:457
+#: ../jabber/JUI.tcl:207 ../whiteboard/Whiteboard.tcl:457
 #: ../whiteboard/Whiteboard.tcl:2943 ../whiteboard/Whiteboard.tcl:2965
 #: ../whiteboard/Whiteboard.tcl:2968
 msgid "Larger"
 msgstr ""
 
-#: ../jabber/JUI.tcl:210
+#: ../jabber/JUI.tcl:209
 msgid "Large"
 msgstr ""
 
-#: ../jabber/JUI.tcl:212
+#: ../jabber/JUI.tcl:211
 msgid "Huge"
 msgstr ""
 
-#: ../jabber/JUI.tcl:216
+#: ../jabber/JUI.tcl:215
 msgid "Tool&bar"
 msgstr ""
 
-#: ../jabber/JUI.tcl:218
+#: ../jabber/JUI.tcl:217
 msgid "&Tabs"
 msgstr ""
 
-#: ../jabber/JUI.tcl:221
+#: ../jabber/JUI.tcl:220
 msgid "Control Panel"
 msgstr ""
 
-#: ../jabber/JUI.tcl:223
+#: ../jabber/JUI.tcl:222
 msgid "&Error Log"
 msgstr ""
 
-#: ../jabber/JUI.tcl:224
+#: ../jabber/JUI.tcl:223
 msgid "&Debug"
 msgstr ""
 
-#: ../jabber/JUI.tcl:232 ../jabber/JUI.tcl:827 ../jabber/JUI.tcl:999
-#: ../jabber/JUI.tcl:1936
+#: ../jabber/JUI.tcl:231 ../jabber/JUI.tcl:826 ../jabber/JUI.tcl:998
+#: ../jabber/JUI.tcl:1935
 msgid "Show Control Panel"
 msgstr ""
 
-#: ../jabber/JUI.tcl:239 ../whiteboard/Whiteboard.tcl:414
+#: ../jabber/JUI.tcl:238 ../whiteboard/Whiteboard.tcl:414
 #: ../whiteboard/Whiteboard.tcl:416
 #, tcl-format
 msgid "&About %s"
 msgstr ""
 
-#: ../jabber/JUI.tcl:246 ../jabber/JUI.tcl:1769 ../jabber/JUI.tcl:1778
+#: ../jabber/JUI.tcl:245 ../jabber/JUI.tcl:1768 ../jabber/JUI.tcl:1777
 #: ../whiteboard/Whiteboard.tcl:443 ../whiteboard/Whiteboard.tcl:2897
 #: ../whiteboard/Whiteboard.tcl:2899
 msgid "&Undo"
 msgstr ""
 
-#: ../jabber/JUI.tcl:247 ../jabber/JUI.tcl:1770 ../jabber/JUI.tcl:1780
+#: ../jabber/JUI.tcl:246 ../jabber/JUI.tcl:1769 ../jabber/JUI.tcl:1779
 #: ../whiteboard/Whiteboard.tcl:444 ../whiteboard/Whiteboard.tcl:2902
 #: ../whiteboard/Whiteboard.tcl:2904
 msgid "Re&do"
 msgstr ""
 
-#: ../jabber/JUI.tcl:249 ../whiteboard/Whiteboard.tcl:446
+#: ../jabber/JUI.tcl:248 ../whiteboard/Whiteboard.tcl:446
 #: ../whiteboard/Whiteboard.tcl:613 ../whiteboard/Whiteboard.tcl:2910
 #: ../whiteboard/Whiteboard.tcl:2912 ../whiteboard/Whiteboard.tcl:2916
 #: ../whiteboard/Whiteboard.tcl:2919
 msgid "Cu&t"
 msgstr ""
 
-#: ../jabber/JUI.tcl:250 ../whiteboard/Whiteboard.tcl:447
+#: ../jabber/JUI.tcl:249 ../whiteboard/Whiteboard.tcl:447
 #: ../whiteboard/Whiteboard.tcl:614 ../whiteboard/Whiteboard.tcl:2914
 #: ../whiteboard/Whiteboard.tcl:2917 ../whiteboard/Whiteboard.tcl:2920
 msgid "&Copy"
 msgstr ""
 
-#: ../jabber/JUI.tcl:251 ../whiteboard/Whiteboard.tcl:448
+#: ../jabber/JUI.tcl:250 ../whiteboard/Whiteboard.tcl:448
 #: ../whiteboard/Whiteboard.tcl:615 ../whiteboard/Whiteboard.tcl:2923
 #: ../whiteboard/Whiteboard.tcl:2925 ../whiteboard/Whiteboard.tcl:2927
 msgid "&Paste"
 msgstr ""
 
-#: ../jabber/JUI.tcl:253 ../jabber/JUI.tcl:1768 ../jabber/JUI.tcl:1776
-#: ../jabber/JUI.tcl:1783 ../jabber/Subscribe.tcl:1091
+#: ../jabber/JUI.tcl:252 ../jabber/JUI.tcl:1767 ../jabber/JUI.tcl:1775
+#: ../jabber/JUI.tcl:1782 ../jabber/Subscribe.tcl:1091
 msgid "All"
 msgstr ""
 
-#: ../jabber/JUI.tcl:486 ../jabber/Roster.tcl:1574
+#: ../jabber/JUI.tcl:485 ../jabber/Roster.tcl:1586
 msgid "Contacts"
 msgstr ""
 
 #. TRANSLATORS; right mouse click menu (on arrow) in control panel (bottom of main window): status info slot
-#: ../jabber/JUI.tcl:530 ../jabber/StatusSlot.tcl:32
+#: ../jabber/JUI.tcl:529 ../jabber/StatusSlot.tcl:32
 msgid "Own Contact ID"
 msgstr ""
 
-#: ../jabber/JUI.tcl:531 ../jabber/StatusSlot.tcl:33
+#: ../jabber/JUI.tcl:530 ../jabber/StatusSlot.tcl:33
 msgid "Own Full Contact ID"
 msgstr ""
 
-#: ../jabber/JUI.tcl:607
+#: ../jabber/JUI.tcl:606
 msgid "Displays your Contact ID or nickname"
 msgstr ""
 
-#: ../jabber/JUI.tcl:608 ../jabber/JUI.tcl:614
+#: ../jabber/JUI.tcl:607 ../jabber/JUI.tcl:613
 msgid "Set your status message"
 msgstr ""
 
-#: ../jabber/JUI.tcl:993 ../jabber/JUI.tcl:1933
+#: ../jabber/JUI.tcl:992 ../jabber/JUI.tcl:1932
 msgid "Hide Control Panel"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1234 ../jabber/JUI.tcl:1238 ../jabber/MailBox.tcl:465
+#: ../jabber/JUI.tcl:1233 ../jabber/JUI.tcl:1237 ../jabber/MailBox.tcl:465
 #: ../jabber/MailBox.tcl:1955
 msgid "Inbox"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1242
+#: ../jabber/JUI.tcl:1241
 msgid "Contact"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1245 ../jabber/JUser.tcl:101 ../jabber/JUser.tcl:152
+#: ../jabber/JUI.tcl:1244 ../jabber/JUser.tcl:101 ../jabber/JUser.tcl:152
 msgid "Add Contact"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1266 ../whiteboard/Whiteboard.tcl:2207
+#: ../jabber/JUI.tcl:1265 ../whiteboard/Whiteboard.tcl:2207
 msgid "&File"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1267
+#: ../jabber/JUI.tcl:1266
 msgid "&Action"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1269 ../lib/EditDialogs.tcl:126
+#: ../jabber/JUI.tcl:1268 ../lib/EditDialogs.tcl:126
 #: ../whiteboard/Whiteboard.tcl:2210
 msgid "&Edit"
 msgstr ""
 
 #. TRANSLATORS; code for these strings is not finished
-#: ../jabber/JUI.tcl:1532
+#: ../jabber/JUI.tcl:1531
 msgid "The connection is secure"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1536
+#: ../jabber/JUI.tcl:1535
 msgid "The connection is medium secure"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1540
+#: ../jabber/JUI.tcl:1539
 msgid "The connection is insecure"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1582
+#: ../jabber/JUI.tcl:1581
 msgid "Logged out"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1824 ../jabber/JUI.tcl:1829 ../jabber/JUI.tcl:1995
+#: ../jabber/JUI.tcl:1823 ../jabber/JUI.tcl:1828 ../jabber/JUI.tcl:1994
 #: ../jabber/Jabber.tcl:2134
 msgid "Logout"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1986
+#: ../jabber/JUI.tcl:1985
 msgid "Stop"
 msgstr ""
 
@@ -3413,7 +3416,7 @@ msgstr ""
 msgid "Both you and your contact cannot see eachother's presence."
 msgstr ""
 
-#: ../jabber/JUser.tcl:771 ../jabber/Roster.tcl:1617
+#: ../jabber/JUser.tcl:771 ../jabber/Roster.tcl:1629
 msgid "You can see your contact's presence, but your contact can't see yours."
 msgstr ""
 
@@ -4287,6 +4290,11 @@ msgstr ""
 msgid "Away"
 msgstr ""
 
+#: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
+#: ../jabber/Status.tcl:46
+msgid "Free For Chat"
+msgstr ""
+
 #: ../jabber/Roster.tcl:84 ../jabber/Roster.tcl:92 ../jabber/Roster.tcl:134
 #: ../jabber/Status.tcl:39 ../jabber/Status.tcl:47
 msgid "Do Not Disturb"
@@ -4373,31 +4381,31 @@ msgstr ""
 msgid "The roster is up to date"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1397
+#: ../jabber/Roster.tcl:1409
 msgid "Transport"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1595
+#: ../jabber/Roster.tcl:1607
 msgid "Remove contact without presence subscription"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1597
+#: ../jabber/Roster.tcl:1609
 msgid "Clear list of contacts on logout"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1599
+#: ../jabber/Roster.tcl:1611
 msgid "Chat on double-click instead of message"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1602
+#: ../jabber/Roster.tcl:1614
 msgid "Show offline users"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1604
+#: ../jabber/Roster.tcl:1616
 msgid "Show transports"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1606
+#: ../jabber/Roster.tcl:1618
 msgid "Show contacts without any subscription"
 msgstr ""
 
@@ -4941,7 +4949,7 @@ msgstr ""
 msgid "Cannot start the internal HTTP server: %s"
 msgstr ""
 
-#: ../lib/Init.tcl:751 ../lib/Init.tcl:772 ../lib/Media.tcl:179
+#: ../lib/Init.tcl:742 ../lib/Init.tcl:763 ../lib/Media.tcl:179
 #: ../whiteboard/Plugins.tcl:445
 #, tcl-format
 msgid "Looking for %s"
@@ -5816,6 +5824,10 @@ msgstr ""
 
 #: ../whiteboard/Plugins.tcl:1373
 msgid "Import Itcl applets"
+msgstr ""
+
+#: ../whiteboard/Plugins.tcl:1374
+msgid "Import documents on Windows"
 msgstr ""
 
 #: ../whiteboard/PutFileIface.tcl:168
