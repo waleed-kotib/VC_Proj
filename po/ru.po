@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ru\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-08-17 08:04+0200\n"
+"POT-Creation-Date: 2009-08-17 08:46+0200\n"
 "PO-Revision-Date: 2009-04-12 21:55+0300\n"
 "Last-Translator: rain <linuxoid.rain@gmail.com>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -1624,7 +1624,7 @@ msgstr "Бегаю"
 msgid "Playing sports"
 msgstr "Занимаюсь спортом"
 
-#: ../components/UserActivity.tcl:343 ../whiteboard/WDialogs.tcl:188
+#: ../components/UserActivity.tcl:343
 msgid "Running"
 msgstr "Работает"
 
@@ -6015,6 +6015,12 @@ msgstr "нет"
 #: ../whiteboard/WDialogs.tcl:169
 msgid "yes"
 msgstr "да"
+
+#: ../whiteboard/WDialogs.tcl:188
+#, fuzzy
+#| msgid "Activity"
+msgid "Activated"
+msgstr "Активность"
 
 #: ../whiteboard/WDialogs.tcl:194
 msgid "Buffering support"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: da\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-08-17 08:04+0200\n"
+"POT-Creation-Date: 2009-08-17 08:46+0200\n"
 "PO-Revision-Date: 2009-02-21 14:51\n"
 "Last-Translator: Mogens Pedersen <Mogens.Pedersen at skolekom.dk>\n"
 "Language-Team: Danish\n"
@@ -1735,7 +1735,7 @@ msgstr ""
 msgid "Playing sports"
 msgstr ""
 
-#: ../components/UserActivity.tcl:343 ../whiteboard/WDialogs.tcl:188
+#: ../components/UserActivity.tcl:343
 #, fuzzy
 msgid "Running"
 msgstr "Running"
@@ -6809,6 +6809,10 @@ msgstr "nej"
 #, fuzzy
 msgid "yes"
 msgstr "ja"
+
+#: ../whiteboard/WDialogs.tcl:188
+msgid "Activated"
+msgstr ""
 
 #: ../whiteboard/WDialogs.tcl:194
 #, fuzzy

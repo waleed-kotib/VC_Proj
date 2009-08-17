@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Coccinella 0.96.11\n"
 "\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-08-17 08:04+0200\n"
+"POT-Creation-Date: 2009-08-17 08:46+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1605,7 +1605,7 @@ msgstr ""
 msgid "Playing sports"
 msgstr ""
 
-#: ../components/UserActivity.tcl:343 ../whiteboard/WDialogs.tcl:188
+#: ../components/UserActivity.tcl:343
 msgid "Running"
 msgstr ""
 
@@ -5895,6 +5895,10 @@ msgstr ""
 
 #: ../whiteboard/WDialogs.tcl:169
 msgid "yes"
+msgstr ""
+
+#: ../whiteboard/WDialogs.tcl:188
+msgid "Activated"
 msgstr ""
 
 #: ../whiteboard/WDialogs.tcl:194

@@ -1,4 +1,4 @@
-set ::msgcat::header "Project-Id-Version: zh_CN\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-08-17 08:04+0200\nPO-Revision-Date: 2009-03-09 21:19+0800\nLast-Translator: lvjinhua <lvjinhua@gmail.com>\nLanguage-Team: Simplified Chinese\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nX-Poedit-Language: Chinese\n"
+set ::msgcat::header "Project-Id-Version: zh_CN\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-08-17 08:46+0200\nPO-Revision-Date: 2009-03-09 21:19+0800\nLast-Translator: lvjinhua <lvjinhua@gmail.com>\nLanguage-Team: Simplified Chinese\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nX-Poedit-Language: Chinese\n"
 ::msgcat::mcset zh_cn "Sourcing Tcl code" "Tcl\u6e90\u4ee3\u7801"
 ::msgcat::mcset zh_cn "Searching for our hostname" "\u641c\u5bfb\u6211\u4eec\u7684\u4e3b\u673a\u540d"
 ::msgcat::mcset zh_cn "Loading Tcl packages" "\u88c5\u8f7dTcl\u5305"
