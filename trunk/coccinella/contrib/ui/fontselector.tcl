@@ -16,7 +16,7 @@ package provide ui::fontselector 0.1
 
 namespace eval ui::fontselector {
 
-    set str   "Hello cruel World!"
+    set str   "abcdefghijk ABCDEFGHIJK"
     set title [::msgcat::mc "Select Font"]
 
     option add *FontSelector.text             $str                widgetDefault
@@ -47,7 +47,7 @@ snit::widget ui::fontselector::widget {
     hulltype toplevel
     widgetclass FontSelector
     
-    set str     "Hello cruel World!"
+    set str     "abcdefghijk ABCDEFGHIJK"
     set defFont {Helvetica 12 normal}
 
     typevariable families {}
@@ -122,9 +122,14 @@ snit::widget ui::fontselector::widget {
 	grid  $frprop.s      -sticky ew -pady 12
 
 	ttk::label    $frprop.lwe -text [::msgcat::mc "Font weight"]:
-	ttk::combobox $frprop.cwe -width 10  \
-	  -textvariable [myvar weight] -state readonly \
-	  -values {normal bold italic}
+	set mDef [list \
+	   [list [mc "Normal"] -value normal] \
+	   [list [mc "Bold"] -value bold] \
+	   [list [mc "Italic"] -value italic] ]
+	# update Select var below ("args" required) on change of myvar weight
+	trace add variable [myvar weight] write [list $self Select]
+	ui::combobutton $frprop.cwe -menulist $mDef \
+	   -variable [myvar weight]
 
 	grid  $frprop.lwe  -sticky w
 	grid  $frprop.cwe  -sticky ew
@@ -229,8 +234,8 @@ snit::widget ui::fontselector::widget {
 	set family [$wlistbox get $idx]
 	$self Select
     }
-	
-    method Select {} {
+    
+    method Select {args} {
 	$wcanvas delete all
 	$wcanvas create text 6 24 -anchor w \
 	  -text $options(-text)             \
