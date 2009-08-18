@@ -1,4 +1,4 @@
-# translation of fr.po to French
+﻿# translation of fr.po to French
 # French translations for Coccinella package.
 # Copyright (C) 2009 The Coccinella Project
 # This file is distributed under the same license as the Coccinella package.
@@ -165,7 +165,7 @@ msgstr "Fermer"
 
 #: ../components/BuddyPounce.tcl:49
 msgid "&Contact Actions"
-msgstr "Ac&tions liées à ce contact"
+msgstr "Actions &liées à ce contact"
 
 #: ../components/BuddyPounce.tcl:153
 #, tcl-format
@@ -226,7 +226,7 @@ msgstr "Afficher une alerte"
 
 #: ../components/BuddyPounce.tcl:237
 msgid "Play sound"
-msgstr "Jouer le son"
+msgstr "Emettre le son"
 
 #: ../components/BuddyPounce.tcl:242
 msgid "Start chat"
@@ -562,7 +562,7 @@ msgstr "satisfait"
 
 #: ../components/Growl.tcl:210 ../components/Mood.tcl:224
 msgid "cranky"
-msgstr "irritable"
+msgstr "grincheux"
 
 #: ../components/Growl.tcl:211 ../components/Mood.tcl:225
 msgid "curious"
@@ -960,7 +960,7 @@ msgstr "Satisfait"
 #. TRANSLATORS: Grouchy, irritable; easily upset.
 #: ../components/Mood.tcl:113
 msgid "Cranky"
-msgstr "Irritable"
+msgstr "Grincheux"
 
 #. TRANSLATORS: Inquisitive; tending to ask questions, investigate, or explore.
 #: ../components/Mood.tcl:115
@@ -1020,7 +1020,7 @@ msgstr "Coupable"
 #. TRANSLATORS: Experiencing the effect of favourable fortune; having the feeling arising from the consciousness of well-being or of enjoyment; enjoying good of any kind, as peace, tranquillity, comfort; contented; joyous.
 #: ../components/Mood.tcl:137
 msgid "Happy"
-msgstr "Joyeux"
+msgstr "Heureux"
 
 #. TRANSLATORS: Feeling the sensation of heat, especially to the point of discomfort.
 #: ../components/Mood.tcl:139
@@ -1386,7 +1386,7 @@ msgstr "Discussion entrante"
 
 #: ../components/Sounds.tcl:80
 msgid "New chat thread"
-msgstr "Nouvelle discussion"
+msgstr "Nouveau fil de discussion"
 
 #: ../components/Sounds.tcl:81
 msgid "Contact presence change"
@@ -1398,7 +1398,7 @@ msgstr "Connecté"
 
 #: ../components/Sounds.tcl:83
 msgid "Chatroom presence change"
-msgstr "Changement de présence dans un salon de discussion"
+msgstr "Chang. présence dans un salon discuss."
 
 #: ../components/Sounds.tcl:497
 msgid "Sounds"
@@ -1418,7 +1418,7 @@ msgstr "Activez ou désactivez les sons ci-dessous"
 
 #: ../components/Sounds.tcl:559
 msgid "Play"
-msgstr "Jouer"
+msgstr "Ecouter"
 
 #: ../components/Sounds.tcl:567
 msgid "Volume"
@@ -1473,7 +1473,7 @@ msgstr "Synthèse vocale pour les discussions"
 
 #: ../components/Speech.tcl:376
 msgid "Select voice for incoming text"
-msgstr "Choisissez la voix à utiliser pour les messages reçus"
+msgstr "Choisissez la voix à utiliser pour les textes reçus"
 
 #: ../components/Speech.tcl:377
 msgid "Select voice for outgoing write"
@@ -1981,7 +1981,7 @@ msgstr "A &propos de Coccinella"
 
 #: ../components/taskbar/Taskbar.tcl:192 ../jabber/JUI.tcl:227
 msgid "&Home Page"
-msgstr "Site &Coccinella"
+msgstr "Site &web Coccinella"
 
 #: ../components/taskbar/Taskbar.tcl:193 ../jabber/JUI.tcl:225
 msgid "&Report Bug"
@@ -2010,7 +2010,7 @@ msgstr "Démarrer réduit dans la zone de notification"
 
 #: ../components/taskbar/Taskbar.tcl:489
 msgid "Hide all on system tray click"
-msgstr "Tout masquer en cliquant sur l'icône de notification"
+msgstr "Tout masquer en cliquant sur la zone de notification"
 
 #. TRANSLATORS; right-click menu of the toolbars
 #: ../contrib/ttoolbar.tcl:452
@@ -2110,7 +2110,7 @@ msgstr "Clic-droit pour ouvrir le menu"
 
 #: ../jabber/AppStatusSlot.tcl:80
 msgid "Application Status"
-msgstr "Statut de l'application"
+msgstr "Notifications de l'application"
 
 #: ../jabber/AppStatusSlot.tcl:88 ../jabber/JUI.tcl:586 ../jabber/JUI.tcl:655
 #: ../jabber/Roster.tcl:87 ../jabber/Roster.tcl:95 ../jabber/Status.tcl:42
@@ -2140,7 +2140,7 @@ msgstr "Absent après"
 #: ../jabber/AutoAway.tcl:286 ../jabber/AutoAway.tcl:309
 #: ../jabber/AutoAway.tcl:332
 msgid "Minutes"
-msgstr "Minutes"
+msgstr "minutes"
 
 #: ../jabber/AutoAway.tcl:307
 msgid "Extended Away after"
@@ -2164,7 +2164,7 @@ msgid ""
 "If activated then directed auto-away presence will be sent to users on "
 "hidden chat tabs"
 msgstr ""
-"Si coché, alors une absence automatique sera signalée aux utilisateurs sur "
+"Si coché, alors une absence automatique sera signalée aux utilisateurs pour "
 "les onglets de discussion masqués"
 
 #. TRANSLATORS; this preference option automatically sets the user's presence to Do Not Disturb when he or she is chatting with too much contacts at the same moment (this number is configurable). There also is a delay until the presence is automatically changed back to the previous presence state when the number of active chats is down again.
@@ -2203,7 +2203,7 @@ msgstr "Avatars récents"
 #: ../jabber/AvatarMB.tcl:573 ../jabber/MUC.tcl:990
 #: ../whiteboard/Multicast.tcl:94
 msgid "Edit"
-msgstr "Éditer"
+msgstr "Editer"
 
 #: ../jabber/AvatarMB.tcl:578
 msgid "Clear Menu"
@@ -2405,7 +2405,7 @@ msgstr "Traiter les messages normaux comme des messages de discussion"
 
 #: ../jabber/Chat.tcl:4233
 msgid "Double click message in inbox"
-msgstr "En double-cliquant sur un message dans la boîte de réception :"
+msgstr "En double-cliquant sur un message reçu :"
 
 #: ../jabber/Chat.tcl:4234
 msgid "Open message in new window"
@@ -2441,7 +2441,7 @@ msgstr "Une heure"
 
 #: ../jabber/Chat.tcl:4254
 msgid "No restriction"
-msgstr "Aucune restriction"
+msgstr "Aucune limite"
 
 #: ../jabber/Chat.tcl:4264
 msgid "Number of messages to display"
@@ -2740,7 +2740,7 @@ msgid ""
 "available chatrooms on the selected service. Some chatrooms may require a "
 "password."
 msgstr ""
-"Choisissez un service, et saisissez un salon de conférence et un pseudo. "
+"Choisissez un service et saisissez un salon de conférence et un pseudo. "
 "Vous pouvez explorer les salons disponibles du service sélectionné. L'accès "
 "à certains salons peut nécessiter un mot de passe."
 
@@ -2931,10 +2931,9 @@ msgid "away"
 msgstr "absent"
 
 #: ../jabber/GroupChat.tcl:189
-#, fuzzy
 #| msgid "Pretty format"
 msgid "free for chat"
-msgstr "Affichage soigné"
+msgstr "prêt à discuter"
 
 #. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
 #: ../jabber/GroupChat.tcl:191
@@ -3013,7 +3012,7 @@ msgstr "Activer les pseudos en couleur"
 
 #: ../jabber/GroupChat.tcl:3748
 msgid "Default nickname"
-msgstr "Pseudonyme par défaut"
+msgstr "Pseudo par défaut"
 
 #: ../jabber/GroupChat.tcl:3768
 msgid "Choose Color"
@@ -3022,7 +3021,7 @@ msgstr "Choisir une couleur"
 #. TRANSLATORS; this string shows when a new conversation thread has been started
 #: ../jabber/History.tcl:841 ../jabber/History.tcl:1157
 msgid "Thread started"
-msgstr "Discussion démarrée le"
+msgstr "Fil de discussion démarré le"
 
 #: ../jabber/History.tcl:854
 msgid "You entered the chatroom"
@@ -3140,12 +3139,12 @@ msgstr "Opacité des  fenêtres"
 
 #: ../jabber/JPrefs.tcl:300
 msgid "Save message inbox between sessions"
-msgstr "Enregistrer la boîte de réception entre les sessions"
+msgstr "Enregistrer les messages entre les sessions"
 
 #: ../jabber/JPrefs.tcl:302
 #, tcl-format
 msgid "Login on %s startup"
-msgstr "Se connecter comme %s au démarrage"
+msgstr "Se connecter au démarrage de %s "
 
 #: ../jabber/JPrefs.tcl:304
 msgid "Remember open windows between sessions"
@@ -3153,7 +3152,7 @@ msgstr "Mémoriser les fenêtres ouvertes d'une session à l'autre"
 
 #: ../jabber/JPrefs.tcl:307
 msgid "Show notifier window"
-msgstr "Afficher la fenêtre de notifications"
+msgstr "Afficher la fenêtre d'alertes"
 
 #: ../jabber/JUI.tcl:144 ../jabber/JUI.tcl:1721 ../jabber/JUI.tcl:1725
 #: ../jabber/JUI.tcl:1737 ../jabber/JUI.tcl:1740
@@ -3166,7 +3165,7 @@ msgstr "Efface&r le compte"
 
 #: ../jabber/JUI.tcl:146 ../jabber/JUI.tcl:1727 ../jabber/JUI.tcl:1742
 msgid "New P&assword"
-msgstr "Nouveau mot de p&asse"
+msgstr "Nouveau &mot de passe"
 
 #: ../jabber/JUI.tcl:147 ../jabber/JUI.tcl:1722 ../jabber/JUI.tcl:1728
 #: ../jabber/JUI.tcl:1743
@@ -3180,7 +3179,7 @@ msgstr "&Editer les profils"
 
 #: ../jabber/JUI.tcl:150 ../jabber/JUI.tcl:1730 ../jabber/JUI.tcl:1744
 msgid "Edit &Business Card"
-msgstr "Éditer la carte de &visite"
+msgstr "Editer la carte de &visite"
 
 #: ../jabber/JUI.tcl:152 ../whiteboard/WBPrefs.tcl:185
 msgid "Import"
@@ -3455,7 +3454,7 @@ msgstr "Détails du transport"
 
 #: ../jabber/JUser.tcl:645
 msgid "Edit Contact"
-msgstr "Éditer le contact"
+msgstr "Editer le contact"
 
 #: ../jabber/JUser.tcl:702
 #, tcl-format
@@ -3575,7 +3574,7 @@ msgid ""
 "your contact will not see them unless you are online while he/she reads your "
 "message. Do you want to send it anyway?"
 msgstr ""
-"%s n'est pas connecté. Si votre message contient de images ou autres données "
+"%s n'est pas connecté. Si votre message contient des images ou autres données "
 "multimedia, votre contact ne les verra pas sauf si vous êtes connecté quand "
 "il/elle lira votre message. Voulez-vous quand même l'envoyer ?"
 
@@ -3765,7 +3764,7 @@ msgstr "Retaper le mot de passe"
 #: ../jabber/Jabber.tcl:1993 ../jabber/Register.tcl:834
 #: ../jabber/SetupAss.tcl:311
 msgid "Passwords do not match. Please try again."
-msgstr "Les mots de passes son différents. Merci de réessayer."
+msgstr "Les mots de passe sont différents. Merci de réessayer."
 
 #: ../jabber/Jabber.tcl:2017
 msgid "Cannot set new password."
@@ -3781,8 +3780,8 @@ msgid ""
 "Enter your account as user@example.org, or choose a profile. You should "
 "already have an account."
 msgstr ""
-"Saisissez votre compte sous la forme utilisateur@exemple.org, ou choisissez "
-"un profil. Votre compte doit déjà avoir été créé."
+"Saisissez votre compte sous la forme utilisateur@exemple.org ou choisissez "
+"un profil. Votre compte doit déjà exister."
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
 #: ../jabber/Login.tcl:141
@@ -3836,7 +3835,7 @@ msgstr "Plus"
 #: ../jabber/Login.tcl:271 ../jabber/Profiles.tcl:891
 #: ../jabber/Profiles.tcl:903
 msgid "Edit Profiles"
-msgstr "Éditer les profils"
+msgstr "Editer les profils"
 
 #: ../jabber/Login.tcl:394 ../jabber/Profiles.tcl:1239
 #: ../jabber/Register.tcl:530
@@ -3964,7 +3963,7 @@ msgstr "Erreur de protocole durant la procédure de connexion."
 #: ../jabber/Login.tcl:957 ../jabber/Register.tcl:966
 msgid "Login failed because of unknown account or wrong password."
 msgstr ""
-"Echec de connexion à cause d'un compte inconnu ou d'un mot de passe erroné."
+"Echec de connexion pour cause de compte inconnu ou d'un mot de passe erroné."
 
 #: ../jabber/Login.tcl:1010
 #, tcl-format
@@ -4069,7 +4068,7 @@ msgstr "Bannir %s du salon de discussion %s."
 
 #: ../jabber/MUC.tcl:879
 msgid "Edit the voice list"
-msgstr "Editer la liste des voix"
+msgstr "Éditer la liste des voix"
 
 #: ../jabber/MUC.tcl:880
 msgid "Edit the ban list"
@@ -4423,7 +4422,7 @@ msgstr "Absent"
 #: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
 #: ../jabber/Status.tcl:46
 msgid "Free For Chat"
-msgstr ""
+msgstr "Prêt à discuter"
 
 #: ../jabber/Roster.tcl:84 ../jabber/Roster.tcl:92 ../jabber/Roster.tcl:134
 #: ../jabber/Status.tcl:39 ../jabber/Status.tcl:47
@@ -4496,7 +4495,7 @@ msgstr "Effacer le contact"
 msgid ""
 "Do you really want to remove this contact? This action cannot be undone."
 msgstr ""
-"Etes-vous sûr de vouloir effacer de contact ? Cette action ne peut pas être "
+"Etes-vous sûr de vouloir effacer ce contact ? Cette action ne peut pas être "
 "annulée."
 
 #: ../jabber/Roster.tcl:598
@@ -4519,7 +4518,7 @@ msgstr "Transport"
 
 #: ../jabber/Roster.tcl:1607
 msgid "Remove contact without presence subscription"
-msgstr "Retirer les contacts sans suivi de présence"
+msgstr "Oter les contacts sans suivi de présence"
 
 #: ../jabber/Roster.tcl:1609
 msgid "Clear list of contacts on logout"
@@ -4568,7 +4567,7 @@ msgid ""
 "iconset."
 msgstr ""
 "Choisissez le jeu d'icônes pour chaque groupe. Un groupe non sélectionné "
-"utilisera le jeu d'icône normal."
+"utilisera le jeu d'icônes normal."
 
 #: ../jabber/Rosticons.tcl:581
 msgid "Standard"
@@ -4737,7 +4736,7 @@ msgstr ""
 
 #: ../jabber/StatusSlot.tcl:84
 msgid "Status Info"
-msgstr "Infos d'état"
+msgstr "Informations d'état"
 
 #: ../jabber/Subscribe.tcl:258
 #, tcl-format
@@ -4840,7 +4839,7 @@ msgstr ""
 
 #: ../jabber/Subscribe.tcl:1666
 msgid "The dialog is closed after (Seconds)"
-msgstr "Le dialogue est fermé après (secondes)"
+msgstr "Fermer le dialogue après (secondes)"
 
 #: ../jabber/Subscribe.tcl:1686
 msgid "Put contacts who add me to their list in"
@@ -4875,7 +4874,7 @@ msgstr "Notes"
 
 #: ../jabber/UserInfo.tcl:444
 msgid "Add your personal notes about this contact."
-msgstr "Ajouter vos notes personnelles à propos de ce contact."
+msgstr "Ajoutez vos notes personnelles à propos de ce contact."
 
 #: ../jabber/UserInfo.tcl:475
 msgid "Client"
@@ -4887,7 +4886,7 @@ msgstr "Carte de visite téléchargée."
 
 #: ../jabber/VCard.tcl:224
 msgid "Edit Business Card"
-msgstr "Éditer la carte de visite"
+msgstr "Editer la carte de visite"
 
 #: ../jabber/VCard.tcl:294
 msgid "First name"
@@ -4895,7 +4894,7 @@ msgstr "Prénom"
 
 #: ../jabber/VCard.tcl:295
 msgid "Middle"
-msgstr "Initiale du second prénom"
+msgstr "Initiales second prénom"
 
 #: ../jabber/VCard.tcl:296
 msgid "Last name"
@@ -4915,7 +4914,7 @@ msgstr "Profession"
 
 #: ../jabber/VCard.tcl:364
 msgid "Birthday"
-msgstr "Date d'anniversaire"
+msgstr "Date de naissance"
 
 #: ../jabber/VCard.tcl:385
 msgid "Format: mm/dd/yyyy"
@@ -4931,7 +4930,7 @@ msgstr "Supprimer l'avatar"
 
 #: ../jabber/VCard.tcl:473
 msgid "Work"
-msgstr "Professionnel"
+msgstr "Travail"
 
 #: ../jabber/VCard.tcl:499
 msgid "Company"
@@ -4971,7 +4970,7 @@ msgstr "Ouvrir la carte de visite"
 
 #: ../lib/Bookmarks.tcl:32
 msgid "Edit Bookmarks"
-msgstr "Éditer les marque-pages"
+msgstr "Editer les marque-pages"
 
 #: ../lib/Bookmarks.tcl:127 ../lib/Bookmarks.tcl:172
 msgid "New Bookmark"
@@ -5129,11 +5128,11 @@ msgstr "Paramètres"
 
 #: ../lib/PrefGeneral.tcl:63
 msgid "Store preferences on same drive as program"
-msgstr "Mettre les préférences sur le même disque que le programme."
+msgstr "Stocker les préférences sur le même disque que le programme."
 
 #: ../lib/PrefGeneral.tcl:66
 msgid "Store preferences in same folder as program"
-msgstr "Mettre les préférences dans le même répertoire que le programme."
+msgstr "Stocker les préférences dans le même répertoire que le programme."
 
 #: ../lib/PrefGeneral.tcl:129
 msgid ""
@@ -5141,7 +5140,7 @@ msgid ""
 "application. If this drive is not a removable device your personal settings "
 "could be visible. Do you want to continue?"
 msgstr ""
-"Vous avez choisi de mettre vos préférences sur le même disque que "
+"Vous avez choisi de stocker vos préférences sur le même disque que "
 "l'application. Si ce disque n'est pas amovible, vos paramètres personnels "
 "pourraient être visibles. Voulez-vous continuer ?"
 
@@ -5153,7 +5152,7 @@ msgid ""
 "location will be used the next time you start %s. Do you want to remove the "
 "old preferences?"
 msgstr ""
-"Vous avez choisi de mettre vos préférences dans l'emplacement par défaut. Si "
+"Vous avez choisi de stocker vos préférences dans l'emplacement par défaut. Si "
 "vous déplacez ou supprimez vos paramètres personnels pour %s, les "
 "préférences de l'emplacement par défaut seront utilisées la prochaine fois "
 "que vous démarrez %s. Voulez-vous supprimer les anciennes préférences ?"
@@ -5192,7 +5191,7 @@ msgstr "Serveur intégré"
 
 #: ../lib/PrefNet.tcl:132
 msgid "File transfer"
-msgstr "Transfert de fichier"
+msgstr "Transfert de fichiers"
 
 #: ../lib/PrefNet.tcl:168 ../lib/PrefNet.tcl:194
 msgid "TLS certificate file"
@@ -5200,7 +5199,7 @@ msgstr "Fichier de certificat TLS"
 
 #: ../lib/PrefNet.tcl:171 ../lib/PrefNet.tcl:177
 msgid "Browse"
-msgstr "Naviguer"
+msgstr "Parcourir"
 
 #: ../lib/PrefNet.tcl:174 ../lib/PrefNet.tcl:203
 msgid "TLS private key file"
@@ -5243,7 +5242,7 @@ msgid ""
 "Usage of this HTTP proxy settings is determined by each profile's settings. "
 "File transfers will not work if you use an HTTP proxy."
 msgstr ""
-"L'utilisation de ces paramètres de proxy HTTP est déterminée au niveau de "
+"L'utilisation de ces paramètres de proxy HTTP est déterminée par "
 "chaque profil. Les transferts de fichiers ne fonctionneront pas si vous "
 "utilisez un proxy HTTP."
 
@@ -5636,7 +5635,7 @@ msgstr "Types de fichiers"
 
 #: ../whiteboard/FilePrefs.tcl:146
 msgid "Edit File Type"
-msgstr "Éditer le type de fichier"
+msgstr "Editer le type de fichier"
 
 #: ../whiteboard/FilePrefs.tcl:148
 msgid "Add File Type"
@@ -6000,7 +5999,7 @@ msgstr "Importe des applets Itcl"
 
 #: ../whiteboard/Plugins.tcl:1374
 msgid "Import documents on Windows"
-msgstr ""
+msgstr "Importe des documents sous Windows"
 
 #: ../whiteboard/PutFileIface.tcl:168
 #, tcl-format
@@ -6032,7 +6031,7 @@ msgstr "Hauteur"
 
 #: ../whiteboard/WBPrefs.tcl:127
 msgid "Smooth freehand strokes"
-msgstr "Lisser les lignes à main levée"
+msgstr "Lisser les lignes tracées à main levée"
 
 #: ../whiteboard/WBPrefs.tcl:129
 msgid "Create new item for each line of text"
@@ -6044,7 +6043,7 @@ msgstr "N'éditer que les éléments locaux du tableau blanc"
 
 #: ../whiteboard/WBPrefs.tcl:136
 msgid "Items created by others cannot be edited when enabled"
-msgstr "Si coché, impossible d'éditer les éléments créés par d'autres."
+msgstr "Si coché, impossible d'éditer les éléments créés par d'autres"
 
 #: ../whiteboard/WBPrefs.tcl:155
 msgid "System"
@@ -6075,10 +6074,9 @@ msgid "yes"
 msgstr "oui"
 
 #: ../whiteboard/WDialogs.tcl:188
-#, fuzzy
 #| msgid "Activity"
 msgid "Activated"
-msgstr "Activité"
+msgstr "Activé"
 
 #: ../whiteboard/WDialogs.tcl:194
 msgid "Buffering support"
