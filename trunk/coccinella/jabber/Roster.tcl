@@ -1237,6 +1237,7 @@ namespace eval ::Roster:: {
 	sametime    "Sametime"
 	tlen        "Tlen"
 	x-tlen      "Tlen"
+	twitter     "Twitter"
 	qq          "QQ"
     }
     variable trptToName {
@@ -1256,6 +1257,7 @@ namespace eval ::Roster:: {
 	sametime    "Sametime"
 	tlen        "Tlen"
 	x-tlen      "Tlen"
+	twitter     "Twitter"
 	qq          "QQ"
     }
     variable nameToTrpt {
@@ -1272,6 +1274,7 @@ namespace eval ::Roster:: {
 	"Gadu-Gadu"        gadu-gadu
 	"Sametime"         sametime
 	"Tlen"             tlen
+	"Twitter"          twitter
 	"QQ"               qq
     }
     

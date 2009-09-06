@@ -62,6 +62,7 @@ namespace eval ::Gateway {
 	dict set shortName sms         "SMS"
 	dict set shortName smtp        [mc "Email"]
 	dict set shortName tlen        "Tlen"
+	dict set shortName twitter     "Twitter"
 	dict set shortName xmpp        "XMPP"
 	dict set shortName yahoo       "Yahoo"
     
@@ -85,6 +86,8 @@ namespace eval ::Gateway {
     dict set promptText smtp       [mc "Email address"]
     dict set promptText qq         [mc "QQ number"]
     dict set promptText tlen       [mc "Tlen address"]
+    # TODO
+    dict set promptText twitter    [mc "Twitter user"]
     dict set promptText xmpp       [mc "Chat address"]
     dict set promptText yahoo      [mc "Yahoo ID"]
     
@@ -92,7 +95,7 @@ namespace eval ::Gateway {
     # These templates provides such a mapping. 
     # Must substitute %s with gateway's JID. Note verbatim "%" as "%%".
     variable template 
-    # TODO: sms, facebook, sametime, qq, gadu-gadu, tlen?
+    # TODO: sms, facebook, sametime, qq, gadu-gadu, tlen, twitter?
     array set template {
 	aim         userName@%s
 	icq         screenNumber@%s
