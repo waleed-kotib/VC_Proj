@@ -1153,15 +1153,55 @@ proc ::UI::QuirkSize {w} {
 # 
 #       Command for auto hide/show scrollbars.
 
+# TODO: clean up this procedure
+
+#proc ::UI::ScrollSet {wscrollbar geocmd offset size} {
+#    
+#    if {($offset != 0.0) || ($size != 1.0)} {
+#	eval $geocmd
+#	$wscrollbar set $offset $size
+#    } else {
+#	set manager [lindex $geocmd 0]
+#	$manager forget $wscrollbar
+#    }
+#}
+
+# 12th June 2009
+# corrected a bug (badly but..hey, it works!) by Mirko Graziani (coccinella@mirkobau.it)
+# The problem is: scrollbars take the focus when they appear.
+# My solution is:
+# i'll remember which object had focus before the scrollbar became visible,
+# and re-set the focus on the correct object everytime this funcion is called.
+# Maybe setting focus *every* time is redundant, and could be not very elegant,
+# but i know too little Coccinella source code to filter the cases.
+#
+# for some other info, see Coccinella bug: https://bugs.launchpad.net/bugs/297970
+
 proc ::UI::ScrollSet {wscrollbar geocmd offset size} {
-    
-    if {($offset != 0.0) || ($size != 1.0)} {
-	eval $geocmd
-	$wscrollbar set $offset $size
-    } else {
-	set manager [lindex $geocmd 0]
-	$manager forget $wscrollbar
-    }
+   # get the geometry manager
+   set manager [lindex $geocmd 0]
+   # Create the name for the focus
+   set wfocus $wscrollbar.focus
+   # that name must survive
+   global $wfocus
+   if {($offset != 0.0) || ($size != 1.0)} {
+      # If the scrollbar hasn't a geomanager,
+      # it means that this time it will appear (and get a geomanager)
+      # then i record the name of the current focused object
+      if {[string equal [$manager info $wscrollbar] ""]} {
+         set $wfocus [focus]
+      }
+      eval $geocmd
+      $wscrollbar set $offset $size
+   } else {
+      $manager forget $wscrollbar
+   }
+
+   # Whatever would happen, i always will set the focus
+   # on the "current focused object" recorded in the lines above.
+   if {[info exists $wfocus]} {
+      focus [set $wfocus]
+   }
 }
 
 # UI::ScrollSetStdGrid --
