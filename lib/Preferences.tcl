@@ -453,7 +453,7 @@ proc ::Preferences::SavePushBt {} {
     if {$needRestart} {
 	set ans [::UI::MessageBox -title [mc "Warning"]  \
 	  -type ok -parent $wDlgs(prefs) -icon info \
-	  -message {[mc "At least one setting requires a restart of %s." $prefs(appName)]}]
+	  -message [mc "At least one setting requires a restart of %s." $prefs(appName)]]
     }
 
     # Save the preference file.
