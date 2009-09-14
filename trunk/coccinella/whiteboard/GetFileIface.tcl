@@ -464,19 +464,38 @@ proc ::GetFileIface::FormatMessage {gettoken msg} {
 	}
     }    
     if {$doformat} {
-	set getfile [dict create]
-	dict set getfile contacting [mc "Contacting %s. Waiting for response"...]
-	dict set getfile eoferr [mc "Connection to %s failed: received an eof."]
-	dict set getfile connerr [mc "Connection to %s failed."]
-	dict set getfile negotiate [mc "Contacted %s. Negotiating"...]
-	dict set getfile readerr [mc "Cannot read server response from %s."]
-	dict set getfile unknownprot [mc "The server at %s did not respond with a well formed protocol."]
-	dict set getfile starts [mc "%s accepted file %s. Initiating file transfer"...]
-	dict set getfile ended [mc "Transfer from %s ended prematurely."]
-	dict set getfile finished [mc "Finished downloading file %s from %s."]
-	dict set getfile neterr [mc "Cannot download from %s: network error."]
-
-	set str [dict getfile $lmsg $pars]
+	switch -- $msg {
+	  contacting {
+	    set str [eval {mc "Contacting %s. Waiting for response"} $pars]...
+	  }
+	  eoferr {
+	    set str [eval {mc "Connection to %s failed: received an eof."} $pars]
+	  }
+	  connerr {
+	    set str [eval {mc "Connection to %s failed."} $pars]
+	  }
+	  negotiate {
+	    set str [eval {mc "Contacted %s. Negotiating"} $pars]...
+	  }
+	  readerr {
+	    set str [eval {mc "Cannot read server response from %s."} $pars]
+	  }
+	  unknownprot {
+	    set str [eval {mc "The server at %s did not respond with a well formed protocol."} $pars]
+	  }
+	  starts {
+	    set str [eval {mc "%s accepted file %s. Initiating file transfer"} $pars]...
+	  }
+	  ended {
+	    set str [eval {mc "Transfer from %s ended prematurely."} $pars]
+	  }
+	  finished {
+	    set str [eval {mc "Finished downloading file %s from %s."} $pars]...
+	  }
+	  neterr {
+	    set str [eval {mc "Cannot download from %s: network error."} $pars]
+	  }
+	}
     } else {
 	set str $msg
     }
