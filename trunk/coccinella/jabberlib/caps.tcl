@@ -30,6 +30,17 @@
 #  
 #  The 'ver' map to a unique combination of disco identities+features.
 #  
+#  UPDATE version 1.5: ---------------------------------------------------------
+#  
+#  <presence from='romeo@montague.lit/orchard'>
+#    <c xmlns='http://jabber.org/protocol/caps' 
+#       hash='sha-1'
+#       node='http://code.google.com/p/exodus'
+#       ver='QgayPKawpkPSDYmwT/WM94uAlu0='/>
+#  </presence>
+#
+#  Hash element is mandatory!
+#
 #  -----------------------------------------------------------------------------
 #  
 #  Copyright (c) 2005-2007  Mats Bengtsson
