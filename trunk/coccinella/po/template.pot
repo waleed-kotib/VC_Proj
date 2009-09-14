@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Coccinella 0.96.11\n"
 "\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-08-17 23:57+0200\n"
+"POT-Creation-Date: 2009-09-14 20:54+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -854,7 +854,7 @@ msgid "Name"
 msgstr ""
 
 #: ../components/JivePhone.tcl:891 ../components/JivePhone.tcl:973
-#: ../jabber/Gateway.tcl:84
+#: ../jabber/Gateway.tcl:85
 msgid "Phone number"
 msgstr ""
 
@@ -1383,52 +1383,56 @@ msgstr ""
 msgid "Chatroom presence change"
 msgstr ""
 
-#: ../components/Sounds.tcl:497
+#: ../components/Sounds.tcl:503
 msgid "Sounds"
 msgstr ""
 
-#: ../components/Sounds.tcl:528
+#: ../components/Sounds.tcl:536
 msgid "Alert sounds"
 msgstr ""
 
-#: ../components/Sounds.tcl:539
+#: ../components/Sounds.tcl:547
 msgid "Sound set"
 msgstr ""
 
-#: ../components/Sounds.tcl:547
+#: ../components/Sounds.tcl:555
 msgid "Enable or disable sounds below"
 msgstr ""
 
-#: ../components/Sounds.tcl:559
+#: ../components/Sounds.tcl:567
 msgid "Play"
 msgstr ""
 
-#: ../components/Sounds.tcl:567
+#: ../components/Sounds.tcl:575
 msgid "Volume"
 msgstr ""
 
-#: ../components/Sounds.tcl:575
+#: ../components/Sounds.tcl:586
+msgid "Sound device"
+msgstr ""
+
+#: ../components/Sounds.tcl:595
 msgid "MIDI Player"
 msgstr ""
 
-#: ../components/Sounds.tcl:584
+#: ../components/Sounds.tcl:604
 msgid "External Midi Player"
 msgstr ""
 
-#: ../components/Sounds.tcl:585
+#: ../components/Sounds.tcl:605
 msgid ""
 "Set command to use for playing MIDI sounds. This option is only relevant if "
 "you use a sound set with MIDI files."
 msgstr ""
 
-#: ../components/Sounds.tcl:586
+#: ../components/Sounds.tcl:606
 msgid "MIDI command"
 msgstr ""
 
-#: ../components/Sounds.tcl:634 ../components/Sounds.tcl:674
-#: ../components/Sounds.tcl:694 ../contrib/ui/fontselector.tcl:156
+#: ../components/Sounds.tcl:654 ../components/Sounds.tcl:698
+#: ../components/Sounds.tcl:724 ../contrib/ui/fontselector.tcl:156
 #: ../contrib/ui/openimage.tcl:97 ../jabber/Emoticons.tcl:749
-#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1399
+#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1402
 #: ../jabber/Rosticons.tcl:605 ../jabber/SetupAss.tcl:116
 #: ../lib/PrefHelpers.tcl:104 ../whiteboard/WBPrefs.tcl:120
 #: ../whiteboard/WBPrefs.tcl:123 ../whiteboard/WBPrefs.tcl:196
@@ -2788,7 +2792,7 @@ msgid "Rate"
 msgstr ""
 
 #: ../jabber/FTrans.tcl:658 ../lib/HttpTrpt.tcl:162
-#: ../whiteboard/GetFileIface.tcl:514
+#: ../whiteboard/GetFileIface.tcl:533
 msgid "Writing file"
 msgstr ""
 
@@ -2807,46 +2811,50 @@ msgid "Email"
 msgstr ""
 
 #. TRANSLATORS; AOL AIM address
-#: ../jabber/Gateway.tcl:72
+#: ../jabber/Gateway.tcl:73
 msgid "Screen name"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:75
+#: ../jabber/Gateway.tcl:76
 msgid "Gadu-Gadu number"
 msgstr ""
 
 #. TRANSLATORS; also known as UIN
-#: ../jabber/Gateway.tcl:77
+#: ../jabber/Gateway.tcl:78
 msgid "ICQ number"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:78
+#: ../jabber/Gateway.tcl:79
 msgid "IRC"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:79 ../jabber/Gateway.tcl:85 ../jabber/JForms.tcl:300
+#: ../jabber/Gateway.tcl:80 ../jabber/Gateway.tcl:86 ../jabber/JForms.tcl:300
 #: ../jabber/Register.tcl:711 ../jabber/VCard.tcl:324
 msgid "Email address"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:80
+#: ../jabber/Gateway.tcl:81
 msgid "MSN Address"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:86
+#: ../jabber/Gateway.tcl:87
 msgid "QQ number"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:87
+#: ../jabber/Gateway.tcl:88
 msgid "Tlen address"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:88 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
+#: ../jabber/Gateway.tcl:90
+msgid "Twitter user"
+msgstr ""
+
+#: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
 #: ../jabber/Profiles.tcl:1121 ../jabber/VCard.tcl:322
 msgid "Chat address"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:89
+#: ../jabber/Gateway.tcl:92
 msgid "Yahoo ID"
 msgstr ""
 
@@ -3266,7 +3274,7 @@ msgstr ""
 msgid "All"
 msgstr ""
 
-#: ../jabber/JUI.tcl:485 ../jabber/Roster.tcl:1586
+#: ../jabber/JUI.tcl:485 ../jabber/Roster.tcl:1589
 msgid "Contacts"
 msgstr ""
 
@@ -3427,7 +3435,7 @@ msgstr ""
 msgid "Both you and your contact cannot see eachother's presence."
 msgstr ""
 
-#: ../jabber/JUser.tcl:771 ../jabber/Roster.tcl:1629
+#: ../jabber/JUser.tcl:771 ../jabber/Roster.tcl:1632
 msgid "You can see your contact's presence, but your contact can't see yours."
 msgstr ""
 
@@ -4392,31 +4400,31 @@ msgstr ""
 msgid "The roster is up to date"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1409
+#: ../jabber/Roster.tcl:1412
 msgid "Transport"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1607
+#: ../jabber/Roster.tcl:1610
 msgid "Remove contact without presence subscription"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1609
+#: ../jabber/Roster.tcl:1612
 msgid "Clear list of contacts on logout"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1611
+#: ../jabber/Roster.tcl:1614
 msgid "Chat on double-click instead of message"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1614
+#: ../jabber/Roster.tcl:1617
 msgid "Show offline users"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1616
+#: ../jabber/Roster.tcl:1619
 msgid "Show transports"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1618
+#: ../jabber/Roster.tcl:1621
 msgid "Show contacts without any subscription"
 msgstr ""
 
@@ -5535,52 +5543,52 @@ msgid ""
 "Message: %s"
 msgstr ""
 
-#: ../whiteboard/GetFileIface.tcl:468 ../whiteboard/PutFileIface.tcl:177
+#: ../whiteboard/GetFileIface.tcl:469 ../whiteboard/PutFileIface.tcl:177
 #, tcl-format
 msgid "Contacting %s. Waiting for response"
 msgstr ""
 
-#: ../whiteboard/GetFileIface.tcl:469 ../whiteboard/PutFileIface.tcl:178
+#: ../whiteboard/GetFileIface.tcl:472 ../whiteboard/PutFileIface.tcl:178
 #, tcl-format
 msgid "Connection to %s failed: received an eof."
 msgstr ""
 
-#: ../whiteboard/GetFileIface.tcl:470 ../whiteboard/PutFileIface.tcl:179
+#: ../whiteboard/GetFileIface.tcl:475 ../whiteboard/PutFileIface.tcl:179
 #, tcl-format
 msgid "Connection to %s failed."
 msgstr ""
 
-#: ../whiteboard/GetFileIface.tcl:471 ../whiteboard/PutFileIface.tcl:180
+#: ../whiteboard/GetFileIface.tcl:478 ../whiteboard/PutFileIface.tcl:180
 #, tcl-format
 msgid "Contacted %s. Negotiating"
 msgstr ""
 
-#: ../whiteboard/GetFileIface.tcl:472 ../whiteboard/PutFileIface.tcl:181
+#: ../whiteboard/GetFileIface.tcl:481 ../whiteboard/PutFileIface.tcl:181
 #, tcl-format
 msgid "Cannot read server response from %s."
 msgstr ""
 
-#: ../whiteboard/GetFileIface.tcl:473 ../whiteboard/PutFileIface.tcl:182
+#: ../whiteboard/GetFileIface.tcl:484 ../whiteboard/PutFileIface.tcl:182
 #, tcl-format
 msgid "The server at %s did not respond with a well formed protocol."
 msgstr ""
 
-#: ../whiteboard/GetFileIface.tcl:474 ../whiteboard/PutFileIface.tcl:183
+#: ../whiteboard/GetFileIface.tcl:487 ../whiteboard/PutFileIface.tcl:183
 #, tcl-format
 msgid "%s accepted file %s. Initiating file transfer"
 msgstr ""
 
-#: ../whiteboard/GetFileIface.tcl:475
+#: ../whiteboard/GetFileIface.tcl:490
 #, tcl-format
 msgid "Transfer from %s ended prematurely."
 msgstr ""
 
-#: ../whiteboard/GetFileIface.tcl:476
+#: ../whiteboard/GetFileIface.tcl:493
 #, tcl-format
 msgid "Finished downloading file %s from %s."
 msgstr ""
 
-#: ../whiteboard/GetFileIface.tcl:477
+#: ../whiteboard/GetFileIface.tcl:496
 #, tcl-format
 msgid "Cannot download from %s: network error."
 msgstr ""

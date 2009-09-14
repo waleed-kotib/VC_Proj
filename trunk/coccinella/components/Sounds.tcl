@@ -123,11 +123,13 @@ proc  ::Sounds::InitPrefsHook {} {
     set sprefs(soundSet) $defaultSet
     set sprefs(volume)   100
     set sprefs(midiCmd)  ""
+    set sprefs(outputDevice)  ""
 
     ::PrefUtils::Add [list  \
       [list ::Sounds::sprefs(soundSet) sound_set     $sprefs(soundSet)] \
       [list ::Sounds::sprefs(volume)   sound_volume  $sprefs(volume)]   \
       [list ::Sounds::sprefs(midiCmd)  sound_midiCmd $sprefs(midiCmd)]  \
+      [list ::Sounds::sprefs(outputDevice)  sound_outputDevice $sprefs(outputDevice)]  \
       ]
     
     set optL [list]
@@ -137,9 +139,13 @@ proc  ::Sounds::InitPrefsHook {} {
     }
     ::PrefUtils::Add $optL
     
-    # Volume seems to be set globally on snack.
     if {$priv(snack)} {
+       # Volume seems to be set globally on snack.
 	set sprefs(volume) [snack::audio play_gain]
+	# initialize snack audio device
+        if {![string equal $sprefs(outputDevice) ""]} {
+            snack::audio selectOutput $sprefs(outputDevice)
+	}
     }
 }
 
@@ -515,10 +521,12 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     foreach name $allSounds {
 	set tmpPrefs($name) $sprefs($name)
     }
-    set tmpPrefs(soundSet) $sprefs(soundSet)
-    set tmpPrefs(volume)   $sprefs(volume)
-    set tmpPrefs(midiCmd)  $sprefs(midiCmd)
+    set tmpPrefs(soundSet)     $sprefs(soundSet)
+    set tmpPrefs(volume)       $sprefs(volume)
+    set tmpPrefs(midiCmd)      $sprefs(midiCmd)
+    set tmpPrefs(outputDevice)  $sprefs(outputDevice)
     set soundSets [GetAllSets]
+    set outputDevices [snack::audio outputDevices]
     
     set wc $wpage.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
@@ -571,6 +579,18 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     pack  $fvol.l  -side left -padx 4
     pack  $fvol.v  -side left -padx 4
     pack  $fvol  -side top -pady 4 -anchor [option get . dialogAnchor {}]
+
+    if {$priv(snack)} {
+        set odev $wc.odev
+        ttk::frame $odev
+        ttk::label $odev.l -text [mc "Sound device"]:
+        ui::combobutton $odev.p -variable [namespace current]::tmpPrefs(outputDevice) \
+          -menulist [ui::optionmenu::menuList $outputDevices]
+        grid $odev.l $odev.p -sticky w -padx 2
+        grid $odev.p -sticky ew
+        grid columnconfigure $odev 1 -minsize [$odev.p maxwidth]
+        pack  $wc.odev  -side top -anchor w
+    }
 
     ttk::button $wc.midi -text [mc "MIDI Player"] -command ::Sounds::MidiPlayer
     pack  $wc.midi -pady 2
@@ -637,8 +657,9 @@ proc ::Sounds::SavePrefsHook {} {
     if {![string equal $tmpPrefs(soundSet) $sprefs(soundSet)]} {
 	LoadSoundSet $tmpPrefs(soundSet)
     }
-    set sprefs(soundSet) $tmpPrefs(soundSet)
-    set sprefs(volume)   $tmpPrefs(volume)
+    set sprefs(soundSet)     $tmpPrefs(soundSet)
+    set sprefs(volume)       $tmpPrefs(volume)
+    set sprefs(outputDevice) $tmpPrefs(outputDevice)
     foreach name $allSounds {
 	set sprefs($name) $tmpPrefs($name)
     }
@@ -652,8 +673,11 @@ proc ::Sounds::SavePrefsHook {} {
     
     # The snack play_gain seems to be set globally on the machine which is BAD!
     if {$priv(snack)} {
-	# snack::audio play_gain [expr int($sprefs(volume))]
+	snack::audio play_gain [expr int($sprefs(volume))]
+	snack::audio selectOutput $sprefs(outputDevice)
     }
+    set sprefs(midiCmd) $tmpPrefs(midiCmd)
+
 }
 
 proc ::Sounds::CancelPrefsHook {} {
@@ -678,6 +702,12 @@ proc ::Sounds::CancelPrefsHook {} {
 	::Preferences::HasChanged
     }
     if {![string equal $sprefs(volume) $tmpPrefs(volume)]} {
+	::Preferences::HasChanged
+    }
+    if {![string equal $sprefs(midiCmd) $tmpPrefs(midiCmd)]} {
+	::Preferences::HasChanged
+    }
+    if {![string equal $sprefs(outputDevice) $tmpPrefs(outputDevice)]} {
 	::Preferences::HasChanged
     }
 }
