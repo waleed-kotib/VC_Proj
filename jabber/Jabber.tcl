@@ -1415,9 +1415,11 @@ proc ::Jabber::CreateCapsPresElement {} {
     }
     set exts [Jlib caps getexts]
     set ver  [Jlib caps generate_ver]
+    # Mandatory element in XEP-0115 version 1.5
+    set hash "sha-1"
     # Need to switch to "$node#$vers" some time
     set xmllist [wrapper::createtag c -attrlist \
-      [list xmlns $xmppxmlns(caps) node $node ver $ver ext $exts]]
+      [list xmlns $xmppxmlns(caps) hash $hash node $node ver $ver ext $exts]]
 
     return $xmllist
 }
