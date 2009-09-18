@@ -22,17 +22,11 @@
 
 namespace eval ::ChatShorts {
 
-    # Crashes, see below.
-    return
-
     component::define ChatShorts \
       "Implements /clean, /retain commands for chats."
 }
 
 proc ::ChatShorts::Init {} {
-    
-    # Crashes, see below.
-    return
     
     component::register ChatShorts
 
@@ -48,7 +42,6 @@ proc ::ChatShorts::ChatTextHook {chattoken jid str} {
 	set wtext [::Chat::GetChatTokenValue $chattoken wtext]
 	puts "wtext=$wtext"
 	$wtext tag configure telide -elide 1
-	# This crashes my Mac Tcl 8.4.9
 	$wtext tag add telide 1.0 end
 	return stop
     } elseif {[regexp {^ */retain$} $str]} {
