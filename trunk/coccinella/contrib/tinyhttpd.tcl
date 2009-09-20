@@ -271,7 +271,7 @@ Server: tinyhttpd/1.0"
     <div id='clearfooter'></div>
     <div id='footerouter'>
     <div id="footer">
-        <a href="http://thecoccinella.org/">@powered</a>
+        <a href="http://coccinella.im/">@powered</a>
     </div>
     </div>
     </body>
@@ -741,6 +741,8 @@ proc ::tinyhttpd::Respond {token} {
 	    return
 	}
 	Debug 2 "\t abspath=$abspath"
+    } else {
+        set abspath $apath
     }
     
     if {[file isdirectory $apath]} {
