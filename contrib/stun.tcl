@@ -36,7 +36,7 @@
 #       stun::reset token
 #       
 #       
-#  Known STUN host: stun.fwdnet.net
+#  Known STUN host: stun01.sipphone.com
 #  
 #  To debug just uncomment the puts.
 

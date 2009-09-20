@@ -146,7 +146,7 @@ proc ::JingleIAX::InitState {} {
     set state(local,ip)    $this(ipnum)
 
     #---- Gets Public IP  ------
-    ::stun::request stun.fwdnet.net -command ::JingleIAX::StunCB
+    ::stun::request stun01.sipphone.com -command ::JingleIAX::StunCB
 }
 
 proc ::JingleIAX::StunCB {token status args} {

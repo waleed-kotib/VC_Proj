@@ -284,7 +284,7 @@ proc ::Proxy::BuildNATFrame {w} {
 }
 
 proc ::Proxy::GetStun {} {
-    ::stun::request stun.fwdnet.net -command ::Proxy::GetStunCB
+    ::stun::request stun01.sipphone.com -command ::Proxy::GetStunCB
 }
 
 proc ::Proxy::GetStunCB {token status args} {
