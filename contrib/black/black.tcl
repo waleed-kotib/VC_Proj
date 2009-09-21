@@ -91,7 +91,7 @@ namespace eval ttk::theme::black {
 
 	  ttk::style configure TreeCtrl \
 	    -background gray30 -itembackground {gray60 gray50} \
-	    -itemfill white -itemaccentfill yellow
+	    -itemfill black -itemaccentfill darkblue
     }
 }
 
