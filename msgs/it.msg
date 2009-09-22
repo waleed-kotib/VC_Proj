@@ -789,7 +789,7 @@ set ::msgcat::header "Project-Id-Version: it\nReport-Msgid-Bugs-To: https://bugs
 ::msgcat::mcset it "Connected to %s. Initializing the XML stream" "Connesso a %s, inizio flusso XML..."
 ::msgcat::mcset it "Negotiating TLS security" "Negoziazione sicurezza TLS"
 ::msgcat::mcset it "Authorization to server %s was successful. Downloading contacts..." "L'autorizzazione al server %s ha avuto successo. Scarico la lista dei contatti..."
-::msgcat::mcset it "Cannot connect to %s. Either there are server or network issues, or you misspelled the server's name." "Imopssinile connettersi a %s. Ci potrebbero essere problemi nel server o nella rete, oppure hai scritto male il nome del server."
+::msgcat::mcset it "Cannot connect to %s. Either there are server or network issues, or you misspelled the server's name." "Impossibile connettersi a %s. Ci potrebbero essere problemi nel server o nella rete, oppure hai scritto male il nome del server."
 ::msgcat::mcset it "Server %s did not respond: timeout." "Il server %s non ha risposto: tempo scaduto."
 ::msgcat::mcset it "Cannot login because this username is already in use by someone else (%s)." "Impossibile connettersi perch\u00e8 questo utente \u00e8 gi\u00e0 in uso da qualcun altro (%s)."
 ::msgcat::mcset it "The server %s has no support for TLS." "Il server %s non supporta il TLS."

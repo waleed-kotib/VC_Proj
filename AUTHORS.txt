@@ -28,6 +28,7 @@ Icons:
 
 Patches:
   Antonio F. Cano <antonio at grupoikusnet.com>
+  Mirko Graziani <contatto at imatica.it>
 
 Founder and former maintainer:
   Mats Bentsson [http://coccinella.im/mats-bengtsson]

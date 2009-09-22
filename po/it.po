@@ -3893,7 +3893,7 @@ msgid ""
 "Cannot connect to %s. Either there are server or network issues, or you "
 "misspelled the server's name."
 msgstr ""
-"Imopssinile connettersi a %s. Ci potrebbero essere problemi nel server o "
+"Impossibile connettersi a %s. Ci potrebbero essere problemi nel server o "
 "nella rete, oppure hai scritto male il nome del server."
 
 #: ../jabber/Login.tcl:915
