@@ -723,7 +723,16 @@ proc ::Chat::GotMsg {xmldata} {
        
 	TabAlert $chattoken
 	XEventCancel $chattoken
-	    
+	
+	# 12th June 2009 - Mirko Graziani, coccinella@mirkobau.it
+	# https://bugs.launchpad.net/coccinella/+bug/297580
+	# Bring the window over the others, but since
+	# the "wm focusmodel" is set to 'passive',
+	# the user is not interrupted in his work.
+	wm focusmodel $dlgstate(w) passive
+	wm attributes $dlgstate(w) -topmost 1
+	wm attributes $dlgstate(w) -topmost 0
+
 	# Put an extra (*) in the windows title if not in focus.
 	if {([set wfocus [focus]] eq "") ||  \
 	  ([winfo toplevel $wfocus] ne $dlgstate(w))} {
