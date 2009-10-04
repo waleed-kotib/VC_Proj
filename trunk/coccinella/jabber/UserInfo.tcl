@@ -30,7 +30,7 @@ namespace eval ::UserInfo::  {
     ::hooks::register menuUserInfoFilePostHook   ::UserInfo::FileMenuPostHook
     ::hooks::register onMenuVCardExport          ::UserInfo::OnMenuExportHook
 
-    variable uid 0
+    variable uid
     
     set ::config(userinfo,disco) 0
 }
@@ -56,14 +56,15 @@ proc ::UserInfo::Get {jid {node ""}} {
     global  wDlgs config
     variable uid
    
+    set jid2 [jlib::barejid $jid]
     # Keep a separate instance specific namespace for each request.
-    set token [namespace current]::[incr uid]
+    set uid [join [split $jid2 "@."] ""]
+    set token [namespace current]::$uid
     namespace eval $token {
 	variable priv
     }
     upvar ${token}::priv  priv
     
-    set jid2 [jlib::barejid $jid]
 
     set avail [::Jabber::RosterCmd isavailable $jid]
     set room  [::Jabber::Jlib service isroom $jid2]
@@ -133,7 +134,12 @@ proc ::UserInfo::Get {jid {node ""}} {
     if {[::Jabber::IsConnected]} {
 	set ujid [jlib::unescapejid $jid]
 	::JUI::SetAppMessage [mc "Downloading business card from %s" $ujid]...
-	$priv(warrow) start
+	# need to check here for the existence of the vcard subwindow
+	# only start the rotating arrow if it not yet exists, for some 
+	# reason a $priv(warrow) stop in the beginning of ::Build did not worked 
+	if (![winfo exists $priv(wnb).fbas]) {
+	  $priv(warrow) start
+	}
     }
     
     ::hooks::run buildUserInfoDlgHook $jid $priv(wnb)
@@ -177,7 +183,6 @@ proc ::UserInfo::VersionCB {token jlibname type subiq} {
 	return
     }
     upvar ${token}::priv priv    
-
     if {![info exists priv(wpageversion)]} {
 	LastAndVersionPage $token
     }
@@ -227,6 +232,9 @@ proc ::UserInfo::LastCB {token jlibname type subiq} {
 	return
     }
     upvar ${token}::priv priv    
+    if ([winfo exists $priv(wnb).fbas]) {
+	return
+    }
 
     incr priv(ncount) -1
     if {$priv(ncount) <= 0} {
@@ -319,6 +327,10 @@ proc ::UserInfo::VCardCB {token jlibname type subiq} {
     }
     upvar ${token}::priv priv    
 
+    if ([winfo exists $priv(wnb).fbas]) {
+       return
+    } 
+
     incr priv(ncount) -1
     if {$priv(ncount) <= 0} {
 	$priv(warrow) stop
@@ -345,6 +357,12 @@ proc ::UserInfo::Build {token} {
     set w   $priv(w)
     set jid $priv(jid)
     
+    if ([winfo exists $w]) {
+	raise $w
+	focus $w
+	return
+    }
+
     ::UI::Toplevel $w -class UserInfo \
       -macstyle documentProc -usemacmainmenu 1 \
       -macclass {document closeBox} \
@@ -433,6 +451,10 @@ proc ::UserInfo::NotesPage {token} {
     upvar ${token}::priv priv    
     
     set wnb $priv(wnb)
+
+    if ([winfo exists $wnb.not]) {
+	return
+    }
 
     # TRANSLATORS: in the business card dialog, there can be made notes about each contact
     $wnb add [ttk::frame $wnb.not] -text [mc "Notes"] -sticky news

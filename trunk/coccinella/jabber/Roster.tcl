@@ -123,7 +123,7 @@ proc ::Roster::InitMenus {} {
 	{command     mSendFile...     {[mc "Send &File"]...} {::FTrans::SendJIDList $jidL} }
 	{separator}
 	{command     mHistory...      {[mc "&History"]...} {::Chat::HistoryForJIDList $jidL} }
-	{command     mBusinessCard... {[mc "View &Business Card"]...} {::UserInfo::GetJIDList $jid2L} }
+	{command     mBusinessCard... {[mc "View &Business Card"]...} {::UserInfo::GetJIDList $jidL} }
 	{command     mAddContact...   {[mc "&Add Contact"]...} {::JUser::NewDlg} }
 	{command     mEditContact...  {[mc "&Edit Contact"]...} {::JUser::EditJIDList $jid2L} }
 	{command     mRemoveContact   {[mc "&Remove Contact"]...} {::Roster::RemoveJIDList $jidL} }

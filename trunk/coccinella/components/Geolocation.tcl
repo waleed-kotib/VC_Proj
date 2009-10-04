@@ -365,6 +365,9 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
     if {![info exists geoloc($mjid)]} {
 	return
     }
+    if ([winfo exists $wnb.geo]) {
+        return
+    }
     
     $wnb add [ttk::frame $wnb.geo] -text [mc "Location"] -sticky news
 
