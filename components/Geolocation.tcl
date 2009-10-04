@@ -359,7 +359,6 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
     variable xmlns
     variable geoloc
     variable help
-    variable location
     variable taglabel
 
     set mjid [jlib::jidmap [jlib::barejid $jid]]
@@ -373,7 +372,7 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
     ttk::frame $wpage -padding [option get . notebookPagePadding {}]
     pack  $wpage  -side top -anchor [option get . dialogAnchor {}]
 
-    ttk::label $wpage._lbl -text [mc "This is location data for"]
+    ttk::label $wpage._lbl -text [mc "This is location data for %s" $jid]
     grid  $wpage._lbl  -  -pady 2
     
     ttk::button $wpage.mapquest -style Url -text www.mapquest.com
@@ -407,7 +406,7 @@ proc ::Geolocation::UserInfoHook {jid wnb} {
 			grid $wpage.l$tag -sticky e
 			grid $wpage.e$tag -sticky w
 			
-			set bstr [dict get $location $name]
+			set bstr $help($tag)
 			::balloonhelp::balloonforwindow $wpage.l$tag $bstr
 			::balloonhelp::balloonforwindow $wpage.e$tag $bstr
 		    }
