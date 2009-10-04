@@ -49,24 +49,24 @@ proc ::Geolocation::Init {} {
     
     # These help strings are for the message catalogs.
     variable help
-    set	help(alt)         "Altitude in meters above or below sea level"
-    set	help(area)        "A named area such as a campus or neighborhood"
-    set	help(bearing)     "GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north"
-    set	help(building)    "A specific building on a street or in an area"
-    set	help(country)     "The nation where the user is located"
-    set	help(datum)       "GPS datum"
-    set	help(description) "A natural-language name for or description of the location"
-    set	help(error)       "Horizontal GPS error in arc minutes"
-    set	help(floor)       "A particular floor in a building"
-    set	help(lat)         "Latitude in decimal degrees North"
-    set	help(locality)    "A locality within the administrative region, such as a town or city"
-    set	help(lon)         "Longitude in decimal degrees East"
-    set	help(postalcode)  "A code used for postal delivery"
-    set	help(region)      "An administrative region of the nation, such as a state or province"
-    set	help(room)        "A particular room in a building"
-    set	help(street)      "A thoroughfare within the locality, or a crossing of two thoroughfares"
-    set	help(text)        "A catch-all element that captures any other information about the location"
-    set	help(timestamp)   "UTC timestamp specifying the moment when the reading was taken"
+    set	help(alt)         [mc "Altitude in meters above or below sea level"]
+    set	help(area)        [mc "A named area such as a campus or neighborhood"]
+    set	help(bearing)     [mc "GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north"]
+    set	help(building)    [mc "A specific building on a street or in an area"]
+    set	help(country)     [mc "The nation where the user is located"]
+    set	help(datum)       [mc "GPS datum"]
+    set	help(description) [mc "A natural-language name for or description of the location"]
+    set	help(error)       [mc "Horizontal GPS error in arc minutes"]
+    set	help(floor)       [mc "A particular floor in a building"]
+    set	help(lat)         [mc "Latitude in decimal degrees North"]
+    set	help(locality)    [mc "A locality within the administrative region, such as a town or city"]
+    set	help(lon)         [mc "Longitude in decimal degrees East"]
+    set	help(postalcode)  [mc "A code used for postal delivery"]
+    set	help(region)      [mc "An administrative region of the nation, such as a state or province"]
+    set	help(room)        [mc "A particular room in a building"]
+    set	help(street)      [mc "A thoroughfare within the locality, or a crossing of two thoroughfares"]
+    set	help(text)        [mc "A catch-all element that captures any other information about the location"]
+    set	help(timestamp)   [mc "UTC timestamp specifying the moment when the reading was taken"]
     
     variable taglabel
     set	taglabel(alt)         [mc "Altitude"]
@@ -152,6 +152,7 @@ proc ::Geolocation::LogoutHook {} {
 proc ::Geolocation::Dlg {} {
     variable xmlns
     variable gearth 0
+    variable help
     variable taglabel
     
     set w [ui::dialog -message [mc "Set your location that will be shown to your contacts."] \
@@ -179,13 +180,7 @@ proc ::Geolocation::Dlg {} {
 	grid  $fr.l$name  $fr.e$name  -sticky e -pady 2
 	grid $fr.e$name -sticky ew
 	
-	set location [dict create]
-	dict set location alt [mc "Altitude in meters above or below sea level"]
-	dict set location lon [mc "Longitude in decimal degrees East"]
-	dict set location lat [mc "Latitude in decimal degrees North"]
-	dict set location country [mc "The nation where the user is located"]
-	
-	set str [dict get $location $name]
+	set str $help($name)
 	::balloonhelp::balloonforwindow $fr.l$name $str
 	::balloonhelp::balloonforwindow $fr.e$name $str
     }
