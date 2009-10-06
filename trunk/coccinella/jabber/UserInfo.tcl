@@ -183,6 +183,10 @@ proc ::UserInfo::VersionCB {token jlibname type subiq} {
 	return
     }
     upvar ${token}::priv priv    
+    
+    if ([winfo exists $priv(wpageversion).l0]) {
+        return
+    }
     if {![info exists priv(wpageversion)]} {
 	LastAndVersionPage $token
     }
