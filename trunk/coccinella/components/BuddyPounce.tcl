@@ -26,6 +26,8 @@
 #     target:   is either a jid, a roster group, or 'any'  
 #     action:   how to respond, popup, sound, reply etc.
 
+package require jlib
+
 namespace eval ::BuddyPounce {
     
     component::define BuddyPounce "Set actions for contact events"
@@ -58,8 +60,6 @@ proc ::BuddyPounce::Init {} {
     
     component::register BuddyPounce
         
-    # Unique id needed to create instance tokens.
-    variable uid 0
     variable wdlg .budpounce
     
     # These define which the events are.
@@ -120,15 +120,14 @@ proc ::BuddyPounce::GetGroupPrefsArr { } {
 proc ::BuddyPounce::Build {typeselected item groupL} {    
     global  this prefs
     
-    variable uid
     variable wdlg
     variable events
     
     ::Debug 2 "::BuddyPounce::Build typeselected=$typeselected, item=$item, groupL=$groupL"
 
     # Initialize the state variable, an array, that keeps is the storage.
-    
-    set token [namespace current]::[incr uid]
+    set uid [join [split [jlib::barejid $item] "@."] ""]
+    set token [namespace current]::$uid
     variable $token
     upvar 0 $token state
     
@@ -188,7 +187,13 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
 	set soundfileDef [mc "None"]
     }
     
+    
     # Toplevel with class BuddyPounce.
+    if ([winfo exists $w]) {
+        raise $w
+        focus $w
+        return
+    }
     ::UI::Toplevel $w -class BuddyPounce \
       -usemacmainmenu 1 -macstyle documentProc -command ::BuddyPounce::CloseHook
     wm title $w $title
