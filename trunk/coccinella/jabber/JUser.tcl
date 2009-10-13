@@ -626,6 +626,7 @@ proc ::JUser::EditUserDlg {jid} {
 	variable $token
 	upvar 0 $token state	
 	raise $state(w)
+	focus $state(w)
 	return
     }
     
