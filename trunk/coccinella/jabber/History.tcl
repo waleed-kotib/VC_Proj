@@ -21,6 +21,7 @@
 #  
 # $Id: History.tcl,v 1.38 2008-05-05 14:22:28 matben Exp $
 
+package require jlib
 package require uriencode
 package require UI::WSearch
 
@@ -30,8 +31,6 @@ namespace eval ::History:: {
     
     ::hooks::register menuHistoryDlgEditPostHook    ::History::MenuEditPostHook
 
-    variable uiddlg 1000
-    
     # History file size limit of 50k
     variable sizeLimit 50000
     
@@ -942,7 +941,6 @@ proc ::History::PutToFileEx {jid args} {
 
 proc ::History::BuildHistory {jid dlgtype args} {
     global  prefs this wDlgs
-    variable uiddlg
     variable historyOptions
     
     set msg [mc "History"]
@@ -954,8 +952,13 @@ proc ::History::BuildHistory {jid dlgtype args} {
       -title        $msg  \
       ]
     array set argsA $args
-    
-    set w $wDlgs(jhist)[incr uiddlg]
+    set uid [join [split [jlib::barejid $jid] "@."] ""]
+    set w $wDlgs(jhist)$uid
+    if ([winfo exists $w]) {
+        raise $w
+        focus $w
+        return
+    }
     ::UI::Toplevel $w \
       -usemacmainmenu 1 -macstyle documentProc \
       -closecommand ::History::CloseHook -class HistoryDlg
