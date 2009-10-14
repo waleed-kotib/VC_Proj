@@ -516,6 +516,7 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     # System gain can have been changed.
     if {$priv(snack)} {
 	set sprefs(volume) [snack::audio play_gain]
+        set outputDevices [snack::audio outputDevices]
     }
     
     foreach name $allSounds {
@@ -526,7 +527,6 @@ proc ::Sounds::BuildPrefsPage {wpage} {
     set tmpPrefs(midiCmd)      $sprefs(midiCmd)
     set tmpPrefs(outputDevice)  $sprefs(outputDevice)
     set soundSets [GetAllSets]
-    set outputDevices [snack::audio outputDevices]
     
     set wc $wpage.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
