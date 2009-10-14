@@ -1670,7 +1670,7 @@ proc ::Jabber::GetVersionResult {from silent jlibname type subiq} {
 	set str [mc "Cannot query %s's version." $ujid]
 	append str "\n"
 	append str [mc "Error"]
-	append str ": [lindex $iqchild 1]"
+	append str ": [lindex $subiq 1]"
 	::Jabber::AddErrorLog $from $str
 	if {!$silent} {
 	    ::ui::dialog -title [mc "Error"] -icon error -type ok -message $str
