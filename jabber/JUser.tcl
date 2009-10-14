@@ -564,7 +564,7 @@ proc ::JUser::EditJIDList {jidL} {
 
 proc ::JUser::EditDlg {jid} {
 
-    if {[::Roster::IsTransport $jid]} {
+    if {[::Roster::IsTransportHeuristics $jid]} {
 	EditTransportDlg $jid
     } else {
 	EditUserDlg $jid
