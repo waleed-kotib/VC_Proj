@@ -207,8 +207,7 @@ namespace eval jlib {
 	pubsub          "http://jabber.org/protocol/pubsub"
     }
     
-    # This is likely to change when XEP accepted.
-    set jxmlns(entitytime) "http://www.xmpp.org/extensions/xep-0202.html#ns"
+    set jxmlns(entitytime) "urn:xmpp:time"
     
     # Auto away and extended away are only set when the
     # current status has a lower priority than away or xa respectively.

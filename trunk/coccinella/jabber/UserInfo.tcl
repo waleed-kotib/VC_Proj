@@ -91,11 +91,8 @@ proc ::UserInfo::Get {jid {node ""}} {
     $jlib get_time $jid [list [namespace current]::TimeCB $token]
     incr priv(ncount)
 
-    # Entity time XEP-0202. Switch on when accepted and in common use.
-    if {0} {
-	$jlib get_entity_time $jid [list [namespace current]::EntityTimeCB $token]
-	incr priv(ncount)
-    }
+    $jlib get_entity_time $jid [list [namespace current]::EntityTimeCB $token]
+    incr priv(ncount)
     
     # vCard
     if {$room} {
