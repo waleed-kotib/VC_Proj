@@ -208,6 +208,7 @@ namespace eval ::Jabber {
 	"jabber:client"
 	"jabber:iq:last"
 	"jabber:iq:time"
+	"urn:xmpp:time"
 	"jabber:iq:version"
 	"jabber:x:event"
     }    
@@ -1631,7 +1632,7 @@ proc ::Jabber::GetEntityTimeString {timeE} {
 	set hours [expr {abs($hours)}]
 	set offset [expr {$sign*60*($minutes + 60*$hours)}]
 	incr secs $offset
-	set msg [clock format $secs -format "%c"]
+	set msg [clock format $secs -format "%c" -gmt 1]
     }
     return $msg
 }
