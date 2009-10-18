@@ -652,7 +652,8 @@ proc ::Login::LoginCmd {} {
 }
 
 proc ::Login::LoginWithProfile {profname} {
-    
+    variable moreOpts
+
     set domain   [::Profiles::Get $profname domain]
     set node     [::Profiles::Get $profname node]
     set password [::Profiles::Get $profname password]
@@ -668,7 +669,28 @@ proc ::Login::LoginWithProfile {profname} {
 	}
 	set password [ui::megaentrytext $ans]
     }
-    set opts [::Profiles::Get $profname options]
+    # first get all general default values for a connection
+    ::Profiles::NotebookSetDefaults [namespace current]::moreOpts $node
+    foreach {key value} [array get tmpProfArr $profname,-*] {
+        set optname [string map [list $profname,- ""] $key]
+        if {$optname ne "resource"} {
+            set moreOpts($optname) $value
+        }
+    }
+    # create options string from default value
+    foreach {key value} [array get moreOpts] {
+        lappend opts -$key $value
+    }
+
+    # then get the specific profile configuration values
+    # and append to the profile configuration string
+    # the last entry wins in case there are options 
+    # doubled in the string
+    array set tmpOpts [::Profiles::Get $profname options]
+    foreach {key value} [array get tmpOpts] {
+        lappend opts $key $value
+    }
+    
     array set optsA $opts
     if {[info exists optsA(-resource)] && ($optsA(-resource) ne "")} {
 	set res $optsA(-resource)
