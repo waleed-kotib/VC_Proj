@@ -27,6 +27,7 @@ namespace eval ::UserActivity {
 
     component::define UserActivity \
       "Communicate information about user activities"
+    set allActivities [list]
 }
 
 proc ::UserActivity::Init {} {
