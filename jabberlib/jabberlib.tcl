@@ -3496,7 +3496,7 @@ proc jlib::handle_get_time {jlibname from subiq args} {
     # Applications using 'jabber:iq:time' SHOULD use the old format, 
     # not the format defined in XEP-0082.
     set secs [clock seconds]
-    set utc [clock format $secs -format "%Y%m%dT%H:%M:%S" -gmt 1]
+    set utc [clock format $secs -format "%Y%m%dT%H:%M:%S" -timezone :UTC]
     set tz "GMT"
     set display [clock format $secs]
     set subtags [list  \
@@ -3547,7 +3547,7 @@ proc jlib::handle_entity_time {jlibname from subiq args} {
     }
     set format "%S + 60*(%M + 60*(%H + 24*%j))"
     set local [clock format $secs -format $format]
-    set gmt   [clock format $secs -format $format -gmt 1]
+    set gmt   [clock format $secs -format $format -timezone :UTC]
 
     # Remove leading zeros since they will be interpreted as octals.
     regsub -all {0+([1-9]+)} $local {\1} local
@@ -3562,7 +3562,7 @@ proc jlib::handle_entity_time {jlibname from subiq args} {
     
     # Time format according to XEP-0082 (XMPP Date and Time Profiles).
     # <utc>2006-12-19T17:58:35Z</utc> 
-    set utc [clock format $secs -format "%Y-%m-%dT%H:%M:%SZ" -gmt 1]
+    set utc [clock format $secs -format "%Y-%m-%dT%H:%M:%SZ" -timezone :UTC]
 
     set subtags [list  \
       [wrapper::createtag "tzo" -chdata $tzo] \

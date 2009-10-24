@@ -700,7 +700,7 @@ proc ::Chat::GotMsg {xmldata} {
     set opts [list]
     set tm [::Jabber::GetDelayStamp $xmldata]
     if {$tm ne ""} {
-	set secs [clock scan $tm -gmt 1]
+	set secs [clock scan $tm -timezone :UTC]
 	lappend opts -secs $secs
     } else {
 	set secs [clock seconds]

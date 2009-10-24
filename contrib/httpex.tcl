@@ -2057,7 +2057,7 @@ if {0} {
 		    return [list 500 $headlist]
 		}
 		if {[catch {clock format [file mtime $abspath]  \
-		  -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1} modTime]} {
+		  -format "%a, %d %b %Y %H:%M:%S GMT" -timezone :UTC} modTime]} {
 		    return [list 404 $headlist]
 		} else {
 		    set headlist [list Last-Modified $modTime]

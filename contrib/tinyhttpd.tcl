@@ -849,7 +849,7 @@ proc ::tinyhttpd::PutResponse {token httpcode abspath} {
 
     # Prepare the header.
     set modTime [clock format [file mtime $abspath]  \
-      -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1]
+      -format "%a, %d %b %Y %H:%M:%S GMT" -timezone :UTC]
     set msg $httpMsg($httpcode)
     set header [format $http(header) $httpcode $msg $modTime $mime \
       $state(contentlen)]
@@ -1110,7 +1110,7 @@ proc ::tinyhttpd::PutHtmlDirList {token abspath} {
 
     # No default html file exists, return directory listing.
     set modTime [clock format [file mtime $abspath]  \
-      -format "%a, %d %b %Y %H:%M:%S GMT" -gmt 1]
+      -format "%a, %d %b %Y %H:%M:%S GMT" -timezone :UTC]
     if {[string equal $cmd "GET"]} {
 	set html [BuildHtmlForDir $token]
     }

@@ -1619,7 +1619,7 @@ proc jlib::roster::availablesince {jlibname jid} {
 	 
 	 # An ISO 8601 point-in-time specification. clock works!
 	 set stamp [wrapper::getattribute $presA($jid,x,$xmlns) stamp]
-	 set time [clock scan $stamp -gmt 1]
+	 set time [clock scan $stamp -timezone :UTC]
      } elseif {[info exists state($jid,secs)]} {
 	 set time $state($jid,secs)
      } else {
