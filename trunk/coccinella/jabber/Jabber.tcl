@@ -1621,7 +1621,7 @@ proc ::Jabber::GetEntityTimeString {timeE} {
 	# NB; I get 5 hours diff here compared to original value
 	# if using 'clock scan' directly on utc1! Skip the "T".
 	regsub {T} $utc1 { } utc1
-	if {[catch {clock scan $utc1 -gmt 1} secs]} {
+	if {[catch {clock scan $utc1 -timezone :UTC} secs]} {
 	    return ""
 	}
 
@@ -1632,7 +1632,7 @@ proc ::Jabber::GetEntityTimeString {timeE} {
 	set hours [expr {abs($hours)}]
 	set offset [expr {$sign*60*($minutes + 60*$hours)}]
 	incr secs $offset
-	set msg [clock format $secs -format "%c" -gmt 1]
+	set msg [clock format $secs -format "%c" -timezone :UTC]
     }
     return $msg
 }

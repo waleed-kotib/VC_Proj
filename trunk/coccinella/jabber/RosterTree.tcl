@@ -1684,7 +1684,7 @@ proc ::RosterTree::Balloon {jid presence item args} {
 	    
 	    # An ISO 8601 point-in-time specification. clock works!
 	    set stamp [wrapper::getattribute $delay stamp]
-	    set tstr [::Utils::SmartClockFormat [clock scan $stamp -gmt 1]]
+	    set tstr [::Utils::SmartClockFormat [clock scan $stamp -timezone :UTC]]
 	    append msg "\n" "Online since: $tstr"
 	}
     }

@@ -2311,7 +2311,7 @@ proc ::GroupChat::InsertMessage {chattoken xmldata} {
     set secs ""    
     set stamp [::Jabber::GetDelayStamp $xmldata]
     if {$stamp ne ""} {
-	set secs [clock scan $stamp -gmt 1]
+	set secs [clock scan $stamp -timezone :UTC]
 	set history 1
     }    
     if {$secs eq ""} {

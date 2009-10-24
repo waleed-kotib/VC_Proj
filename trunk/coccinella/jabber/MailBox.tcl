@@ -209,7 +209,7 @@ proc ::MailBox::MessageHook {xmldata uuid} {
     if {[MKHaveMetakit]} {
 	set stamp [::Jabber::GetDelayStamp $xmldata]
 	if {$stamp ne ""} {
-	    set secs [clock scan $stamp -gmt 1]
+	    set secs [clock scan $stamp -timezone :UTC]
 	} else {
 	    set secs [clock seconds]
 	}
@@ -285,7 +285,7 @@ proc ::MailBox::HandleRawWBMessage {jlibname xmlns xmldata args} {
     if {[MKHaveMetakit]} {
 	set stamp [::Jabber::GetDelayStamp $xmldata]
 	if {$stamp ne ""} {
-	    set secs [clock scan $stamp -gmt 1]
+	    set secs [clock scan $stamp -timezone :UTC]
 	} else {
 	    set secs [clock seconds]
 	}
@@ -346,7 +346,7 @@ proc ::MailBox::HandleSVGWBMessage {jlibname xmlns xmldata args} {
     if {[MKHaveMetakit]} {
 	set stamp [::Jabber::GetDelayStamp $xmldata]
 	if {$stamp ne ""} {
-	    set secs [clock scan $stamp -gmt 1]
+	    set secs [clock scan $stamp -timezone :UTC]
 	} else {
 	    set secs [clock seconds]
 	}
@@ -1131,7 +1131,7 @@ proc ::MailBox::MakeMessageList {body args} {
     set tm [::Jabber::GetDelayStamp $xmldata]
     if {$tm ne ""} {
 	# Always use local time!
-	set secs [clock scan $tm -gmt 1]
+	set secs [clock scan $tm -timezone :UTC]
     }
     if {$secs eq ""} {
 	set secs [clock seconds]

@@ -741,7 +741,7 @@ proc ::History::XInsertText {w} {
 	set xmppE [lindex [tinydom::children $itemE] 0]
 	set stamp [::Jabber::GetDelayStamp $xmppE]
 	if {$stamp ne ""} {
-	    set secs [clock scan $stamp -gmt 1]
+	    set secs [clock scan $stamp -timezone :UTC]
 	} else {
 	    set time [tinydom::getattribute $itemE time]
 	    set secs [clock scan $time]
