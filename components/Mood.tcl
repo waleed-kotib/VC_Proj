@@ -27,6 +27,7 @@ namespace eval ::Mood {
     
     # Shall we display all moods in menus or just a subset?
     set ::config(mood,showall) 1
+    set sortedLocMoods [list]
 }
 
 proc ::Mood::Init {} {
