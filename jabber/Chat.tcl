@@ -1402,8 +1402,7 @@ proc ::Chat::Build {threadID jid} {
     bind $w <<Find>>         [namespace code [list Find $dlgtoken]]
     bind $w <<FindAgain>>    [namespace code [list FindAgain $dlgtoken]]  
     bind $w <<FindPrevious>> [namespace code [list FindAgain $dlgtoken -1]]  
-    # Wrong binding to toplevel.
-    #bind $w <FocusIn>       +[namespace code [list FocusIn $dlgtoken]]
+    bind $w <FocusIn>        [namespace code [list FocusIn $dlgtoken]]
     bind $wtray <<TToolbarCollapse>> [namespace code [list TTCollapse $dlgtoken]]
         
     # For toplevel binds.
