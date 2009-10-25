@@ -1105,6 +1105,7 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	grid  $wui.pop  $wui.ejid  $wui.epass  $wui.enick -sticky ew
 
 	set wuserinfofocus $wui.ejid
+	bind $wui.pop <Map> { focus %W }
     } elseif {$config(profiles,style) eq "parts"} {
 	grid  $wui.lpop   $wui.pop    -sticky e -pady 2
 	grid  $wui.lserv  $wui.eserv  -sticky e -pady 2
@@ -1116,6 +1117,7 @@ proc ::Profiles::FrameWidget {w moreless args} {
 	grid  $wui.pop  $wui.eserv  $wui.euser  $wui.epass  $wui.eres  $wui.enick -sticky ew
 
 	set wuserinfofocus $wui.eserv
+	bind $wui.pop <Map> { focus %W }
     }
     
     ::balloonhelp::balloonforwindow $wui.ejid [mc "Chat address"]
