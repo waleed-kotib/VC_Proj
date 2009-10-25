@@ -46,6 +46,7 @@ proc ui::megaentry {args} {
 	$fr.e insert 0 $state(-value)
     }
     bind $fr.e <Map> { focus %W }
+    focus $fr.e
     Grab $w
     
     if {$state(dlgbt) eq "ok"} {
