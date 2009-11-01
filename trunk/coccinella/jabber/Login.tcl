@@ -978,9 +978,13 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 		dict set xmppShort mechanism-too-weak [mc "Protocol error during the login process."]
 		dict set xmppShort not-authorized [mc "Login failed because of unknown account or wrong password."]
 		dict set xmppShort temporary-auth-failure [mc "Protocol error during the login process."]
+
+		if {![info exists xmppShort($errcode)]} {
+			dict set xmppShort $errcode [mc "Invalid server response due to bug in server software: \
+						error <%s/> is not defined in section 6.4 SASL Errors of RFC 3920. \
+						Please consider reporting this bug to your server administrator." $errcode]
+		}
 		
-		# Added 'bad-auth' which seems to be a ejabberd anachronism.
-		set errcode [string map {bad-auth not-authorized} $errcode]
 		set key xmpp-stanzas-short-$errcode
 		set str [dict get $xmppShort $errcode]
 		if {$str eq $key} {
