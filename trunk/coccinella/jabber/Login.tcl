@@ -984,7 +984,7 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 						error <%s/> is not defined in section 6.4 SASL Errors of RFC 3920. \
 						Please consider reporting this bug to your server administrator." $errcode]
 		}
-		
+
 		set key xmpp-stanzas-short-$errcode
 		set str [dict get $xmppShort $errcode]
 		if {$str eq $key} {
@@ -1004,6 +1004,9 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 		append str " " "($errcode)"
 		if {$errmsg ne ""} {
 		    append str " " $errmsg
+		}
+		if {$errcode eq "not-authorized"} {
+		    append str " " [mc "Do you want to retry a different password or profile?"]
 		}
 	    } else {
 		set str $errmsg
@@ -1037,10 +1040,20 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
 	set type yesno
 	set default no
     }
+    if {($state(state) eq "authenticate") && ($errcode eq "not-authorized")} {
+        set type yesno
+        set default yes
+    }
     set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type \
       -default $default -message $str]
     if {$ans eq "yes"} {
-	::RegisterEx::New -server $state(server) -autoget 1
+	if {$errcode eq "not-authorized"} {
+            # in case the user wants to try relogin
+	    Dlg
+        } else {
+	    # it is the answer to the register question
+	    ::RegisterEx::New -server $state(server) -autoget 1
+	}
     }
 }
 
