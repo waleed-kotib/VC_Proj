@@ -967,6 +967,7 @@ proc ::Profiles::SaveDlg {w} {
     }
     SetList [FrameGetProfiles $wdlgpage]
     SetSelectedName [FrameGetSelected $wdlgpage]
+    ::PrefUtils::SaveToFile
     ::Login::LoadProfiles
     Close $w
 }
