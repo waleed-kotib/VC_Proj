@@ -604,6 +604,8 @@ proc ::Login::DoLogin {} {
 		  -message [mc "Your current login settings differ from your profile settings. Do you want to save them to your profile?"]]
 		if {$ans eq "yes"} {
 		    eval {::Profiles::Set $profile $server $username $password} $opts
+		    # save preferences immediately to file
+		    ::PrefUtils::SaveToFile
 		}	
 	    }
 	}
