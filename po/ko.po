@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ko\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-08-17 23:57+0200\n"
+"POT-Creation-Date: 2009-11-17 20:19+0100\n"
 "PO-Revision-Date: 2009-02-21 15:08\n"
 "Last-Translator: Dylan Park, Korea NVC Center <hanmaum AT krnvc.org>\n"
 "Language-Team: Korean\n"
@@ -58,8 +58,8 @@ msgstr "갱신 점검"
 #: ../components/AutoUpdate.tcl:122 ../components/ImageMagic.tcl:77
 #: ../components/ImageMagic.tcl:93 ../components/JivePhone.tcl:612
 #: ../jabber/Adhoc.tcl:143 ../jabber/Adhoc.tcl:383 ../jabber/Avatar.tcl:337
-#: ../jabber/Chat.tcl:408 ../jabber/Chat.tcl:2777 ../jabber/Chat.tcl:3076
-#: ../jabber/Chat.tcl:3126 ../jabber/Create.tcl:314 ../jabber/Create.tcl:319
+#: ../jabber/Chat.tcl:408 ../jabber/Chat.tcl:2785 ../jabber/Chat.tcl:3084
+#: ../jabber/Chat.tcl:3134 ../jabber/Create.tcl:314 ../jabber/Create.tcl:319
 #: ../jabber/Create.tcl:324 ../jabber/Create.tcl:332 ../jabber/Create.tcl:429
 #: ../jabber/Create.tcl:471 ../jabber/Create.tcl:515 ../jabber/Create.tcl:549
 #: ../jabber/Create.tcl:580 ../jabber/Create.tcl:759 ../jabber/Disco.tcl:1784
@@ -72,27 +72,27 @@ msgstr "갱신 점검"
 #: ../jabber/FTrans.tcl:371 ../jabber/FTrans.tcl:407 ../jabber/FTrans.tcl:442
 #: ../jabber/FTrans.tcl:447 ../jabber/FTrans.tcl:458 ../jabber/FTrans.tcl:509
 #: ../jabber/FTrans.tcl:541 ../jabber/FTrans.tcl:680 ../jabber/FTrans.tcl:682
-#: ../jabber/FTrans.tcl:693 ../jabber/GroupChat.tcl:364
-#: ../jabber/GroupChat.tcl:2709 ../jabber/GroupChat.tcl:2711
-#: ../jabber/GroupChat.tcl:2719 ../jabber/GroupChat.tcl:3505
+#: ../jabber/FTrans.tcl:693 ../jabber/GroupChat.tcl:365
+#: ../jabber/GroupChat.tcl:2710 ../jabber/GroupChat.tcl:2712
+#: ../jabber/GroupChat.tcl:2720 ../jabber/GroupChat.tcl:3491
 #: ../jabber/JUser.tcl:295 ../jabber/JUser.tcl:303 ../jabber/JUser.tcl:322
 #: ../jabber/JUser.tcl:388 ../jabber/JUser.tcl:412 ../jabber/JWB.tcl:2052
-#: ../jabber/JWB.tcl:2057 ../jabber/Jabber.tcl:620 ../jabber/Jabber.tcl:867
-#: ../jabber/Jabber.tcl:911 ../jabber/Jabber.tcl:921 ../jabber/Jabber.tcl:933
-#: ../jabber/Jabber.tcl:945 ../jabber/Jabber.tcl:1490
-#: ../jabber/Jabber.tcl:1494 ../jabber/Jabber.tcl:1573
-#: ../jabber/Jabber.tcl:1575 ../jabber/Jabber.tcl:1670
-#: ../jabber/Jabber.tcl:1674 ../jabber/Jabber.tcl:1992
-#: ../jabber/Jabber.tcl:2023 ../jabber/Login.tcl:493 ../jabber/Login.tcl:521
-#: ../jabber/Login.tcl:530 ../jabber/Login.tcl:911 ../jabber/Login.tcl:1014
+#: ../jabber/JWB.tcl:2057 ../jabber/Jabber.tcl:621 ../jabber/Jabber.tcl:868
+#: ../jabber/Jabber.tcl:912 ../jabber/Jabber.tcl:922 ../jabber/Jabber.tcl:934
+#: ../jabber/Jabber.tcl:946 ../jabber/Jabber.tcl:1493
+#: ../jabber/Jabber.tcl:1497 ../jabber/Jabber.tcl:1576
+#: ../jabber/Jabber.tcl:1578 ../jabber/Jabber.tcl:1673
+#: ../jabber/Jabber.tcl:1677 ../jabber/Jabber.tcl:1995
+#: ../jabber/Jabber.tcl:2026 ../jabber/Login.tcl:493 ../jabber/Login.tcl:521
+#: ../jabber/Login.tcl:530 ../jabber/Login.tcl:935 ../jabber/Login.tcl:1049
 #: ../jabber/MUC.tcl:318 ../jabber/MUC.tcl:321 ../jabber/MUC.tcl:1162
 #: ../jabber/MUC.tcl:1247 ../jabber/MUC.tcl:1356 ../jabber/MUC.tcl:1514
 #: ../jabber/MUC.tcl:1541 ../jabber/MUC.tcl:1717 ../jabber/MUC.tcl:1719
 #: ../jabber/MUC.tcl:1740 ../jabber/MUC.tcl:1742 ../jabber/MailBox.tcl:1597
 #: ../jabber/MailBox.tcl:1675 ../jabber/MailBox.tcl:1782
 #: ../jabber/MailBox.tcl:1816 ../jabber/NewMsg.tcl:888
-#: ../jabber/NewMsg.tcl:924 ../jabber/Profiles.tcl:1452
-#: ../jabber/Profiles.tcl:1460 ../jabber/Profiles.tcl:1646
+#: ../jabber/NewMsg.tcl:924 ../jabber/Profiles.tcl:1455
+#: ../jabber/Profiles.tcl:1463 ../jabber/Profiles.tcl:1649
 #: ../jabber/Register.tcl:124 ../jabber/Register.tcl:583
 #: ../jabber/Register.tcl:589 ../jabber/Register.tcl:664
 #: ../jabber/Register.tcl:833 ../jabber/Register.tcl:893
@@ -103,15 +103,16 @@ msgstr "갱신 점검"
 #: ../jabber/Search.tcl:309 ../jabber/Search.tcl:353 ../jabber/Search.tcl:430
 #: ../jabber/Search.tcl:771 ../jabber/SetupAss.tcl:306
 #: ../jabber/SetupAss.tcl:310 ../jabber/SetupAss.tcl:319
-#: ../jabber/UserInfo.tcl:197 ../jabber/UserInfo.tcl:244
-#: ../jabber/UserInfo.tcl:276 ../jabber/UserInfo.tcl:305
-#: ../jabber/UserInfo.tcl:515 ../jabber/VCard.tcl:104 ../jabber/VCard.tcl:106
-#: ../jabber/VCard.tcl:785 ../jabber/VCard.tcl:845 ../jabber/VCard.tcl:847
-#: ../jabber/VCard.tcl:893 ../jabber/VCard.tcl:914 ../lib/Dialogs.tcl:162
-#: ../lib/Dialogs.tcl:169 ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71
-#: ../lib/HttpTrpt.tcl:107 ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226
-#: ../lib/HttpTrpt.tcl:233 ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78
-#: ../lib/Init.tcl:723 ../lib/Init.tcl:745 ../lib/MacintoshUtils.tcl:55
+#: ../jabber/UserInfo.tcl:215 ../jabber/UserInfo.tcl:265
+#: ../jabber/UserInfo.tcl:297 ../jabber/UserInfo.tcl:326
+#: ../jabber/UserInfo.tcl:473 ../jabber/UserInfo.tcl:604
+#: ../jabber/VCard.tcl:104 ../jabber/VCard.tcl:106 ../jabber/VCard.tcl:785
+#: ../jabber/VCard.tcl:845 ../jabber/VCard.tcl:847 ../jabber/VCard.tcl:893
+#: ../jabber/VCard.tcl:914 ../lib/Dialogs.tcl:162 ../lib/Dialogs.tcl:169
+#: ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71 ../lib/HttpTrpt.tcl:107
+#: ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226 ../lib/HttpTrpt.tcl:233
+#: ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78 ../lib/Init.tcl:722
+#: ../lib/Init.tcl:744 ../lib/MacintoshUtils.tcl:55
 #: ../lib/MacintoshUtils.tcl:77 ../lib/MacintoshUtils.tcl:99
 #: ../lib/PrefUtils.tcl:91 ../lib/PrefUtils.tcl:217 ../lib/TheServer.tcl:65
 #: ../lib/UserActions.tcl:44 ../lib/UserActions.tcl:72
@@ -173,12 +174,12 @@ msgstr "Automatically check for updates"
 msgid "Close"
 msgstr "닫기"
 
-#: ../components/BuddyPounce.tcl:49
+#: ../components/BuddyPounce.tcl:51
 #, fuzzy
 msgid "&Contact Actions"
 msgstr "+대화상대"
 
-#: ../components/BuddyPounce.tcl:153
+#: ../components/BuddyPounce.tcl:152
 #, fuzzy, tcl-format
 msgid ""
 "Set a specific action for events related to %s. Select events using the tabs "
@@ -187,13 +188,13 @@ msgstr ""
 "Set a specific action for events related to %s. Select events using the tabs "
 "below."
 
-#: ../components/BuddyPounce.tcl:154 ../components/BuddyPounce.tcl:162
-#: ../components/BuddyPounce.tcl:168 ../components/BuddyPounce.tcl:206
+#: ../components/BuddyPounce.tcl:153 ../components/BuddyPounce.tcl:161
+#: ../components/BuddyPounce.tcl:167 ../components/BuddyPounce.tcl:211
 #, fuzzy
 msgid "Contact Actions"
 msgstr "Contact Actions"
 
-#: ../components/BuddyPounce.tcl:161
+#: ../components/BuddyPounce.tcl:160
 #, fuzzy, tcl-format
 msgid ""
 "Set a specific action for events related to any contact belonging to the "
@@ -202,7 +203,7 @@ msgstr ""
 "Set a specific action for events related to any contact belonging to the "
 "group %s. Select events using the tabs below."
 
-#: ../components/BuddyPounce.tcl:167
+#: ../components/BuddyPounce.tcl:166
 #, fuzzy
 msgid ""
 "Set a specific action for events related to any contact in your contact "
@@ -211,18 +212,18 @@ msgstr ""
 "Set a specific action for events related to any contact in your contact "
 "list. Select events using the tabs below."
 
-#: ../components/BuddyPounce.tcl:170
+#: ../components/BuddyPounce.tcl:169
 #, fuzzy
 msgid "Any"
 msgstr "Any"
 
-#: ../components/BuddyPounce.tcl:187 ../components/BuddyPounce.tcl:188
-#: ../components/BuddyPounce.tcl:621 ../components/Mood.tcl:295
-#: ../components/Mood.tcl:477 ../components/Mood.tcl:628
-#: ../components/Mood.tcl:669 ../components/UserActivity.tcl:244
-#: ../components/UserActivity.tcl:400 ../components/UserActivity.tcl:651
-#: ../components/UserActivity.tcl:694 ../jabber/Emoticons.tcl:755
-#: ../jabber/GroupChat.tcl:172 ../jabber/JUser.tcl:110 ../jabber/JUser.tcl:345
+#: ../components/BuddyPounce.tcl:186 ../components/BuddyPounce.tcl:187
+#: ../components/BuddyPounce.tcl:626 ../components/Mood.tcl:296
+#: ../components/Mood.tcl:478 ../components/Mood.tcl:629
+#: ../components/Mood.tcl:670 ../components/UserActivity.tcl:245
+#: ../components/UserActivity.tcl:401 ../components/UserActivity.tcl:652
+#: ../components/UserActivity.tcl:695 ../jabber/Emoticons.tcl:755
+#: ../jabber/GroupChat.tcl:173 ../jabber/JUser.tcl:110 ../jabber/JUser.tcl:345
 #: ../jabber/Subscribe.tcl:325 ../jabber/Subscribe.tcl:570
 #: ../jabber/Subscribe.tcl:1283 ../jabber/Subscribe.tcl:1326
 #: ../whiteboard/CanvasUtils.tcl:154 ../whiteboard/CanvasUtils.tcl:204
@@ -235,40 +236,40 @@ msgstr "Any"
 msgid "None"
 msgstr "아무도없음"
 
-#: ../components/BuddyPounce.tcl:234
+#: ../components/BuddyPounce.tcl:239
 #, fuzzy
 msgid "Show popup"
 msgstr "Show popup"
 
-#: ../components/BuddyPounce.tcl:237
+#: ../components/BuddyPounce.tcl:242
 #, fuzzy
 msgid "Play sound"
 msgstr "Play sound"
 
-#: ../components/BuddyPounce.tcl:242
+#: ../components/BuddyPounce.tcl:247
 #, fuzzy
 msgid "Start chat"
 msgstr "Start chat"
 
-#: ../components/BuddyPounce.tcl:250
+#: ../components/BuddyPounce.tcl:255
 #, fuzzy
 msgid "Send message with subject"
 msgstr "Send message with subject"
 
-#: ../components/BuddyPounce.tcl:258 ../components/Carbon.tcl:184
+#: ../components/BuddyPounce.tcl:263 ../components/Carbon.tcl:184
 #: ../components/Growl.tcl:71 ../components/Growl.tcl:74
 #: ../components/Growl.tcl:93 ../components/Growl.tcl:106
-#: ../components/Mood.tcl:489 ../components/UserActivity.tcl:257
+#: ../components/Mood.tcl:490 ../components/UserActivity.tcl:258
 #: ../jabber/AutoAway.tcl:294 ../jabber/AutoAway.tcl:317
 #: ../jabber/AutoAway.tcl:340 ../jabber/AutoAway.tcl:378
 #: ../jabber/Create.tcl:427 ../jabber/Create.tcl:469 ../jabber/Create.tcl:547
 #: ../jabber/Create.tcl:756 ../jabber/Enter.tcl:650 ../jabber/Enter.tcl:694
 #: ../jabber/FTrans.tcl:505 ../jabber/FTrans.tcl:537 ../jabber/JUser.tcl:386
-#: ../jabber/Jabber.tcl:618 ../jabber/Jabber.tcl:862 ../jabber/Jabber.tcl:1521
-#: ../jabber/Jabber.tcl:2021 ../jabber/Jabber.tcl:2123 ../jabber/MUC.tcl:189
+#: ../jabber/Jabber.tcl:619 ../jabber/Jabber.tcl:863 ../jabber/Jabber.tcl:1524
+#: ../jabber/Jabber.tcl:2024 ../jabber/Jabber.tcl:2126 ../jabber/MUC.tcl:189
 #: ../jabber/MUC.tcl:365 ../jabber/MUC.tcl:811 ../jabber/MUC.tcl:840
 #: ../jabber/MUC.tcl:1618 ../jabber/MailBox.tcl:499 ../jabber/NewMsg.tcl:232
-#: ../jabber/Profiles.tcl:1644 ../jabber/Register.tcl:122
+#: ../jabber/Profiles.tcl:1647 ../jabber/Register.tcl:122
 #: ../jabber/Register.tcl:662 ../jabber/Register.tcl:1291
 #: ../jabber/Register.tcl:1356 ../jabber/Register.tcl:1540
 #: ../jabber/Search.tcl:351 ../jabber/Search.tcl:419 ../jabber/Search.tcl:427
@@ -277,12 +278,12 @@ msgstr "Send message with subject"
 msgid "Message"
 msgstr "메세지"
 
-#: ../components/BuddyPounce.tcl:288 ../components/ImageMagic.tcl:143
+#: ../components/BuddyPounce.tcl:293 ../components/ImageMagic.tcl:143
 #: ../components/Totd.tcl:90 ../components/XMLConsole.tcl:109
 #: ../components/fsdialog.tcl:427 ../components/fsdialog.tcl:1052
 #: ../components/fsdialog.tcl:1444 ../contrib/ui/dialog.tcl:242
 #: ../contrib/ui/fontselector.tcl:152 ../jabber/Chat.tcl:356
-#: ../jabber/Jabber.tcl:1727 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
+#: ../jabber/Jabber.tcl:1730 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
 #: ../jabber/MUC.tcl:1439 ../jabber/MUC.tcl:1632 ../jabber/Status.tcl:428
 #: ../jabber/Subscribe.tcl:1107 ../lib/Component.tcl:80
 #: ../whiteboard/ItemInspector.tcl:991 ../whiteboard/WDialogs.tcl:60
@@ -291,7 +292,7 @@ msgstr "메세지"
 msgid "OK"
 msgstr "OK"
 
-#: ../components/BuddyPounce.tcl:290 ../components/ImageMagic.tcl:145
+#: ../components/BuddyPounce.tcl:295 ../components/ImageMagic.tcl:145
 #: ../components/JivePhone.tcl:905 ../components/JivePhone.tcl:987
 #: ../components/Phone/Phone.tcl:432 ../components/fsdialog.tcl:430
 #: ../components/fsdialog.tcl:1054 ../components/fsdialog.tcl:1446
@@ -300,14 +301,14 @@ msgstr "OK"
 #: ../jabber/Adhoc.tcl:201 ../jabber/Adhoc.tcl:396 ../jabber/Chat.tcl:358
 #: ../jabber/Create.tcl:151 ../jabber/Create.tcl:670 ../jabber/Disco.tcl:1509
 #: ../jabber/Disco.tcl:1678 ../jabber/Enter.tcl:222 ../jabber/FTrans.tcl:220
-#: ../jabber/History.tcl:989 ../jabber/JUser.tcl:230 ../jabber/JUser.tcl:802
-#: ../jabber/Jabber.tcl:1007 ../jabber/Jabber.tcl:1943
-#: ../jabber/Jabber.tcl:2136 ../jabber/Login.tcl:269 ../jabber/MUC.tcl:204
+#: ../jabber/History.tcl:992 ../jabber/JUser.tcl:230 ../jabber/JUser.tcl:803
+#: ../jabber/Jabber.tcl:1008 ../jabber/Jabber.tcl:1946
+#: ../jabber/Jabber.tcl:2139 ../jabber/Login.tcl:269 ../jabber/MUC.tcl:204
 #: ../jabber/MUC.tcl:462 ../jabber/MUC.tcl:1011 ../jabber/MUC.tcl:1441
 #: ../jabber/MUC.tcl:1634 ../jabber/Profiles.tcl:923
 #: ../jabber/Register.tcl:329 ../jabber/Register.tcl:1172
 #: ../jabber/Register.tcl:1485 ../jabber/Search.tcl:131
-#: ../jabber/Status.tcl:430 ../jabber/UserInfo.tcl:377 ../jabber/VCard.tcl:250
+#: ../jabber/Status.tcl:430 ../jabber/UserInfo.tcl:408 ../jabber/VCard.tcl:250
 #: ../jabber/VCard.tcl:260 ../lib/Bookmarks.tcl:125 ../lib/Component.tcl:82
 #: ../lib/Dialogs.tcl:132 ../lib/Dialogs.tcl:341 ../lib/EditDialogs.tcl:143
 #: ../lib/EditDialogs.tcl:332 ../lib/Preferences.tcl:240
@@ -317,32 +318,32 @@ msgstr "OK"
 msgid "Cancel"
 msgstr "취소"
 
-#: ../components/BuddyPounce.tcl:292
+#: ../components/BuddyPounce.tcl:297
 #, fuzzy
 msgid "Disable All"
 msgstr "Disable All"
 
-#: ../components/BuddyPounce.tcl:562
+#: ../components/BuddyPounce.tcl:567
 #, fuzzy, tcl-format
 msgid "%s just went online!"
 msgstr "%s just went online!"
 
-#: ../components/BuddyPounce.tcl:563
+#: ../components/BuddyPounce.tcl:568
 #, fuzzy, tcl-format
 msgid "%s just went offline!"
 msgstr "%s just went offline!"
 
-#: ../components/BuddyPounce.tcl:564
+#: ../components/BuddyPounce.tcl:569
 #, fuzzy, tcl-format
 msgid "%s just sent you a message!"
 msgstr "%s just sent you a message!"
 
-#: ../components/BuddyPounce.tcl:565
+#: ../components/BuddyPounce.tcl:570
 #, fuzzy, tcl-format
 msgid "%s just started a chat!"
 msgstr "%s just started a chat!"
 
-#: ../components/BuddyPounce.tcl:591
+#: ../components/BuddyPounce.tcl:596
 #, fuzzy
 msgid "Auto Reply"
 msgstr "Auto Reply"
@@ -366,6 +367,88 @@ msgstr "Relogin on wakeup"
 #. TRANSLATORS: geographical location of the user ( http://xmpp.org/extensions/xep-0080.html#format ); see Action menu when logged in to a server with PEP support
 #: ../components/Geolocation.tcl:48
 msgid "Locat&ion"
+msgstr ""
+
+#: ../components/Geolocation.tcl:52
+#, fuzzy
+msgid "Altitude in meters above or below sea level"
+msgstr "Altitude in meters above or below sea level"
+
+#: ../components/Geolocation.tcl:53
+msgid "A named area such as a campus or neighborhood"
+msgstr ""
+
+#: ../components/Geolocation.tcl:54
+msgid ""
+"GPS bearing (direction in which the entity is heading to reach its next "
+"waypoint), measured in decimal degrees relative to true north"
+msgstr ""
+
+#: ../components/Geolocation.tcl:55
+msgid "A specific building on a street or in an area"
+msgstr ""
+
+#: ../components/Geolocation.tcl:56
+#, fuzzy
+msgid "The nation where the user is located"
+msgstr "The nation where the user is located"
+
+#: ../components/Geolocation.tcl:57
+msgid "GPS datum"
+msgstr ""
+
+#: ../components/Geolocation.tcl:58
+msgid "A natural-language name for or description of the location"
+msgstr ""
+
+#: ../components/Geolocation.tcl:59
+msgid "Horizontal GPS error in arc minutes"
+msgstr ""
+
+#: ../components/Geolocation.tcl:60
+msgid "A particular floor in a building"
+msgstr ""
+
+#: ../components/Geolocation.tcl:61
+#, fuzzy
+msgid "Latitude in decimal degrees North"
+msgstr "Latitude in decimal degrees North"
+
+#: ../components/Geolocation.tcl:62
+#, fuzzy
+msgid "A locality within the administrative region, such as a town or city"
+msgstr "우편 도시 주소"
+
+#: ../components/Geolocation.tcl:63
+#, fuzzy
+msgid "Longitude in decimal degrees East"
+msgstr "Longitude in decimal degrees East"
+
+#: ../components/Geolocation.tcl:64
+msgid "A code used for postal delivery"
+msgstr ""
+
+#: ../components/Geolocation.tcl:65 ../jabber/JForms.tcl:308
+#: ../jabber/Register.tcl:719
+#, fuzzy
+msgid "An administrative region of the nation, such as a state or province"
+msgstr "우편 도시 주소"
+
+#: ../components/Geolocation.tcl:66
+msgid "A particular room in a building"
+msgstr ""
+
+#: ../components/Geolocation.tcl:67
+msgid "A thoroughfare within the locality, or a crossing of two thoroughfares"
+msgstr ""
+
+#: ../components/Geolocation.tcl:68
+msgid ""
+"A catch-all element that captures any other information about the location"
+msgstr ""
+
+#: ../components/Geolocation.tcl:69
+msgid "UTC timestamp specifying the moment when the reading was taken"
 msgstr ""
 
 #: ../components/Geolocation.tcl:72
@@ -459,50 +542,30 @@ msgstr "Timestamp"
 msgid "Remove"
 msgstr "지우기"
 
-#: ../components/Geolocation.tcl:157
+#: ../components/Geolocation.tcl:158
 msgid "Set your location that will be shown to your contacts."
 msgstr ""
 
-#: ../components/Geolocation.tcl:158
+#: ../components/Geolocation.tcl:159
 #, fuzzy
 msgid ""
 "Enter your location details below. At least you should set latitude and "
 "longitude."
 msgstr "들어가기."
 
-#: ../components/Geolocation.tcl:161 ../components/Geolocation.tcl:370
-#: ../components/fsdialog.tcl:421 ../jabber/GroupChat.tcl:3477
+#: ../components/Geolocation.tcl:162 ../components/Geolocation.tcl:367
+#: ../components/fsdialog.tcl:421 ../jabber/GroupChat.tcl:3463
 msgid "Location"
 msgstr ""
 
-#: ../components/Geolocation.tcl:183
-#, fuzzy
-msgid "Altitude in meters above or below sea level"
-msgstr "Altitude in meters above or below sea level"
-
-#: ../components/Geolocation.tcl:184
-#, fuzzy
-msgid "Longitude in decimal degrees East"
-msgstr "Longitude in decimal degrees East"
-
-#: ../components/Geolocation.tcl:185
-#, fuzzy
-msgid "Latitude in decimal degrees North"
-msgstr "Latitude in decimal degrees North"
-
-#: ../components/Geolocation.tcl:186
-#, fuzzy
-msgid "The nation where the user is located"
-msgstr "The nation where the user is located"
-
-#: ../components/Geolocation.tcl:200
+#: ../components/Geolocation.tcl:195
 #, fuzzy
 msgid "Synchronize with Google Earth"
 msgstr "Synchronize with Google Earth"
 
-#: ../components/Geolocation.tcl:376
-#, fuzzy
-msgid "This is location data for"
+#: ../components/Geolocation.tcl:373
+#, fuzzy, tcl-format
+msgid "This is location data for %s"
 msgstr "This is location data for"
 
 #: ../components/Growl.tcl:162 ../components/taskbar/Taskbar.tcl:185
@@ -555,307 +618,307 @@ msgstr "전화 .."
 msgid "Phone"
 msgstr "전화"
 
-#: ../components/Growl.tcl:197 ../components/Mood.tcl:211
+#: ../components/Growl.tcl:197 ../components/Mood.tcl:212
 #, fuzzy
 msgid "afraid"
 msgstr "afraid"
 
-#: ../components/Growl.tcl:198 ../components/Mood.tcl:212
+#: ../components/Growl.tcl:198 ../components/Mood.tcl:213
 #, fuzzy
 msgid "amazed"
 msgstr "amazed"
 
-#: ../components/Growl.tcl:199 ../components/Mood.tcl:213
+#: ../components/Growl.tcl:199 ../components/Mood.tcl:214
 #, fuzzy
 msgid "angry"
 msgstr "화남"
 
-#: ../components/Growl.tcl:200 ../components/Mood.tcl:214
+#: ../components/Growl.tcl:200 ../components/Mood.tcl:215
 #, fuzzy
 msgid "annoyed"
 msgstr "annoyed"
 
-#: ../components/Growl.tcl:201 ../components/Mood.tcl:215
+#: ../components/Growl.tcl:201 ../components/Mood.tcl:216
 #, fuzzy
 msgid "anxious"
 msgstr "불안함"
 
-#: ../components/Growl.tcl:202 ../components/Mood.tcl:216
+#: ../components/Growl.tcl:202 ../components/Mood.tcl:217
 #, fuzzy
 msgid "aroused"
 msgstr "aroused"
 
-#: ../components/Growl.tcl:203 ../components/Mood.tcl:217
+#: ../components/Growl.tcl:203 ../components/Mood.tcl:218
 #, fuzzy
 msgid "ashamed"
 msgstr "부끄러움"
 
-#: ../components/Growl.tcl:204 ../components/Mood.tcl:218
+#: ../components/Growl.tcl:204 ../components/Mood.tcl:219
 #, fuzzy
 msgid "bored"
 msgstr "지겨움"
 
-#: ../components/Growl.tcl:205 ../components/Mood.tcl:219
+#: ../components/Growl.tcl:205 ../components/Mood.tcl:220
 #, fuzzy
 msgid "brave"
 msgstr "brave"
 
-#: ../components/Growl.tcl:206 ../components/Mood.tcl:220
+#: ../components/Growl.tcl:206 ../components/Mood.tcl:221
 #, fuzzy
 msgid "calm"
 msgstr "calm"
 
-#: ../components/Growl.tcl:207 ../components/Mood.tcl:221
+#: ../components/Growl.tcl:207 ../components/Mood.tcl:222
 #, fuzzy
 msgid "cold"
 msgstr "cold"
 
-#: ../components/Growl.tcl:208 ../components/Mood.tcl:222
+#: ../components/Growl.tcl:208 ../components/Mood.tcl:223
 #, fuzzy
 msgid "confused"
 msgstr "confused"
 
-#: ../components/Growl.tcl:209 ../components/Mood.tcl:223
+#: ../components/Growl.tcl:209 ../components/Mood.tcl:224
 #, fuzzy
 msgid "contented"
 msgstr "contented"
 
-#: ../components/Growl.tcl:210 ../components/Mood.tcl:224
+#: ../components/Growl.tcl:210 ../components/Mood.tcl:225
 #, fuzzy
 msgid "cranky"
 msgstr "cranky"
 
-#: ../components/Growl.tcl:211 ../components/Mood.tcl:225
+#: ../components/Growl.tcl:211 ../components/Mood.tcl:226
 #, fuzzy
 msgid "curious"
 msgstr "궁금함"
 
-#: ../components/Growl.tcl:212 ../components/Mood.tcl:226
+#: ../components/Growl.tcl:212 ../components/Mood.tcl:227
 #, fuzzy
 msgid "depressed"
 msgstr "의기소침함"
 
-#: ../components/Growl.tcl:213 ../components/Mood.tcl:227
+#: ../components/Growl.tcl:213 ../components/Mood.tcl:228
 #, fuzzy
 msgid "disappointed"
 msgstr "disappointed"
 
-#: ../components/Growl.tcl:214 ../components/Mood.tcl:228
+#: ../components/Growl.tcl:214 ../components/Mood.tcl:229
 #, fuzzy
 msgid "disgusted"
 msgstr "disgusted"
 
-#: ../components/Growl.tcl:215 ../components/Mood.tcl:229
+#: ../components/Growl.tcl:215 ../components/Mood.tcl:230
 #, fuzzy
 msgid "distracted"
 msgstr "distracted"
 
-#: ../components/Growl.tcl:216 ../components/Mood.tcl:230
+#: ../components/Growl.tcl:216 ../components/Mood.tcl:231
 #, fuzzy
 msgid "embarrassed"
 msgstr "embarrassed"
 
-#: ../components/Growl.tcl:217 ../components/Mood.tcl:231
+#: ../components/Growl.tcl:217 ../components/Mood.tcl:232
 #, fuzzy
 msgid "excited"
 msgstr "흥분함"
 
-#: ../components/Growl.tcl:218 ../components/Mood.tcl:232
+#: ../components/Growl.tcl:218 ../components/Mood.tcl:233
 #, fuzzy
 msgid "flirtatious"
 msgstr "flirtatious"
 
-#: ../components/Growl.tcl:219 ../components/Mood.tcl:233
+#: ../components/Growl.tcl:219 ../components/Mood.tcl:234
 #, fuzzy
 msgid "frustrated"
 msgstr "frustrated"
 
-#: ../components/Growl.tcl:220 ../components/Mood.tcl:234
+#: ../components/Growl.tcl:220 ../components/Mood.tcl:235
 #, fuzzy
 msgid "grumpy"
 msgstr "grumpy"
 
-#: ../components/Growl.tcl:221 ../components/Mood.tcl:235
+#: ../components/Growl.tcl:221 ../components/Mood.tcl:236
 #, fuzzy
 msgid "guilty"
 msgstr "guilty"
 
-#: ../components/Growl.tcl:222 ../components/Mood.tcl:236
+#: ../components/Growl.tcl:222 ../components/Mood.tcl:237
 #, fuzzy
 msgid "happy"
 msgstr "행복함"
 
-#: ../components/Growl.tcl:223 ../components/Mood.tcl:237
+#: ../components/Growl.tcl:223 ../components/Mood.tcl:238
 #, fuzzy
 msgid "hot"
 msgstr "hot"
 
-#: ../components/Growl.tcl:224 ../components/Mood.tcl:238
+#: ../components/Growl.tcl:224 ../components/Mood.tcl:239
 #, fuzzy
 msgid "humbled"
 msgstr "humbled"
 
-#: ../components/Growl.tcl:225 ../components/Mood.tcl:239
+#: ../components/Growl.tcl:225 ../components/Mood.tcl:240
 #, fuzzy
 msgid "humiliated"
 msgstr "humiliated"
 
-#: ../components/Growl.tcl:226 ../components/Mood.tcl:240
+#: ../components/Growl.tcl:226 ../components/Mood.tcl:241
 #, fuzzy
 msgid "hungry"
 msgstr "hungry"
 
-#: ../components/Growl.tcl:227 ../components/Mood.tcl:241
+#: ../components/Growl.tcl:227 ../components/Mood.tcl:242
 #, fuzzy
 msgid "hurt"
 msgstr "hurt"
 
-#: ../components/Growl.tcl:228 ../components/Mood.tcl:242
+#: ../components/Growl.tcl:228 ../components/Mood.tcl:243
 #, fuzzy
 msgid "impressed"
 msgstr "impressed"
 
-#: ../components/Growl.tcl:229 ../components/Mood.tcl:243
+#: ../components/Growl.tcl:229 ../components/Mood.tcl:244
 #, fuzzy
 msgid "in awe"
 msgstr "in awe"
 
-#: ../components/Growl.tcl:230 ../components/Mood.tcl:244
+#: ../components/Growl.tcl:230 ../components/Mood.tcl:245
 #, fuzzy
 msgid "in love"
 msgstr "사랑에 빠짐"
 
-#: ../components/Growl.tcl:231 ../components/Mood.tcl:245
+#: ../components/Growl.tcl:231 ../components/Mood.tcl:246
 #, fuzzy
 msgid "indignant"
 msgstr "indignant"
 
-#: ../components/Growl.tcl:232 ../components/Mood.tcl:246
+#: ../components/Growl.tcl:232 ../components/Mood.tcl:247
 #, fuzzy
 msgid "interested"
 msgstr "interested"
 
-#: ../components/Growl.tcl:233 ../components/Mood.tcl:247
+#: ../components/Growl.tcl:233 ../components/Mood.tcl:248
 #, fuzzy
 msgid "intoxicated"
 msgstr "intoxicated"
 
-#: ../components/Growl.tcl:234 ../components/Mood.tcl:248
+#: ../components/Growl.tcl:234 ../components/Mood.tcl:249
 #, fuzzy
 msgid "invincible"
 msgstr "완강함"
 
-#: ../components/Growl.tcl:235 ../components/Mood.tcl:249
+#: ../components/Growl.tcl:235 ../components/Mood.tcl:250
 #, fuzzy
 msgid "jealous"
 msgstr "샘"
 
-#: ../components/Growl.tcl:236 ../components/Mood.tcl:250
+#: ../components/Growl.tcl:236 ../components/Mood.tcl:251
 #, fuzzy
 msgid "lonely"
 msgstr "lonely"
 
-#: ../components/Growl.tcl:237 ../components/Mood.tcl:251
+#: ../components/Growl.tcl:237 ../components/Mood.tcl:252
 #, fuzzy
 msgid "mean"
 msgstr "mean"
 
-#: ../components/Growl.tcl:238 ../components/Mood.tcl:252
+#: ../components/Growl.tcl:238 ../components/Mood.tcl:253
 #, fuzzy
 msgid "moody"
 msgstr "moody"
 
-#: ../components/Growl.tcl:239 ../components/Mood.tcl:253
+#: ../components/Growl.tcl:239 ../components/Mood.tcl:254
 #, fuzzy
 msgid "nervous"
 msgstr "신경질남"
 
-#: ../components/Growl.tcl:240 ../components/Mood.tcl:254
+#: ../components/Growl.tcl:240 ../components/Mood.tcl:255
 #, fuzzy
 msgid "neutral"
 msgstr "neutral"
 
-#: ../components/Growl.tcl:241 ../components/Mood.tcl:255
+#: ../components/Growl.tcl:241 ../components/Mood.tcl:256
 #, fuzzy
 msgid "offended"
 msgstr "offended"
 
-#: ../components/Growl.tcl:242 ../components/Mood.tcl:256
+#: ../components/Growl.tcl:242 ../components/Mood.tcl:257
 #, fuzzy
 msgid "playful"
 msgstr "playful"
 
-#: ../components/Growl.tcl:243 ../components/Mood.tcl:257
+#: ../components/Growl.tcl:243 ../components/Mood.tcl:258
 #, fuzzy
 msgid "proud"
 msgstr "proud"
 
-#: ../components/Growl.tcl:244 ../components/Mood.tcl:258
+#: ../components/Growl.tcl:244 ../components/Mood.tcl:259
 #, fuzzy
 msgid "relieved"
 msgstr "relieved"
 
-#: ../components/Growl.tcl:245 ../components/Mood.tcl:259
+#: ../components/Growl.tcl:245 ../components/Mood.tcl:260
 #, fuzzy
 msgid "remorseful"
 msgstr "remorseful"
 
-#: ../components/Growl.tcl:246 ../components/Mood.tcl:260
+#: ../components/Growl.tcl:246 ../components/Mood.tcl:261
 #, fuzzy
 msgid "restless"
 msgstr "restless"
 
-#: ../components/Growl.tcl:247 ../components/Mood.tcl:261
+#: ../components/Growl.tcl:247 ../components/Mood.tcl:262
 #, fuzzy
 msgid "sad"
 msgstr "슬픔"
 
-#: ../components/Growl.tcl:248 ../components/Mood.tcl:262
+#: ../components/Growl.tcl:248 ../components/Mood.tcl:263
 #, fuzzy
 msgid "sarcastic"
 msgstr "sarcastic"
 
-#: ../components/Growl.tcl:249 ../components/Mood.tcl:263
+#: ../components/Growl.tcl:249 ../components/Mood.tcl:264
 #, fuzzy
 msgid "serious"
 msgstr "serious"
 
-#: ../components/Growl.tcl:250 ../components/Mood.tcl:264
+#: ../components/Growl.tcl:250 ../components/Mood.tcl:265
 #, fuzzy
 msgid "shocked"
 msgstr "shocked"
 
-#: ../components/Growl.tcl:251 ../components/Mood.tcl:265
+#: ../components/Growl.tcl:251 ../components/Mood.tcl:266
 #, fuzzy
 msgid "shy"
 msgstr "shy"
 
-#: ../components/Growl.tcl:252 ../components/Mood.tcl:266
+#: ../components/Growl.tcl:252 ../components/Mood.tcl:267
 #, fuzzy
 msgid "sick"
 msgstr "sick"
 
-#: ../components/Growl.tcl:253 ../components/Mood.tcl:267
+#: ../components/Growl.tcl:253 ../components/Mood.tcl:268
 #, fuzzy
 msgid "sleepy"
 msgstr "졸림"
 
-#: ../components/Growl.tcl:254 ../components/Mood.tcl:268
+#: ../components/Growl.tcl:254 ../components/Mood.tcl:269
 #, fuzzy
 msgid "stressed"
 msgstr "스트레스받음"
 
-#: ../components/Growl.tcl:255 ../components/Mood.tcl:269
+#: ../components/Growl.tcl:255 ../components/Mood.tcl:270
 #, fuzzy
 msgid "surprised"
 msgstr "surprised"
 
-#: ../components/Growl.tcl:256 ../components/Mood.tcl:270
+#: ../components/Growl.tcl:256 ../components/Mood.tcl:271
 #, fuzzy
 msgid "thirsty"
 msgstr "thirsty"
 
-#: ../components/Growl.tcl:257 ../components/Mood.tcl:271
+#: ../components/Growl.tcl:257 ../components/Mood.tcl:272
 #, fuzzy
 msgid "worried"
 msgstr "걱정함"
@@ -880,9 +943,9 @@ msgstr "왜냐하면"
 msgid "retracted mood"
 msgstr "retracted mood"
 
-#: ../components/Growl.tcl:273 ../components/Mood.tcl:292
-#: ../components/Mood.tcl:484 ../components/Mood.tcl:586
-#: ../components/Mood.tcl:601 ../components/Mood.tcl:665
+#: ../components/Growl.tcl:273 ../components/Mood.tcl:293
+#: ../components/Mood.tcl:485 ../components/Mood.tcl:587
+#: ../components/Mood.tcl:602 ../components/Mood.tcl:666
 #, fuzzy
 msgid "Mood"
 msgstr "분위기"
@@ -991,13 +1054,13 @@ msgstr "새 주소록"
 
 #: ../components/JivePhone.tcl:888 ../components/JivePhone.tcl:970
 #: ../components/fsdialog.tcl:488 ../jabber/Emoticons.tcl:601
-#: ../jabber/Search.tcl:934 ../jabber/UserInfo.tcl:206
+#: ../jabber/Search.tcl:934 ../jabber/UserInfo.tcl:224
 #, fuzzy
 msgid "Name"
 msgstr "Name"
 
 #: ../components/JivePhone.tcl:891 ../components/JivePhone.tcl:973
-#: ../jabber/Gateway.tcl:84
+#: ../jabber/Gateway.tcl:85
 #, fuzzy
 msgid "Phone number"
 msgstr "전화번호"
@@ -1026,385 +1089,385 @@ msgstr "대화"
 
 #. TRANSLATORS: Moods, more information at http://xmpp.org/extensions/xep-0107.html#moods
 #. TRANSLATORS: Impressed with fear or apprehension; in fear; apprehensive.
-#: ../components/Mood.tcl:87
+#: ../components/Mood.tcl:88
 #, fuzzy
 msgid "Afraid"
 msgstr "Afraid"
 
 #. TRANSLATORS: Astonished; confounded with fear, surprise or wonder.
-#: ../components/Mood.tcl:89
+#: ../components/Mood.tcl:90
 #, fuzzy
 msgid "Amazed"
 msgstr "Amazed"
 
 #. TRANSLATORS: Displaying or feeling anger, i.e., a strong feeling of displeasure, hostility or antagonism towards someone or something, usually combined with an urge to harm.
-#: ../components/Mood.tcl:91
+#: ../components/Mood.tcl:92
 #, fuzzy
 msgid "Angry"
 msgstr "화난"
 
 #. TRANSLATORS: To be disturbed or irritated, especially by continued or repeated acts.
-#: ../components/Mood.tcl:93
+#: ../components/Mood.tcl:94
 #, fuzzy
 msgid "Annoyed"
 msgstr "Annoyed"
 
 #. TRANSLATORS: Full of anxiety or disquietude; greatly concerned or solicitous, esp. respecting something future or unknown; being in painful suspense.
-#: ../components/Mood.tcl:95
+#: ../components/Mood.tcl:96
 #, fuzzy
 msgid "Anxious"
 msgstr "불안한"
 
 #. TRANSLATORS: To be stimulated in one's feelings, especially to be sexually stimulated.
-#: ../components/Mood.tcl:97
+#: ../components/Mood.tcl:98
 #, fuzzy
 msgid "Aroused"
 msgstr "Aroused"
 
 #. TRANSLATORS: Feeling shame or guilt.
-#: ../components/Mood.tcl:99
+#: ../components/Mood.tcl:100
 #, fuzzy
 msgid "Ashamed"
 msgstr "부끄러운"
 
 #. TRANSLATORS: Suffering from boredom; uninterested, without attention.
-#: ../components/Mood.tcl:101
+#: ../components/Mood.tcl:102
 #, fuzzy
 msgid "Bored"
 msgstr "지겨운"
 
 #. TRANSLATORS: Strong in the face of fear; courageous.
-#: ../components/Mood.tcl:103
+#: ../components/Mood.tcl:104
 #, fuzzy
 msgid "Brave"
 msgstr "Brave"
 
 #. TRANSLATORS: Peaceful, quiet.
-#: ../components/Mood.tcl:105
+#: ../components/Mood.tcl:106
 #, fuzzy
 msgid "Calm"
 msgstr "Calm"
 
 #. TRANSLATORS: Feeling the sensation of coldness, especially to the point of discomfort.
-#: ../components/Mood.tcl:107
+#: ../components/Mood.tcl:108
 #, fuzzy
 msgid "Cold"
 msgstr "Cold"
 
 #. TRANSLATORS: Chaotic, jumbled or muddled.
-#: ../components/Mood.tcl:109
+#: ../components/Mood.tcl:110
 #, fuzzy
 msgid "Confused"
 msgstr "Confused"
 
 #. TRANSLATORS: Pleased at the satisfaction of a want or desire; satisfied.
-#: ../components/Mood.tcl:111
+#: ../components/Mood.tcl:112
 #, fuzzy
 msgid "Contented"
 msgstr "Contented"
 
 #. TRANSLATORS: Grouchy, irritable; easily upset.
-#: ../components/Mood.tcl:113
+#: ../components/Mood.tcl:114
 #, fuzzy
 msgid "Cranky"
 msgstr "Cranky"
 
 #. TRANSLATORS: Inquisitive; tending to ask questions, investigate, or explore.
-#: ../components/Mood.tcl:115
+#: ../components/Mood.tcl:116
 #, fuzzy
 msgid "Curious"
 msgstr "궁금한"
 
 #. TRANSLATORS: Severely despondent and unhappy.
-#: ../components/Mood.tcl:117
+#: ../components/Mood.tcl:118
 #, fuzzy
 msgid "Depressed"
 msgstr "의기소침한"
 
 #. TRANSLATORS: Defeated of expectation or hope; let down.
-#: ../components/Mood.tcl:119
+#: ../components/Mood.tcl:120
 #, fuzzy
 msgid "Disappointed"
 msgstr "Disappointed"
 
 #. TRANSLATORS: Filled with disgust; irritated and out of patience.
-#: ../components/Mood.tcl:121
+#: ../components/Mood.tcl:122
 #, fuzzy
 msgid "Disgusted"
 msgstr "Disgusted"
 
 #. TRANSLATORS: Having one's attention diverted; preoccupied.
-#: ../components/Mood.tcl:123
+#: ../components/Mood.tcl:124
 #, fuzzy
 msgid "Distracted"
 msgstr "Distracted"
 
 #. TRANSLATORS: Having a feeling of shameful discomfort.
-#: ../components/Mood.tcl:125
+#: ../components/Mood.tcl:126
 #, fuzzy
 msgid "Embarrassed"
 msgstr "Embarrassed"
 
 #. TRANSLATORS: Having great enthusiasm.
-#: ../components/Mood.tcl:127
+#: ../components/Mood.tcl:128
 #, fuzzy
 msgid "Excited"
 msgstr "흥분한"
 
 #. TRANSLATORS: In the mood for flirting.
-#: ../components/Mood.tcl:129
+#: ../components/Mood.tcl:130
 #, fuzzy
 msgid "Flirtatious"
 msgstr "Flirtatious"
 
 #. TRANSLATORS: Suffering from frustration; dissatisfied, agitated, or discontented because one is unable to perform an action or fulfill a desire.
-#: ../components/Mood.tcl:131
+#: ../components/Mood.tcl:132
 #, fuzzy
 msgid "Frustrated"
 msgstr "Frustrated"
 
 #. TRANSLATORS: Unhappy and irritable.
-#: ../components/Mood.tcl:133
+#: ../components/Mood.tcl:134
 #, fuzzy
 msgid "Grumpy"
 msgstr "Grumpy"
 
 #. TRANSLATORS: Feeling responsible for wrongdoing; feeling blameworthy.
-#: ../components/Mood.tcl:135
+#: ../components/Mood.tcl:136
 #, fuzzy
 msgid "Guilty"
 msgstr "Guilty"
 
 #. TRANSLATORS: Experiencing the effect of favourable fortune; having the feeling arising from the consciousness of well-being or of enjoyment; enjoying good of any kind, as peace, tranquillity, comfort; contented; joyous.
-#: ../components/Mood.tcl:137
+#: ../components/Mood.tcl:138
 #, fuzzy
 msgid "Happy"
 msgstr "행복한"
 
 #. TRANSLATORS: Feeling the sensation of heat, especially to the point of discomfort.
-#: ../components/Mood.tcl:139
+#: ../components/Mood.tcl:140
 #, fuzzy
 msgid "Hot"
 msgstr "Hot"
 
 #. TRANSLATORS: Having or showing a modest or low estimate of one's own importance; feeling lowered in dignity or importance.
-#: ../components/Mood.tcl:141
+#: ../components/Mood.tcl:142
 #, fuzzy
 msgid "Humbled"
 msgstr "Humbled"
 
 #. TRANSLATORS: Feeling deprived of dignity or self-respect.
-#: ../components/Mood.tcl:143
+#: ../components/Mood.tcl:144
 #, fuzzy
 msgid "Humiliated"
 msgstr "Humiliated"
 
 #. TRANSLATORS: Having a physical need for food.
-#: ../components/Mood.tcl:145
+#: ../components/Mood.tcl:146
 #, fuzzy
 msgid "Hungry"
 msgstr "Hungry"
 
 #. TRANSLATORS: Wounded, injured, or pained, whether physically or emotionally.
-#: ../components/Mood.tcl:147
+#: ../components/Mood.tcl:148
 #, fuzzy
 msgid "Hurt"
 msgstr "Hurt"
 
 #. TRANSLATORS: Favourably affected by something or someone.
-#: ../components/Mood.tcl:149
+#: ../components/Mood.tcl:150
 #, fuzzy
 msgid "Impressed"
 msgstr "Impressed"
 
 #. TRANSLATORS: Feeling amazement at something or someone; or feeling a combination of fear and reverence.
-#: ../components/Mood.tcl:151
+#: ../components/Mood.tcl:152
 #, fuzzy
 msgid "In awe"
 msgstr "In awe"
 
 #. TRANSLATORS: Feeling strong affection, care, liking, or attraction.
-#: ../components/Mood.tcl:153
+#: ../components/Mood.tcl:154
 #, fuzzy
 msgid "In love"
 msgstr "사랑에 빠진"
 
 #. TRANSLATORS: Showing anger or indignation, especially at something unjust or wrong.
-#: ../components/Mood.tcl:155
+#: ../components/Mood.tcl:156
 #, fuzzy
 msgid "Indignant"
 msgstr "Indignant"
 
 #. TRANSLATORS: Showing great attention to something or someone; having or showing interest.
-#: ../components/Mood.tcl:157
+#: ../components/Mood.tcl:158
 #, fuzzy
 msgid "Interested"
 msgstr "Interested"
 
 #. TRANSLATORS: Under the influence of alcohol; drunk.
-#: ../components/Mood.tcl:159
+#: ../components/Mood.tcl:160
 #, fuzzy
 msgid "Intoxicated"
 msgstr "Intoxicated"
 
 #. TRANSLATORS: Feeling as if one cannot be defeated, overcome or denied.
-#: ../components/Mood.tcl:161
+#: ../components/Mood.tcl:162
 #, fuzzy
 msgid "Invincible"
 msgstr "완강한"
 
 #. TRANSLATORS: Fearful of being replaced in position or affection.
-#: ../components/Mood.tcl:163
+#: ../components/Mood.tcl:164
 #, fuzzy
 msgid "Jealous"
 msgstr "샘나는"
 
 #. TRANSLATORS: Feeling isolated, empty, or abandoned.
-#: ../components/Mood.tcl:165
+#: ../components/Mood.tcl:166
 #, fuzzy
 msgid "Lonely"
 msgstr "Lonely"
 
 #. TRANSLATORS: Causing or intending to cause intentional harm; bearing ill will towards another; cruel; malicious.
-#: ../components/Mood.tcl:167
+#: ../components/Mood.tcl:168
 #, fuzzy
 msgid "Mean"
 msgstr "Mean"
 
 #. TRANSLATORS: Given to sudden or frequent changes of mind or feeling; temperamental.
-#: ../components/Mood.tcl:169
+#: ../components/Mood.tcl:170
 #, fuzzy
 msgid "Moody"
 msgstr "Moody"
 
 #. TRANSLATORS: Easily agitated or alarmed; apprehensive or anxious.
-#: ../components/Mood.tcl:171
+#: ../components/Mood.tcl:172
 #, fuzzy
 msgid "Nervous"
 msgstr "날카로운"
 
 #. TRANSLATORS: Not having a strong mood or emotional state.
-#: ../components/Mood.tcl:173
+#: ../components/Mood.tcl:174
 #, fuzzy
 msgid "Neutral"
 msgstr "Neutral"
 
 #. TRANSLATORS: Feeling emotionally hurt, displeased, or insulted.
-#: ../components/Mood.tcl:175
+#: ../components/Mood.tcl:176
 #, fuzzy
 msgid "Offended"
 msgstr "Offended"
 
 #. TRANSLATORS: Interested in play; fun, recreational, unserious, lighthearted; joking, silly.
-#: ../components/Mood.tcl:177
+#: ../components/Mood.tcl:178
 #, fuzzy
 msgid "Playful"
 msgstr "Playful"
 
 #. TRANSLATORS: Feeling a sense of one's own worth or accomplishment.
-#: ../components/Mood.tcl:179
+#: ../components/Mood.tcl:180
 #, fuzzy
 msgid "Proud"
 msgstr "Proud"
 
 #. TRANSLATORS: Feeling uplifted because of the removal of stress or discomfort.
-#: ../components/Mood.tcl:181
+#: ../components/Mood.tcl:182
 #, fuzzy
 msgid "Relieved"
 msgstr "Relieved"
 
 #. TRANSLATORS: Feeling regret or sadness for doing something wrong.
-#: ../components/Mood.tcl:183
+#: ../components/Mood.tcl:184
 #, fuzzy
 msgid "Remorseful"
 msgstr "Remorseful"
 
 #. TRANSLATORS: Without rest; unable to be still or quiet; uneasy; continually moving.
-#: ../components/Mood.tcl:185
+#: ../components/Mood.tcl:186
 #, fuzzy
 msgid "Restless"
 msgstr "Restless"
 
 #. TRANSLATORS: Feeling sorrow; sorrowful, mournful.
-#: ../components/Mood.tcl:187
+#: ../components/Mood.tcl:188
 #, fuzzy
 msgid "Sad"
 msgstr "슬픈"
 
 #. TRANSLATORS: Mocking and ironical.
-#: ../components/Mood.tcl:189
+#: ../components/Mood.tcl:190
 #, fuzzy
 msgid "Sarcastic"
 msgstr "Sarcastic"
 
 #. TRANSLATORS: Without humor or expression of happiness; grave in manner or disposition; earnest; thoughtful; solemn.
-#: ../components/Mood.tcl:191
+#: ../components/Mood.tcl:192
 #, fuzzy
 msgid "Serious"
 msgstr "Serious"
 
 #. TRANSLATORS: Surprised, startled, confused, or taken aback.
-#: ../components/Mood.tcl:193
+#: ../components/Mood.tcl:194
 #, fuzzy
 msgid "Shocked"
 msgstr "Shocked"
 
 #. TRANSLATORS: Feeling easily frightened or scared; timid; reserved or coy.
-#: ../components/Mood.tcl:195
+#: ../components/Mood.tcl:196
 #, fuzzy
 msgid "Shy"
 msgstr "Shy"
 
 #. TRANSLATORS: Feeling in poor health; ill.
-#: ../components/Mood.tcl:197
+#: ../components/Mood.tcl:198
 #, fuzzy
 msgid "Sick"
 msgstr "Sick"
 
 #. TRANSLATORS: Feeling the need for sleep.
-#: ../components/Mood.tcl:199
+#: ../components/Mood.tcl:200
 #, fuzzy
 msgid "Sleepy"
 msgstr "졸리는"
 
 #. TRANSLATORS: Suffering emotional pressure.
-#: ../components/Mood.tcl:201
+#: ../components/Mood.tcl:202
 #, fuzzy
 msgid "Stressed"
 msgstr "스트레스받은"
 
 #. TRANSLATORS: Experiencing a feeling caused by something unexpected.
-#: ../components/Mood.tcl:203
+#: ../components/Mood.tcl:204
 #, fuzzy
 msgid "Surprised"
 msgstr "Surprised"
 
 #. TRANSLATORS: Feeling the need to drink.
-#: ../components/Mood.tcl:205
+#: ../components/Mood.tcl:206
 #, fuzzy
 msgid "Thirsty"
 msgstr "Thirsty"
 
 #. TRANSLATORS: Thinking about unpleasant things that have happened or that might happen; feeling afraid and unhappy.
-#: ../components/Mood.tcl:207
+#: ../components/Mood.tcl:208
 #, fuzzy
 msgid "Worried"
 msgstr "걱정하는"
 
-#: ../components/Mood.tcl:303 ../components/Mood.tcl:640
+#: ../components/Mood.tcl:304 ../components/Mood.tcl:641
 #, fuzzy
 msgid "&Custom Mood"
 msgstr "분위기"
 
-#: ../components/Mood.tcl:470
+#: ../components/Mood.tcl:471
 msgid "Only contacts with compatible software will see your mood."
 msgstr ""
 
-#: ../components/Mood.tcl:470
+#: ../components/Mood.tcl:471
 msgid "Select your mood to show to your contacts."
 msgstr ""
 
-#: ../components/Mood.tcl:473
+#: ../components/Mood.tcl:474
 #, fuzzy
 msgid "Custom Mood"
 msgstr "분위기"
@@ -1429,8 +1492,8 @@ msgstr "전화 들기"
 msgid "Call VM?"
 msgstr "가상머신 부르기?"
 
-#: ../components/ParseURI.tcl:220 ../jabber/Login.tcl:665
-#: ../jabber/Login.tcl:711
+#: ../components/ParseURI.tcl:220 ../jabber/Login.tcl:668
+#: ../jabber/Login.tcl:735
 #, fuzzy, tcl-format
 msgid "Enter the password for your account %s"
 msgstr "%s 계정에 대한 암호를 치세요"
@@ -1442,8 +1505,8 @@ msgstr "Please enter your desired nick name for the room %s"
 
 #: ../components/ParseURI.tcl:392 ../components/ParseURI.tcl:396
 #: ../jabber/Create.tcl:111 ../jabber/Create.tcl:636 ../jabber/Enter.tcl:164
-#: ../jabber/GroupChat.tcl:3478 ../jabber/JUser.tcl:182
-#: ../jabber/JUser.tcl:730 ../jabber/MUC.tcl:478 ../jabber/Profiles.tcl:1096
+#: ../jabber/GroupChat.tcl:3464 ../jabber/JUser.tcl:182
+#: ../jabber/JUser.tcl:731 ../jabber/MUC.tcl:478 ../jabber/Profiles.tcl:1097
 #: ../jabber/Subscribe.tcl:322 ../jabber/Subscribe.tcl:1285
 #: ../jabber/VCard.tcl:307
 #, fuzzy
@@ -1477,7 +1540,7 @@ msgid "Answer"
 msgstr "응답"
 
 #: ../components/Phone/NotifyCall.tcl:275 ../jabber/JUser.tcl:593
-#: ../jabber/Jabber.tcl:716 ../jabber/Subscribe.tcl:447
+#: ../jabber/Jabber.tcl:717 ../jabber/Subscribe.tcl:447
 #: ../jabber/Subscribe.tcl:467 ../jabber/Subscribe.tcl:667
 #: ../jabber/Subscribe.tcl:700 ../jabber/Subscribe.tcl:779
 #: ../jabber/Subscribe.tcl:826 ../jabber/Subscribe.tcl:892
@@ -1561,8 +1624,8 @@ msgstr "처음"
 msgid "Last"
 msgstr "끝"
 
-#: ../components/SlideShow.tcl:121 ../jabber/Chat.tcl:1350
-#: ../jabber/GroupChat.tcl:676 ../lib/FileCache.tcl:599
+#: ../components/SlideShow.tcl:121 ../jabber/Chat.tcl:1359
+#: ../jabber/GroupChat.tcl:677 ../lib/FileCache.tcl:599
 #: ../whiteboard/FilePrefs.tcl:77 ../whiteboard/Plugins.tcl:1324
 #: ../whiteboard/WBPrefs.tcl:74
 #, fuzzy
@@ -1626,47 +1689,52 @@ msgstr "Logged in"
 msgid "Chatroom presence change"
 msgstr "Chatroom presence change"
 
-#: ../components/Sounds.tcl:497
+#: ../components/Sounds.tcl:503
 #, fuzzy
 msgid "Sounds"
 msgstr "소리"
 
-#: ../components/Sounds.tcl:528
+#: ../components/Sounds.tcl:536
 #, fuzzy
 msgid "Alert sounds"
 msgstr "경고음"
 
-#: ../components/Sounds.tcl:539
+#: ../components/Sounds.tcl:547
 #, fuzzy
 msgid "Sound set"
 msgstr "Sound set"
 
-#: ../components/Sounds.tcl:547
+#: ../components/Sounds.tcl:555
 #, fuzzy
 msgid "Enable or disable sounds below"
 msgstr "Enable or disable sounds below"
 
-#: ../components/Sounds.tcl:559
+#: ../components/Sounds.tcl:567
 #, fuzzy
 msgid "Play"
 msgstr "놀다"
 
-#: ../components/Sounds.tcl:567
+#: ../components/Sounds.tcl:575
 #, fuzzy
 msgid "Volume"
 msgstr "Volume"
 
-#: ../components/Sounds.tcl:575
+#: ../components/Sounds.tcl:586
+#, fuzzy
+msgid "Sound device"
+msgstr "Sound set"
+
+#: ../components/Sounds.tcl:595
 #, fuzzy
 msgid "MIDI Player"
 msgstr "미디 플레이어"
 
-#: ../components/Sounds.tcl:584
+#: ../components/Sounds.tcl:604
 #, fuzzy
 msgid "External Midi Player"
 msgstr "External Midi Player"
 
-#: ../components/Sounds.tcl:585
+#: ../components/Sounds.tcl:605
 #, fuzzy
 msgid ""
 "Set command to use for playing MIDI sounds. This option is only relevant if "
@@ -1675,15 +1743,15 @@ msgstr ""
 "Set command to use for playing MIDI sounds. This option is only relevant if "
 "you use a sound set with MIDI files."
 
-#: ../components/Sounds.tcl:586
+#: ../components/Sounds.tcl:606
 #, fuzzy
 msgid "MIDI command"
 msgstr "MIDI command"
 
-#: ../components/Sounds.tcl:634 ../components/Sounds.tcl:674
-#: ../components/Sounds.tcl:694 ../contrib/ui/fontselector.tcl:156
+#: ../components/Sounds.tcl:654 ../components/Sounds.tcl:698
+#: ../components/Sounds.tcl:724 ../contrib/ui/fontselector.tcl:156
 #: ../contrib/ui/openimage.tcl:97 ../jabber/Emoticons.tcl:749
-#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1399
+#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1402
 #: ../jabber/Rosticons.tcl:605 ../jabber/SetupAss.tcl:116
 #: ../lib/PrefHelpers.tcl:104 ../whiteboard/WBPrefs.tcl:120
 #: ../whiteboard/WBPrefs.tcl:123 ../whiteboard/WBPrefs.tcl:196
@@ -1748,335 +1816,335 @@ msgid "Show tips on startup"
 msgstr "보여주기"
 
 #. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
-#: ../components/UserActivity.tcl:53
+#: ../components/UserActivity.tcl:54
 msgid "Acti&vity"
 msgstr ""
 
-#: ../components/UserActivity.tcl:224
+#: ../components/UserActivity.tcl:225
 msgid "Set your activity that will be shown to your contacts."
 msgstr ""
 
-#: ../components/UserActivity.tcl:225
+#: ../components/UserActivity.tcl:226
 #, fuzzy
 msgid ""
 "Select from the first button your general activity, and optionally, your "
 "specific actvity from the second button. You may also add a descriptive text."
 msgstr "처음 문자."
 
-#: ../components/UserActivity.tcl:228
+#: ../components/UserActivity.tcl:229
 #, fuzzy
 msgid "User Activity"
 msgstr "User Activity"
 
-#: ../components/UserActivity.tcl:251 ../jabber/VCard.tcl:287
+#: ../components/UserActivity.tcl:252 ../jabber/VCard.tcl:287
 #: ../lib/PrefHelpers.tcl:71 ../lib/PrefNet.tcl:61 ../lib/Preferences.tcl:217
 #, fuzzy
 msgid "General"
 msgstr "일반적"
 
-#: ../components/UserActivity.tcl:254
+#: ../components/UserActivity.tcl:255
 #, fuzzy
 msgid "Specific"
 msgstr "Specific"
 
-#: ../components/UserActivity.tcl:259
+#: ../components/UserActivity.tcl:260
 #, fuzzy
 msgid "Show all specific activities"
 msgstr "보여주기"
 
-#: ../components/UserActivity.tcl:317
+#: ../components/UserActivity.tcl:318
 msgid "Doing chores"
 msgstr ""
 
-#: ../components/UserActivity.tcl:318
+#: ../components/UserActivity.tcl:319
 msgid "Buying groceries"
 msgstr ""
 
-#: ../components/UserActivity.tcl:319
+#: ../components/UserActivity.tcl:320
 msgid "Cleaning"
 msgstr ""
 
-#: ../components/UserActivity.tcl:320
+#: ../components/UserActivity.tcl:321
 msgid "Cooking"
 msgstr ""
 
-#: ../components/UserActivity.tcl:321
+#: ../components/UserActivity.tcl:322
 msgid "Doing maintenance"
 msgstr ""
 
-#: ../components/UserActivity.tcl:322
+#: ../components/UserActivity.tcl:323
 msgid "Doing the dishes"
 msgstr ""
 
-#: ../components/UserActivity.tcl:323
+#: ../components/UserActivity.tcl:324
 msgid "Doing the laundry"
 msgstr ""
 
-#: ../components/UserActivity.tcl:324
+#: ../components/UserActivity.tcl:325
 msgid "Gardening"
 msgstr ""
 
-#: ../components/UserActivity.tcl:325
+#: ../components/UserActivity.tcl:326
 #, fuzzy
 msgid "Running an errand"
 msgstr "Running"
 
-#: ../components/UserActivity.tcl:326
+#: ../components/UserActivity.tcl:327
 msgid "Walking the dog"
 msgstr ""
 
-#: ../components/UserActivity.tcl:328
+#: ../components/UserActivity.tcl:329
 msgid "Drinking"
 msgstr ""
 
-#: ../components/UserActivity.tcl:329
+#: ../components/UserActivity.tcl:330
 msgid "Having a beer"
 msgstr ""
 
-#: ../components/UserActivity.tcl:330
+#: ../components/UserActivity.tcl:331
 msgid "Having coffee"
 msgstr ""
 
-#: ../components/UserActivity.tcl:331
+#: ../components/UserActivity.tcl:332
 msgid "Having tea"
 msgstr ""
 
-#: ../components/UserActivity.tcl:333
+#: ../components/UserActivity.tcl:334
 msgid "Eating"
 msgstr ""
 
-#: ../components/UserActivity.tcl:334
+#: ../components/UserActivity.tcl:335
 msgid "Having a snack"
 msgstr ""
 
-#: ../components/UserActivity.tcl:335
+#: ../components/UserActivity.tcl:336
 msgid "Having breakfast"
 msgstr ""
 
-#: ../components/UserActivity.tcl:336
+#: ../components/UserActivity.tcl:337
 msgid "Having dinner"
 msgstr ""
 
-#: ../components/UserActivity.tcl:337
+#: ../components/UserActivity.tcl:338
 msgid "Having lunch"
 msgstr ""
 
-#: ../components/UserActivity.tcl:339
+#: ../components/UserActivity.tcl:340
 msgid "Exercising"
 msgstr ""
 
-#: ../components/UserActivity.tcl:340
+#: ../components/UserActivity.tcl:341
 msgid "Hiking"
 msgstr ""
 
-#: ../components/UserActivity.tcl:341
+#: ../components/UserActivity.tcl:342
 msgid "Jogging"
 msgstr ""
 
-#: ../components/UserActivity.tcl:342
+#: ../components/UserActivity.tcl:343
 msgid "Playing sports"
 msgstr ""
 
-#: ../components/UserActivity.tcl:343
+#: ../components/UserActivity.tcl:344
 #, fuzzy
 msgid "Running"
 msgstr "Running"
 
-#: ../components/UserActivity.tcl:344
+#: ../components/UserActivity.tcl:345
 msgid "Skiing"
 msgstr ""
 
-#: ../components/UserActivity.tcl:345
+#: ../components/UserActivity.tcl:346
 msgid "Swimming"
 msgstr ""
 
-#: ../components/UserActivity.tcl:346
+#: ../components/UserActivity.tcl:347
 msgid "Working out"
 msgstr ""
 
-#: ../components/UserActivity.tcl:348
+#: ../components/UserActivity.tcl:349
 msgid "Grooming"
 msgstr ""
 
-#: ../components/UserActivity.tcl:349
+#: ../components/UserActivity.tcl:350
 msgid "At the spa"
 msgstr ""
 
-#: ../components/UserActivity.tcl:350
+#: ../components/UserActivity.tcl:351
 msgid "Brushing teeth"
 msgstr ""
 
-#: ../components/UserActivity.tcl:351
+#: ../components/UserActivity.tcl:352
 #, fuzzy
 msgid "Getting a haircut"
 msgstr "가져옴"
 
-#: ../components/UserActivity.tcl:352
+#: ../components/UserActivity.tcl:353
 msgid "Shaving"
 msgstr ""
 
-#: ../components/UserActivity.tcl:353
+#: ../components/UserActivity.tcl:354
 msgid "Taking a bath"
 msgstr ""
 
-#: ../components/UserActivity.tcl:354
+#: ../components/UserActivity.tcl:355
 msgid "Taking a shower"
 msgstr ""
 
-#: ../components/UserActivity.tcl:356
+#: ../components/UserActivity.tcl:357
 msgid "Having appointment"
 msgstr ""
 
-#: ../components/UserActivity.tcl:358
+#: ../components/UserActivity.tcl:359
 msgid "Inactive"
 msgstr ""
 
-#: ../components/UserActivity.tcl:359
+#: ../components/UserActivity.tcl:360
 msgid "Day off"
 msgstr ""
 
-#: ../components/UserActivity.tcl:360
+#: ../components/UserActivity.tcl:361
 msgid "Hanging out"
 msgstr ""
 
-#: ../components/UserActivity.tcl:361
+#: ../components/UserActivity.tcl:362
 msgid "On vacation"
 msgstr ""
 
-#: ../components/UserActivity.tcl:362
+#: ../components/UserActivity.tcl:363
 msgid "Scheduled holiday"
 msgstr ""
 
-#: ../components/UserActivity.tcl:363
+#: ../components/UserActivity.tcl:364
 msgid "Sleeping"
 msgstr ""
 
-#: ../components/UserActivity.tcl:365
+#: ../components/UserActivity.tcl:366
 msgid "Relaxing"
 msgstr ""
 
-#: ../components/UserActivity.tcl:366
+#: ../components/UserActivity.tcl:367
 msgid "Gaming"
 msgstr ""
 
-#: ../components/UserActivity.tcl:367
+#: ../components/UserActivity.tcl:368
 msgid "Going out"
 msgstr ""
 
-#: ../components/UserActivity.tcl:368
+#: ../components/UserActivity.tcl:369
 msgid "Partying"
 msgstr ""
 
-#: ../components/UserActivity.tcl:369
+#: ../components/UserActivity.tcl:370
 msgid "Reading"
 msgstr ""
 
-#: ../components/UserActivity.tcl:370
+#: ../components/UserActivity.tcl:371
 msgid "Rehearsing"
 msgstr ""
 
-#: ../components/UserActivity.tcl:371
+#: ../components/UserActivity.tcl:372
 msgid "Shopping"
 msgstr ""
 
-#: ../components/UserActivity.tcl:372
+#: ../components/UserActivity.tcl:373
 msgid "Socializing"
 msgstr ""
 
-#: ../components/UserActivity.tcl:373
+#: ../components/UserActivity.tcl:374
 msgid "Sunbathing"
 msgstr ""
 
-#: ../components/UserActivity.tcl:374
+#: ../components/UserActivity.tcl:375
 msgid "Watching tv"
 msgstr ""
 
-#: ../components/UserActivity.tcl:375
+#: ../components/UserActivity.tcl:376
 msgid "Watching a movie"
 msgstr ""
 
-#: ../components/UserActivity.tcl:377
+#: ../components/UserActivity.tcl:378
 msgid "Talking"
 msgstr ""
 
-#: ../components/UserActivity.tcl:378
+#: ../components/UserActivity.tcl:379
 msgid "In real life"
 msgstr ""
 
-#: ../components/UserActivity.tcl:379
+#: ../components/UserActivity.tcl:380
 msgid "On the phone"
 msgstr ""
 
-#: ../components/UserActivity.tcl:380
+#: ../components/UserActivity.tcl:381
 msgid "On video phone"
 msgstr ""
 
-#: ../components/UserActivity.tcl:382
+#: ../components/UserActivity.tcl:383
 msgid "Traveling"
 msgstr ""
 
-#: ../components/UserActivity.tcl:383
+#: ../components/UserActivity.tcl:384
 msgid "Commuting"
 msgstr ""
 
-#: ../components/UserActivity.tcl:384
+#: ../components/UserActivity.tcl:385
 msgid "Cycling"
 msgstr ""
 
-#: ../components/UserActivity.tcl:385
+#: ../components/UserActivity.tcl:386
 msgid "Driving"
 msgstr ""
 
-#: ../components/UserActivity.tcl:386
+#: ../components/UserActivity.tcl:387
 msgid "In a car"
 msgstr ""
 
-#: ../components/UserActivity.tcl:387
+#: ../components/UserActivity.tcl:388
 msgid "On a bus"
 msgstr ""
 
-#: ../components/UserActivity.tcl:388
+#: ../components/UserActivity.tcl:389
 msgid "On a plane"
 msgstr ""
 
-#: ../components/UserActivity.tcl:389
+#: ../components/UserActivity.tcl:390
 msgid "On a train"
 msgstr ""
 
-#: ../components/UserActivity.tcl:390
+#: ../components/UserActivity.tcl:391
 msgid "On a trip"
 msgstr ""
 
-#: ../components/UserActivity.tcl:391
+#: ../components/UserActivity.tcl:392
 msgid "Walking"
 msgstr ""
 
-#: ../components/UserActivity.tcl:393
+#: ../components/UserActivity.tcl:394
 msgid "Working"
 msgstr ""
 
-#: ../components/UserActivity.tcl:394
+#: ../components/UserActivity.tcl:395
 msgid "Coding"
 msgstr ""
 
-#: ../components/UserActivity.tcl:395
+#: ../components/UserActivity.tcl:396
 msgid "In a meeting"
 msgstr ""
 
-#: ../components/UserActivity.tcl:396
+#: ../components/UserActivity.tcl:397
 msgid "Studying"
 msgstr ""
 
-#: ../components/UserActivity.tcl:397
+#: ../components/UserActivity.tcl:398
 msgid "Writing"
 msgstr ""
 
-#: ../components/UserActivity.tcl:604 ../components/UserActivity.tcl:626
-#: ../components/UserActivity.tcl:692 ../components/UserActivity.tcl:699
+#: ../components/UserActivity.tcl:605 ../components/UserActivity.tcl:627
+#: ../components/UserActivity.tcl:693 ../components/UserActivity.tcl:700
 msgid "Activity"
 msgstr ""
 
-#: ../components/UserActivity.tcl:664
+#: ../components/UserActivity.tcl:665
 msgid "Custom Activity"
 msgstr ""
 
@@ -2090,7 +2158,7 @@ msgid "Pretty format"
 msgstr ""
 
 #: ../components/XMLConsole.tcl:111 ../components/fsdialog.tcl:1050
-#: ../contrib/ui/openimage.tcl:95 ../jabber/History.tcl:991
+#: ../contrib/ui/openimage.tcl:95 ../jabber/History.tcl:994
 #: ../whiteboard/Whiteboard.tcl:450 ../whiteboard/Whiteboard.tcl:2933
 #: ../whiteboard/Whiteboard.tcl:2935
 #, fuzzy
@@ -2149,7 +2217,7 @@ msgid "Filter"
 msgstr "필터"
 
 #: ../components/fsdialog.tcl:492 ../jabber/Emoticons.tcl:603
-#: ../jabber/History.tcl:952 ../jabber/MailBox.tcl:689
+#: ../jabber/History.tcl:950 ../jabber/MailBox.tcl:689
 #: ../jabber/NewMsg.tcl:446
 #, fuzzy
 msgid "Date"
@@ -2165,7 +2233,7 @@ msgid "Owner"
 msgstr "소유자"
 
 #: ../components/fsdialog.tcl:498 ../jabber/JUser.tcl:184
-#: ../jabber/JUser.tcl:740 ../jabber/Subscribe.tcl:324
+#: ../jabber/JUser.tcl:741 ../jabber/Subscribe.tcl:324
 #: ../jabber/Subscribe.tcl:1287
 #, fuzzy
 msgid "Group"
@@ -2219,7 +2287,7 @@ msgstr "Mi&nimize"
 
 #. TRANSLATORS; menu item for sending normal message (no chat!)
 #: ../components/taskbar/Taskbar.tcl:187 ../jabber/Disco.tcl:155
-#: ../jabber/GroupChat.tcl:220 ../jabber/JUI.tcl:176 ../jabber/JUI.tcl:1832
+#: ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:176 ../jabber/JUI.tcl:1832
 #: ../jabber/JUI.tcl:1852 ../jabber/Roster.tcl:122 ../jabber/Search.tcl:33
 #: ../jabber/Search.tcl:41
 #, fuzzy
@@ -2524,27 +2592,27 @@ msgstr "Clear Menu"
 msgid "Select Avatar"
 msgstr "Select Avatar"
 
-#: ../jabber/Chat.tcl:313 ../jabber/Chat.tcl:325 ../jabber/Chat.tcl:2102
-#: ../jabber/Chat.tcl:3216 ../jabber/Chat.tcl:4201 ../jabber/JUI.tcl:1245
+#: ../jabber/Chat.tcl:313 ../jabber/Chat.tcl:325 ../jabber/Chat.tcl:2110
+#: ../jabber/Chat.tcl:3224 ../jabber/Chat.tcl:4209 ../jabber/JUI.tcl:1245
 msgid "Chat"
 msgstr ""
 
 #: ../jabber/Chat.tcl:343 ../jabber/JUser.tcl:180 ../jabber/JWB.tcl:450
-#: ../jabber/Login.tcl:168 ../jabber/MUC.tcl:242 ../jabber/Profiles.tcl:1081
+#: ../jabber/Login.tcl:168 ../jabber/MUC.tcl:242 ../jabber/Profiles.tcl:1082
 #: ../jabber/Subscribe.tcl:1087 ../jabber/VCard.tcl:309
 #, fuzzy
 msgid "Contact ID"
 msgstr "Contact ID"
 
 #. TRANSLATORS; Control + T (or Command + T on Mac OS X), then enter @ and proceed
-#: ../jabber/Chat.tcl:407 ../jabber/Chat.tcl:3125 ../jabber/Disco.tcl:1783
+#: ../jabber/Chat.tcl:407 ../jabber/Chat.tcl:3133 ../jabber/Disco.tcl:1783
 #: ../jabber/MUC.tcl:1248
 #, fuzzy, tcl-format
 msgid "%s is invalid. Do you want to continue anyway?"
 msgstr "%s is invalid. Do you want to continue anyway?"
 
 #. TRANSLATORS; composing events in chat window
-#: ../jabber/Chat.tcl:685 ../jabber/Chat.tcl:687 ../jabber/Chat.tcl:3708
+#: ../jabber/Chat.tcl:685 ../jabber/Chat.tcl:687 ../jabber/Chat.tcl:3716
 #, fuzzy, tcl-format
 msgid "%s is composing a reply"
 msgstr "%s님이 응답 작성중"
@@ -2569,31 +2637,31 @@ msgstr "%s님이 잠시동안 대화방을 떠나있습니다"
 msgid "%s has closed the chat"
 msgstr "%s님이 대화방을 닫았습니다"
 
-#: ../jabber/Chat.tcl:844 ../jabber/Chat.tcl:1581 ../jabber/GotMsg.tcl:261
-#: ../jabber/GroupChat.tcl:2364 ../jabber/History.tcl:801
+#: ../jabber/Chat.tcl:853 ../jabber/Chat.tcl:1589 ../jabber/GotMsg.tcl:261
+#: ../jabber/GroupChat.tcl:2365 ../jabber/History.tcl:800
 #: ../jabber/MailBox.tcl:683 ../jabber/NewMsg.tcl:367 ../jabber/NewMsg.tcl:450
 #, fuzzy
 msgid "Subject"
 msgstr "주제"
 
-#: ../jabber/Chat.tcl:1328 ../jabber/FTrans.tcl:218
-#: ../jabber/GroupChat.tcl:657 ../jabber/GroupChat.tcl:862
+#: ../jabber/Chat.tcl:1337 ../jabber/FTrans.tcl:218
+#: ../jabber/GroupChat.tcl:658 ../jabber/GroupChat.tcl:863
 #: ../jabber/NewMsg.tcl:302
 #, fuzzy
 msgid "Send"
 msgstr "보내기"
 
-#: ../jabber/Chat.tcl:1332 ../jabber/FTrans.tcl:38 ../jabber/FTrans.tcl:182
+#: ../jabber/Chat.tcl:1341 ../jabber/FTrans.tcl:38 ../jabber/FTrans.tcl:182
 #, fuzzy
 msgid "Send File"
 msgstr "파일 보내기"
 
-#: ../jabber/Chat.tcl:1336 ../jabber/Chat.tcl:3290 ../jabber/GroupChat.tcl:660
-#: ../jabber/GroupChat.tcl:3182 ../jabber/History.tcl:995
-#: ../jabber/History.tcl:1348 ../jabber/JUser.tcl:800
-#: ../jabber/Jabber.tcl:1941 ../jabber/MailBox.tcl:508
+#: ../jabber/Chat.tcl:1345 ../jabber/Chat.tcl:3298 ../jabber/GroupChat.tcl:661
+#: ../jabber/GroupChat.tcl:3183 ../jabber/History.tcl:998
+#: ../jabber/History.tcl:1351 ../jabber/JUser.tcl:801
+#: ../jabber/Jabber.tcl:1944 ../jabber/MailBox.tcl:508
 #: ../jabber/NewMsg.tcl:309 ../jabber/Profiles.tcl:920
-#: ../jabber/UserInfo.tcl:375 ../jabber/VCard.tcl:248 ../lib/Bookmarks.tcl:122
+#: ../jabber/UserInfo.tcl:406 ../jabber/VCard.tcl:248 ../lib/Bookmarks.tcl:122
 #: ../lib/Dialogs.tcl:339 ../lib/EditDialogs.tcl:140
 #: ../lib/EditDialogs.tcl:284 ../lib/Preferences.tcl:237
 #: ../whiteboard/CanvasFile.tcl:686 ../whiteboard/FilePrefs.tcl:526
@@ -2603,81 +2671,81 @@ msgid "Save"
 msgstr "저장하기"
 
 #. TRANSLATORS; history of past chat conversations
-#: ../jabber/Chat.tcl:1341 ../jabber/GroupChat.tcl:663
-#: ../jabber/History.tcl:948
+#: ../jabber/Chat.tcl:1350 ../jabber/GroupChat.tcl:664
+#: ../jabber/History.tcl:946
 #, fuzzy
 msgid "History"
 msgstr "기록"
 
-#: ../jabber/Chat.tcl:1345 ../jabber/GroupChat.tcl:672
-#: ../jabber/History.tcl:993 ../jabber/MailBox.tcl:511
+#: ../jabber/Chat.tcl:1354 ../jabber/GroupChat.tcl:673
+#: ../jabber/History.tcl:996 ../jabber/MailBox.tcl:511
 #: ../jabber/NewMsg.tcl:312 ../lib/Dialogs.tcl:103 ../lib/Dialogs.tcl:115
 #: ../lib/Dialogs.tcl:130
 #, fuzzy
 msgid "Print"
 msgstr "인쇄하기"
 
-#: ../jabber/Chat.tcl:1355 ../jabber/GroupChat.tcl:479
-#: ../jabber/GroupChat.tcl:666
+#: ../jabber/Chat.tcl:1364 ../jabber/GroupChat.tcl:480
+#: ../jabber/GroupChat.tcl:667
 #, fuzzy
 msgid "Invite"
 msgstr "초대하기"
 
 #. TRANSLATORS; balloon mouse over texts in chat dialog
-#: ../jabber/Chat.tcl:1603
+#: ../jabber/Chat.tcl:1611
 #, fuzzy
 msgid "Enter the subject of the conversation, set by pressing Return"
 msgstr "들어가기"
 
-#: ../jabber/Chat.tcl:1640
+#: ../jabber/Chat.tcl:1648
 #, fuzzy
 msgid "Show or hide the chat history"
 msgstr "대화 기록 보이거나 감추기"
 
-#: ../jabber/Chat.tcl:1641 ../jabber/GroupChat.tcl:916
+#: ../jabber/Chat.tcl:1649 ../jabber/GroupChat.tcl:917
 msgid "If checked, Return sends message, else use Ctrl/Cmd-Return"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1642 ../jabber/NewMsg.tcl:375
+#: ../jabber/Chat.tcl:1650 ../jabber/NewMsg.tcl:375
 #, fuzzy
 msgid "Insert emoticon"
 msgstr "Insert emoticon"
 
-#: ../jabber/Chat.tcl:1643 ../jabber/GroupChat.tcl:918
+#: ../jabber/Chat.tcl:1651 ../jabber/GroupChat.tcl:919
 #, fuzzy
 msgid "Show or hide status changes in chat"
 msgstr "보여주기 대화"
 
-#: ../jabber/Chat.tcl:1734
+#: ../jabber/Chat.tcl:1742
 #, fuzzy
 msgid "Enter your message and press Return or Shift-Return"
 msgstr "들어가기"
 
 #. TRANSLATORS; Control + F (or Command + F on Mac OS X)
-#: ../jabber/Chat.tcl:1890 ../jabber/GroupChat.tcl:1169
-#: ../jabber/History.tcl:1074 ../jabber/JUI.tcl:254 ../jabber/JUI.tcl:1786
+#: ../jabber/Chat.tcl:1898 ../jabber/GroupChat.tcl:1170
+#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:254 ../jabber/JUI.tcl:1786
 #: ../jabber/RosterTree.tcl:1995
 #, fuzzy
 msgid "Find"
 msgstr "찾기"
 
-#: ../jabber/Chat.tcl:1892 ../jabber/GroupChat.tcl:1171
-#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
+#: ../jabber/Chat.tcl:1900 ../jabber/GroupChat.tcl:1172
+#: ../jabber/History.tcl:1080 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
 #: ../jabber/RosterTree.tcl:1997
 #, fuzzy
 msgid "Find Next"
 msgstr "Find Next"
 
-#: ../jabber/Chat.tcl:1893 ../jabber/GroupChat.tcl:1172
-#: ../jabber/History.tcl:1078 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
+#: ../jabber/Chat.tcl:1901 ../jabber/GroupChat.tcl:1173
+#: ../jabber/History.tcl:1081 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
 #: ../jabber/RosterTree.tcl:1998
 #, fuzzy
 msgid "Find Previous"
 msgstr "Find Previous"
 
-#: ../jabber/Chat.tcl:1965 ../jabber/Create.tcl:723 ../jabber/NewMsg.tcl:1066
-#: ../jabber/NewMsg.tcl:1097 ../jabber/Profiles.tcl:982
-#: ../jabber/Profiles.tcl:1603 ../jabber/Register.tcl:84
+#: ../jabber/Chat.tcl:1973 ../jabber/Create.tcl:723 ../jabber/NewMsg.tcl:1066
+#: ../jabber/NewMsg.tcl:1097 ../jabber/Profiles.tcl:983
+#: ../jabber/Profiles.tcl:1606 ../jabber/Register.tcl:84
 #: ../lib/EditDialogs.tcl:226 ../lib/Preferences.tcl:393
 #: ../lib/Preferences.tcl:454 ../lib/Preferences.tcl:497
 #: ../whiteboard/CanvasFile.tcl:548
@@ -2685,38 +2753,38 @@ msgstr "Find Previous"
 msgid "Warning"
 msgstr "경고"
 
-#: ../jabber/Chat.tcl:1966
+#: ../jabber/Chat.tcl:1974
 #, fuzzy
 msgid "Do you want to invite this contact to a new chatroom?"
 msgstr "Do you want to invite this contact to a new chatroom?"
 
-#: ../jabber/Chat.tcl:2239 ../jabber/GroupChat.tcl:1238
+#: ../jabber/Chat.tcl:2247 ../jabber/GroupChat.tcl:1239
 #, fuzzy
 msgid "Close tab"
 msgstr "Close tab"
 
-#: ../jabber/Chat.tcl:2561
+#: ../jabber/Chat.tcl:2569
 msgid "You need to be logged in to see the presence of this contact"
 msgstr ""
 
-#: ../jabber/Chat.tcl:2763
+#: ../jabber/Chat.tcl:2771
 #, fuzzy
 msgid "Converting Chat into Conference"
 msgstr "대화를 회의로 바꾸기"
 
-#: ../jabber/Chat.tcl:2778 ../jabber/Create.tcl:314 ../jabber/Create.tcl:581
-#: ../jabber/GroupChat.tcl:365
+#: ../jabber/Chat.tcl:2786 ../jabber/Create.tcl:314 ../jabber/Create.tcl:581
+#: ../jabber/GroupChat.tcl:366
 #, fuzzy
 msgid "Cannot find any chatroom service."
 msgstr "Cannot find any chatroom service."
 
-#: ../jabber/Chat.tcl:3077 ../jabber/GroupChat.tcl:2720
+#: ../jabber/Chat.tcl:3085 ../jabber/GroupChat.tcl:2721
 #: ../jabber/NewMsg.tcl:888
 #, fuzzy
 msgid "Cannot send when not logged in."
 msgstr "Cannot send when not logged in."
 
-#: ../jabber/Chat.tcl:3568
+#: ../jabber/Chat.tcl:3576
 #, fuzzy
 msgid ""
 "Do you want to close this chat window and lose the complete conversation?"
@@ -2724,83 +2792,83 @@ msgstr ""
 "Do you want to close this chat window and loose the complete conversation?"
 
 #. TRANSLATORS; see Chat settings in preferences
-#: ../jabber/Chat.tcl:4224
+#: ../jabber/Chat.tcl:4232
 #, fuzzy
 msgid "By default use active <Return> to send messages"
 msgstr "By default use active <Return> to send messages"
 
-#: ../jabber/Chat.tcl:4226
+#: ../jabber/Chat.tcl:4234
 #, fuzzy
 msgid "Show incoming messages in new window"
 msgstr "새창에다 메세지 보여주기"
 
-#: ../jabber/Chat.tcl:4228
+#: ../jabber/Chat.tcl:4236
 #, fuzzy
 msgid "Treat normal messages as chat messages"
 msgstr "일반 메세지를 대화메세지로 다루기"
 
-#: ../jabber/Chat.tcl:4233
+#: ../jabber/Chat.tcl:4241
 #, fuzzy
 msgid "Double click message in inbox"
 msgstr "받은 함의 메세지를 더블클릭하세요:"
 
-#: ../jabber/Chat.tcl:4234
+#: ../jabber/Chat.tcl:4242
 #, fuzzy
 msgid "Open message in new window"
 msgstr "새창에서 메세지 열기"
 
-#: ../jabber/Chat.tcl:4237
+#: ../jabber/Chat.tcl:4245
 #, fuzzy
 msgid "Reply to sender"
 msgstr "보낸 이에게 답하기"
 
-#: ../jabber/Chat.tcl:4244
+#: ../jabber/Chat.tcl:4252
 #, fuzzy
 msgid "History length"
 msgstr "기록 길이"
 
-#: ../jabber/Chat.tcl:4247
+#: ../jabber/Chat.tcl:4255
 #, fuzzy
 msgid "More recent than"
 msgstr "More recent than"
 
-#: ../jabber/Chat.tcl:4250
+#: ../jabber/Chat.tcl:4258
 #, fuzzy
 msgid "Ten seconds"
 msgstr "10 초"
 
-#: ../jabber/Chat.tcl:4251
+#: ../jabber/Chat.tcl:4259
 #, fuzzy
 msgid "One minute"
 msgstr "1 분"
 
-#: ../jabber/Chat.tcl:4252
+#: ../jabber/Chat.tcl:4260
 #, fuzzy
 msgid "Ten minutes"
 msgstr "10 분"
 
-#: ../jabber/Chat.tcl:4253
+#: ../jabber/Chat.tcl:4261
 #, fuzzy
 msgid "One hour"
 msgstr "1 시간"
 
-#: ../jabber/Chat.tcl:4254
+#: ../jabber/Chat.tcl:4262
 #, fuzzy
 msgid "No restriction"
 msgstr "No restriction"
 
-#: ../jabber/Chat.tcl:4264
+#: ../jabber/Chat.tcl:4272
 #, fuzzy
 msgid "Number of messages to display"
 msgstr "번호"
 
 #. TRANSLATORS; the user's name that is showed in the in the user's chat dialog, but not on the screen of the remote contact
-#: ../jabber/Chat.tcl:4271
+#: ../jabber/Chat.tcl:4279
 #, fuzzy
 msgid "Local nickname"
 msgstr "Local nickname"
 
-#: ../jabber/Chat.tcl:4276
+#: ../jabber/Chat.tcl:4284
 msgid "Your nickname for local display"
 msgstr ""
 
@@ -2809,7 +2877,7 @@ msgstr ""
 msgid "Create Chatroom"
 msgstr "Create Chatroom"
 
-#: ../jabber/Create.tcl:81 ../jabber/GroupChat.tcl:196
+#: ../jabber/Create.tcl:81 ../jabber/GroupChat.tcl:197
 #: ../whiteboard/WDialogs.tcl:202 ../whiteboard/WDialogs.tcl:203
 #: ../whiteboard/WDialogs.tcl:204 ../whiteboard/WDialogs.tcl:205
 #: ../whiteboard/WDialogs.tcl:213 ../whiteboard/WDialogs.tcl:214
@@ -2828,14 +2896,14 @@ msgstr ""
 
 #: ../jabber/Create.tcl:105 ../jabber/Create.tcl:627 ../jabber/Enter.tcl:128
 #: ../jabber/Register.tcl:1124 ../jabber/Register.tcl:1451
-#: ../jabber/Search.tcl:154 ../jabber/UserInfo.tcl:477
+#: ../jabber/Search.tcl:154 ../jabber/UserInfo.tcl:566
 #, fuzzy
 msgid "Service"
 msgstr "서비스"
 
 #: ../jabber/Create.tcl:108 ../jabber/Create.tcl:632 ../jabber/Enter.tcl:162
-#: ../jabber/GroupChat.tcl:1547 ../jabber/GroupChat.tcl:1550
-#: ../jabber/GroupChat.tcl:3477 ../jabber/GroupChat.tcl:3679
+#: ../jabber/GroupChat.tcl:1548 ../jabber/GroupChat.tcl:1551
+#: ../jabber/GroupChat.tcl:3463 ../jabber/GroupChat.tcl:3665
 #, fuzzy
 msgid "Chatroom"
 msgstr "Chatroom"
@@ -2849,14 +2917,14 @@ msgid "Select or manually enter the name of a chatroom"
 msgstr ""
 
 #: ../jabber/Create.tcl:124 ../jabber/Enter.tcl:189
-#: ../jabber/GroupChat.tcl:3755 ../jabber/JForms.tcl:305
-#: ../jabber/JUser.tcl:200 ../jabber/Profiles.tcl:1123
+#: ../jabber/GroupChat.tcl:3741 ../jabber/JForms.tcl:305
+#: ../jabber/JUser.tcl:200 ../jabber/Profiles.tcl:1126
 #: ../jabber/Register.tcl:716 ../jabber/VCard.tcl:323
 #, fuzzy
 msgid "Familiar name"
 msgstr "사용자에게 친근한 이름"
 
-#: ../jabber/Create.tcl:147 ../jabber/GroupChat.tcl:669
+#: ../jabber/Create.tcl:147 ../jabber/GroupChat.tcl:670
 #, fuzzy
 msgid "Configure"
 msgstr "Configure"
@@ -2877,7 +2945,7 @@ msgid "You must provide a nickname."
 msgstr "별명을 제공하셔야 합니다."
 
 #: ../jabber/Create.tcl:332 ../jabber/Create.tcl:515 ../jabber/JUser.tcl:294
-#: ../jabber/Profiles.tcl:1452
+#: ../jabber/Profiles.tcl:1455
 #, fuzzy
 msgid "Invalid Contact ID."
 msgstr "Invalid Contact ID."
@@ -2895,8 +2963,8 @@ msgstr "Cannot download the configuration form of the chatroom."
 #: ../jabber/Create.tcl:425 ../jabber/Create.tcl:467 ../jabber/Create.tcl:545
 #: ../jabber/Create.tcl:753 ../jabber/Enter.tcl:648 ../jabber/Enter.tcl:691
 #: ../jabber/FTrans.tcl:502 ../jabber/FTrans.tcl:534 ../jabber/JUser.tcl:384
-#: ../jabber/Jabber.tcl:616 ../jabber/Jabber.tcl:860 ../jabber/Jabber.tcl:2019
-#: ../jabber/Login.tcl:918 ../jabber/Login.tcl:942 ../jabber/Profiles.tcl:1642
+#: ../jabber/Jabber.tcl:617 ../jabber/Jabber.tcl:861 ../jabber/Jabber.tcl:2022
+#: ../jabber/Login.tcl:942 ../jabber/Login.tcl:966 ../jabber/Profiles.tcl:1645
 #: ../jabber/Register.tcl:120 ../jabber/Register.tcl:660
 #: ../jabber/Register.tcl:1289 ../jabber/Register.tcl:1354
 #: ../jabber/Register.tcl:1538 ../jabber/Search.tcl:349
@@ -2935,7 +3003,7 @@ msgstr "Please Fill in all fields before entering chatroom."
 msgid "Cannot enter chatroom %s."
 msgstr "Cannot enter chatroom %s."
 
-#: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:177
+#: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:222 ../jabber/JUI.tcl:177
 #: ../jabber/JUI.tcl:1833 ../jabber/JUI.tcl:1853 ../jabber/Roster.tcl:121
 #: ../jabber/Roster.tcl:527 ../jabber/Search.tcl:34 ../jabber/Search.tcl:42
 msgid "Cha&t"
@@ -2953,7 +3021,7 @@ msgstr "Enter Chat&room..."
 msgid "&Create Chatroom"
 msgstr "&Create Chatroom..."
 
-#: ../jabber/Disco.tcl:164 ../jabber/GroupChat.tcl:223
+#: ../jabber/Disco.tcl:164 ../jabber/GroupChat.tcl:224
 #: ../jabber/Roster.tcl:126 ../jabber/Roster.tcl:187 ../jabber/Search.tcl:35
 #: ../jabber/Search.tcl:43
 #, fuzzy
@@ -3013,7 +3081,7 @@ msgstr "Remove Listing"
 msgid "C&ommands"
 msgstr "Ad-Hoc Commands"
 
-#: ../jabber/Disco.tcl:187 ../jabber/GroupChat.tcl:231 ../jabber/JUI.tcl:192
+#: ../jabber/Disco.tcl:187 ../jabber/GroupChat.tcl:232 ../jabber/JUI.tcl:192
 #: ../jabber/Roster.tcl:172
 #, fuzzy
 msgid "&Whiteboard"
@@ -3040,7 +3108,7 @@ msgid "Background Image"
 msgstr "이미지"
 
 #: ../jabber/Disco.tcl:1491 ../jabber/Disco.tcl:1676 ../jabber/Enter.tcl:131
-#: ../jabber/MUC.tcl:1616 ../jabber/UserInfo.tcl:163
+#: ../jabber/MUC.tcl:1616 ../jabber/UserInfo.tcl:175
 #, fuzzy
 msgid "Discover"
 msgstr "Discover"
@@ -3056,7 +3124,7 @@ msgid "Enter a server to discover and use its services."
 msgstr "Add a server to discover and use its chatrooms and other services."
 
 #: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:531 ../jabber/Login.tcl:171
-#: ../jabber/Profiles.tcl:1083 ../jabber/Profiles.tcl:1861
+#: ../jabber/Profiles.tcl:1084 ../jabber/Profiles.tcl:1864
 #: ../jabber/Register.tcl:274 ../jabber/SetupAss.tcl:137
 #: ../jabber/SetupAss.tcl:165 ../jabber/StatusSlot.tcl:34
 #: ../whiteboard/WDialogs.tcl:172
@@ -3080,10 +3148,10 @@ msgstr "저자"
 msgid "Home"
 msgstr "홈"
 
-#: ../jabber/Emoticons.tcl:602 ../jabber/Jabber.tcl:1682
-#: ../jabber/Jabber.tcl:1693 ../jabber/Roster.tcl:190
-#: ../jabber/UserInfo.tcl:193 ../jabber/UserInfo.tcl:202
-#: ../jabber/UserInfo.tcl:207 ../whiteboard/WDialogs.tcl:133
+#: ../jabber/Emoticons.tcl:602 ../jabber/Jabber.tcl:1685
+#: ../jabber/Jabber.tcl:1696 ../jabber/Roster.tcl:190
+#: ../jabber/UserInfo.tcl:211 ../jabber/UserInfo.tcl:220
+#: ../jabber/UserInfo.tcl:225 ../whiteboard/WDialogs.tcl:133
 #, fuzzy
 msgid "Version"
 msgstr "Version"
@@ -3140,9 +3208,9 @@ msgstr ""
 "available chatrooms on the selected service. Some chatrooms may require a "
 "password."
 
-#: ../jabber/Enter.tcl:166 ../jabber/GroupChat.tcl:3478
-#: ../jabber/Login.tcl:179 ../jabber/Login.tcl:663 ../jabber/Login.tcl:665
-#: ../jabber/Login.tcl:709 ../jabber/Login.tcl:711 ../jabber/Profiles.tcl:1089
+#: ../jabber/Enter.tcl:166 ../jabber/GroupChat.tcl:3464
+#: ../jabber/Login.tcl:179 ../jabber/Login.tcl:666 ../jabber/Login.tcl:668
+#: ../jabber/Login.tcl:733 ../jabber/Login.tcl:735 ../jabber/Profiles.tcl:1090
 #: ../jabber/Register.tcl:1458 ../jabber/SetupAss.tcl:168 ../lib/Proxy.tcl:211
 #, fuzzy
 msgid "Password"
@@ -3154,7 +3222,7 @@ msgid "Bookmarks"
 msgstr "북마크"
 
 #: ../jabber/Enter.tcl:190 ../jabber/JForms.tcl:306 ../jabber/Login.tcl:224
-#: ../jabber/Profiles.tcl:1122 ../jabber/Register.tcl:717
+#: ../jabber/Profiles.tcl:1125 ../jabber/Register.tcl:717
 #, fuzzy
 msgid "Password or secret"
 msgstr "사용자를 위한 암호나 비밀"
@@ -3230,7 +3298,7 @@ msgid "Rate"
 msgstr "Rate"
 
 #: ../jabber/FTrans.tcl:658 ../lib/HttpTrpt.tcl:162
-#: ../whiteboard/GetFileIface.tcl:514
+#: ../whiteboard/GetFileIface.tcl:513
 #, fuzzy
 msgid "Writing file"
 msgstr "파일 쓰기"
@@ -3252,49 +3320,53 @@ msgid "Email"
 msgstr "메일"
 
 #. TRANSLATORS; AOL AIM address
-#: ../jabber/Gateway.tcl:72
+#: ../jabber/Gateway.tcl:73
 msgid "Screen name"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:75
+#: ../jabber/Gateway.tcl:76
 msgid "Gadu-Gadu number"
 msgstr ""
 
 #. TRANSLATORS; also known as UIN
-#: ../jabber/Gateway.tcl:77
+#: ../jabber/Gateway.tcl:78
 msgid "ICQ number"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:78
+#: ../jabber/Gateway.tcl:79
 #, fuzzy
 msgid "IRC"
 msgstr "IRC"
 
-#: ../jabber/Gateway.tcl:79 ../jabber/Gateway.tcl:85 ../jabber/JForms.tcl:300
+#: ../jabber/Gateway.tcl:80 ../jabber/Gateway.tcl:86 ../jabber/JForms.tcl:300
 #: ../jabber/Register.tcl:711 ../jabber/VCard.tcl:324
 #, fuzzy
 msgid "Email address"
 msgstr "사용자의 전자우편"
 
-#: ../jabber/Gateway.tcl:80
+#: ../jabber/Gateway.tcl:81
 #, fuzzy
 msgid "MSN Address"
 msgstr "MSN Address"
 
-#: ../jabber/Gateway.tcl:86
+#: ../jabber/Gateway.tcl:87
 msgid "QQ number"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:87
+#: ../jabber/Gateway.tcl:88
 msgid "Tlen address"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:88 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
-#: ../jabber/Profiles.tcl:1121 ../jabber/VCard.tcl:322
+#: ../jabber/Gateway.tcl:90
+msgid "Twitter user"
+msgstr ""
+
+#: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
+#: ../jabber/Profiles.tcl:1124 ../jabber/VCard.tcl:322
 msgid "Chat address"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:89
+#: ../jabber/Gateway.tcl:92
 #, fuzzy
 msgid "Yahoo ID"
 msgstr "Yahoo ID"
@@ -3325,148 +3397,148 @@ msgstr "이창에서 받은 메세지 보여주기"
 msgid "From"
 msgstr "부터"
 
-#: ../jabber/GroupChat.tcl:171
+#: ../jabber/GroupChat.tcl:172
 #, fuzzy
 msgid "Moderators"
 msgstr "진행자"
 
-#: ../jabber/GroupChat.tcl:173
+#: ../jabber/GroupChat.tcl:174
 #, fuzzy
 msgid "Participants"
 msgstr "참가자"
 
-#: ../jabber/GroupChat.tcl:174
+#: ../jabber/GroupChat.tcl:175
 #, fuzzy
 msgid "Visitors"
 msgstr "방문자"
 
-#: ../jabber/GroupChat.tcl:186
+#: ../jabber/GroupChat.tcl:187
 #, fuzzy
 msgid "available"
 msgstr "접속 가능함"
 
 #. TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a short moment
-#: ../jabber/GroupChat.tcl:188
+#: ../jabber/GroupChat.tcl:189
 #, fuzzy
 msgid "away"
 msgstr "나감"
 
-#: ../jabber/GroupChat.tcl:189
+#: ../jabber/GroupChat.tcl:190
 #, fuzzy
 msgid "free for chat"
 msgstr "Text-to-speech for chat"
 
 #. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
-#: ../jabber/GroupChat.tcl:191
+#: ../jabber/GroupChat.tcl:192
 #, fuzzy
 msgid "do not disturb"
 msgstr "일에 집중하고 있어요"
 
 #. TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a longer period
-#: ../jabber/GroupChat.tcl:193
+#: ../jabber/GroupChat.tcl:194
 #, fuzzy
 msgid "extended away"
 msgstr "멀리 나감"
 
 #. TRANSLATORS; presence state when the user is available, but not visible as available to her or his contacts
-#: ../jabber/GroupChat.tcl:195
+#: ../jabber/GroupChat.tcl:196
 #, fuzzy
 msgid "invisible"
 msgstr "안보임"
 
-#: ../jabber/GroupChat.tcl:222 ../jabber/Roster.tcl:123
+#: ../jabber/GroupChat.tcl:223 ../jabber/Roster.tcl:123
 #, fuzzy
 msgid "Send &File"
 msgstr "파일 보내기..."
 
-#: ../jabber/GroupChat.tcl:224
+#: ../jabber/GroupChat.tcl:225
 #, fuzzy
 msgid "&Edit Nickname"
 msgstr "Edit Nickname"
 
-#: ../jabber/GroupChat.tcl:225
+#: ../jabber/GroupChat.tcl:226
 #, fuzzy
 msgid "&Ignore"
 msgstr "무시하기"
 
-#: ../jabber/GroupChat.tcl:477
+#: ../jabber/GroupChat.tcl:478
 #, fuzzy, tcl-format
 msgid "%s invited you to %s. Do you want to enter this chatroom?"
 msgstr "%s invited you to %s. Do you want to enter this chatroom?"
 
-#: ../jabber/GroupChat.tcl:917
+#: ../jabber/GroupChat.tcl:918
 #, fuzzy
 msgid "Bookmark this chatroom"
 msgstr "Bookmark this chatroom"
 
 #. TRANSLATORS; subject of a chatroom discussion with multiple people
-#: ../jabber/GroupChat.tcl:925
+#: ../jabber/GroupChat.tcl:926
 #, fuzzy
 msgid "Topic"
 msgstr "토픽"
 
-#: ../jabber/GroupChat.tcl:1507
+#: ../jabber/GroupChat.tcl:1508
 #, fuzzy
 msgid "You logged out and exited the chatroom"
 msgstr "당신은 로그아웃하였고 방도 나가 있습니다"
 
-#: ../jabber/GroupChat.tcl:2536
+#: ../jabber/GroupChat.tcl:2537
 #, fuzzy, tcl-format
 msgid "Do you want to exit the chatroom %s?"
 msgstr "Do you want to exit the chatroom %s?"
 
-#: ../jabber/GroupChat.tcl:2707 ../jabber/MUC.tcl:1715 ../jabber/MUC.tcl:1738
+#: ../jabber/GroupChat.tcl:2708 ../jabber/MUC.tcl:1715 ../jabber/MUC.tcl:1738
 #, fuzzy, tcl-format
 msgid "Cannot interact with the chatroom %s."
 msgstr "Cannot interact with the chatroom %s."
 
-#: ../jabber/GroupChat.tcl:3479
+#: ../jabber/GroupChat.tcl:3465
 #, fuzzy
 msgid "Auto Join"
 msgstr "자동 합류"
 
-#: ../jabber/GroupChat.tcl:3704
+#: ../jabber/GroupChat.tcl:3690
 #, fuzzy
 msgid "Synchronize chatroom presence with global presence"
 msgstr "Synchronize chatroom presence with global presence"
 
-#: ../jabber/GroupChat.tcl:3713
+#: ../jabber/GroupChat.tcl:3699
 msgid "Custom Colors"
 msgstr ""
 
 #. TRANSLATORS; in preferences; use different colors for different chatroom participants
-#: ../jabber/GroupChat.tcl:3718
+#: ../jabber/GroupChat.tcl:3704
 #, fuzzy
 msgid "Enable nickname coloring"
 msgstr "Enable nickname coloring"
 
-#: ../jabber/GroupChat.tcl:3748
+#: ../jabber/GroupChat.tcl:3734
 #, fuzzy
 msgid "Default nickname"
 msgstr "기본 별명"
 
-#: ../jabber/GroupChat.tcl:3768
+#: ../jabber/GroupChat.tcl:3754
 #, fuzzy
 msgid "Choose Color"
 msgstr "Color"
 
 #. TRANSLATORS; this string shows when a new conversation thread has been started
-#: ../jabber/History.tcl:841 ../jabber/History.tcl:1157
+#: ../jabber/History.tcl:840 ../jabber/History.tcl:1160
 #, fuzzy
 msgid "Thread started"
 msgstr "연결 시작"
 
-#: ../jabber/History.tcl:854
+#: ../jabber/History.tcl:853
 #, fuzzy
 msgid "You entered the chatroom"
 msgstr "You entered the chatroom"
 
-#: ../jabber/History.tcl:860
+#: ../jabber/History.tcl:859
 #, fuzzy
 msgid "Exit chatroom"
 msgstr "나가기"
 
-#: ../jabber/History.tcl:1039
+#: ../jabber/History.tcl:1042
 #, fuzzy
 msgid "No registered history for"
 msgstr "No registered history for"
@@ -3522,11 +3594,6 @@ msgstr "사용자의 전체 이름"
 #, fuzzy
 msgid "Telephone number"
 msgstr "사용자 전화번호"
-
-#: ../jabber/JForms.tcl:308 ../jabber/Register.tcl:719
-#, fuzzy
-msgid "An administrative region of the nation, such as a state or province"
-msgstr "우편 도시 주소"
 
 #: ../jabber/JForms.tcl:309 ../jabber/Register.tcl:720 ../jabber/VCard.tcl:389
 #, fuzzy
@@ -3656,12 +3723,12 @@ msgstr "Icon &Set..."
 
 #: ../jabber/JUI.tcl:154 ../jabber/JUI.tcl:159 ../jabber/JUI.tcl:1710
 #: ../jabber/JUI.tcl:1713 ../jabber/JUI.tcl:1732 ../jabber/RosterTree.tcl:1981
-#: ../jabber/UserInfo.tcl:584 ../jabber/VCard.tcl:800
+#: ../jabber/UserInfo.tcl:663 ../jabber/VCard.tcl:800
 #, fuzzy
 msgid "&Business Card"
 msgstr "&Business Card..."
 
-#: ../jabber/JUI.tcl:156 ../jabber/UserInfo.tcl:387 ../jabber/VCard.tcl:264
+#: ../jabber/JUI.tcl:156 ../jabber/UserInfo.tcl:418 ../jabber/VCard.tcl:264
 #, fuzzy
 msgid "Export"
 msgstr "Export"
@@ -3685,13 +3752,13 @@ msgstr "원도우 닫기"
 
 #: ../jabber/JUI.tcl:173 ../jabber/JUI.tcl:1229 ../jabber/JUI.tcl:1844
 #: ../jabber/JUI.tcl:1847 ../jabber/JUI.tcl:2004 ../jabber/Login.tcl:111
-#: ../jabber/Login.tcl:124 ../jabber/Login.tcl:267 ../jabber/Profiles.tcl:1832
+#: ../jabber/Login.tcl:124 ../jabber/Login.tcl:267 ../jabber/Profiles.tcl:1835
 #, fuzzy
 msgid "Login"
 msgstr "로그인"
 
 #: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1829 ../jabber/JUI.tcl:1849
-#: ../jabber/Jabber.tcl:2094 ../jabber/Jabber.tcl:2106
+#: ../jabber/Jabber.tcl:2097 ../jabber/Jabber.tcl:2109
 #, fuzzy
 msgid "Logout With Message"
 msgstr "메세지 두고 로그아웃"
@@ -3802,7 +3869,7 @@ msgstr "붙이기"
 msgid "All"
 msgstr "All"
 
-#: ../jabber/JUI.tcl:485 ../jabber/Roster.tcl:1586
+#: ../jabber/JUI.tcl:485 ../jabber/Roster.tcl:1589
 #, fuzzy
 msgid "Contacts"
 msgstr "대화 상대"
@@ -3886,7 +3953,7 @@ msgid "Logged out"
 msgstr "로그아웃"
 
 #: ../jabber/JUI.tcl:1823 ../jabber/JUI.tcl:1828 ../jabber/JUI.tcl:1994
-#: ../jabber/Jabber.tcl:2134
+#: ../jabber/Jabber.tcl:2137
 #, fuzzy
 msgid "Logout"
 msgstr "로그아웃"
@@ -3945,7 +4012,7 @@ msgstr ""
 msgid "Cannot set %s's nickname or group."
 msgstr "Cannot set %s's nickname or group."
 
-#: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:700
+#: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:701
 #, fuzzy, tcl-format
 msgid ""
 "This is your own account at %s that acts as a service that transports "
@@ -3956,16 +4023,16 @@ msgstr ""
 "messages to that IM system. It needs to be in your list. You have a "
 "subscription for %s: %s."
 
-#: ../jabber/JUser.tcl:643
+#: ../jabber/JUser.tcl:644
 msgid "Transport Details"
 msgstr ""
 
-#: ../jabber/JUser.tcl:645
+#: ../jabber/JUser.tcl:646
 #, fuzzy
 msgid "Edit Contact"
 msgstr "Edit Contact"
 
-#: ../jabber/JUser.tcl:702
+#: ../jabber/JUser.tcl:703
 #, fuzzy, tcl-format
 msgid ""
 "Edit nickname and group of %s. You also can request or remove presence "
@@ -3974,39 +4041,39 @@ msgstr ""
 "Edit nickname and group of %s. You also can request or remove presence "
 "subscription."
 
-#: ../jabber/JUser.tcl:755
+#: ../jabber/JUser.tcl:756
 #, fuzzy
 msgid "Request presence subscription"
 msgstr "Request presence subscription"
 
-#: ../jabber/JUser.tcl:760
+#: ../jabber/JUser.tcl:761
 #, fuzzy
 msgid "Remove presence subscription"
 msgstr "Remove presence subscription"
 
 #. TRANSLATORS; these strings are balloon mouse over tooltips in the edit contact dialog
-#: ../jabber/JUser.tcl:768
+#: ../jabber/JUser.tcl:769
 #, fuzzy
 msgid "Both you and your contact can see eachother's presence."
 msgstr "Both you and your contact can see eachother's presence."
 
-#: ../jabber/JUser.tcl:769
+#: ../jabber/JUser.tcl:770
 #, fuzzy
 msgid "You cannot see your contact's presence, but your contact can see yours."
 msgstr ""
 "You cannot see your contact's presence, but your contact can see yours."
 
-#: ../jabber/JUser.tcl:770
+#: ../jabber/JUser.tcl:771
 #, fuzzy
 msgid "Both you and your contact cannot see eachother's presence."
 msgstr "Both you and your contact cannot see eachother's presence."
 
-#: ../jabber/JUser.tcl:771 ../jabber/Roster.tcl:1629
+#: ../jabber/JUser.tcl:772 ../jabber/Roster.tcl:1632
 #, fuzzy
 msgid "You can see your contact's presence, but your contact can't see yours."
 msgstr "You can see your contact's presence, but your contact can't see yours."
 
-#: ../jabber/JUser.tcl:818 ../jabber/Subscribe.tcl:332
+#: ../jabber/JUser.tcl:819 ../jabber/Subscribe.tcl:332
 #: ../jabber/Subscribe.tcl:368 ../jabber/Subscribe.tcl:1302
 #: ../jabber/Subscribe.tcl:1562
 #, fuzzy
@@ -4129,20 +4196,20 @@ msgstr "지금 막 %s 파일을 받았습니다. 당신도 받기를 원하나�
 msgid "Cannot find importer for the MIME type %s"
 msgstr "Cannot find importer for the MIME type %s"
 
-#: ../jabber/Jabber.tcl:614
+#: ../jabber/Jabber.tcl:615
 #, fuzzy, tcl-format
 msgid "Cannot send message to %s."
 msgstr "Cannot send message to %s."
 
-#: ../jabber/Jabber.tcl:717
+#: ../jabber/Jabber.tcl:718
 #, tcl-format
 msgid ""
 "Your registered account with the %s service will be put in your list of "
 "contacts to work as a transport with this service."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:768 ../jabber/Jabber.tcl:773 ../jabber/Jabber.tcl:779
-#: ../jabber/Jabber.tcl:828 ../jabber/Subscribe.tcl:210
+#: ../jabber/Jabber.tcl:769 ../jabber/Jabber.tcl:774 ../jabber/Jabber.tcl:780
+#: ../jabber/Jabber.tcl:829 ../jabber/Subscribe.tcl:210
 #: ../jabber/Subscribe.tcl:243 ../jabber/Subscribe.tcl:996
 #: ../jabber/Subscribe.tcl:1015 ../jabber/Subscribe.tcl:1411
 #: ../jabber/Subscribe.tcl:1439 ../jabber/Subscribe.tcl:1448
@@ -4152,7 +4219,7 @@ msgstr ""
 msgid "Presence Subscription"
 msgstr "Presence Subscription"
 
-#: ../jabber/Jabber.tcl:769
+#: ../jabber/Jabber.tcl:770
 #, fuzzy, tcl-format
 msgid ""
 "Because %s does not allow you to see his/her presence anymore, he/she is "
@@ -4161,12 +4228,12 @@ msgstr ""
 "Because %s does not allow you to see his/her presence anymore, he/she is "
 "removed."
 
-#: ../jabber/Jabber.tcl:774
+#: ../jabber/Jabber.tcl:775
 #, fuzzy, tcl-format
 msgid "%s does not allow you to see his/her presence anymore."
 msgstr "%s does not allow you to see his/her presence anymore."
 
-#: ../jabber/Jabber.tcl:781
+#: ../jabber/Jabber.tcl:782
 #, fuzzy, tcl-format
 msgid ""
 "%s does not allow you to see his/her presence anymore. Do you want to remove "
@@ -4175,7 +4242,7 @@ msgstr ""
 "%s does not allow you to see his/her presence anymore. Do you want to remove "
 "%s?"
 
-#: ../jabber/Jabber.tcl:814
+#: ../jabber/Jabber.tcl:815
 #, fuzzy, tcl-format
 msgid ""
 "Cannot subscribe to %s's presence. The contact does not allow you to see his/"
@@ -4184,135 +4251,135 @@ msgstr ""
 "Cannot subscribe to %s's presence. The contact does not allow you to see his/"
 "her presence."
 
-#: ../jabber/Jabber.tcl:819
+#: ../jabber/Jabber.tcl:820
 #, fuzzy
 msgid "Subscription Failed"
 msgstr "서명 실패"
 
-#: ../jabber/Jabber.tcl:829
+#: ../jabber/Jabber.tcl:830
 #, fuzzy, tcl-format
 msgid "You cannot see %s's presence anymore."
 msgstr "You cannot see %s's presence anymore."
 
-#: ../jabber/Jabber.tcl:858
+#: ../jabber/Jabber.tcl:859
 #, fuzzy
 msgid "Presence Error"
 msgstr "존제 오류"
 
-#: ../jabber/Jabber.tcl:912 ../jabber/Jabber.tcl:940
+#: ../jabber/Jabber.tcl:913 ../jabber/Jabber.tcl:941
 #, fuzzy
 msgid "The connection was unexpectedly broken."
 msgstr "연결이 불연듯 끊어졌습니다."
 
-#: ../jabber/Jabber.tcl:917 ../jabber/Jabber.tcl:919 ../jabber/Jabber.tcl:929
-#: ../jabber/Jabber.tcl:931
+#: ../jabber/Jabber.tcl:918 ../jabber/Jabber.tcl:920 ../jabber/Jabber.tcl:930
+#: ../jabber/Jabber.tcl:932
 #, fuzzy, tcl-format
 msgid "Received a fatal error: %s The connection is closed."
 msgstr "Receieved a fatal error: %s The connection is closed."
 
-#: ../jabber/Jabber.tcl:994
+#: ../jabber/Jabber.tcl:995
 #, fuzzy
 msgid "Error Log (noncriticals)"
 msgstr "에러"
 
-#: ../jabber/Jabber.tcl:1488 ../jabber/UserInfo.tcl:242
+#: ../jabber/Jabber.tcl:1491 ../jabber/UserInfo.tcl:263
 #, fuzzy, tcl-format
 msgid "Cannot query %s's last activity."
 msgstr "Cannot query %s's last activity."
 
-#: ../jabber/Jabber.tcl:1500 ../jabber/Jabber.tcl:1503
-#: ../jabber/UserInfo.tcl:240
+#: ../jabber/Jabber.tcl:1503 ../jabber/Jabber.tcl:1506
+#: ../jabber/UserInfo.tcl:261
 #, fuzzy
 msgid "Last Activity"
 msgstr "최근 활동"
 
-#: ../jabber/Jabber.tcl:1501 ../jabber/Jabber.tcl:1514
-#: ../jabber/Jabber.tcl:1516
+#: ../jabber/Jabber.tcl:1504 ../jabber/Jabber.tcl:1517
+#: ../jabber/Jabber.tcl:1519
 #, fuzzy, tcl-format
 msgid "Cannot query %s's local time information."
 msgstr "Cannot query %s's local time information."
 
-#: ../jabber/Jabber.tcl:1530
+#: ../jabber/Jabber.tcl:1533
 #, fuzzy, tcl-format
 msgid "Time since client %s was last active"
 msgstr "Time since client %s was last active"
 
-#: ../jabber/Jabber.tcl:1532
+#: ../jabber/Jabber.tcl:1535
 #, fuzzy, tcl-format
 msgid "Time since %s was last connected"
 msgstr "Time since %s was last connected"
 
-#: ../jabber/Jabber.tcl:1534
+#: ../jabber/Jabber.tcl:1537
 #, fuzzy, tcl-format
 msgid "Time since server %s was started"
 msgstr "Time since server %s was started"
 
-#: ../jabber/Jabber.tcl:1537
+#: ../jabber/Jabber.tcl:1540
 #, fuzzy
 msgid "The uptime/last activity is"
 msgstr "The uptime/last activity is"
 
-#: ../jabber/Jabber.tcl:1571 ../jabber/UserInfo.tcl:274
-#: ../jabber/UserInfo.tcl:304
+#: ../jabber/Jabber.tcl:1574 ../jabber/UserInfo.tcl:295
+#: ../jabber/UserInfo.tcl:325
 #, fuzzy, tcl-format
 msgid "Cannot query %s's local time."
 msgstr "Cannot query %s's local time."
 
-#: ../jabber/Jabber.tcl:1579 ../jabber/UserInfo.tcl:272
-#: ../jabber/UserInfo.tcl:302
+#: ../jabber/Jabber.tcl:1582 ../jabber/UserInfo.tcl:293
+#: ../jabber/UserInfo.tcl:323
 #, fuzzy
 msgid "Local Time"
 msgstr "지역 시간"
 
-#: ../jabber/Jabber.tcl:1580 ../jabber/UserInfo.tcl:282
-#: ../jabber/UserInfo.tcl:311
+#: ../jabber/Jabber.tcl:1583 ../jabber/UserInfo.tcl:303
+#: ../jabber/UserInfo.tcl:332
 #, fuzzy, tcl-format
 msgid "%s's local time is: %s"
 msgstr "%s's local time is: %s"
 
-#: ../jabber/Jabber.tcl:1668 ../jabber/UserInfo.tcl:195
+#: ../jabber/Jabber.tcl:1671 ../jabber/UserInfo.tcl:213
 #, fuzzy, tcl-format
 msgid "Cannot query %s's version."
 msgstr "Cannot query %s's version."
 
-#: ../jabber/Jabber.tcl:1707
+#: ../jabber/Jabber.tcl:1710
 #, fuzzy, tcl-format
 msgid "Version information for %s."
 msgstr "%s에 대한 버전 정보"
 
-#: ../jabber/Jabber.tcl:1904 ../jabber/Jabber.tcl:2032
+#: ../jabber/Jabber.tcl:1907 ../jabber/Jabber.tcl:2035
 #, fuzzy
 msgid "New Password"
 msgstr "새 암호"
 
-#: ../jabber/Jabber.tcl:1921
+#: ../jabber/Jabber.tcl:1924
 #, fuzzy
 msgid "Set a new password for"
 msgstr "새 암호를 설정하기:"
 
-#: ../jabber/Jabber.tcl:1923
+#: ../jabber/Jabber.tcl:1926
 #, fuzzy
 msgid "New password"
 msgstr "New password"
 
-#: ../jabber/Jabber.tcl:1927 ../jabber/Register.tcl:746
+#: ../jabber/Jabber.tcl:1930 ../jabber/Register.tcl:746
 #: ../jabber/SetupAss.tcl:169
 #, fuzzy
 msgid "Retype password"
 msgstr "Retype password"
 
-#: ../jabber/Jabber.tcl:1993 ../jabber/Register.tcl:834
+#: ../jabber/Jabber.tcl:1996 ../jabber/Register.tcl:834
 #: ../jabber/SetupAss.tcl:311
 #, fuzzy
 msgid "Passwords do not match. Please try again."
 msgstr "Passwords do not match. Please try again."
 
-#: ../jabber/Jabber.tcl:2017
+#: ../jabber/Jabber.tcl:2020
 #, fuzzy
 msgid "Cannot set new password."
 msgstr "Cannot set new password."
 
-#: ../jabber/Jabber.tcl:2033
+#: ../jabber/Jabber.tcl:2036
 #, fuzzy
 msgid "Setting new password was successful."
 msgstr "새암호설정이 성공했습니다"
@@ -4346,12 +4413,12 @@ msgstr ""
 msgid "Enter your username and password to login to %s."
 msgstr "%s에 로그인 하기 위한 당신의 사용자명과 암호를 적으세요."
 
-#: ../jabber/Login.tcl:159 ../jabber/Profiles.tcl:1061
+#: ../jabber/Login.tcl:159 ../jabber/Profiles.tcl:1062
 #, fuzzy
 msgid "Profile"
 msgstr "프로필"
 
-#: ../jabber/Login.tcl:175 ../jabber/Profiles.tcl:1086
+#: ../jabber/Login.tcl:175 ../jabber/Profiles.tcl:1087
 #: ../jabber/Register.tcl:1454 ../jabber/Search.tcl:935
 #: ../jabber/SetupAss.tcl:167 ../lib/Proxy.tcl:209
 #: ../whiteboard/WDialogs.tcl:192
@@ -4359,15 +4426,15 @@ msgstr "프로필"
 msgid "Username"
 msgstr "사용자명"
 
-#: ../jabber/Login.tcl:183 ../jabber/Profiles.tcl:1093
+#: ../jabber/Login.tcl:183 ../jabber/Profiles.tcl:1094
 #, fuzzy
 msgid "Resource"
 msgstr "자원"
 
 #: ../jabber/Login.tcl:235 ../jabber/Login.tcl:239 ../jabber/Login.tcl:243
-#: ../jabber/Login.tcl:409 ../jabber/Profiles.tcl:1159
-#: ../jabber/Profiles.tcl:1163 ../jabber/Profiles.tcl:1167
-#: ../jabber/Profiles.tcl:1258 ../jabber/Register.tcl:293
+#: ../jabber/Login.tcl:409 ../jabber/Profiles.tcl:1162
+#: ../jabber/Profiles.tcl:1166 ../jabber/Profiles.tcl:1170
+#: ../jabber/Profiles.tcl:1261 ../jabber/Register.tcl:293
 #: ../jabber/Register.tcl:297 ../jabber/Register.tcl:301
 #: ../jabber/Register.tcl:541
 #, fuzzy
@@ -4380,7 +4447,7 @@ msgstr "더"
 msgid "Edit Profiles"
 msgstr "Edit Profiles"
 
-#: ../jabber/Login.tcl:394 ../jabber/Profiles.tcl:1239
+#: ../jabber/Login.tcl:394 ../jabber/Profiles.tcl:1242
 #: ../jabber/Register.tcl:530
 #, fuzzy
 msgid "Less"
@@ -4403,18 +4470,18 @@ msgid ""
 msgstr ""
 "The Contact ID differs from your profile. Do you want to save a new profile?"
 
-#: ../jabber/Login.tcl:579 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1530
+#: ../jabber/Login.tcl:579 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1533
 #, fuzzy
 msgid "Profile Name"
 msgstr "프로파일 명"
 
-#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1134
-#: ../jabber/Profiles.tcl:1532
+#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1137
+#: ../jabber/Profiles.tcl:1535
 #, fuzzy
 msgid "Add Profile"
 msgstr "Add Profile"
 
-#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1532
+#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1535
 #, fuzzy
 msgid "Enter the name for the new profile."
 msgstr "Enter the name for the new profile."
@@ -4428,27 +4495,27 @@ msgstr ""
 "Your current login settings differ from your profile settings. Do you want "
 "to save them to your profile?"
 
-#: ../jabber/Login.tcl:795
+#: ../jabber/Login.tcl:819
 #, fuzzy, tcl-format
 msgid "Contacted %s. Waiting for response"
 msgstr "%s에 연결됨. 반응 기다리는 중..."
 
-#: ../jabber/Login.tcl:834
+#: ../jabber/Login.tcl:858
 #, fuzzy, tcl-format
 msgid "Connected to %s. Initializing the XML stream"
 msgstr "%s로 연결됨. XML 스트림 초기화중..."
 
-#: ../jabber/Login.tcl:837
+#: ../jabber/Login.tcl:861
 #, fuzzy
 msgid "Negotiating TLS security"
 msgstr "Negotiating TLS security"
 
-#: ../jabber/Login.tcl:853
+#: ../jabber/Login.tcl:877
 #, fuzzy, tcl-format
 msgid "Authorization to server %s was successful. Downloading contacts..."
 msgstr "Authorization to server %s was successful. Downloading contacts..."
 
-#: ../jabber/Login.tcl:909
+#: ../jabber/Login.tcl:933
 #, fuzzy, tcl-format
 msgid ""
 "Cannot connect to %s. Either there are server or network issues, or you "
@@ -4457,66 +4524,78 @@ msgstr ""
 "Cannot connect to %s. Either there are server or network issues, or you "
 "misspelled the server's name."
 
-#: ../jabber/Login.tcl:915
+#: ../jabber/Login.tcl:939
 #, fuzzy, tcl-format
 msgid "Server %s did not respond: timeout."
 msgstr "Server %s did not respond: timeout."
 
-#: ../jabber/Login.tcl:920
+#: ../jabber/Login.tcl:944
 #, fuzzy, tcl-format
 msgid ""
 "Cannot login because this username is already in use by someone else (%s)."
 msgstr ""
 "Cannot login because this username is already in use by someone else (%s)."
 
-#: ../jabber/Login.tcl:923
+#: ../jabber/Login.tcl:947
 #, fuzzy, tcl-format
 msgid "The server %s has no support for TLS."
 msgstr "%s서버는 TLS에 대해 지원하지 않습니다."
 
-#: ../jabber/Login.tcl:926
+#: ../jabber/Login.tcl:950
 #, fuzzy, tcl-format
 msgid "Cannot negotiate TLS with server %s."
 msgstr "%s 서버와의 TLS 교신 실패."
 
-#: ../jabber/Login.tcl:929
+#: ../jabber/Login.tcl:953
 #, fuzzy
 msgid "The server has no support for SASL authentication."
 msgstr "이 서버는 SASL 인증을 지원하지 않습니다."
 
-#: ../jabber/Login.tcl:932
+#: ../jabber/Login.tcl:956
 #, fuzzy
 msgid "Cannot authenticate due to internal protocol error."
 msgstr "Authentication failed due to internal protocol error."
 
-#: ../jabber/Login.tcl:937
+#: ../jabber/Login.tcl:961
 #, fuzzy, tcl-format
 msgid "Stream error received from the server with code: %s"
 msgstr "서버로 부터 다음 코드의 스트림 오류 코드를 받았습니다: %s"
 
-#: ../jabber/Login.tcl:940
+#: ../jabber/Login.tcl:964
 #, fuzzy
 msgid "The proxy server reported an error."
 msgstr "The proxy server reported an error."
 
-#: ../jabber/Login.tcl:952 ../jabber/Register.tcl:961
+#: ../jabber/Login.tcl:976 ../jabber/Register.tcl:961
 #, fuzzy
 msgid "The login process was aborted."
 msgstr "로그인 과정이 중단되었습니다."
 
-#: ../jabber/Login.tcl:953 ../jabber/Login.tcl:954 ../jabber/Login.tcl:955
-#: ../jabber/Login.tcl:956 ../jabber/Login.tcl:958 ../jabber/Register.tcl:962
+#: ../jabber/Login.tcl:977 ../jabber/Login.tcl:978 ../jabber/Login.tcl:979
+#: ../jabber/Login.tcl:980 ../jabber/Login.tcl:982 ../jabber/Register.tcl:962
 #: ../jabber/Register.tcl:963 ../jabber/Register.tcl:964
 #: ../jabber/Register.tcl:965 ../jabber/Register.tcl:967
 msgid "Protocol error during the login process."
 msgstr ""
 
-#: ../jabber/Login.tcl:957 ../jabber/Register.tcl:966
+#: ../jabber/Login.tcl:981 ../jabber/Register.tcl:966
 #, fuzzy
 msgid "Login failed because of unknown account or wrong password."
 msgstr "사용자 명이나 암호가 잘못되어 로그인 실패했습니다."
 
-#: ../jabber/Login.tcl:1010
+#: ../jabber/Login.tcl:985
+#, tcl-format
+msgid ""
+"Invalid server response due to bug in server software:  error <%s/> is not "
+"defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting "
+"this bug to your server administrator."
+msgstr ""
+
+#: ../jabber/Login.tcl:1011
+msgid "Do you want to retry a different password or profile?"
+msgstr ""
+
+#: ../jabber/Login.tcl:1041
 #, fuzzy, tcl-format
 msgid "Do you want to register a new account with %s."
 msgstr "%s에 새 계정으로 등록하기를 원하나요."
@@ -4770,7 +4849,7 @@ msgid "Accounts"
 msgstr ""
 
 #. TRANSLATORS: string shown if you change anything in an existing account profile in the login dialog
-#: ../jabber/Profiles.tcl:981 ../jabber/Profiles.tcl:1578
+#: ../jabber/Profiles.tcl:982 ../jabber/Profiles.tcl:1581
 #, fuzzy
 msgid ""
 "You changed one or more values. Do you want to save them before closing?"
@@ -4778,29 +4857,29 @@ msgstr ""
 "You changed one or more values. Do you want to save them before closing?"
 
 #. TRANSLATORS: See File in the main window, and then Edit Profiles...
-#: ../jabber/Profiles.tcl:1055
+#: ../jabber/Profiles.tcl:1056
 #, fuzzy
 msgid ""
 "Edit, add or delete profiles. The selected profile will become the default."
 msgstr ""
 "Edit, add or delete profiles. The selected profile will become the default."
 
-#: ../jabber/Profiles.tcl:1136
+#: ../jabber/Profiles.tcl:1139
 #, fuzzy
 msgid "Delete Profile"
 msgstr "기본 프로파일"
 
-#: ../jabber/Profiles.tcl:1460
+#: ../jabber/Profiles.tcl:1463
 #, fuzzy
 msgid "You need to fill in at least the server name and user name."
 msgstr "최소한 서버이름과 사용자이름을 넣어주셔야 합니다."
 
-#: ../jabber/Profiles.tcl:1565
+#: ../jabber/Profiles.tcl:1568
 #, fuzzy
 msgid "Do you want to register a new account?"
 msgstr "Do you want to register a new account?"
 
-#: ../jabber/Profiles.tcl:1605
+#: ../jabber/Profiles.tcl:1608
 #, fuzzy
 msgid ""
 "The selected profile will be deleted. Do you also want to delete the account "
@@ -4811,78 +4890,78 @@ msgstr ""
 "for this profile? This action cannot be undone. Press Cancel to abort "
 "deletion of account and profile."
 
-#: ../jabber/Profiles.tcl:1640 ../jabber/Register.tcl:118
+#: ../jabber/Profiles.tcl:1643 ../jabber/Register.tcl:118
 #, fuzzy, tcl-format
 msgid "Cannot unregister from %s."
 msgstr "Cannot unregister from %s."
 
-#: ../jabber/Profiles.tcl:1782
+#: ../jabber/Profiles.tcl:1785
 #, fuzzy
 msgid "Connection"
 msgstr "연결"
 
-#: ../jabber/Profiles.tcl:1798
+#: ../jabber/Profiles.tcl:1801
 #, fuzzy
 msgid "Use secure connection"
 msgstr "Use secure connection"
 
-#: ../jabber/Profiles.tcl:1801
+#: ../jabber/Profiles.tcl:1804
 msgid "Certificate"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1804
+#: ../jabber/Profiles.tcl:1807
 #, fuzzy
 msgid "Use SASL authentication"
 msgstr "Use SASL authentication"
 
-#: ../jabber/Profiles.tcl:1807
+#: ../jabber/Profiles.tcl:1810
 #, fuzzy
 msgid "Use TLS and SASL"
 msgstr "Use TLS and SASL"
 
-#: ../jabber/Profiles.tcl:1810
+#: ../jabber/Profiles.tcl:1813
 #, fuzzy
 msgid "Use TLS on separate port (old)"
 msgstr "분리된 포트상에서 TLS 사용 (이전형태)"
 
-#: ../jabber/Profiles.tcl:1813
+#: ../jabber/Profiles.tcl:1816
 #, fuzzy
 msgid "Use compression"
 msgstr "Use compression"
 
-#: ../jabber/Profiles.tcl:1843
+#: ../jabber/Profiles.tcl:1846
 #, fuzzy
 msgid "Plain text password"
 msgstr "Plain text password"
 
-#: ../jabber/Profiles.tcl:1846
+#: ../jabber/Profiles.tcl:1849
 #, fuzzy
 msgid "Priority"
 msgstr "우선권"
 
-#: ../jabber/Profiles.tcl:1853
+#: ../jabber/Profiles.tcl:1856
 #, fuzzy
 msgid "Login as invisible"
 msgstr "안보이게 로그인"
 
-#: ../jabber/Profiles.tcl:1869 ../lib/Proxy.tcl:204
+#: ../jabber/Profiles.tcl:1872 ../lib/Proxy.tcl:204
 #: ../whiteboard/WDialogs.tcl:191
 #, fuzzy
 msgid "Host"
 msgstr "Host"
 
-#: ../jabber/Profiles.tcl:1871 ../lib/Proxy.tcl:206
+#: ../jabber/Profiles.tcl:1874 ../lib/Proxy.tcl:206
 #: ../whiteboard/WDialogs.tcl:193
 #, fuzzy
 msgid "Port"
 msgstr "포트"
 
-#: ../jabber/Profiles.tcl:1895
+#: ../jabber/Profiles.tcl:1898
 #, fuzzy
 msgid "Use HTTP transport"
 msgstr "Use HTTP transport"
 
-#: ../jabber/Profiles.tcl:1900 ../lib/PrefNet.tcl:98 ../lib/Proxy.tcl:144
+#: ../jabber/Profiles.tcl:1903 ../lib/PrefNet.tcl:98 ../lib/Proxy.tcl:144
 #, fuzzy
 msgid "Proxy"
 msgstr "Proxy"
@@ -5141,36 +5220,36 @@ msgstr "Logout from %s"
 msgid "The roster is up to date"
 msgstr "목록이 갱신됨"
 
-#: ../jabber/Roster.tcl:1409
+#: ../jabber/Roster.tcl:1412
 msgid "Transport"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1607
+#: ../jabber/Roster.tcl:1610
 #, fuzzy
 msgid "Remove contact without presence subscription"
 msgstr "Remove contact without presence subscription"
 
-#: ../jabber/Roster.tcl:1609
+#: ../jabber/Roster.tcl:1612
 #, fuzzy
 msgid "Clear list of contacts on logout"
 msgstr "Clear list of contacts on logout"
 
-#: ../jabber/Roster.tcl:1611
+#: ../jabber/Roster.tcl:1614
 #, fuzzy
 msgid "Chat on double-click instead of message"
 msgstr "Chat on double-click instead of message"
 
-#: ../jabber/Roster.tcl:1614
+#: ../jabber/Roster.tcl:1617
 #, fuzzy
 msgid "Show offline users"
 msgstr "Show offline users"
 
-#: ../jabber/Roster.tcl:1616
+#: ../jabber/Roster.tcl:1619
 #, fuzzy
 msgid "Show transports"
 msgstr "Show transports"
 
-#: ../jabber/Roster.tcl:1618
+#: ../jabber/Roster.tcl:1621
 #, fuzzy
 msgid "Show contacts without any subscription"
 msgstr "Show contacts without any subscription"
@@ -5521,38 +5600,43 @@ msgstr "Put contacts who add me to their list in"
 msgid "Default group"
 msgstr "기본 그룹"
 
-#: ../jabber/UserInfo.tcl:135 ../jabber/VCard.tcl:82
+#: ../jabber/UserInfo.tcl:142 ../jabber/VCard.tcl:82
 #, fuzzy, tcl-format
 msgid "Downloading business card from %s"
 msgstr "Downloading business card from %s"
 
-#: ../jabber/UserInfo.tcl:208
+#: ../jabber/UserInfo.tcl:226
 #, fuzzy
 msgid "Operating system"
 msgstr "운영 시스템"
 
-#: ../jabber/UserInfo.tcl:331 ../jabber/VCard.tcl:102 ../jabber/VCard.tcl:844
+#: ../jabber/UserInfo.tcl:356 ../jabber/VCard.tcl:102 ../jabber/VCard.tcl:844
 #, fuzzy
 msgid "Cannot download business card."
 msgstr "Cannot download business card."
 
-#: ../jabber/UserInfo.tcl:353 ../jabber/VCard.tcl:227
+#: ../jabber/UserInfo.tcl:384 ../jabber/VCard.tcl:227
 #, tcl-format
 msgid "Business Card: %s"
 msgstr ""
 
+#: ../jabber/UserInfo.tcl:474
+#, tcl-format
+msgid "Failed to obtain personal notes: %s"
+msgstr ""
+
 #. TRANSLATORS: in the business card dialog, there can be made notes about each contact
-#: ../jabber/UserInfo.tcl:438
+#: ../jabber/UserInfo.tcl:529
 #, fuzzy
 msgid "Notes"
 msgstr "노트"
 
-#: ../jabber/UserInfo.tcl:444
+#: ../jabber/UserInfo.tcl:535
 #, fuzzy
 msgid "Add your personal notes about this contact."
 msgstr "Add your personal notes about this contact."
 
-#: ../jabber/UserInfo.tcl:475
+#: ../jabber/UserInfo.tcl:564
 #, fuzzy
 msgid "Client"
 msgstr "고객"
@@ -5828,7 +5912,7 @@ msgstr "%s 파일 전송 재시작됨"
 msgid "Cannot start the internal HTTP server: %s"
 msgstr "Cannot start the internal HTTP server: %s"
 
-#: ../lib/Init.tcl:742 ../lib/Init.tcl:763 ../lib/Media.tcl:179
+#: ../lib/Init.tcl:741 ../lib/Init.tcl:762 ../lib/Media.tcl:179
 #: ../whiteboard/Plugins.tcl:445
 #, fuzzy, tcl-format
 msgid "Looking for %s"

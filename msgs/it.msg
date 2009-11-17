@@ -1,4 +1,4 @@
-set ::msgcat::header "Project-Id-Version: it\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-08-17 23:57+0200\nPO-Revision-Date: 2009-03-16 10:21+0100\nLast-Translator: Mirko Graziani <coccinella@mirkobau.it>\nLanguage-Team: Italian\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\nX-Poedit-Language: Italian\n"
+set ::msgcat::header "Project-Id-Version: it\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-09-14 20:54+0200\nPO-Revision-Date: 2009-03-16 10:21+0100\nLast-Translator: Mirko Graziani <coccinella@mirkobau.it>\nLanguage-Team: Italian\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\nX-Poedit-Language: Italian\n"
 ::msgcat::mcset it "Sourcing Tcl code" "Caricamento codice sorgente Tcl"
 ::msgcat::mcset it "Searching for our hostname" "Ricerca nome host"
 ::msgcat::mcset it "Loading Tcl packages" "Caricamento pacchetti Tcl"

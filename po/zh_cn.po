@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: zh_CN\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-08-17 23:57+0200\n"
+"POT-Creation-Date: 2009-11-17 20:19+0100\n"
 "PO-Revision-Date: 2009-03-09 21:19+0800\n"
 "Last-Translator: lvjinhua <lvjinhua@gmail.com>\n"
 "Language-Team: Simplified Chinese\n"
@@ -51,8 +51,8 @@ msgstr "检查更新(&U)"
 #: ../components/AutoUpdate.tcl:122 ../components/ImageMagic.tcl:77
 #: ../components/ImageMagic.tcl:93 ../components/JivePhone.tcl:612
 #: ../jabber/Adhoc.tcl:143 ../jabber/Adhoc.tcl:383 ../jabber/Avatar.tcl:337
-#: ../jabber/Chat.tcl:408 ../jabber/Chat.tcl:2777 ../jabber/Chat.tcl:3076
-#: ../jabber/Chat.tcl:3126 ../jabber/Create.tcl:314 ../jabber/Create.tcl:319
+#: ../jabber/Chat.tcl:408 ../jabber/Chat.tcl:2785 ../jabber/Chat.tcl:3084
+#: ../jabber/Chat.tcl:3134 ../jabber/Create.tcl:314 ../jabber/Create.tcl:319
 #: ../jabber/Create.tcl:324 ../jabber/Create.tcl:332 ../jabber/Create.tcl:429
 #: ../jabber/Create.tcl:471 ../jabber/Create.tcl:515 ../jabber/Create.tcl:549
 #: ../jabber/Create.tcl:580 ../jabber/Create.tcl:759 ../jabber/Disco.tcl:1784
@@ -65,27 +65,27 @@ msgstr "检查更新(&U)"
 #: ../jabber/FTrans.tcl:371 ../jabber/FTrans.tcl:407 ../jabber/FTrans.tcl:442
 #: ../jabber/FTrans.tcl:447 ../jabber/FTrans.tcl:458 ../jabber/FTrans.tcl:509
 #: ../jabber/FTrans.tcl:541 ../jabber/FTrans.tcl:680 ../jabber/FTrans.tcl:682
-#: ../jabber/FTrans.tcl:693 ../jabber/GroupChat.tcl:364
-#: ../jabber/GroupChat.tcl:2709 ../jabber/GroupChat.tcl:2711
-#: ../jabber/GroupChat.tcl:2719 ../jabber/GroupChat.tcl:3505
+#: ../jabber/FTrans.tcl:693 ../jabber/GroupChat.tcl:365
+#: ../jabber/GroupChat.tcl:2710 ../jabber/GroupChat.tcl:2712
+#: ../jabber/GroupChat.tcl:2720 ../jabber/GroupChat.tcl:3491
 #: ../jabber/JUser.tcl:295 ../jabber/JUser.tcl:303 ../jabber/JUser.tcl:322
 #: ../jabber/JUser.tcl:388 ../jabber/JUser.tcl:412 ../jabber/JWB.tcl:2052
-#: ../jabber/JWB.tcl:2057 ../jabber/Jabber.tcl:620 ../jabber/Jabber.tcl:867
-#: ../jabber/Jabber.tcl:911 ../jabber/Jabber.tcl:921 ../jabber/Jabber.tcl:933
-#: ../jabber/Jabber.tcl:945 ../jabber/Jabber.tcl:1490
-#: ../jabber/Jabber.tcl:1494 ../jabber/Jabber.tcl:1573
-#: ../jabber/Jabber.tcl:1575 ../jabber/Jabber.tcl:1670
-#: ../jabber/Jabber.tcl:1674 ../jabber/Jabber.tcl:1992
-#: ../jabber/Jabber.tcl:2023 ../jabber/Login.tcl:493 ../jabber/Login.tcl:521
-#: ../jabber/Login.tcl:530 ../jabber/Login.tcl:911 ../jabber/Login.tcl:1014
+#: ../jabber/JWB.tcl:2057 ../jabber/Jabber.tcl:621 ../jabber/Jabber.tcl:868
+#: ../jabber/Jabber.tcl:912 ../jabber/Jabber.tcl:922 ../jabber/Jabber.tcl:934
+#: ../jabber/Jabber.tcl:946 ../jabber/Jabber.tcl:1493
+#: ../jabber/Jabber.tcl:1497 ../jabber/Jabber.tcl:1576
+#: ../jabber/Jabber.tcl:1578 ../jabber/Jabber.tcl:1673
+#: ../jabber/Jabber.tcl:1677 ../jabber/Jabber.tcl:1995
+#: ../jabber/Jabber.tcl:2026 ../jabber/Login.tcl:493 ../jabber/Login.tcl:521
+#: ../jabber/Login.tcl:530 ../jabber/Login.tcl:935 ../jabber/Login.tcl:1049
 #: ../jabber/MUC.tcl:318 ../jabber/MUC.tcl:321 ../jabber/MUC.tcl:1162
 #: ../jabber/MUC.tcl:1247 ../jabber/MUC.tcl:1356 ../jabber/MUC.tcl:1514
 #: ../jabber/MUC.tcl:1541 ../jabber/MUC.tcl:1717 ../jabber/MUC.tcl:1719
 #: ../jabber/MUC.tcl:1740 ../jabber/MUC.tcl:1742 ../jabber/MailBox.tcl:1597
 #: ../jabber/MailBox.tcl:1675 ../jabber/MailBox.tcl:1782
 #: ../jabber/MailBox.tcl:1816 ../jabber/NewMsg.tcl:888
-#: ../jabber/NewMsg.tcl:924 ../jabber/Profiles.tcl:1452
-#: ../jabber/Profiles.tcl:1460 ../jabber/Profiles.tcl:1646
+#: ../jabber/NewMsg.tcl:924 ../jabber/Profiles.tcl:1455
+#: ../jabber/Profiles.tcl:1463 ../jabber/Profiles.tcl:1649
 #: ../jabber/Register.tcl:124 ../jabber/Register.tcl:583
 #: ../jabber/Register.tcl:589 ../jabber/Register.tcl:664
 #: ../jabber/Register.tcl:833 ../jabber/Register.tcl:893
@@ -96,15 +96,16 @@ msgstr "检查更新(&U)"
 #: ../jabber/Search.tcl:309 ../jabber/Search.tcl:353 ../jabber/Search.tcl:430
 #: ../jabber/Search.tcl:771 ../jabber/SetupAss.tcl:306
 #: ../jabber/SetupAss.tcl:310 ../jabber/SetupAss.tcl:319
-#: ../jabber/UserInfo.tcl:197 ../jabber/UserInfo.tcl:244
-#: ../jabber/UserInfo.tcl:276 ../jabber/UserInfo.tcl:305
-#: ../jabber/UserInfo.tcl:515 ../jabber/VCard.tcl:104 ../jabber/VCard.tcl:106
-#: ../jabber/VCard.tcl:785 ../jabber/VCard.tcl:845 ../jabber/VCard.tcl:847
-#: ../jabber/VCard.tcl:893 ../jabber/VCard.tcl:914 ../lib/Dialogs.tcl:162
-#: ../lib/Dialogs.tcl:169 ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71
-#: ../lib/HttpTrpt.tcl:107 ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226
-#: ../lib/HttpTrpt.tcl:233 ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78
-#: ../lib/Init.tcl:723 ../lib/Init.tcl:745 ../lib/MacintoshUtils.tcl:55
+#: ../jabber/UserInfo.tcl:215 ../jabber/UserInfo.tcl:265
+#: ../jabber/UserInfo.tcl:297 ../jabber/UserInfo.tcl:326
+#: ../jabber/UserInfo.tcl:473 ../jabber/UserInfo.tcl:604
+#: ../jabber/VCard.tcl:104 ../jabber/VCard.tcl:106 ../jabber/VCard.tcl:785
+#: ../jabber/VCard.tcl:845 ../jabber/VCard.tcl:847 ../jabber/VCard.tcl:893
+#: ../jabber/VCard.tcl:914 ../lib/Dialogs.tcl:162 ../lib/Dialogs.tcl:169
+#: ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71 ../lib/HttpTrpt.tcl:107
+#: ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226 ../lib/HttpTrpt.tcl:233
+#: ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78 ../lib/Init.tcl:722
+#: ../lib/Init.tcl:744 ../lib/MacintoshUtils.tcl:55
 #: ../lib/MacintoshUtils.tcl:77 ../lib/MacintoshUtils.tcl:99
 #: ../lib/PrefUtils.tcl:91 ../lib/PrefUtils.tcl:217 ../lib/TheServer.tcl:65
 #: ../lib/UserActions.tcl:44 ../lib/UserActions.tcl:72
@@ -160,46 +161,46 @@ msgstr "自动检查更新"
 msgid "Close"
 msgstr "关闭"
 
-#: ../components/BuddyPounce.tcl:49
+#: ../components/BuddyPounce.tcl:51
 msgid "&Contact Actions"
 msgstr "联系"
 
-#: ../components/BuddyPounce.tcl:153
+#: ../components/BuddyPounce.tcl:152
 #, tcl-format
 msgid ""
 "Set a specific action for events related to %s. Select events using the tabs "
 "below."
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:154 ../components/BuddyPounce.tcl:162
-#: ../components/BuddyPounce.tcl:168 ../components/BuddyPounce.tcl:206
+#: ../components/BuddyPounce.tcl:153 ../components/BuddyPounce.tcl:161
+#: ../components/BuddyPounce.tcl:167 ../components/BuddyPounce.tcl:211
 msgid "Contact Actions"
 msgstr "联系动作"
 
-#: ../components/BuddyPounce.tcl:161
+#: ../components/BuddyPounce.tcl:160
 #, tcl-format
 msgid ""
 "Set a specific action for events related to any contact belonging to the "
 "group %s. Select events using the tabs below."
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:167
+#: ../components/BuddyPounce.tcl:166
 msgid ""
 "Set a specific action for events related to any contact in your contact "
 "list. Select events using the tabs below."
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:170
+#: ../components/BuddyPounce.tcl:169
 msgid "Any"
 msgstr "任何"
 
-#: ../components/BuddyPounce.tcl:187 ../components/BuddyPounce.tcl:188
-#: ../components/BuddyPounce.tcl:621 ../components/Mood.tcl:295
-#: ../components/Mood.tcl:477 ../components/Mood.tcl:628
-#: ../components/Mood.tcl:669 ../components/UserActivity.tcl:244
-#: ../components/UserActivity.tcl:400 ../components/UserActivity.tcl:651
-#: ../components/UserActivity.tcl:694 ../jabber/Emoticons.tcl:755
-#: ../jabber/GroupChat.tcl:172 ../jabber/JUser.tcl:110 ../jabber/JUser.tcl:345
+#: ../components/BuddyPounce.tcl:186 ../components/BuddyPounce.tcl:187
+#: ../components/BuddyPounce.tcl:626 ../components/Mood.tcl:296
+#: ../components/Mood.tcl:478 ../components/Mood.tcl:629
+#: ../components/Mood.tcl:670 ../components/UserActivity.tcl:245
+#: ../components/UserActivity.tcl:401 ../components/UserActivity.tcl:652
+#: ../components/UserActivity.tcl:695 ../jabber/Emoticons.tcl:755
+#: ../jabber/GroupChat.tcl:173 ../jabber/JUser.tcl:110 ../jabber/JUser.tcl:345
 #: ../jabber/Subscribe.tcl:325 ../jabber/Subscribe.tcl:570
 #: ../jabber/Subscribe.tcl:1283 ../jabber/Subscribe.tcl:1326
 #: ../whiteboard/CanvasUtils.tcl:154 ../whiteboard/CanvasUtils.tcl:204
@@ -211,36 +212,36 @@ msgstr "任何"
 msgid "None"
 msgstr "None"
 
-#: ../components/BuddyPounce.tcl:234
+#: ../components/BuddyPounce.tcl:239
 msgid "Show popup"
 msgstr "显示弹出窗口"
 
-#: ../components/BuddyPounce.tcl:237
+#: ../components/BuddyPounce.tcl:242
 msgid "Play sound"
 msgstr "播放声音"
 
-#: ../components/BuddyPounce.tcl:242
+#: ../components/BuddyPounce.tcl:247
 msgid "Start chat"
 msgstr "开始聊天"
 
-#: ../components/BuddyPounce.tcl:250
+#: ../components/BuddyPounce.tcl:255
 msgid "Send message with subject"
 msgstr "带主题发送消息"
 
-#: ../components/BuddyPounce.tcl:258 ../components/Carbon.tcl:184
+#: ../components/BuddyPounce.tcl:263 ../components/Carbon.tcl:184
 #: ../components/Growl.tcl:71 ../components/Growl.tcl:74
 #: ../components/Growl.tcl:93 ../components/Growl.tcl:106
-#: ../components/Mood.tcl:489 ../components/UserActivity.tcl:257
+#: ../components/Mood.tcl:490 ../components/UserActivity.tcl:258
 #: ../jabber/AutoAway.tcl:294 ../jabber/AutoAway.tcl:317
 #: ../jabber/AutoAway.tcl:340 ../jabber/AutoAway.tcl:378
 #: ../jabber/Create.tcl:427 ../jabber/Create.tcl:469 ../jabber/Create.tcl:547
 #: ../jabber/Create.tcl:756 ../jabber/Enter.tcl:650 ../jabber/Enter.tcl:694
 #: ../jabber/FTrans.tcl:505 ../jabber/FTrans.tcl:537 ../jabber/JUser.tcl:386
-#: ../jabber/Jabber.tcl:618 ../jabber/Jabber.tcl:862 ../jabber/Jabber.tcl:1521
-#: ../jabber/Jabber.tcl:2021 ../jabber/Jabber.tcl:2123 ../jabber/MUC.tcl:189
+#: ../jabber/Jabber.tcl:619 ../jabber/Jabber.tcl:863 ../jabber/Jabber.tcl:1524
+#: ../jabber/Jabber.tcl:2024 ../jabber/Jabber.tcl:2126 ../jabber/MUC.tcl:189
 #: ../jabber/MUC.tcl:365 ../jabber/MUC.tcl:811 ../jabber/MUC.tcl:840
 #: ../jabber/MUC.tcl:1618 ../jabber/MailBox.tcl:499 ../jabber/NewMsg.tcl:232
-#: ../jabber/Profiles.tcl:1644 ../jabber/Register.tcl:122
+#: ../jabber/Profiles.tcl:1647 ../jabber/Register.tcl:122
 #: ../jabber/Register.tcl:662 ../jabber/Register.tcl:1291
 #: ../jabber/Register.tcl:1356 ../jabber/Register.tcl:1540
 #: ../jabber/Search.tcl:351 ../jabber/Search.tcl:419 ../jabber/Search.tcl:427
@@ -248,12 +249,12 @@ msgstr "带主题发送消息"
 msgid "Message"
 msgstr "信息"
 
-#: ../components/BuddyPounce.tcl:288 ../components/ImageMagic.tcl:143
+#: ../components/BuddyPounce.tcl:293 ../components/ImageMagic.tcl:143
 #: ../components/Totd.tcl:90 ../components/XMLConsole.tcl:109
 #: ../components/fsdialog.tcl:427 ../components/fsdialog.tcl:1052
 #: ../components/fsdialog.tcl:1444 ../contrib/ui/dialog.tcl:242
 #: ../contrib/ui/fontselector.tcl:152 ../jabber/Chat.tcl:356
-#: ../jabber/Jabber.tcl:1727 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
+#: ../jabber/Jabber.tcl:1730 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
 #: ../jabber/MUC.tcl:1439 ../jabber/MUC.tcl:1632 ../jabber/Status.tcl:428
 #: ../jabber/Subscribe.tcl:1107 ../lib/Component.tcl:80
 #: ../whiteboard/ItemInspector.tcl:991 ../whiteboard/WDialogs.tcl:60
@@ -261,7 +262,7 @@ msgstr "信息"
 msgid "OK"
 msgstr "好"
 
-#: ../components/BuddyPounce.tcl:290 ../components/ImageMagic.tcl:145
+#: ../components/BuddyPounce.tcl:295 ../components/ImageMagic.tcl:145
 #: ../components/JivePhone.tcl:905 ../components/JivePhone.tcl:987
 #: ../components/Phone/Phone.tcl:432 ../components/fsdialog.tcl:430
 #: ../components/fsdialog.tcl:1054 ../components/fsdialog.tcl:1446
@@ -270,14 +271,14 @@ msgstr "好"
 #: ../jabber/Adhoc.tcl:201 ../jabber/Adhoc.tcl:396 ../jabber/Chat.tcl:358
 #: ../jabber/Create.tcl:151 ../jabber/Create.tcl:670 ../jabber/Disco.tcl:1509
 #: ../jabber/Disco.tcl:1678 ../jabber/Enter.tcl:222 ../jabber/FTrans.tcl:220
-#: ../jabber/History.tcl:989 ../jabber/JUser.tcl:230 ../jabber/JUser.tcl:802
-#: ../jabber/Jabber.tcl:1007 ../jabber/Jabber.tcl:1943
-#: ../jabber/Jabber.tcl:2136 ../jabber/Login.tcl:269 ../jabber/MUC.tcl:204
+#: ../jabber/History.tcl:992 ../jabber/JUser.tcl:230 ../jabber/JUser.tcl:803
+#: ../jabber/Jabber.tcl:1008 ../jabber/Jabber.tcl:1946
+#: ../jabber/Jabber.tcl:2139 ../jabber/Login.tcl:269 ../jabber/MUC.tcl:204
 #: ../jabber/MUC.tcl:462 ../jabber/MUC.tcl:1011 ../jabber/MUC.tcl:1441
 #: ../jabber/MUC.tcl:1634 ../jabber/Profiles.tcl:923
 #: ../jabber/Register.tcl:329 ../jabber/Register.tcl:1172
 #: ../jabber/Register.tcl:1485 ../jabber/Search.tcl:131
-#: ../jabber/Status.tcl:430 ../jabber/UserInfo.tcl:377 ../jabber/VCard.tcl:250
+#: ../jabber/Status.tcl:430 ../jabber/UserInfo.tcl:408 ../jabber/VCard.tcl:250
 #: ../jabber/VCard.tcl:260 ../lib/Bookmarks.tcl:125 ../lib/Component.tcl:82
 #: ../lib/Dialogs.tcl:132 ../lib/Dialogs.tcl:341 ../lib/EditDialogs.tcl:143
 #: ../lib/EditDialogs.tcl:332 ../lib/Preferences.tcl:240
@@ -286,31 +287,31 @@ msgstr "好"
 msgid "Cancel"
 msgstr "取消"
 
-#: ../components/BuddyPounce.tcl:292
+#: ../components/BuddyPounce.tcl:297
 msgid "Disable All"
 msgstr "全部不启用"
 
-#: ../components/BuddyPounce.tcl:562
+#: ../components/BuddyPounce.tcl:567
 #, tcl-format
 msgid "%s just went online!"
 msgstr "%s 刚上线！"
 
-#: ../components/BuddyPounce.tcl:563
+#: ../components/BuddyPounce.tcl:568
 #, tcl-format
 msgid "%s just went offline!"
 msgstr "%s 刚下线！"
 
-#: ../components/BuddyPounce.tcl:564
+#: ../components/BuddyPounce.tcl:569
 #, tcl-format
 msgid "%s just sent you a message!"
 msgstr "%s 刚给您发来一条消息！"
 
-#: ../components/BuddyPounce.tcl:565
+#: ../components/BuddyPounce.tcl:570
 #, tcl-format
 msgid "%s just started a chat!"
 msgstr "%s聊天中!"
 
-#: ../components/BuddyPounce.tcl:591
+#: ../components/BuddyPounce.tcl:596
 msgid "Auto Reply"
 msgstr "自动回复"
 
@@ -331,6 +332,86 @@ msgstr "登录为唤醒状态"
 #: ../components/Geolocation.tcl:48
 msgid "Locat&ion"
 msgstr "指定&位置"
+
+#: ../components/Geolocation.tcl:52
+msgid "Altitude in meters above or below sea level"
+msgstr ""
+
+#: ../components/Geolocation.tcl:53
+msgid "A named area such as a campus or neighborhood"
+msgstr ""
+
+#: ../components/Geolocation.tcl:54
+msgid ""
+"GPS bearing (direction in which the entity is heading to reach its next "
+"waypoint), measured in decimal degrees relative to true north"
+msgstr ""
+
+#: ../components/Geolocation.tcl:55
+msgid "A specific building on a street or in an area"
+msgstr ""
+
+#: ../components/Geolocation.tcl:56
+msgid "The nation where the user is located"
+msgstr ""
+
+#: ../components/Geolocation.tcl:57
+#, fuzzy
+#| msgid "GPS Datum"
+msgid "GPS datum"
+msgstr "GPS Datum"
+
+#: ../components/Geolocation.tcl:58
+msgid "A natural-language name for or description of the location"
+msgstr ""
+
+#: ../components/Geolocation.tcl:59
+msgid "Horizontal GPS error in arc minutes"
+msgstr ""
+
+#: ../components/Geolocation.tcl:60
+msgid "A particular floor in a building"
+msgstr ""
+
+#: ../components/Geolocation.tcl:61
+msgid "Latitude in decimal degrees North"
+msgstr ""
+
+#: ../components/Geolocation.tcl:62
+#, fuzzy
+#| msgid "An administrative region of the nation, such as a state or province"
+msgid "A locality within the administrative region, such as a town or city"
+msgstr "行政管理区域,例如州或者省"
+
+#: ../components/Geolocation.tcl:63
+msgid "Longitude in decimal degrees East"
+msgstr ""
+
+#: ../components/Geolocation.tcl:64
+msgid "A code used for postal delivery"
+msgstr ""
+
+#: ../components/Geolocation.tcl:65 ../jabber/JForms.tcl:308
+#: ../jabber/Register.tcl:719
+msgid "An administrative region of the nation, such as a state or province"
+msgstr "行政管理区域,例如州或者省"
+
+#: ../components/Geolocation.tcl:66
+msgid "A particular room in a building"
+msgstr ""
+
+#: ../components/Geolocation.tcl:67
+msgid "A thoroughfare within the locality, or a crossing of two thoroughfares"
+msgstr ""
+
+#: ../components/Geolocation.tcl:68
+msgid ""
+"A catch-all element that captures any other information about the location"
+msgstr ""
+
+#: ../components/Geolocation.tcl:69
+msgid "UTC timestamp specifying the moment when the reading was taken"
+msgstr ""
 
 #: ../components/Geolocation.tcl:72
 msgid "Altitude"
@@ -413,43 +494,28 @@ msgstr "时间信息"
 msgid "Remove"
 msgstr "移除"
 
-#: ../components/Geolocation.tcl:157
+#: ../components/Geolocation.tcl:158
 msgid "Set your location that will be shown to your contacts."
 msgstr "设置你的位置，它将显示于连接上."
 
-#: ../components/Geolocation.tcl:158
+#: ../components/Geolocation.tcl:159
 msgid ""
 "Enter your location details below. At least you should set latitude and "
 "longitude."
 msgstr "输入你如下的位置描述. 至少要设置维度和经度."
 
-#: ../components/Geolocation.tcl:161 ../components/Geolocation.tcl:370
-#: ../components/fsdialog.tcl:421 ../jabber/GroupChat.tcl:3477
+#: ../components/Geolocation.tcl:162 ../components/Geolocation.tcl:367
+#: ../components/fsdialog.tcl:421 ../jabber/GroupChat.tcl:3463
 msgid "Location"
 msgstr "指定位置"
 
-#: ../components/Geolocation.tcl:183
-msgid "Altitude in meters above or below sea level"
-msgstr ""
-
-#: ../components/Geolocation.tcl:184
-msgid "Longitude in decimal degrees East"
-msgstr ""
-
-#: ../components/Geolocation.tcl:185
-msgid "Latitude in decimal degrees North"
-msgstr ""
-
-#: ../components/Geolocation.tcl:186
-msgid "The nation where the user is located"
-msgstr ""
-
-#: ../components/Geolocation.tcl:200
+#: ../components/Geolocation.tcl:195
 msgid "Synchronize with Google Earth"
 msgstr "与Google地球同步"
 
-#: ../components/Geolocation.tcl:376
-msgid "This is location data for"
+#: ../components/Geolocation.tcl:373
+#, tcl-format
+msgid "This is location data for %s"
 msgstr ""
 
 #: ../components/Growl.tcl:162 ../components/taskbar/Taskbar.tcl:185
@@ -496,247 +562,247 @@ msgstr "电话呼叫来自 %s"
 msgid "Phone"
 msgstr "电话"
 
-#: ../components/Growl.tcl:197 ../components/Mood.tcl:211
+#: ../components/Growl.tcl:197 ../components/Mood.tcl:212
 msgid "afraid"
 msgstr "担心"
 
-#: ../components/Growl.tcl:198 ../components/Mood.tcl:212
+#: ../components/Growl.tcl:198 ../components/Mood.tcl:213
 msgid "amazed"
 msgstr "吃惊"
 
-#: ../components/Growl.tcl:199 ../components/Mood.tcl:213
+#: ../components/Growl.tcl:199 ../components/Mood.tcl:214
 msgid "angry"
 msgstr "气愤"
 
-#: ../components/Growl.tcl:200 ../components/Mood.tcl:214
+#: ../components/Growl.tcl:200 ../components/Mood.tcl:215
 msgid "annoyed"
 msgstr "苦恼"
 
-#: ../components/Growl.tcl:201 ../components/Mood.tcl:215
+#: ../components/Growl.tcl:201 ../components/Mood.tcl:216
 msgid "anxious"
 msgstr "期盼"
 
-#: ../components/Growl.tcl:202 ../components/Mood.tcl:216
+#: ../components/Growl.tcl:202 ../components/Mood.tcl:217
 msgid "aroused"
 msgstr "鼓舞"
 
-#: ../components/Growl.tcl:203 ../components/Mood.tcl:217
+#: ../components/Growl.tcl:203 ../components/Mood.tcl:218
 msgid "ashamed"
 msgstr "惭愧"
 
-#: ../components/Growl.tcl:204 ../components/Mood.tcl:218
+#: ../components/Growl.tcl:204 ../components/Mood.tcl:219
 msgid "bored"
 msgstr "无聊"
 
-#: ../components/Growl.tcl:205 ../components/Mood.tcl:219
+#: ../components/Growl.tcl:205 ../components/Mood.tcl:220
 msgid "brave"
 msgstr "勇敢"
 
-#: ../components/Growl.tcl:206 ../components/Mood.tcl:220
+#: ../components/Growl.tcl:206 ../components/Mood.tcl:221
 msgid "calm"
 msgstr "平静"
 
-#: ../components/Growl.tcl:207 ../components/Mood.tcl:221
+#: ../components/Growl.tcl:207 ../components/Mood.tcl:222
 msgid "cold"
 msgstr "冷淡"
 
-#: ../components/Growl.tcl:208 ../components/Mood.tcl:222
+#: ../components/Growl.tcl:208 ../components/Mood.tcl:223
 msgid "confused"
 msgstr "困惑"
 
-#: ../components/Growl.tcl:209 ../components/Mood.tcl:223
+#: ../components/Growl.tcl:209 ../components/Mood.tcl:224
 msgid "contented"
 msgstr "满足"
 
-#: ../components/Growl.tcl:210 ../components/Mood.tcl:224
+#: ../components/Growl.tcl:210 ../components/Mood.tcl:225
 msgid "cranky"
 msgstr "暴躁"
 
-#: ../components/Growl.tcl:211 ../components/Mood.tcl:225
+#: ../components/Growl.tcl:211 ../components/Mood.tcl:226
 msgid "curious"
 msgstr "好奇"
 
-#: ../components/Growl.tcl:212 ../components/Mood.tcl:226
+#: ../components/Growl.tcl:212 ../components/Mood.tcl:227
 msgid "depressed"
 msgstr "失望"
 
-#: ../components/Growl.tcl:213 ../components/Mood.tcl:227
+#: ../components/Growl.tcl:213 ../components/Mood.tcl:228
 msgid "disappointed"
 msgstr "失望"
 
-#: ../components/Growl.tcl:214 ../components/Mood.tcl:228
+#: ../components/Growl.tcl:214 ../components/Mood.tcl:229
 msgid "disgusted"
 msgstr "厌烦"
 
-#: ../components/Growl.tcl:215 ../components/Mood.tcl:229
+#: ../components/Growl.tcl:215 ../components/Mood.tcl:230
 msgid "distracted"
 msgstr "心烦"
 
-#: ../components/Growl.tcl:216 ../components/Mood.tcl:230
+#: ../components/Growl.tcl:216 ../components/Mood.tcl:231
 msgid "embarrassed"
 msgstr "窘迫"
 
-#: ../components/Growl.tcl:217 ../components/Mood.tcl:231
+#: ../components/Growl.tcl:217 ../components/Mood.tcl:232
 msgid "excited"
 msgstr "兴奋"
 
-#: ../components/Growl.tcl:218 ../components/Mood.tcl:232
+#: ../components/Growl.tcl:218 ../components/Mood.tcl:233
 msgid "flirtatious"
 msgstr "轻浮"
 
-#: ../components/Growl.tcl:219 ../components/Mood.tcl:233
+#: ../components/Growl.tcl:219 ../components/Mood.tcl:234
 msgid "frustrated"
 msgstr "落魄"
 
-#: ../components/Growl.tcl:220 ../components/Mood.tcl:234
+#: ../components/Growl.tcl:220 ../components/Mood.tcl:235
 msgid "grumpy"
 msgstr "暴戾"
 
-#: ../components/Growl.tcl:221 ../components/Mood.tcl:235
+#: ../components/Growl.tcl:221 ../components/Mood.tcl:236
 msgid "guilty"
 msgstr "负罪感"
 
-#: ../components/Growl.tcl:222 ../components/Mood.tcl:236
+#: ../components/Growl.tcl:222 ../components/Mood.tcl:237
 msgid "happy"
 msgstr "高兴"
 
-#: ../components/Growl.tcl:223 ../components/Mood.tcl:237
+#: ../components/Growl.tcl:223 ../components/Mood.tcl:238
 msgid "hot"
 msgstr "热情"
 
-#: ../components/Growl.tcl:224 ../components/Mood.tcl:238
+#: ../components/Growl.tcl:224 ../components/Mood.tcl:239
 msgid "humbled"
 msgstr "谦虚"
 
-#: ../components/Growl.tcl:225 ../components/Mood.tcl:239
+#: ../components/Growl.tcl:225 ../components/Mood.tcl:240
 msgid "humiliated"
 msgstr "好羞辱"
 
-#: ../components/Growl.tcl:226 ../components/Mood.tcl:240
+#: ../components/Growl.tcl:226 ../components/Mood.tcl:241
 msgid "hungry"
 msgstr "饿了"
 
-#: ../components/Growl.tcl:227 ../components/Mood.tcl:241
+#: ../components/Growl.tcl:227 ../components/Mood.tcl:242
 msgid "hurt"
 msgstr "被伤害了"
 
-#: ../components/Growl.tcl:228 ../components/Mood.tcl:242
+#: ../components/Growl.tcl:228 ../components/Mood.tcl:243
 msgid "impressed"
 msgstr "留下印象"
 
-#: ../components/Growl.tcl:229 ../components/Mood.tcl:243
+#: ../components/Growl.tcl:229 ../components/Mood.tcl:244
 msgid "in awe"
 msgstr "敬畏"
 
-#: ../components/Growl.tcl:230 ../components/Mood.tcl:244
+#: ../components/Growl.tcl:230 ../components/Mood.tcl:245
 msgid "in love"
 msgstr "热恋中"
 
-#: ../components/Growl.tcl:231 ../components/Mood.tcl:245
+#: ../components/Growl.tcl:231 ../components/Mood.tcl:246
 msgid "indignant"
 msgstr "愤慨"
 
-#: ../components/Growl.tcl:232 ../components/Mood.tcl:246
+#: ../components/Growl.tcl:232 ../components/Mood.tcl:247
 msgid "interested"
 msgstr "有兴趣"
 
-#: ../components/Growl.tcl:233 ../components/Mood.tcl:247
+#: ../components/Growl.tcl:233 ../components/Mood.tcl:248
 msgid "intoxicated"
 msgstr "极兴奋"
 
-#: ../components/Growl.tcl:234 ../components/Mood.tcl:248
+#: ../components/Growl.tcl:234 ../components/Mood.tcl:249
 msgid "invincible"
 msgstr "无敌"
 
-#: ../components/Growl.tcl:235 ../components/Mood.tcl:249
+#: ../components/Growl.tcl:235 ../components/Mood.tcl:250
 msgid "jealous"
 msgstr "嫉妒"
 
-#: ../components/Growl.tcl:236 ../components/Mood.tcl:250
+#: ../components/Growl.tcl:236 ../components/Mood.tcl:251
 msgid "lonely"
 msgstr "孤独"
 
-#: ../components/Growl.tcl:237 ../components/Mood.tcl:251
+#: ../components/Growl.tcl:237 ../components/Mood.tcl:252
 msgid "mean"
 msgstr "可怜"
 
-#: ../components/Growl.tcl:238 ../components/Mood.tcl:252
+#: ../components/Growl.tcl:238 ../components/Mood.tcl:253
 msgid "moody"
 msgstr "喜怒无常"
 
-#: ../components/Growl.tcl:239 ../components/Mood.tcl:253
+#: ../components/Growl.tcl:239 ../components/Mood.tcl:254
 msgid "nervous"
 msgstr "不安"
 
-#: ../components/Growl.tcl:240 ../components/Mood.tcl:254
+#: ../components/Growl.tcl:240 ../components/Mood.tcl:255
 msgid "neutral"
 msgstr "一般"
 
-#: ../components/Growl.tcl:241 ../components/Mood.tcl:255
+#: ../components/Growl.tcl:241 ../components/Mood.tcl:256
 msgid "offended"
 msgstr "冒犯"
 
-#: ../components/Growl.tcl:242 ../components/Mood.tcl:256
+#: ../components/Growl.tcl:242 ../components/Mood.tcl:257
 msgid "playful"
 msgstr "顽皮"
 
-#: ../components/Growl.tcl:243 ../components/Mood.tcl:257
+#: ../components/Growl.tcl:243 ../components/Mood.tcl:258
 msgid "proud"
 msgstr "自大"
 
-#: ../components/Growl.tcl:244 ../components/Mood.tcl:258
+#: ../components/Growl.tcl:244 ../components/Mood.tcl:259
 msgid "relieved"
 msgstr "安心"
 
-#: ../components/Growl.tcl:245 ../components/Mood.tcl:259
+#: ../components/Growl.tcl:245 ../components/Mood.tcl:260
 msgid "remorseful"
 msgstr "悔恨"
 
-#: ../components/Growl.tcl:246 ../components/Mood.tcl:260
+#: ../components/Growl.tcl:246 ../components/Mood.tcl:261
 msgid "restless"
 msgstr "累了"
 
-#: ../components/Growl.tcl:247 ../components/Mood.tcl:261
+#: ../components/Growl.tcl:247 ../components/Mood.tcl:262
 msgid "sad"
 msgstr "伤心"
 
-#: ../components/Growl.tcl:248 ../components/Mood.tcl:262
+#: ../components/Growl.tcl:248 ../components/Mood.tcl:263
 msgid "sarcastic"
 msgstr "讽刺"
 
-#: ../components/Growl.tcl:249 ../components/Mood.tcl:263
+#: ../components/Growl.tcl:249 ../components/Mood.tcl:264
 msgid "serious"
 msgstr "严肃"
 
-#: ../components/Growl.tcl:250 ../components/Mood.tcl:264
+#: ../components/Growl.tcl:250 ../components/Mood.tcl:265
 msgid "shocked"
 msgstr "震惊"
 
-#: ../components/Growl.tcl:251 ../components/Mood.tcl:265
+#: ../components/Growl.tcl:251 ../components/Mood.tcl:266
 msgid "shy"
 msgstr "害羞"
 
-#: ../components/Growl.tcl:252 ../components/Mood.tcl:266
+#: ../components/Growl.tcl:252 ../components/Mood.tcl:267
 msgid "sick"
 msgstr "孱弱"
 
-#: ../components/Growl.tcl:253 ../components/Mood.tcl:267
+#: ../components/Growl.tcl:253 ../components/Mood.tcl:268
 msgid "sleepy"
 msgstr "困了"
 
-#: ../components/Growl.tcl:254 ../components/Mood.tcl:268
+#: ../components/Growl.tcl:254 ../components/Mood.tcl:269
 msgid "stressed"
 msgstr "压力很大"
 
-#: ../components/Growl.tcl:255 ../components/Mood.tcl:269
+#: ../components/Growl.tcl:255 ../components/Mood.tcl:270
 msgid "surprised"
 msgstr "惊奇"
 
-#: ../components/Growl.tcl:256 ../components/Mood.tcl:270
+#: ../components/Growl.tcl:256 ../components/Mood.tcl:271
 msgid "thirsty"
 msgstr "渴了"
 
-#: ../components/Growl.tcl:257 ../components/Mood.tcl:271
+#: ../components/Growl.tcl:257 ../components/Mood.tcl:272
 msgid "worried"
 msgstr "闷闷不乐"
 
@@ -756,9 +822,9 @@ msgstr "因为"
 msgid "retracted mood"
 msgstr "撤销心情"
 
-#: ../components/Growl.tcl:273 ../components/Mood.tcl:292
-#: ../components/Mood.tcl:484 ../components/Mood.tcl:586
-#: ../components/Mood.tcl:601 ../components/Mood.tcl:665
+#: ../components/Growl.tcl:273 ../components/Mood.tcl:293
+#: ../components/Mood.tcl:485 ../components/Mood.tcl:587
+#: ../components/Mood.tcl:602 ../components/Mood.tcl:666
 msgid "Mood"
 msgstr "心情"
 
@@ -850,12 +916,12 @@ msgstr "新地址"
 
 #: ../components/JivePhone.tcl:888 ../components/JivePhone.tcl:970
 #: ../components/fsdialog.tcl:488 ../jabber/Emoticons.tcl:601
-#: ../jabber/Search.tcl:934 ../jabber/UserInfo.tcl:206
+#: ../jabber/Search.tcl:934 ../jabber/UserInfo.tcl:224
 msgid "Name"
 msgstr "姓名"
 
 #: ../components/JivePhone.tcl:891 ../components/JivePhone.tcl:973
-#: ../jabber/Gateway.tcl:84
+#: ../jabber/Gateway.tcl:85
 msgid "Phone number"
 msgstr "电话号码"
 
@@ -879,323 +945,323 @@ msgstr "聊天中"
 
 #. TRANSLATORS: Moods, more information at http://xmpp.org/extensions/xep-0107.html#moods
 #. TRANSLATORS: Impressed with fear or apprehension; in fear; apprehensive.
-#: ../components/Mood.tcl:87
+#: ../components/Mood.tcl:88
 msgid "Afraid"
 msgstr "担心"
 
 #. TRANSLATORS: Astonished; confounded with fear, surprise or wonder.
-#: ../components/Mood.tcl:89
+#: ../components/Mood.tcl:90
 msgid "Amazed"
 msgstr "吃惊"
 
 #. TRANSLATORS: Displaying or feeling anger, i.e., a strong feeling of displeasure, hostility or antagonism towards someone or something, usually combined with an urge to harm.
-#: ../components/Mood.tcl:91
+#: ../components/Mood.tcl:92
 msgid "Angry"
 msgstr "生气"
 
 #. TRANSLATORS: To be disturbed or irritated, especially by continued or repeated acts.
-#: ../components/Mood.tcl:93
+#: ../components/Mood.tcl:94
 msgid "Annoyed"
 msgstr "苦闷"
 
 #. TRANSLATORS: Full of anxiety or disquietude; greatly concerned or solicitous, esp. respecting something future or unknown; being in painful suspense.
-#: ../components/Mood.tcl:95
+#: ../components/Mood.tcl:96
 msgid "Anxious"
 msgstr "期盼"
 
 #. TRANSLATORS: To be stimulated in one's feelings, especially to be sexually stimulated.
-#: ../components/Mood.tcl:97
+#: ../components/Mood.tcl:98
 msgid "Aroused"
 msgstr "鼓舞"
 
 #. TRANSLATORS: Feeling shame or guilt.
-#: ../components/Mood.tcl:99
+#: ../components/Mood.tcl:100
 msgid "Ashamed"
 msgstr "惭愧"
 
 #. TRANSLATORS: Suffering from boredom; uninterested, without attention.
-#: ../components/Mood.tcl:101
+#: ../components/Mood.tcl:102
 msgid "Bored"
 msgstr "无聊"
 
 #. TRANSLATORS: Strong in the face of fear; courageous.
-#: ../components/Mood.tcl:103
+#: ../components/Mood.tcl:104
 msgid "Brave"
 msgstr "勇敢"
 
 #. TRANSLATORS: Peaceful, quiet.
-#: ../components/Mood.tcl:105
+#: ../components/Mood.tcl:106
 msgid "Calm"
 msgstr "平静"
 
 #. TRANSLATORS: Feeling the sensation of coldness, especially to the point of discomfort.
-#: ../components/Mood.tcl:107
+#: ../components/Mood.tcl:108
 msgid "Cold"
 msgstr "冷淡"
 
 #. TRANSLATORS: Chaotic, jumbled or muddled.
-#: ../components/Mood.tcl:109
+#: ../components/Mood.tcl:110
 msgid "Confused"
 msgstr "困惑"
 
 #. TRANSLATORS: Pleased at the satisfaction of a want or desire; satisfied.
-#: ../components/Mood.tcl:111
+#: ../components/Mood.tcl:112
 msgid "Contented"
 msgstr "满足"
 
 #. TRANSLATORS: Grouchy, irritable; easily upset.
-#: ../components/Mood.tcl:113
+#: ../components/Mood.tcl:114
 msgid "Cranky"
 msgstr "暴躁"
 
 #. TRANSLATORS: Inquisitive; tending to ask questions, investigate, or explore.
-#: ../components/Mood.tcl:115
+#: ../components/Mood.tcl:116
 msgid "Curious"
 msgstr "好奇"
 
 #. TRANSLATORS: Severely despondent and unhappy.
-#: ../components/Mood.tcl:117
+#: ../components/Mood.tcl:118
 msgid "Depressed"
 msgstr "沮丧"
 
 #. TRANSLATORS: Defeated of expectation or hope; let down.
-#: ../components/Mood.tcl:119
+#: ../components/Mood.tcl:120
 msgid "Disappointed"
 msgstr "失望"
 
 #. TRANSLATORS: Filled with disgust; irritated and out of patience.
-#: ../components/Mood.tcl:121
+#: ../components/Mood.tcl:122
 msgid "Disgusted"
 msgstr "厌烦"
 
 #. TRANSLATORS: Having one's attention diverted; preoccupied.
-#: ../components/Mood.tcl:123
+#: ../components/Mood.tcl:124
 msgid "Distracted"
 msgstr "心烦"
 
 #. TRANSLATORS: Having a feeling of shameful discomfort.
-#: ../components/Mood.tcl:125
+#: ../components/Mood.tcl:126
 msgid "Embarrassed"
 msgstr "窘迫"
 
 #. TRANSLATORS: Having great enthusiasm.
-#: ../components/Mood.tcl:127
+#: ../components/Mood.tcl:128
 msgid "Excited"
 msgstr "兴奋"
 
 #. TRANSLATORS: In the mood for flirting.
-#: ../components/Mood.tcl:129
+#: ../components/Mood.tcl:130
 msgid "Flirtatious"
 msgstr "轻浮"
 
 #. TRANSLATORS: Suffering from frustration; dissatisfied, agitated, or discontented because one is unable to perform an action or fulfill a desire.
-#: ../components/Mood.tcl:131
+#: ../components/Mood.tcl:132
 msgid "Frustrated"
 msgstr "落魄"
 
 #. TRANSLATORS: Unhappy and irritable.
-#: ../components/Mood.tcl:133
+#: ../components/Mood.tcl:134
 msgid "Grumpy"
 msgstr "暴戾"
 
 #. TRANSLATORS: Feeling responsible for wrongdoing; feeling blameworthy.
-#: ../components/Mood.tcl:135
+#: ../components/Mood.tcl:136
 msgid "Guilty"
 msgstr "负罪感"
 
 #. TRANSLATORS: Experiencing the effect of favourable fortune; having the feeling arising from the consciousness of well-being or of enjoyment; enjoying good of any kind, as peace, tranquillity, comfort; contented; joyous.
-#: ../components/Mood.tcl:137
+#: ../components/Mood.tcl:138
 msgid "Happy"
 msgstr "高兴"
 
 #. TRANSLATORS: Feeling the sensation of heat, especially to the point of discomfort.
-#: ../components/Mood.tcl:139
+#: ../components/Mood.tcl:140
 msgid "Hot"
 msgstr "热情"
 
 #. TRANSLATORS: Having or showing a modest or low estimate of one's own importance; feeling lowered in dignity or importance.
-#: ../components/Mood.tcl:141
+#: ../components/Mood.tcl:142
 msgid "Humbled"
 msgstr "谦虚"
 
 #. TRANSLATORS: Feeling deprived of dignity or self-respect.
-#: ../components/Mood.tcl:143
+#: ../components/Mood.tcl:144
 msgid "Humiliated"
 msgstr "好羞辱"
 
 #. TRANSLATORS: Having a physical need for food.
-#: ../components/Mood.tcl:145
+#: ../components/Mood.tcl:146
 msgid "Hungry"
 msgstr "饥饿"
 
 #. TRANSLATORS: Wounded, injured, or pained, whether physically or emotionally.
-#: ../components/Mood.tcl:147
+#: ../components/Mood.tcl:148
 msgid "Hurt"
 msgstr "被伤害了"
 
 #. TRANSLATORS: Favourably affected by something or someone.
-#: ../components/Mood.tcl:149
+#: ../components/Mood.tcl:150
 msgid "Impressed"
 msgstr "留下印象"
 
 #. TRANSLATORS: Feeling amazement at something or someone; or feeling a combination of fear and reverence.
-#: ../components/Mood.tcl:151
+#: ../components/Mood.tcl:152
 msgid "In awe"
 msgstr ""
 
 #. TRANSLATORS: Feeling strong affection, care, liking, or attraction.
-#: ../components/Mood.tcl:153
+#: ../components/Mood.tcl:154
 msgid "In love"
 msgstr ""
 
 #. TRANSLATORS: Showing anger or indignation, especially at something unjust or wrong.
-#: ../components/Mood.tcl:155
+#: ../components/Mood.tcl:156
 msgid "Indignant"
 msgstr "愤慨"
 
 #. TRANSLATORS: Showing great attention to something or someone; having or showing interest.
-#: ../components/Mood.tcl:157
+#: ../components/Mood.tcl:158
 msgid "Interested"
 msgstr "感兴趣"
 
 #. TRANSLATORS: Under the influence of alcohol; drunk.
-#: ../components/Mood.tcl:159
+#: ../components/Mood.tcl:160
 msgid "Intoxicated"
 msgstr "极兴奋"
 
 #. TRANSLATORS: Feeling as if one cannot be defeated, overcome or denied.
-#: ../components/Mood.tcl:161
+#: ../components/Mood.tcl:162
 msgid "Invincible"
 msgstr "无敌"
 
 #. TRANSLATORS: Fearful of being replaced in position or affection.
-#: ../components/Mood.tcl:163
+#: ../components/Mood.tcl:164
 msgid "Jealous"
 msgstr "嫉妒"
 
 #. TRANSLATORS: Feeling isolated, empty, or abandoned.
-#: ../components/Mood.tcl:165
+#: ../components/Mood.tcl:166
 msgid "Lonely"
 msgstr "孤独"
 
 #. TRANSLATORS: Causing or intending to cause intentional harm; bearing ill will towards another; cruel; malicious.
-#: ../components/Mood.tcl:167
+#: ../components/Mood.tcl:168
 msgid "Mean"
 msgstr "可怜"
 
 #. TRANSLATORS: Given to sudden or frequent changes of mind or feeling; temperamental.
-#: ../components/Mood.tcl:169
+#: ../components/Mood.tcl:170
 msgid "Moody"
 msgstr "喜怒无常"
 
 #. TRANSLATORS: Easily agitated or alarmed; apprehensive or anxious.
-#: ../components/Mood.tcl:171
+#: ../components/Mood.tcl:172
 msgid "Nervous"
 msgstr "不安"
 
 #. TRANSLATORS: Not having a strong mood or emotional state.
-#: ../components/Mood.tcl:173
+#: ../components/Mood.tcl:174
 msgid "Neutral"
 msgstr "一般"
 
 #. TRANSLATORS: Feeling emotionally hurt, displeased, or insulted.
-#: ../components/Mood.tcl:175
+#: ../components/Mood.tcl:176
 msgid "Offended"
 msgstr "冒犯"
 
 #. TRANSLATORS: Interested in play; fun, recreational, unserious, lighthearted; joking, silly.
-#: ../components/Mood.tcl:177
+#: ../components/Mood.tcl:178
 msgid "Playful"
 msgstr "顽皮"
 
 #. TRANSLATORS: Feeling a sense of one's own worth or accomplishment.
-#: ../components/Mood.tcl:179
+#: ../components/Mood.tcl:180
 msgid "Proud"
 msgstr "自大"
 
 #. TRANSLATORS: Feeling uplifted because of the removal of stress or discomfort.
-#: ../components/Mood.tcl:181
+#: ../components/Mood.tcl:182
 msgid "Relieved"
 msgstr "安心"
 
 #. TRANSLATORS: Feeling regret or sadness for doing something wrong.
-#: ../components/Mood.tcl:183
+#: ../components/Mood.tcl:184
 msgid "Remorseful"
 msgstr "悔恨"
 
 #. TRANSLATORS: Without rest; unable to be still or quiet; uneasy; continually moving.
-#: ../components/Mood.tcl:185
+#: ../components/Mood.tcl:186
 msgid "Restless"
 msgstr "累了"
 
 #. TRANSLATORS: Feeling sorrow; sorrowful, mournful.
-#: ../components/Mood.tcl:187
+#: ../components/Mood.tcl:188
 msgid "Sad"
 msgstr "伤心"
 
 #. TRANSLATORS: Mocking and ironical.
-#: ../components/Mood.tcl:189
+#: ../components/Mood.tcl:190
 msgid "Sarcastic"
 msgstr "讽刺"
 
 #. TRANSLATORS: Without humor or expression of happiness; grave in manner or disposition; earnest; thoughtful; solemn.
-#: ../components/Mood.tcl:191
+#: ../components/Mood.tcl:192
 msgid "Serious"
 msgstr "严肃"
 
 #. TRANSLATORS: Surprised, startled, confused, or taken aback.
-#: ../components/Mood.tcl:193
+#: ../components/Mood.tcl:194
 msgid "Shocked"
 msgstr "震惊"
 
 #. TRANSLATORS: Feeling easily frightened or scared; timid; reserved or coy.
-#: ../components/Mood.tcl:195
+#: ../components/Mood.tcl:196
 msgid "Shy"
 msgstr "害羞"
 
 #. TRANSLATORS: Feeling in poor health; ill.
-#: ../components/Mood.tcl:197
+#: ../components/Mood.tcl:198
 msgid "Sick"
 msgstr "孱弱"
 
 #. TRANSLATORS: Feeling the need for sleep.
-#: ../components/Mood.tcl:199
+#: ../components/Mood.tcl:200
 msgid "Sleepy"
 msgstr "困了"
 
 #. TRANSLATORS: Suffering emotional pressure.
-#: ../components/Mood.tcl:201
+#: ../components/Mood.tcl:202
 msgid "Stressed"
 msgstr "压力很大"
 
 #. TRANSLATORS: Experiencing a feeling caused by something unexpected.
-#: ../components/Mood.tcl:203
+#: ../components/Mood.tcl:204
 msgid "Surprised"
 msgstr "惊奇"
 
 #. TRANSLATORS: Feeling the need to drink.
-#: ../components/Mood.tcl:205
+#: ../components/Mood.tcl:206
 msgid "Thirsty"
 msgstr "渴望"
 
 #. TRANSLATORS: Thinking about unpleasant things that have happened or that might happen; feeling afraid and unhappy.
-#: ../components/Mood.tcl:207
+#: ../components/Mood.tcl:208
 msgid "Worried"
 msgstr "闷闷不乐"
 
-#: ../components/Mood.tcl:303 ../components/Mood.tcl:640
+#: ../components/Mood.tcl:304 ../components/Mood.tcl:641
 msgid "&Custom Mood"
 msgstr "惯用心情(&C)"
 
-#: ../components/Mood.tcl:470
+#: ../components/Mood.tcl:471
 msgid "Only contacts with compatible software will see your mood."
 msgstr "联系人需要使用兼容的软件才能看到你的心情."
 
-#: ../components/Mood.tcl:470
+#: ../components/Mood.tcl:471
 msgid "Select your mood to show to your contacts."
 msgstr "选择你的心情，您的联系人可以查看该选择。"
 
-#: ../components/Mood.tcl:473
+#: ../components/Mood.tcl:474
 msgid "Custom Mood"
 msgstr "自定义心情"
 
@@ -1215,8 +1281,8 @@ msgstr "挂断"
 msgid "Call VM?"
 msgstr "呼叫 VM?"
 
-#: ../components/ParseURI.tcl:220 ../jabber/Login.tcl:665
-#: ../jabber/Login.tcl:711
+#: ../components/ParseURI.tcl:220 ../jabber/Login.tcl:668
+#: ../jabber/Login.tcl:735
 #, tcl-format
 msgid "Enter the password for your account %s"
 msgstr "输入帐号%s的密码"
@@ -1228,8 +1294,8 @@ msgstr "请为聊天室%s输入你想要的昵称"
 
 #: ../components/ParseURI.tcl:392 ../components/ParseURI.tcl:396
 #: ../jabber/Create.tcl:111 ../jabber/Create.tcl:636 ../jabber/Enter.tcl:164
-#: ../jabber/GroupChat.tcl:3478 ../jabber/JUser.tcl:182
-#: ../jabber/JUser.tcl:730 ../jabber/MUC.tcl:478 ../jabber/Profiles.tcl:1096
+#: ../jabber/GroupChat.tcl:3464 ../jabber/JUser.tcl:182
+#: ../jabber/JUser.tcl:731 ../jabber/MUC.tcl:478 ../jabber/Profiles.tcl:1097
 #: ../jabber/Subscribe.tcl:322 ../jabber/Subscribe.tcl:1285
 #: ../jabber/VCard.tcl:307
 msgid "Nickname"
@@ -1257,7 +1323,7 @@ msgid "Answer"
 msgstr "回复"
 
 #: ../components/Phone/NotifyCall.tcl:275 ../jabber/JUser.tcl:593
-#: ../jabber/Jabber.tcl:716 ../jabber/Subscribe.tcl:447
+#: ../jabber/Jabber.tcl:717 ../jabber/Subscribe.tcl:447
 #: ../jabber/Subscribe.tcl:467 ../jabber/Subscribe.tcl:667
 #: ../jabber/Subscribe.tcl:700 ../jabber/Subscribe.tcl:779
 #: ../jabber/Subscribe.tcl:826 ../jabber/Subscribe.tcl:892
@@ -1331,8 +1397,8 @@ msgstr "第一"
 msgid "Last"
 msgstr "最近"
 
-#: ../components/SlideShow.tcl:121 ../jabber/Chat.tcl:1350
-#: ../jabber/GroupChat.tcl:676 ../lib/FileCache.tcl:599
+#: ../components/SlideShow.tcl:121 ../jabber/Chat.tcl:1359
+#: ../jabber/GroupChat.tcl:677 ../lib/FileCache.tcl:599
 #: ../whiteboard/FilePrefs.tcl:77 ../whiteboard/Plugins.tcl:1324
 #: ../whiteboard/WBPrefs.tcl:74
 msgid "Whiteboard"
@@ -1384,53 +1450,59 @@ msgstr "登录"
 msgid "Chatroom presence change"
 msgstr "聊天室改动"
 
-#: ../components/Sounds.tcl:497
+#: ../components/Sounds.tcl:503
 msgid "Sounds"
 msgstr "声音"
 
-#: ../components/Sounds.tcl:528
+#: ../components/Sounds.tcl:536
 msgid "Alert sounds"
 msgstr "警告音"
 
-#: ../components/Sounds.tcl:539
+#: ../components/Sounds.tcl:547
 msgid "Sound set"
 msgstr "声音设置"
 
-#: ../components/Sounds.tcl:547
+#: ../components/Sounds.tcl:555
 msgid "Enable or disable sounds below"
 msgstr "开启/关闭下面的声音"
 
-#: ../components/Sounds.tcl:559
+#: ../components/Sounds.tcl:567
 msgid "Play"
 msgstr "播放"
 
-#: ../components/Sounds.tcl:567
+#: ../components/Sounds.tcl:575
 msgid "Volume"
 msgstr "音量"
 
-#: ../components/Sounds.tcl:575
+#: ../components/Sounds.tcl:586
+#, fuzzy
+#| msgid "Sound set"
+msgid "Sound device"
+msgstr "声音设置"
+
+#: ../components/Sounds.tcl:595
 msgid "MIDI Player"
 msgstr "MIDI播放器"
 
-#: ../components/Sounds.tcl:584
+#: ../components/Sounds.tcl:604
 msgid "External Midi Player"
 msgstr "外部音频播放器"
 
-#: ../components/Sounds.tcl:585
+#: ../components/Sounds.tcl:605
 msgid ""
 "Set command to use for playing MIDI sounds. This option is only relevant if "
 "you use a sound set with MIDI files."
 msgstr ""
 "设置命令来播放 MIDI 格式的声音. 这个选项只有在你使用 MIDI 文件才有意义."
 
-#: ../components/Sounds.tcl:586
+#: ../components/Sounds.tcl:606
 msgid "MIDI command"
 msgstr "MIDI命令"
 
-#: ../components/Sounds.tcl:634 ../components/Sounds.tcl:674
-#: ../components/Sounds.tcl:694 ../contrib/ui/fontselector.tcl:156
+#: ../components/Sounds.tcl:654 ../components/Sounds.tcl:698
+#: ../components/Sounds.tcl:724 ../contrib/ui/fontselector.tcl:156
 #: ../contrib/ui/openimage.tcl:97 ../jabber/Emoticons.tcl:749
-#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1399
+#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1402
 #: ../jabber/Rosticons.tcl:605 ../jabber/SetupAss.tcl:116
 #: ../lib/PrefHelpers.tcl:104 ../whiteboard/WBPrefs.tcl:120
 #: ../whiteboard/WBPrefs.tcl:123 ../whiteboard/WBPrefs.tcl:196
@@ -1484,15 +1556,15 @@ msgid "Show tips on startup"
 msgstr "显示"
 
 #. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
-#: ../components/UserActivity.tcl:53
+#: ../components/UserActivity.tcl:54
 msgid "Acti&vity"
 msgstr "活动"
 
-#: ../components/UserActivity.tcl:224
+#: ../components/UserActivity.tcl:225
 msgid "Set your activity that will be shown to your contacts."
 msgstr "设置你的活动使他能够现实于你的连接中."
 
-#: ../components/UserActivity.tcl:225
+#: ../components/UserActivity.tcl:226
 msgid ""
 "Select from the first button your general activity, and optionally, your "
 "specific actvity from the second button. You may also add a descriptive text."
@@ -1500,313 +1572,313 @@ msgstr ""
 "从第一个按钮中选择你的活动, 从第二个按钮中指定你的活动（可选）. 你可以添加文"
 "字描述."
 
-#: ../components/UserActivity.tcl:228
+#: ../components/UserActivity.tcl:229
 msgid "User Activity"
 msgstr "用户活动"
 
-#: ../components/UserActivity.tcl:251 ../jabber/VCard.tcl:287
+#: ../components/UserActivity.tcl:252 ../jabber/VCard.tcl:287
 #: ../lib/PrefHelpers.tcl:71 ../lib/PrefNet.tcl:61 ../lib/Preferences.tcl:217
 msgid "General"
 msgstr "通常"
 
-#: ../components/UserActivity.tcl:254
+#: ../components/UserActivity.tcl:255
 msgid "Specific"
 msgstr "特殊"
 
-#: ../components/UserActivity.tcl:259
+#: ../components/UserActivity.tcl:260
 msgid "Show all specific activities"
 msgstr "显示"
 
-#: ../components/UserActivity.tcl:317
+#: ../components/UserActivity.tcl:318
 msgid "Doing chores"
 msgstr "做家务中"
 
-#: ../components/UserActivity.tcl:318
+#: ../components/UserActivity.tcl:319
 msgid "Buying groceries"
 msgstr "购物中"
 
-#: ../components/UserActivity.tcl:319
+#: ../components/UserActivity.tcl:320
 msgid "Cleaning"
 msgstr "打扫中"
 
-#: ../components/UserActivity.tcl:320
+#: ../components/UserActivity.tcl:321
 msgid "Cooking"
 msgstr "下厨中"
 
-#: ../components/UserActivity.tcl:321
+#: ../components/UserActivity.tcl:322
 msgid "Doing maintenance"
 msgstr "搞维修中"
 
-#: ../components/UserActivity.tcl:322
+#: ../components/UserActivity.tcl:323
 msgid "Doing the dishes"
 msgstr "炒菜中"
 
-#: ../components/UserActivity.tcl:323
+#: ../components/UserActivity.tcl:324
 msgid "Doing the laundry"
 msgstr "洗衣服中"
 
-#: ../components/UserActivity.tcl:324
+#: ../components/UserActivity.tcl:325
 msgid "Gardening"
 msgstr "园艺劳动中"
 
-#: ../components/UserActivity.tcl:325
+#: ../components/UserActivity.tcl:326
 msgid "Running an errand"
 msgstr "执行任务中"
 
-#: ../components/UserActivity.tcl:326
+#: ../components/UserActivity.tcl:327
 msgid "Walking the dog"
 msgstr "遛狗中"
 
-#: ../components/UserActivity.tcl:328
+#: ../components/UserActivity.tcl:329
 msgid "Drinking"
 msgstr "喝酒"
 
-#: ../components/UserActivity.tcl:329
+#: ../components/UserActivity.tcl:330
 msgid "Having a beer"
 msgstr "喝啤酒"
 
-#: ../components/UserActivity.tcl:330
+#: ../components/UserActivity.tcl:331
 msgid "Having coffee"
 msgstr "喝啡"
 
-#: ../components/UserActivity.tcl:331
+#: ../components/UserActivity.tcl:332
 msgid "Having tea"
 msgstr "喝茶"
 
-#: ../components/UserActivity.tcl:333
+#: ../components/UserActivity.tcl:334
 msgid "Eating"
 msgstr "吃饭"
 
-#: ../components/UserActivity.tcl:334
+#: ../components/UserActivity.tcl:335
 msgid "Having a snack"
 msgstr "吃点心"
 
-#: ../components/UserActivity.tcl:335
+#: ../components/UserActivity.tcl:336
 msgid "Having breakfast"
 msgstr "吃早餐"
 
-#: ../components/UserActivity.tcl:336
+#: ../components/UserActivity.tcl:337
 msgid "Having dinner"
 msgstr "吃晚餐"
 
-#: ../components/UserActivity.tcl:337
+#: ../components/UserActivity.tcl:338
 msgid "Having lunch"
 msgstr "吃午餐"
 
-#: ../components/UserActivity.tcl:339
+#: ../components/UserActivity.tcl:340
 msgid "Exercising"
 msgstr "锻炼中"
 
-#: ../components/UserActivity.tcl:340
+#: ../components/UserActivity.tcl:341
 msgid "Hiking"
 msgstr "徒步旅行"
 
-#: ../components/UserActivity.tcl:341
+#: ../components/UserActivity.tcl:342
 msgid "Jogging"
 msgstr "慢跑"
 
-#: ../components/UserActivity.tcl:342
+#: ../components/UserActivity.tcl:343
 msgid "Playing sports"
 msgstr "体育运动"
 
-#: ../components/UserActivity.tcl:343
+#: ../components/UserActivity.tcl:344
 msgid "Running"
 msgstr "跑步"
 
-#: ../components/UserActivity.tcl:344
+#: ../components/UserActivity.tcl:345
 msgid "Skiing"
 msgstr "滑雪"
 
-#: ../components/UserActivity.tcl:345
+#: ../components/UserActivity.tcl:346
 msgid "Swimming"
 msgstr "游泳"
 
-#: ../components/UserActivity.tcl:346
+#: ../components/UserActivity.tcl:347
 msgid "Working out"
 msgstr "计算"
 
-#: ../components/UserActivity.tcl:348
+#: ../components/UserActivity.tcl:349
 msgid "Grooming"
 msgstr "打扮"
 
-#: ../components/UserActivity.tcl:349
+#: ../components/UserActivity.tcl:350
 msgid "At the spa"
 msgstr "泡温泉"
 
-#: ../components/UserActivity.tcl:350
+#: ../components/UserActivity.tcl:351
 msgid "Brushing teeth"
 msgstr "刷牙"
 
-#: ../components/UserActivity.tcl:351
+#: ../components/UserActivity.tcl:352
 msgid "Getting a haircut"
 msgstr "理发"
 
-#: ../components/UserActivity.tcl:352
+#: ../components/UserActivity.tcl:353
 msgid "Shaving"
 msgstr "刮胡子"
 
-#: ../components/UserActivity.tcl:353
+#: ../components/UserActivity.tcl:354
 msgid "Taking a bath"
 msgstr "泡澡"
 
-#: ../components/UserActivity.tcl:354
+#: ../components/UserActivity.tcl:355
 msgid "Taking a shower"
 msgstr "淋浴"
 
-#: ../components/UserActivity.tcl:356
+#: ../components/UserActivity.tcl:357
 msgid "Having appointment"
 msgstr "在任命"
 
-#: ../components/UserActivity.tcl:358
+#: ../components/UserActivity.tcl:359
 msgid "Inactive"
 msgstr "不活动"
 
-#: ../components/UserActivity.tcl:359
+#: ../components/UserActivity.tcl:360
 msgid "Day off"
 msgstr "放假"
 
-#: ../components/UserActivity.tcl:360
+#: ../components/UserActivity.tcl:361
 msgid "Hanging out"
 msgstr "挂了"
 
-#: ../components/UserActivity.tcl:361
+#: ../components/UserActivity.tcl:362
 msgid "On vacation"
 msgstr "休假"
 
-#: ../components/UserActivity.tcl:362
+#: ../components/UserActivity.tcl:363
 msgid "Scheduled holiday"
 msgstr "法定假日"
 
-#: ../components/UserActivity.tcl:363
+#: ../components/UserActivity.tcl:364
 msgid "Sleeping"
 msgstr "睡觉"
 
-#: ../components/UserActivity.tcl:365
+#: ../components/UserActivity.tcl:366
 msgid "Relaxing"
 msgstr "放松"
 
-#: ../components/UserActivity.tcl:366
+#: ../components/UserActivity.tcl:367
 msgid "Gaming"
 msgstr "游戏"
 
-#: ../components/UserActivity.tcl:367
+#: ../components/UserActivity.tcl:368
 msgid "Going out"
 msgstr "外出"
 
-#: ../components/UserActivity.tcl:368
+#: ../components/UserActivity.tcl:369
 msgid "Partying"
 msgstr "聚会"
 
-#: ../components/UserActivity.tcl:369
+#: ../components/UserActivity.tcl:370
 msgid "Reading"
 msgstr "阅读"
 
-#: ../components/UserActivity.tcl:370
+#: ../components/UserActivity.tcl:371
 msgid "Rehearsing"
 msgstr "排演"
 
-#: ../components/UserActivity.tcl:371
+#: ../components/UserActivity.tcl:372
 msgid "Shopping"
 msgstr "购物"
 
-#: ../components/UserActivity.tcl:372
+#: ../components/UserActivity.tcl:373
 msgid "Socializing"
 msgstr "社交"
 
-#: ../components/UserActivity.tcl:373
+#: ../components/UserActivity.tcl:374
 msgid "Sunbathing"
 msgstr "日光浴"
 
-#: ../components/UserActivity.tcl:374
+#: ../components/UserActivity.tcl:375
 msgid "Watching tv"
 msgstr "看电视"
 
-#: ../components/UserActivity.tcl:375
+#: ../components/UserActivity.tcl:376
 msgid "Watching a movie"
 msgstr "看电影"
 
-#: ../components/UserActivity.tcl:377
+#: ../components/UserActivity.tcl:378
 msgid "Talking"
 msgstr "谈话"
 
-#: ../components/UserActivity.tcl:378
+#: ../components/UserActivity.tcl:379
 msgid "In real life"
 msgstr "在现实生活中"
 
-#: ../components/UserActivity.tcl:379
+#: ../components/UserActivity.tcl:380
 msgid "On the phone"
 msgstr "打电话"
 
-#: ../components/UserActivity.tcl:380
+#: ../components/UserActivity.tcl:381
 msgid "On video phone"
 msgstr "视频电话"
 
-#: ../components/UserActivity.tcl:382
+#: ../components/UserActivity.tcl:383
 msgid "Traveling"
 msgstr "旅行"
 
-#: ../components/UserActivity.tcl:383
+#: ../components/UserActivity.tcl:384
 msgid "Commuting"
 msgstr "交换"
 
-#: ../components/UserActivity.tcl:384
+#: ../components/UserActivity.tcl:385
 msgid "Cycling"
 msgstr "转圈"
 
-#: ../components/UserActivity.tcl:385
+#: ../components/UserActivity.tcl:386
 msgid "Driving"
 msgstr "驾驶"
 
-#: ../components/UserActivity.tcl:386
+#: ../components/UserActivity.tcl:387
 msgid "In a car"
 msgstr "在小汽车中"
 
-#: ../components/UserActivity.tcl:387
+#: ../components/UserActivity.tcl:388
 msgid "On a bus"
 msgstr "在公交车上"
 
-#: ../components/UserActivity.tcl:388
+#: ../components/UserActivity.tcl:389
 msgid "On a plane"
 msgstr "在飞机上"
 
-#: ../components/UserActivity.tcl:389
+#: ../components/UserActivity.tcl:390
 msgid "On a train"
 msgstr "在火车上"
 
-#: ../components/UserActivity.tcl:390
+#: ../components/UserActivity.tcl:391
 msgid "On a trip"
 msgstr "在旅途中"
 
-#: ../components/UserActivity.tcl:391
+#: ../components/UserActivity.tcl:392
 msgid "Walking"
 msgstr "步行中"
 
-#: ../components/UserActivity.tcl:393
+#: ../components/UserActivity.tcl:394
 msgid "Working"
 msgstr "工作中"
 
-#: ../components/UserActivity.tcl:394
+#: ../components/UserActivity.tcl:395
 msgid "Coding"
 msgstr "写代码中"
 
-#: ../components/UserActivity.tcl:395
+#: ../components/UserActivity.tcl:396
 msgid "In a meeting"
 msgstr "开会中"
 
-#: ../components/UserActivity.tcl:396
+#: ../components/UserActivity.tcl:397
 msgid "Studying"
 msgstr "学习中"
 
-#: ../components/UserActivity.tcl:397
+#: ../components/UserActivity.tcl:398
 msgid "Writing"
 msgstr "写作中"
 
-#: ../components/UserActivity.tcl:604 ../components/UserActivity.tcl:626
-#: ../components/UserActivity.tcl:692 ../components/UserActivity.tcl:699
+#: ../components/UserActivity.tcl:605 ../components/UserActivity.tcl:627
+#: ../components/UserActivity.tcl:693 ../components/UserActivity.tcl:700
 msgid "Activity"
 msgstr "活动"
 
-#: ../components/UserActivity.tcl:664
+#: ../components/UserActivity.tcl:665
 msgid "Custom Activity"
 msgstr "自定义活动"
 
@@ -1820,7 +1892,7 @@ msgid "Pretty format"
 msgstr ""
 
 #: ../components/XMLConsole.tcl:111 ../components/fsdialog.tcl:1050
-#: ../contrib/ui/openimage.tcl:95 ../jabber/History.tcl:991
+#: ../contrib/ui/openimage.tcl:95 ../jabber/History.tcl:994
 #: ../whiteboard/Whiteboard.tcl:450 ../whiteboard/Whiteboard.tcl:2933
 #: ../whiteboard/Whiteboard.tcl:2935
 msgid "Clear"
@@ -1872,7 +1944,7 @@ msgid "Filter"
 msgstr "过滤器"
 
 #: ../components/fsdialog.tcl:492 ../jabber/Emoticons.tcl:603
-#: ../jabber/History.tcl:952 ../jabber/MailBox.tcl:689
+#: ../jabber/History.tcl:950 ../jabber/MailBox.tcl:689
 #: ../jabber/NewMsg.tcl:446
 msgid "Date"
 msgstr "日期"
@@ -1886,7 +1958,7 @@ msgid "Owner"
 msgstr "所有者"
 
 #: ../components/fsdialog.tcl:498 ../jabber/JUser.tcl:184
-#: ../jabber/JUser.tcl:740 ../jabber/Subscribe.tcl:324
+#: ../jabber/JUser.tcl:741 ../jabber/Subscribe.tcl:324
 #: ../jabber/Subscribe.tcl:1287
 msgid "Group"
 msgstr "群"
@@ -1934,7 +2006,7 @@ msgstr "最小化(&n)"
 
 #. TRANSLATORS; menu item for sending normal message (no chat!)
 #: ../components/taskbar/Taskbar.tcl:187 ../jabber/Disco.tcl:155
-#: ../jabber/GroupChat.tcl:220 ../jabber/JUI.tcl:176 ../jabber/JUI.tcl:1832
+#: ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:176 ../jabber/JUI.tcl:1832
 #: ../jabber/JUI.tcl:1852 ../jabber/Roster.tcl:122 ../jabber/Search.tcl:33
 #: ../jabber/Search.tcl:41
 msgid "&Message"
@@ -2191,26 +2263,26 @@ msgstr "清理菜单"
 msgid "Select Avatar"
 msgstr "选择形象"
 
-#: ../jabber/Chat.tcl:313 ../jabber/Chat.tcl:325 ../jabber/Chat.tcl:2102
-#: ../jabber/Chat.tcl:3216 ../jabber/Chat.tcl:4201 ../jabber/JUI.tcl:1245
+#: ../jabber/Chat.tcl:313 ../jabber/Chat.tcl:325 ../jabber/Chat.tcl:2110
+#: ../jabber/Chat.tcl:3224 ../jabber/Chat.tcl:4209 ../jabber/JUI.tcl:1245
 msgid "Chat"
 msgstr "聊天"
 
 #: ../jabber/Chat.tcl:343 ../jabber/JUser.tcl:180 ../jabber/JWB.tcl:450
-#: ../jabber/Login.tcl:168 ../jabber/MUC.tcl:242 ../jabber/Profiles.tcl:1081
+#: ../jabber/Login.tcl:168 ../jabber/MUC.tcl:242 ../jabber/Profiles.tcl:1082
 #: ../jabber/Subscribe.tcl:1087 ../jabber/VCard.tcl:309
 msgid "Contact ID"
 msgstr "联系ID"
 
 #. TRANSLATORS; Control + T (or Command + T on Mac OS X), then enter @ and proceed
-#: ../jabber/Chat.tcl:407 ../jabber/Chat.tcl:3125 ../jabber/Disco.tcl:1783
+#: ../jabber/Chat.tcl:407 ../jabber/Chat.tcl:3133 ../jabber/Disco.tcl:1783
 #: ../jabber/MUC.tcl:1248
 #, tcl-format
 msgid "%s is invalid. Do you want to continue anyway?"
 msgstr "%s无效.仍然继续?"
 
 #. TRANSLATORS; composing events in chat window
-#: ../jabber/Chat.tcl:685 ../jabber/Chat.tcl:687 ../jabber/Chat.tcl:3708
+#: ../jabber/Chat.tcl:685 ../jabber/Chat.tcl:687 ../jabber/Chat.tcl:3716
 #, tcl-format
 msgid "%s is composing a reply"
 msgstr "%s正在写回复"
@@ -2235,28 +2307,28 @@ msgstr "%s已经有一段时间不聊天了"
 msgid "%s has closed the chat"
 msgstr "%s关闭了对话"
 
-#: ../jabber/Chat.tcl:844 ../jabber/Chat.tcl:1581 ../jabber/GotMsg.tcl:261
-#: ../jabber/GroupChat.tcl:2364 ../jabber/History.tcl:801
+#: ../jabber/Chat.tcl:853 ../jabber/Chat.tcl:1589 ../jabber/GotMsg.tcl:261
+#: ../jabber/GroupChat.tcl:2365 ../jabber/History.tcl:800
 #: ../jabber/MailBox.tcl:683 ../jabber/NewMsg.tcl:367 ../jabber/NewMsg.tcl:450
 msgid "Subject"
 msgstr "主题"
 
-#: ../jabber/Chat.tcl:1328 ../jabber/FTrans.tcl:218
-#: ../jabber/GroupChat.tcl:657 ../jabber/GroupChat.tcl:862
+#: ../jabber/Chat.tcl:1337 ../jabber/FTrans.tcl:218
+#: ../jabber/GroupChat.tcl:658 ../jabber/GroupChat.tcl:863
 #: ../jabber/NewMsg.tcl:302
 msgid "Send"
 msgstr "发送"
 
-#: ../jabber/Chat.tcl:1332 ../jabber/FTrans.tcl:38 ../jabber/FTrans.tcl:182
+#: ../jabber/Chat.tcl:1341 ../jabber/FTrans.tcl:38 ../jabber/FTrans.tcl:182
 msgid "Send File"
 msgstr "发送文件"
 
-#: ../jabber/Chat.tcl:1336 ../jabber/Chat.tcl:3290 ../jabber/GroupChat.tcl:660
-#: ../jabber/GroupChat.tcl:3182 ../jabber/History.tcl:995
-#: ../jabber/History.tcl:1348 ../jabber/JUser.tcl:800
-#: ../jabber/Jabber.tcl:1941 ../jabber/MailBox.tcl:508
+#: ../jabber/Chat.tcl:1345 ../jabber/Chat.tcl:3298 ../jabber/GroupChat.tcl:661
+#: ../jabber/GroupChat.tcl:3183 ../jabber/History.tcl:998
+#: ../jabber/History.tcl:1351 ../jabber/JUser.tcl:801
+#: ../jabber/Jabber.tcl:1944 ../jabber/MailBox.tcl:508
 #: ../jabber/NewMsg.tcl:309 ../jabber/Profiles.tcl:920
-#: ../jabber/UserInfo.tcl:375 ../jabber/VCard.tcl:248 ../lib/Bookmarks.tcl:122
+#: ../jabber/UserInfo.tcl:406 ../jabber/VCard.tcl:248 ../lib/Bookmarks.tcl:122
 #: ../lib/Dialogs.tcl:339 ../lib/EditDialogs.tcl:140
 #: ../lib/EditDialogs.tcl:284 ../lib/Preferences.tcl:237
 #: ../whiteboard/CanvasFile.tcl:686 ../whiteboard/FilePrefs.tcl:526
@@ -2265,170 +2337,170 @@ msgid "Save"
 msgstr "保存"
 
 #. TRANSLATORS; history of past chat conversations
-#: ../jabber/Chat.tcl:1341 ../jabber/GroupChat.tcl:663
-#: ../jabber/History.tcl:948
+#: ../jabber/Chat.tcl:1350 ../jabber/GroupChat.tcl:664
+#: ../jabber/History.tcl:946
 msgid "History"
 msgstr "历史记录"
 
-#: ../jabber/Chat.tcl:1345 ../jabber/GroupChat.tcl:672
-#: ../jabber/History.tcl:993 ../jabber/MailBox.tcl:511
+#: ../jabber/Chat.tcl:1354 ../jabber/GroupChat.tcl:673
+#: ../jabber/History.tcl:996 ../jabber/MailBox.tcl:511
 #: ../jabber/NewMsg.tcl:312 ../lib/Dialogs.tcl:103 ../lib/Dialogs.tcl:115
 #: ../lib/Dialogs.tcl:130
 msgid "Print"
 msgstr "打印"
 
-#: ../jabber/Chat.tcl:1355 ../jabber/GroupChat.tcl:479
-#: ../jabber/GroupChat.tcl:666
+#: ../jabber/Chat.tcl:1364 ../jabber/GroupChat.tcl:480
+#: ../jabber/GroupChat.tcl:667
 msgid "Invite"
 msgstr "邀请"
 
 #. TRANSLATORS; balloon mouse over texts in chat dialog
-#: ../jabber/Chat.tcl:1603
+#: ../jabber/Chat.tcl:1611
 msgid "Enter the subject of the conversation, set by pressing Return"
 msgstr "输入对话的主题, 按回车键设定"
 
-#: ../jabber/Chat.tcl:1640
+#: ../jabber/Chat.tcl:1648
 msgid "Show or hide the chat history"
 msgstr "显示或隐藏聊天记录"
 
-#: ../jabber/Chat.tcl:1641 ../jabber/GroupChat.tcl:916
+#: ../jabber/Chat.tcl:1649 ../jabber/GroupChat.tcl:917
 msgid "If checked, Return sends message, else use Ctrl/Cmd-Return"
 msgstr "如果选中，按“回车”发送消息，否则按“Ctrl+回车”发送消息"
 
-#: ../jabber/Chat.tcl:1642 ../jabber/NewMsg.tcl:375
+#: ../jabber/Chat.tcl:1650 ../jabber/NewMsg.tcl:375
 msgid "Insert emoticon"
 msgstr "插入表情"
 
-#: ../jabber/Chat.tcl:1643 ../jabber/GroupChat.tcl:918
+#: ../jabber/Chat.tcl:1651 ../jabber/GroupChat.tcl:919
 msgid "Show or hide status changes in chat"
 msgstr "聊天中显示或隐藏状态"
 
-#: ../jabber/Chat.tcl:1734
+#: ../jabber/Chat.tcl:1742
 msgid "Enter your message and press Return or Shift-Return"
 msgstr "输入你的消息按下回车或者Shift+回车"
 
 #. TRANSLATORS; Control + F (or Command + F on Mac OS X)
-#: ../jabber/Chat.tcl:1890 ../jabber/GroupChat.tcl:1169
-#: ../jabber/History.tcl:1074 ../jabber/JUI.tcl:254 ../jabber/JUI.tcl:1786
+#: ../jabber/Chat.tcl:1898 ../jabber/GroupChat.tcl:1170
+#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:254 ../jabber/JUI.tcl:1786
 #: ../jabber/RosterTree.tcl:1995
 msgid "Find"
 msgstr "查找"
 
-#: ../jabber/Chat.tcl:1892 ../jabber/GroupChat.tcl:1171
-#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
+#: ../jabber/Chat.tcl:1900 ../jabber/GroupChat.tcl:1172
+#: ../jabber/History.tcl:1080 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
 #: ../jabber/RosterTree.tcl:1997
 msgid "Find Next"
 msgstr "查找下一个"
 
-#: ../jabber/Chat.tcl:1893 ../jabber/GroupChat.tcl:1172
-#: ../jabber/History.tcl:1078 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
+#: ../jabber/Chat.tcl:1901 ../jabber/GroupChat.tcl:1173
+#: ../jabber/History.tcl:1081 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
 #: ../jabber/RosterTree.tcl:1998
 msgid "Find Previous"
 msgstr "查找前一个"
 
-#: ../jabber/Chat.tcl:1965 ../jabber/Create.tcl:723 ../jabber/NewMsg.tcl:1066
-#: ../jabber/NewMsg.tcl:1097 ../jabber/Profiles.tcl:982
-#: ../jabber/Profiles.tcl:1603 ../jabber/Register.tcl:84
+#: ../jabber/Chat.tcl:1973 ../jabber/Create.tcl:723 ../jabber/NewMsg.tcl:1066
+#: ../jabber/NewMsg.tcl:1097 ../jabber/Profiles.tcl:983
+#: ../jabber/Profiles.tcl:1606 ../jabber/Register.tcl:84
 #: ../lib/EditDialogs.tcl:226 ../lib/Preferences.tcl:393
 #: ../lib/Preferences.tcl:454 ../lib/Preferences.tcl:497
 #: ../whiteboard/CanvasFile.tcl:548
 msgid "Warning"
 msgstr "警告"
 
-#: ../jabber/Chat.tcl:1966
+#: ../jabber/Chat.tcl:1974
 msgid "Do you want to invite this contact to a new chatroom?"
 msgstr "确认邀请此联系人加入聊天室?"
 
-#: ../jabber/Chat.tcl:2239 ../jabber/GroupChat.tcl:1238
+#: ../jabber/Chat.tcl:2247 ../jabber/GroupChat.tcl:1239
 msgid "Close tab"
 msgstr "关闭制表符"
 
-#: ../jabber/Chat.tcl:2561
+#: ../jabber/Chat.tcl:2569
 msgid "You need to be logged in to see the presence of this contact"
 msgstr "你需要登录来查看你的先前状态"
 
-#: ../jabber/Chat.tcl:2763
+#: ../jabber/Chat.tcl:2771
 msgid "Converting Chat into Conference"
 msgstr "转换到会议模式"
 
-#: ../jabber/Chat.tcl:2778 ../jabber/Create.tcl:314 ../jabber/Create.tcl:581
-#: ../jabber/GroupChat.tcl:365
+#: ../jabber/Chat.tcl:2786 ../jabber/Create.tcl:314 ../jabber/Create.tcl:581
+#: ../jabber/GroupChat.tcl:366
 msgid "Cannot find any chatroom service."
 msgstr "无法找到任何聊天室服务."
 
-#: ../jabber/Chat.tcl:3077 ../jabber/GroupChat.tcl:2720
+#: ../jabber/Chat.tcl:3085 ../jabber/GroupChat.tcl:2721
 #: ../jabber/NewMsg.tcl:888
 msgid "Cannot send when not logged in."
 msgstr "没有登录，无法发送信息."
 
-#: ../jabber/Chat.tcl:3568
+#: ../jabber/Chat.tcl:3576
 msgid ""
 "Do you want to close this chat window and lose the complete conversation?"
 msgstr "确认关闭此聊天窗口？将会丢失对话."
 
 #. TRANSLATORS; see Chat settings in preferences
-#: ../jabber/Chat.tcl:4224
+#: ../jabber/Chat.tcl:4232
 msgid "By default use active <Return> to send messages"
 msgstr "默认使用 <回车键> 来发送消息"
 
-#: ../jabber/Chat.tcl:4226
+#: ../jabber/Chat.tcl:4234
 msgid "Show incoming messages in new window"
 msgstr "在新窗口中显示收到信息"
 
-#: ../jabber/Chat.tcl:4228
+#: ../jabber/Chat.tcl:4236
 msgid "Treat normal messages as chat messages"
 msgstr "将普通信息视为聊天信息"
 
-#: ../jabber/Chat.tcl:4233
+#: ../jabber/Chat.tcl:4241
 msgid "Double click message in inbox"
 msgstr "在收件箱中双击信息"
 
-#: ../jabber/Chat.tcl:4234
+#: ../jabber/Chat.tcl:4242
 msgid "Open message in new window"
 msgstr "在新窗口中打开信息"
 
-#: ../jabber/Chat.tcl:4237
+#: ../jabber/Chat.tcl:4245
 msgid "Reply to sender"
 msgstr "回复给发送人"
 
-#: ../jabber/Chat.tcl:4244
+#: ../jabber/Chat.tcl:4252
 msgid "History length"
 msgstr "历史记录长度"
 
-#: ../jabber/Chat.tcl:4247
+#: ../jabber/Chat.tcl:4255
 msgid "More recent than"
 msgstr "更晚于"
 
-#: ../jabber/Chat.tcl:4250
+#: ../jabber/Chat.tcl:4258
 msgid "Ten seconds"
 msgstr "十秒"
 
-#: ../jabber/Chat.tcl:4251
+#: ../jabber/Chat.tcl:4259
 msgid "One minute"
 msgstr "一分钟"
 
-#: ../jabber/Chat.tcl:4252
+#: ../jabber/Chat.tcl:4260
 msgid "Ten minutes"
 msgstr "十分钟"
 
-#: ../jabber/Chat.tcl:4253
+#: ../jabber/Chat.tcl:4261
 msgid "One hour"
 msgstr "一个小时"
 
-#: ../jabber/Chat.tcl:4254
+#: ../jabber/Chat.tcl:4262
 msgid "No restriction"
 msgstr "不限制"
 
-#: ../jabber/Chat.tcl:4264
+#: ../jabber/Chat.tcl:4272
 msgid "Number of messages to display"
 msgstr "显示信息的数目"
 
 #. TRANSLATORS; the user's name that is showed in the in the user's chat dialog, but not on the screen of the remote contact
-#: ../jabber/Chat.tcl:4271
+#: ../jabber/Chat.tcl:4279
 msgid "Local nickname"
 msgstr "本地昵称"
 
-#: ../jabber/Chat.tcl:4276
+#: ../jabber/Chat.tcl:4284
 msgid "Your nickname for local display"
 msgstr "您本地显示的昵称"
 
@@ -2436,7 +2508,7 @@ msgstr "您本地显示的昵称"
 msgid "Create Chatroom"
 msgstr "创建聊天室"
 
-#: ../jabber/Create.tcl:81 ../jabber/GroupChat.tcl:196
+#: ../jabber/Create.tcl:81 ../jabber/GroupChat.tcl:197
 #: ../whiteboard/WDialogs.tcl:202 ../whiteboard/WDialogs.tcl:203
 #: ../whiteboard/WDialogs.tcl:204 ../whiteboard/WDialogs.tcl:205
 #: ../whiteboard/WDialogs.tcl:213 ../whiteboard/WDialogs.tcl:214
@@ -2451,13 +2523,13 @@ msgstr "选择一个服务,输入聊天室名称和昵称.你也可以配置聊�
 
 #: ../jabber/Create.tcl:105 ../jabber/Create.tcl:627 ../jabber/Enter.tcl:128
 #: ../jabber/Register.tcl:1124 ../jabber/Register.tcl:1451
-#: ../jabber/Search.tcl:154 ../jabber/UserInfo.tcl:477
+#: ../jabber/Search.tcl:154 ../jabber/UserInfo.tcl:566
 msgid "Service"
 msgstr "服务"
 
 #: ../jabber/Create.tcl:108 ../jabber/Create.tcl:632 ../jabber/Enter.tcl:162
-#: ../jabber/GroupChat.tcl:1547 ../jabber/GroupChat.tcl:1550
-#: ../jabber/GroupChat.tcl:3477 ../jabber/GroupChat.tcl:3679
+#: ../jabber/GroupChat.tcl:1548 ../jabber/GroupChat.tcl:1551
+#: ../jabber/GroupChat.tcl:3463 ../jabber/GroupChat.tcl:3665
 msgid "Chatroom"
 msgstr "聊天室"
 
@@ -2470,13 +2542,13 @@ msgid "Select or manually enter the name of a chatroom"
 msgstr "选择或输入聊天室名称"
 
 #: ../jabber/Create.tcl:124 ../jabber/Enter.tcl:189
-#: ../jabber/GroupChat.tcl:3755 ../jabber/JForms.tcl:305
-#: ../jabber/JUser.tcl:200 ../jabber/Profiles.tcl:1123
+#: ../jabber/GroupChat.tcl:3741 ../jabber/JForms.tcl:305
+#: ../jabber/JUser.tcl:200 ../jabber/Profiles.tcl:1126
 #: ../jabber/Register.tcl:716 ../jabber/VCard.tcl:323
 msgid "Familiar name"
 msgstr "随意的称呼"
 
-#: ../jabber/Create.tcl:147 ../jabber/GroupChat.tcl:669
+#: ../jabber/Create.tcl:147 ../jabber/GroupChat.tcl:670
 msgid "Configure"
 msgstr "配置"
 
@@ -2493,7 +2565,7 @@ msgid "You must provide a nickname."
 msgstr "你必须提供一个昵称."
 
 #: ../jabber/Create.tcl:332 ../jabber/Create.tcl:515 ../jabber/JUser.tcl:294
-#: ../jabber/Profiles.tcl:1452
+#: ../jabber/Profiles.tcl:1455
 msgid "Invalid Contact ID."
 msgstr "无效的联系人ID."
 
@@ -2508,8 +2580,8 @@ msgstr "无法从聊天室装载配置."
 #: ../jabber/Create.tcl:425 ../jabber/Create.tcl:467 ../jabber/Create.tcl:545
 #: ../jabber/Create.tcl:753 ../jabber/Enter.tcl:648 ../jabber/Enter.tcl:691
 #: ../jabber/FTrans.tcl:502 ../jabber/FTrans.tcl:534 ../jabber/JUser.tcl:384
-#: ../jabber/Jabber.tcl:616 ../jabber/Jabber.tcl:860 ../jabber/Jabber.tcl:2019
-#: ../jabber/Login.tcl:918 ../jabber/Login.tcl:942 ../jabber/Profiles.tcl:1642
+#: ../jabber/Jabber.tcl:617 ../jabber/Jabber.tcl:861 ../jabber/Jabber.tcl:2022
+#: ../jabber/Login.tcl:942 ../jabber/Login.tcl:966 ../jabber/Profiles.tcl:1645
 #: ../jabber/Register.tcl:120 ../jabber/Register.tcl:660
 #: ../jabber/Register.tcl:1289 ../jabber/Register.tcl:1354
 #: ../jabber/Register.tcl:1538 ../jabber/Search.tcl:349
@@ -2543,7 +2615,7 @@ msgstr "进入聊天室前请填写所有的域."
 msgid "Cannot enter chatroom %s."
 msgstr "无法进入聊天室 %s."
 
-#: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:177
+#: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:222 ../jabber/JUI.tcl:177
 #: ../jabber/JUI.tcl:1833 ../jabber/JUI.tcl:1853 ../jabber/Roster.tcl:121
 #: ../jabber/Roster.tcl:527 ../jabber/Search.tcl:34 ../jabber/Search.tcl:42
 msgid "Cha&t"
@@ -2559,7 +2631,7 @@ msgstr "进入聊天室(&r)"
 msgid "&Create Chatroom"
 msgstr "创建聊天室(&C)"
 
-#: ../jabber/Disco.tcl:164 ../jabber/GroupChat.tcl:223
+#: ../jabber/Disco.tcl:164 ../jabber/GroupChat.tcl:224
 #: ../jabber/Roster.tcl:126 ../jabber/Roster.tcl:187 ../jabber/Search.tcl:35
 #: ../jabber/Search.tcl:43
 msgid "View &Business Card"
@@ -2609,7 +2681,7 @@ msgstr "移除列表(&L)"
 msgid "C&ommands"
 msgstr "命令(C&)"
 
-#: ../jabber/Disco.tcl:187 ../jabber/GroupChat.tcl:231 ../jabber/JUI.tcl:192
+#: ../jabber/Disco.tcl:187 ../jabber/GroupChat.tcl:232 ../jabber/JUI.tcl:192
 #: ../jabber/Roster.tcl:172
 msgid "&Whiteboard"
 msgstr "画板(&W)"
@@ -2630,7 +2702,7 @@ msgid "Background Image"
 msgstr "背景图片"
 
 #: ../jabber/Disco.tcl:1491 ../jabber/Disco.tcl:1676 ../jabber/Enter.tcl:131
-#: ../jabber/MUC.tcl:1616 ../jabber/UserInfo.tcl:163
+#: ../jabber/MUC.tcl:1616 ../jabber/UserInfo.tcl:175
 msgid "Discover"
 msgstr "搜寻"
 
@@ -2643,7 +2715,7 @@ msgid "Enter a server to discover and use its services."
 msgstr "输入要找寻的服务器,并使用其服务."
 
 #: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:531 ../jabber/Login.tcl:171
-#: ../jabber/Profiles.tcl:1083 ../jabber/Profiles.tcl:1861
+#: ../jabber/Profiles.tcl:1084 ../jabber/Profiles.tcl:1864
 #: ../jabber/Register.tcl:274 ../jabber/SetupAss.tcl:137
 #: ../jabber/SetupAss.tcl:165 ../jabber/StatusSlot.tcl:34
 #: ../whiteboard/WDialogs.tcl:172
@@ -2663,10 +2735,10 @@ msgstr "作者"
 msgid "Home"
 msgstr "主页"
 
-#: ../jabber/Emoticons.tcl:602 ../jabber/Jabber.tcl:1682
-#: ../jabber/Jabber.tcl:1693 ../jabber/Roster.tcl:190
-#: ../jabber/UserInfo.tcl:193 ../jabber/UserInfo.tcl:202
-#: ../jabber/UserInfo.tcl:207 ../whiteboard/WDialogs.tcl:133
+#: ../jabber/Emoticons.tcl:602 ../jabber/Jabber.tcl:1685
+#: ../jabber/Jabber.tcl:1696 ../jabber/Roster.tcl:190
+#: ../jabber/UserInfo.tcl:211 ../jabber/UserInfo.tcl:220
+#: ../jabber/UserInfo.tcl:225 ../whiteboard/WDialogs.tcl:133
 msgid "Version"
 msgstr "版本"
 
@@ -2714,9 +2786,9 @@ msgstr ""
 "请选择一项服务,输入聊天室名和用户名. 你可以搜寻位于此服务上的聊天室.一些聊天"
 "室可能需要密码."
 
-#: ../jabber/Enter.tcl:166 ../jabber/GroupChat.tcl:3478
-#: ../jabber/Login.tcl:179 ../jabber/Login.tcl:663 ../jabber/Login.tcl:665
-#: ../jabber/Login.tcl:709 ../jabber/Login.tcl:711 ../jabber/Profiles.tcl:1089
+#: ../jabber/Enter.tcl:166 ../jabber/GroupChat.tcl:3464
+#: ../jabber/Login.tcl:179 ../jabber/Login.tcl:666 ../jabber/Login.tcl:668
+#: ../jabber/Login.tcl:733 ../jabber/Login.tcl:735 ../jabber/Profiles.tcl:1090
 #: ../jabber/Register.tcl:1458 ../jabber/SetupAss.tcl:168 ../lib/Proxy.tcl:211
 msgid "Password"
 msgstr "密码"
@@ -2726,7 +2798,7 @@ msgid "Bookmarks"
 msgstr "书签"
 
 #: ../jabber/Enter.tcl:190 ../jabber/JForms.tcl:306 ../jabber/Login.tcl:224
-#: ../jabber/Profiles.tcl:1122 ../jabber/Register.tcl:717
+#: ../jabber/Profiles.tcl:1125 ../jabber/Register.tcl:717
 msgid "Password or secret"
 msgstr "密码"
 
@@ -2794,7 +2866,7 @@ msgid "Rate"
 msgstr "比率"
 
 #: ../jabber/FTrans.tcl:658 ../lib/HttpTrpt.tcl:162
-#: ../whiteboard/GetFileIface.tcl:514
+#: ../whiteboard/GetFileIface.tcl:513
 msgid "Writing file"
 msgstr "正在写入文件"
 
@@ -2813,46 +2885,50 @@ msgid "Email"
 msgstr "电子邮件"
 
 #. TRANSLATORS; AOL AIM address
-#: ../jabber/Gateway.tcl:72
+#: ../jabber/Gateway.tcl:73
 msgid "Screen name"
 msgstr "屏显名称"
 
-#: ../jabber/Gateway.tcl:75
+#: ../jabber/Gateway.tcl:76
 msgid "Gadu-Gadu number"
 msgstr "Gadu-Gadu号"
 
 #. TRANSLATORS; also known as UIN
-#: ../jabber/Gateway.tcl:77
+#: ../jabber/Gateway.tcl:78
 msgid "ICQ number"
 msgstr "ICQ号"
 
-#: ../jabber/Gateway.tcl:78
+#: ../jabber/Gateway.tcl:79
 msgid "IRC"
 msgstr "聊天系统"
 
-#: ../jabber/Gateway.tcl:79 ../jabber/Gateway.tcl:85 ../jabber/JForms.tcl:300
+#: ../jabber/Gateway.tcl:80 ../jabber/Gateway.tcl:86 ../jabber/JForms.tcl:300
 #: ../jabber/Register.tcl:711 ../jabber/VCard.tcl:324
 msgid "Email address"
 msgstr "电子邮件地址"
 
-#: ../jabber/Gateway.tcl:80
+#: ../jabber/Gateway.tcl:81
 msgid "MSN Address"
 msgstr "MSN地址"
 
-#: ../jabber/Gateway.tcl:86
+#: ../jabber/Gateway.tcl:87
 msgid "QQ number"
 msgstr "QQ号"
 
-#: ../jabber/Gateway.tcl:87
+#: ../jabber/Gateway.tcl:88
 msgid "Tlen address"
 msgstr "Tlen地址"
 
-#: ../jabber/Gateway.tcl:88 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
-#: ../jabber/Profiles.tcl:1121 ../jabber/VCard.tcl:322
+#: ../jabber/Gateway.tcl:90
+msgid "Twitter user"
+msgstr ""
+
+#: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
+#: ../jabber/Profiles.tcl:1124 ../jabber/VCard.tcl:322
 msgid "Chat address"
 msgstr "聊天地址"
 
-#: ../jabber/Gateway.tcl:89
+#: ../jabber/Gateway.tcl:92
 msgid "Yahoo ID"
 msgstr "Yahoo帐号"
 
@@ -2877,127 +2953,127 @@ msgstr "在此窗口中显示收到的信息"
 msgid "From"
 msgstr "由"
 
-#: ../jabber/GroupChat.tcl:171
+#: ../jabber/GroupChat.tcl:172
 msgid "Moderators"
 msgstr "缓冲器"
 
-#: ../jabber/GroupChat.tcl:173
+#: ../jabber/GroupChat.tcl:174
 msgid "Participants"
 msgstr "参与者"
 
-#: ../jabber/GroupChat.tcl:174
+#: ../jabber/GroupChat.tcl:175
 msgid "Visitors"
 msgstr "访问者"
 
-#: ../jabber/GroupChat.tcl:186
+#: ../jabber/GroupChat.tcl:187
 msgid "available"
 msgstr "在线"
 
 #. TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a short moment
-#: ../jabber/GroupChat.tcl:188
+#: ../jabber/GroupChat.tcl:189
 msgid "away"
 msgstr "离开"
 
-#: ../jabber/GroupChat.tcl:189
+#: ../jabber/GroupChat.tcl:190
 #, fuzzy
 #| msgid "Text-to-speech for chat"
 msgid "free for chat"
 msgstr "聊天中使用文本朗读器"
 
 #. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
-#: ../jabber/GroupChat.tcl:191
+#: ../jabber/GroupChat.tcl:192
 msgid "do not disturb"
 msgstr "请勿打扰"
 
 #. TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a longer period
-#: ../jabber/GroupChat.tcl:193
+#: ../jabber/GroupChat.tcl:194
 msgid "extended away"
 msgstr "长时间离开"
 
 #. TRANSLATORS; presence state when the user is available, but not visible as available to her or his contacts
-#: ../jabber/GroupChat.tcl:195
+#: ../jabber/GroupChat.tcl:196
 msgid "invisible"
 msgstr "隐身"
 
-#: ../jabber/GroupChat.tcl:222 ../jabber/Roster.tcl:123
+#: ../jabber/GroupChat.tcl:223 ../jabber/Roster.tcl:123
 msgid "Send &File"
 msgstr "发送文件(&F)"
 
-#: ../jabber/GroupChat.tcl:224
+#: ../jabber/GroupChat.tcl:225
 msgid "&Edit Nickname"
 msgstr "编辑昵称(&E)"
 
-#: ../jabber/GroupChat.tcl:225
+#: ../jabber/GroupChat.tcl:226
 msgid "&Ignore"
 msgstr "忽略(&I)"
 
-#: ../jabber/GroupChat.tcl:477
+#: ../jabber/GroupChat.tcl:478
 #, tcl-format
 msgid "%s invited you to %s. Do you want to enter this chatroom?"
 msgstr "%s邀请你到%s.确认进入此聊天室?"
 
-#: ../jabber/GroupChat.tcl:917
+#: ../jabber/GroupChat.tcl:918
 msgid "Bookmark this chatroom"
 msgstr "添加此聊天室到书签"
 
 #. TRANSLATORS; subject of a chatroom discussion with multiple people
-#: ../jabber/GroupChat.tcl:925
+#: ../jabber/GroupChat.tcl:926
 msgid "Topic"
 msgstr "话题"
 
-#: ../jabber/GroupChat.tcl:1507
+#: ../jabber/GroupChat.tcl:1508
 msgid "You logged out and exited the chatroom"
 msgstr "你已登出并退出聊天室."
 
-#: ../jabber/GroupChat.tcl:2536
+#: ../jabber/GroupChat.tcl:2537
 #, tcl-format
 msgid "Do you want to exit the chatroom %s?"
 msgstr "确认离开聊天室%s?"
 
-#: ../jabber/GroupChat.tcl:2707 ../jabber/MUC.tcl:1715 ../jabber/MUC.tcl:1738
+#: ../jabber/GroupChat.tcl:2708 ../jabber/MUC.tcl:1715 ../jabber/MUC.tcl:1738
 #, tcl-format
 msgid "Cannot interact with the chatroom %s."
 msgstr "不能与聊天室 %s互动."
 
-#: ../jabber/GroupChat.tcl:3479
+#: ../jabber/GroupChat.tcl:3465
 msgid "Auto Join"
 msgstr "自动加入"
 
-#: ../jabber/GroupChat.tcl:3704
+#: ../jabber/GroupChat.tcl:3690
 msgid "Synchronize chatroom presence with global presence"
 msgstr "同步聊天室显身和全局显身信息"
 
-#: ../jabber/GroupChat.tcl:3713
+#: ../jabber/GroupChat.tcl:3699
 msgid "Custom Colors"
 msgstr "自定义颜色"
 
 #. TRANSLATORS; in preferences; use different colors for different chatroom participants
-#: ../jabber/GroupChat.tcl:3718
+#: ../jabber/GroupChat.tcl:3704
 msgid "Enable nickname coloring"
 msgstr "启用昵称颜色"
 
-#: ../jabber/GroupChat.tcl:3748
+#: ../jabber/GroupChat.tcl:3734
 msgid "Default nickname"
 msgstr "默认昵称"
 
-#: ../jabber/GroupChat.tcl:3768
+#: ../jabber/GroupChat.tcl:3754
 msgid "Choose Color"
 msgstr "颜色"
 
 #. TRANSLATORS; this string shows when a new conversation thread has been started
-#: ../jabber/History.tcl:841 ../jabber/History.tcl:1157
+#: ../jabber/History.tcl:840 ../jabber/History.tcl:1160
 msgid "Thread started"
 msgstr "进程开始"
 
-#: ../jabber/History.tcl:854
+#: ../jabber/History.tcl:853
 msgid "You entered the chatroom"
 msgstr "你已进入聊天室"
 
-#: ../jabber/History.tcl:860
+#: ../jabber/History.tcl:859
 msgid "Exit chatroom"
 msgstr "退出"
 
-#: ../jabber/History.tcl:1039
+#: ../jabber/History.tcl:1042
 msgid "No registered history for"
 msgstr "没有注册记录关于"
 
@@ -3041,10 +3117,6 @@ msgstr "全名"
 #: ../jabber/JForms.tcl:307 ../jabber/Register.tcl:718
 msgid "Telephone number"
 msgstr "电话"
-
-#: ../jabber/JForms.tcl:308 ../jabber/Register.tcl:719
-msgid "An administrative region of the nation, such as a state or province"
-msgstr "行政管理区域,例如州或者省"
 
 #: ../jabber/JForms.tcl:309 ../jabber/Register.tcl:720 ../jabber/VCard.tcl:389
 msgid "URL to personal website"
@@ -3152,11 +3224,11 @@ msgstr "图标集(&S)"
 
 #: ../jabber/JUI.tcl:154 ../jabber/JUI.tcl:159 ../jabber/JUI.tcl:1710
 #: ../jabber/JUI.tcl:1713 ../jabber/JUI.tcl:1732 ../jabber/RosterTree.tcl:1981
-#: ../jabber/UserInfo.tcl:584 ../jabber/VCard.tcl:800
+#: ../jabber/UserInfo.tcl:663 ../jabber/VCard.tcl:800
 msgid "&Business Card"
 msgstr "名片(&B)"
 
-#: ../jabber/JUI.tcl:156 ../jabber/UserInfo.tcl:387 ../jabber/VCard.tcl:264
+#: ../jabber/JUI.tcl:156 ../jabber/UserInfo.tcl:418 ../jabber/VCard.tcl:264
 msgid "Export"
 msgstr "导出"
 
@@ -3176,12 +3248,12 @@ msgstr "关闭窗口(&C)"
 
 #: ../jabber/JUI.tcl:173 ../jabber/JUI.tcl:1229 ../jabber/JUI.tcl:1844
 #: ../jabber/JUI.tcl:1847 ../jabber/JUI.tcl:2004 ../jabber/Login.tcl:111
-#: ../jabber/Login.tcl:124 ../jabber/Login.tcl:267 ../jabber/Profiles.tcl:1832
+#: ../jabber/Login.tcl:124 ../jabber/Login.tcl:267 ../jabber/Profiles.tcl:1835
 msgid "Login"
 msgstr "登录"
 
 #: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1829 ../jabber/JUI.tcl:1849
-#: ../jabber/Jabber.tcl:2094 ../jabber/Jabber.tcl:2106
+#: ../jabber/Jabber.tcl:2097 ../jabber/Jabber.tcl:2109
 msgid "Logout With Message"
 msgstr "登出并留言"
 
@@ -3274,7 +3346,7 @@ msgstr "粘贴(&P)"
 msgid "All"
 msgstr "所有"
 
-#: ../jabber/JUI.tcl:485 ../jabber/Roster.tcl:1586
+#: ../jabber/JUI.tcl:485 ../jabber/Roster.tcl:1589
 msgid "Contacts"
 msgstr "联系人"
 
@@ -3343,7 +3415,7 @@ msgid "Logged out"
 msgstr "登出"
 
 #: ../jabber/JUI.tcl:1823 ../jabber/JUI.tcl:1828 ../jabber/JUI.tcl:1994
-#: ../jabber/Jabber.tcl:2134
+#: ../jabber/Jabber.tcl:2137
 msgid "Logout"
 msgstr "登出"
 
@@ -3391,7 +3463,7 @@ msgstr ""
 msgid "Cannot set %s's nickname or group."
 msgstr "无法设置%s的昵称或群."
 
-#: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:700
+#: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:701
 #, tcl-format
 msgid ""
 "This is your own account at %s that acts as a service that transports "
@@ -3401,47 +3473,47 @@ msgstr ""
 "这是属于你的位于%s上的帐号，用来作为服务向IM系统收发信息.需要将它加入到你的列"
 "表中. 这是你得到%s的附属信息: %s."
 
-#: ../jabber/JUser.tcl:643
+#: ../jabber/JUser.tcl:644
 msgid "Transport Details"
 msgstr ""
 
-#: ../jabber/JUser.tcl:645
+#: ../jabber/JUser.tcl:646
 msgid "Edit Contact"
 msgstr "编辑联系人"
 
-#: ../jabber/JUser.tcl:702
+#: ../jabber/JUser.tcl:703
 #, tcl-format
 msgid ""
 "Edit nickname and group of %s. You also can request or remove presence "
 "subscription."
 msgstr "编辑昵称和组%s. 你也可以要求或者删除先前的定制."
 
-#: ../jabber/JUser.tcl:755
+#: ../jabber/JUser.tcl:756
 msgid "Request presence subscription"
 msgstr "要求先前的定制"
 
-#: ../jabber/JUser.tcl:760
+#: ../jabber/JUser.tcl:761
 msgid "Remove presence subscription"
 msgstr "删除先前的定制"
 
 #. TRANSLATORS; these strings are balloon mouse over tooltips in the edit contact dialog
-#: ../jabber/JUser.tcl:768
+#: ../jabber/JUser.tcl:769
 msgid "Both you and your contact can see eachother's presence."
 msgstr "你和你的联系人都能看到对方的显身"
 
-#: ../jabber/JUser.tcl:769
+#: ../jabber/JUser.tcl:770
 msgid "You cannot see your contact's presence, but your contact can see yours."
 msgstr "你不能看到你联系人的显身,但是你的联系人可以看到你的."
 
-#: ../jabber/JUser.tcl:770
+#: ../jabber/JUser.tcl:771
 msgid "Both you and your contact cannot see eachother's presence."
 msgstr "你和你的联系人都不能看到彼此显身."
 
-#: ../jabber/JUser.tcl:771 ../jabber/Roster.tcl:1629
+#: ../jabber/JUser.tcl:772 ../jabber/Roster.tcl:1632
 msgid "You can see your contact's presence, but your contact can't see yours."
 msgstr "你可以看到你的联系人显身,但是你的联系人看不到你的显身."
 
-#: ../jabber/JUser.tcl:818 ../jabber/Subscribe.tcl:332
+#: ../jabber/JUser.tcl:819 ../jabber/Subscribe.tcl:332
 #: ../jabber/Subscribe.tcl:368 ../jabber/Subscribe.tcl:1302
 #: ../jabber/Subscribe.tcl:1562
 msgid "View business card"
@@ -3545,20 +3617,20 @@ msgstr "正准备接收文件%s。确认接收?"
 msgid "Cannot find importer for the MIME type %s"
 msgstr "找不到文件类型%s的导入器"
 
-#: ../jabber/Jabber.tcl:614
+#: ../jabber/Jabber.tcl:615
 #, tcl-format
 msgid "Cannot send message to %s."
 msgstr "无法发送信息给%s."
 
-#: ../jabber/Jabber.tcl:717
+#: ../jabber/Jabber.tcl:718
 #, tcl-format
 msgid ""
 "Your registered account with the %s service will be put in your list of "
 "contacts to work as a transport with this service."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:768 ../jabber/Jabber.tcl:773 ../jabber/Jabber.tcl:779
-#: ../jabber/Jabber.tcl:828 ../jabber/Subscribe.tcl:210
+#: ../jabber/Jabber.tcl:769 ../jabber/Jabber.tcl:774 ../jabber/Jabber.tcl:780
+#: ../jabber/Jabber.tcl:829 ../jabber/Subscribe.tcl:210
 #: ../jabber/Subscribe.tcl:243 ../jabber/Subscribe.tcl:996
 #: ../jabber/Subscribe.tcl:1015 ../jabber/Subscribe.tcl:1411
 #: ../jabber/Subscribe.tcl:1439 ../jabber/Subscribe.tcl:1448
@@ -3567,148 +3639,148 @@ msgstr ""
 msgid "Presence Subscription"
 msgstr "显身约定"
 
-#: ../jabber/Jabber.tcl:769
+#: ../jabber/Jabber.tcl:770
 #, tcl-format
 msgid ""
 "Because %s does not allow you to see his/her presence anymore, he/she is "
 "removed."
 msgstr "因为%s不允许你看到他/她的显身,他/她已被移除."
 
-#: ../jabber/Jabber.tcl:774
+#: ../jabber/Jabber.tcl:775
 #, tcl-format
 msgid "%s does not allow you to see his/her presence anymore."
 msgstr "%s 不再允许你看到他/她的显身."
 
-#: ../jabber/Jabber.tcl:781
+#: ../jabber/Jabber.tcl:782
 #, tcl-format
 msgid ""
 "%s does not allow you to see his/her presence anymore. Do you want to remove "
 "%s?"
 msgstr "%s 不再允许你看到他/她的显身.希望移除 %s?"
 
-#: ../jabber/Jabber.tcl:814
+#: ../jabber/Jabber.tcl:815
 #, tcl-format
 msgid ""
 "Cannot subscribe to %s's presence. The contact does not allow you to see his/"
 "her presence."
 msgstr "不能通过%s的显身验证. 联系人不允许你看到他/她的显身."
 
-#: ../jabber/Jabber.tcl:819
+#: ../jabber/Jabber.tcl:820
 msgid "Subscription Failed"
 msgstr "添加附注失败"
 
-#: ../jabber/Jabber.tcl:829
+#: ../jabber/Jabber.tcl:830
 #, tcl-format
 msgid "You cannot see %s's presence anymore."
 msgstr "你不能再看到%s的显身."
 
-#: ../jabber/Jabber.tcl:858
+#: ../jabber/Jabber.tcl:859
 msgid "Presence Error"
 msgstr "显身错误"
 
-#: ../jabber/Jabber.tcl:912 ../jabber/Jabber.tcl:940
+#: ../jabber/Jabber.tcl:913 ../jabber/Jabber.tcl:941
 msgid "The connection was unexpectedly broken."
 msgstr "连接意外中断."
 
-#: ../jabber/Jabber.tcl:917 ../jabber/Jabber.tcl:919 ../jabber/Jabber.tcl:929
-#: ../jabber/Jabber.tcl:931
+#: ../jabber/Jabber.tcl:918 ../jabber/Jabber.tcl:920 ../jabber/Jabber.tcl:930
+#: ../jabber/Jabber.tcl:932
 #, tcl-format
 msgid "Received a fatal error: %s The connection is closed."
 msgstr "收到严重错误: %s 连接已关闭."
 
-#: ../jabber/Jabber.tcl:994
+#: ../jabber/Jabber.tcl:995
 msgid "Error Log (noncriticals)"
 msgstr "错误"
 
-#: ../jabber/Jabber.tcl:1488 ../jabber/UserInfo.tcl:242
+#: ../jabber/Jabber.tcl:1491 ../jabber/UserInfo.tcl:263
 #, tcl-format
 msgid "Cannot query %s's last activity."
 msgstr "无法获取%s的最近活动."
 
-#: ../jabber/Jabber.tcl:1500 ../jabber/Jabber.tcl:1503
-#: ../jabber/UserInfo.tcl:240
+#: ../jabber/Jabber.tcl:1503 ../jabber/Jabber.tcl:1506
+#: ../jabber/UserInfo.tcl:261
 msgid "Last Activity"
 msgstr "最近活动"
 
-#: ../jabber/Jabber.tcl:1501 ../jabber/Jabber.tcl:1514
-#: ../jabber/Jabber.tcl:1516
+#: ../jabber/Jabber.tcl:1504 ../jabber/Jabber.tcl:1517
+#: ../jabber/Jabber.tcl:1519
 #, tcl-format
 msgid "Cannot query %s's local time information."
 msgstr "无法获取%s的当地时间信息."
 
-#: ../jabber/Jabber.tcl:1530
+#: ../jabber/Jabber.tcl:1533
 #, tcl-format
 msgid "Time since client %s was last active"
 msgstr "客户端%s最近一次活动已历时"
 
-#: ../jabber/Jabber.tcl:1532
+#: ../jabber/Jabber.tcl:1535
 #, tcl-format
 msgid "Time since %s was last connected"
 msgstr "%s自最近一次连接历时"
 
-#: ../jabber/Jabber.tcl:1534
+#: ../jabber/Jabber.tcl:1537
 #, tcl-format
 msgid "Time since server %s was started"
 msgstr "服务器%s开启历时"
 
-#: ../jabber/Jabber.tcl:1537
+#: ../jabber/Jabber.tcl:1540
 msgid "The uptime/last activity is"
 msgstr "最后一次活动的时间是"
 
-#: ../jabber/Jabber.tcl:1571 ../jabber/UserInfo.tcl:274
-#: ../jabber/UserInfo.tcl:304
+#: ../jabber/Jabber.tcl:1574 ../jabber/UserInfo.tcl:295
+#: ../jabber/UserInfo.tcl:325
 #, tcl-format
 msgid "Cannot query %s's local time."
 msgstr "无法查询%s的当地时间."
 
-#: ../jabber/Jabber.tcl:1579 ../jabber/UserInfo.tcl:272
-#: ../jabber/UserInfo.tcl:302
+#: ../jabber/Jabber.tcl:1582 ../jabber/UserInfo.tcl:293
+#: ../jabber/UserInfo.tcl:323
 msgid "Local Time"
 msgstr "本地时间"
 
-#: ../jabber/Jabber.tcl:1580 ../jabber/UserInfo.tcl:282
-#: ../jabber/UserInfo.tcl:311
+#: ../jabber/Jabber.tcl:1583 ../jabber/UserInfo.tcl:303
+#: ../jabber/UserInfo.tcl:332
 #, tcl-format
 msgid "%s's local time is: %s"
 msgstr "%s的当地时间: %s"
 
-#: ../jabber/Jabber.tcl:1668 ../jabber/UserInfo.tcl:195
+#: ../jabber/Jabber.tcl:1671 ../jabber/UserInfo.tcl:213
 #, tcl-format
 msgid "Cannot query %s's version."
 msgstr "无法查询%s的版本."
 
-#: ../jabber/Jabber.tcl:1707
+#: ../jabber/Jabber.tcl:1710
 #, tcl-format
 msgid "Version information for %s."
 msgstr "%s的版本信息."
 
-#: ../jabber/Jabber.tcl:1904 ../jabber/Jabber.tcl:2032
+#: ../jabber/Jabber.tcl:1907 ../jabber/Jabber.tcl:2035
 msgid "New Password"
 msgstr "新密码"
 
-#: ../jabber/Jabber.tcl:1921
+#: ../jabber/Jabber.tcl:1924
 msgid "Set a new password for"
 msgstr "请设置一个密码"
 
-#: ../jabber/Jabber.tcl:1923
+#: ../jabber/Jabber.tcl:1926
 msgid "New password"
 msgstr "新密码"
 
-#: ../jabber/Jabber.tcl:1927 ../jabber/Register.tcl:746
+#: ../jabber/Jabber.tcl:1930 ../jabber/Register.tcl:746
 #: ../jabber/SetupAss.tcl:169
 msgid "Retype password"
 msgstr "再输入一次密码"
 
-#: ../jabber/Jabber.tcl:1993 ../jabber/Register.tcl:834
+#: ../jabber/Jabber.tcl:1996 ../jabber/Register.tcl:834
 #: ../jabber/SetupAss.tcl:311
 msgid "Passwords do not match. Please try again."
 msgstr "密码不匹配.请重试."
 
-#: ../jabber/Jabber.tcl:2017
+#: ../jabber/Jabber.tcl:2020
 msgid "Cannot set new password."
 msgstr "无法设置新密码."
 
-#: ../jabber/Jabber.tcl:2033
+#: ../jabber/Jabber.tcl:2036
 msgid "Setting new password was successful."
 msgstr "设置新密码成功."
 
@@ -3742,25 +3814,25 @@ msgstr ""
 msgid "Enter your username and password to login to %s."
 msgstr "输入你的用户名和密码以登录 %s."
 
-#: ../jabber/Login.tcl:159 ../jabber/Profiles.tcl:1061
+#: ../jabber/Login.tcl:159 ../jabber/Profiles.tcl:1062
 msgid "Profile"
 msgstr "档案"
 
-#: ../jabber/Login.tcl:175 ../jabber/Profiles.tcl:1086
+#: ../jabber/Login.tcl:175 ../jabber/Profiles.tcl:1087
 #: ../jabber/Register.tcl:1454 ../jabber/Search.tcl:935
 #: ../jabber/SetupAss.tcl:167 ../lib/Proxy.tcl:209
 #: ../whiteboard/WDialogs.tcl:192
 msgid "Username"
 msgstr "用户名"
 
-#: ../jabber/Login.tcl:183 ../jabber/Profiles.tcl:1093
+#: ../jabber/Login.tcl:183 ../jabber/Profiles.tcl:1094
 msgid "Resource"
 msgstr "资源"
 
 #: ../jabber/Login.tcl:235 ../jabber/Login.tcl:239 ../jabber/Login.tcl:243
-#: ../jabber/Login.tcl:409 ../jabber/Profiles.tcl:1159
-#: ../jabber/Profiles.tcl:1163 ../jabber/Profiles.tcl:1167
-#: ../jabber/Profiles.tcl:1258 ../jabber/Register.tcl:293
+#: ../jabber/Login.tcl:409 ../jabber/Profiles.tcl:1162
+#: ../jabber/Profiles.tcl:1166 ../jabber/Profiles.tcl:1170
+#: ../jabber/Profiles.tcl:1261 ../jabber/Register.tcl:293
 #: ../jabber/Register.tcl:297 ../jabber/Register.tcl:301
 #: ../jabber/Register.tcl:541
 msgid "More"
@@ -3771,7 +3843,7 @@ msgstr "更多"
 msgid "Edit Profiles"
 msgstr "编辑档案"
 
-#: ../jabber/Login.tcl:394 ../jabber/Profiles.tcl:1239
+#: ../jabber/Login.tcl:394 ../jabber/Profiles.tcl:1242
 #: ../jabber/Register.tcl:530
 msgid "Less"
 msgstr "少于"
@@ -3791,16 +3863,16 @@ msgid ""
 "The Contact ID differs from your profile. Do you want to save a new profile?"
 msgstr "联系人ID与你的档案中信息不匹配.是否保存为新档案?"
 
-#: ../jabber/Login.tcl:579 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1530
+#: ../jabber/Login.tcl:579 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1533
 msgid "Profile Name"
 msgstr "档案名"
 
-#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1134
-#: ../jabber/Profiles.tcl:1532
+#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1137
+#: ../jabber/Profiles.tcl:1535
 msgid "Add Profile"
 msgstr "添加档案"
 
-#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1532
+#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1535
 msgid "Enter the name for the new profile."
 msgstr "输入新档案的名称."
 
@@ -3810,86 +3882,98 @@ msgid ""
 "to save them to your profile?"
 msgstr "你的登录设置与你的档案中信息不匹配.是否保存为新档案?"
 
-#: ../jabber/Login.tcl:795
+#: ../jabber/Login.tcl:819
 #, tcl-format
 msgid "Contacted %s. Waiting for response"
 msgstr "连接%s. 等待回应"
 
-#: ../jabber/Login.tcl:834
+#: ../jabber/Login.tcl:858
 #, tcl-format
 msgid "Connected to %s. Initializing the XML stream"
 msgstr "与 %s连接. 初始化XML流"
 
-#: ../jabber/Login.tcl:837
+#: ../jabber/Login.tcl:861
 msgid "Negotiating TLS security"
 msgstr "谈判 TLS 的安全"
 
-#: ../jabber/Login.tcl:853
+#: ../jabber/Login.tcl:877
 #, tcl-format
 msgid "Authorization to server %s was successful. Downloading contacts..."
 msgstr "服务器%s认证成功.正在下载联系人列表..."
 
-#: ../jabber/Login.tcl:909
+#: ../jabber/Login.tcl:933
 #, tcl-format
 msgid ""
 "Cannot connect to %s. Either there are server or network issues, or you "
 "misspelled the server's name."
 msgstr "无法连接到%s. 可能服务器或者网络存在问题,请确认服务器名称完整无误."
 
-#: ../jabber/Login.tcl:915
+#: ../jabber/Login.tcl:939
 #, tcl-format
 msgid "Server %s did not respond: timeout."
 msgstr "服务器%s没有回应 :超时."
 
-#: ../jabber/Login.tcl:920
+#: ../jabber/Login.tcl:944
 #, tcl-format
 msgid ""
 "Cannot login because this username is already in use by someone else (%s)."
 msgstr "无法登录，此用户名正被其他人使用(%s)."
 
-#: ../jabber/Login.tcl:923
+#: ../jabber/Login.tcl:947
 #, tcl-format
 msgid "The server %s has no support for TLS."
 msgstr "服务器%s不支持TLS."
 
-#: ../jabber/Login.tcl:926
+#: ../jabber/Login.tcl:950
 #, tcl-format
 msgid "Cannot negotiate TLS with server %s."
 msgstr "无法与服务器%s完成TLS验证."
 
-#: ../jabber/Login.tcl:929
+#: ../jabber/Login.tcl:953
 msgid "The server has no support for SASL authentication."
 msgstr "服务器不支持SASL验证."
 
-#: ../jabber/Login.tcl:932
+#: ../jabber/Login.tcl:956
 msgid "Cannot authenticate due to internal protocol error."
 msgstr "由于端口错误无法完成验证."
 
-#: ../jabber/Login.tcl:937
+#: ../jabber/Login.tcl:961
 #, tcl-format
 msgid "Stream error received from the server with code: %s"
 msgstr "从服务器接收流发生错误: %s"
 
-#: ../jabber/Login.tcl:940
+#: ../jabber/Login.tcl:964
 msgid "The proxy server reported an error."
 msgstr "代理服务器反馈错误信息."
 
-#: ../jabber/Login.tcl:952 ../jabber/Register.tcl:961
+#: ../jabber/Login.tcl:976 ../jabber/Register.tcl:961
 msgid "The login process was aborted."
 msgstr "登录进程被放弃."
 
-#: ../jabber/Login.tcl:953 ../jabber/Login.tcl:954 ../jabber/Login.tcl:955
-#: ../jabber/Login.tcl:956 ../jabber/Login.tcl:958 ../jabber/Register.tcl:962
+#: ../jabber/Login.tcl:977 ../jabber/Login.tcl:978 ../jabber/Login.tcl:979
+#: ../jabber/Login.tcl:980 ../jabber/Login.tcl:982 ../jabber/Register.tcl:962
 #: ../jabber/Register.tcl:963 ../jabber/Register.tcl:964
 #: ../jabber/Register.tcl:965 ../jabber/Register.tcl:967
 msgid "Protocol error during the login process."
 msgstr "登陆进程中发生协议错误."
 
-#: ../jabber/Login.tcl:957 ../jabber/Register.tcl:966
+#: ../jabber/Login.tcl:981 ../jabber/Register.tcl:966
 msgid "Login failed because of unknown account or wrong password."
 msgstr "登陆失败：账号或密码错误."
 
-#: ../jabber/Login.tcl:1010
+#: ../jabber/Login.tcl:985
+#, tcl-format
+msgid ""
+"Invalid server response due to bug in server software:  error <%s/> is not "
+"defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting "
+"this bug to your server administrator."
+msgstr ""
+
+#: ../jabber/Login.tcl:1011
+msgid "Do you want to retry a different password or profile?"
+msgstr ""
+
+#: ../jabber/Login.tcl:1041
 #, tcl-format
 msgid "Do you want to register a new account with %s."
 msgstr "你是否希望以%s注册一个新的账户."
@@ -4109,30 +4193,30 @@ msgid "Accounts"
 msgstr ""
 
 #. TRANSLATORS: string shown if you change anything in an existing account profile in the login dialog
-#: ../jabber/Profiles.tcl:981 ../jabber/Profiles.tcl:1578
+#: ../jabber/Profiles.tcl:982 ../jabber/Profiles.tcl:1581
 msgid ""
 "You changed one or more values. Do you want to save them before closing?"
 msgstr "你更改了变量，关闭之前是否保存?"
 
 #. TRANSLATORS: See File in the main window, and then Edit Profiles...
-#: ../jabber/Profiles.tcl:1055
+#: ../jabber/Profiles.tcl:1056
 msgid ""
 "Edit, add or delete profiles. The selected profile will become the default."
 msgstr "编辑,添加或删除档案.被选的档案将成为默认."
 
-#: ../jabber/Profiles.tcl:1136
+#: ../jabber/Profiles.tcl:1139
 msgid "Delete Profile"
 msgstr "默认档案"
 
-#: ../jabber/Profiles.tcl:1460
+#: ../jabber/Profiles.tcl:1463
 msgid "You need to fill in at least the server name and user name."
 msgstr "你必须至少填写服务器名和用户名."
 
-#: ../jabber/Profiles.tcl:1565
+#: ../jabber/Profiles.tcl:1568
 msgid "Do you want to register a new account?"
 msgstr "确认注册一个新帐号?"
 
-#: ../jabber/Profiles.tcl:1605
+#: ../jabber/Profiles.tcl:1608
 msgid ""
 "The selected profile will be deleted. Do you also want to delete the account "
 "for this profile? This action cannot be undone. Press Cancel to abort "
@@ -4141,66 +4225,66 @@ msgstr ""
 "所选档案文件已被删除.是否同时删除此档案文件的帐号?此操作无法撤销.点击“取消”放"
 "弃删除档案和帐号."
 
-#: ../jabber/Profiles.tcl:1640 ../jabber/Register.tcl:118
+#: ../jabber/Profiles.tcl:1643 ../jabber/Register.tcl:118
 #, tcl-format
 msgid "Cannot unregister from %s."
 msgstr "无法从%s注销帐号."
 
-#: ../jabber/Profiles.tcl:1782
+#: ../jabber/Profiles.tcl:1785
 msgid "Connection"
 msgstr "连接"
 
-#: ../jabber/Profiles.tcl:1798
+#: ../jabber/Profiles.tcl:1801
 msgid "Use secure connection"
 msgstr "使用安全连接"
 
-#: ../jabber/Profiles.tcl:1801
+#: ../jabber/Profiles.tcl:1804
 msgid "Certificate"
 msgstr "证书"
 
-#: ../jabber/Profiles.tcl:1804
+#: ../jabber/Profiles.tcl:1807
 msgid "Use SASL authentication"
 msgstr "使用SASL验证"
 
-#: ../jabber/Profiles.tcl:1807
+#: ../jabber/Profiles.tcl:1810
 msgid "Use TLS and SASL"
 msgstr "使用TLS和SASL"
 
-#: ../jabber/Profiles.tcl:1810
+#: ../jabber/Profiles.tcl:1813
 msgid "Use TLS on separate port (old)"
 msgstr "使用TLS在分散的端口(旧的)"
 
-#: ../jabber/Profiles.tcl:1813
+#: ../jabber/Profiles.tcl:1816
 msgid "Use compression"
 msgstr "启用压缩"
 
-#: ../jabber/Profiles.tcl:1843
+#: ../jabber/Profiles.tcl:1846
 msgid "Plain text password"
 msgstr "纯文本密码"
 
-#: ../jabber/Profiles.tcl:1846
+#: ../jabber/Profiles.tcl:1849
 msgid "Priority"
 msgstr "优先权"
 
-#: ../jabber/Profiles.tcl:1853
+#: ../jabber/Profiles.tcl:1856
 msgid "Login as invisible"
 msgstr "登录并隐身"
 
-#: ../jabber/Profiles.tcl:1869 ../lib/Proxy.tcl:204
+#: ../jabber/Profiles.tcl:1872 ../lib/Proxy.tcl:204
 #: ../whiteboard/WDialogs.tcl:191
 msgid "Host"
 msgstr "主机"
 
-#: ../jabber/Profiles.tcl:1871 ../lib/Proxy.tcl:206
+#: ../jabber/Profiles.tcl:1874 ../lib/Proxy.tcl:206
 #: ../whiteboard/WDialogs.tcl:193
 msgid "Port"
 msgstr "端口"
 
-#: ../jabber/Profiles.tcl:1895
+#: ../jabber/Profiles.tcl:1898
 msgid "Use HTTP transport"
 msgstr "使用HTTP传输器"
 
-#: ../jabber/Profiles.tcl:1900 ../lib/PrefNet.tcl:98 ../lib/Proxy.tcl:144
+#: ../jabber/Profiles.tcl:1903 ../lib/PrefNet.tcl:98 ../lib/Proxy.tcl:144
 msgid "Proxy"
 msgstr "代理"
 
@@ -4413,31 +4497,31 @@ msgstr "从%s登出"
 msgid "The roster is up to date"
 msgstr "名单是最新的"
 
-#: ../jabber/Roster.tcl:1409
+#: ../jabber/Roster.tcl:1412
 msgid "Transport"
 msgstr ""
 
-#: ../jabber/Roster.tcl:1607
+#: ../jabber/Roster.tcl:1610
 msgid "Remove contact without presence subscription"
 msgstr "将没有同意显示的联系人移除"
 
-#: ../jabber/Roster.tcl:1609
+#: ../jabber/Roster.tcl:1612
 msgid "Clear list of contacts on logout"
 msgstr "登出时清除联系人列表"
 
-#: ../jabber/Roster.tcl:1611
+#: ../jabber/Roster.tcl:1614
 msgid "Chat on double-click instead of message"
 msgstr "使用鼠标双击(取代提示信息)开启聊天"
 
-#: ../jabber/Roster.tcl:1614
+#: ../jabber/Roster.tcl:1617
 msgid "Show offline users"
 msgstr "显示离线用户"
 
-#: ../jabber/Roster.tcl:1616
+#: ../jabber/Roster.tcl:1619
 msgid "Show transports"
 msgstr "显示Transports"
 
-#: ../jabber/Roster.tcl:1618
+#: ../jabber/Roster.tcl:1621
 msgid "Show contacts without any subscription"
 msgstr "无需定阅，自动显示连接"
 
@@ -4727,34 +4811,39 @@ msgstr "将添加我的人放入联系人列表中"
 msgid "Default group"
 msgstr "默认群"
 
-#: ../jabber/UserInfo.tcl:135 ../jabber/VCard.tcl:82
+#: ../jabber/UserInfo.tcl:142 ../jabber/VCard.tcl:82
 #, tcl-format
 msgid "Downloading business card from %s"
 msgstr "从 %s下载名片中"
 
-#: ../jabber/UserInfo.tcl:208
+#: ../jabber/UserInfo.tcl:226
 msgid "Operating system"
 msgstr "操作系统"
 
-#: ../jabber/UserInfo.tcl:331 ../jabber/VCard.tcl:102 ../jabber/VCard.tcl:844
+#: ../jabber/UserInfo.tcl:356 ../jabber/VCard.tcl:102 ../jabber/VCard.tcl:844
 msgid "Cannot download business card."
 msgstr "无法下载名片."
 
-#: ../jabber/UserInfo.tcl:353 ../jabber/VCard.tcl:227
+#: ../jabber/UserInfo.tcl:384 ../jabber/VCard.tcl:227
 #, tcl-format
 msgid "Business Card: %s"
 msgstr "名牌: %s"
 
+#: ../jabber/UserInfo.tcl:474
+#, tcl-format
+msgid "Failed to obtain personal notes: %s"
+msgstr ""
+
 #. TRANSLATORS: in the business card dialog, there can be made notes about each contact
-#: ../jabber/UserInfo.tcl:438
+#: ../jabber/UserInfo.tcl:529
 msgid "Notes"
 msgstr "便条"
 
-#: ../jabber/UserInfo.tcl:444
+#: ../jabber/UserInfo.tcl:535
 msgid "Add your personal notes about this contact."
 msgstr "添加你个人关于此联系人的注释."
 
-#: ../jabber/UserInfo.tcl:475
+#: ../jabber/UserInfo.tcl:564
 msgid "Client"
 msgstr "客户端"
 
@@ -4983,7 +5072,7 @@ msgstr "文件%s传输被重置."
 msgid "Cannot start the internal HTTP server: %s"
 msgstr "不能启动HTTP服务器: %s"
 
-#: ../lib/Init.tcl:742 ../lib/Init.tcl:763 ../lib/Media.tcl:179
+#: ../lib/Init.tcl:741 ../lib/Init.tcl:762 ../lib/Media.tcl:179
 #: ../whiteboard/Plugins.tcl:445
 #, tcl-format
 msgid "Looking for %s"
