@@ -1,4 +1,4 @@
-set ::msgcat::header "Project-Id-Version: ru\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-08-17 23:57+0200\nPO-Revision-Date: 2009-04-12 21:55+0300\nLast-Translator: rain <linuxoid.rain@gmail.com>\nLanguage-Team: Russian <ru@li.org>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n\nX-Generator: KBabel 1.11.4\n"
+set ::msgcat::header "Project-Id-Version: ru\nReport-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\nPOT-Creation-Date: 2009-09-14 20:54+0200\nPO-Revision-Date: 2009-04-12 21:55+0300\nLast-Translator: rain <linuxoid.rain@gmail.com>\nLanguage-Team: Russian <ru@li.org>\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\n\nX-Generator: KBabel 1.11.4\n"
 ::msgcat::mcset ru "Sourcing Tcl code" "\u0427\u0442\u0435\u043d\u0438\u0435 Tcl-\u043a\u043e\u0434\u0430"
 ::msgcat::mcset ru "Searching for our hostname" "\u041f\u043e\u0438\u0441\u043a \u0438\u043c\u0435\u043d\u0438 \u0445\u043e\u0441\u0442\u0430"
 ::msgcat::mcset ru "Loading Tcl packages" "\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 Tcl"
