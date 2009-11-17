@@ -23,16 +23,25 @@
 package provide UserInfo 1.0
 
 package require VCard
+package require TracedText
 
 namespace eval ::UserInfo::  {
         
     # Add all event hooks.
     ::hooks::register menuUserInfoFilePostHook   ::UserInfo::FileMenuPostHook
     ::hooks::register onMenuVCardExport          ::UserInfo::OnMenuExportHook
+    ::hooks::register logoutHook                 ::UserInfo::NotesLogoutHook
 
     variable uid
+    array set rosternotes {}
     
     set ::config(userinfo,disco) 0
+}
+
+proc ::UserInfo::NotesLogoutHook {} {
+    variable rosternotes
+        
+    array set rosternotes {}
 }
 
 proc ::UserInfo::GetJIDList {jidL} {
@@ -450,9 +459,64 @@ proc ::UserInfo::Close {token} {
     Free $token
 }
 
+proc ::UserInfo::NotesSendGetCB {token type queryElem args} {
+    variable rosternotes
+    upvar ${token}::priv priv
+
+    incr priv(ncount) -1
+    if {$priv(ncount) <= 0} {
+        $priv(warrow) stop
+    } 
+
+
+    if {$type eq "error"} {
+        ::UI::MessageBox -type ok -icon error -title [mc "Error"] \
+       -message "Failed to obtain personal notes: [lindex $queryElem 1]"
+       destroy $dlg
+    } else {
+        # Extract the relevant Note element
+       array set rosternotes [NotesExtractFromElem $queryElem]
+    }
+    set jid2 $priv(jid2)
+    if {[info exists rosternotes($jid2)]} {
+        set priv(strnote) $rosternotes($jid2)
+    } else {
+	set priv(strnote) ""
+    }
+    return [array get rosternotes]
+
+}
+
+proc ::UserInfo::NotesExtractFromElem {queryElem} {
+    variable rosternotes
+    array set rosternotes {}
+    set storageElem \
+      [wrapper::getfirstchild $queryElem "storage" "storage:rosternotes"]
+    set notesElems [wrapper::getchildswithtag $storageElem "note"]
+    foreach elem $notesElems {
+       array unset notesarr
+       array set notesarr [list name "" jid ""]
+       array set notesarr [wrapper::getattrlist $elem]
+      set note [list $notesarr(jid)]
+      if {[info exists notesarr(cdate)]} {
+              lappend note -cdate $notesarr(cdate)
+      }
+      if {[info exists notesarr(mdate)]} {
+              lappend note -cdate $notesarr(mdate)
+      }
+       set noteData [wrapper::getcdata $elem]
+       if {$noteData ne ""} {
+           set rosternotes($notesarr(jid)) $noteData
+       }
+    }
+    return [array get rosternotes]
+}
+
+
 proc ::UserInfo::NotesPage {token} {
     global  this
     upvar ${token}::priv priv    
+    variable rosternotes
     
     set wnb $priv(wnb)
 
@@ -473,8 +537,8 @@ proc ::UserInfo::NotesPage {token} {
     set wtext $wpage.t
     set wysc  $wpage.s
     ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
-    text $wtext -wrap word -width 40 -height 12 -bd 1 -relief sunken \
-      -yscrollcommand [list ::UI::ScrollSet $wysc \
+    TracedText::TracedText $wtext -wrap word -width 40 -height 12 -bd 1 -textvariable ${token}::priv\(strnote) \
+      -relief sunken -yscrollcommand [list ::UI::ScrollSet $wysc \
       [list pack $wysc  -side right -fill y]]
     
     pack $wysc  -side right -fill y
@@ -482,12 +546,10 @@ proc ::UserInfo::NotesPage {token} {
     
     set priv(wnotes) $wtext
     
-    if {[file exists $this(notesFile)]} {
-	source $this(notesFile)
-	set jid2 $priv(jid2)
-	if {[info exists notes($jid2)]} {
-	    $wtext insert end $notes($jid2)
-	}
+    ::jlib::annotations::send_get "rosternotes" [list [namespace current]::NotesSendGetCB $token]
+    set $wtext priv(strnote) 
+    if {[info exists rosternotes($priv(jid2))]} {
+	$wtext insert end $rosternotes($priv(jid2))
     }
 }
 
@@ -549,28 +611,18 @@ proc ::UserInfo::BuildErrorPage {token} {
 
 proc ::UserInfo::SaveNotes {token} {
     global  this
+    variable rosternotes
     upvar ${token}::priv priv    
     
-    if {[file exists $this(notesFile)]} {
-	source $this(notesFile)
-    }    
     set str [string trim [$priv(wnotes) get 1.0 end]]
     set jid2 $priv(jid2)
-    set notes($jid2) $str
-    
-    # Work on a temporary file and switch later.
-    set tmp $this(notesFile).tmp
-    if {![catch {open $tmp w} fd]} {
-	#fconfigure $fd -encoding utf-8
-	puts $fd "# Notes file"
-	puts $fd "# The data written at: [clock format [clock seconds]]\n#"
-	foreach {jid str} [array get notes] {
-	    puts $fd [list set notes($jid) $notes($jid)]
-	}
-	close $fd
-	catch {file rename -force $tmp $this(notesFile)}
+    set rosternotes($jid2) $str
+    set rosternoteslist {}
+    foreach {jid str} [array get rosternotes] {
+        lappend rosternoteslist [list "note" [list jid $jid] 0 $str]
     }
-}
+    ::jlib::annotations::send_set "rosternotes" $rosternoteslist
+}    
 
 proc ::UserInfo::GetTokenFrom {key pattern} {    
     foreach ns [namespace children [namespace current]] {

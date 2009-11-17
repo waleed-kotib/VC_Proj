@@ -50,6 +50,7 @@ these XEPs have the form of a library or support protocol for other functions.
    0045 | Multi-User Chat               | complete
    0047 | In-Band Bytestreams           | complete
    0048 | Bookmark Storage              | for conference rooms
+   0049 | Private XML Storage           | complete
    0050 | Ad-Hoc Commands               | complete
    0054 | vcard-temp                    | complete
    0055 | Jabber Search                 | complete
@@ -75,6 +76,7 @@ these XEPs have the form of a library or support protocol for other functions.
    0128 | Service Discovery Extensions  [ (+
    0137 | Publishing Stream Initiation..| complete (except pubsub) (1.0)
    0138 | Stream Compression            | complete
+   0145 | Annotations                   | complete (x
    0147 | XMPP URI Scheme Query Comp... | almost complete
    0153 | vCard-Based Avatars           | complete
    0156 | A DNS TXT Resource...         | complete
@@ -82,10 +84,10 @@ these XEPs have the form of a library or support protocol for other functions.
    0166 | Jingle                        | complete
    0170 | Recommended Order of Stream.. | complete (*
    0179 | Jingle IAX Transport Method   | complete
-   0202 | Entity Time                   | understands but not speak before accepted
+   0202 | Entity Time                   | complete
 
 
 (*  XEP-0138 and XEOP-0170 have different opinions on order of compression
 (** presence caps follow 1.4 but not activated own cache
 (+  disco info the full JID returns specific ip info
-
+(x  only used without note timestamps in Coccinella
