@@ -28,6 +28,7 @@ package require JUI
 package require UI::WSearch
 package require colorutils
 package require mstack
+package require jlib::annotations
 
 package provide GroupChat 1.0
 
@@ -3326,7 +3327,7 @@ namespace eval ::GroupChat:: {
 
 proc ::GroupChat::BookmarkLoginHook {} {
     
-    BookmarkSendGet [namespace current]::BookmarkExtractFromCB
+    ::jlib::annotations::send_get "bookmarks" [namespace current]::BookmarkExtractFromCB
 }
 
 proc ::GroupChat::BookmarkLogoutHook {} {
@@ -3438,22 +3439,7 @@ proc ::GroupChat::BookmarkSendSet {} {
 	  -attrlist $attrs -subtags $confChilds]
 	lappend confElems $confElem
     }
-    set storageElem [wrapper::createtag "storage"  \
-      -attrlist [list xmlns "storage:bookmarks"] -subtags $confElems]
-    set queryElem [wrapper::createtag "query"  \
-      -attrlist [list xmlns "jabber:iq:private"] -subtags [list $storageElem]]
-    
-    ::Jabber::Jlib send_iq set [list $queryElem]
-}
-
-proc ::GroupChat::BookmarkSendGet {callback} {
-    
-    set storageElem [wrapper::createtag "storage"  \
-      -attrlist [list xmlns storage:bookmarks]]
-    set queryElem [wrapper::createtag "query"  \
-      -attrlist [list xmlns "jabber:iq:private"] -subtags [list $storageElem]]
-
-    ::Jabber::Jlib send_iq get [list $queryElem] -command $callback
+    ::jlib::annotations::send_set "bookmarks" $confElems
 }
 
 proc ::GroupChat::OnMenuBookmark {} {
@@ -3489,7 +3475,7 @@ proc ::GroupChat::EditBookmarks {} {
     $dlg state disabled
     $dlg wait
 
-    BookmarkSendGet [namespace current]::BookmarkSendGetCB
+    ::jlib::annotations::send_get "bookmarks" [namespace current]::BookmarkSendGetCB
 }
 
 proc ::GroupChat::BookmarkSendGetCB {type queryElem args} {

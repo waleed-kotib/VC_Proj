@@ -403,7 +403,6 @@ proc ::Init::SetPrefsPaths {} {
     set this(altEmoticonsPath)  [file join $path $this(emoticons)]
     set this(altThemesPath)     [file join $path themes]
     set this(inboxFile)         [file join $path Inbox.tcl]
-    set this(notesFile)         [file join $path Notes.tcl]
     set this(prefsAvatarPath)   [file join $path avatar]
     set this(myAvatarPath)      [file join $path avatar my]
     set this(cacheAvatarPath)   [file join $path avatar cache]
