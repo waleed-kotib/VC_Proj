@@ -1,1 +1,1 @@
-package ifneeded tls 1.5.1     "[list load [file join $dir libtls1.5.1.dylib]] ;      [list source [file join $dir tls.tcl]]"
+package ifneeded tls 1.6     "[list source [file join $dir tls.tcl]] ;      [list tls::initlib $dir libtls1.6.dylib]"
