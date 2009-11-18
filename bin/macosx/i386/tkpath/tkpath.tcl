@@ -8,14 +8,14 @@
 #
 #       Various support procedures for the tkpath package.
 #       
-#  Copyright (c) 2005-2007  Mats Bengtsson
+#  Copyright (c) 2005-2008  Mats Bengtsson
 #  
-# $Id: tkpath.tcl,v 1.1 2008-03-10 08:03:46 matben Exp $
+# $Id: tkpath.tcl,v 1.15 2008/06/04 14:08:21 matben Exp $
 
-namespace eval ::tkpath {}
+namespace eval ::tkp {}
 
 
-# ::tkpath::transform --
+# ::tkp::transform --
 # 
 #       Helper for designing the -matrix option from simpler transformations.
 #       
@@ -25,7 +25,7 @@ namespace eval ::tkpath {}
 # Results:
 #       a transformation matrix
 
-proc ::tkpath::transform {cmd args} {
+proc ::tkp::transform {cmd args} {
     
     set len [llength $args]
     
@@ -90,119 +90,40 @@ proc ::tkpath::transform {cmd args} {
     return $matrix
 }
 
-proc ::tkpath::mmult {m1 m2} {
-    foreach {a1 b1 c1 d1 tx1 ty1} $m1 { break }
-    foreach {a2 b2 c2 d2 tx2 ty2} $m2 { break }
-    return [list \
-      [expr {$a1*$a2  + $c1*$b2}]         \
-      [expr {$b1*$a2  + $d1*$b2}]         \
-      [expr {$a1*$c2  + $c1*$d2}]         \
-      [expr {$b1*$c2  + $d1*$d2}]         \
-      [expr {$a1*$tx2 + $c1*$ty2 + $tx1}] \
-      [expr {$b1*$tx2 + $d1*$ty2 + $ty1}]]
+proc ::tkp::mmult {m1 m2} { 
+    seteach {{a1 b1} {c1 d1} {tx1 ty1}} $m1 
+    seteach {{a2 b2} {c2 d2} {tx2 ty2}} $m2 
+    return [list  \
+      [list [expr {$a1*$a2 + $c1*$b2}] [expr {$b1*$a2 + $d1*$b2}]] \
+      [list [expr {$a1*$c2 + $c1*$d2}] [expr {$b1*$c2 + $d1*$d2}]] \
+      [list [expr {$a1*$tx2 + $c1*$ty2 + $tx1}] \
+      [expr {$b1*$tx2 + $d1*$ty2 + $ty1}]]] 
 }
 
-# OUTDATED!
+# Function  : seteach 
+# ------------------------------ ------------------------------ ---- 
+# Returns : - 
+# Parameters : 
+# Description : set a list of variables 
+# Written : 01/10/2007, Arndt Roger Schneider 
+#  roger.schneider@addcom.de 
+#
+# Rewritten  : 09/24/2007, Roger -- for tkpath::mmult 
+# License   : Tcl-License 
+# ------------------------------ ------------------------------ ---- 
 
-# ::tkpath::coords --
-# 
-#       Helper for designing the path specification for some typical items.
-#       These have SVG prototypes.
-#       
-# Arguments:
-#       type         any of circle, ellipse, polygon, polyline, or rect.
-#       args         a list of the type specific coordinates, followed by
-#                    optional attributes, such as -rx and -ry for rect.
-#       
-# Results:
-#       a transformation matrix
-
-proc ::tkpath::coords {type args} {
-    
-    set len [llength $args]
-    
-    switch -- $type {
-	circle {
-	    if {$len != 3} {
-		return -code error "unrecognized circle coords \"$args\""
-	    }
-	    foreach {cx cy r} $args {break}
-	    set path [list \
-	      M $cx [expr {$cy-$r}] \
-	      A $r $r 0 0 1 $cx [expr {$cy+$r}] \
-	      A $r $r 0 0 1 $cx [expr {$cy-$r}] Z]
-	}
-	ellipse {
-	    if {$len != 4} {
-		return -code error "unrecognized circle ellipse \"$args\""
-	    }
-	    foreach {cx cy rx ry} $args {break}
-	    set path [list \
-	      M $cx [expr {$cy-$ry}] \
-	      A $rx $ry 0 0 1 $cx [expr {$cy+$ry}] \
-	      A $rx $ry 0 0 1 $cx [expr {$cy-$ry}] Z]
-	}
-	polygon {
-            # 03Sep06RT - original coding seems to be a bug as 4 points in
-            # yields only a triangle out.
-	    # set path [concat M [lrange $args 0 1] M [lrange $args 2 end] Z]
-	    set path [concat M [lrange $args 0 end] Z]
-	}
-	polyline {
-	    set path [concat M [lrange $args 0 1] M [lrange $args 2 end]]
-	}
-	rect {
-	    if {$len < 4} {
-		return -code error "unrecognized rect coords \"$args\""
-	    }
-	    foreach {x y width height} $args {break}
-	    set opts [lrange $args 4 end]
-	    if {$opts == {}} {
-		set path [list M $x $y h $width v $height h -$width z]
-	    } else {
-		set rx 0.0
-		set ry 0.0
-		foreach {key value} $opts {
-		    
-		    switch -- $key {
-			-rx - -ry {
-			    set [string trimleft $key -] $value
-			}
-			default {
-			    return -code error "unrecognized rect option $key"
-			}
-		    }
-		}
-		set x2 [expr {$x+$width}]
-		set y2 [expr {$y+$height}]
-		if {2*$rx > $width} {
-		    set rx [expr {$width/2.0}]
-		}
-		if {2*$ry > $height} {
-		    set ry [expr {$height/2.0}]
-		}
-		set dx [expr {$width-2*$rx}]
-		set dy [expr {$height-2*$ry}]
-		set path [list \
-		  M [expr {$x+$rx}] $y \
-		  h $dx \
-		  a $rx $ry 0 0 1 $rx $ry \
-		  v $dy \
-		  a $rx $ry 0 0 1 -$rx $ry \
-		  h [expr {-1*$dx}] \
-		  a $rx $ry 0 0 1 -$rx -$ry \
-		  v [expr {-1*$dy}] \
-		  a $rx $ry 0 0 1 $rx -$ry Z]
-	    }
-	}
-	default {
-	    return -code error "unrecognized item type: \"$type\""
-	}
+proc ::tkp::seteach {variables arglist} {
+    foreach i $variables j $arglist { 
+	set lgi [llength $i]
+	if {1 < $lgi && [llength $j] == $lgi} { 
+	    uplevel [list seteach $i $j]
+	} else {  
+	    uplevel [list set $i $j]
+	} 
     }
-    return $path
 }
 
-# ::tkpath::gradientstopsstyle --
+# ::tkp::gradientstopsstyle --
 # 
 #       Utility function to create named example gradient definitions.
 #       
@@ -213,7 +134,7 @@ proc ::tkpath::coords {type args} {
 # Results:
 #       the stops list.
 
-proc ::tkpath::gradientstopsstyle {name args} {
+proc ::tkp::gradientstopsstyle {name args} {
     
     switch -- $name {
 	rainbow {
@@ -234,5 +155,12 @@ proc ::tkpath::gradientstopsstyle {name args} {
     }    
 }
 
+proc ::tkp::ellipsepath {x y rx ry} {
+    return "M $x $y a $rx $ry 0 1 1 0 [expr {2*$ry}] a $rx $ry 0 1 1 0 [expr {-2*$ry}] Z"
+}
 
+proc ::tkp::circlepath {x y r} {
+    return [ellipsepath $x $y $r $r]
+}
  	  	 
+

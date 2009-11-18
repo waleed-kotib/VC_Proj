@@ -7,19 +7,20 @@ Not to mention all bugfixes and rewrites.
 
 Coccinella-0.96.16
  o XEP-0202 support Entity Time enabled (441223)
- o Fixed exception on MacOS X regarding sound device selection (427951)
- o Login settings are now saved (180132)
+ o fixed exception on MacOS X regarding sound device selection (427951)
+ o login settings are now saved (180132)
  o wrong password behaviour fixed (147392)
  o fixed exception when some plugins were disabled (456982)
  o removed usage of obsolete clock option -gmt (454856)
- o Enter password dialog: no focus (454527)
- o When a transport died on the server, a wrong Edit Contact dialog was shown (451037)
- o Edit business card dialog can be opened multiple times (179936)
+ o enter password dialog: no focus (454527)
+ o when a transport died on the server, a wrong Edit Contact dialog was shown (451037)
+ o edit business card dialog can be opened multiple times (179936)
  o login to google-talk with wrong username/password leads to segfault on OpenBSD (460499)
  o business card window, error retrieving client infos (441293)
  o error opening business card dialog when someone has geoloc info enabled (437700)
  o automatic login fails (427809)
  o support for XEP-0145: Annotations (140336)
+ o fixed crash due to tkpath library on Mac OS X 10.6
 
 Coccinella-0.96.14 (20090923)
 
