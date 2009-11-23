@@ -49,6 +49,7 @@ proc ::Totd::Init {} {
     dict set tips 3 [mc "You can initiate a whiteboard session with multiple\
                      participants by clicking the whiteboard icon in a\
                      chatroom. All participants using %s will be invited." $prefs(appName)]
+    dict set tips 4 [mc "Documentation is available at http://coccinella.im/documentation"]
     ::hooks::register launchFinalHook ::Totd::LaunchHook
     ::hooks::register prefsInitHook   ::Totd::InitPrefsHook
 
