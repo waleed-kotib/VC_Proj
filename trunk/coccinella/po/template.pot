@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Coccinella 0.96.15\n"
 "\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-11-23 23:28+0100\n"
+"POT-Creation-Date: 2009-11-23 23:35+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -249,7 +249,7 @@ msgid "Message"
 msgstr ""
 
 #: ../components/BuddyPounce.tcl:293 ../components/ImageMagic.tcl:143
-#: ../components/Totd.tcl:106 ../components/XMLConsole.tcl:109
+#: ../components/Totd.tcl:107 ../components/XMLConsole.tcl:109
 #: ../components/fsdialog.tcl:427 ../components/fsdialog.tcl:1052
 #: ../components/fsdialog.tcl:1444 ../contrib/ui/dialog.tcl:242
 #: ../contrib/ui/fontselector.tcl:152 ../jabber/Chat.tcl:356
@@ -1369,14 +1369,14 @@ msgstr ""
 
 #: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:358
 #: ../components/SlideShow.tcl:362 ../components/SlideShow.tcl:369
-#: ../components/Totd.tcl:110 ../contrib/wizard.tcl:224
+#: ../components/Totd.tcl:111 ../contrib/wizard.tcl:224
 #: ../jabber/Adhoc.tcl:209
 msgid "Previous"
 msgstr ""
 
 #: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:359
 #: ../components/SlideShow.tcl:364 ../components/SlideShow.tcl:370
-#: ../components/Totd.tcl:108 ../contrib/wizard.tcl:219
+#: ../components/Totd.tcl:109 ../contrib/wizard.tcl:219
 #: ../contrib/wizard.tcl:586 ../jabber/Adhoc.tcl:207 ../jabber/GotMsg.tcl:225
 #: ../jabber/Register.tcl:327 ../jabber/Register.tcl:1168
 #: ../lib/TSearch.tcl:81 ../lib/WSearch.tcl:72
@@ -1539,7 +1539,7 @@ msgstr ""
 msgid "Add to Dictionary"
 msgstr ""
 
-#: ../components/Totd.tcl:18 ../components/Totd.tcl:89
+#: ../components/Totd.tcl:18 ../components/Totd.tcl:90
 msgid "Tip of the Day"
 msgstr ""
 
@@ -1581,7 +1581,11 @@ msgid ""
 "the whiteboard icon in a chatroom. All participants using %s will be invited."
 msgstr ""
 
-#: ../components/Totd.tcl:104
+#: ../components/Totd.tcl:52
+msgid "Documentation is available at http://coccinella.im/documentation"
+msgstr ""
+
+#: ../components/Totd.tcl:105
 #, tcl-format
 msgid "Show tips on %s startup"
 msgstr ""

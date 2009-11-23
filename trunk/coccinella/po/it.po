@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-11-23 23:28+0100\n"
+"POT-Creation-Date: 2009-11-23 23:35+0100\n"
 "PO-Revision-Date: 2009-03-16 10:21+0100\n"
 "Last-Translator: Mirko Graziani <coccinella@mirkobau.it>\n"
 "Language-Team: Italian\n"
@@ -259,7 +259,7 @@ msgid "Message"
 msgstr "Messaggio"
 
 #: ../components/BuddyPounce.tcl:293 ../components/ImageMagic.tcl:143
-#: ../components/Totd.tcl:106 ../components/XMLConsole.tcl:109
+#: ../components/Totd.tcl:107 ../components/XMLConsole.tcl:109
 #: ../components/fsdialog.tcl:427 ../components/fsdialog.tcl:1052
 #: ../components/fsdialog.tcl:1444 ../contrib/ui/dialog.tcl:242
 #: ../contrib/ui/fontselector.tcl:152 ../jabber/Chat.tcl:356
@@ -1390,14 +1390,14 @@ msgstr "Apri &Cartella"
 
 #: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:358
 #: ../components/SlideShow.tcl:362 ../components/SlideShow.tcl:369
-#: ../components/Totd.tcl:110 ../contrib/wizard.tcl:224
+#: ../components/Totd.tcl:111 ../contrib/wizard.tcl:224
 #: ../jabber/Adhoc.tcl:209
 msgid "Previous"
 msgstr "Precedente"
 
 #: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:359
 #: ../components/SlideShow.tcl:364 ../components/SlideShow.tcl:370
-#: ../components/Totd.tcl:108 ../contrib/wizard.tcl:219
+#: ../components/Totd.tcl:109 ../contrib/wizard.tcl:219
 #: ../contrib/wizard.tcl:586 ../jabber/Adhoc.tcl:207 ../jabber/GotMsg.tcl:225
 #: ../jabber/Register.tcl:327 ../jabber/Register.tcl:1168
 #: ../lib/TSearch.tcl:81 ../lib/WSearch.tcl:72
@@ -1564,7 +1564,7 @@ msgstr "Dizionari"
 msgid "Add to Dictionary"
 msgstr "Aggiungi al Dizionario"
 
-#: ../components/Totd.tcl:18 ../components/Totd.tcl:89
+#: ../components/Totd.tcl:18 ../components/Totd.tcl:90
 msgid "Tip of the Day"
 msgstr ""
 
@@ -1606,7 +1606,11 @@ msgid ""
 "the whiteboard icon in a chatroom. All participants using %s will be invited."
 msgstr ""
 
-#: ../components/Totd.tcl:104
+#: ../components/Totd.tcl:52
+msgid "Documentation is available at http://coccinella.im/documentation"
+msgstr ""
+
+#: ../components/Totd.tcl:105
 #, fuzzy, tcl-format
 #| msgid "Show tips on startup"
 msgid "Show tips on %s startup"
@@ -6310,10 +6314,16 @@ msgstr ""
 msgid "&Library"
 msgstr "&Libreria"
 
+#~ msgid "Useful Tips"
+#~ msgstr "Suggerimeti Utili"
+
+#~ msgid "chat"
+#~ msgstr "chat"
+
 #, fuzzy
-#~| msgid "cold"
-#~ msgid "bold"
-#~ msgstr "freddo"
+#~| msgid "Normal"
+#~ msgid "normal"
+#~ msgstr "Normale"
 
 #, fuzzy
 #~| msgid "Italic"
@@ -6321,12 +6331,6 @@ msgstr "&Libreria"
 #~ msgstr "Italico"
 
 #, fuzzy
-#~| msgid "Normal"
-#~ msgid "normal"
-#~ msgstr "Normale"
-
-#~ msgid "chat"
-#~ msgstr "chat"
-
-#~ msgid "Useful Tips"
-#~ msgstr "Suggerimeti Utili"
+#~| msgid "cold"
+#~ msgid "bold"
+#~ msgstr "freddo"
