@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ru\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-11-17 20:19+0100\n"
+"POT-Creation-Date: 2009-11-23 23:28+0100\n"
 "PO-Revision-Date: 2009-04-12 21:55+0300\n"
 "Last-Translator: rain <linuxoid.rain@gmail.com>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -259,7 +259,7 @@ msgid "Message"
 msgstr "Сообщение"
 
 #: ../components/BuddyPounce.tcl:293 ../components/ImageMagic.tcl:143
-#: ../components/Totd.tcl:90 ../components/XMLConsole.tcl:109
+#: ../components/Totd.tcl:106 ../components/XMLConsole.tcl:109
 #: ../components/fsdialog.tcl:427 ../components/fsdialog.tcl:1052
 #: ../components/fsdialog.tcl:1444 ../contrib/ui/dialog.tcl:242
 #: ../contrib/ui/fontselector.tcl:152 ../jabber/Chat.tcl:356
@@ -1384,13 +1384,14 @@ msgstr "&Открыть каталог"
 
 #: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:358
 #: ../components/SlideShow.tcl:362 ../components/SlideShow.tcl:369
-#: ../components/Totd.tcl:94 ../contrib/wizard.tcl:224 ../jabber/Adhoc.tcl:209
+#: ../components/Totd.tcl:110 ../contrib/wizard.tcl:224
+#: ../jabber/Adhoc.tcl:209
 msgid "Previous"
 msgstr "Назад"
 
 #: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:359
 #: ../components/SlideShow.tcl:364 ../components/SlideShow.tcl:370
-#: ../components/Totd.tcl:92 ../contrib/wizard.tcl:219
+#: ../components/Totd.tcl:108 ../contrib/wizard.tcl:219
 #: ../contrib/wizard.tcl:586 ../jabber/Adhoc.tcl:207 ../jabber/GotMsg.tcl:225
 #: ../jabber/Register.tcl:327 ../jabber/Register.tcl:1168
 #: ../lib/TSearch.tcl:81 ../lib/WSearch.tcl:72
@@ -1557,13 +1558,52 @@ msgstr "Словари"
 msgid "Add to Dictionary"
 msgstr "Добавить в словарь"
 
-#. TRANSLATORS; For future startup tips dialog
-#: ../components/Totd.tcl:21 ../components/Totd.tcl:73
-msgid "Useful Tips"
-msgstr "Полезные советы"
+#: ../components/Totd.tcl:18 ../components/Totd.tcl:89
+msgid "Tip of the Day"
+msgstr ""
 
-#: ../components/Totd.tcl:88
-msgid "Show tips on startup"
+#: ../components/Totd.tcl:30
+#, tcl-format
+msgid ""
+"If the desired chat system is not available when you want to add a contact, "
+"this indicates no server support had been detected. Luckily, for most chat "
+"systems you can use another server without the need to register a new "
+"account. \n"
+"\n"
+" Instructions:\n"
+" 1. Login to your account in %s.\n"
+" 2. Select the Discover Server option in the Actions menu.\n"
+" 3. Find a server with support for the desired chat system at http://"
+"coccinella.im/servers/servers.html (you can sort the columns).\n"
+" 4. Enter the name of the desired server and proceed.\n"
+" 5. The chat system will become available in the list!"
+msgstr ""
+
+#: ../components/Totd.tcl:43
+msgid ""
+"Typing the /clean command during a chat conversation will empty your chat "
+"window, whilst the /retain command will restore its content. Your contacts "
+"do not see these commands."
+msgstr ""
+
+#: ../components/Totd.tcl:46
+#, tcl-format
+msgid ""
+"You might be interested in the hidden XML console if you are a developer. "
+"You can open it with the command %s+Shift+D"
+msgstr ""
+
+#: ../components/Totd.tcl:49
+#, tcl-format
+msgid ""
+"You can initiate a whiteboard session with multiple participants by clicking "
+"the whiteboard icon in a chatroom. All participants using %s will be invited."
+msgstr ""
+
+#: ../components/Totd.tcl:104
+#, fuzzy, tcl-format
+#| msgid "Show tips on startup"
+msgid "Show tips on %s startup"
 msgstr "Показывать советы при запуске"
 
 #. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
@@ -2110,7 +2150,7 @@ msgstr "Отменить"
 msgid "Ignore"
 msgstr "Игнорировать"
 
-#: ../contrib/ui/fontselector.tcl:20 ../jabber/JPrefs.tcl:193
+#: ../contrib/ui/fontselector.tcl:20 ../jabber/JPrefs.tcl:194
 msgid "Select Font"
 msgstr "Выбрать шрифт"
 
@@ -3154,55 +3194,55 @@ msgid "Labels with (*) are required."
 msgstr "Поля с (*) обязательны"
 
 #. TRANSLATORS; see preferences
-#: ../jabber/JPrefs.tcl:110 ../jabber/JPrefs.tcl:177
+#: ../jabber/JPrefs.tcl:110 ../jabber/JPrefs.tcl:178
 msgid "Appearance"
 msgstr "Внешний вид"
 
-#: ../jabber/JPrefs.tcl:111 ../jabber/JPrefs.tcl:289
+#: ../jabber/JPrefs.tcl:111 ../jabber/JPrefs.tcl:304
 msgid "Customization"
 msgstr "Настройка"
 
-#: ../jabber/JPrefs.tcl:188
+#: ../jabber/JPrefs.tcl:189
 msgid "Use tabbed interface"
 msgstr "Использовать вкладки"
 
-#: ../jabber/JPrefs.tcl:192
+#: ../jabber/JPrefs.tcl:193
 msgid "Chat window"
 msgstr "Окно чата"
 
-#: ../jabber/JPrefs.tcl:196
+#: ../jabber/JPrefs.tcl:197
 msgid "Theme"
 msgstr "Тема"
 
-#: ../jabber/JPrefs.tcl:202 ../jabber/SetupAss.tcl:127
+#: ../jabber/JPrefs.tcl:203 ../jabber/SetupAss.tcl:127
 #: ../lib/PrefGeneral.tcl:105 ../lib/PrefGeneral.tcl:117
 #: ../whiteboard/Plugins.tcl:1347
 #, tcl-format
 msgid "Requires a restart of %s"
 msgstr "Требуется перезапуск %s"
 
-#: ../jabber/JPrefs.tcl:208
+#: ../jabber/JPrefs.tcl:209
 msgid "Skin"
 msgstr "Внешний вид"
 
-#: ../jabber/JPrefs.tcl:234
+#: ../jabber/JPrefs.tcl:236
 msgid "Windows opacity"
 msgstr "Прозрачность окон"
 
-#: ../jabber/JPrefs.tcl:300
+#: ../jabber/JPrefs.tcl:315
 msgid "Save message inbox between sessions"
 msgstr "Сохранять список входящих сообщений между сессиями."
 
-#: ../jabber/JPrefs.tcl:302
+#: ../jabber/JPrefs.tcl:317
 #, tcl-format
 msgid "Login on %s startup"
 msgstr "Запускать %s при старте"
 
-#: ../jabber/JPrefs.tcl:304
+#: ../jabber/JPrefs.tcl:319
 msgid "Remember open windows between sessions"
 msgstr "Запоминать открытые окна"
 
-#: ../jabber/JPrefs.tcl:307
+#: ../jabber/JPrefs.tcl:322
 msgid "Show notifier window"
 msgstr "Показывать окно уведомления"
 
@@ -6240,13 +6280,10 @@ msgstr ""
 msgid "&Library"
 msgstr "Библиотека"
 
-#~ msgid "chat"
-#~ msgstr "чат"
-
 #, fuzzy
-#~| msgid "Normal"
-#~ msgid "normal"
-#~ msgstr "Нормальный"
+#~| msgid "cold"
+#~ msgid "bold"
+#~ msgstr "замёрз"
 
 #, fuzzy
 #~| msgid "Italic"
@@ -6254,6 +6291,12 @@ msgstr "Библиотека"
 #~ msgstr "Курсив"
 
 #, fuzzy
-#~| msgid "cold"
-#~ msgid "bold"
-#~ msgstr "замёрз"
+#~| msgid "Normal"
+#~ msgid "normal"
+#~ msgstr "Нормальный"
+
+#~ msgid "chat"
+#~ msgstr "чат"
+
+#~ msgid "Useful Tips"
+#~ msgstr "Полезные советы"
