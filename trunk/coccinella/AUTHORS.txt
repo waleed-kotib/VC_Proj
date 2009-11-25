@@ -16,7 +16,7 @@ Translations:
                           Bart Van Hove <bartvanhove at skynet.be>
   Polish:                 Zbigniew Baniewski <zb at ispid.com.pl>
   Portuguese:             Paulo Oliveira <paulo.ferraz.oliveira at gmail.com>
-  Rusian:                 Rain <rain at jabberworld.info> <<linuxoid.rain at gmail.com>
+  Rusian:                 Rain <rain at jabberworld.info> <linuxoid.rain at gmail.com>
                           JabberWorld.info team (review: h31, vlas, cyam)
                           Alexander Balezin <gescheit at list.ru>
   Swedish:                Mats Bengtsson [http://coccinella.im/mats-bengtsson]
