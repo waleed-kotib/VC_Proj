@@ -6,20 +6,21 @@
 # Néstor Díaz <n3storm at grupoikusnet.com>, 2004.
 # Antonio F. Cano <antonio at grupoikusnet.com>, 2006.
 # Agustin Vericat <agustin at grupoikusnet.com>, 2006.
-# César Alcalde <lambda512 at gmail.com>, 2008.
+# César Alcalde <lambda512 at gmail.com>, 2009.
 msgid ""
 msgstr ""
 "Project-Id-Version: es\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
 "POT-Creation-Date: 2009-11-23 23:35+0100\n"
-"PO-Revision-Date: 2009-03-14 17:07+0100\n"
-"Last-Translator: naw <lambda512@gmail.com>\n"
-"Language-Team: Spanish\n"
+"PO-Revision-Date: 2009-11-25 16:58+0100\n"
+"Last-Translator: César Alcalde <lambda512 at gmail.com>\n"
+"Language-Team: Spanish <>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-Language: Spanish\n"
+"X-Generator: Lokalize 1.0\n"
 
 #. TRANSLATORS: splash screen strings; shown at startup
 #: ../Coccinella.tcl:173
@@ -350,49 +351,50 @@ msgstr "Altitud en metros sobre el nivel del mar"
 
 #: ../components/Geolocation.tcl:53
 msgid "A named area such as a campus or neighborhood"
-msgstr ""
+msgstr "La zona, tal como un campus o un barrio"
 
 #: ../components/Geolocation.tcl:54
 msgid ""
 "GPS bearing (direction in which the entity is heading to reach its next "
 "waypoint), measured in decimal degrees relative to true north"
 msgstr ""
+"Orientación GPS (dirección en la cual se está desplazando para alcanzar el "
+"siguiente punto en la ruta), medido en grados decimales en relación al norte"
 
 #: ../components/Geolocation.tcl:55
 msgid "A specific building on a street or in an area"
-msgstr ""
+msgstr "Un edificio específico en una calle o zona"
 
 #: ../components/Geolocation.tcl:56
 msgid "The nation where the user is located"
 msgstr "El país donde se encuentra el usuario"
 
 #: ../components/Geolocation.tcl:57
-#, fuzzy
 #| msgid "GPS Datum"
 msgid "GPS datum"
 msgstr "Datos GPS"
 
 #: ../components/Geolocation.tcl:58
 msgid "A natural-language name for or description of the location"
-msgstr ""
+msgstr "Un nombre o descrpción de la ubicación"
 
 #: ../components/Geolocation.tcl:59
 msgid "Horizontal GPS error in arc minutes"
-msgstr ""
+msgstr "Error horizontal del GPS en minutos de arco"
 
 #: ../components/Geolocation.tcl:60
 msgid "A particular floor in a building"
-msgstr ""
+msgstr "Una planta especifica en el edificio"
 
 #: ../components/Geolocation.tcl:61
 msgid "Latitude in decimal degrees North"
 msgstr "Latitud en grados decimales Norte"
 
 #: ../components/Geolocation.tcl:62
-#, fuzzy
 #| msgid "An administrative region of the nation, such as a state or province"
 msgid "A locality within the administrative region, such as a town or city"
-msgstr "Una región administrativa de la nación, como un estado o una provincia"
+msgstr ""
+"Una localidad en la región administrativa, como una ciudad o un pueblo "
 
 #: ../components/Geolocation.tcl:63
 msgid "Longitude in decimal degrees East"
@@ -400,7 +402,7 @@ msgstr "Longitud en grados decimales Este"
 
 #: ../components/Geolocation.tcl:64
 msgid "A code used for postal delivery"
-msgstr ""
+msgstr "Código utilizado para envíos postales"
 
 #: ../components/Geolocation.tcl:65 ../jabber/JForms.tcl:308
 #: ../jabber/Register.tcl:719
@@ -409,20 +411,22 @@ msgstr "Una región administrativa de la nación, como un estado o una provincia
 
 #: ../components/Geolocation.tcl:66
 msgid "A particular room in a building"
-msgstr ""
+msgstr "Una habitación particular en un edificio"
 
 #: ../components/Geolocation.tcl:67
+#, fuzzy
 msgid "A thoroughfare within the locality, or a crossing of two thoroughfares"
 msgstr ""
 
 #: ../components/Geolocation.tcl:68
+#, fuzzy
 msgid ""
 "A catch-all element that captures any other information about the location"
 msgstr ""
 
 #: ../components/Geolocation.tcl:69
 msgid "UTC timestamp specifying the moment when the reading was taken"
-msgstr ""
+msgstr "Hora en UTC cuando la lectura fue tomada"
 
 #: ../components/Geolocation.tcl:72
 msgid "Altitude"
@@ -526,11 +530,10 @@ msgstr "Ubicación"
 msgid "Synchronize with Google Earth"
 msgstr "Sincronizar con Google Earth"
 
-#: ../components/Geolocation.tcl:373
-#, fuzzy, tcl-format
+#: ../components/Geolocation.tcl:373, tcl-format
 #| msgid "This is location data for"
 msgid "This is location data for %s"
-msgstr "La información del lugar para"
+msgstr "Esta es la información geográfica para %s"
 
 #: ../components/Growl.tcl:162 ../components/taskbar/Taskbar.tcl:185
 #: ../jabber/JUI.tcl:178 ../jabber/JUI.tcl:532 ../jabber/JUI.tcl:1834
@@ -864,10 +867,9 @@ msgstr ""
 "Haga click en una ventana o seleccione un área rectangular para hacer una "
 "captura de pantalla e importarla a la pizarra."
 
-#: ../components/ImageMagic.tcl:183
-#, fuzzy, tcl-format
+#: ../components/ImageMagic.tcl:183, tcl-format
 msgid "Dangerous in-box path name: %s"
-msgstr "La ruta al archivo es problemática: %s"
+msgstr "La ruta al archivo es peligrosa: %s"
 
 #: ../components/ImageMagic.tcl:195
 #, tcl-format
@@ -1494,10 +1496,9 @@ msgid "Volume"
 msgstr "Volumen"
 
 #: ../components/Sounds.tcl:586
-#, fuzzy
 #| msgid "Sound set"
 msgid "Sound device"
-msgstr "Conjunto de sonidos"
+msgstr "Dispositivo de sonido"
 
 #: ../components/Sounds.tcl:595
 msgid "MIDI Player"
@@ -1568,7 +1569,7 @@ msgstr "Añadir al Diccionario"
 
 #: ../components/Totd.tcl:18 ../components/Totd.tcl:90
 msgid "Tip of the Day"
-msgstr ""
+msgstr "Consejo del día"
 
 #: ../components/Totd.tcl:30
 #, tcl-format
@@ -1586,6 +1587,18 @@ msgid ""
 " 4. Enter the name of the desired server and proceed.\n"
 " 5. The chat system will become available in the list!"
 msgstr ""
+"Si el sistema de mensajería deseado no está disponible cuando desee añadir "
+"un contacto es debido a que no se ha detectado soporte en el servidor. "
+"Afortunadamente, para la mayoría de sistemas, puede usar otro servidor sin "
+"necesidad de registrar una nueva cuenta. \n"
+"\n"
+" Instrucciones:\n"
+" 1. Conéctese a su cuenta en %s.\n"
+" 2. Seleccione la opción Descubrir Servidor en el menu Acción.\n"
+" 3. Busque un servidor con soporte para el sistema deseado en http://"
+"coccinella.im/servers/servers.html (puede ordenar por columnas).\n"
+" 4. Introduzca el nombre del servidor deseado y continúe.\n"
+" 5. ¡El sistema aparecerá como disponible en la lista!"
 
 #: ../components/Totd.tcl:43
 msgid ""
@@ -1593,6 +1606,9 @@ msgid ""
 "window, whilst the /retain command will restore its content. Your contacts "
 "do not see these commands."
 msgstr ""
+"Puede usar el comando /clean durante una conversación para vaciar la ventana "
+"de conversación, mientras que el comando /retain restaurará el contenido. "
+"Los otros usuarios no verán estos comandos."
 
 #: ../components/Totd.tcl:46
 #, tcl-format
@@ -1600,6 +1616,8 @@ msgid ""
 "You might be interested in the hidden XML console if you are a developer. "
 "You can open it with the command %s+Shift+D"
 msgstr ""
+"Si usted es un desarrollador, puede que le interese acceder a la consola XML."
+" Puede abrirla usando %s+Shift+D"
 
 #: ../components/Totd.tcl:49
 #, tcl-format
@@ -1607,16 +1625,18 @@ msgid ""
 "You can initiate a whiteboard session with multiple participants by clicking "
 "the whiteboard icon in a chatroom. All participants using %s will be invited."
 msgstr ""
+"Puede iniciar una sesión de pizarra con múltiples participantes haciendo "
+"click en el icono de la pizarra en una sala de chat. Todos los participantes "
+"que usen %s serán invitados."
 
 #: ../components/Totd.tcl:52
 msgid "Documentation is available at http://coccinella.im/documentation"
-msgstr ""
+msgstr "La documentación está disponible en http://coccinella.im/documentation"
 
-#: ../components/Totd.tcl:105
-#, fuzzy, tcl-format
+#: ../components/Totd.tcl:105, tcl-format
 #| msgid "Show tips on startup"
 msgid "Show tips on %s startup"
-msgstr "Mostrar sugerencias al iniciar"
+msgstr "Mostrar sugerencias al iniciar %s"
 
 #. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
 #: ../components/UserActivity.tcl:54
@@ -2745,7 +2765,7 @@ msgstr "Refrescar"
 #: ../jabber/Disco.tcl:181 ../jabber/JUI.tcl:183 ../jabber/JUI.tcl:1838
 #: ../jabber/JUI.tcl:1858
 msgid "&Discover Server"
-msgstr "&Buscar servidores"
+msgstr "&Descubrir servidor"
 
 #: ../jabber/Disco.tcl:182
 msgid "Remove &Listing"
@@ -2997,7 +3017,7 @@ msgstr "Diercción TLEN"
 
 #: ../jabber/Gateway.tcl:90
 msgid "Twitter user"
-msgstr ""
+msgstr "Usuario de Twitter"
 
 #: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
 #: ../jabber/Profiles.tcl:1124 ../jabber/VCard.tcl:322
@@ -3051,10 +3071,9 @@ msgid "away"
 msgstr "ausente"
 
 #: ../jabber/GroupChat.tcl:190
-#, fuzzy
 #| msgid "Pretty format"
 msgid "free for chat"
-msgstr "Formato bonito"
+msgstr "Disponible para conversar"
 
 #. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
 #: ../jabber/GroupChat.tcl:192
@@ -4072,17 +4091,19 @@ msgid "Login failed because of unknown account or wrong password."
 msgstr ""
 "Fallo la autenticación porque el usuario o la contraseña es incorrecta."
 
-#: ../jabber/Login.tcl:985
-#, tcl-format
+#: ../jabber/Login.tcl:985, tcl-format
 msgid ""
 "Invalid server response due to bug in server software:  error <%s/> is not "
 "defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting "
 "this bug to your server administrator."
 msgstr ""
+"Respuesta invalida des servidor debido a un bug en el servidor: error <%s/> "
+"no está definido en la sección 6.4 SASL Errors del RFC 3920.  Por favor, "
+"considere informar de esto al administrador de su servidor."
 
 #: ../jabber/Login.tcl:1011
 msgid "Do you want to retry a different password or profile?"
-msgstr ""
+msgstr "¿Desea intentarlo con otra contraseña o perfil?"
 
 #: ../jabber/Login.tcl:1041
 #, tcl-format
@@ -4435,7 +4456,7 @@ msgstr "Desregistrarse"
 #: ../jabber/Register.tcl:134
 #, tcl-format
 msgid "You are unregistered from %s."
-msgstr "We ha desregistrado de %s."
+msgstr "Se ha desregistrado de %s."
 
 #: ../jabber/Register.tcl:233 ../jabber/Register.tcl:248
 #: ../jabber/SetupAss.tcl:192 ../jabber/SetupAss.tcl:196
@@ -4538,7 +4559,7 @@ msgstr "Ausente"
 #: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
 #: ../jabber/Status.tcl:46
 msgid "Free For Chat"
-msgstr ""
+msgstr "Disponible para conversar"
 
 #: ../jabber/Roster.tcl:84 ../jabber/Roster.tcl:92 ../jabber/Roster.tcl:134
 #: ../jabber/Status.tcl:39 ../jabber/Status.tcl:47
@@ -4982,7 +5003,7 @@ msgstr "VCard: %s"
 #: ../jabber/UserInfo.tcl:474
 #, tcl-format
 msgid "Failed to obtain personal notes: %s"
-msgstr ""
+msgstr "Error obteniendo las notas personales: %s"
 
 #. TRANSLATORS: in the business card dialog, there can be made notes about each contact
 #: ../jabber/UserInfo.tcl:529
@@ -5187,7 +5208,7 @@ msgid "Cannot download the file %s."
 msgstr "No puedo descargar el archivo %s."
 
 #: ../lib/HttpTrpt.tcl:102 ../lib/HttpTrpt.tcl:135 ../lib/HttpTrpt.tcl:229
-#, tcl-format
+#, fuzzy, tcl-format
 msgid "File transport error: %s"
 msgstr ""
 
@@ -6111,6 +6132,7 @@ msgid "Import Itcl applets"
 msgstr "Importar applets Itcl"
 
 #: ../whiteboard/Plugins.tcl:1374
+#, fuzzy
 msgid "Import documents on Windows"
 msgstr ""
 
@@ -6186,10 +6208,9 @@ msgid "yes"
 msgstr "sí"
 
 #: ../whiteboard/WDialogs.tcl:188
-#, fuzzy
 #| msgid "Activity"
 msgid "Activated"
-msgstr "Actividad"
+msgstr "Activado"
 
 #: ../whiteboard/WDialogs.tcl:194
 msgid "Buffering support"
