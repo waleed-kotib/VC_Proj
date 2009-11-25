@@ -5,20 +5,21 @@
 #
 # Hermann J. Beckers <hj dot beckers at onlinehome dot de>, 2004-2008.
 # Hermann J. Beckers <hj.beckers@onlinehome.de>, 2009.
+# Hermann-Josef Beckers <hj.beckers@onlinehome.de>, 2009.
 msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
 "POT-Creation-Date: 2009-11-23 23:35+0100\n"
-"PO-Revision-Date: 2009-02-22 18:04+0100\n"
-"Last-Translator: Hermann J. Beckers <hj.beckers@onlinehome.de>\n"
+"PO-Revision-Date: 2009-11-25 20:51+0100\n"
+"Last-Translator: Hermann-Josef Beckers <hj.beckers@onlinehome.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms:  nplurals=2; plural=(n != 1);\n"
 "X-Poedit-Language: German\n"
-"X-Generator: Lokalize 0.3\n"
+"X-Generator: Lokalize 1.0\n"
 
 #. TRANSLATORS: splash screen strings; shown at startup
 #: ../Coccinella.tcl:173
@@ -349,7 +350,7 @@ msgstr "Höhenlage in Meter über oder unter Meereshöhe"
 
 #: ../components/Geolocation.tcl:53
 msgid "A named area such as a campus or neighborhood"
-msgstr ""
+msgstr "Ein benannter Bereich wie ein Campus oder eine Nachbarschaft"
 
 #: ../components/Geolocation.tcl:54
 msgid ""
@@ -359,39 +360,37 @@ msgstr ""
 
 #: ../components/Geolocation.tcl:55
 msgid "A specific building on a street or in an area"
-msgstr ""
+msgstr "Ein spezielles Gebäude in einer Straße oder einem Bereich"
 
 #: ../components/Geolocation.tcl:56
 msgid "The nation where the user is located"
 msgstr "Die Nation, in der der Anwender lebt"
 
 #: ../components/Geolocation.tcl:57
-#, fuzzy
 #| msgid "GPS Datum"
 msgid "GPS datum"
 msgstr "GPS-Datum"
 
 #: ../components/Geolocation.tcl:58
 msgid "A natural-language name for or description of the location"
-msgstr ""
+msgstr "Umgangssprachlicher Name oder Bezeichnung des Ortes"
 
 #: ../components/Geolocation.tcl:59
 msgid "Horizontal GPS error in arc minutes"
-msgstr ""
+msgstr "Horizontale GPS-Abweichung in Bogenminuten"
 
 #: ../components/Geolocation.tcl:60
 msgid "A particular floor in a building"
-msgstr ""
+msgstr "Eine spezielle Etage in einem Gebäude"
 
 #: ../components/Geolocation.tcl:61
 msgid "Latitude in decimal degrees North"
 msgstr "Breitengrad in Dezimalgrad Nord"
 
 #: ../components/Geolocation.tcl:62
-#, fuzzy
 #| msgid "An administrative region of the nation, such as a state or province"
 msgid "A locality within the administrative region, such as a town or city"
-msgstr "Verwaltungsbereich der Nation wie Staat oder Provinz"
+msgstr "Ein Ort innerhalb des Verwaltungsbereichs wie Stadt oder Dorf."
 
 #: ../components/Geolocation.tcl:63
 msgid "Longitude in decimal degrees East"
@@ -399,7 +398,7 @@ msgstr "Längengrad in Dezimalgrad Ost"
 
 #: ../components/Geolocation.tcl:64
 msgid "A code used for postal delivery"
-msgstr ""
+msgstr "Postzustellungs-Code"
 
 #: ../components/Geolocation.tcl:65 ../jabber/JForms.tcl:308
 #: ../jabber/Register.tcl:719
@@ -408,20 +407,23 @@ msgstr "Verwaltungsbereich der Nation wie Staat oder Provinz"
 
 #: ../components/Geolocation.tcl:66
 msgid "A particular room in a building"
-msgstr ""
+msgstr "Ein spezieller Raum in einem Gebäude"
 
 #: ../components/Geolocation.tcl:67
 msgid "A thoroughfare within the locality, or a crossing of two thoroughfares"
 msgstr ""
+"Durchgangsstraße innerhalb des Ortes oder eine Kreuzung zweier "
+"Durchgangsstraßen"
 
 #: ../components/Geolocation.tcl:68
 msgid ""
 "A catch-all element that captures any other information about the location"
 msgstr ""
+"Ein Auffangelement, das alle sonstigen Informationen über den Ort aufnimmt"
 
 #: ../components/Geolocation.tcl:69
 msgid "UTC timestamp specifying the moment when the reading was taken"
-msgstr ""
+msgstr "UTC-Zeitstempel, der den Zeitpunkt der Messung angibt"
 
 #: ../components/Geolocation.tcl:72
 msgid "Altitude"
@@ -525,8 +527,7 @@ msgstr "Lokation"
 msgid "Synchronize with Google Earth"
 msgstr "Synchronisiere mit Google Earth"
 
-#: ../components/Geolocation.tcl:373
-#, fuzzy, tcl-format
+#: ../components/Geolocation.tcl:373, tcl-format
 #| msgid "This is location data for"
 msgid "This is location data for %s"
 msgstr "Dies sind Lokalisierungsdaten für"
@@ -1361,8 +1362,7 @@ msgstr "Anruf-Benachrichtigung"
 msgid "Close Slot"
 msgstr "Slot schliessen"
 
-#: ../components/Phone/NotifyCall.tcl:636
-#, fuzzy, tcl-format
+#: ../components/Phone/NotifyCall.tcl:636, tcl-format
 #| msgid "%s is calling"
 msgid "%s is calling"
 msgstr "%f ruft an"
@@ -1493,10 +1493,9 @@ msgid "Volume"
 msgstr "Lautstärke"
 
 #: ../components/Sounds.tcl:586
-#, fuzzy
 #| msgid "Sound set"
 msgid "Sound device"
-msgstr "Klang-Menge"
+msgstr "Klang-Gerät"
 
 #: ../components/Sounds.tcl:595
 msgid "MIDI Player"
@@ -1567,7 +1566,7 @@ msgstr "Zum Wörterbuch hinzufügen"
 
 #: ../components/Totd.tcl:18 ../components/Totd.tcl:90
 msgid "Tip of the Day"
-msgstr ""
+msgstr "Tipp des Tages"
 
 #: ../components/Totd.tcl:30
 #, tcl-format
@@ -1592,6 +1591,11 @@ msgid ""
 "window, whilst the /retain command will restore its content. Your contacts "
 "do not see these commands."
 msgstr ""
+"Eingabe des /clean-Befehls während einer Chat-Konversation leert Ihr "
+"Chat-Fenster, "
+"während der /retain-Befehl den Inhalt wiederherstellt. Ihre Kontakte sehen "
+"diese "
+"Befehle nicht.."
 
 #: ../components/Totd.tcl:46
 #, tcl-format
@@ -1599,6 +1603,9 @@ msgid ""
 "You might be interested in the hidden XML console if you are a developer. "
 "You can open it with the command %s+Shift+D"
 msgstr ""
+"Die versteckte XML-Konsole könnte Sie interessieren, falls Sie Entwickler "
+"sind. "
+"Sie können diese mit dem Befehl %s+Umsch+D öffnen."
 
 #: ../components/Totd.tcl:49
 #, tcl-format
@@ -1606,16 +1613,18 @@ msgid ""
 "You can initiate a whiteboard session with multiple participants by clicking "
 "the whiteboard icon in a chatroom. All participants using %s will be invited."
 msgstr ""
+"Sie können eine Zeichenfläche-Sitzung mit mehreren Teilnehmern durch Klicken "
+"des Zeichenfläche-Icons in einem Chat-Raum initiieren. Es werden alle "
+"Teilnehmer eingeladen, die %s benutzen."
 
 #: ../components/Totd.tcl:52
 msgid "Documentation is available at http://coccinella.im/documentation"
-msgstr ""
+msgstr "Dokumentation findet sich unter http://coccinella.im/documentation"
 
-#: ../components/Totd.tcl:105
-#, fuzzy, tcl-format
+#: ../components/Totd.tcl:105, tcl-format
 #| msgid "Show tips on startup"
 msgid "Show tips on %s startup"
-msgstr "Zeige Tipps beim Start"
+msgstr "Zeige Tipps beim %s-Start"
 
 #. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
 #: ../components/UserActivity.tcl:54
@@ -2998,7 +3007,7 @@ msgstr "Tlen-Adresse"
 
 #: ../jabber/Gateway.tcl:90
 msgid "Twitter user"
-msgstr ""
+msgstr "Twitter-Benutzer"
 
 #: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
 #: ../jabber/Profiles.tcl:1124 ../jabber/VCard.tcl:322
@@ -3052,10 +3061,9 @@ msgid "away"
 msgstr "weg"
 
 #: ../jabber/GroupChat.tcl:190
-#, fuzzy
 #| msgid "Pretty format"
 msgid "free for chat"
-msgstr "hübsch formatiert"
+msgstr "für Chat verfügbar"
 
 #. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
 #: ../jabber/GroupChat.tcl:192
@@ -3552,8 +3560,7 @@ msgstr ""
 msgid "Cannot set %s's nickname or group."
 msgstr "Kann %ss Spitzname oder Gruppe nicht setzen."
 
-#: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:701
-#, fuzzy, tcl-format
+#: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:701, tcl-format
 #| msgid ""
 #| "This is your own account at %s that acts as a service that transports "
 #| "messages to that IM system. It needs to be in your list. You have a "
@@ -3999,7 +4006,7 @@ msgid ""
 "Your current login settings differ from your profile settings. Do you want "
 "to save them to your profile?"
 msgstr ""
-"Ihre aktuellen Anmeldeeinstellungen weichen von Ihren Profileinstelllungen "
+"Ihre aktuellen Anmeldeeinstellungen weichen von Ihren Profileinstellungen "
 "ab. Möchten Sie diese in Ihrem neuen Profil speichern?"
 
 #: ../jabber/Login.tcl:819
@@ -4094,10 +4101,13 @@ msgid ""
 "defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting "
 "this bug to your server administrator."
 msgstr ""
+"Ungültige Server-Antwort aufgrund eines Fehlers in der Server-Software: "
+"Fehler <%s/> ist nicht in Abschnitt 6.4 SASL Errors des RFC 3920 definiert. "
+"Bitte überlegen Sie, diesen Fehler Ihrem Server-Administrator zu berichten."
 
 #: ../jabber/Login.tcl:1011
 msgid "Do you want to retry a different password or profile?"
-msgstr ""
+msgstr "Möchten Sie ein anderes Passwort oder Profil versuchen?"
 
 #: ../jabber/Login.tcl:1041
 #, tcl-format
@@ -4266,11 +4276,10 @@ msgstr "Fehler bei Öffnen"
 msgid "Cannot open the inbox file %s when trying to save it."
 msgstr "Kann Inbox-Datei %s beim Speicherversuch nicht öffnen."
 
-#: ../jabber/MailBox.tcl:1783 ../jabber/MailBox.tcl:1817
-#, fuzzy, tcl-format
+#: ../jabber/MailBox.tcl:1783 ../jabber/MailBox.tcl:1817, tcl-format
 #| msgid "Cannot read the inbox file %s: %s"
 msgid "Cannot read the inbox file %s: %s"
-msgstr "Kann Inbox-Datei nicht lesen: %s"
+msgstr "Kann die Inbox-Datei %s nicht lesen: %s"
 
 #: ../jabber/MegaPresence.tcl:102 ../jabber/MegaPresence.tcl:111
 #: ../jabber/VCard.tcl:411
@@ -4555,7 +4564,7 @@ msgstr "Weg"
 #: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
 #: ../jabber/Status.tcl:46
 msgid "Free For Chat"
-msgstr ""
+msgstr "Für Chat verfübgar"
 
 #: ../jabber/Roster.tcl:84 ../jabber/Roster.tcl:92 ../jabber/Roster.tcl:134
 #: ../jabber/Status.tcl:39 ../jabber/Status.tcl:47
@@ -5000,7 +5009,7 @@ msgstr "Visitenkarte: %s"
 #: ../jabber/UserInfo.tcl:474
 #, tcl-format
 msgid "Failed to obtain personal notes: %s"
-msgstr ""
+msgstr "Konnte persönliche Notizen nicht abrufen: %s"
 
 #. TRANSLATORS: in the business card dialog, there can be made notes about each contact
 #: ../jabber/UserInfo.tcl:529
@@ -5918,12 +5927,10 @@ msgid "Round"
 msgstr "Rund"
 
 #: ../whiteboard/ItemInspector.tcl:219
-#, fuzzy
 msgid "Bevel"
 msgstr "Bevel"
 
 #: ../whiteboard/ItemInspector.tcl:220
-#, fuzzy
 msgid "Miter"
 msgstr "Miter"
 
@@ -6136,7 +6143,7 @@ msgstr "Importiere Itcl-Anwendungen"
 
 #: ../whiteboard/Plugins.tcl:1374
 msgid "Import documents on Windows"
-msgstr ""
+msgstr "Dokumente unter Windows importieren"
 
 #: ../whiteboard/PutFileIface.tcl:168
 #, tcl-format
@@ -6212,10 +6219,9 @@ msgid "yes"
 msgstr "ja"
 
 #: ../whiteboard/WDialogs.tcl:188
-#, fuzzy
 #| msgid "Activity"
 msgid "Activated"
-msgstr "Aktivität"
+msgstr "Aktiviert"
 
 #: ../whiteboard/WDialogs.tcl:194
 msgid "Buffering support"
