@@ -10,13 +10,13 @@ msgstr ""
 "Project-Id-Version: pt\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
 "POT-Creation-Date: 2009-11-23 23:35+0100\n"
-"PO-Revision-Date: 2009-03-10 21:09+0000\n"
+"PO-Revision-Date: 2009-11-27 01:14+0100\n"
 "Last-Translator: Paulo Oliveira <paulo.ferraz.oliveira at gmail.com>\n"
 "Language-Team: Portuguese <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms:  nplurals=2; plural=(n != 1);\n"
+"Plural-Forms:  nplurals=2; plural=(n != 1);"
 
 #. TRANSLATORS: splash screen strings; shown at startup
 #: ../Coccinella.tcl:173
@@ -133,8 +133,7 @@ msgstr "Erro"
 #: ../components/AutoUpdate.tcl:123
 #, tcl-format
 msgid "Cannot connect to server %s to download update details: %s"
-msgstr ""
-"Impossível ligar ao servidor %s para transferir detalhes da actualização: %s"
+msgstr "Impossível ligar ao servidor %s para transferir detalhes da actualização: %s"
 
 #: ../components/AutoUpdate.tcl:176
 msgid "Update Check"
@@ -346,57 +345,57 @@ msgstr "Altitude em metros acima ou abaixo do nível das águas do mar"
 
 #: ../components/Geolocation.tcl:53
 msgid "A named area such as a campus or neighborhood"
-msgstr ""
+msgstr "Uma área determinada como um campus ou um bairro"
 
 #: ../components/Geolocation.tcl:54
 msgid ""
 "GPS bearing (direction in which the entity is heading to reach its next "
 "waypoint), measured in decimal degrees relative to true north"
 msgstr ""
+"Coordenadas GPS (direcção na qual a entidade se encontra para chegar ao seu"
+"próximo destino), medido em graus decimais relativos ao Norte verdadeiro"
 
 #: ../components/Geolocation.tcl:55
 msgid "A specific building on a street or in an area"
-msgstr ""
+msgstr "Um edifício específico numa rua ou numa área"
 
 #: ../components/Geolocation.tcl:56
 msgid "The nation where the user is located"
 msgstr "O país onde o utilizador se encontra"
 
 #: ../components/Geolocation.tcl:57
-#, fuzzy
 #| msgid "GPS Datum"
 msgid "GPS datum"
 msgstr "Datum GPS"
 
 #: ../components/Geolocation.tcl:58
 msgid "A natural-language name for or description of the location"
-msgstr ""
+msgstr "Um nome nativo para ou a descrição do local"
 
 #: ../components/Geolocation.tcl:59
 msgid "Horizontal GPS error in arc minutes"
-msgstr ""
+msgstr "Erro GPS horizontal em minutos de arco"
 
 #: ../components/Geolocation.tcl:60
 msgid "A particular floor in a building"
-msgstr ""
+msgstr "Um dado andar num edifício"
 
 #: ../components/Geolocation.tcl:61
 msgid "Latitude in decimal degrees North"
-msgstr "Latitude em graus decimais a North"
+msgstr "Latitude em graus decimais Norte"
 
 #: ../components/Geolocation.tcl:62
-#, fuzzy
 #| msgid "An administrative region of the nation, such as a state or province"
 msgid "A locality within the administrative region, such as a town or city"
-msgstr "Uma região administrativa do país, tal como um estado ou uma província"
+msgstr "Uma localidade dentro de uma região administrativa, tal como um vila ou uma cidade"
 
 #: ../components/Geolocation.tcl:63
 msgid "Longitude in decimal degrees East"
-msgstr "Longitude em graus decimais a East"
+msgstr "Longitude em graus decimais Este"
 
 #: ../components/Geolocation.tcl:64
 msgid "A code used for postal delivery"
-msgstr ""
+msgstr "Um código usado para entrega postal"
 
 #: ../components/Geolocation.tcl:65 ../jabber/JForms.tcl:308
 #: ../jabber/Register.tcl:719
@@ -405,20 +404,21 @@ msgstr "Uma região administrativa do país, tal como um estado ou uma provínci
 
 #: ../components/Geolocation.tcl:66
 msgid "A particular room in a building"
-msgstr ""
+msgstr "Um dado quarto num edifício"
 
 #: ../components/Geolocation.tcl:67
 msgid "A thoroughfare within the locality, or a crossing of two thoroughfares"
-msgstr ""
+msgstr "Uma via dentro da localidade, ou uma passagem entre duas vias"
 
 #: ../components/Geolocation.tcl:68
 msgid ""
 "A catch-all element that captures any other information about the location"
 msgstr ""
+"Um elemento agregador que capture qualquer outra informação sobre o local"
 
 #: ../components/Geolocation.tcl:69
 msgid "UTC timestamp specifying the moment when the reading was taken"
-msgstr ""
+msgstr "\"Carimbo de tempo\" especificando o momento em que a leitura tomou lugar"
 
 #: ../components/Geolocation.tcl:72
 msgid "Altitude"
@@ -523,10 +523,10 @@ msgid "Synchronize with Google Earth"
 msgstr "Sincronizar com Google Earth"
 
 #: ../components/Geolocation.tcl:373
-#, fuzzy, tcl-format
+#, tcl-format
 #| msgid "This is location data for"
 msgid "This is location data for %s"
-msgstr "Isto é informação de localização para"
+msgstr "Isto é informação de localização para %s"
 
 #: ../components/Growl.tcl:162 ../components/taskbar/Taskbar.tcl:185
 #: ../jabber/JUI.tcl:178 ../jabber/JUI.tcl:532 ../jabber/JUI.tcl:1834
@@ -857,7 +857,7 @@ msgid ""
 "Click on a window or drag a rectangular area to import a snapshot into the "
 "current whiteboard."
 msgstr ""
-"Clicar numa janela ou arraste uma área rectangular para importar um "
+"Escolha uma janela ou arraste uma área rectangular para importar um "
 "instantâneo para dentro do quadro branco actual."
 
 #: ../components/ImageMagic.tcl:183
@@ -1297,7 +1297,7 @@ msgstr "Chamar VM?"
 #: ../jabber/Login.tcl:735
 #, tcl-format
 msgid "Enter the password for your account %s"
-msgstr "Introduza a palavra chave para a sua conta %s"
+msgstr "Introduza a palavra-chave para a sua conta %s"
 
 #: ../components/ParseURI.tcl:391
 #, tcl-format
@@ -1360,7 +1360,7 @@ msgstr "Fechar Slot"
 #: ../components/Phone/NotifyCall.tcl:636
 #, tcl-format
 msgid "%s is calling"
-msgstr "é"
+msgstr "%s está a ligar"
 
 #: ../components/Phone/NotifyCall.tcl:663
 msgid "Answer call"
@@ -1373,7 +1373,7 @@ msgstr "Desligar chamada"
 #: ../components/Phone/NotifyCall.tcl:717
 #, tcl-format
 msgid "%s is on the phone"
-msgstr "é"
+msgstr "%s encontra-se ao telefone"
 
 #. TRANSLATORS; whiteboard slide show menu
 #: ../components/SlideShow.tcl:43 ../components/SlideShow.tcl:123
@@ -1488,10 +1488,9 @@ msgid "Volume"
 msgstr "Volume"
 
 #: ../components/Sounds.tcl:586
-#, fuzzy
 #| msgid "Sound set"
 msgid "Sound device"
-msgstr "Configuração de som"
+msgstr "Dispositivo de som"
 
 #: ../components/Sounds.tcl:595
 msgid "MIDI Player"
@@ -1562,7 +1561,7 @@ msgstr "Adicionar ao Dicionário"
 
 #: ../components/Totd.tcl:18 ../components/Totd.tcl:90
 msgid "Tip of the Day"
-msgstr ""
+msgstr "Dica do Dia"
 
 #: ../components/Totd.tcl:30
 #, tcl-format
@@ -1580,6 +1579,18 @@ msgid ""
 " 4. Enter the name of the desired server and proceed.\n"
 " 5. The chat system will become available in the list!"
 msgstr ""
+"Se o sistema de conversação pretendido não se encontra disponível quando"
+"tenta adicionar um contacto, isto indica que nenhum suporte de servidor foi"
+"detectado. Felizmente, para a maioria dos sistemas de conversação pode usar"
+"outro servidor sem necessidade de registar uma nova conta.\n"
+"\n"
+" Instruções:\n"
+" 1. Aceda à sua conta em %s.\n"
+" 2. Seleccione a opção Descobrir Servidor no menu Acções.\n"
+" 3. Procure um servidor com suporte para o sistema de conversação pretendido"
+" em http://coccinella.im/servers/servers.html (as colunas podem ser ordenadas).\n"
+" 4. Introduza o nome do servidor pretendido e proceda.\n"
+" 5. O sistema de conversação encontrar-se-á disponível na lista!"
 
 #: ../components/Totd.tcl:43
 msgid ""
@@ -1587,6 +1598,9 @@ msgid ""
 "window, whilst the /retain command will restore its content. Your contacts "
 "do not see these commands."
 msgstr ""
+"Escrever o comando /clean durante uma conversa irá esvaziar a janela"
+"da conversa, enquanto o comando /retain irá restaurar o seu conteúdo. Os"
+"seus contactos não vêem estes comandos."
 
 #: ../components/Totd.tcl:46
 #, tcl-format
@@ -1594,6 +1608,8 @@ msgid ""
 "You might be interested in the hidden XML console if you are a developer. "
 "You can open it with the command %s+Shift+D"
 msgstr ""
+"Poderá encontrar-se interessando na consola XML se for um programador."
+"Pode abri-la com o comando %s+Shift+D"
 
 #: ../components/Totd.tcl:49
 #, tcl-format
@@ -1601,16 +1617,18 @@ msgid ""
 "You can initiate a whiteboard session with multiple participants by clicking "
 "the whiteboard icon in a chatroom. All participants using %s will be invited."
 msgstr ""
+"Pode iniciar uma sessão quadro branco com vários participantes carregando no ícone de"
+"quadro branco numa sala de conversa. Todos os participantes usando %s serão convidados."
 
 #: ../components/Totd.tcl:52
 msgid "Documentation is available at http://coccinella.im/documentation"
-msgstr ""
+msgstr "Documentação está disponível em http://coccinella.im/documentation"
 
 #: ../components/Totd.tcl:105
-#, fuzzy, tcl-format
+#, tcl-format
 #| msgid "Show tips on startup"
 msgid "Show tips on %s startup"
-msgstr "Mostrar"
+msgstr "Mostrar dicas ao %s iniciar"
 
 #. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
 #: ../components/UserActivity.tcl:54
@@ -1626,9 +1644,8 @@ msgid ""
 "Select from the first button your general activity, and optionally, your "
 "specific actvity from the second button. You may also add a descriptive text."
 msgstr ""
-"Seleccione no primeiro botão a sua actividade geral e, opcionalmente, a sua "
-"actividade específica do segundo botão. Também pode juntar um texto "
-"descritivo."
+"Seleccione no primeiro botão a sua actividade geral e, opcionalmente, a sua actividade"
+"específica do segundo botão. Também pode juntar um texto descritivo."
 
 #: ../components/UserActivity.tcl:229
 msgid "User Activity"
@@ -1940,8 +1957,7 @@ msgstr "Actividade"
 msgid "Custom Activity"
 msgstr "Actividade"
 
-#. TRANSLATORS; hidden XML console: Control + Shift + D (or Command + Shift + D on Mac OS X)
-#: ../components/XMLConsole.tcl:96
+#. TRANSLATORS; hidden XML console: Control + Shift + D (or Command + Shift + D on Mac OS X)#: ../components/XMLConsole.tcl:96
 msgid "XML Console"
 msgstr "Consola XML"
 
@@ -2276,7 +2292,7 @@ msgid ""
 "If activated then directed auto-away presence will be sent to users on "
 "hidden chat tabs"
 msgstr ""
-"Se activado então ausência automática dirigida será enviada a utilizador em "
+"Se activado então a ausência automática conduzida será enviada a utilizadores em "
 "separadores de conversação escondidos"
 
 #. TRANSLATORS; this preference option automatically sets the user's presence to Do Not Disturb when he or she is chatting with too much contacts at the same moment (this number is configurable). There also is a delay until the presence is automatically changed back to the previous presence state when the number of active chats is down again.
@@ -2498,7 +2514,8 @@ msgstr "Impossível enviar antes do início da sessão."
 #: ../jabber/Chat.tcl:3576
 msgid ""
 "Do you want to close this chat window and lose the complete conversation?"
-msgstr "Deseja fechar esta janela de conversação e perder todo o seu conteúdo?"
+msgstr ""
+"Deseja fechar esta janela de conversação e perder todo o seu conteúdo?"
 
 #. TRANSLATORS; see Chat settings in preferences
 #: ../jabber/Chat.tcl:4232
@@ -2639,8 +2656,7 @@ msgstr "A transferir formulário de configuração"
 
 #: ../jabber/Create.tcl:423 ../jabber/Create.tcl:465 ../jabber/Enter.tcl:646
 msgid "Cannot download the configuration form of the chatroom."
-msgstr ""
-"Impossível transferir formulário de configuração da sala de conversação."
+msgstr "Impossível transferir formulário de configuração da sala de conversação."
 
 #: ../jabber/Create.tcl:425 ../jabber/Create.tcl:467 ../jabber/Create.tcl:545
 #: ../jabber/Create.tcl:753 ../jabber/Enter.tcl:648 ../jabber/Enter.tcl:691
@@ -2669,14 +2685,11 @@ msgstr "Entrar/Criar Sala de Conversação"
 
 #: ../jabber/Create.tcl:624
 msgid "Select a chatroom service, a chatroom, and a nickname."
-msgstr ""
-"Seleccione um serviço de sala de conversação, uma sala de conversação e uma "
-"alcunha."
+msgstr "Seleccione um serviço de sala de conversação, uma sala de conversação e uma alcunha."
 
 #: ../jabber/Create.tcl:724 ../jabber/Enter.tcl:493
 msgid "Please fill in all fields before entering chatroom."
-msgstr ""
-"Por favor preencha todos os campos antes de entrar na sala de conversação."
+msgstr "Por favor preencha todos os campos antes de entrar na sala de conversação."
 
 #: ../jabber/Create.tcl:747 ../jabber/Enter.tcl:685
 #, tcl-format
@@ -2831,8 +2844,7 @@ msgstr "Emoticons"
 
 #: ../jabber/Emoticons.tcl:741
 msgid "The selected iconset will become the default."
-msgstr ""
-"O conjunto de ícones seleccionado vai tornar-se o conjunto por omissão."
+msgstr "O conjunto de ícones seleccionado vai tornar-se o conjunto por omissão."
 
 #: ../jabber/Emoticons.tcl:813 ../jabber/Emoticons.tcl:861
 #, tcl-format
@@ -2949,8 +2961,7 @@ msgstr "Impossível transferir ficheiro %s de %s."
 
 #: ../jabber/FTrans.tcl:694
 msgid "The MD5 checksums did not match. The file may be corrupt."
-msgstr ""
-"As validações MD5 não coincidem. O ficheiro pode encontrar-se corrompido."
+msgstr "As validações MD5 não coincidem. O ficheiro pode encontrar-se corrompido."
 
 #: ../jabber/Gateway.tcl:63 ../jabber/Rosticons.tcl:587
 #: ../jabber/Search.tcl:936 ../jabber/VCard.tcl:308
@@ -2994,7 +3005,7 @@ msgstr "Endereço Tlen"
 
 #: ../jabber/Gateway.tcl:90
 msgid "Twitter user"
-msgstr ""
+msgstr "Utilizador twitter"
 
 #: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
 #: ../jabber/Profiles.tcl:1124 ../jabber/VCard.tcl:322
@@ -3048,10 +3059,9 @@ msgid "away"
 msgstr "ausente"
 
 #: ../jabber/GroupChat.tcl:190
-#, fuzzy
 #| msgid "Pretty format"
 msgid "free for chat"
-msgstr "Formato limpo"
+msgstr "livre para conversa"
 
 #. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
 #: ../jabber/GroupChat.tcl:192
@@ -3168,9 +3178,7 @@ msgstr "Porção de localidade de um endereço físico ou postal"
 
 #: ../jabber/JForms.tcl:299 ../jabber/Register.tcl:710
 msgid "Some date (e.g., birth date, hire date, sign-up date)"
-msgstr ""
-"Uma data qualquer (ex: data de nascimento, data de contratação, data de "
-"registo)"
+msgstr "Uma data qualquer (ex: data de nascimento, data de contratação, data de registo)"
 
 #: ../jabber/JForms.tcl:301 ../jabber/Register.tcl:712
 msgid "First name or given name"
@@ -3479,15 +3487,15 @@ msgstr "&Editar"
 #. TRANSLATORS; code for these strings is not finished
 #: ../jabber/JUI.tcl:1531
 msgid "The connection is secure"
-msgstr "é"
+msgstr "A ligação é segura"
 
 #: ../jabber/JUI.tcl:1535
 msgid "The connection is medium secure"
-msgstr "é"
+msgstr "A ligação é meio-segura"
 
 #: ../jabber/JUI.tcl:1539
 msgid "The connection is insecure"
-msgstr "é"
+msgstr "A ligação é insegura"
 
 #: ../jabber/JUI.tcl:1581
 msgid "Logged out"
@@ -3510,9 +3518,7 @@ msgstr ""
 
 #: ../jabber/JUser.tcl:165
 msgid "Nickname and group are optional and can be set or changed later."
-msgstr ""
-"A Alcunha e o Grupo são opcionar e podem ser escolhidos ou alterados mais "
-"tarde."
+msgstr "A Alcunha e o Grupo são opcionar e podem ser escolhidos ou alterados mais tarde."
 
 #: ../jabber/JUser.tcl:177
 msgid "Chat system"
@@ -3539,10 +3545,9 @@ msgid ""
 "account on this closed system, plus you need to register this account with "
 "the corresponding transport (%s). Do you want to do this now?"
 msgstr ""
-"Para adicionar um contacto de uma janela de conversação de sistema sem "
-"federação aberta necessita de uma conta neste sistema fechado, além do "
-"registo dessa conta com o transporte correspondente (%s). Deseja continuar e "
-"efectuar esta operação agora?"
+"Para adicionar um contacto de uma janela de conversação de sistema sem federação aberta necessita de uma"
+"conta neste sistema fechado, além do registo dessa conta com o transporte correspondente (%s). Deseja"
+"continuar e efectuar esta operação agora?"
 
 #: ../jabber/JUser.tcl:382
 #, tcl-format
@@ -3592,9 +3597,7 @@ msgstr "Você e o seu contacto conseguem ver-se mutuamente."
 
 #: ../jabber/JUser.tcl:770
 msgid "You cannot see your contact's presence, but your contact can see yours."
-msgstr ""
-"Você não consegue ver o seu contacto, mas o seu contacto consegue vê-lo(a) a "
-"si."
+msgstr "Você não consegue ver o seu contacto, mas o seu contacto consegue vê-lo(a) a si."
 
 #: ../jabber/JUser.tcl:771
 msgid "Both you and your contact cannot see eachother's presence."
@@ -3602,9 +3605,7 @@ msgstr "Nem você nem o seu contacto conseguem ver o outro."
 
 #: ../jabber/JUser.tcl:772 ../jabber/Roster.tcl:1632
 msgid "You can see your contact's presence, but your contact can't see yours."
-msgstr ""
-"Você consegue ver o seu contacto, mas o seu contacto não consegue vê-lo(a) a "
-"si."
+msgstr "Você consegue ver o seu contacto, mas o seu contacto não consegue vê-lo(a) a si."
 
 #: ../jabber/JUser.tcl:819 ../jabber/Subscribe.tcl:332
 #: ../jabber/Subscribe.tcl:368 ../jabber/Subscribe.tcl:1302
@@ -3743,7 +3744,9 @@ msgstr "Subscrição de Presença"
 msgid ""
 "Because %s does not allow you to see his/her presence anymore, he/she is "
 "removed."
-msgstr "Porque %s não o(a) permite de vê-lo(a), ele(a) é removido."
+msgstr ""
+"Porque %s não o(a) permite de vê-lo(a), ele(a) é"
+"removido(a)."
 
 #: ../jabber/Jabber.tcl:775
 #, tcl-format
@@ -3755,7 +3758,9 @@ msgstr "%s já não o(a) permite mais de o(a) ver."
 msgid ""
 "%s does not allow you to see his/her presence anymore. Do you want to remove "
 "%s?"
-msgstr "%s já não o(a) permite mais de o(a) ver. Deseja remover %s?"
+msgstr ""
+"%s já não o(a) permite mais de o(a) ver. Deseja remover"
+"%s?"
 
 #: ../jabber/Jabber.tcl:815
 #, tcl-format
@@ -3763,7 +3768,8 @@ msgid ""
 "Cannot subscribe to %s's presence. The contact does not allow you to see his/"
 "her presence."
 msgstr ""
-"Impossível subscrever a presença %s. O contacto não o permite de vê-lo(a)."
+"Impossível subscrever a presença %s. O contacto não o permite de"
+"vê-lo(a)."
 
 #: ../jabber/Jabber.tcl:820
 msgid "Subscription Failed"
@@ -3964,7 +3970,8 @@ msgstr "Caracter(es) inválido(s) em %s: %s!"
 #: ../jabber/Login.tcl:574
 msgid ""
 "The Contact ID differs from your profile. Do you want to save a new profile?"
-msgstr "O ID do Contacto difere do seu perfil. Deseja guardar um novo perfil?"
+msgstr ""
+"O ID do Contacto difere do seu perfil. Deseja guardar um novo perfil?"
 
 #: ../jabber/Login.tcl:579 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1533
 msgid "Profile Name"
@@ -4004,9 +4011,7 @@ msgstr "A negociar segurança TLS"
 #: ../jabber/Login.tcl:877
 #, tcl-format
 msgid "Authorization to server %s was successful. Downloading contacts..."
-msgstr ""
-"Autorização para servidor %s foi terminada com sucesso. A transferir "
-"contactos..."
+msgstr "Autorização para servidor %s foi terminada com sucesso. A transferir contactos..."
 
 #: ../jabber/Login.tcl:933
 #, tcl-format
@@ -4027,8 +4032,7 @@ msgstr "Servidor %s não respondeu: tempo limite ultrapassado."
 msgid ""
 "Cannot login because this username is already in use by someone else (%s)."
 msgstr ""
-"Impossível iniciar sessão porque este nome de utilizador já se encontra a "
-"ser usado (%s)."
+"Impossível iniciar sessão porque este nome de utilizador já se encontra a ser usado (%s)."
 
 #: ../jabber/Login.tcl:947
 #, tcl-format
@@ -4070,9 +4074,7 @@ msgstr "Erro de protocolo no processo de login."
 
 #: ../jabber/Login.tcl:981 ../jabber/Register.tcl:966
 msgid "Login failed because of unknown account or wrong password."
-msgstr ""
-"O início de sessão falhou devido a uma conta desconhecida ou palavra-chave "
-"inválida."
+msgstr "O início de sessão falhou devido a uma conta desconhecida ou palavra-chave inválida."
 
 #: ../jabber/Login.tcl:985
 #, tcl-format
@@ -4081,10 +4083,13 @@ msgid ""
 "defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting "
 "this bug to your server administrator."
 msgstr ""
+"Resposta inválida do servidor devido a um erro no software deste: o erro <%s/> não"
+"se encontra definido na secção 6.4 SASL Errors do RFC 3920. Por favor considere enviar"
+"um relatório deste erro ao seu administrador de servidor."
 
 #: ../jabber/Login.tcl:1011
 msgid "Do you want to retry a different password or profile?"
-msgstr ""
+msgstr "Quer experimentar uma nova palavra-chave ou profil?"
 
 #: ../jabber/Login.tcl:1041
 #, tcl-format
@@ -4251,8 +4256,7 @@ msgstr "Abrir Falhados"
 #: ../jabber/MailBox.tcl:1598 ../jabber/MailBox.tcl:1676
 #, tcl-format
 msgid "Cannot open the inbox file %s when trying to save it."
-msgstr ""
-"Impossível abrir o ficheiro %s da caixa de entrada, ao tentar guardá-lo."
+msgstr "Impossível abrir o ficheiro %s da caixa de entrada, ao tentar guardá-lo."
 
 #: ../jabber/MailBox.tcl:1783 ../jabber/MailBox.tcl:1817
 #, tcl-format
@@ -4279,8 +4283,7 @@ msgstr "Mensagem reencaminhada"
 #: ../jabber/NewMsg.tcl:901
 #, tcl-format
 msgid "Contact ID %s is invalid. Do you want to skip it and send to the rest?"
-msgstr ""
-"ID do Contacto %s é inválido. Deseja continuar e enviar para o restante?"
+msgstr "ID do Contacto %s é inválido. Deseja continuar e enviar para o restante?"
 
 #: ../jabber/NewMsg.tcl:904
 #, tcl-format
@@ -4312,15 +4315,15 @@ msgstr "Contas"
 #: ../jabber/Profiles.tcl:982 ../jabber/Profiles.tcl:1581
 msgid ""
 "You changed one or more values. Do you want to save them before closing?"
-msgstr "Alterou um ou mais valores. Deseja guardá-los antes de fechar?"
+msgstr ""
+"Alterou um ou mais valores. Deseja guardá-los antes de fechar?"
 
 #. TRANSLATORS: See File in the main window, and then Edit Profiles...
 #: ../jabber/Profiles.tcl:1056
 msgid ""
 "Edit, add or delete profiles. The selected profile will become the default."
 msgstr ""
-"Editar, adicionar ou remover perfis. O perfil seleccionado tornar-se-á o "
-"perfil por omissão."
+"Editar, adicionar ou remover perfis. O perfil seleccionado tornar-se-á o perfil por omissão."
 
 #: ../jabber/Profiles.tcl:1139
 msgid "Delete Profile"
@@ -4328,8 +4331,7 @@ msgstr "Remover Perfil"
 
 #: ../jabber/Profiles.tcl:1463
 msgid "You need to fill in at least the server name and user name."
-msgstr ""
-"Necessita de preencher no mínimo o nome do servidor e o nome de utilizador."
+msgstr "Necessita de preencher no mínimo o nome do servidor e o nome de utilizador."
 
 #: ../jabber/Profiles.tcl:1568
 msgid "Do you want to register a new account?"
@@ -4416,7 +4418,8 @@ msgstr "Remover Conta"
 #: ../jabber/Register.tcl:77
 msgid ""
 "Do you really want to remove your account? This process cannot be undone."
-msgstr "Deseja remover a sua conta? Este processo não pode ser desfeito."
+msgstr ""
+"Deseja remover a sua conta? Este processo não pode ser desfeito."
 
 #: ../jabber/Register.tcl:85
 msgid ""
@@ -4490,7 +4493,9 @@ msgstr "Guardar palavra-chave"
 msgid ""
 "The registration failed because this username is already in use by someone "
 "else."
-msgstr "O registo falhou porque este nome de utilizador já se encontra em uso."
+msgstr ""
+"O registo falhou porque este nome de utilizador já se encontra em"
+"uso."
 
 #: ../jabber/Register.tcl:896
 msgid "The registration failed."
@@ -4508,9 +4513,7 @@ msgstr ""
 #: ../jabber/Register.tcl:954
 #, tcl-format
 msgid "You are now registered and automatically logged in as %s"
-msgstr ""
-"Encontra-se agora registado como como %s. A sua sessão foi iniciada "
-"automaticamente"
+msgstr "Encontra-se agora registado como como %s. A sua sessão foi iniciada automaticamente"
 
 #: ../jabber/Register.tcl:1119 ../jabber/Register.tcl:1442
 msgid "Select a service and press Next"
@@ -4539,7 +4542,7 @@ msgstr "Ausente"
 #: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
 #: ../jabber/Status.tcl:46
 msgid "Free For Chat"
-msgstr ""
+msgstr "Livre para Conversação"
 
 #: ../jabber/Roster.tcl:84 ../jabber/Roster.tcl:92 ../jabber/Roster.tcl:134
 #: ../jabber/Status.tcl:39 ../jabber/Status.tcl:47
@@ -4612,8 +4615,7 @@ msgstr "Remover Contacto"
 msgid ""
 "Do you really want to remove this contact? This action cannot be undone."
 msgstr ""
-"Deseja verdadeiramente remover este contacto? Esta acção não pode ser "
-"desfeita."
+"Deseja verdadeiramente remover este contacto? Esta acção não pode ser desfeita."
 
 #: ../jabber/Roster.tcl:598
 #, tcl-format
@@ -4754,9 +4756,7 @@ msgstr ""
 
 #: ../jabber/SetupAss.tcl:103
 msgid "Any time you can press Previous to go back. Press Next to proceed."
-msgstr ""
-"Pode escolher Anterior a qualquer altura, para voltar. Escolha Próximo para "
-"continuar."
+msgstr "Pode escolher Anterior a qualquer altura, para voltar. Escolha Próximo para continuar."
 
 #: ../jabber/SetupAss.tcl:111 ../lib/PrefGeneral.tcl:103
 msgid "Language"
@@ -4804,8 +4804,7 @@ msgstr "Terminado"
 
 #: ../jabber/SetupAss.tcl:210
 msgid "That's all. Also, be nice to the bug and his friends ;-)"
-msgstr ""
-"E é tudo. Além disso, seja simpático para com o insecto e os seus amigos ;-)"
+msgstr "E é tudo. Além disso, seja simpático para com o insecto e os seus amigos ;-)"
 
 #: ../jabber/SetupAss.tcl:307
 msgid "Be sure to fill in all entries before you continue."
@@ -4842,13 +4841,11 @@ msgstr "Estado Personalizado"
 #. TRANSLATORS: custom status dialog; Control + B (or Command + B on Mac OS X)
 #: ../jabber/Status.tcl:861
 msgid "Select a presence state and optionally enter a message."
-msgstr ""
-"Seleccione um estado de presença e introduza, opcionalmente, uma mensagem."
+msgstr "Seleccione um estado de presença e introduza, opcionalmente, uma mensagem."
 
 #: ../jabber/Status.tcl:862
 msgid "The most frequent combinations are easily reachable as menu entries."
-msgstr ""
-"As combinações mais frequentes são facilmente obtidas como entradas de menu."
+msgstr "As combinações mais frequentes são facilmente obtidas como entradas de menu."
 
 #: ../jabber/StatusSlot.tcl:84
 msgid "Status Info"
@@ -4905,7 +4902,9 @@ msgstr "%s não consegue vê-lo(a)."
 msgid ""
 "%s contacts want to see your presence. Select those who may see your "
 "presence."
-msgstr "%s contactos desejam vê-lo. Seleccione aqueles que o podem ver."
+msgstr ""
+"%s contactos desejam vê-lo. Seleccione aqueles que o podem"
+"ver."
 
 #: ../jabber/Subscribe.tcl:1086
 msgid "Allow"
@@ -4955,8 +4954,7 @@ msgstr "A caixa de diálogo é fechada após (Segundos)"
 
 #: ../jabber/Subscribe.tcl:1686
 msgid "Put contacts who add me to their list in"
-msgstr ""
-"Adicionar automaticamente contactos que me adicionam à sua lista de contactos"
+msgstr "Adicionar automaticamente contactos que me adicionam à sua lista de contactos"
 
 #: ../jabber/Subscribe.tcl:1689
 msgid "Default group"
@@ -4983,7 +4981,7 @@ msgstr "Cartão de Visita: %s"
 #: ../jabber/UserInfo.tcl:474
 #, tcl-format
 msgid "Failed to obtain personal notes: %s"
-msgstr ""
+msgstr "Falha ao obter notas pessoais: %s"
 
 #. TRANSLATORS: in the business card dialog, there can be made notes about each contact
 #: ../jabber/UserInfo.tcl:529
@@ -5096,9 +5094,7 @@ msgstr "Novo Favorito"
 
 #: ../lib/Component.tcl:59 ../whiteboard/WDialogs.tcl:39
 msgid "There are no plugins or helper applications identified on this system."
-msgstr ""
-"Não existe qualquer extensão ou aplicação de ajuda identificada neste "
-"sistema."
+msgstr "Não existe qualquer extensão ou aplicação de ajuda identificada neste sistema."
 
 #: ../lib/Component.tcl:68 ../whiteboard/Plugins.tcl:1326
 #: ../whiteboard/WDialogs.tcl:47
@@ -5160,9 +5156,7 @@ msgstr "Limpar Cache"
 
 #: ../lib/FileCache.tcl:636
 msgid "Amount of cache to store recent whiteboard files to increase speed."
-msgstr ""
-"Tamanho de cache para guardar ficheiros de quadro branco para aumentar "
-"rapidez."
+msgstr "Tamanho de cache para guardar ficheiros de quadro branco para aumentar rapidez."
 
 #: ../lib/FileCache.tcl:648
 msgid "Synchronise cache"
@@ -5256,7 +5250,10 @@ msgid ""
 "You have chosen to store your preferences on the same drive as the "
 "application. If this drive is not a removable device your personal settings "
 "could be visible. Do you want to continue?"
-msgstr "é?"
+msgstr ""
+"Escolheu guardar as suas preferências no mesmo disco que a sua"
+"aplicação. Se este disco não for removível as suas configurações"
+"pessoas podem ser vistas por terceiros. Deseja continuar?"
 
 #: ../lib/PrefGeneral.tcl:144 ../lib/PrefGeneral.tcl:168
 #, tcl-format
@@ -5334,9 +5331,7 @@ msgstr "Configurações de Fábrica"
 
 #: ../lib/Preferences.tcl:394
 msgid "Do you really want to reset your customization to factory defaults?"
-msgstr ""
-"Tem a certeza de querer reverter as suas personalizações aos valores de "
-"fábrica?"
+msgstr "Tem a certeza de querer reverter as suas personalizações aos valores de fábrica?"
 
 #: ../lib/Preferences.tcl:456
 #, tcl-format
@@ -5356,9 +5351,8 @@ msgid ""
 "Usage of this HTTP proxy settings is determined by each profile's settings. "
 "File transfers will not work if you use an HTTP proxy."
 msgstr ""
-"O uso das configurações desta proxy HTTP é determinedo por cada configuração "
-"de perfil. A transferência de ficheiros não funcionará se usar uma proxu "
-"HTTP."
+"O uso das configurações desta proxy HTTP é determinado por cada configuração "
+"de perfil. A transferência de ficheiros não funcionará se usar uma proxy HTTP."
 
 #: ../lib/Proxy.tcl:197
 msgid "Use proxy"
@@ -5605,9 +5599,7 @@ msgstr "Ferramenta de arco, clique e arraste"
 #: ../whiteboard/CanvasDraw.tcl:1462 ../whiteboard/CanvasDraw.tcl:1519
 #: ../whiteboard/Whiteboard.tcl:87
 msgid "Arc tool, click to set center, spacebar to cancel"
-msgstr ""
-"Ferramenta de arco, clique para escolher centro, barra de espaço para "
-"cancelar"
+msgstr "Ferramenta de arco, clique para escolher centro, barra de espaço para cancelar"
 
 #: ../whiteboard/CanvasFile.tcl:549
 msgid "Opening a whiteboard file clears the current whiteboard!"
@@ -5806,12 +5798,15 @@ msgid "File Transfer Error"
 msgstr "Erro de Transferência de Ficheiro"
 
 #: ../whiteboard/GetFileIface.tcl:459
-#, fuzzy, tcl-format
+#, tcl-format
 msgid ""
 "Received response of the server %s.\n"
 " Error code %s\n"
 "Message: %s"
-msgstr "Recebida a resposta do servidor %s.Código de erro %sMensagem: %s"
+msgstr ""
+"Recebida a resposta do servidor %s.\n"
+" Código de erro %s\n"
+"Mensagem: %s"
 
 #: ../whiteboard/GetFileIface.tcl:468 ../whiteboard/PutFileIface.tcl:177
 #, tcl-format
@@ -6067,7 +6062,11 @@ msgid ""
 "realtime live streaming sending. Can be audio (radio) or video (TV). "
 "Alternatively, use your web browser to find the SDP file for a live "
 "transmission, download it on disk and open it is an ordinary movie."
-msgstr "Abrir é."
+msgstr ""
+"Abrir um URL que contenha um ficheiro SDP com extensão .mov para envio de streaming"
+"QuickTime em tempo real. Pode ser áudio (rádio) ou vídeo (TV). Alternativamente, use o"
+"seu explorador de Internet para encontrar o ficheiro SDP para transmissão ao vivo, descarregue-o"
+"para o disco e abra-o como um ficheiro de vídeo normal."
 
 #: ../whiteboard/Plugins.tcl:1346
 msgid "Select the plugins you want to be loaded."
@@ -6107,7 +6106,7 @@ msgstr "Importar"
 
 #: ../whiteboard/Plugins.tcl:1374
 msgid "Import documents on Windows"
-msgstr ""
+msgstr "Importar documentos no Windows"
 
 #: ../whiteboard/PutFileIface.tcl:168
 #, tcl-format
@@ -6169,9 +6168,7 @@ msgstr ""
 
 #: ../whiteboard/WBPrefs.tcl:299
 msgid "The standard fonts, Times, Helvetica, and Courier, may not be removed."
-msgstr ""
-"Os tipos de letra de norma, Times, Helvetica, e Courier, não podem ser "
-"removidos."
+msgstr "Os tipos de letra de norma, Times, Helvetica, e Courier, não podem ser removidos."
 
 #: ../whiteboard/WDialogs.tcl:169
 msgid "no"
@@ -6182,10 +6179,9 @@ msgid "yes"
 msgstr "sim"
 
 #: ../whiteboard/WDialogs.tcl:188
-#, fuzzy
 #| msgid "Activity"
 msgid "Activated"
-msgstr "Actividade"
+msgstr "Activado(a)"
 
 #: ../whiteboard/WDialogs.tcl:194
 msgid "Buffering support"
@@ -6203,8 +6199,7 @@ msgstr "Seguro"
 msgid ""
 "Point tool, click to mark, double click to inspect, right click to popup"
 msgstr ""
-"Aponte ferramenta, clique para marcar, clique duas vezes para inspeccionar, "
-"pressionar para fazer saltar"
+"Aponte ferramenta, clique para marcar, clique duas vezes para inspeccionar, pressionar para fazer saltar"
 
 #: ../whiteboard/Whiteboard.tcl:77
 msgid "Move tool"
@@ -6312,31 +6307,9 @@ msgstr "&Servidor"
 
 #: ../whiteboard/Whiteboard.tcl:1662 ../whiteboard/Whiteboard.tcl:2452
 msgid "Point tool, click to mark, double click to inspect, press to popup"
-msgstr ""
-"Aponte ferramenta, clique para marcar, clique duas vezes para inspeccionar, "
-"pressionar para fazer saltar"
+msgstr "Aponte ferramenta, clique para marcar, clique duas vezes para inspeccionar, pressionar para fazer saltar"
 
 #: ../whiteboard/Whiteboard.tcl:2211 ../whiteboard/Whiteboard.tcl:2286
 msgid "&Library"
 msgstr "&Biblioteca"
 
-#~ msgid "Useful Tips"
-#~ msgstr "Notas Úteis"
-
-#~ msgid "chat"
-#~ msgstr "conversação"
-
-#, fuzzy
-#~| msgid "Normal"
-#~ msgid "normal"
-#~ msgstr "Normal"
-
-#, fuzzy
-#~| msgid "Italic"
-#~ msgid "italic"
-#~ msgstr "Itálico"
-
-#, fuzzy
-#~| msgid "cold"
-#~ msgid "bold"
-#~ msgstr "frio"
