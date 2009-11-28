@@ -115,7 +115,7 @@ proc ::Totd::Build {} {
     pack $frbot -side bottom -fill x
 
     set wtext $wbox.t
-    text $wbox.t -width 52 -height 12
+    text $wbox.t -width 52 -height 12 -wrap word
     pack $wbox.t -side right -fill both -expand 1
     
     ttk::label $wbox.icon -compound image -image $icon -padding {0 0 6 0}
