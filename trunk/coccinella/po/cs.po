@@ -4,24 +4,25 @@
 # This file is distributed under the same license as the Coccinella package.
 # 
 # David Štancl <david.stancl at seznam.cz>, 2007-2009.
+# David Štancl <dstancl@dstancl.cz>, 2009.
 msgid ""
 msgstr ""
 "Project-Id-Version: cs\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
 "POT-Creation-Date: 2009-11-23 23:35+0100\n"
-"PO-Revision-Date: 2009-03-05 22:18+0100\n"
-"Last-Translator: David Štancl <david.stancl at seznam.cz>\n"
-"Language-Team: Czech <>\n"
+"PO-Revision-Date: 2009-11-28 17:54+0100\n"
+"Last-Translator: David Štancl <dstancl@dstancl.cz>\n"
+"Language-Team: Czech < >\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Transfer-Encoding: UTF-8\n"
 "Plural-Forms:  nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Poedit-Language: Czech\n"
 
 #. TRANSLATORS: splash screen strings; shown at startup
 #: ../Coccinella.tcl:173
 msgid "Sourcing Tcl code"
-msgstr "Zpracovávám Tcl kód"
+msgstr "Zpracová se Tcl kód"
 
 #: ../Coccinella.tcl:178
 msgid "Searching for our hostname"
@@ -29,19 +30,19 @@ msgstr "Zjišťuji jméno počítače"
 
 #: ../Coccinella.tcl:196
 msgid "Loading Tcl packages"
-msgstr "Načítám Tcl balíčky"
+msgstr "Načítají se Tcl balíčky"
 
 #: ../Coccinella.tcl:259
 msgid "Sourcing Jabber code"
-msgstr "Zpracovávám Jabber kód"
+msgstr "Zpracová se Jabber kód"
 
 #: ../Coccinella.tcl:269
 msgid "Initializing"
-msgstr "Inicializuji"
+msgstr "Inicializuje se"
 
 #: ../Coccinella.tcl:283
 msgid "Setting preferences"
-msgstr "Čtu nastavení"
+msgstr "Čte se nastavení"
 
 #. TRANSLATORS: checking for new versions of Coccinella; see Info menu
 #: ../components/AutoUpdate.tcl:53
@@ -133,8 +134,7 @@ msgstr "Chyba"
 #: ../components/AutoUpdate.tcl:123
 #, tcl-format
 msgid "Cannot connect to server %s to download update details: %s"
-msgstr ""
-"Nemohu se spojit se serverem %s pro získání aktualizovaných detailů: %s"
+msgstr "Nelze se spojit se serverem %s pro získání aktualizovaných detailů: %s"
 
 #: ../components/AutoUpdate.tcl:176
 msgid "Update Check"
@@ -143,7 +143,7 @@ msgstr "Kontrola aktualizace"
 #: ../components/AutoUpdate.tcl:177
 #, tcl-format
 msgid "You already have the latest version available (%s)."
-msgstr "Máš poslední verzi (%s)."
+msgstr "Máte poslední verzi (%s)."
 
 #: ../components/AutoUpdate.tcl:199
 msgid "New Version"
@@ -171,7 +171,7 @@ msgstr "Akce ke &kontaktu"
 msgid ""
 "Set a specific action for events related to %s. Select events using the tabs "
 "below."
-msgstr "Nastav akce pro události od %s. Vyber si událost ze záložek."
+msgstr "Nastavení akcí pro události od %s. Vyberte si událost ze záložek."
 
 #: ../components/BuddyPounce.tcl:153 ../components/BuddyPounce.tcl:161
 #: ../components/BuddyPounce.tcl:167 ../components/BuddyPounce.tcl:211
@@ -184,15 +184,15 @@ msgid ""
 "Set a specific action for events related to any contact belonging to the "
 "group %s. Select events using the tabs below."
 msgstr ""
-"Nastav akce spojené s libovolným kontaktem ze skupiny %s. Vyber si událost "
-"ze záložek."
+"Nastavení akcí spojených s libovolným kontaktem ze skupiny %s. Vyberte si "
+"událost ze záložek."
 
 #: ../components/BuddyPounce.tcl:166
 msgid ""
 "Set a specific action for events related to any contact in your contact "
 "list. Select events using the tabs below."
 msgstr ""
-"Nastaví akce pro libovolný kontakt v seznamu. Události jsou v záložkách."
+"Nastavení akcí pro libovolný kontakt v seznamu. Události jsou v záložkách."
 
 #: ../components/BuddyPounce.tcl:169
 msgid "Any"
@@ -343,49 +343,49 @@ msgstr "Nadmořská výška v metrech."
 
 #: ../components/Geolocation.tcl:53
 msgid "A named area such as a campus or neighborhood"
-msgstr ""
+msgstr "Místo se jménem, např. vrch"
 
 #: ../components/Geolocation.tcl:54
 msgid ""
 "GPS bearing (direction in which the entity is heading to reach its next "
 "waypoint), measured in decimal degrees relative to true north"
 msgstr ""
+"GPS směr (směr, který vede do další změny), měřený ve stupních vzhledem k "
+"severu"
 
 #: ../components/Geolocation.tcl:55
 msgid "A specific building on a street or in an area"
-msgstr ""
+msgstr "Významná stavba na ulici, nebo v krajině"
 
 #: ../components/Geolocation.tcl:56
 msgid "The nation where the user is located"
 msgstr "Země, kde uživatel je"
 
 #: ../components/Geolocation.tcl:57
-#, fuzzy
 #| msgid "GPS Datum"
 msgid "GPS datum"
-msgstr "GPS datum"
+msgstr "GPS"
 
 #: ../components/Geolocation.tcl:58
 msgid "A natural-language name for or description of the location"
-msgstr ""
+msgstr "Pojmenování pro popis místa"
 
 #: ../components/Geolocation.tcl:59
 msgid "Horizontal GPS error in arc minutes"
-msgstr ""
+msgstr "Horizontální GPS chyba v obloukových minutách"
 
 #: ../components/Geolocation.tcl:60
 msgid "A particular floor in a building"
-msgstr ""
+msgstr "Patro v budově"
 
 #: ../components/Geolocation.tcl:61
 msgid "Latitude in decimal degrees North"
 msgstr "Zeměpisná šířka ve stupních (+ severní, - jižní)"
 
 #: ../components/Geolocation.tcl:62
-#, fuzzy
 #| msgid "An administrative region of the nation, such as a state or province"
 msgid "A locality within the administrative region, such as a town or city"
-msgstr "Kraj"
+msgstr "Místo v administrativním regionu (kraji, okrese), např. město"
 
 #: ../components/Geolocation.tcl:63
 msgid "Longitude in decimal degrees East"
@@ -393,7 +393,7 @@ msgstr "Zeměpisná délka ve stupních (+ východní, - západní)"
 
 #: ../components/Geolocation.tcl:64
 msgid "A code used for postal delivery"
-msgstr ""
+msgstr "PSČ"
 
 #: ../components/Geolocation.tcl:65 ../jabber/JForms.tcl:308
 #: ../jabber/Register.tcl:719
@@ -402,20 +402,20 @@ msgstr "Kraj"
 
 #: ../components/Geolocation.tcl:66
 msgid "A particular room in a building"
-msgstr ""
+msgstr "Byt v budově"
 
 #: ../components/Geolocation.tcl:67
 msgid "A thoroughfare within the locality, or a crossing of two thoroughfares"
-msgstr ""
+msgstr "Ulice poblíž, popř. křižovatka"
 
 #: ../components/Geolocation.tcl:68
 msgid ""
 "A catch-all element that captures any other information about the location"
-msgstr ""
+msgstr "Zbytek všech dalších informací o umístění"
 
 #: ../components/Geolocation.tcl:69
 msgid "UTC timestamp specifying the moment when the reading was taken"
-msgstr ""
+msgstr "Časové razítko (v Greenwichském čase), kdy bylo čtení provedeno"
 
 #: ../components/Geolocation.tcl:72
 msgid "Altitude"
@@ -500,14 +500,13 @@ msgstr "Odstranit"
 
 #: ../components/Geolocation.tcl:158
 msgid "Set your location that will be shown to your contacts."
-msgstr "Nastav zeměpisnou polohu, kterou uvidí tvé kontakty."
+msgstr "Určete zeměpisnou polohu, kterou uvidí vaše kontakty."
 
 #: ../components/Geolocation.tcl:159
 msgid ""
 "Enter your location details below. At least you should set latitude and "
 "longitude."
-msgstr ""
-"Vlož údaje o poloze. Měl(a) bys vložit alespoň zeměpisnou šířku a délku."
+msgstr "Vložte údaje o poloze, alespoň zeměpisnou šířku a délku."
 
 #: ../components/Geolocation.tcl:162 ../components/Geolocation.tcl:367
 #: ../components/fsdialog.tcl:421 ../jabber/GroupChat.tcl:3463
@@ -519,10 +518,10 @@ msgid "Synchronize with Google Earth"
 msgstr "Synchronizovat s Google Earth"
 
 #: ../components/Geolocation.tcl:373
-#, fuzzy, tcl-format
+#, tcl-format
 #| msgid "This is location data for"
 msgid "This is location data for %s"
-msgstr "Zeměpisná data pro"
+msgstr "Zeměpisná data pro %s"
 
 #: ../components/Growl.tcl:162 ../components/taskbar/Taskbar.tcl:185
 #: ../jabber/JUI.tcl:178 ../jabber/JUI.tcl:532 ../jabber/JUI.tcl:1834
@@ -551,7 +550,7 @@ msgstr "Velikost"
 #: ../jabber/FTrans.tcl:573 ../jabber/OOB.tcl:113
 #, tcl-format
 msgid "%s wants to send you this file: %s Do you want to receive this file?"
-msgstr "%s ti chce poslat soubor %s. Chceš ho přijmout?"
+msgstr "%s chce poslat soubor %s. Chcete ho přijmout?"
 
 #: ../components/Growl.tcl:186
 msgid "Ring, ring"
@@ -853,8 +852,8 @@ msgid ""
 "Click on a window or drag a rectangular area to import a snapshot into the "
 "current whiteboard."
 msgstr ""
-"Klikni na okno, nebo označ obdélníkovou oblast, kterou chceš importovat jako "
-"snímek obrazovky do současné kreslicí plochy."
+"Klikněte na okno, nebo označte obdélníkovou oblast, kterou chcete importovat "
+"jako snímek obrazovky do současné kreslicí plochy."
 
 #: ../components/ImageMagic.tcl:183
 #, tcl-format
@@ -1263,11 +1262,11 @@ msgstr "Vlastní nálada"
 
 #: ../components/Mood.tcl:471
 msgid "Only contacts with compatible software will see your mood."
-msgstr "Pouze kontakty s kompatibilním programem mohou znát tvou náladu."
+msgstr "Pouze kontakty s kompatibilním programem mohou zobrazit vaši náladu."
 
 #: ../components/Mood.tcl:471
 msgid "Select your mood to show to your contacts."
-msgstr "Vyber si svou náladu, kterou chceš ukázat svým kontaktům."
+msgstr "Vyberte si svou náladu, kterou chcete ukázat svým kontaktům."
 
 #: ../components/Mood.tcl:474
 msgid "Custom Mood"
@@ -1293,12 +1292,12 @@ msgstr "Volat VM?"
 #: ../jabber/Login.tcl:735
 #, tcl-format
 msgid "Enter the password for your account %s"
-msgstr "Vlož heslo pro tvůj účet %s"
+msgstr "Vložte heslo pro svůj účet %s"
 
 #: ../components/ParseURI.tcl:391
 #, tcl-format
 msgid "Please enter your desired nickname for the chatroom %s"
-msgstr "Prosím, vlož přezdívku pro místnost %s"
+msgstr "Vložte přezdívku pro místnost %s"
 
 #: ../components/ParseURI.tcl:392 ../components/ParseURI.tcl:396
 #: ../jabber/Create.tcl:111 ../jabber/Create.tcl:636 ../jabber/Enter.tcl:164
@@ -1341,7 +1340,7 @@ msgstr "Informace"
 #: ../components/Phone/NotifyCall.tcl:367
 #: ../components/Phone/NotifyCall.tcl:795
 msgid "Do you want to hang up?"
-msgstr "Chceš zavěsit?"
+msgstr "Chcete zavěsit?"
 
 #: ../components/Phone/NotifyCall.tcl:574
 msgid "Call Notification"
@@ -1484,10 +1483,9 @@ msgid "Volume"
 msgstr "Hlasitost"
 
 #: ../components/Sounds.tcl:586
-#, fuzzy
 #| msgid "Sound set"
 msgid "Sound device"
-msgstr "Nastavení zvuku"
+msgstr "Zvukové zařízení"
 
 #: ../components/Sounds.tcl:595
 msgid "MIDI Player"
@@ -1502,7 +1500,7 @@ msgid ""
 "Set command to use for playing MIDI sounds. This option is only relevant if "
 "you use a sound set with MIDI files."
 msgstr ""
-"Nastav příkaz pro přehrávání MIDI zvuků. Tato volba je použita, pokud v "
+"Nastavte příkaz pro přehrávání MIDI zvuků. Tato volba je použita, pokud v "
 "souboru zvuků jsou MIDI soubory."
 
 #: ../components/Sounds.tcl:606
@@ -1538,11 +1536,11 @@ msgstr "Čtení textu chatu"
 
 #: ../components/Speech.tcl:376
 msgid "Select voice for incoming text"
-msgstr "Vyber hlas pro příchozí text"
+msgstr "Vyberte hlas pro příchozí text"
 
 #: ../components/Speech.tcl:377
 msgid "Select voice for outgoing write"
-msgstr "Vyber hlas pro odchozí text"
+msgstr "Vyberte hlas pro odchozí text"
 
 #: ../components/Spell.tcl:55
 msgid "Check Spelling"
@@ -1558,7 +1556,7 @@ msgstr "Přidat do slovníku"
 
 #: ../components/Totd.tcl:18 ../components/Totd.tcl:90
 msgid "Tip of the Day"
-msgstr ""
+msgstr "Tip dne"
 
 #: ../components/Totd.tcl:30
 #, tcl-format
@@ -1576,6 +1574,19 @@ msgid ""
 " 4. Enter the name of the desired server and proceed.\n"
 " 5. The chat system will become available in the list!"
 msgstr ""
+"Jestliže není zobrazen požadovaný komunikační kanál, když chcete přidat "
+"kontakt, znamená to, že není dostupný server, který tuto službu podporuje. "
+"Naštěstí existují pro většinu komunikačních kanálů servery, na které se "
+"můžete přihlásit bez vytváření dalšího účtu.\n"
+"\n"
+"Instrukce:\n"
+"1. Přihlaste se do svého účtu na %s.\n"
+"2. Vyberte Prozkoumat služby v menu Akce.\n"
+"3. Na stránce http://coccinella.im/servers/servers.html si najděte server, "
+"který podporuje požadovaný komunikační kanál (tip: je možné řadit podle "
+"sloupců).\n"
+"4. Název nalezeného serveru vpište do pole Server a klikněte na Prohledat.\n"
+"5. Komunikační systém se objeví v seznamu."
 
 #: ../components/Totd.tcl:43
 msgid ""
@@ -1583,6 +1594,8 @@ msgid ""
 "window, whilst the /retain command will restore its content. Your contacts "
 "do not see these commands."
 msgstr ""
+"Když napíšete příkaz /clean během konverzace, smažete obsah okna, zatímco "
+"příkaz /retain obsah obnoví. Váš protějšek tyto příkazy neuvidí."
 
 #: ../components/Totd.tcl:46
 #, tcl-format
@@ -1590,6 +1603,8 @@ msgid ""
 "You might be interested in the hidden XML console if you are a developer. "
 "You can open it with the command %s+Shift+D"
 msgstr ""
+"Pokud jste vývojář, bude vás možná zajímat skrytá XML konzola. Otevřete ji "
+"pomocí kombinace kláves %s+Shift+D"
 
 #: ../components/Totd.tcl:49
 #, tcl-format
@@ -1597,16 +1612,18 @@ msgid ""
 "You can initiate a whiteboard session with multiple participants by clicking "
 "the whiteboard icon in a chatroom. All participants using %s will be invited."
 msgstr ""
+"Sezení s kreslicí plochou a více příjemci můžete otevřít kliknutím na ikonu "
+"Plocha v místnosti. Budou pozváni všichni členové, kteří používají %s."
 
 #: ../components/Totd.tcl:52
 msgid "Documentation is available at http://coccinella.im/documentation"
-msgstr ""
+msgstr "Dokumentace je přístupná na http://coccinella.im/documentation"
 
 #: ../components/Totd.tcl:105
-#, fuzzy, tcl-format
+#, tcl-format
 #| msgid "Show tips on startup"
 msgid "Show tips on %s startup"
-msgstr "Zobrazit tipy při startu"
+msgstr "Zobrazit tipy při startu programu %s"
 
 #. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
 #: ../components/UserActivity.tcl:54
@@ -1615,15 +1632,15 @@ msgstr "Či&nnost"
 
 #: ../components/UserActivity.tcl:225
 msgid "Set your activity that will be shown to your contacts."
-msgstr "Nastav činnost, kterou uvidí tvé kontakty."
+msgstr "Nastavte činnost, kterou uvidí vaše kontakty."
 
 #: ../components/UserActivity.tcl:226
 msgid ""
 "Select from the first button your general activity, and optionally, your "
 "specific actvity from the second button. You may also add a descriptive text."
 msgstr ""
-"Z prvního tlačítka si vyber činnost obecně a volitelně specifikuj činnost na "
-"druhém tlačítku. Můžeš také přidat popisný text."
+"Z prvního tlačítka si vyberte skupinu činností (činnost obecně) a pak můžete "
+"činnost upřesnit pomocí dalšího tlačítka. Můžete také přidat popisný text."
 
 #: ../components/UserActivity.tcl:229
 msgid "User Activity"
@@ -1760,7 +1777,7 @@ msgstr "Koupu se v lázních"
 
 #: ../components/UserActivity.tcl:351
 msgid "Brushing teeth"
-msgstr "Čistím zuby"
+msgstr "Čistím si zuby"
 
 #: ../components/UserActivity.tcl:352
 msgid "Getting a haircut"
@@ -2027,7 +2044,7 @@ msgstr "Vytvořit novou složku v"
 #: ../components/fsdialog.tcl:1131
 #, tcl-format
 msgid "File %s already exists. Do you want to overwrite it?"
-msgstr "Soubor %s již existuje. Chceš ho přepsat?"
+msgstr "Soubor %s již existuje. Chcete ho přepsat?"
 
 #: ../components/fsdialog.tcl:1138
 #, tcl-format
@@ -2037,7 +2054,7 @@ msgstr "Soubor %s neexistuje."
 #: ../components/fsdialog.tcl:1158
 #, tcl-format
 msgid "Cannot change to the directory %s. Permission denied."
-msgstr "Nemohu otevřít složku %s. Přístup odepřen."
+msgstr "Nelze otevřít složku %s. Přístup odepřen."
 
 #: ../components/fsdialog.tcl:1361 ../plugins/PluginTextPlain.tcl:222
 #: ../whiteboard/Import.tcl:1802
@@ -2264,7 +2281,7 @@ msgstr "Znovu přihlásit při aktivitě"
 
 #: ../jabber/AutoAway.tcl:361
 msgid "Apply auto-away on hidden chat tabs"
-msgstr "Ve skrytých záložkách chatu nastavit, že jsi pryč"
+msgstr "Ve skrytých záložkách chatu nastavit, že jste pryč"
 
 #: ../jabber/AutoAway.tcl:366
 msgid ""
@@ -2272,20 +2289,20 @@ msgid ""
 "hidden chat tabs"
 msgstr ""
 "Jesliže je zaškrtnuto, pak uživatelům ve schovaných záložkách chatu je "
-"odesláno, že jsi pryč"
+"odesláno, že jste pryč"
 
 #. TRANSLATORS; this preference option automatically sets the user's presence to Do Not Disturb when he or she is chatting with too much contacts at the same moment (this number is configurable). There also is a delay until the presence is automatically changed back to the previous presence state when the number of active chats is down again.
 #: ../jabber/AutoAway.tcl:372
 msgid "Do Not Disturb when (active chat sessions)"
-msgstr "Nerušit když si povídám s více lidmi"
+msgstr "Nastavit Nerušit při povídání si s více lidmi"
 
 #: ../jabber/AutoAway.tcl:389
 msgid ""
 "When you have <number> or more active chat sessions, presence state will be "
 "automatically changed to Do Not Disturb."
 msgstr ""
-"Když máš <číslo> nebo více aktivních chatů, bude tvůj stav automaticky "
-"změněn na Nerušit."
+"Když je <číslo> nebo více aktivních chatů, bude stav automaticky změněn na "
+"Nerušit."
 
 #. TRANSLATORS; first Control Panel, then Avatar, then Open, then putting an asterisk (*) in the filter field, pressing return and trying to open a non-image file
 #: ../jabber/Avatar.tcl:366 ../jabber/Disco.tcl:874
@@ -2296,7 +2313,7 @@ msgstr "Podporované formáty obrázků jsou"
 #: ../jabber/Avatar.tcl:374
 #, tcl-format
 msgid "Cannot create an image from %s."
-msgstr "Nemohu z %s vytvořit obrázek."
+msgstr "Nelze z %s vytvořit obrázek."
 
 #: ../jabber/Avatar.tcl:381
 #, tcl-format
@@ -2336,7 +2353,7 @@ msgstr "ID kontaktu"
 #: ../jabber/MUC.tcl:1248
 #, tcl-format
 msgid "%s is invalid. Do you want to continue anyway?"
-msgstr "%s je neplatné. Chceš i přesto pokračovat?"
+msgstr "%s je neplatné. Chcete i přesto pokračovat?"
 
 #. TRANSLATORS; composing events in chat window
 #: ../jabber/Chat.tcl:685 ../jabber/Chat.tcl:687 ../jabber/Chat.tcl:3716
@@ -2414,7 +2431,7 @@ msgstr "Pozvat"
 #. TRANSLATORS; balloon mouse over texts in chat dialog
 #: ../jabber/Chat.tcl:1611
 msgid "Enter the subject of the conversation, set by pressing Return"
-msgstr "Vlož předmět konverzace, odešli pomocí Enter"
+msgstr "Vložte předmět konverzace a pomocí Enter jej nastavíte"
 
 #: ../jabber/Chat.tcl:1648
 msgid "Show or hide the chat history"
@@ -2422,7 +2439,7 @@ msgstr "Ukázat/schovat historii chatu"
 
 #: ../jabber/Chat.tcl:1649 ../jabber/GroupChat.tcl:917
 msgid "If checked, Return sends message, else use Ctrl/Cmd-Return"
-msgstr "Jestliže je zaškrtnuté, Enter odešle zprávu. Jinak použij Ctrl-Enter"
+msgstr "Jestliže je zaškrtnuté, Enter odešle zprávu, jinak Ctrl-Enter"
 
 #: ../jabber/Chat.tcl:1650 ../jabber/NewMsg.tcl:375
 msgid "Insert emoticon"
@@ -2430,11 +2447,11 @@ msgstr "Přidat smajlíka"
 
 #: ../jabber/Chat.tcl:1651 ../jabber/GroupChat.tcl:919
 msgid "Show or hide status changes in chat"
-msgstr "Zobrazovat, nebo neukazovat změny stavu při chatu"
+msgstr "Zda při chatu zobrazovat změny stavu"
 
 #: ../jabber/Chat.tcl:1742
 msgid "Enter your message and press Return or Shift-Return"
-msgstr "Vlož zprávu a stiskni Enter nebo Ctrl-Enter"
+msgstr "Vložte zprávu a stiskněte Enter nebo Ctrl-Enter"
 
 #. TRANSLATORS; Control + F (or Command + F on Mac OS X)
 #: ../jabber/Chat.tcl:1898 ../jabber/GroupChat.tcl:1170
@@ -2466,7 +2483,7 @@ msgstr "Varování"
 
 #: ../jabber/Chat.tcl:1974
 msgid "Do you want to invite this contact to a new chatroom?"
-msgstr "Chceš pozvat tento kontakt do nové místnosti?"
+msgstr "Chcete pozvat tento kontakt do nové místnosti?"
 
 #: ../jabber/Chat.tcl:2247 ../jabber/GroupChat.tcl:1239
 msgid "Close tab"
@@ -2474,7 +2491,7 @@ msgstr "Zavřít záložku"
 
 #: ../jabber/Chat.tcl:2569
 msgid "You need to be logged in to see the presence of this contact"
-msgstr "Musíš být přihlášen(a), abys viděl(a) stav tohoto kontaktu"
+msgstr "Musíte být přihlášeni, abyste viděli stav tohoto kontaktu"
 
 #: ../jabber/Chat.tcl:2771
 msgid "Converting Chat into Conference"
@@ -2483,17 +2500,17 @@ msgstr "Převést chat na konferenci"
 #: ../jabber/Chat.tcl:2786 ../jabber/Create.tcl:314 ../jabber/Create.tcl:581
 #: ../jabber/GroupChat.tcl:366
 msgid "Cannot find any chatroom service."
-msgstr "Nemohu najít žádnou službu s místnostmi."
+msgstr "Nelze najít žádnou službu s místnostmi."
 
 #: ../jabber/Chat.tcl:3085 ../jabber/GroupChat.tcl:2721
 #: ../jabber/NewMsg.tcl:888
 msgid "Cannot send when not logged in."
-msgstr "Dokud nejsi přihlášen(a), nemohu odeslat."
+msgstr "Dokud nejste přihlášeni, nemohu odeslat."
 
 #: ../jabber/Chat.tcl:3576
 msgid ""
 "Do you want to close this chat window and lose the complete conversation?"
-msgstr "Chceš uzavřít chatovací okno a ztratit tak celou konverzaci?"
+msgstr "Chcete zavřít chatovací okno a ztratit tak celou konverzaci?"
 
 #. TRANSLATORS; see Chat settings in preferences
 #: ../jabber/Chat.tcl:4232
@@ -2577,8 +2594,8 @@ msgid ""
 "Select a service, and enter a chatroom and nickname. Optionally, you can "
 "configure the chatroom."
 msgstr ""
-"Vyber si službu a vlož název místnosti a přezdívku. Volitelně můžeš měnit "
-"nastavení místnosti."
+"Vyberte si službu, vložte název místnosti a přezdívku. Volitelně můžete "
+"změnit nastavení místnosti."
 
 #: ../jabber/Create.tcl:105 ../jabber/Create.tcl:627 ../jabber/Enter.tcl:128
 #: ../jabber/Register.tcl:1124 ../jabber/Register.tcl:1451
@@ -2594,11 +2611,11 @@ msgstr "Místnost"
 
 #: ../jabber/Create.tcl:122 ../jabber/Enter.tcl:186
 msgid "Select or manually enter a chatroom service"
-msgstr "Vyber nebo vlož název konferenční služby"
+msgstr "Vyberte nebo vložte název konferenční služby"
 
 #: ../jabber/Create.tcl:123 ../jabber/Enter.tcl:188
 msgid "Select or manually enter the name of a chatroom"
-msgstr "Vyber nebo vlož název místnosti"
+msgstr "Vyberte nebo vložte název místnosti"
 
 #: ../jabber/Create.tcl:124 ../jabber/Enter.tcl:189
 #: ../jabber/GroupChat.tcl:3741 ../jabber/JForms.tcl:305
@@ -2617,11 +2634,11 @@ msgstr "Vytvořit"
 
 #: ../jabber/Create.tcl:319
 msgid "You must provide a chatroom name."
-msgstr "Musíš uvést název místnosti."
+msgstr "Musíte uvést název místnosti."
 
 #: ../jabber/Create.tcl:324
 msgid "You must provide a nickname."
-msgstr "Musíš uvést přezdívku."
+msgstr "Musíte uvést přezdívku."
 
 #: ../jabber/Create.tcl:332 ../jabber/Create.tcl:515 ../jabber/JUser.tcl:294
 #: ../jabber/Profiles.tcl:1455
@@ -2634,7 +2651,7 @@ msgstr "Stahuji konfigurační formulář"
 
 #: ../jabber/Create.tcl:423 ../jabber/Create.tcl:465 ../jabber/Enter.tcl:646
 msgid "Cannot download the configuration form of the chatroom."
-msgstr "Nemohu stáhnout potvrzovací formulář místnosti."
+msgstr "Nelze stáhnout potvrzovací formulář místnosti."
 
 #: ../jabber/Create.tcl:425 ../jabber/Create.tcl:467 ../jabber/Create.tcl:545
 #: ../jabber/Create.tcl:753 ../jabber/Enter.tcl:648 ../jabber/Enter.tcl:691
@@ -2655,7 +2672,7 @@ msgstr "Čekám až bude stisknuto Získat"
 #: ../jabber/Create.tcl:543
 #, tcl-format
 msgid "Cannot enter/create chatroom %s."
-msgstr "Nemohu vstoupit/vytvořit místnost %s."
+msgstr "Nelze vstoupit/vytvořit místnost %s."
 
 #: ../jabber/Create.tcl:594
 msgid "Enter/Create Chatroom"
@@ -2663,16 +2680,16 @@ msgstr "Vstoupit/vytvořit místnost"
 
 #: ../jabber/Create.tcl:624
 msgid "Select a chatroom service, a chatroom, and a nickname."
-msgstr "Vyber si konferenční službu, místnost a přezdívku."
+msgstr "Vyberte si konferenční službu, místnost a přezdívku."
 
 #: ../jabber/Create.tcl:724 ../jabber/Enter.tcl:493
 msgid "Please fill in all fields before entering chatroom."
-msgstr "Prosím, vyplň všechna políčka před vstupem do místnosti."
+msgstr "Vyplňte všechna políčka před vstupem do místnosti."
 
 #: ../jabber/Create.tcl:747 ../jabber/Enter.tcl:685
 #, tcl-format
 msgid "Cannot enter chatroom %s."
-msgstr "Nemohu vstoupit do místnosti %s."
+msgstr "Nelze vstoupit do místnosti %s."
 
 #: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:222 ../jabber/JUI.tcl:177
 #: ../jabber/JUI.tcl:1833 ../jabber/JUI.tcl:1853 ../jabber/Roster.tcl:121
@@ -2755,8 +2772,8 @@ msgid ""
 "Select an image file for the background. To remove a background image press "
 "Remove and Save."
 msgstr ""
-"Vyber si soubor s obrázkem, který bude na pozadí. Pro odstranění stiskni "
-"Odstranit a uložit."
+"Vyberte si soubor s obrázkem, který bude na pozadí. Pro odstranění stiskněte "
+"Odstranit a Uložit."
 
 #: ../jabber/Disco.tcl:881 ../jabber/RosterTree.tcl:812
 msgid "Background Image"
@@ -2773,7 +2790,7 @@ msgstr "Prohlédnout služby"
 
 #: ../jabber/Disco.tcl:1650
 msgid "Enter a server to discover and use its services."
-msgstr "Vlož jméno serveru, jehož služby chceš prozkoumat a použít."
+msgstr "Vlož jméno serveru, jehož služby chcete prozkoumat a použít."
 
 #: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:531 ../jabber/Login.tcl:171
 #: ../jabber/Profiles.tcl:1084 ../jabber/Profiles.tcl:1864
@@ -2827,7 +2844,7 @@ msgstr "Vybraná skupina ikon bude výchozí."
 #: ../jabber/Emoticons.tcl:813 ../jabber/Emoticons.tcl:861
 #, tcl-format
 msgid "Cannot load iconset %s."
-msgstr "Nemohu načíst skupinu ikon %s."
+msgstr "Nelze načíst skupinu ikon %s."
 
 #: ../jabber/Emoticons.tcl:852
 #, tcl-format
@@ -2844,8 +2861,8 @@ msgid ""
 "available chatrooms on the selected service. Some chatrooms may require a "
 "password."
 msgstr ""
-"Vyber si službu, vlož místnost a přezdívku. Můžeš se podívat, které místosti "
-"jsou ve službě dostupné. Některé místnosti vyžadují heslo."
+"Vyberte si službu, vložte místnost a přezdívku. Můžete se podívat, které "
+"místosti jsou ve službě dostupné. Některé místnosti vyžadují heslo."
 
 #: ../jabber/Enter.tcl:166 ../jabber/GroupChat.tcl:3464
 #: ../jabber/Login.tcl:179 ../jabber/Login.tcl:666 ../jabber/Login.tcl:668
@@ -2866,16 +2883,16 @@ msgstr "Heslo"
 #: ../jabber/Enter.tcl:403 ../jabber/Enter.tcl:453
 #, tcl-format
 msgid "Cannot find any chatrooms at %s."
-msgstr "Nemohu na %s najít žádné místnosti."
+msgstr "Nelze na %s najít žádné místnosti."
 
 #: ../jabber/Enter.tcl:469
 msgid "Loading available chatrooms"
-msgstr "Načítám dostupné místnosti"
+msgstr "Načítají se dostupné místnosti"
 
 #: ../jabber/Enter.tcl:638
 #, tcl-format
 msgid "Cannot enter chatroom %s: %s Do you want to retry?"
-msgstr "Nemohu vstoupit do místnosti %s: %s. Chceš to zkusit znovu?"
+msgstr "Nelze vstoupit do místnosti %s: %s. Chcete to zkusit znovu?"
 
 #: ../jabber/FTrans.tcl:195
 #, tcl-format
@@ -2897,11 +2914,11 @@ msgstr "Čekám na výsledky"
 
 #: ../jabber/FTrans.tcl:442
 msgid "You must select a file to send."
-msgstr "Musíš si vybrat soubor, který chceš poslat."
+msgstr "Musíte si vybrat soubor, který chcete poslat."
 
 #: ../jabber/FTrans.tcl:447
 msgid "The selected file does not exist. Select a new one."
-msgstr "Vybraný soubor neexistuje. Vyber si jiný."
+msgstr "Vybraný soubor neexistuje. Vyberte si jiný."
 
 #: ../jabber/FTrans.tcl:497 ../jabber/FTrans.tcl:529
 #, tcl-format
@@ -2911,7 +2928,7 @@ msgstr "%s nepřijal(a) soubor %s."
 #: ../jabber/FTrans.tcl:500 ../jabber/FTrans.tcl:532
 #, tcl-format
 msgid "Cannot send the file %s to %s."
-msgstr "Nemohu poslat soubor %s k %s."
+msgstr "Nelze poslat soubor %s k %s."
 
 #: ../jabber/FTrans.tcl:513 ../jabber/FTrans.tcl:543
 msgid "File Transfer"
@@ -2934,7 +2951,7 @@ msgstr "Zapisuji soubor"
 #: ../jabber/FTrans.tcl:678
 #, tcl-format
 msgid "Cannot download file %s from %s."
-msgstr "Nemohu stáhnout soubor %s od %s."
+msgstr "Nelze stáhnout soubor %s od %s."
 
 #: ../jabber/FTrans.tcl:694
 msgid "The MD5 checksums did not match. The file may be corrupt."
@@ -2982,7 +2999,7 @@ msgstr "Tlen adresa"
 
 #: ../jabber/Gateway.tcl:90
 msgid "Twitter user"
-msgstr ""
+msgstr "Twitter"
 
 #: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
 #: ../jabber/Profiles.tcl:1124 ../jabber/VCard.tcl:322
@@ -3036,10 +3053,9 @@ msgid "away"
 msgstr "pryč"
 
 #: ../jabber/GroupChat.tcl:190
-#, fuzzy
 #| msgid "Pretty format"
 msgid "free for chat"
-msgstr "Krásný formát"
+msgstr "k dispozici (upovídaný)"
 
 #. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
 #: ../jabber/GroupChat.tcl:192
@@ -3071,7 +3087,7 @@ msgstr "&Ignorovat"
 #: ../jabber/GroupChat.tcl:478
 #, tcl-format
 msgid "%s invited you to %s. Do you want to enter this chatroom?"
-msgstr "%s tě pozval(a) do %s. Chceš do této místnosti vstoupit?"
+msgstr "%s vás pozval(a) do %s. Chcete do této místnosti vstoupit?"
 
 #: ../jabber/GroupChat.tcl:918
 msgid "Bookmark this chatroom"
@@ -3084,17 +3100,17 @@ msgstr "Téma"
 
 #: ../jabber/GroupChat.tcl:1508
 msgid "You logged out and exited the chatroom"
-msgstr "Byl(a) jsi odhlášen(a) a opustil(a) jsi místnost"
+msgstr "Byli jste odhlášeni a opustili jste místnost"
 
 #: ../jabber/GroupChat.tcl:2537
 #, tcl-format
 msgid "Do you want to exit the chatroom %s?"
-msgstr "Chceš opustit místnost %s?"
+msgstr "Chcete opustit místnost %s?"
 
 #: ../jabber/GroupChat.tcl:2708 ../jabber/MUC.tcl:1715 ../jabber/MUC.tcl:1738
 #, tcl-format
 msgid "Cannot interact with the chatroom %s."
-msgstr "Nemohu se domluvit s místností %s."
+msgstr "Nelze se domluvit s místností %s."
 
 #: ../jabber/GroupChat.tcl:3465
 msgid "Auto Join"
@@ -3128,7 +3144,7 @@ msgstr "Vlákno začato"
 
 #: ../jabber/History.tcl:853
 msgid "You entered the chatroom"
-msgstr "Vstoupil(a) jsi do místnosti"
+msgstr "Vstoupili jste do místnosti"
 
 #: ../jabber/History.tcl:859
 msgid "Exit chatroom"
@@ -3142,7 +3158,8 @@ msgstr "Historie není registrována pro"
 msgid ""
 "You are already registered with this service. These are your current "
 "registration settings."
-msgstr "V této službě již jsi zaregistrován(a). Zde jsou registrační údaje."
+msgstr ""
+"V této službě jste už zaregistrováni. Toto jsou vaše registrační údaje."
 
 #: ../jabber/JForms.tcl:297 ../jabber/Register.tcl:708
 msgid "Street portion of a physical or mailing address"
@@ -3165,7 +3182,8 @@ msgstr "Jméno"
 msgid ""
 "You are already registered with this service. These are your current login "
 "settings."
-msgstr "Již jsi k této službě přihlášen(a). Tady jsou přihlašovací údaje."
+msgstr ""
+"K této službě jste už přihlášeni. Současné přihlašovací údaje jsou níže."
 
 #: ../jabber/JForms.tcl:303 ../jabber/Register.tcl:714
 msgid "Last name, surname, or family name"
@@ -3238,7 +3256,7 @@ msgstr "Ukládat schránku mezi sezeními"
 #: ../jabber/JPrefs.tcl:317
 #, tcl-format
 msgid "Login on %s startup"
-msgstr "Při startu se přihlásit k %s"
+msgstr "Při startu programu %s se přihlásit"
 
 #: ../jabber/JPrefs.tcl:319
 msgid "Remember open windows between sessions"
@@ -3487,7 +3505,7 @@ msgstr "Zastavit"
 #: ../jabber/JUser.tcl:163
 msgid ""
 "Select the chat system and contact ID of the contact you would like to add."
-msgstr "Vyber si chatovací systém a ID kontaktu, který chceš přidat."
+msgstr "Vyberte si chatovací systém a ID kontaktu, který chcete přidat."
 
 #: ../jabber/JUser.tcl:165
 msgid "Nickname and group are optional and can be set or changed later."
@@ -3510,7 +3528,7 @@ msgstr "Přidat"
 #: ../jabber/JUser.tcl:302 ../jabber/Search.tcl:257 ../jabber/Search.tcl:770
 #, tcl-format
 msgid "%s is already in your list. Do you want to continue anyway?"
-msgstr "%s je už v seznamu. Chceš i přesto pokračovat?"
+msgstr "%s už je v seznamu. Chcete i přesto pokračovat?"
 
 #: ../jabber/JUser.tcl:323 ../jabber/JUser.tcl:477 ../jabber/JUser.tcl:534
 #, tcl-format
@@ -3519,14 +3537,14 @@ msgid ""
 "account on this closed system, plus you need to register this account with "
 "the corresponding transport (%s). Do you want to do this now?"
 msgstr ""
-"Jestli chceš přidat kontakt z uzavřeného IM systému, potřebuješ mít účet v "
-"tomto systému, dále si musíš zaregistrovat odpovídající transport (%s). "
-"Chceš se do toho pustit?"
+"Jestliže chcete přidat kontakt z uzavřeného IM systému, potřebujete mít účet "
+"v tomto systému, dále si musíte zaregistrovat odpovídající transport (%s). "
+"Chcete se do toho pustit?"
 
 #: ../jabber/JUser.tcl:382
 #, tcl-format
 msgid "Cannot set %s's nickname or group."
-msgstr "Nemohu změnit přezdívku nebo skupinu kontaktu %s."
+msgstr "Nelze změnit přezdívku nebo skupinu kontaktu %s."
 
 #: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:701
 #, tcl-format
@@ -3535,8 +3553,8 @@ msgid ""
 "messages to that IM system. It needs to be in your list. You have a "
 "subscription for %s: %s."
 msgstr ""
-"Toto je tvůj vlastní účet u %s, který funguje jako služba pro přenos zpráv "
-"do tohoto IM systému. Musí být ve tvém seznamu. Pro %s máš přihlášení: %s."
+"Toto je váš vlastní účet u %s, který funguje jako služba pro přenos zpráv do "
+"tohoto IM systému. Musí být ve vašem seznamu. Pro %s máte přihlášení: %s."
 
 #: ../jabber/JUser.tcl:644
 msgid "Transport Details"
@@ -3552,7 +3570,7 @@ msgid ""
 "Edit nickname and group of %s. You also can request or remove presence "
 "subscription."
 msgstr ""
-"Vlož přezdívku a skupinu pro %s. Můžeš si také vyžádat, nebo odstranit "
+"Vložte přezdívku a skupinu pro %s. Můžete si také vyžádat, nebo odstranit "
 "zviditelnění stavu."
 
 #: ../jabber/JUser.tcl:756
@@ -3566,19 +3584,19 @@ msgstr "Odstranit zviditelnění stavu"
 #. TRANSLATORS; these strings are balloon mouse over tooltips in the edit contact dialog
 #: ../jabber/JUser.tcl:769
 msgid "Both you and your contact can see eachother's presence."
-msgstr "Oba (ty i kontakt) vidíte stav jeden druhého."
+msgstr "Oba (vy i kontakt) vidíte stav jeden druhého."
 
 #: ../jabber/JUser.tcl:770
 msgid "You cannot see your contact's presence, but your contact can see yours."
-msgstr "Ty sice stav kontaktu nevidíš, ale on tvůj stav vidí."
+msgstr "Vy sice stav kontaktu nevidíte, ale on váš stav vidí."
 
 #: ../jabber/JUser.tcl:771
 msgid "Both you and your contact cannot see eachother's presence."
-msgstr "Oba (ty i kontakt) vidíte stav jeden druhého."
+msgstr "Oba (vy i kontakt) vidíte stav jeden druhého."
 
 #: ../jabber/JUser.tcl:772 ../jabber/Roster.tcl:1632
 msgid "You can see your contact's presence, but your contact can't see yours."
-msgstr "Ty sice vidíš stav kontaktu, ale on tvůj stav nevidí."
+msgstr "Vy sice vidíte stav kontaktu, ale on váš stav nevidí."
 
 #: ../jabber/JUser.tcl:819 ../jabber/Subscribe.tcl:332
 #: ../jabber/Subscribe.tcl:368 ../jabber/Subscribe.tcl:1302
@@ -3638,11 +3656,11 @@ msgstr "Poslat živě"
 
 #: ../jabber/JWB.tcl:631 ../jabber/JWB.tcl:646
 msgid "Do you want to close this whiteboard and lose the complete session?"
-msgstr "Chceš zavřít plochu a ztratit tak spojení?"
+msgstr "Chcete zavřít plochu a ztratit tak spojení?"
 
 #: ../jabber/JWB.tcl:656
 msgid "Do you want to save the changes?"
-msgstr "Chceš změny uložit?"
+msgstr "Chcete uložit změny?"
 
 #: ../jabber/JWB.tcl:656
 msgid "This whiteboard document has been changed."
@@ -3660,15 +3678,16 @@ msgid ""
 "your contact will not see them unless you are online while he/she reads your "
 "message. Do you want to send it anyway?"
 msgstr ""
-"%s je odpojen(a). Jestli tvoje zpráva obsahuje obrázky nebo jiná multimédia, "
-"kontakt je neuvidí, když nebudeš připojen(a). Chceš i přesto zprávu odeslat?"
+"%s je odpojen(a). Jestliže vaše zpráva obsahuje obrázky nebo jiná "
+"multimédia, kontakt je neuvidí, pokud nebudete připojeni. Chcete i přesto "
+"zprávu odeslat?"
 
 #: ../jabber/JWB.tcl:986 ../jabber/JWB.tcl:2080
 msgid ""
 "Invalid Contact ID. You need to enter a valid one at the bottom (e.g. "
 "user@example.org)."
 msgstr ""
-"Nesprávné ID kontaktu. Musíš vložit správné (ve tvaru jmeno@jabber.org)."
+"Nesprávné ID kontaktu. Musíte vložit správné (ve tvaru jmeno@jabber.org)."
 
 #: ../jabber/JWB.tcl:1522 ../whiteboard/GetFileIface.tcl:286
 msgid "Request To User"
@@ -3677,18 +3696,18 @@ msgstr "Požadavek k uživateli"
 #: ../jabber/JWB.tcl:1523 ../whiteboard/GetFileIface.tcl:287
 #, tcl-format
 msgid "We are about to receive the file %s. Do you want to receive it?"
-msgstr "Přišla žádost o příjem souboru %s. Chceš ho přijmout?"
+msgstr "Přišla žádost o příjem souboru %s. Chcete ho přijmout?"
 
 #: ../jabber/JWB.tcl:2058 ../whiteboard/Import.tcl:79
 #: ../whiteboard/Whiteboard.tcl:3277
 #, tcl-format
 msgid "Cannot find importer for the MIME type %s"
-msgstr "Nemohu najít importér pro MIME typ %s"
+msgstr "Nelze najít importér pro MIME typ %s"
 
 #: ../jabber/Jabber.tcl:615
 #, tcl-format
 msgid "Cannot send message to %s."
-msgstr "Nemohu poslat zprávu kontaktu %s."
+msgstr "Nelze poslat zprávu kontaktu %s."
 
 #: ../jabber/Jabber.tcl:718
 #, tcl-format
@@ -3714,19 +3733,19 @@ msgstr "Zprávy o přítomnosti"
 msgid ""
 "Because %s does not allow you to see his/her presence anymore, he/she is "
 "removed."
-msgstr "Protože ti %s nedovolil(a) vidět jeho/její stav, bude odstraněn(a)."
+msgstr "Protože vám %s nedovolil(a) vidět jeho/její stav, bude odstraněn(a)."
 
 #: ../jabber/Jabber.tcl:775
 #, tcl-format
 msgid "%s does not allow you to see his/her presence anymore."
-msgstr "%s ti neumožnil(a) vidět jeho/její stav."
+msgstr "%s vám neumožnil(a) vidět jeho/její stav."
 
 #: ../jabber/Jabber.tcl:782
 #, tcl-format
 msgid ""
 "%s does not allow you to see his/her presence anymore. Do you want to remove "
 "%s?"
-msgstr "%s ti neumožnil(a) vidět jeho/její stav. Chceš %s odstranit?"
+msgstr "%s vám neumožnil(a) vidět jeho/její stav. Chcete %s odstranit?"
 
 #: ../jabber/Jabber.tcl:815
 #, tcl-format
@@ -3734,7 +3753,7 @@ msgid ""
 "Cannot subscribe to %s's presence. The contact does not allow you to see his/"
 "her presence."
 msgstr ""
-"Nemohu získat oprávnění ke zjišťování stavu kontaktu %s. Kontakt ti "
+"Nelze získat oprávnění ke zjišťování stavu kontaktu %s. Kontakt vám "
 "neumožnil zjišťovat jeho/její stav."
 
 #: ../jabber/Jabber.tcl:820
@@ -3744,7 +3763,7 @@ msgstr "Povolení selhalo"
 #: ../jabber/Jabber.tcl:830
 #, tcl-format
 msgid "You cannot see %s's presence anymore."
-msgstr "Nemůžeš vidět stav kontaktu %s."
+msgstr "Nemůžete vidět stav kontaktu %s."
 
 #: ../jabber/Jabber.tcl:859
 msgid "Presence Error"
@@ -3767,7 +3786,7 @@ msgstr "Seznam chyb (ne kritických)"
 #: ../jabber/Jabber.tcl:1491 ../jabber/UserInfo.tcl:263
 #, tcl-format
 msgid "Cannot query %s's last activity."
-msgstr "Nemohu zjistit poslední aktivitu kontaktu %s."
+msgstr "Nelze zjistit poslední aktivitu kontaktu %s."
 
 #: ../jabber/Jabber.tcl:1503 ../jabber/Jabber.tcl:1506
 #: ../jabber/UserInfo.tcl:261
@@ -3778,7 +3797,7 @@ msgstr "Poslední aktivita"
 #: ../jabber/Jabber.tcl:1519
 #, tcl-format
 msgid "Cannot query %s's local time information."
-msgstr "Nemohu zjistit místní čas kontaktu %s."
+msgstr "Nelze zjistit místní čas kontaktu %s."
 
 #: ../jabber/Jabber.tcl:1533
 #, tcl-format
@@ -3803,7 +3822,7 @@ msgstr "Naposledy spatřen(a)"
 #: ../jabber/UserInfo.tcl:325
 #, tcl-format
 msgid "Cannot query %s's local time."
-msgstr "Nemohu zjistit místní čas kontaktu %s."
+msgstr "Nelze zjistit místní čas kontaktu %s."
 
 #: ../jabber/Jabber.tcl:1582 ../jabber/UserInfo.tcl:293
 #: ../jabber/UserInfo.tcl:323
@@ -3819,7 +3838,7 @@ msgstr "Místní čas kontaktu %s: %s"
 #: ../jabber/Jabber.tcl:1671 ../jabber/UserInfo.tcl:213
 #, tcl-format
 msgid "Cannot query %s's version."
-msgstr "Nemohu zjistit verzi %s."
+msgstr "Nelze zjistit verzi %s."
 
 #: ../jabber/Jabber.tcl:1710
 #, tcl-format
@@ -3846,11 +3865,11 @@ msgstr "Heslo znovu"
 #: ../jabber/Jabber.tcl:1996 ../jabber/Register.tcl:834
 #: ../jabber/SetupAss.tcl:311
 msgid "Passwords do not match. Please try again."
-msgstr "Hesla neodpovídají. Zkus to znovu."
+msgstr "Hesla neodpovídají. Zkuste to znovu."
 
 #: ../jabber/Jabber.tcl:2020
 msgid "Cannot set new password."
-msgstr "Nemohu změnit heslo."
+msgstr "Nelze změnit heslo."
 
 #: ../jabber/Jabber.tcl:2036
 msgid "Setting new password was successful."
@@ -3862,8 +3881,8 @@ msgid ""
 "Enter your account as user@example.org, or choose a profile. You should "
 "already have an account."
 msgstr ""
-"Vlož svůj účet ve tvaru  jméno@example.org, nebo si vyber profil. Měl(a) bys "
-"už mít založený účet."
+"Vložte svůj účet ve tvaru  jméno@example.org, nebo si vyberte profil. Už "
+"byste měli mít účet založen."
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
 #: ../jabber/Login.tcl:141
@@ -3871,7 +3890,7 @@ msgid ""
 "Enter your Contact ID as user@example.org. You should already have an "
 "account with this server."
 msgstr ""
-"Vlož své JID ve tvaru jméno@myjabb.org. Měl(a) bys už mít založený účet."
+"Vložte své JID ve tvaru jméno@myjabb.org. Účet byste už měli mít založen."
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
 #: ../jabber/Login.tcl:144
@@ -3879,14 +3898,14 @@ msgid ""
 "Write XMPP server IP number or name, or choose from the popup menu. You "
 "should already have an account with this server."
 msgstr ""
-"Vlož IP, nebo adresu XMPP serveru, nebo si ho vyber ze seznamu. Už bys měl"
-"(a) mít na vybraném serveru účet."
+"Vložte IP, nebo adresu XMPP serveru, nebo si ho vyberte ze seznamu. Na "
+"vybraném serveru byste už měli mít účet založen."
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
 #: ../jabber/Login.tcl:148
 #, tcl-format
 msgid "Enter your username and password to login to %s."
-msgstr "Vlož jméno a heslo pro přihlášení k %s."
+msgstr "Vložte jméno a heslo pro přihlášení k %s."
 
 #: ../jabber/Login.tcl:159 ../jabber/Profiles.tcl:1062
 msgid "Profile"
@@ -3935,7 +3954,7 @@ msgstr "Chybný(é) znak(y) v %s: %s!"
 #: ../jabber/Login.tcl:574
 msgid ""
 "The Contact ID differs from your profile. Do you want to save a new profile?"
-msgstr "ID kontaktu je jiné než v profilu. Chceš nový profil uložit?"
+msgstr "ID kontaktu je jiné než v profilu. Chcete nový profil uložit?"
 
 #: ../jabber/Login.tcl:579 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1533
 msgid "Profile Name"
@@ -3948,15 +3967,14 @@ msgstr "Přidat profil"
 
 #: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1535
 msgid "Enter the name for the new profile."
-msgstr "Vlož jméno nového profilu."
+msgstr "Vložte název nového profilu."
 
 #: ../jabber/Login.tcl:604
 msgid ""
 "Your current login settings differ from your profile settings. Do you want "
 "to save them to your profile?"
 msgstr ""
-"Tvé přihlašovací údaje jsou jiné než v profilu. Chceš údaje uložit do "
-"profilu?"
+"Přihlašovací údaje jsou jiné než v profilu. Chcete údaje uložit do profilu?"
 
 #: ../jabber/Login.tcl:819
 #, tcl-format
@@ -3975,7 +3993,7 @@ msgstr "Potvrzuji TLS."
 #: ../jabber/Login.tcl:877
 #, tcl-format
 msgid "Authorization to server %s was successful. Downloading contacts..."
-msgstr "Přihlášení k serveru %s bylo úspěšné. Načítám kontakty..."
+msgstr "Přihlášení k serveru %s bylo úspěšné. Načítají se kontakty..."
 
 #: ../jabber/Login.tcl:933
 #, tcl-format
@@ -3983,7 +4001,7 @@ msgid ""
 "Cannot connect to %s. Either there are server or network issues, or you "
 "misspelled the server's name."
 msgstr ""
-"Nemohu se spojit s %s. Ať už kvůli serveru, síti, nebo je špatné jméno "
+"Nelze se spojit s %s. Ať už kvůli serveru, síti, nebo je špatné jméno "
 "serveru."
 
 #: ../jabber/Login.tcl:939
@@ -3995,7 +4013,7 @@ msgstr "Server %s neodpovídá."
 #, tcl-format
 msgid ""
 "Cannot login because this username is already in use by someone else (%s)."
-msgstr "Nemohu se přihlásit, protože jméno již někdo používá (%s)."
+msgstr "Nelze se přihlásit, protože jméno již někdo používá (%s)."
 
 #: ../jabber/Login.tcl:947
 #, tcl-format
@@ -4005,7 +4023,7 @@ msgstr "Server %s nepodporuje TLS."
 #: ../jabber/Login.tcl:950
 #, tcl-format
 msgid "Cannot negotiate TLS with server %s."
-msgstr "Nemohu vyjednat TLS se serverem %s."
+msgstr "Nelze vyjednat TLS se serverem %s."
 
 #: ../jabber/Login.tcl:953
 msgid "The server has no support for SASL authentication."
@@ -4013,7 +4031,7 @@ msgstr "Server nepodporuje SASL autentikaci."
 
 #: ../jabber/Login.tcl:956
 msgid "Cannot authenticate due to internal protocol error."
-msgstr "Nemohu autentikovat kvůli interní chybě protokolu."
+msgstr "Nelze autentikovat kvůli interní chybě protokolu."
 
 #: ../jabber/Login.tcl:961
 #, tcl-format
@@ -4046,15 +4064,18 @@ msgid ""
 "defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting "
 "this bug to your server administrator."
 msgstr ""
+"Nesprávná odpověď serveru způsobená chybou jeho software: chyba <%s/> není "
+"definována v sekci 6.4 SASL Errors v RFC 3920. Oznamte tuto chybu vašemu "
+"správci serveru."
 
 #: ../jabber/Login.tcl:1011
 msgid "Do you want to retry a different password or profile?"
-msgstr ""
+msgstr "Chcete zkusit jiné heslo, nebo profil?"
 
 #: ../jabber/Login.tcl:1041
 #, tcl-format
 msgid "Do you want to register a new account with %s."
-msgstr "Chceš zaregistrovat nový účet na %s."
+msgstr "Chcete zaregistrovat nový účet na %s?"
 
 #. TRANSLATORS: strings related to Multi-User Chat (MUC) chatrooms
 #: ../jabber/MUC.tcl:136 ../jabber/MUC.tcl:164
@@ -4069,12 +4090,12 @@ msgstr "Pozvat kontakt do místnosti %s."
 #: ../jabber/MUC.tcl:314
 #, tcl-format
 msgid "Cannot invite %s to %s."
-msgstr "Nemohu pozvat %s do %s."
+msgstr "Nelze pozvat %s do %s."
 
 #: ../jabber/MUC.tcl:362
 #, tcl-format
 msgid "%s invites you to join chatroom %s."
-msgstr "%s tě pozval(a) připojit se k místnosti %s."
+msgstr "%s vás pozval(a) do místnosti %s."
 
 #: ../jabber/MUC.tcl:369
 #, tcl-format
@@ -4083,7 +4104,7 @@ msgstr "Pro vstup je zapotřebí heslo %s."
 
 #: ../jabber/MUC.tcl:372
 msgid "Do you want to join right away?"
-msgstr "Chceš se hned přidat?"
+msgstr "Chcete se přidat hned?"
 
 #: ../jabber/MUC.tcl:373
 msgid "Invitation"
@@ -4191,8 +4212,8 @@ msgid ""
 "chatroom participants to an alternative chatroom and tell why the chatroom "
 "is destroyed."
 msgstr ""
-"Chceš zrušit místnost %s? Volitelně můžeš stávajícím návštěvníkům říci, kam "
-"mají jít, a říci jim, proč byla místnost zrušena."
+"Chcete zrušit místnost %s? Volitelně můžete stávajícím návštěvníkům říci, "
+"kam mají jít, a sdělit jim, proč byla místnost zrušena."
 
 #: ../jabber/MUC.tcl:1614
 msgid "Alternative chatroom"
@@ -4215,12 +4236,12 @@ msgstr "Otevření selhalo"
 #: ../jabber/MailBox.tcl:1598 ../jabber/MailBox.tcl:1676
 #, tcl-format
 msgid "Cannot open the inbox file %s when trying to save it."
-msgstr "Nemohu otevřít soubor schránky %s při pokusu ji uložit."
+msgstr "Nelze otevřít soubor schránky %s při pokusu ji uložit."
 
 #: ../jabber/MailBox.tcl:1783 ../jabber/MailBox.tcl:1817
 #, tcl-format
 msgid "Cannot read the inbox file %s: %s"
-msgstr "Nemohu přečíst soubor schránky %s: %s"
+msgstr "Nelze přečíst soubor schránky %s: %s"
 
 #: ../jabber/MegaPresence.tcl:102 ../jabber/MegaPresence.tcl:111
 #: ../jabber/VCard.tcl:411
@@ -4242,16 +4263,16 @@ msgstr "Přeposlaná zpráva"
 #: ../jabber/NewMsg.tcl:901
 #, tcl-format
 msgid "Contact ID %s is invalid. Do you want to skip it and send to the rest?"
-msgstr "ID kontaktu %s je nesprávné. Chceš ho přeskočit a odeslat ostatním?"
+msgstr "ID kontaktu %s je nesprávné. Chcete ho přeskočit a odeslat ostatním?"
 
 #: ../jabber/NewMsg.tcl:904
 #, tcl-format
 msgid "Invalid Contact ID: %s. Please correct and resend."
-msgstr "Nesprávné ID kontaktu: %s. Prosím, oprav ho a pošli znovu."
+msgstr "Nesprávné ID kontaktu: %s. Opravte ho a pošlete znovu."
 
 #: ../jabber/NewMsg.tcl:925
 msgid "You need to fill in at least one valid address."
-msgstr "Musíš vyplnit alespoň jednu správnou adresu."
+msgstr "Musíte vyplnit alespoň jednu správnou adresu."
 
 #: ../jabber/NewMsg.tcl:984
 #, tcl-format
@@ -4260,11 +4281,11 @@ msgstr "V %s, %s %s napsal(a):"
 
 #: ../jabber/NewMsg.tcl:1068
 msgid "There are unsaved messages. Do you still want to quit?"
-msgstr "Jsou tu nějaké neuložené zprávy. Opravdu chceš skončit?"
+msgstr "Jsou tu nějaké neuložené zprávy. Opravdu chcete skončit?"
 
 #: ../jabber/NewMsg.tcl:1099
 msgid "Do you want to save this message before closing?"
-msgstr "Chceš tuto zprávu před uzavřením uložit?"
+msgstr "Chcete tuto zprávu před uzavřením uložit?"
 
 #: ../jabber/Profiles.tcl:810
 msgid "Accounts"
@@ -4275,7 +4296,7 @@ msgstr "Účty"
 msgid ""
 "You changed one or more values. Do you want to save them before closing?"
 msgstr ""
-"Byla změněna alespoň jedna hodnota. Chceš před zavřením okna data uložit?"
+"Byla změněna alespoň jedna hodnota. Chcete před zavřením okna data uložit?"
 
 #. TRANSLATORS: See File in the main window, and then Edit Profiles...
 #: ../jabber/Profiles.tcl:1056
@@ -4290,11 +4311,11 @@ msgstr "Smazat profil"
 
 #: ../jabber/Profiles.tcl:1463
 msgid "You need to fill in at least the server name and user name."
-msgstr "Musíš vyplnit alespoň název serveru a přihlašovací jméno."
+msgstr "Musíte vyplnit alespoň název serveru a přihlašovací jméno."
 
 #: ../jabber/Profiles.tcl:1568
 msgid "Do you want to register a new account?"
-msgstr "Chceš si zaregistrovat nový účet?"
+msgstr "Chcete si zaregistrovat nový účet?"
 
 #: ../jabber/Profiles.tcl:1608
 msgid ""
@@ -4302,14 +4323,14 @@ msgid ""
 "for this profile? This action cannot be undone. Press Cancel to abort "
 "deletion of account and profile."
 msgstr ""
-"Zvolený profil bude vymazán. Chceš také zrušit účet spojený s profilem? Tuto "
-"akci ale nelze vrátit zpět. Stiskni Storno pro zrušení operace mazání účtu a "
-"profilu."
+"Zvolený profil bude vymazán. Chcete také zrušit účet spojený s profilem? "
+"Tuto akci ale nelze vrátit zpět. Klikněte na Storno pro zrušení operace "
+"mazání účtu a profilu."
 
 #: ../jabber/Profiles.tcl:1643 ../jabber/Register.tcl:118
 #, tcl-format
 msgid "Cannot unregister from %s."
-msgstr "Nemohu se odhlásit z %s."
+msgstr "Nelze odhlásit z %s."
 
 #: ../jabber/Profiles.tcl:1785
 msgid "Connection"
@@ -4377,7 +4398,7 @@ msgstr "Smazat účet"
 #: ../jabber/Register.tcl:77
 msgid ""
 "Do you really want to remove your account? This process cannot be undone."
-msgstr "Opravdu chceš zrušit svůj účet? Toto je nevratná změna."
+msgstr "Opravdu chcete zrušit svůj účet? Toto je nevratná změna."
 
 #: ../jabber/Register.tcl:85
 msgid ""
@@ -4385,7 +4406,7 @@ msgid ""
 "Do you want to remove these contacts as well (Yes), keep them (No), or "
 "cancel everything (Cancel)?"
 msgstr ""
-"Chceš odhlásit transport, jehož kontakty máš v seznamu. Chceš kontakty "
+"Chcete odhlásit transport, jehož kontakty máte v seznamu. Chcete kontakty "
 "odstranit (Ano), ponechat (Ne), nebo akci stornovat (Storno)?"
 
 #: ../jabber/Register.tcl:133
@@ -4395,7 +4416,7 @@ msgstr "Odhlásit"
 #: ../jabber/Register.tcl:134
 #, tcl-format
 msgid "You are unregistered from %s."
-msgstr "Z %s jsi odhlášen(a)."
+msgstr "Byli jste odhlášeni z %s."
 
 #: ../jabber/Register.tcl:233 ../jabber/Register.tcl:248
 #: ../jabber/SetupAss.tcl:192 ../jabber/SetupAss.tcl:196
@@ -4408,7 +4429,7 @@ msgid ""
 "Register with the service %s. You may need to press the Next button to "
 "retrieve the registration instructions."
 msgstr ""
-"Registrovat službu %s. Měl(a) bys stisknout tlačítko Další pro získání "
+"Registrovat službu %s. Měli byste kliknout na tlačítko Další pro získání "
 "registračních instrukcí."
 
 #: ../jabber/Register.tcl:262
@@ -4417,13 +4438,14 @@ msgid ""
 "retrieve the registration instructions. Follow the instructions and hit "
 "Register."
 msgstr ""
-"Vyber si server ze seznamu, nebo ručně vlož. Pak stiskni Další pro získání "
-"registračních instrukcí. Postupuj podle nich a stiskni Registrovat."
+"Vyberte si server ze seznamu, nebo vložte jeho adresu. Pak klikněte na Další "
+"pro získání registračních instrukcí. Postupujte podle nich a klikněte na "
+"Registrovat."
 
 #: ../jabber/Register.tcl:584 ../jabber/Register.tcl:1256
 #: ../jabber/Search.tcl:310
 msgid "Please first enter or select a server."
-msgstr "Nejprve napiš, nebo vyber server."
+msgstr "Nejprve napište adresu serveru, nebo ho vyberte."
 
 #: ../jabber/Register.tcl:594 ../jabber/Register.tcl:1263
 #: ../jabber/Search.tcl:315
@@ -4432,14 +4454,14 @@ msgstr "Čekám na odpověď serveru"
 
 #: ../jabber/Register.tcl:658 ../jabber/Register.tcl:1287
 msgid "Cannot obtain registration information."
-msgstr "Nemohu získat registrační informace."
+msgstr "Nelze získat registrační informace."
 
 #: ../jabber/Register.tcl:670 ../jabber/Register.tcl:1039
 #: ../jabber/Register.tcl:1076 ../jabber/Register.tcl:1088
 #: ../jabber/Register.tcl:1170 ../jabber/Register.tcl:1418
 #: ../jabber/Register.tcl:1430 ../jabber/Register.tcl:1483
 msgid "Register"
-msgstr "Přihlásit"
+msgstr "Zaregistrovat"
 
 #: ../jabber/Register.tcl:792 ../jabber/SetupAss.tcl:177
 msgid "Save password"
@@ -4451,7 +4473,7 @@ msgid ""
 "else."
 msgstr ""
 "Registrace neproběhla, protože toto jméno si zaregistroval již někdo před "
-"tebou."
+"vámi."
 
 #: ../jabber/Register.tcl:896
 msgid "The registration failed."
@@ -4469,16 +4491,16 @@ msgstr ""
 #: ../jabber/Register.tcl:954
 #, tcl-format
 msgid "You are now registered and automatically logged in as %s"
-msgstr "Jsi zaregistrován(a) a automaticky přihlášen(a) jako %s"
+msgstr "Jste zaregistrováni a automaticky přihlášeni jako %s"
 
 #: ../jabber/Register.tcl:1119 ../jabber/Register.tcl:1442
 msgid "Select a service and press Next"
-msgstr "Vyber si službu a klikni na Další"
+msgstr "Vyberte si službu a klikněte na Další"
 
 #: ../jabber/Register.tcl:1352 ../jabber/Register.tcl:1536
 #, tcl-format
 msgid "Cannot register with service %s."
-msgstr "Nemohu zaregistrovat službu %s."
+msgstr "Nelze zaregistrovat službu %s."
 
 #: ../jabber/Register.tcl:1361 ../jabber/Register.tcl:1544
 #, tcl-format
@@ -4498,7 +4520,7 @@ msgstr "Pryč"
 #: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
 #: ../jabber/Status.tcl:46
 msgid "Free For Chat"
-msgstr ""
+msgstr "Volný k povídání"
 
 #: ../jabber/Roster.tcl:84 ../jabber/Roster.tcl:92 ../jabber/Roster.tcl:134
 #: ../jabber/Status.tcl:39 ../jabber/Status.tcl:47
@@ -4570,7 +4592,7 @@ msgstr "Smazat kontakt"
 #: ../jabber/Roster.tcl:395 ../jabber/Roster.tcl:406
 msgid ""
 "Do you really want to remove this contact? This action cannot be undone."
-msgstr "Chceš opravdu odstranit tento kontakt? Akci nelze vrátit zpět."
+msgstr "Chcete opravdu odstranit tento kontakt? Akci nelze vrátit zpět."
 
 #: ../jabber/Roster.tcl:598
 #, tcl-format
@@ -4628,7 +4650,7 @@ msgstr "Transporty"
 
 #: ../jabber/RosterTree.tcl:70
 msgid "Subscription Pending"
-msgstr "Povolení čeká"
+msgstr "Čeká na povolení"
 
 #. TRANSLATORS: themes for the contact icons (different presence state icons); see preferences
 #: ../jabber/Rosticons.tcl:433
@@ -4640,7 +4662,7 @@ msgid ""
 "Select iconsets for each group. A deselected group will use the normal "
 "iconset."
 msgstr ""
-"Vyber si skupinu ikon pro každou skupinu. Nevybraná skupina bude mít "
+"Vyberte si skupinu ikon pro každou skupinu. Nevybraná skupina bude mít "
 "normální skupinu ikon."
 
 #: ../jabber/Rosticons.tcl:581
@@ -4681,19 +4703,19 @@ msgstr "Výsledky hledání"
 
 #: ../jabber/Search.tcl:347
 msgid "Cannot obtain search form."
-msgstr "Nemohu získat vyhledávací formulář."
+msgstr "Nelze získat vyhledávací formulář."
 
 #: ../jabber/Search.tcl:417
 msgid "There was an invalid field. Please correct it."
-msgstr "Nějaké neplatné pole. Prosím, oprav."
+msgstr "Některé z polí neobsahuje správný údaj, proveďte opravu."
 
 #: ../jabber/Search.tcl:422
 msgid "Cannot search."
-msgstr "Nemohu hledat."
+msgstr "Hledat nelze."
 
 #: ../jabber/Search.tcl:929 ../jabber/Search.tcl:945 ../jabber/Search.tcl:1022
 msgid "Search People"
-msgstr "Vyhledat kamarády"
+msgstr "Najít kamarády"
 
 #: ../jabber/Search.tcl:933
 msgid "Full Name"
@@ -4704,13 +4726,12 @@ msgstr "Celé jméno"
 msgid ""
 "This setup assistant will help you to configure the most important settings "
 "to get started with %s."
-msgstr ""
-"Asistent nastavení ti pomůže nastavit to nejdůležitější pro začátek s %s."
+msgstr "Asistent nastavení pomůže nastavit to nejdůležitější pro začátek s %s."
 
 #: ../jabber/SetupAss.tcl:103
 msgid "Any time you can press Previous to go back. Press Next to proceed."
 msgstr ""
-"Kdykoli můžeš stisknout Předchozí pro krok zpět. Stiskni Další pro "
+"Kdykoli můžete kliknout na Předchozí pro krok zpět. Klikněte na Další pro "
 "pokračování."
 
 #: ../jabber/SetupAss.tcl:111 ../lib/PrefGeneral.tcl:103
@@ -4719,7 +4740,7 @@ msgstr "Jazyk"
 
 #: ../jabber/SetupAss.tcl:114
 msgid "Choose your language"
-msgstr "Vyber si jazyk"
+msgstr "Vyberte si jazyk"
 
 #: ../jabber/SetupAss.tcl:131
 msgid "Select Server"
@@ -4730,8 +4751,8 @@ msgid ""
 "Select or enter a server you wish to have your account on. If you already "
 "have an account, use the server of this account."
 msgstr ""
-"Vyber si, nebo vlož název serveru, kde chceš mít účet. Jestliže už účet máš, "
-"použij server, kde je účet."
+"Vyberte si, nebo vložte název serveru, kde chcete mít účet. Jestliže už účet "
+"máte, použijte server, kde ho máte."
 
 #: ../jabber/SetupAss.tcl:160
 msgid "Username & Password"
@@ -4742,16 +4763,16 @@ msgid ""
 "Enter your username and password. If the chosen username is already in use "
 "by someone else, you will not be able to register."
 msgstr ""
-"Vlož jméno a heslo. Jestliže vložené jméno už někdo používá, nebudeš se moci "
-"zaregistrovat."
+"Vložte jméno a heslo. Jestliže vložené jméno už někdo používá, nebudete se "
+"moci zaregistrovat."
 
 #: ../jabber/SetupAss.tcl:195
 msgid ""
 "Click on the button below to create a new account. You must be connected to "
 "the Internet. Pay attention to a possible firewall!"
 msgstr ""
-"Kliknutím na níže uvedené tlačítko vytvoříš účet. Musíš být připojen(a) k "
-"internetu. Dávej pozor na firewall!"
+"Kliknutím na níže uvedené tlačítko vytvoříte účet. Musíte být připojeni k "
+"internetu. Pozor na firewall!"
 
 #: ../jabber/SetupAss.tcl:207
 msgid "Finished"
@@ -4759,18 +4780,18 @@ msgstr "Ukončeno"
 
 #: ../jabber/SetupAss.tcl:210
 msgid "That's all. Also, be nice to the bug and his friends ;-)"
-msgstr "A to je vše. Buď krásný(á) jako beruška a její přátelé ;-)"
+msgstr "A to je vše. Buďte hodní na berušku a její přátele ;-)"
 
 #: ../jabber/SetupAss.tcl:307
 msgid "Be sure to fill in all entries before you continue."
-msgstr "Přesvědč se, než budeš pokračovat, že jsi vyplnil(a) všechna pole "
+msgstr "Přesvědčte se, než budete pokračovat, že jste vyplnili všechna pole "
 
 #: ../jabber/SetupAss.tcl:342
 msgid ""
 "Are you sure you want to close the setup assistant? You may start it any "
 "time later from the menu."
 msgstr ""
-"Opravdu chceš ukončit asistenta nastavení? Můžeš ho pak kdykoli spustit z "
+"Opravdu chcete ukončit asistenta nastavení? Můžete ho pak kdykoli spustit z "
 "menu."
 
 #: ../jabber/Status.tcl:256 ../jabber/Status.tcl:274 ../jabber/Status.tcl:335
@@ -4796,7 +4817,7 @@ msgstr "Vlastní stav"
 #. TRANSLATORS: custom status dialog; Control + B (or Command + B on Mac OS X)
 #: ../jabber/Status.tcl:861
 msgid "Select a presence state and optionally enter a message."
-msgstr "Vyber si stav a volitelně vlož zprávu."
+msgstr "Vyberte si stav a volitelně vložte zprávu."
 
 #: ../jabber/Status.tcl:862
 msgid "The most frequent combinations are easily reachable as menu entries."
@@ -4809,13 +4830,14 @@ msgstr "Informace o stavu"
 #: ../jabber/Subscribe.tcl:258
 #, tcl-format
 msgid "May %s see your presence?"
-msgstr "Může %s vidět tvůj stav?"
+msgstr "Může %s vidět váš stav?"
 
 #. TRANSLATORS: shown in subscription request dialog when someone tries to add the user to his or her list
 #: ../jabber/Subscribe.tcl:262
 msgid ""
 "Entering a nickname and group is optional, and for your personal use only."
-msgstr "Vložení přezdívky a skupiny je volitelné a jen pro tvé osobní použití."
+msgstr ""
+"Vložení přezdívky a skupiny je volitelné a jen pro vaše osobní použití."
 
 #. TRANSLATORS: shown in subscription request dialog if auto-accept and the timer option are both enabled in the preferences
 #: ../jabber/Subscribe.tcl:277 ../jabber/Subscribe.tcl:450
@@ -4842,13 +4864,13 @@ msgstr "Požadavek byl odmítnut za %s sekund."
 #: ../jabber/Subscribe.tcl:825
 #, tcl-format
 msgid "%s can see your presence."
-msgstr "%s může vidět tvůj stav."
+msgstr "%s může vidět váš stav."
 
 #: ../jabber/Subscribe.tcl:466 ../jabber/Subscribe.tcl:699
 #: ../jabber/Subscribe.tcl:891
 #, tcl-format
 msgid "%s cannot see your presence."
-msgstr "%s nemůže vidět tvůj stav."
+msgstr "%s nemůže vidět váš stav."
 
 #: ../jabber/Subscribe.tcl:1030 ../jabber/Subscribe.tcl:1220
 #: ../jabber/Subscribe.tcl:1449
@@ -4856,7 +4878,8 @@ msgstr "%s nemůže vidět tvůj stav."
 msgid ""
 "%s contacts want to see your presence. Select those who may see your "
 "presence."
-msgstr "Kontakty %s chtějí vidět tvůj stav. Vyber kontakty, kterým to umožníš."
+msgstr ""
+"Kontakty %s chtějí vidět váš stav. Vyberte kontakty, kterým to umožníte."
 
 #: ../jabber/Subscribe.tcl:1086
 msgid "Allow"
@@ -4865,16 +4888,16 @@ msgstr "Povolit"
 #: ../jabber/Subscribe.tcl:1412 ../jabber/Subscribe.tcl:1440
 #, tcl-format
 msgid "%s allows you to see his/her presence."
-msgstr "%s ti dovolil(a) vidět její stav."
+msgstr "%s vám dovolil(a) vidět jeho/její stav."
 
 #: ../jabber/Subscribe.tcl:1491 ../jabber/Subscribe.tcl:1538
 #, tcl-format
 msgid "%s additional contacts can see your presence."
-msgstr "%s dalších kontaktů může vidět tvůj stav."
+msgstr "%s dalších kontaktů může vidět váš stav."
 
 #: ../jabber/Subscribe.tcl:1633
 msgid "If someone wants to see my presence and"
-msgstr "Jesliže někdo chce vidět můj stav a"
+msgstr "Jesliže někdo chce vidět váš stav a"
 
 #: ../jabber/Subscribe.tcl:1634
 msgid "is not in my list"
@@ -4907,7 +4930,7 @@ msgstr "Okno se zavře za (vteřiny)"
 
 #: ../jabber/Subscribe.tcl:1686
 msgid "Put contacts who add me to their list in"
-msgstr "Vložit kontakty, které si mě chtějí přidat do seznamu"
+msgstr "Vložte kontakty, které si vás chtějí přidat do seznamu"
 
 #: ../jabber/Subscribe.tcl:1689
 msgid "Default group"
@@ -4916,7 +4939,7 @@ msgstr "Výchozí skupina"
 #: ../jabber/UserInfo.tcl:142 ../jabber/VCard.tcl:82
 #, tcl-format
 msgid "Downloading business card from %s"
-msgstr "Načítám vizitku z %s"
+msgstr "Načítá se vizitka z %s"
 
 #: ../jabber/UserInfo.tcl:226
 msgid "Operating system"
@@ -4924,7 +4947,7 @@ msgstr "Oper. systém"
 
 #: ../jabber/UserInfo.tcl:356 ../jabber/VCard.tcl:102 ../jabber/VCard.tcl:844
 msgid "Cannot download business card."
-msgstr "Nemohu načíst vizitku."
+msgstr "Nelze načíst vizitku."
 
 #: ../jabber/UserInfo.tcl:384 ../jabber/VCard.tcl:227
 #, tcl-format
@@ -4934,7 +4957,7 @@ msgstr "Vizitka pro %s"
 #: ../jabber/UserInfo.tcl:474
 #, tcl-format
 msgid "Failed to obtain personal notes: %s"
-msgstr ""
+msgstr "Nelze získat osobní poznámky: %s"
 
 #. TRANSLATORS: in the business card dialog, there can be made notes about each contact
 #: ../jabber/UserInfo.tcl:529
@@ -4943,7 +4966,7 @@ msgstr "Poznámky"
 
 #: ../jabber/UserInfo.tcl:535
 msgid "Add your personal notes about this contact."
-msgstr "Přidej své poznámky ke kontaktu."
+msgstr "Přidejte své poznámky ke kontaktu."
 
 #: ../jabber/UserInfo.tcl:564
 msgid "Client"
@@ -5057,13 +5080,13 @@ msgstr "Pluginy"
 #. TRANSLATORS: shown on Linux when trying to print
 #: ../lib/Dialogs.tcl:120
 msgid "Shell print command, edit if desired"
-msgstr "Příkaz k tisku, uprav, jestli chceš"
+msgstr "Příkaz k tisku, upravte, jestli chcete"
 
 #: ../lib/Dialogs.tcl:470 ../lib/Splash.tcl:83 ../lib/UI.tcl:488
 #: ../lib/UI.tcl:490
 #, tcl-format
 msgid "About %s"
-msgstr "O %s"
+msgstr "O programu %s"
 
 #. TRANSLATORS: some old whiteboard feature
 #: ../lib/EditDialogs.tcl:81 ../lib/EditDialogs.tcl:93
@@ -5072,7 +5095,7 @@ msgstr "Úpravy zkratek"
 
 #: ../lib/EditDialogs.tcl:226
 msgid "Warning: you have edited the shortcuts. Don't you want to save them?"
-msgstr "Varování: zkratky byly změněny. Chceš uložit změny?"
+msgstr "Varování: zkratky byly změněny. Chcete uložit změny?"
 
 #: ../lib/EditDialogs.tcl:276
 msgid "Add Shortcut"
@@ -5084,7 +5107,7 @@ msgstr "Nová zkratka"
 
 #: ../lib/EditDialogs.tcl:278 ../lib/EditDialogs.tcl:283
 msgid "Complete ip number or name"
-msgstr "Vyplň IP adresu nebo jméno"
+msgstr "Vyplňte IP adresu nebo název"
 
 #: ../lib/EditDialogs.tcl:281
 msgid "Edit Shortcut"
@@ -5130,13 +5153,13 @@ msgstr "Nikdy"
 #: ../lib/HttpTrpt.tcl:66
 #, tcl-format
 msgid "Cannot open file %s"
-msgstr "Nemohu otevřít soubor %s"
+msgstr "Nelze otevřít soubor %s"
 
 #: ../lib/HttpTrpt.tcl:100 ../lib/HttpTrpt.tcl:133 ../lib/HttpTrpt.tcl:227
 #: ../lib/HttpTrpt.tcl:241
 #, tcl-format
 msgid "Cannot download the file %s."
-msgstr "Nemohu stáhnout soubor %s."
+msgstr "Nelze stáhnout soubor %s."
 
 #: ../lib/HttpTrpt.tcl:102 ../lib/HttpTrpt.tcl:135 ../lib/HttpTrpt.tcl:229
 #, tcl-format
@@ -5153,7 +5176,7 @@ msgstr "Časový limit"
 
 #: ../lib/HttpTrpt.tcl:222
 msgid "Cannot download file over HTTP: timeout."
-msgstr "Nemohu stáhnout soubor přes HTTP: vypršel časový limit."
+msgstr "Nelze stáhnout soubor přes HTTP: vypršel časový limit."
 
 #: ../lib/HttpTrpt.tcl:234
 msgid "The server closed the socket without replying."
@@ -5172,19 +5195,19 @@ msgstr "Přenos souboru %s byl stornován."
 #: ../lib/Httpd.tcl:79
 #, tcl-format
 msgid "Cannot start the internal HTTP server: %s"
-msgstr "Nemohu spustit interní HTTP server: %s"
+msgstr "Nelze spustit interní HTTP server: %s"
 
 #: ../lib/Init.tcl:741 ../lib/Init.tcl:762 ../lib/Media.tcl:179
 #: ../whiteboard/Plugins.tcl:445
 #, tcl-format
 msgid "Looking for %s"
-msgstr "Hledám balíček %s"
+msgstr "Hledání balíčku %s"
 
 #: ../lib/MacintoshUtils.tcl:56 ../lib/MacintoshUtils.tcl:78
 #: ../lib/MacintoshUtils.tcl:100 ../lib/UserActions.tcl:45
 #: ../lib/UserActions.tcl:73 ../lib/UserActions.tcl:94
 msgid "Cannot find necessary Tcl extension."
-msgstr "Nemohu najít potřebné Tcl rozšíření."
+msgstr "Nelze najít potřebné Tcl rozšíření."
 
 #: ../lib/PrefGeneral.tcl:59
 msgid "Settings"
@@ -5204,9 +5227,9 @@ msgid ""
 "application. If this drive is not a removable device your personal settings "
 "could be visible. Do you want to continue?"
 msgstr ""
-"Vybral(a) sis uložit nastavení na stejný disk, na kterém je program. "
-"Jestliže se ale jedná o nevyměnitelný disk, tvoje osobní nastavení může být "
-"přístupné všem. Chceš pokračovat?"
+"Vybrali jste uložit nastavení na stejný disk, na kterém je program. Jestliže "
+"se ale jedná o nevyměnitelný disk, vaše osobní nastavení může být přístupné "
+"všem. Chcete pokračovat?"
 
 #: ../lib/PrefGeneral.tcl:144 ../lib/PrefGeneral.tcl:168
 #, tcl-format
@@ -5216,9 +5239,9 @@ msgid ""
 "location will be used the next time you start %s. Do you want to remove the "
 "old preferences?"
 msgstr ""
-"Vybral(a) sis ukládání nastavení do přednastaveného místa. Když odstraníš, "
-"nebo přesuneš osobní nastavení z %s, přednastavené místo bude v %s. Chceš "
-"odstranit stará nastavení?"
+"Vybrali jste ukládání nastavení do výchozího místa. Když odstraníte, nebo "
+"přesunete osobní nastavení z %s, při dalším startu %s bude použito výchozí "
+"místo. Chcete odstranit stará nastavení?"
 
 #: ../lib/PrefHelpers.tcl:73 ../lib/PrefHelpers.tcl:116
 msgid "Default Applications"
@@ -5271,7 +5294,7 @@ msgstr "Privátní soubor s klíčem pro TLS"
 #: ../lib/PrefUtils.tcl:218
 #, tcl-format
 msgid "Cannot open file %s."
-msgstr "Nemohu otevřít soubor %s."
+msgstr "Nelze otevřít soubor %s."
 
 #: ../lib/Preferences.tcl:174
 msgid "Preferences"
@@ -5283,16 +5306,16 @@ msgstr "Tovární nastavení"
 
 #: ../lib/Preferences.tcl:394
 msgid "Do you really want to reset your customization to factory defaults?"
-msgstr "Opravdu chceš smazat svoje nastavení?"
+msgstr "Opravdu chcete smazat svoje nastavení?"
 
 #: ../lib/Preferences.tcl:456
 #, tcl-format
 msgid "At least one setting requires a restart of %s."
-msgstr "Nejméně jedno nastavení požaduje restart %s."
+msgstr "Nejméně jedno nastavení požaduje restart programu %s."
 
 #: ../lib/Preferences.tcl:499
 msgid "The preferences have been changed. Do you want to cancel anyway?"
-msgstr "Nastavení bylo změněno. Chceš přesto stornovat změny?"
+msgstr "Nastavení bylo změněno. Chcete přesto stornovat změny?"
 
 #: ../lib/Proxy.tcl:152
 msgid "NAT Address"
@@ -5304,7 +5327,7 @@ msgid ""
 "File transfers will not work if you use an HTTP proxy."
 msgstr ""
 "Užití HTTP proxy nastavení je určeno v profilech. Přenosy souborů nebudou "
-"fungovat, pokud použiješ HTTP proxy."
+"fungovat, pokud použijete HTTP proxy."
 
 #: ../lib/Proxy.tcl:197
 msgid "Use proxy"
@@ -5329,7 +5352,7 @@ msgstr "Detekovat"
 
 #: ../lib/TheServer.tcl:64
 msgid "Cannot start server socket. Perhaps you are not connected."
-msgstr "Nemohu otevřít socket serveru Asi nejsi připojen(a)."
+msgstr "Nelze otevřít socket serveru Asi nejste připojeni."
 
 #: ../lib/Types.tcl:577
 msgid "World Application"
@@ -5529,29 +5552,29 @@ msgstr "Konec"
 
 #: ../lib/UserActions.tcl:136
 msgid "Do you actually want to quit?"
-msgstr "Opravdu chceš skončit?"
+msgstr "Opravdu chcete skončit?"
 
 #: ../whiteboard/CanvasCmd.tcl:447 ../whiteboard/CanvasFile.tcl:737
 #: ../whiteboard/CanvasFile.tcl:768
 #, tcl-format
 msgid "Cannot write to %s: %s"
-msgstr "Nemohu zapisovat do %s: %s"
+msgstr "Nelze zapisovat do %s: %s"
 
 #: ../whiteboard/CanvasCmd.tcl:455 ../whiteboard/CanvasFile.tcl:52
 #: ../whiteboard/CanvasFile.tcl:71 ../whiteboard/CanvasFile.tcl:500
 #: ../whiteboard/CanvasFile.tcl:843
 #, tcl-format
 msgid "Cannot read %s: %s"
-msgstr "Nemohu číst %s: %s"
+msgstr "Nelze přečíst %s: %s"
 
 #: ../whiteboard/CanvasDraw.tcl:1353
 msgid "Arc tool, click and drag"
-msgstr "Oblouk, klikni a táhni"
+msgstr "Oblouk, klikněte a vytáhněte"
 
 #: ../whiteboard/CanvasDraw.tcl:1462 ../whiteboard/CanvasDraw.tcl:1519
 #: ../whiteboard/Whiteboard.tcl:87
 msgid "Arc tool, click to set center, spacebar to cancel"
-msgstr "Oblouk, kliknutím určíš střed, mezerník ukončí"
+msgstr "Oblouk, kliknutím určíte střed, mezerník ukončí"
 
 #: ../whiteboard/CanvasFile.tcl:549
 msgid "Opening a whiteboard file clears the current whiteboard!"
@@ -5742,7 +5765,7 @@ msgstr "Uložit na disk"
 
 #: ../whiteboard/FilePrefs.tcl:587
 msgid "One or more fields are missing. Try again or cancel."
-msgstr "Jedno nebo více polí chybí. Zkus to znovu nebo stornuj akci."
+msgstr "Jedno nebo více polí chybí. Zkuste to znovu nebo akci stornujte."
 
 #: ../whiteboard/GetFileIface.tcl:130 ../whiteboard/GetFileIface.tcl:232
 #: ../whiteboard/GetFileIface.tcl:233 ../whiteboard/PutFileIface.tcl:248
@@ -5763,7 +5786,7 @@ msgstr ""
 #: ../whiteboard/GetFileIface.tcl:468 ../whiteboard/PutFileIface.tcl:177
 #, tcl-format
 msgid "Contacting %s. Waiting for response"
-msgstr "Kontaktuji %s. Čekám na odpověď"
+msgstr "Kontaktuji %s. Čeká se na odpověď"
 
 #: ../whiteboard/GetFileIface.tcl:469 ../whiteboard/PutFileIface.tcl:178
 #, tcl-format
@@ -5783,7 +5806,7 @@ msgstr "%s kontaktován. Vyjednáváme"
 #: ../whiteboard/GetFileIface.tcl:472 ../whiteboard/PutFileIface.tcl:181
 #, tcl-format
 msgid "Cannot read server response from %s."
-msgstr "Nemohu přečíst odpověď serveru %s."
+msgstr "Nelze přečíst odpověď serveru %s."
 
 #: ../whiteboard/GetFileIface.tcl:473 ../whiteboard/PutFileIface.tcl:182
 #, tcl-format
@@ -5808,7 +5831,7 @@ msgstr "Přenos souboru %s od %s skončil."
 #: ../whiteboard/GetFileIface.tcl:477
 #, tcl-format
 msgid "Cannot download from %s: network error."
-msgstr "Nemohu stáhnout od %s: chyba sítě."
+msgstr "Nelze stáhnout od %s: chyba sítě."
 
 #: ../whiteboard/Import.tcl:59
 msgid "Import Image/Movie"
@@ -6006,7 +6029,7 @@ msgstr "Otevřít QuickTime proud"
 
 #: ../whiteboard/Multicast.tcl:71
 msgid "Write URL or choose from shortcut"
-msgstr "Vlož URL, nebo vyber ze zkratek"
+msgstr "Vložte URL, nebo vyberte ze zkratek"
 
 #: ../whiteboard/Multicast.tcl:78
 msgid ""
@@ -6017,12 +6040,12 @@ msgid ""
 msgstr ""
 "Otevřít URL, které obsahuje SDP soubor s příponou .mov. Obsahuje QuickTime "
 "proud k odeslání. Může to být audio (rádio), nebo video (televize). Nebo "
-"také můžeš použít k nalezení SDP souboru prohlížeč internetu, stáhnout "
+"také můžete použít k nalezení SDP souboru prohlížeč internetu, stáhnout "
 "soubor a otevřít ho jako normální film."
 
 #: ../whiteboard/Plugins.tcl:1346
 msgid "Select the plugins you want to be loaded."
-msgstr "Vyber pluginy, které chceš, aby byly nahrány."
+msgstr "Vyber pluginy, které chcete, aby byly načteny."
 
 #: ../whiteboard/Plugins.tcl:1366
 msgid "Support for mp3, wav, and a few other audio formats"
@@ -6058,7 +6081,7 @@ msgstr "Import Itcl apletů"
 
 #: ../whiteboard/Plugins.tcl:1374
 msgid "Import documents on Windows"
-msgstr ""
+msgstr "Import dokumentů ve Windows"
 
 #: ../whiteboard/PutFileIface.tcl:168
 #, tcl-format
@@ -6078,7 +6101,7 @@ msgstr "Přenos souboru %s pro %s skončil."
 #: ../whiteboard/PutFileIface.tcl:186
 #, tcl-format
 msgid "Cannot upload to %s: network error."
-msgstr "Nemohu nahrát k %s: chyba sítě."
+msgstr "Nelze nahrát k %s: chyba sítě."
 
 #: ../whiteboard/WBPrefs.tcl:76
 msgid "Fonts"
@@ -6116,7 +6139,7 @@ msgid ""
 "have this font installed on their system."
 msgstr ""
 "Varování: před importem jiných fontů, než jsou standardní (Times, Helvetica, "
-"nebo Courier) se ujisti, zda kontakty tyto fonty mají také k dispozici."
+"nebo Courier) se ujistěte, zda kontakty tyto fonty mají také k dispozici."
 
 #: ../whiteboard/WBPrefs.tcl:299
 msgid "The standard fonts, Times, Helvetica, and Courier, may not be removed."
@@ -6131,10 +6154,9 @@ msgid "yes"
 msgstr "ano"
 
 #: ../whiteboard/WDialogs.tcl:188
-#, fuzzy
 #| msgid "Activity"
 msgid "Activated"
-msgstr "Činnost"
+msgstr "Aktivováno"
 
 #: ../whiteboard/WDialogs.tcl:194
 msgid "Buffering support"
