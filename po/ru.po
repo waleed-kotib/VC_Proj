@@ -1,19 +1,19 @@
 # translation of ru.po to Russian
 # Copyright (C) 2009 "The-Coccinella-Project"
 #
-# Rain <rain@jabberworld.info>, 2009.
-# rain <linuxoid.rain@gmail.com>, 2009.
 # JabberWorld.info team
 #
+# Rain <rain@jabberworld.info>, 2009.
+# rain <linuxoid.rain@gmail.com>, 2009.
 # Errors correction: h31, vlas, cyam
 msgid ""
 msgstr ""
 "Project-Id-Version: ru\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
 "POT-Creation-Date: 2009-11-23 23:35+0100\n"
-"PO-Revision-Date: 2009-04-12 21:55+0300\n"
+"PO-Revision-Date: 2009-11-28 18:22+0200\n"
 "Last-Translator: rain <linuxoid.rain@gmail.com>\n"
-"Language-Team: Russian <ru@li.org>\n"
+"Language-Team: Russian <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -135,8 +135,7 @@ msgstr "Ошибка"
 #: ../components/AutoUpdate.tcl:123
 #, tcl-format
 msgid "Cannot connect to server %s to download update details: %s"
-msgstr ""
-"Не могу подключиться к серверу %s для загрузки подробностей обновления: %s"
+msgstr "Не могу подключиться к серверу %s для загрузки подробностей обновления: %s"
 
 #: ../components/AutoUpdate.tcl:176
 msgid "Update Check"
@@ -394,7 +393,7 @@ msgstr "Долгота в градусах восточной долготы"
 
 #: ../components/Geolocation.tcl:64
 msgid "A code used for postal delivery"
-msgstr ""
+msgstr "Почтовый индекс для доставки"
 
 #: ../components/Geolocation.tcl:65 ../jabber/JForms.tcl:308
 #: ../jabber/Register.tcl:719
@@ -410,8 +409,7 @@ msgid "A thoroughfare within the locality, or a crossing of two thoroughfares"
 msgstr ""
 
 #: ../components/Geolocation.tcl:68
-msgid ""
-"A catch-all element that captures any other information about the location"
+msgid "A catch-all element that captures any other information about the location"
 msgstr ""
 
 #: ../components/Geolocation.tcl:69
@@ -432,7 +430,7 @@ msgstr ""
 
 #: ../components/Geolocation.tcl:75
 msgid "Building"
-msgstr ""
+msgstr "Здание"
 
 #: ../components/Geolocation.tcl:76 ../jabber/VCard.tcl:507
 msgid "Country"
@@ -462,7 +460,7 @@ msgstr "Широта"
 
 #: ../components/Geolocation.tcl:82
 msgid "Locality"
-msgstr ""
+msgstr "Местоположение"
 
 #: ../components/Geolocation.tcl:83
 msgid "Longitude"
@@ -501,8 +499,7 @@ msgstr "Удалить"
 
 #: ../components/Geolocation.tcl:158
 msgid "Set your location that will be shown to your contacts."
-msgstr ""
-"Укажите свое местоположение, которое будет показываться Вашим контактам"
+msgstr "Укажите свое местоположение, которое будет показываться Вашим контактам"
 
 #: ../components/Geolocation.tcl:159
 msgid ""
@@ -1486,10 +1483,9 @@ msgid "Volume"
 msgstr "Громкость"
 
 #: ../components/Sounds.tcl:586
-#, fuzzy
 #| msgid "Sound set"
 msgid "Sound device"
-msgstr "Звуковая тема"
+msgstr "Аудиоустройство"
 
 #: ../components/Sounds.tcl:595
 msgid "MIDI Player"
@@ -1560,7 +1556,7 @@ msgstr "Добавить в словарь"
 
 #: ../components/Totd.tcl:18 ../components/Totd.tcl:90
 msgid "Tip of the Day"
-msgstr ""
+msgstr "Совет дня"
 
 #: ../components/Totd.tcl:30
 #, tcl-format
@@ -1578,37 +1574,45 @@ msgid ""
 " 4. Enter the name of the desired server and proceed.\n"
 " 5. The chat system will become available in the list!"
 msgstr ""
+"Если при добавлении контакта требуемая IM-сеть недоступна, это означает, что на сервере не обнаружена поддержка данной сети (не был найден соответствующий транспорт). К счастью, в большистве случаев можно использовать транспорт на другом сервере без необходимости иметь там аккаунт.\n"
+"\n"
+"Для этого:\n"
+"1. Подключитесь к вашему аккаунту в %s.\n"
+"2. Выберите пункт \"Просмотреть сервер\" из меню \"Действие\".\n"
+"3. Найдите сервер с поддержкой необходимой вам сети на http://coccinella.im/servers/servers.html или http://jabberworld.info/Список_работающих_публичных_серверов_Jabber (колонки можно сортировать). \n"
+"4. Введите название выбранного сервера и нажмите \"Просмотреть\".\n"
+"5. Необходимая IM-сеть станет доступна в списке!"
 
 #: ../components/Totd.tcl:43
 msgid ""
 "Typing the /clean command during a chat conversation will empty your chat "
 "window, whilst the /retain command will restore its content. Your contacts "
 "do not see these commands."
-msgstr ""
+msgstr "Ввод команды /clean в чате очистит окно чата, а команда /retain вернет убранное содержимое. Ваш собеседник не будет видеть эти команды."
 
 #: ../components/Totd.tcl:46
 #, tcl-format
 msgid ""
 "You might be interested in the hidden XML console if you are a developer. "
 "You can open it with the command %s+Shift+D"
-msgstr ""
+msgstr "Вам может быть интересна скрытая XML-консоль в том случае, если вы разработчик. Вы можете открыть ее комбинацией %s+Shift+D"
 
 #: ../components/Totd.tcl:49
 #, tcl-format
 msgid ""
 "You can initiate a whiteboard session with multiple participants by clicking "
 "the whiteboard icon in a chatroom. All participants using %s will be invited."
-msgstr ""
+msgstr "Вы можете рисовать одновременно с несколькими людьми, нажав кнопку вызова доски для рисования в конференции. Все, кто используют %s, будут приглашены."
 
 #: ../components/Totd.tcl:52
 msgid "Documentation is available at http://coccinella.im/documentation"
-msgstr ""
+msgstr "Документация доступна по адресу http://coccinella.im/documentation"
 
 #: ../components/Totd.tcl:105
-#, fuzzy, tcl-format
+#, tcl-format
 #| msgid "Show tips on startup"
 msgid "Show tips on %s startup"
-msgstr "Показывать советы при запуске"
+msgstr "Показывать советы при запуске %s"
 
 #. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
 #: ../components/UserActivity.tcl:54
@@ -1944,7 +1948,7 @@ msgstr "XML-консоль"
 
 #: ../components/XMLConsole.tcl:108
 msgid "Pretty format"
-msgstr ""
+msgstr "Включить форматирование"
 
 #: ../components/XMLConsole.tcl:111 ../components/fsdialog.tcl:1050
 #: ../contrib/ui/openimage.tcl:95 ../jabber/History.tcl:994
@@ -2422,8 +2426,7 @@ msgstr "Показать или спрятать историю чата"
 
 #: ../jabber/Chat.tcl:1649 ../jabber/GroupChat.tcl:917
 msgid "If checked, Return sends message, else use Ctrl/Cmd-Return"
-msgstr ""
-"Если отмечено, Enter отправляет сообщения, иначе используйте Ctrl/Cmd-Enter"
+msgstr "Если отмечено, Enter отправляет сообщения, иначе используйте Ctrl/Cmd-Enter"
 
 #: ../jabber/Chat.tcl:1650 ../jabber/NewMsg.tcl:375
 msgid "Insert emoticon"
@@ -2492,9 +2495,8 @@ msgid "Cannot send when not logged in."
 msgstr "Не могу отправить, когда не подключён"
 
 #: ../jabber/Chat.tcl:3576
-msgid ""
-"Do you want to close this chat window and lose the complete conversation?"
-msgstr ""
+msgid "Do you want to close this chat window and lose the complete conversation?"
+msgstr "Вы действительно хотите закрыть это окно и потерять историю переписки?"
 
 #. TRANSLATORS; see Chat settings in preferences
 #: ../jabber/Chat.tcl:4232
@@ -2627,7 +2629,7 @@ msgstr "Вы должны ввести ник"
 #: ../jabber/Create.tcl:332 ../jabber/Create.tcl:515 ../jabber/JUser.tcl:294
 #: ../jabber/Profiles.tcl:1455
 msgid "Invalid Contact ID."
-msgstr ""
+msgstr "Неправильный ID контакта."
 
 #: ../jabber/Create.tcl:337
 msgid "Downloading configuration form"
@@ -2863,7 +2865,7 @@ msgstr "Закладки"
 #: ../jabber/Enter.tcl:190 ../jabber/JForms.tcl:306 ../jabber/Login.tcl:224
 #: ../jabber/Profiles.tcl:1125 ../jabber/Register.tcl:717
 msgid "Password or secret"
-msgstr ""
+msgstr "Пароль"
 
 #: ../jabber/Enter.tcl:403 ../jabber/Enter.tcl:453
 #, tcl-format
@@ -2984,7 +2986,7 @@ msgstr "Адрес в Tlen"
 
 #: ../jabber/Gateway.tcl:90
 msgid "Twitter user"
-msgstr ""
+msgstr "Пользователь Twitter"
 
 #: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
 #: ../jabber/Profiles.tcl:1124 ../jabber/VCard.tcl:322
@@ -3039,7 +3041,7 @@ msgstr "отошёл"
 
 #: ../jabber/GroupChat.tcl:190
 msgid "free for chat"
-msgstr ""
+msgstr "Готов поболтать"
 
 #. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
 #: ../jabber/GroupChat.tcl:192
@@ -3142,8 +3144,7 @@ msgstr "Нет истории для"
 msgid ""
 "You are already registered with this service. These are your current "
 "registration settings."
-msgstr ""
-"Вы уже зарегистрированы на этом сервисе. Ваши текущие настройки регистрации."
+msgstr "Вы уже зарегистрированы на этом сервисе. Ваши текущие настройки регистрации."
 
 #: ../jabber/JForms.tcl:297 ../jabber/Register.tcl:708
 msgid "Street portion of a physical or mailing address"
@@ -3166,8 +3167,7 @@ msgstr "Имя"
 msgid ""
 "You are already registered with this service. These are your current login "
 "settings."
-msgstr ""
-"Вы уже зарегистрированы на этом сервисе. Ваши текущие настройки подключения."
+msgstr "Вы уже зарегистрированы на этом сервисе. Ваши текущие настройки подключения."
 
 #: ../jabber/JForms.tcl:303 ../jabber/Register.tcl:714
 msgid "Last name, surname, or family name"
@@ -3487,15 +3487,12 @@ msgid "Stop"
 msgstr "Остановить"
 
 #: ../jabber/JUser.tcl:163
-msgid ""
-"Select the chat system and contact ID of the contact you would like to add."
-msgstr ""
-"Выберите сеть и введите идентификатор контакта, который Вы хотите добавить."
+msgid "Select the chat system and contact ID of the contact you would like to add."
+msgstr "Выберите сеть и введите идентификатор контакта, который Вы хотите добавить."
 
 #: ../jabber/JUser.tcl:165
 msgid "Nickname and group are optional and can be set or changed later."
-msgstr ""
-"Ник и группа не обязательны и могут быть установлены или изменены позже."
+msgstr "Ник и группа не обязательны и могут быть установлены или изменены позже."
 
 #: ../jabber/JUser.tcl:177
 msgid "Chat system"
@@ -3650,8 +3647,7 @@ msgid "This whiteboard document has been changed."
 msgstr "Содержимое этой доски было изменено."
 
 #: ../jabber/JWB.tcl:815
-msgid ""
-"This contact is not online anymore and the message is therefore not sent."
+msgid "This contact is not online anymore and the message is therefore not sent."
 msgstr "Этот контакт уже не в сети, поэтому сообщение не отправлено."
 
 #: ../jabber/JWB.tcl:977
@@ -3699,7 +3695,7 @@ msgstr "Не могу отправить сообщение %s."
 msgid ""
 "Your registered account with the %s service will be put in your list of "
 "contacts to work as a transport with this service."
-msgstr ""
+msgstr "Зарегистрированный контакт на сервисе %s будет добавлен в ростер для работы в качестве транспорта."
 
 #: ../jabber/Jabber.tcl:769 ../jabber/Jabber.tcl:774 ../jabber/Jabber.tcl:780
 #: ../jabber/Jabber.tcl:829 ../jabber/Subscribe.tcl:210
@@ -3716,8 +3712,7 @@ msgstr "Запрос подписки"
 msgid ""
 "Because %s does not allow you to see his/her presence anymore, he/she is "
 "removed."
-msgstr ""
-"Так как %s больше не разрешает Вам видеть его/ее статус, он будет удалён."
+msgstr "Так как %s больше не разрешает Вам видеть его/ее статус, он будет удалён."
 
 #: ../jabber/Jabber.tcl:775
 #, tcl-format
@@ -3736,8 +3731,7 @@ msgstr "%s больше не разрешает Вам видеть его/ее 
 msgid ""
 "Cannot subscribe to %s's presence. The contact does not allow you to see his/"
 "her presence."
-msgstr ""
-"Не могу видеть статус %s. Этот контакт не разрешил Вам видеть его/ее статус."
+msgstr "Не могу видеть статус %s. Этот контакт не разрешил Вам видеть его/ее статус."
 
 #: ../jabber/Jabber.tcl:820
 msgid "Subscription Failed"
@@ -3936,8 +3930,7 @@ msgid "Illegal character(s) in %s: %s!"
 msgstr "Некорректные символ(ы) в %s: %s!"
 
 #: ../jabber/Login.tcl:574
-msgid ""
-"The Contact ID differs from your profile. Do you want to save a new profile?"
+msgid "The Contact ID differs from your profile. Do you want to save a new profile?"
 msgstr ""
 "Jabber ID отличается от сохраненного в профиле. Хотите сохранить новый "
 "профиль?"
@@ -3998,8 +3991,7 @@ msgstr "Сервер %s не отвечает: таймаут."
 
 #: ../jabber/Login.tcl:944
 #, tcl-format
-msgid ""
-"Cannot login because this username is already in use by someone else (%s)."
+msgid "Cannot login because this username is already in use by someone else (%s)."
 msgstr ""
 "Не могу подключиться, так как имя пользователя уже используется кем-то ещё (%"
 "s)."
@@ -4044,8 +4036,7 @@ msgstr "Ошибка протокола во время подключения."
 
 #: ../jabber/Login.tcl:981 ../jabber/Register.tcl:966
 msgid "Login failed because of unknown account or wrong password."
-msgstr ""
-"Подключение не удалось из-за неправильного имени пользователя или пароля."
+msgstr "Подключение не удалось из-за неправильного имени пользователя или пароля."
 
 #: ../jabber/Login.tcl:985
 #, tcl-format
@@ -4053,11 +4044,11 @@ msgid ""
 "Invalid server response due to bug in server software:  error <%s/> is not "
 "defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting "
 "this bug to your server administrator."
-msgstr ""
+msgstr "Неправильный ответ сервера из-за ошибки в ПО сервера: ошибка <%s/> не определена в разделе 6.4 ошибок SASL в RFC 3920. Пожалуйста, сообщите об этой ошибке администратору сервера."
 
 #: ../jabber/Login.tcl:1011
 msgid "Do you want to retry a different password or profile?"
-msgstr ""
+msgstr "Хотите попробовать с другим паролем или профилем?"
 
 #: ../jabber/Login.tcl:1041
 #, tcl-format
@@ -4104,7 +4095,7 @@ msgstr "Настроить конференцию"
 
 #: ../jabber/MUC.tcl:478
 msgid "Affiliation"
-msgstr ""
+msgstr "Ранг"
 
 #: ../jabber/MUC.tcl:478
 msgid "Role"
@@ -4224,12 +4215,12 @@ msgstr "Не удалось открыть"
 #: ../jabber/MailBox.tcl:1598 ../jabber/MailBox.tcl:1676
 #, tcl-format
 msgid "Cannot open the inbox file %s when trying to save it."
-msgstr ""
+msgstr "Не могу открыть файл входящих сообщений %s при попытке сохранения."
 
 #: ../jabber/MailBox.tcl:1783 ../jabber/MailBox.tcl:1817
 #, tcl-format
 msgid "Cannot read the inbox file %s: %s"
-msgstr ""
+msgstr "Не удается прочитать файл входящих сообщений %s: %s"
 
 #: ../jabber/MegaPresence.tcl:102 ../jabber/MegaPresence.tcl:111
 #: ../jabber/VCard.tcl:411
@@ -4251,8 +4242,7 @@ msgstr "Пересланное сообщение"
 #: ../jabber/NewMsg.tcl:901
 #, tcl-format
 msgid "Contact ID %s is invalid. Do you want to skip it and send to the rest?"
-msgstr ""
-"Jabber ID %s некорректный. Хотите пропустить его и отправить остальным?"
+msgstr "Jabber ID %s некорректный. Хотите пропустить его и отправить остальным?"
 
 #: ../jabber/NewMsg.tcl:904
 #, tcl-format
@@ -4282,16 +4272,14 @@ msgstr "Учетные записи"
 
 #. TRANSLATORS: string shown if you change anything in an existing account profile in the login dialog
 #: ../jabber/Profiles.tcl:982 ../jabber/Profiles.tcl:1581
-msgid ""
-"You changed one or more values. Do you want to save them before closing?"
+msgid "You changed one or more values. Do you want to save them before closing?"
 msgstr ""
 "Вы изменили одно или более значений. Вы хотите сохранить изменения перед "
 "закрытием?"
 
 #. TRANSLATORS: See File in the main window, and then Edit Profiles...
 #: ../jabber/Profiles.tcl:1056
-msgid ""
-"Edit, add or delete profiles. The selected profile will become the default."
+msgid "Edit, add or delete profiles. The selected profile will become the default."
 msgstr ""
 "Редактировать, добавить или удалить профили. Выбранный профиль будет "
 "использоваться по умолчанию."
@@ -4387,10 +4375,8 @@ msgid "Remove Account"
 msgstr "Удалить акканут"
 
 #: ../jabber/Register.tcl:77
-msgid ""
-"Do you really want to remove your account? This process cannot be undone."
-msgstr ""
-"Вы действительно хотите удалить Вашу учетную запись? Это нельзя отменить."
+msgid "Do you really want to remove your account? This process cannot be undone."
+msgstr "Вы действительно хотите удалить Вашу учетную запись? Это нельзя отменить."
 
 #: ../jabber/Register.tcl:85
 msgid ""
@@ -4512,7 +4498,7 @@ msgstr "Отошел"
 #: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
 #: ../jabber/Status.tcl:46
 msgid "Free For Chat"
-msgstr ""
+msgstr "Готов поболтать"
 
 #: ../jabber/Roster.tcl:84 ../jabber/Roster.tcl:92 ../jabber/Roster.tcl:134
 #: ../jabber/Status.tcl:39 ../jabber/Status.tcl:47
@@ -4582,10 +4568,8 @@ msgid "Remove Contact"
 msgstr "Удалить контакт."
 
 #: ../jabber/Roster.tcl:395 ../jabber/Roster.tcl:406
-msgid ""
-"Do you really want to remove this contact? This action cannot be undone."
-msgstr ""
-"Вы действительно хотите удалить этот контакт? Это действие нельзя отменить."
+msgid "Do you really want to remove this contact? This action cannot be undone."
+msgstr "Вы действительно хотите удалить этот контакт? Это действие нельзя отменить."
 
 #: ../jabber/Roster.tcl:598
 #, tcl-format
@@ -4683,8 +4667,7 @@ msgstr "Поиск"
 msgid ""
 "Search contacts with the selected service. A new search form will empty the "
 "previous one."
-msgstr ""
-"Искать контакты на выбранном сервисе. Новая форма поиска очистит предыдущую."
+msgstr "Искать контакты на выбранном сервисе. Новая форма поиска очистит предыдущую."
 
 #: ../jabber/Search.tcl:155
 msgid "New Form"
@@ -4829,8 +4812,7 @@ msgstr "Разрешить %s видеть Ваш статус?"
 
 #. TRANSLATORS: shown in subscription request dialog when someone tries to add the user to his or her list
 #: ../jabber/Subscribe.tcl:262
-msgid ""
-"Entering a nickname and group is optional, and for your personal use only."
+msgid "Entering a nickname and group is optional, and for your personal use only."
 msgstr ""
 "Ввод ника и группы необязателен и используется только для собственного "
 "удобства."
@@ -5236,7 +5218,7 @@ msgid ""
 "remove or move your personal settings at %s, the preferences in the default "
 "location will be used the next time you start %s. Do you want to remove the "
 "old preferences?"
-msgstr ""
+msgstr "Вы выбрали сохранение настроек в каталоге по умолчанию. Если вы удалите или переместите собственные настройки %s, при следующем старте %s будут использоваться настройки из каталога по умолчанию. Вы действительно хотите удалить старые настройки?"
 
 #: ../lib/PrefHelpers.tcl:73 ../lib/PrefHelpers.tcl:116
 msgid "Default Applications"
@@ -5301,8 +5283,7 @@ msgstr "По умолчанию"
 
 #: ../lib/Preferences.tcl:394
 msgid "Do you really want to reset your customization to factory defaults?"
-msgstr ""
-"Вы действительно хотите сбросить Ваши изменения к настройкам по умолчанию?"
+msgstr "Вы действительно хотите сбросить Ваши изменения к настройкам по умолчанию?"
 
 #: ../lib/Preferences.tcl:456
 #, tcl-format
@@ -6078,7 +6059,7 @@ msgstr ""
 #: ../whiteboard/PutFileIface.tcl:168
 #, tcl-format
 msgid "The server at %s responded with a code %s: %s"
-msgstr ""
+msgstr "Сервер %s ответил с кодом %s: %s"
 
 #: ../whiteboard/PutFileIface.tcl:184
 #, tcl-format
@@ -6113,8 +6094,7 @@ msgstr ""
 
 #: ../whiteboard/WBPrefs.tcl:131
 msgid "Only edit local whiteboard items"
-msgstr ""
-"Редактировать только локально созданные элементы на доске для рисования"
+msgstr "Редактировать только локально созданные элементы на доске для рисования"
 
 #: ../whiteboard/WBPrefs.tcl:136
 msgid "Items created by others cannot be edited when enabled"
@@ -6147,10 +6127,9 @@ msgid "yes"
 msgstr "да"
 
 #: ../whiteboard/WDialogs.tcl:188
-#, fuzzy
 #| msgid "Activity"
 msgid "Activated"
-msgstr "Активность"
+msgstr "Запущен"
 
 #: ../whiteboard/WDialogs.tcl:194
 msgid "Buffering support"
@@ -6165,8 +6144,7 @@ msgid "Secured"
 msgstr "Защищено"
 
 #: ../whiteboard/Whiteboard.tcl:76 ../whiteboard/Whiteboard.tcl:1665
-msgid ""
-"Point tool, click to mark, double click to inspect, right click to popup"
+msgid "Point tool, click to mark, double click to inspect, right click to popup"
 msgstr ""
 "Инструмент выделения, щелкните для отметки, двойной щелчок для просмотра "
 "параметров, правый клик для меню"
@@ -6277,30 +6255,9 @@ msgstr "Сервер"
 
 #: ../whiteboard/Whiteboard.tcl:1662 ../whiteboard/Whiteboard.tcl:2452
 msgid "Point tool, click to mark, double click to inspect, press to popup"
-msgstr ""
-"Инструмент выделения. Щелчок для выделения, двойной щелчок для просмотра, "
+msgstr "Инструмент выделения. Щелчок для выделения, двойной щелчок для просмотра, "
 
 #: ../whiteboard/Whiteboard.tcl:2211 ../whiteboard/Whiteboard.tcl:2286
 msgid "&Library"
 msgstr "Библиотека"
 
-#~ msgid "Useful Tips"
-#~ msgstr "Полезные советы"
-
-#~ msgid "chat"
-#~ msgstr "чат"
-
-#, fuzzy
-#~| msgid "Normal"
-#~ msgid "normal"
-#~ msgstr "Нормальный"
-
-#, fuzzy
-#~| msgid "Italic"
-#~ msgid "italic"
-#~ msgstr "Курсив"
-
-#, fuzzy
-#~| msgid "cold"
-#~ msgid "bold"
-#~ msgstr "замёрз"
