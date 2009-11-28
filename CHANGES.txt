@@ -5,7 +5,8 @@
 
 Not to mention all bugfixes and rewrites.
 
-Coccinella-0.96.16
+Coccinella-0.96.16 (20091201)
+
  o XEP-0202 support Entity Time enabled (441223)
  o fixed exception on MacOS X regarding sound device selection (427951)
  o login settings are now saved (180132)

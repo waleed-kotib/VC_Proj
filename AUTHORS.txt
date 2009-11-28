@@ -1,7 +1,7 @@
 The Coccinella Team
 
 Translations:
-  Czech:                  David Štancl <david.stancl at seznam.cz>
+  Czech:                  David Štancl <dstancl at dstancl.cz>
   Danish:                 Mogens Pedersen <Mogens.Pedersen at skolekom.dk>
   German:                 Hermann J. Beckers <hj.beckers at onlinehome.de>
   Spanish:                César Alcalde <lambda512 at gmail.com>
