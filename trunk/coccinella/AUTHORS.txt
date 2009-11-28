@@ -33,6 +33,9 @@ Patches:
 Founder and former maintainer:
   Mats Bengtsson [http://coccinella.im/mats-bengtsson]
 
+Developer: 
+  Sebastian Reitenbach <sebastia at l00-bugdead-prods.de>
+
 Maintainer:
   Sander Devrieze <sander at sanderdevrieze.net>
 

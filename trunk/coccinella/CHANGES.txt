@@ -21,6 +21,7 @@ Coccinella-0.96.16
  o automatic login fails (427809)
  o support for XEP-0145: Annotations (140336)
  o fixed crash due to tkpath library on Mac OS X 10.6
+ o enable Totd at startup (145627)
 
 Coccinella-0.96.14 (20090923)
 
