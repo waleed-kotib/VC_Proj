@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: nl\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
 "POT-Creation-Date: 2009-11-23 23:35+0100\n"
-"PO-Revision-Date: 2009-08-17 20:29+0100\n"
-"Last-Translator: Sander Devrieze <sander at sanderdevrieze.net>\n"
+"PO-Revision-Date: 2009-11-29 16:45+0100\n"
+"Last-Translator: Sander Devrieze <sander@sanderdevrieze.net>\n"
 "Language-Team: Dutch\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -49,84 +49,192 @@ msgstr "Voorkeuren worden ingelezen en ingesteld"
 msgid "&Update Check"
 msgstr "&Controle op updates"
 
-#: ../components/AutoUpdate.tcl:122 ../components/ImageMagic.tcl:77
-#: ../components/ImageMagic.tcl:93 ../components/JivePhone.tcl:612
-#: ../jabber/Adhoc.tcl:143 ../jabber/Adhoc.tcl:383 ../jabber/Avatar.tcl:337
-#: ../jabber/Chat.tcl:408 ../jabber/Chat.tcl:2785 ../jabber/Chat.tcl:3084
-#: ../jabber/Chat.tcl:3134 ../jabber/Create.tcl:314 ../jabber/Create.tcl:319
-#: ../jabber/Create.tcl:324 ../jabber/Create.tcl:332 ../jabber/Create.tcl:429
-#: ../jabber/Create.tcl:471 ../jabber/Create.tcl:515 ../jabber/Create.tcl:549
-#: ../jabber/Create.tcl:580 ../jabber/Create.tcl:759 ../jabber/Disco.tcl:1784
-#: ../jabber/Disco.tcl:1807 ../jabber/Emoticons.tcl:654
-#: ../jabber/Emoticons.tcl:663 ../jabber/Emoticons.tcl:815
-#: ../jabber/Emoticons.tcl:817 ../jabber/Emoticons.tcl:851
-#: ../jabber/Emoticons.tcl:863 ../jabber/Emoticons.tcl:865
-#: ../jabber/Enter.tcl:402 ../jabber/Enter.tcl:452 ../jabber/Enter.tcl:492
-#: ../jabber/Enter.tcl:637 ../jabber/Enter.tcl:652 ../jabber/Enter.tcl:697
-#: ../jabber/FTrans.tcl:371 ../jabber/FTrans.tcl:407 ../jabber/FTrans.tcl:442
-#: ../jabber/FTrans.tcl:447 ../jabber/FTrans.tcl:458 ../jabber/FTrans.tcl:509
-#: ../jabber/FTrans.tcl:541 ../jabber/FTrans.tcl:680 ../jabber/FTrans.tcl:682
-#: ../jabber/FTrans.tcl:693 ../jabber/GroupChat.tcl:365
-#: ../jabber/GroupChat.tcl:2710 ../jabber/GroupChat.tcl:2712
-#: ../jabber/GroupChat.tcl:2720 ../jabber/GroupChat.tcl:3491
-#: ../jabber/JUser.tcl:295 ../jabber/JUser.tcl:303 ../jabber/JUser.tcl:322
-#: ../jabber/JUser.tcl:388 ../jabber/JUser.tcl:412 ../jabber/JWB.tcl:2052
-#: ../jabber/JWB.tcl:2057 ../jabber/Jabber.tcl:621 ../jabber/Jabber.tcl:868
-#: ../jabber/Jabber.tcl:912 ../jabber/Jabber.tcl:922 ../jabber/Jabber.tcl:934
-#: ../jabber/Jabber.tcl:946 ../jabber/Jabber.tcl:1493
-#: ../jabber/Jabber.tcl:1497 ../jabber/Jabber.tcl:1576
-#: ../jabber/Jabber.tcl:1578 ../jabber/Jabber.tcl:1673
-#: ../jabber/Jabber.tcl:1677 ../jabber/Jabber.tcl:1995
-#: ../jabber/Jabber.tcl:2026 ../jabber/Login.tcl:493 ../jabber/Login.tcl:521
-#: ../jabber/Login.tcl:530 ../jabber/Login.tcl:935 ../jabber/Login.tcl:1049
-#: ../jabber/MUC.tcl:318 ../jabber/MUC.tcl:321 ../jabber/MUC.tcl:1162
-#: ../jabber/MUC.tcl:1247 ../jabber/MUC.tcl:1356 ../jabber/MUC.tcl:1514
-#: ../jabber/MUC.tcl:1541 ../jabber/MUC.tcl:1717 ../jabber/MUC.tcl:1719
-#: ../jabber/MUC.tcl:1740 ../jabber/MUC.tcl:1742 ../jabber/MailBox.tcl:1597
-#: ../jabber/MailBox.tcl:1675 ../jabber/MailBox.tcl:1782
-#: ../jabber/MailBox.tcl:1816 ../jabber/NewMsg.tcl:888
-#: ../jabber/NewMsg.tcl:924 ../jabber/Profiles.tcl:1455
-#: ../jabber/Profiles.tcl:1463 ../jabber/Profiles.tcl:1649
-#: ../jabber/Register.tcl:124 ../jabber/Register.tcl:583
-#: ../jabber/Register.tcl:589 ../jabber/Register.tcl:664
-#: ../jabber/Register.tcl:833 ../jabber/Register.tcl:893
-#: ../jabber/Register.tcl:898 ../jabber/Register.tcl:901
-#: ../jabber/Register.tcl:970 ../jabber/Register.tcl:1255
-#: ../jabber/Register.tcl:1293 ../jabber/Register.tcl:1358
-#: ../jabber/Register.tcl:1542 ../jabber/Search.tcl:258
-#: ../jabber/Search.tcl:309 ../jabber/Search.tcl:353 ../jabber/Search.tcl:430
-#: ../jabber/Search.tcl:771 ../jabber/SetupAss.tcl:306
-#: ../jabber/SetupAss.tcl:310 ../jabber/SetupAss.tcl:319
-#: ../jabber/UserInfo.tcl:215 ../jabber/UserInfo.tcl:265
-#: ../jabber/UserInfo.tcl:297 ../jabber/UserInfo.tcl:326
-#: ../jabber/UserInfo.tcl:473 ../jabber/UserInfo.tcl:604
-#: ../jabber/VCard.tcl:104 ../jabber/VCard.tcl:106 ../jabber/VCard.tcl:785
-#: ../jabber/VCard.tcl:845 ../jabber/VCard.tcl:847 ../jabber/VCard.tcl:893
-#: ../jabber/VCard.tcl:914 ../lib/Dialogs.tcl:162 ../lib/Dialogs.tcl:169
-#: ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71 ../lib/HttpTrpt.tcl:107
-#: ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226 ../lib/HttpTrpt.tcl:233
-#: ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78 ../lib/Init.tcl:722
-#: ../lib/Init.tcl:744 ../lib/MacintoshUtils.tcl:55
-#: ../lib/MacintoshUtils.tcl:77 ../lib/MacintoshUtils.tcl:99
-#: ../lib/PrefUtils.tcl:91 ../lib/PrefUtils.tcl:217 ../lib/TheServer.tcl:65
-#: ../lib/UserActions.tcl:44 ../lib/UserActions.tcl:72
-#: ../lib/UserActions.tcl:93 ../lib/Utils.tcl:379 ../lib/WindowsUtils.tcl:61
-#: ../lib/WindowsUtils.tcl:109 ../lib/WindowsUtils.tcl:151
-#: ../plugins/HtmlImport.tcl:284 ../plugins/PluginTextPlain.tcl:254
-#: ../plugins/WinImport.tcl:283 ../whiteboard/CanvasCmd.tcl:448
-#: ../whiteboard/CanvasCmd.tcl:456 ../whiteboard/CanvasFile.tcl:51
-#: ../whiteboard/CanvasFile.tcl:72 ../whiteboard/CanvasFile.tcl:501
-#: ../whiteboard/CanvasFile.tcl:736 ../whiteboard/CanvasFile.tcl:767
-#: ../whiteboard/CanvasFile.tcl:842 ../whiteboard/FilePrefs.tcl:586
-#: ../whiteboard/GetFileIface.tcl:401 ../whiteboard/Import.tcl:74
-#: ../whiteboard/Import.tcl:78 ../whiteboard/Import.tcl:1172
-#: ../whiteboard/Import.tcl:1206 ../whiteboard/Import.tcl:1309
-#: ../whiteboard/Import.tcl:2012 ../whiteboard/Import.tcl:2033
-#: ../whiteboard/Multicast.tcl:198 ../whiteboard/Multicast.tcl:234
-#: ../whiteboard/Multicast.tcl:239 ../whiteboard/Multicast.tcl:247
-#: ../whiteboard/Multicast.tcl:254 ../whiteboard/PutFileIface.tcl:77
-#: ../whiteboard/PutFileIface.tcl:114 ../whiteboard/PutFileIface.tcl:125
-#: ../whiteboard/WBPrefs.tcl:300 ../whiteboard/Whiteboard.tcl:3270
+#: ../components/AutoUpdate.tcl:122
+#: ../components/ImageMagic.tcl:77
+#: ../components/ImageMagic.tcl:93
+#: ../components/JivePhone.tcl:612
+#: ../jabber/Adhoc.tcl:143
+#: ../jabber/Adhoc.tcl:383
+#: ../jabber/Avatar.tcl:337
+#: ../jabber/Chat.tcl:408
+#: ../jabber/Chat.tcl:2785
+#: ../jabber/Chat.tcl:3084
+#: ../jabber/Chat.tcl:3134
+#: ../jabber/Create.tcl:314
+#: ../jabber/Create.tcl:319
+#: ../jabber/Create.tcl:324
+#: ../jabber/Create.tcl:332
+#: ../jabber/Create.tcl:429
+#: ../jabber/Create.tcl:471
+#: ../jabber/Create.tcl:515
+#: ../jabber/Create.tcl:549
+#: ../jabber/Create.tcl:580
+#: ../jabber/Create.tcl:759
+#: ../jabber/Disco.tcl:1784
+#: ../jabber/Disco.tcl:1807
+#: ../jabber/Emoticons.tcl:654
+#: ../jabber/Emoticons.tcl:663
+#: ../jabber/Emoticons.tcl:815
+#: ../jabber/Emoticons.tcl:817
+#: ../jabber/Emoticons.tcl:851
+#: ../jabber/Emoticons.tcl:863
+#: ../jabber/Emoticons.tcl:865
+#: ../jabber/Enter.tcl:402
+#: ../jabber/Enter.tcl:452
+#: ../jabber/Enter.tcl:492
+#: ../jabber/Enter.tcl:637
+#: ../jabber/Enter.tcl:652
+#: ../jabber/Enter.tcl:697
+#: ../jabber/FTrans.tcl:371
+#: ../jabber/FTrans.tcl:407
+#: ../jabber/FTrans.tcl:442
+#: ../jabber/FTrans.tcl:447
+#: ../jabber/FTrans.tcl:458
+#: ../jabber/FTrans.tcl:509
+#: ../jabber/FTrans.tcl:541
+#: ../jabber/FTrans.tcl:680
+#: ../jabber/FTrans.tcl:682
+#: ../jabber/FTrans.tcl:693
+#: ../jabber/GroupChat.tcl:365
+#: ../jabber/GroupChat.tcl:2710
+#: ../jabber/GroupChat.tcl:2712
+#: ../jabber/GroupChat.tcl:2720
+#: ../jabber/GroupChat.tcl:3491
+#: ../jabber/JUser.tcl:295
+#: ../jabber/JUser.tcl:303
+#: ../jabber/JUser.tcl:322
+#: ../jabber/JUser.tcl:388
+#: ../jabber/JUser.tcl:412
+#: ../jabber/JWB.tcl:2052
+#: ../jabber/JWB.tcl:2057
+#: ../jabber/Jabber.tcl:621
+#: ../jabber/Jabber.tcl:868
+#: ../jabber/Jabber.tcl:912
+#: ../jabber/Jabber.tcl:922
+#: ../jabber/Jabber.tcl:934
+#: ../jabber/Jabber.tcl:946
+#: ../jabber/Jabber.tcl:1493
+#: ../jabber/Jabber.tcl:1497
+#: ../jabber/Jabber.tcl:1576
+#: ../jabber/Jabber.tcl:1578
+#: ../jabber/Jabber.tcl:1673
+#: ../jabber/Jabber.tcl:1677
+#: ../jabber/Jabber.tcl:1995
+#: ../jabber/Jabber.tcl:2026
+#: ../jabber/Login.tcl:493
+#: ../jabber/Login.tcl:521
+#: ../jabber/Login.tcl:530
+#: ../jabber/Login.tcl:935
+#: ../jabber/Login.tcl:1049
+#: ../jabber/MUC.tcl:318
+#: ../jabber/MUC.tcl:321
+#: ../jabber/MUC.tcl:1162
+#: ../jabber/MUC.tcl:1247
+#: ../jabber/MUC.tcl:1356
+#: ../jabber/MUC.tcl:1514
+#: ../jabber/MUC.tcl:1541
+#: ../jabber/MUC.tcl:1717
+#: ../jabber/MUC.tcl:1719
+#: ../jabber/MUC.tcl:1740
+#: ../jabber/MUC.tcl:1742
+#: ../jabber/MailBox.tcl:1597
+#: ../jabber/MailBox.tcl:1675
+#: ../jabber/MailBox.tcl:1782
+#: ../jabber/MailBox.tcl:1816
+#: ../jabber/NewMsg.tcl:888
+#: ../jabber/NewMsg.tcl:924
+#: ../jabber/Profiles.tcl:1455
+#: ../jabber/Profiles.tcl:1463
+#: ../jabber/Profiles.tcl:1649
+#: ../jabber/Register.tcl:124
+#: ../jabber/Register.tcl:583
+#: ../jabber/Register.tcl:589
+#: ../jabber/Register.tcl:664
+#: ../jabber/Register.tcl:833
+#: ../jabber/Register.tcl:893
+#: ../jabber/Register.tcl:898
+#: ../jabber/Register.tcl:901
+#: ../jabber/Register.tcl:970
+#: ../jabber/Register.tcl:1255
+#: ../jabber/Register.tcl:1293
+#: ../jabber/Register.tcl:1358
+#: ../jabber/Register.tcl:1542
+#: ../jabber/Search.tcl:258
+#: ../jabber/Search.tcl:309
+#: ../jabber/Search.tcl:353
+#: ../jabber/Search.tcl:430
+#: ../jabber/Search.tcl:771
+#: ../jabber/SetupAss.tcl:306
+#: ../jabber/SetupAss.tcl:310
+#: ../jabber/SetupAss.tcl:319
+#: ../jabber/UserInfo.tcl:215
+#: ../jabber/UserInfo.tcl:265
+#: ../jabber/UserInfo.tcl:297
+#: ../jabber/UserInfo.tcl:326
+#: ../jabber/UserInfo.tcl:473
+#: ../jabber/UserInfo.tcl:604
+#: ../jabber/VCard.tcl:104
+#: ../jabber/VCard.tcl:106
+#: ../jabber/VCard.tcl:785
+#: ../jabber/VCard.tcl:845
+#: ../jabber/VCard.tcl:847
+#: ../jabber/VCard.tcl:893
+#: ../jabber/VCard.tcl:914
+#: ../lib/Dialogs.tcl:162
+#: ../lib/Dialogs.tcl:169
+#: ../lib/Dialogs.tcl:412
+#: ../lib/HttpTrpt.tcl:71
+#: ../lib/HttpTrpt.tcl:107
+#: ../lib/HttpTrpt.tcl:136
+#: ../lib/HttpTrpt.tcl:226
+#: ../lib/HttpTrpt.tcl:233
+#: ../lib/HttpTrpt.tcl:239
+#: ../lib/Httpd.tcl:78
+#: ../lib/Init.tcl:722
+#: ../lib/Init.tcl:744
+#: ../lib/MacintoshUtils.tcl:55
+#: ../lib/MacintoshUtils.tcl:77
+#: ../lib/MacintoshUtils.tcl:99
+#: ../lib/PrefUtils.tcl:91
+#: ../lib/PrefUtils.tcl:217
+#: ../lib/TheServer.tcl:65
+#: ../lib/UserActions.tcl:44
+#: ../lib/UserActions.tcl:72
+#: ../lib/UserActions.tcl:93
+#: ../lib/Utils.tcl:379
+#: ../lib/WindowsUtils.tcl:61
+#: ../lib/WindowsUtils.tcl:109
+#: ../lib/WindowsUtils.tcl:151
+#: ../plugins/HtmlImport.tcl:284
+#: ../plugins/PluginTextPlain.tcl:254
+#: ../plugins/WinImport.tcl:283
+#: ../whiteboard/CanvasCmd.tcl:448
+#: ../whiteboard/CanvasCmd.tcl:456
+#: ../whiteboard/CanvasFile.tcl:51
+#: ../whiteboard/CanvasFile.tcl:72
+#: ../whiteboard/CanvasFile.tcl:501
+#: ../whiteboard/CanvasFile.tcl:736
+#: ../whiteboard/CanvasFile.tcl:767
+#: ../whiteboard/CanvasFile.tcl:842
+#: ../whiteboard/FilePrefs.tcl:586
+#: ../whiteboard/GetFileIface.tcl:401
+#: ../whiteboard/Import.tcl:74
+#: ../whiteboard/Import.tcl:78
+#: ../whiteboard/Import.tcl:1172
+#: ../whiteboard/Import.tcl:1206
+#: ../whiteboard/Import.tcl:1309
+#: ../whiteboard/Import.tcl:2012
+#: ../whiteboard/Import.tcl:2033
+#: ../whiteboard/Multicast.tcl:198
+#: ../whiteboard/Multicast.tcl:234
+#: ../whiteboard/Multicast.tcl:239
+#: ../whiteboard/Multicast.tcl:247
+#: ../whiteboard/Multicast.tcl:254
+#: ../whiteboard/PutFileIface.tcl:77
+#: ../whiteboard/PutFileIface.tcl:114
+#: ../whiteboard/PutFileIface.tcl:125
+#: ../whiteboard/WBPrefs.tcl:300
+#: ../whiteboard/Whiteboard.tcl:3270
 #: ../whiteboard/Whiteboard.tcl:3276
 msgid "Error"
 msgstr "Fout"
@@ -134,9 +242,7 @@ msgstr "Fout"
 #: ../components/AutoUpdate.tcl:123
 #, tcl-format
 msgid "Cannot connect to server %s to download update details: %s"
-msgstr ""
-"Kan niet verbinden met server %s om informatie over nieuwere versies te "
-"downloaden: %s"
+msgstr "Kan niet verbinden met server %s om informatie over nieuwere versies te downloaden: %s"
 
 #: ../components/AutoUpdate.tcl:176
 msgid "Update Check"
@@ -159,7 +265,8 @@ msgstr "Veranderingen sinds vorige uitgave"
 msgid "Automatically check for updates"
 msgstr "Automatisch controleren voor nieuwe versies"
 
-#: ../components/AutoUpdate.tcl:265 ../jabber/Search.tcl:1173
+#: ../components/AutoUpdate.tcl:265
+#: ../jabber/Search.tcl:1173
 #: ../plugins/PluginTextPlain.tcl:225
 msgid "Close"
 msgstr "Annuleren"
@@ -170,53 +277,58 @@ msgstr "Contactpersoon&acties"
 
 #: ../components/BuddyPounce.tcl:152
 #, tcl-format
-msgid ""
-"Set a specific action for events related to %s. Select events using the tabs "
-"below."
-msgstr ""
-"Stel een actie in voor gebeurtenissen i.v.m. %s. Selecteer gebeurtenissen in "
-"onderstaande tabbladen."
+msgid "Set a specific action for events related to %s. Select events using the tabs below."
+msgstr "Stel een actie in voor gebeurtenissen i.v.m. %s. Selecteer gebeurtenissen in onderstaande tabbladen."
 
-#: ../components/BuddyPounce.tcl:153 ../components/BuddyPounce.tcl:161
-#: ../components/BuddyPounce.tcl:167 ../components/BuddyPounce.tcl:211
+#: ../components/BuddyPounce.tcl:153
+#: ../components/BuddyPounce.tcl:161
+#: ../components/BuddyPounce.tcl:167
+#: ../components/BuddyPounce.tcl:211
 msgid "Contact Actions"
 msgstr "Contactpersoonacties"
 
 #: ../components/BuddyPounce.tcl:160
 #, tcl-format
-msgid ""
-"Set a specific action for events related to any contact belonging to the "
-"group %s. Select events using the tabs below."
-msgstr ""
-"Stel een actie in voor gebeurtenissen i.v.m. alle contactpersonen in groep %"
-"s. Selecteer gebeurtenissen in onderstaande tabbladen."
+msgid "Set a specific action for events related to any contact belonging to the group %s. Select events using the tabs below."
+msgstr "Stel een actie in voor gebeurtenissen i.v.m. alle contactpersonen in groep %s. Selecteer gebeurtenissen in onderstaande tabbladen."
 
 #: ../components/BuddyPounce.tcl:166
-msgid ""
-"Set a specific action for events related to any contact in your contact "
-"list. Select events using the tabs below."
-msgstr ""
-"Stel een actie in voor gebeurtenissen i.v.m. alle contactpersonen in uw "
-"lijst. Selecteer gebeurtenissen in onderstaande tabbladen."
+msgid "Set a specific action for events related to any contact in your contact list. Select events using the tabs below."
+msgstr "Stel een actie in voor gebeurtenissen i.v.m. alle contactpersonen in uw lijst. Selecteer gebeurtenissen in onderstaande tabbladen."
 
 #: ../components/BuddyPounce.tcl:169
 msgid "Any"
 msgstr "Elke"
 
-#: ../components/BuddyPounce.tcl:186 ../components/BuddyPounce.tcl:187
-#: ../components/BuddyPounce.tcl:626 ../components/Mood.tcl:296
-#: ../components/Mood.tcl:478 ../components/Mood.tcl:629
-#: ../components/Mood.tcl:670 ../components/UserActivity.tcl:245
-#: ../components/UserActivity.tcl:401 ../components/UserActivity.tcl:652
-#: ../components/UserActivity.tcl:695 ../jabber/Emoticons.tcl:755
-#: ../jabber/GroupChat.tcl:173 ../jabber/JUser.tcl:110 ../jabber/JUser.tcl:345
-#: ../jabber/Subscribe.tcl:325 ../jabber/Subscribe.tcl:570
-#: ../jabber/Subscribe.tcl:1283 ../jabber/Subscribe.tcl:1326
-#: ../whiteboard/CanvasUtils.tcl:154 ../whiteboard/CanvasUtils.tcl:204
-#: ../whiteboard/FilePrefs.tcl:436 ../whiteboard/FilePrefs.tcl:437
-#: ../whiteboard/FilePrefs.tcl:445 ../whiteboard/FilePrefs.tcl:446
-#: ../whiteboard/FilePrefs.tcl:514 ../whiteboard/FilePrefs.tcl:593
-#: ../whiteboard/ItemInspector.tcl:212 ../whiteboard/Whiteboard.tcl:501
+#: ../components/BuddyPounce.tcl:186
+#: ../components/BuddyPounce.tcl:187
+#: ../components/BuddyPounce.tcl:626
+#: ../components/Mood.tcl:296
+#: ../components/Mood.tcl:478
+#: ../components/Mood.tcl:629
+#: ../components/Mood.tcl:670
+#: ../components/UserActivity.tcl:245
+#: ../components/UserActivity.tcl:401
+#: ../components/UserActivity.tcl:652
+#: ../components/UserActivity.tcl:695
+#: ../jabber/Emoticons.tcl:755
+#: ../jabber/GroupChat.tcl:173
+#: ../jabber/JUser.tcl:110
+#: ../jabber/JUser.tcl:345
+#: ../jabber/Subscribe.tcl:325
+#: ../jabber/Subscribe.tcl:570
+#: ../jabber/Subscribe.tcl:1283
+#: ../jabber/Subscribe.tcl:1326
+#: ../whiteboard/CanvasUtils.tcl:154
+#: ../whiteboard/CanvasUtils.tcl:204
+#: ../whiteboard/FilePrefs.tcl:436
+#: ../whiteboard/FilePrefs.tcl:437
+#: ../whiteboard/FilePrefs.tcl:445
+#: ../whiteboard/FilePrefs.tcl:446
+#: ../whiteboard/FilePrefs.tcl:514
+#: ../whiteboard/FilePrefs.tcl:593
+#: ../whiteboard/ItemInspector.tcl:212
+#: ../whiteboard/Whiteboard.tcl:501
 #: ../whiteboard/Whiteboard.tcl:530
 msgid "None"
 msgstr "Geen"
@@ -237,62 +349,130 @@ msgstr "Chatsessie starten"
 msgid "Send message with subject"
 msgstr "Verzend bericht met onderwerp"
 
-#: ../components/BuddyPounce.tcl:263 ../components/Carbon.tcl:184
-#: ../components/Growl.tcl:71 ../components/Growl.tcl:74
-#: ../components/Growl.tcl:93 ../components/Growl.tcl:106
-#: ../components/Mood.tcl:490 ../components/UserActivity.tcl:258
-#: ../jabber/AutoAway.tcl:294 ../jabber/AutoAway.tcl:317
-#: ../jabber/AutoAway.tcl:340 ../jabber/AutoAway.tcl:378
-#: ../jabber/Create.tcl:427 ../jabber/Create.tcl:469 ../jabber/Create.tcl:547
-#: ../jabber/Create.tcl:756 ../jabber/Enter.tcl:650 ../jabber/Enter.tcl:694
-#: ../jabber/FTrans.tcl:505 ../jabber/FTrans.tcl:537 ../jabber/JUser.tcl:386
-#: ../jabber/Jabber.tcl:619 ../jabber/Jabber.tcl:863 ../jabber/Jabber.tcl:1524
-#: ../jabber/Jabber.tcl:2024 ../jabber/Jabber.tcl:2126 ../jabber/MUC.tcl:189
-#: ../jabber/MUC.tcl:365 ../jabber/MUC.tcl:811 ../jabber/MUC.tcl:840
-#: ../jabber/MUC.tcl:1618 ../jabber/MailBox.tcl:499 ../jabber/NewMsg.tcl:232
-#: ../jabber/Profiles.tcl:1647 ../jabber/Register.tcl:122
-#: ../jabber/Register.tcl:662 ../jabber/Register.tcl:1291
-#: ../jabber/Register.tcl:1356 ../jabber/Register.tcl:1540
-#: ../jabber/Search.tcl:351 ../jabber/Search.tcl:419 ../jabber/Search.tcl:427
-#: ../jabber/Status.tcl:876 ../lib/HttpTrpt.tcl:246
+#: ../components/BuddyPounce.tcl:263
+#: ../components/Carbon.tcl:184
+#: ../components/Growl.tcl:71
+#: ../components/Growl.tcl:74
+#: ../components/Growl.tcl:93
+#: ../components/Growl.tcl:106
+#: ../components/Mood.tcl:490
+#: ../components/UserActivity.tcl:258
+#: ../jabber/AutoAway.tcl:294
+#: ../jabber/AutoAway.tcl:317
+#: ../jabber/AutoAway.tcl:340
+#: ../jabber/AutoAway.tcl:378
+#: ../jabber/Create.tcl:427
+#: ../jabber/Create.tcl:469
+#: ../jabber/Create.tcl:547
+#: ../jabber/Create.tcl:756
+#: ../jabber/Enter.tcl:650
+#: ../jabber/Enter.tcl:694
+#: ../jabber/FTrans.tcl:505
+#: ../jabber/FTrans.tcl:537
+#: ../jabber/JUser.tcl:386
+#: ../jabber/Jabber.tcl:619
+#: ../jabber/Jabber.tcl:863
+#: ../jabber/Jabber.tcl:1524
+#: ../jabber/Jabber.tcl:2024
+#: ../jabber/Jabber.tcl:2126
+#: ../jabber/MUC.tcl:189
+#: ../jabber/MUC.tcl:365
+#: ../jabber/MUC.tcl:811
+#: ../jabber/MUC.tcl:840
+#: ../jabber/MUC.tcl:1618
+#: ../jabber/MailBox.tcl:499
+#: ../jabber/NewMsg.tcl:232
+#: ../jabber/Profiles.tcl:1647
+#: ../jabber/Register.tcl:122
+#: ../jabber/Register.tcl:662
+#: ../jabber/Register.tcl:1291
+#: ../jabber/Register.tcl:1356
+#: ../jabber/Register.tcl:1540
+#: ../jabber/Search.tcl:351
+#: ../jabber/Search.tcl:419
+#: ../jabber/Search.tcl:427
+#: ../jabber/Status.tcl:876
+#: ../lib/HttpTrpt.tcl:246
 msgid "Message"
 msgstr "Bericht"
 
-#: ../components/BuddyPounce.tcl:293 ../components/ImageMagic.tcl:143
-#: ../components/Totd.tcl:107 ../components/XMLConsole.tcl:109
-#: ../components/fsdialog.tcl:427 ../components/fsdialog.tcl:1052
-#: ../components/fsdialog.tcl:1444 ../contrib/ui/dialog.tcl:242
-#: ../contrib/ui/fontselector.tcl:152 ../jabber/Chat.tcl:356
-#: ../jabber/Jabber.tcl:1730 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
-#: ../jabber/MUC.tcl:1439 ../jabber/MUC.tcl:1632 ../jabber/Status.tcl:428
-#: ../jabber/Subscribe.tcl:1107 ../lib/Component.tcl:80
-#: ../whiteboard/ItemInspector.tcl:991 ../whiteboard/WDialogs.tcl:60
+#: ../components/BuddyPounce.tcl:293
+#: ../components/ImageMagic.tcl:143
+#: ../components/Totd.tcl:107
+#: ../components/XMLConsole.tcl:109
+#: ../components/fsdialog.tcl:427
+#: ../components/fsdialog.tcl:1052
+#: ../components/fsdialog.tcl:1444
+#: ../contrib/ui/dialog.tcl:242
+#: ../contrib/ui/fontselector.tcl:152
+#: ../jabber/Chat.tcl:356
+#: ../jabber/Jabber.tcl:1730
+#: ../jabber/MUC.tcl:202
+#: ../jabber/MUC.tcl:1009
+#: ../jabber/MUC.tcl:1439
+#: ../jabber/MUC.tcl:1632
+#: ../jabber/Status.tcl:428
+#: ../jabber/Subscribe.tcl:1107
+#: ../lib/Component.tcl:80
+#: ../whiteboard/ItemInspector.tcl:991
+#: ../whiteboard/WDialogs.tcl:60
 #: ../whiteboard/WDialogs.tcl:232
 msgid "OK"
 msgstr "OK"
 
-#: ../components/BuddyPounce.tcl:295 ../components/ImageMagic.tcl:145
-#: ../components/JivePhone.tcl:905 ../components/JivePhone.tcl:987
-#: ../components/Phone/Phone.tcl:432 ../components/fsdialog.tcl:430
-#: ../components/fsdialog.tcl:1054 ../components/fsdialog.tcl:1446
-#: ../contrib/ui/dialog.tcl:243 ../contrib/ui/fontselector.tcl:154
-#: ../contrib/ui/progress.tcl:316 ../contrib/wizard.tcl:227
-#: ../jabber/Adhoc.tcl:201 ../jabber/Adhoc.tcl:396 ../jabber/Chat.tcl:358
-#: ../jabber/Create.tcl:151 ../jabber/Create.tcl:670 ../jabber/Disco.tcl:1509
-#: ../jabber/Disco.tcl:1678 ../jabber/Enter.tcl:222 ../jabber/FTrans.tcl:220
-#: ../jabber/History.tcl:992 ../jabber/JUser.tcl:230 ../jabber/JUser.tcl:803
-#: ../jabber/Jabber.tcl:1008 ../jabber/Jabber.tcl:1946
-#: ../jabber/Jabber.tcl:2139 ../jabber/Login.tcl:269 ../jabber/MUC.tcl:204
-#: ../jabber/MUC.tcl:462 ../jabber/MUC.tcl:1011 ../jabber/MUC.tcl:1441
-#: ../jabber/MUC.tcl:1634 ../jabber/Profiles.tcl:923
-#: ../jabber/Register.tcl:329 ../jabber/Register.tcl:1172
-#: ../jabber/Register.tcl:1485 ../jabber/Search.tcl:131
-#: ../jabber/Status.tcl:430 ../jabber/UserInfo.tcl:408 ../jabber/VCard.tcl:250
-#: ../jabber/VCard.tcl:260 ../lib/Bookmarks.tcl:125 ../lib/Component.tcl:82
-#: ../lib/Dialogs.tcl:132 ../lib/Dialogs.tcl:341 ../lib/EditDialogs.tcl:143
-#: ../lib/EditDialogs.tcl:332 ../lib/Preferences.tcl:240
-#: ../whiteboard/FilePrefs.tcl:529 ../whiteboard/ItemInspector.tcl:507
-#: ../whiteboard/ItemInspector.tcl:868 ../whiteboard/Multicast.tcl:92
+#: ../components/BuddyPounce.tcl:295
+#: ../components/ImageMagic.tcl:145
+#: ../components/JivePhone.tcl:905
+#: ../components/JivePhone.tcl:987
+#: ../components/Phone/Phone.tcl:432
+#: ../components/fsdialog.tcl:430
+#: ../components/fsdialog.tcl:1054
+#: ../components/fsdialog.tcl:1446
+#: ../contrib/ui/dialog.tcl:243
+#: ../contrib/ui/fontselector.tcl:154
+#: ../contrib/ui/progress.tcl:316
+#: ../contrib/wizard.tcl:227
+#: ../jabber/Adhoc.tcl:201
+#: ../jabber/Adhoc.tcl:396
+#: ../jabber/Chat.tcl:358
+#: ../jabber/Create.tcl:151
+#: ../jabber/Create.tcl:670
+#: ../jabber/Disco.tcl:1509
+#: ../jabber/Disco.tcl:1678
+#: ../jabber/Enter.tcl:222
+#: ../jabber/FTrans.tcl:220
+#: ../jabber/History.tcl:992
+#: ../jabber/JUser.tcl:230
+#: ../jabber/JUser.tcl:803
+#: ../jabber/Jabber.tcl:1008
+#: ../jabber/Jabber.tcl:1946
+#: ../jabber/Jabber.tcl:2139
+#: ../jabber/Login.tcl:269
+#: ../jabber/MUC.tcl:204
+#: ../jabber/MUC.tcl:462
+#: ../jabber/MUC.tcl:1011
+#: ../jabber/MUC.tcl:1441
+#: ../jabber/MUC.tcl:1634
+#: ../jabber/Profiles.tcl:923
+#: ../jabber/Register.tcl:329
+#: ../jabber/Register.tcl:1172
+#: ../jabber/Register.tcl:1485
+#: ../jabber/Search.tcl:131
+#: ../jabber/Status.tcl:430
+#: ../jabber/UserInfo.tcl:408
+#: ../jabber/VCard.tcl:250
+#: ../jabber/VCard.tcl:260
+#: ../lib/Bookmarks.tcl:125
+#: ../lib/Component.tcl:82
+#: ../lib/Dialogs.tcl:132
+#: ../lib/Dialogs.tcl:341
+#: ../lib/EditDialogs.tcl:143
+#: ../lib/EditDialogs.tcl:332
+#: ../lib/Preferences.tcl:240
+#: ../whiteboard/FilePrefs.tcl:529
+#: ../whiteboard/ItemInspector.tcl:507
+#: ../whiteboard/ItemInspector.tcl:868
+#: ../whiteboard/Multicast.tcl:92
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -325,7 +505,8 @@ msgid "Auto Reply"
 msgstr "Automatisch beantwoorden"
 
 #. TRANSLATORS: automatic logout when computer is put in sleep mode and relogin on wakeup; in preferences dialog (Mac OS X only!)
-#: ../components/Carbon.tcl:149 ../components/Carbon.tcl:170
+#: ../components/Carbon.tcl:149
+#: ../components/Carbon.tcl:170
 msgid "Sleep"
 msgstr "Slaapstand"
 
@@ -348,49 +529,45 @@ msgstr "Hoogte in meters boven zeeniveau"
 
 #: ../components/Geolocation.tcl:53
 msgid "A named area such as a campus or neighborhood"
-msgstr ""
+msgstr "Een plaats met een naam zoals een campus of een buurt"
 
 #: ../components/Geolocation.tcl:54
-msgid ""
-"GPS bearing (direction in which the entity is heading to reach its next "
-"waypoint), measured in decimal degrees relative to true north"
-msgstr ""
+msgid "GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north"
+msgstr "GPS-peiling (richting waarin de entiteit zich beweegt om haar volgende waypoint te bereiken), gemeten in decimale graden ten opzichte van het geografische noorden"
 
 #: ../components/Geolocation.tcl:55
 msgid "A specific building on a street or in an area"
-msgstr ""
+msgstr "Een specifiek gebouw in een straat of een gebied"
 
 #: ../components/Geolocation.tcl:56
 msgid "The nation where the user is located"
 msgstr "Het land waar de gebruiker zich bevindt"
 
 #: ../components/Geolocation.tcl:57
-#, fuzzy
 #| msgid "GPS Datum"
 msgid "GPS datum"
-msgstr "GPS datum"
+msgstr "GPS-datum"
 
 #: ../components/Geolocation.tcl:58
 msgid "A natural-language name for or description of the location"
-msgstr ""
+msgstr "Plaatsnaam in de plaatselijke taal of beschrijving van de plaats"
 
 #: ../components/Geolocation.tcl:59
 msgid "Horizontal GPS error in arc minutes"
-msgstr ""
+msgstr "Horizontale GPS-fout in boogminuten"
 
 #: ../components/Geolocation.tcl:60
 msgid "A particular floor in a building"
-msgstr ""
+msgstr "Een bepaalde verdieping in een gebouw"
 
 #: ../components/Geolocation.tcl:61
 msgid "Latitude in decimal degrees North"
 msgstr "Breedtegraad in decimale graden nooderbreedte"
 
 #: ../components/Geolocation.tcl:62
-#, fuzzy
 #| msgid "An administrative region of the nation, such as a state or province"
 msgid "A locality within the administrative region, such as a town or city"
-msgstr "Regio/provincie"
+msgstr "Een plaats binnen de administratieve regio, zoals een dorp of stad"
 
 #: ../components/Geolocation.tcl:63
 msgid "Longitude in decimal degrees East"
@@ -398,29 +575,29 @@ msgstr "Lengtegraad in decimale graden oosterlengte"
 
 #: ../components/Geolocation.tcl:64
 msgid "A code used for postal delivery"
-msgstr ""
+msgstr "Een code die gebruikt wordt voor postbezorging"
 
-#: ../components/Geolocation.tcl:65 ../jabber/JForms.tcl:308
+#: ../components/Geolocation.tcl:65
+#: ../jabber/JForms.tcl:308
 #: ../jabber/Register.tcl:719
 msgid "An administrative region of the nation, such as a state or province"
 msgstr "Regio/provincie"
 
 #: ../components/Geolocation.tcl:66
 msgid "A particular room in a building"
-msgstr ""
+msgstr "Een bepaalde kamer in een gebouw"
 
 #: ../components/Geolocation.tcl:67
 msgid "A thoroughfare within the locality, or a crossing of two thoroughfares"
-msgstr ""
+msgstr "Een doorgang in de streek of een kruising van twee wegen"
 
 #: ../components/Geolocation.tcl:68
-msgid ""
-"A catch-all element that captures any other information about the location"
-msgstr ""
+msgid "A catch-all element that captures any other information about the location"
+msgstr "Een element met alle andere informatie over de locatie"
 
 #: ../components/Geolocation.tcl:69
 msgid "UTC timestamp specifying the moment when the reading was taken"
-msgstr ""
+msgstr "UTC-tijdsaanduiding met het tijdstip waarop de aflezing werd gedaan"
 
 #: ../components/Geolocation.tcl:72
 msgid "Altitude"
@@ -438,7 +615,8 @@ msgstr "GPS-positie"
 msgid "Building"
 msgstr "Gebouw"
 
-#: ../components/Geolocation.tcl:76 ../jabber/VCard.tcl:507
+#: ../components/Geolocation.tcl:76
+#: ../jabber/VCard.tcl:507
 msgid "Country"
 msgstr "Land"
 
@@ -446,9 +624,13 @@ msgstr "Land"
 msgid "GPS Datum"
 msgstr "GPS datum"
 
-#: ../components/Geolocation.tcl:78 ../jabber/Emoticons.tcl:599
-#: ../jabber/FTrans.tcl:204 ../jabber/FTrans.tcl:570 ../jabber/OOB.tcl:96
-#: ../jabber/VCard.tcl:328 ../whiteboard/WDialogs.tcl:128
+#: ../components/Geolocation.tcl:78
+#: ../jabber/Emoticons.tcl:599
+#: ../jabber/FTrans.tcl:204
+#: ../jabber/FTrans.tcl:570
+#: ../jabber/OOB.tcl:96
+#: ../jabber/VCard.tcl:328
+#: ../whiteboard/WDialogs.tcl:128
 msgid "Description"
 msgstr "Beschrijving"
 
@@ -472,11 +654,13 @@ msgstr "District"
 msgid "Longitude"
 msgstr "Lengtegraad"
 
-#: ../components/Geolocation.tcl:84 ../jabber/VCard.tcl:506
+#: ../components/Geolocation.tcl:84
+#: ../jabber/VCard.tcl:506
 msgid "Postal code"
 msgstr "Postcode"
 
-#: ../components/Geolocation.tcl:85 ../jabber/VCard.tcl:505
+#: ../components/Geolocation.tcl:85
+#: ../jabber/VCard.tcl:505
 msgid "Region"
 msgstr "Regio"
 
@@ -488,8 +672,10 @@ msgstr "Kamer"
 msgid "Street"
 msgstr "Straat"
 
-#: ../components/Geolocation.tcl:88 ../jabber/Emoticons.tcl:617
-#: ../whiteboard/FilePrefs.tcl:473 ../whiteboard/ItemInspector.tcl:372
+#: ../components/Geolocation.tcl:88
+#: ../jabber/Emoticons.tcl:617
+#: ../whiteboard/FilePrefs.tcl:473
+#: ../whiteboard/ItemInspector.tcl:372
 msgid "Text"
 msgstr "Tekst"
 
@@ -497,8 +683,11 @@ msgstr "Tekst"
 msgid "Timestamp"
 msgstr "Tijdsaanduiding"
 
-#: ../components/Geolocation.tcl:105 ../components/JivePhone.tcl:95
-#: ../jabber/AvatarMB.tcl:583 ../jabber/MUC.tcl:992 ../lib/EditDialogs.tcl:122
+#: ../components/Geolocation.tcl:105
+#: ../components/JivePhone.tcl:95
+#: ../jabber/AvatarMB.tcl:583
+#: ../jabber/MUC.tcl:992
+#: ../lib/EditDialogs.tcl:122
 #: ../whiteboard/WBPrefs.tcl:191
 msgid "Remove"
 msgstr "Verwijderen"
@@ -508,15 +697,13 @@ msgid "Set your location that will be shown to your contacts."
 msgstr "Stel uw locatie in die getoond zal worden aan uw contactpersonen."
 
 #: ../components/Geolocation.tcl:159
-msgid ""
-"Enter your location details below. At least you should set latitude and "
-"longitude."
-msgstr ""
-"Voer uw locatiegegevens hieronder in. U moet minstens breedtegraad en "
-"lengtegraad opgeven."
+msgid "Enter your location details below. At least you should set latitude and longitude."
+msgstr "Voer uw locatiegegevens hieronder in. U moet minstens breedtegraad en lengtegraad opgeven."
 
-#: ../components/Geolocation.tcl:162 ../components/Geolocation.tcl:367
-#: ../components/fsdialog.tcl:421 ../jabber/GroupChat.tcl:3463
+#: ../components/Geolocation.tcl:162
+#: ../components/Geolocation.tcl:367
+#: ../components/fsdialog.tcl:421
+#: ../jabber/GroupChat.tcl:3463
 msgid "Location"
 msgstr "Locatie"
 
@@ -525,36 +712,49 @@ msgid "Synchronize with Google Earth"
 msgstr "Synchroniseren met Google Earth"
 
 #: ../components/Geolocation.tcl:373
-#, fuzzy, tcl-format
+#, tcl-format
 #| msgid "This is location data for"
 msgid "This is location data for %s"
-msgstr "Dit zijn locatiegegevens van"
+msgstr "Dit zijn plaatsgegevens voor %s"
 
-#: ../components/Growl.tcl:162 ../components/taskbar/Taskbar.tcl:185
-#: ../jabber/JUI.tcl:178 ../jabber/JUI.tcl:532 ../jabber/JUI.tcl:1834
-#: ../jabber/JUI.tcl:1854 ../jabber/MegaPresence.tcl:96
+#: ../components/Growl.tcl:162
+#: ../components/taskbar/Taskbar.tcl:185
+#: ../jabber/JUI.tcl:178
+#: ../jabber/JUI.tcl:532
+#: ../jabber/JUI.tcl:1834
+#: ../jabber/JUI.tcl:1854
+#: ../jabber/MegaPresence.tcl:96
 #: ../jabber/StatusSlot.tcl:35
 msgid "Status"
 msgstr "Status"
 
-#: ../components/Growl.tcl:170 ../jabber/FTrans.tcl:574 ../jabber/OOB.tcl:114
+#: ../components/Growl.tcl:170
+#: ../jabber/FTrans.tcl:574
+#: ../jabber/OOB.tcl:114
 msgid "Receive File"
 msgstr "Bestand ontvangen"
 
-#: ../components/Growl.tcl:172 ../components/Growl.tcl:178
-#: ../components/Notifier.tcl:133 ../jabber/FTrans.tcl:565
+#: ../components/Growl.tcl:172
+#: ../components/Growl.tcl:178
+#: ../components/Notifier.tcl:133
+#: ../jabber/FTrans.tcl:565
 #: ../jabber/OOB.tcl:92
 msgid "File"
 msgstr "Bestand"
 
-#: ../components/Growl.tcl:174 ../components/Notifier.tcl:135
-#: ../components/fsdialog.tcl:490 ../jabber/FTrans.tcl:567
-#: ../whiteboard/CanvasUtils.tcl:173 ../whiteboard/Whiteboard.tcl:555
+#: ../components/Growl.tcl:174
+#: ../components/Notifier.tcl:135
+#: ../components/fsdialog.tcl:490
+#: ../jabber/FTrans.tcl:567
+#: ../whiteboard/CanvasUtils.tcl:173
+#: ../whiteboard/Whiteboard.tcl:555
 msgid "Size"
 msgstr "Grootte"
 
-#: ../components/Growl.tcl:177 ../components/Notifier.tcl:138
-#: ../jabber/FTrans.tcl:573 ../jabber/OOB.tcl:113
+#: ../components/Growl.tcl:177
+#: ../components/Notifier.tcl:138
+#: ../jabber/FTrans.tcl:573
+#: ../jabber/OOB.tcl:113
 #, tcl-format
 msgid "%s wants to send you this file: %s Do you want to receive this file?"
 msgstr "%s wilt u dit bestand verzenden: %s Wilt u het ontvangen?"
@@ -568,253 +768,316 @@ msgstr "Ring, ring"
 msgid "Phone is ringing from %s"
 msgstr "Inkomend telefoongesprek van %s"
 
-#: ../components/Growl.tcl:188 ../components/JivePhone.tcl:480
-#: ../components/Phone/Phone.tcl:382 ../components/Phone/Phone.tcl:413
+#: ../components/Growl.tcl:188
+#: ../components/JivePhone.tcl:480
+#: ../components/Phone/Phone.tcl:382
+#: ../components/Phone/Phone.tcl:413
 #: ../jabber/Rosticons.tcl:585
 msgid "Phone"
 msgstr "Telefoon"
 
-#: ../components/Growl.tcl:197 ../components/Mood.tcl:212
+#: ../components/Growl.tcl:197
+#: ../components/Mood.tcl:212
 msgid "afraid"
 msgstr "bang"
 
-#: ../components/Growl.tcl:198 ../components/Mood.tcl:213
+#: ../components/Growl.tcl:198
+#: ../components/Mood.tcl:213
 msgid "amazed"
 msgstr "verbaasd"
 
-#: ../components/Growl.tcl:199 ../components/Mood.tcl:214
+#: ../components/Growl.tcl:199
+#: ../components/Mood.tcl:214
 msgid "angry"
 msgstr "boos"
 
-#: ../components/Growl.tcl:200 ../components/Mood.tcl:215
+#: ../components/Growl.tcl:200
+#: ../components/Mood.tcl:215
 msgid "annoyed"
 msgstr "geërgerd"
 
-#: ../components/Growl.tcl:201 ../components/Mood.tcl:216
+#: ../components/Growl.tcl:201
+#: ../components/Mood.tcl:216
 msgid "anxious"
 msgstr "bezorgd"
 
-#: ../components/Growl.tcl:202 ../components/Mood.tcl:217
+#: ../components/Growl.tcl:202
+#: ../components/Mood.tcl:217
 msgid "aroused"
 msgstr "alert"
 
-#: ../components/Growl.tcl:203 ../components/Mood.tcl:218
+#: ../components/Growl.tcl:203
+#: ../components/Mood.tcl:218
 msgid "ashamed"
 msgstr "beschaamd"
 
-#: ../components/Growl.tcl:204 ../components/Mood.tcl:219
+#: ../components/Growl.tcl:204
+#: ../components/Mood.tcl:219
 msgid "bored"
 msgstr "verveeld"
 
-#: ../components/Growl.tcl:205 ../components/Mood.tcl:220
+#: ../components/Growl.tcl:205
+#: ../components/Mood.tcl:220
 msgid "brave"
 msgstr "dapper"
 
-#: ../components/Growl.tcl:206 ../components/Mood.tcl:221
+#: ../components/Growl.tcl:206
+#: ../components/Mood.tcl:221
 msgid "calm"
 msgstr "rustig"
 
-#: ../components/Growl.tcl:207 ../components/Mood.tcl:222
+#: ../components/Growl.tcl:207
+#: ../components/Mood.tcl:222
 msgid "cold"
 msgstr "onverschillig"
 
-#: ../components/Growl.tcl:208 ../components/Mood.tcl:223
+#: ../components/Growl.tcl:208
+#: ../components/Mood.tcl:223
 msgid "confused"
 msgstr "verward"
 
-#: ../components/Growl.tcl:209 ../components/Mood.tcl:224
+#: ../components/Growl.tcl:209
+#: ../components/Mood.tcl:224
 msgid "contented"
 msgstr "tevreden"
 
-#: ../components/Growl.tcl:210 ../components/Mood.tcl:225
+#: ../components/Growl.tcl:210
+#: ../components/Mood.tcl:225
 msgid "cranky"
 msgstr "ontevreden"
 
-#: ../components/Growl.tcl:211 ../components/Mood.tcl:226
+#: ../components/Growl.tcl:211
+#: ../components/Mood.tcl:226
 msgid "curious"
 msgstr "nieuwsgierig"
 
-#: ../components/Growl.tcl:212 ../components/Mood.tcl:227
+#: ../components/Growl.tcl:212
+#: ../components/Mood.tcl:227
 msgid "depressed"
 msgstr "gedeprimeerd"
 
-#: ../components/Growl.tcl:213 ../components/Mood.tcl:228
+#: ../components/Growl.tcl:213
+#: ../components/Mood.tcl:228
 msgid "disappointed"
 msgstr "teleurgesteld"
 
-#: ../components/Growl.tcl:214 ../components/Mood.tcl:229
+#: ../components/Growl.tcl:214
+#: ../components/Mood.tcl:229
 msgid "disgusted"
 msgstr "vol afkeer"
 
-#: ../components/Growl.tcl:215 ../components/Mood.tcl:230
+#: ../components/Growl.tcl:215
+#: ../components/Mood.tcl:230
 msgid "distracted"
 msgstr "radeloos"
 
-#: ../components/Growl.tcl:216 ../components/Mood.tcl:231
+#: ../components/Growl.tcl:216
+#: ../components/Mood.tcl:231
 msgid "embarrassed"
 msgstr "beschaamd"
 
-#: ../components/Growl.tcl:217 ../components/Mood.tcl:232
+#: ../components/Growl.tcl:217
+#: ../components/Mood.tcl:232
 msgid "excited"
 msgstr "opgewonden"
 
-#: ../components/Growl.tcl:218 ../components/Mood.tcl:233
+#: ../components/Growl.tcl:218
+#: ../components/Mood.tcl:233
 msgid "flirtatious"
 msgstr "fliterig"
 
-#: ../components/Growl.tcl:219 ../components/Mood.tcl:234
+#: ../components/Growl.tcl:219
+#: ../components/Mood.tcl:234
 msgid "frustrated"
 msgstr "gefrustreerd"
 
-#: ../components/Growl.tcl:220 ../components/Mood.tcl:235
+#: ../components/Growl.tcl:220
+#: ../components/Mood.tcl:235
 msgid "grumpy"
 msgstr "knorrig"
 
-#: ../components/Growl.tcl:221 ../components/Mood.tcl:236
+#: ../components/Growl.tcl:221
+#: ../components/Mood.tcl:236
 msgid "guilty"
 msgstr "schuldig"
 
-#: ../components/Growl.tcl:222 ../components/Mood.tcl:237
+#: ../components/Growl.tcl:222
+#: ../components/Mood.tcl:237
 msgid "happy"
 msgstr "gelukkig"
 
-#: ../components/Growl.tcl:223 ../components/Mood.tcl:238
+#: ../components/Growl.tcl:223
+#: ../components/Mood.tcl:238
 msgid "hot"
 msgstr "heet"
 
-#: ../components/Growl.tcl:224 ../components/Mood.tcl:239
+#: ../components/Growl.tcl:224
+#: ../components/Mood.tcl:239
 msgid "humbled"
 msgstr "bescheiden"
 
-#: ../components/Growl.tcl:225 ../components/Mood.tcl:240
+#: ../components/Growl.tcl:225
+#: ../components/Mood.tcl:240
 msgid "humiliated"
 msgstr "vernederd"
 
-#: ../components/Growl.tcl:226 ../components/Mood.tcl:241
+#: ../components/Growl.tcl:226
+#: ../components/Mood.tcl:241
 msgid "hungry"
 msgstr "hongerig"
 
-#: ../components/Growl.tcl:227 ../components/Mood.tcl:242
+#: ../components/Growl.tcl:227
+#: ../components/Mood.tcl:242
 msgid "hurt"
 msgstr "verwond"
 
-#: ../components/Growl.tcl:228 ../components/Mood.tcl:243
+#: ../components/Growl.tcl:228
+#: ../components/Mood.tcl:243
 msgid "impressed"
 msgstr "geïmponeerd"
 
-#: ../components/Growl.tcl:229 ../components/Mood.tcl:244
+#: ../components/Growl.tcl:229
+#: ../components/Mood.tcl:244
 msgid "in awe"
 msgstr "eerbiedig"
 
-#: ../components/Growl.tcl:230 ../components/Mood.tcl:245
+#: ../components/Growl.tcl:230
+#: ../components/Mood.tcl:245
 msgid "in love"
 msgstr "verliefd"
 
-#: ../components/Growl.tcl:231 ../components/Mood.tcl:246
+#: ../components/Growl.tcl:231
+#: ../components/Mood.tcl:246
 msgid "indignant"
 msgstr "verontwaardigd"
 
-#: ../components/Growl.tcl:232 ../components/Mood.tcl:247
+#: ../components/Growl.tcl:232
+#: ../components/Mood.tcl:247
 msgid "interested"
 msgstr "geïnteresseerd"
 
-#: ../components/Growl.tcl:233 ../components/Mood.tcl:248
+#: ../components/Growl.tcl:233
+#: ../components/Mood.tcl:248
 msgid "intoxicated"
 msgstr "dronken"
 
-#: ../components/Growl.tcl:234 ../components/Mood.tcl:249
+#: ../components/Growl.tcl:234
+#: ../components/Mood.tcl:249
 msgid "invincible"
 msgstr "onoverwinnelijk"
 
-#: ../components/Growl.tcl:235 ../components/Mood.tcl:250
+#: ../components/Growl.tcl:235
+#: ../components/Mood.tcl:250
 msgid "jealous"
 msgstr "jaloers"
 
-#: ../components/Growl.tcl:236 ../components/Mood.tcl:251
+#: ../components/Growl.tcl:236
+#: ../components/Mood.tcl:251
 msgid "lonely"
 msgstr "eenzaam"
 
-#: ../components/Growl.tcl:237 ../components/Mood.tcl:252
+#: ../components/Growl.tcl:237
+#: ../components/Mood.tcl:252
 msgid "mean"
 msgstr "gemeen"
 
-#: ../components/Growl.tcl:238 ../components/Mood.tcl:253
+#: ../components/Growl.tcl:238
+#: ../components/Mood.tcl:253
 msgid "moody"
 msgstr "humeurig"
 
-#: ../components/Growl.tcl:239 ../components/Mood.tcl:254
+#: ../components/Growl.tcl:239
+#: ../components/Mood.tcl:254
 msgid "nervous"
 msgstr "angstig"
 
-#: ../components/Growl.tcl:240 ../components/Mood.tcl:255
+#: ../components/Growl.tcl:240
+#: ../components/Mood.tcl:255
 msgid "neutral"
 msgstr "neutraal"
 
-#: ../components/Growl.tcl:241 ../components/Mood.tcl:256
+#: ../components/Growl.tcl:241
+#: ../components/Mood.tcl:256
 msgid "offended"
 msgstr "beledigd"
 
-#: ../components/Growl.tcl:242 ../components/Mood.tcl:257
+#: ../components/Growl.tcl:242
+#: ../components/Mood.tcl:257
 msgid "playful"
 msgstr "speels"
 
-#: ../components/Growl.tcl:243 ../components/Mood.tcl:258
+#: ../components/Growl.tcl:243
+#: ../components/Mood.tcl:258
 msgid "proud"
 msgstr "trots"
 
-#: ../components/Growl.tcl:244 ../components/Mood.tcl:259
+#: ../components/Growl.tcl:244
+#: ../components/Mood.tcl:259
 msgid "relieved"
 msgstr "opgelucht"
 
-#: ../components/Growl.tcl:245 ../components/Mood.tcl:260
+#: ../components/Growl.tcl:245
+#: ../components/Mood.tcl:260
 msgid "remorseful"
 msgstr "berouwvol"
 
-#: ../components/Growl.tcl:246 ../components/Mood.tcl:261
+#: ../components/Growl.tcl:246
+#: ../components/Mood.tcl:261
 msgid "restless"
 msgstr "rusteloos"
 
-#: ../components/Growl.tcl:247 ../components/Mood.tcl:262
+#: ../components/Growl.tcl:247
+#: ../components/Mood.tcl:262
 msgid "sad"
 msgstr "droevig"
 
-#: ../components/Growl.tcl:248 ../components/Mood.tcl:263
+#: ../components/Growl.tcl:248
+#: ../components/Mood.tcl:263
 msgid "sarcastic"
 msgstr "sarcastisch"
 
-#: ../components/Growl.tcl:249 ../components/Mood.tcl:264
+#: ../components/Growl.tcl:249
+#: ../components/Mood.tcl:264
 msgid "serious"
 msgstr "ernstig"
 
-#: ../components/Growl.tcl:250 ../components/Mood.tcl:265
+#: ../components/Growl.tcl:250
+#: ../components/Mood.tcl:265
 msgid "shocked"
 msgstr "verbijsterd"
 
-#: ../components/Growl.tcl:251 ../components/Mood.tcl:266
+#: ../components/Growl.tcl:251
+#: ../components/Mood.tcl:266
 msgid "shy"
 msgstr "verlegen"
 
-#: ../components/Growl.tcl:252 ../components/Mood.tcl:267
+#: ../components/Growl.tcl:252
+#: ../components/Mood.tcl:267
 msgid "sick"
 msgstr "ziek"
 
-#: ../components/Growl.tcl:253 ../components/Mood.tcl:268
+#: ../components/Growl.tcl:253
+#: ../components/Mood.tcl:268
 msgid "sleepy"
 msgstr "slaperig"
 
-#: ../components/Growl.tcl:254 ../components/Mood.tcl:269
+#: ../components/Growl.tcl:254
+#: ../components/Mood.tcl:269
 msgid "stressed"
 msgstr "gestresseerd"
 
-#: ../components/Growl.tcl:255 ../components/Mood.tcl:270
+#: ../components/Growl.tcl:255
+#: ../components/Mood.tcl:270
 msgid "surprised"
 msgstr "verrast"
 
-#: ../components/Growl.tcl:256 ../components/Mood.tcl:271
+#: ../components/Growl.tcl:256
+#: ../components/Mood.tcl:271
 msgid "thirsty"
 msgstr "dorstig"
 
-#: ../components/Growl.tcl:257 ../components/Mood.tcl:272
+#: ../components/Growl.tcl:257
+#: ../components/Mood.tcl:272
 msgid "worried"
 msgstr "ongerust"
 
@@ -834,18 +1097,23 @@ msgstr "omdat"
 msgid "retracted mood"
 msgstr "ingetrokken stemming"
 
-#: ../components/Growl.tcl:273 ../components/Mood.tcl:293
-#: ../components/Mood.tcl:485 ../components/Mood.tcl:587
-#: ../components/Mood.tcl:602 ../components/Mood.tcl:666
+#: ../components/Growl.tcl:273
+#: ../components/Mood.tcl:293
+#: ../components/Mood.tcl:485
+#: ../components/Mood.tcl:587
+#: ../components/Mood.tcl:602
+#: ../components/Mood.tcl:666
 msgid "Mood"
 msgstr "Stemmi&ng"
 
 #. TRANSLATORS: see Plugins menu in whiteboard
-#: ../components/ImageMagic.tcl:61 ../whiteboard/CanvasUtils.tcl:144
+#: ../components/ImageMagic.tcl:61
+#: ../whiteboard/CanvasUtils.tcl:144
 msgid "Take &Snapshot"
 msgstr "&Schermafdruk maken"
 
-#: ../components/ImageMagic.tcl:63 ../jabber/JUI.tcl:201
+#: ../components/ImageMagic.tcl:63
+#: ../jabber/JUI.tcl:201
 #: ../whiteboard/Whiteboard.tcl:590
 msgid "Plu&gins"
 msgstr "&Plugins"
@@ -855,12 +1123,8 @@ msgid "Take Snapshot"
 msgstr "Schermafdruk maken"
 
 #: ../components/ImageMagic.tcl:118
-msgid ""
-"Click on a window or drag a rectangular area to import a snapshot into the "
-"current whiteboard."
-msgstr ""
-"Klik op een venster of versleep een rechthoekig gebied om een "
-"schermafbeelding te importeren in het huidige whiteboard."
+msgid "Click on a window or drag a rectangular area to import a snapshot into the current whiteboard."
+msgstr "Klik op een venster of versleep een rechthoekig gebied om een schermafbeelding te importeren in het huidige whiteboard."
 
 #: ../components/ImageMagic.tcl:183
 #, tcl-format
@@ -872,9 +1136,12 @@ msgstr "Gevaarlijk pad: %s"
 msgid "Click OK to remove files: %s"
 msgstr "Druk op OK om bestanden te verwijderen: %s"
 
-#: ../components/JivePhone.tcl:69 ../components/JivePhone.tcl:83
-#: ../components/JivePhone.tcl:91 ../components/JivePhone.tcl:250
-#: ../components/JivePhone.tcl:361 ../components/JivePhone.tcl:1106
+#: ../components/JivePhone.tcl:69
+#: ../components/JivePhone.tcl:83
+#: ../components/JivePhone.tcl:91
+#: ../components/JivePhone.tcl:250
+#: ../components/JivePhone.tcl:361
+#: ../components/JivePhone.tcl:1106
 #: ../components/Phone/IAX/JingleIax.tcl:575
 msgid "Call"
 msgstr "Telefoneren"
@@ -903,19 +1170,23 @@ msgstr "Huidig telefoongesprek omleiden naar"
 msgid "Call to"
 msgstr "Telefoneren naar"
 
-#: ../components/JivePhone.tcl:470 ../components/Phone/Phone.tcl:404
+#: ../components/JivePhone.tcl:470
+#: ../components/Phone/Phone.tcl:404
 msgid "Forward to"
 msgstr "Omleiden naar"
 
-#: ../components/JivePhone.tcl:494 ../components/Phone/Phone.tcl:427
+#: ../components/JivePhone.tcl:494
+#: ../components/Phone/Phone.tcl:427
 msgid "Number"
 msgstr "Nummer"
 
-#: ../components/JivePhone.tcl:497 ../components/Phone/Phone.tcl:430
+#: ../components/JivePhone.tcl:497
+#: ../components/Phone/Phone.tcl:430
 msgid "Dial"
 msgstr "Telefoneren"
 
-#: ../components/JivePhone.tcl:613 ../components/Phone/IAX/JingleIax.tcl:231
+#: ../components/JivePhone.tcl:613
+#: ../components/Phone/IAX/JingleIax.tcl:231
 #, tcl-format
 msgid "Failed calling %s"
 msgstr "Kan niet telefoneren naar %s"
@@ -924,27 +1195,35 @@ msgstr "Kan niet telefoneren naar %s"
 msgid "Address Book"
 msgstr "Adresboek"
 
-#: ../components/JivePhone.tcl:865 ../components/JivePhone.tcl:881
+#: ../components/JivePhone.tcl:865
+#: ../components/JivePhone.tcl:881
 msgid "New address book"
 msgstr "Nieuw adresboek"
 
-#: ../components/JivePhone.tcl:888 ../components/JivePhone.tcl:970
-#: ../components/fsdialog.tcl:488 ../jabber/Emoticons.tcl:601
-#: ../jabber/Search.tcl:934 ../jabber/UserInfo.tcl:224
+#: ../components/JivePhone.tcl:888
+#: ../components/JivePhone.tcl:970
+#: ../components/fsdialog.tcl:488
+#: ../jabber/Emoticons.tcl:601
+#: ../jabber/Search.tcl:934
+#: ../jabber/UserInfo.tcl:224
 msgid "Name"
 msgstr "Naam"
 
-#: ../components/JivePhone.tcl:891 ../components/JivePhone.tcl:973
+#: ../components/JivePhone.tcl:891
+#: ../components/JivePhone.tcl:973
 #: ../jabber/Gateway.tcl:85
 msgid "Phone number"
 msgstr "Telefoonnummer"
 
-#: ../components/JivePhone.tcl:903 ../components/JivePhone.tcl:985
-#: ../jabber/Create.tcl:668 ../jabber/Enter.tcl:220
+#: ../components/JivePhone.tcl:903
+#: ../components/JivePhone.tcl:985
+#: ../jabber/Create.tcl:668
+#: ../jabber/Enter.tcl:220
 msgid "Enter"
 msgstr "Betreden"
 
-#: ../components/JivePhone.tcl:947 ../components/JivePhone.tcl:963
+#: ../components/JivePhone.tcl:947
+#: ../components/JivePhone.tcl:963
 msgid "Modify address book"
 msgstr "Adresboek veranderen"
 
@@ -1263,14 +1542,14 @@ msgstr "Dorstig"
 msgid "Worried"
 msgstr "Ongerust"
 
-#: ../components/Mood.tcl:304 ../components/Mood.tcl:641
+#: ../components/Mood.tcl:304
+#: ../components/Mood.tcl:641
 msgid "&Custom Mood"
 msgstr "&Aangepaste stemming"
 
 #: ../components/Mood.tcl:471
 msgid "Only contacts with compatible software will see your mood."
-msgstr ""
-"Alleen contactpersonen met compatibele software zullen uw stemming zien."
+msgstr "Alleen contactpersonen met compatibele software zullen uw stemming zien."
 
 #: ../components/Mood.tcl:471
 msgid "Select your mood to show to your contacts."
@@ -1280,15 +1559,18 @@ msgstr "Selecteer uw stemming om te tonen aan uw contactpersonen."
 msgid "Custom Mood"
 msgstr "Aangepaste stemming"
 
-#: ../components/NotifyCall.tcl:85 ../components/Phone/NotifyCall.tcl:168
+#: ../components/NotifyCall.tcl:85
+#: ../components/Phone/NotifyCall.tcl:168
 msgid "Notify Call"
 msgstr "Telefoongesprek melden"
 
-#: ../components/NotifyCall.tcl:94 ../components/Phone/NotifyCall.tcl:169
+#: ../components/NotifyCall.tcl:94
+#: ../components/Phone/NotifyCall.tcl:169
 msgid "Inbound Call"
 msgstr "Inkomend telefoongesprek"
 
-#: ../components/NotifyCall.tcl:115 ../components/Phone/NotifyCall.tcl:264
+#: ../components/NotifyCall.tcl:115
+#: ../components/Phone/NotifyCall.tcl:264
 msgid "Hung Up"
 msgstr "Opgehangen"
 
@@ -1296,7 +1578,8 @@ msgstr "Opgehangen"
 msgid "Call VM?"
 msgstr "Wilt u naar VM telefoneren?"
 
-#: ../components/ParseURI.tcl:220 ../jabber/Login.tcl:668
+#: ../components/ParseURI.tcl:220
+#: ../jabber/Login.tcl:668
 #: ../jabber/Login.tcl:735
 #, tcl-format
 msgid "Enter the password for your account %s"
@@ -1307,17 +1590,26 @@ msgstr "Voer het wachtwoord in van uw account %s"
 msgid "Please enter your desired nickname for the chatroom %s"
 msgstr "Voer de gewenste bijnaam in voor de chatruimte %s"
 
-#: ../components/ParseURI.tcl:392 ../components/ParseURI.tcl:396
-#: ../jabber/Create.tcl:111 ../jabber/Create.tcl:636 ../jabber/Enter.tcl:164
-#: ../jabber/GroupChat.tcl:3464 ../jabber/JUser.tcl:182
-#: ../jabber/JUser.tcl:731 ../jabber/MUC.tcl:478 ../jabber/Profiles.tcl:1097
-#: ../jabber/Subscribe.tcl:322 ../jabber/Subscribe.tcl:1285
+#: ../components/ParseURI.tcl:392
+#: ../components/ParseURI.tcl:396
+#: ../jabber/Create.tcl:111
+#: ../jabber/Create.tcl:636
+#: ../jabber/Enter.tcl:164
+#: ../jabber/GroupChat.tcl:3464
+#: ../jabber/JUser.tcl:182
+#: ../jabber/JUser.tcl:731
+#: ../jabber/MUC.tcl:478
+#: ../jabber/Profiles.tcl:1097
+#: ../jabber/Subscribe.tcl:322
+#: ../jabber/Subscribe.tcl:1285
 #: ../jabber/VCard.tcl:307
 msgid "Nickname"
 msgstr "Bijnaam"
 
-#: ../components/ParseURI.tcl:559 ../jabber/FTrans.tcl:594
-#: ../jabber/MailBox.tcl:2133 ../jabber/OOB.tcl:133
+#: ../components/ParseURI.tcl:559
+#: ../jabber/FTrans.tcl:594
+#: ../jabber/MailBox.tcl:2133
+#: ../jabber/OOB.tcl:133
 msgid "Save File"
 msgstr "Bestand opslaan"
 
@@ -1337,11 +1629,16 @@ msgstr "Uitgaand gesprek"
 msgid "Answer"
 msgstr "Antwoorden"
 
-#: ../components/Phone/NotifyCall.tcl:275 ../jabber/JUser.tcl:593
-#: ../jabber/Jabber.tcl:717 ../jabber/Subscribe.tcl:447
-#: ../jabber/Subscribe.tcl:467 ../jabber/Subscribe.tcl:667
-#: ../jabber/Subscribe.tcl:700 ../jabber/Subscribe.tcl:779
-#: ../jabber/Subscribe.tcl:826 ../jabber/Subscribe.tcl:892
+#: ../components/Phone/NotifyCall.tcl:275
+#: ../jabber/JUser.tcl:593
+#: ../jabber/Jabber.tcl:717
+#: ../jabber/Subscribe.tcl:447
+#: ../jabber/Subscribe.tcl:467
+#: ../jabber/Subscribe.tcl:667
+#: ../jabber/Subscribe.tcl:700
+#: ../jabber/Subscribe.tcl:779
+#: ../jabber/Subscribe.tcl:826
+#: ../jabber/Subscribe.tcl:892
 msgid "Info"
 msgstr "Info"
 
@@ -1354,8 +1651,10 @@ msgstr "Wilt u ophangen?"
 msgid "Call Notification"
 msgstr "Telefoongesprek melden"
 
-#: ../components/Phone/NotifyCall.tcl:605 ../jabber/AppStatusSlot.tcl:65
-#: ../jabber/MegaPresence.tcl:81 ../jabber/Search.tcl:901
+#: ../components/Phone/NotifyCall.tcl:605
+#: ../jabber/AppStatusSlot.tcl:65
+#: ../jabber/MegaPresence.tcl:81
+#: ../jabber/Search.tcl:901
 #: ../jabber/StatusSlot.tcl:63
 msgid "Close Slot"
 msgstr "Slot sluiten"
@@ -1379,7 +1678,8 @@ msgid "%s is on the phone"
 msgstr "%s hangt aan de lijn"
 
 #. TRANSLATORS; whiteboard slide show menu
-#: ../components/SlideShow.tcl:43 ../components/SlideShow.tcl:123
+#: ../components/SlideShow.tcl:43
+#: ../components/SlideShow.tcl:123
 msgid "Slide Show"
 msgstr "Diavoorstelling"
 
@@ -1387,35 +1687,52 @@ msgstr "Diavoorstelling"
 msgid "&Open Folder"
 msgstr "Map &openen"
 
-#: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:358
-#: ../components/SlideShow.tcl:362 ../components/SlideShow.tcl:369
-#: ../components/Totd.tcl:111 ../contrib/wizard.tcl:224
+#: ../components/SlideShow.tcl:46
+#: ../components/SlideShow.tcl:358
+#: ../components/SlideShow.tcl:362
+#: ../components/SlideShow.tcl:369
+#: ../components/Totd.tcl:111
+#: ../contrib/wizard.tcl:224
 #: ../jabber/Adhoc.tcl:209
 msgid "Previous"
 msgstr "Vorige"
 
-#: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:359
-#: ../components/SlideShow.tcl:364 ../components/SlideShow.tcl:370
-#: ../components/Totd.tcl:109 ../contrib/wizard.tcl:219
-#: ../contrib/wizard.tcl:586 ../jabber/Adhoc.tcl:207 ../jabber/GotMsg.tcl:225
-#: ../jabber/Register.tcl:327 ../jabber/Register.tcl:1168
-#: ../lib/TSearch.tcl:81 ../lib/WSearch.tcl:72
+#: ../components/SlideShow.tcl:47
+#: ../components/SlideShow.tcl:359
+#: ../components/SlideShow.tcl:364
+#: ../components/SlideShow.tcl:370
+#: ../components/Totd.tcl:109
+#: ../contrib/wizard.tcl:219
+#: ../contrib/wizard.tcl:586
+#: ../jabber/Adhoc.tcl:207
+#: ../jabber/GotMsg.tcl:225
+#: ../jabber/Register.tcl:327
+#: ../jabber/Register.tcl:1168
+#: ../lib/TSearch.tcl:81
+#: ../lib/WSearch.tcl:72
 msgid "Next"
 msgstr "Volgende"
 
-#: ../components/SlideShow.tcl:48 ../components/SlideShow.tcl:354
-#: ../components/SlideShow.tcl:367 ../whiteboard/ItemInspector.tcl:213
+#: ../components/SlideShow.tcl:48
+#: ../components/SlideShow.tcl:354
+#: ../components/SlideShow.tcl:367
+#: ../whiteboard/ItemInspector.tcl:213
 msgid "First"
 msgstr "Eerste"
 
-#: ../components/SlideShow.tcl:49 ../components/SlideShow.tcl:355
-#: ../components/SlideShow.tcl:368 ../whiteboard/ItemInspector.tcl:214
+#: ../components/SlideShow.tcl:49
+#: ../components/SlideShow.tcl:355
+#: ../components/SlideShow.tcl:368
+#: ../whiteboard/ItemInspector.tcl:214
 msgid "Last"
 msgstr "Laatste"
 
-#: ../components/SlideShow.tcl:121 ../jabber/Chat.tcl:1359
-#: ../jabber/GroupChat.tcl:677 ../lib/FileCache.tcl:599
-#: ../whiteboard/FilePrefs.tcl:77 ../whiteboard/Plugins.tcl:1324
+#: ../components/SlideShow.tcl:121
+#: ../jabber/Chat.tcl:1359
+#: ../jabber/GroupChat.tcl:677
+#: ../lib/FileCache.tcl:599
+#: ../whiteboard/FilePrefs.tcl:77
+#: ../whiteboard/Plugins.tcl:1324
 #: ../whiteboard/WBPrefs.tcl:74
 msgid "Whiteboard"
 msgstr "Whiteboard"
@@ -1428,7 +1745,8 @@ msgstr "Navigatieknoppen tonen"
 msgid "Resize window to fit slides"
 msgstr "Venster automatisch aanpassen aan de diagrootte"
 
-#: ../components/SlideShow.tcl:207 ../lib/FileCache.tcl:667
+#: ../components/SlideShow.tcl:207
+#: ../lib/FileCache.tcl:667
 #: ../whiteboard/GetFileIface.tcl:292
 msgid "Open Folder"
 msgstr "Map openen"
@@ -1491,10 +1809,9 @@ msgid "Volume"
 msgstr "Volume"
 
 #: ../components/Sounds.tcl:586
-#, fuzzy
 #| msgid "Sound set"
 msgid "Sound device"
-msgstr "Geluidsthema"
+msgstr "Geluidsapparaat"
 
 #: ../components/Sounds.tcl:595
 msgid "MIDI Player"
@@ -1505,29 +1822,33 @@ msgid "External Midi Player"
 msgstr "Externe Midispeler"
 
 #: ../components/Sounds.tcl:605
-msgid ""
-"Set command to use for playing MIDI sounds. This option is only relevant if "
-"you use a sound set with MIDI files."
-msgstr ""
-"Commando instellen om Midi-bestanden af te spelen. Deze optie is alleen "
-"relevant relevant als u een geluidsthema met Midi-bestanden gebruikt."
+msgid "Set command to use for playing MIDI sounds. This option is only relevant if you use a sound set with MIDI files."
+msgstr "Commando instellen om Midi-bestanden af te spelen. Deze optie is alleen relevant relevant als u een geluidsthema met Midi-bestanden gebruikt."
 
 #: ../components/Sounds.tcl:606
 msgid "MIDI command"
 msgstr "MIDI-commando"
 
-#: ../components/Sounds.tcl:654 ../components/Sounds.tcl:698
-#: ../components/Sounds.tcl:724 ../contrib/ui/fontselector.tcl:156
-#: ../contrib/ui/openimage.tcl:97 ../jabber/Emoticons.tcl:749
-#: ../jabber/Roster.tcl:519 ../jabber/Roster.tcl:1402
-#: ../jabber/Rosticons.tcl:605 ../jabber/SetupAss.tcl:116
-#: ../lib/PrefHelpers.tcl:104 ../whiteboard/WBPrefs.tcl:120
-#: ../whiteboard/WBPrefs.tcl:123 ../whiteboard/WBPrefs.tcl:196
+#: ../components/Sounds.tcl:654
+#: ../components/Sounds.tcl:698
+#: ../components/Sounds.tcl:724
+#: ../contrib/ui/fontselector.tcl:156
+#: ../contrib/ui/openimage.tcl:97
+#: ../jabber/Emoticons.tcl:749
+#: ../jabber/Roster.tcl:519
+#: ../jabber/Roster.tcl:1402
+#: ../jabber/Rosticons.tcl:605
+#: ../jabber/SetupAss.tcl:116
+#: ../lib/PrefHelpers.tcl:104
+#: ../whiteboard/WBPrefs.tcl:120
+#: ../whiteboard/WBPrefs.tcl:123
+#: ../whiteboard/WBPrefs.tcl:196
 msgid "Default"
 msgstr "Standaard"
 
 #. TRANSLATORS; Only on Mac OS X and Windows in preferences.
-#: ../components/Speech.tcl:281 ../components/Speech.tcl:337
+#: ../components/Speech.tcl:281
+#: ../components/Speech.tcl:337
 msgid "Text-to-Speech"
 msgstr "Tekst-naar-Spraak"
 
@@ -1563,57 +1884,55 @@ msgstr "&Woordenboeken"
 msgid "Add to Dictionary"
 msgstr "Toevoegen aan woordenboek"
 
-#: ../components/Totd.tcl:18 ../components/Totd.tcl:90
+#: ../components/Totd.tcl:18
+#: ../components/Totd.tcl:90
 msgid "Tip of the Day"
-msgstr ""
+msgstr "Tip van de dag"
 
 #: ../components/Totd.tcl:30
 #, tcl-format
 msgid ""
-"If the desired chat system is not available when you want to add a contact, "
-"this indicates no server support had been detected. Luckily, for most chat "
-"systems you can use another server without the need to register a new "
-"account. \n"
+"If the desired chat system is not available when you want to add a contact, this indicates no server support had been detected. Luckily, for most chat systems you can use another server without the need to register a new account. \n"
 "\n"
 " Instructions:\n"
 " 1. Login to your account in %s.\n"
 " 2. Select the Discover Server option in the Actions menu.\n"
-" 3. Find a server with support for the desired chat system at http://"
-"coccinella.im/servers/servers.html (you can sort the columns).\n"
+" 3. Find a server with support for the desired chat system at http://coccinella.im/servers/servers.html (you can sort the columns).\n"
 " 4. Enter the name of the desired server and proceed.\n"
 " 5. The chat system will become available in the list!"
 msgstr ""
+"Als het gewenste chatsysteem niet beschikbaar is wanneer u een contactpersoon wilt toevoegen, dan betekent dit dat geen ondersteuning op de server werd gedetecteerd. Gelukkig kunt u voor de meeste chatsystemen een andere server gebruiken zonder dat u een nieuwe account moet registreren. \n"
+"\n"
+" Instructies:\n"
+" 1. Meld aan op uw account in % s.\n"
+" 2. Selecteer \"Server waarnemen\" in het menu \"Actie\".\n"
+" 3. Zoek een server met ondersteuning voor het gewenste chatsysteem op http://coccinella.im/servers/servers.html (u kunt de kolommen sorteren).\n"
+" 4. Voer de naam in van de gewenste server en ga verder.\n"
+" 5. Het chatsysteem zal beschikbaar zijn in de lijst!"
 
 #: ../components/Totd.tcl:43
-msgid ""
-"Typing the /clean command during a chat conversation will empty your chat "
-"window, whilst the /retain command will restore its content. Your contacts "
-"do not see these commands."
-msgstr ""
+msgid "Typing the /clean command during a chat conversation will empty your chat window, whilst the /retain command will restore its content. Your contacts do not see these commands."
+msgstr "Als u het commando /clean typt tijdens een chatsessie zal uw chatvenster leeggemaakt worden, terwijl /retain de inhoud zal herstellen. Uw contactpersonen zien deze commando's niet."
 
 #: ../components/Totd.tcl:46
 #, tcl-format
-msgid ""
-"You might be interested in the hidden XML console if you are a developer. "
-"You can open it with the command %s+Shift+D"
-msgstr ""
+msgid "You might be interested in the hidden XML console if you are a developer. You can open it with the command %s+Shift+D"
+msgstr "Misschien bent u geïnteresseerd in de verborgen XML-console als u een ontwikkelaar bent. U kunt de console openen met het commando % s+Shift+D"
 
 #: ../components/Totd.tcl:49
 #, tcl-format
-msgid ""
-"You can initiate a whiteboard session with multiple participants by clicking "
-"the whiteboard icon in a chatroom. All participants using %s will be invited."
-msgstr ""
+msgid "You can initiate a whiteboard session with multiple participants by clicking the whiteboard icon in a chatroom. All participants using %s will be invited."
+msgstr "Je kunt een whiteboardsessie beginnen met meerdere deelnemers door te klikken op het whiteboard-pictogram in een chatruimte. Alle deelnemers die %s gebruiken worden dan uitgenodigd."
 
 #: ../components/Totd.tcl:52
 msgid "Documentation is available at http://coccinella.im/documentation"
-msgstr ""
+msgstr "Documentatie is beschikbaar op http://coccinella.im/documentation"
 
 #: ../components/Totd.tcl:105
-#, fuzzy, tcl-format
+#, tcl-format
 #| msgid "Show tips on startup"
 msgid "Show tips on %s startup"
-msgstr "Tips tonen tijdens het starten"
+msgstr "Tips tonen tijdens het starten van %s"
 
 #. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
 #: ../components/UserActivity.tcl:54
@@ -1625,19 +1944,18 @@ msgid "Set your activity that will be shown to your contacts."
 msgstr "Stel uw activiteit in die getoond zal worden aan uw contactpersonen."
 
 #: ../components/UserActivity.tcl:226
-msgid ""
-"Select from the first button your general activity, and optionally, your "
-"specific actvity from the second button. You may also add a descriptive text."
-msgstr ""
-"Selecteer uw hoofdactiviteit en specificeer die als u dit wenst. U kunt ook "
-"een passend bericht toevoegen."
+msgid "Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add a descriptive text."
+msgstr "Selecteer uw hoofdactiviteit en specificeer die als u dit wenst. U kunt ook een passend bericht toevoegen."
 
 #: ../components/UserActivity.tcl:229
 msgid "User Activity"
 msgstr "Activiteit"
 
-#: ../components/UserActivity.tcl:252 ../jabber/VCard.tcl:287
-#: ../lib/PrefHelpers.tcl:71 ../lib/PrefNet.tcl:61 ../lib/Preferences.tcl:217
+#: ../components/UserActivity.tcl:252
+#: ../jabber/VCard.tcl:287
+#: ../lib/PrefHelpers.tcl:71
+#: ../lib/PrefNet.tcl:61
+#: ../lib/Preferences.tcl:217
 msgid "General"
 msgstr "Algemeen"
 
@@ -1933,8 +2251,10 @@ msgstr "Studeren"
 msgid "Writing"
 msgstr "Schrijven"
 
-#: ../components/UserActivity.tcl:605 ../components/UserActivity.tcl:627
-#: ../components/UserActivity.tcl:693 ../components/UserActivity.tcl:700
+#: ../components/UserActivity.tcl:605
+#: ../components/UserActivity.tcl:627
+#: ../components/UserActivity.tcl:693
+#: ../components/UserActivity.tcl:700
 msgid "Activity"
 msgstr "Activiteit"
 
@@ -1951,9 +2271,12 @@ msgstr "XML-console"
 msgid "Pretty format"
 msgstr "Elegante opmaak"
 
-#: ../components/XMLConsole.tcl:111 ../components/fsdialog.tcl:1050
-#: ../contrib/ui/openimage.tcl:95 ../jabber/History.tcl:994
-#: ../whiteboard/Whiteboard.tcl:450 ../whiteboard/Whiteboard.tcl:2933
+#: ../components/XMLConsole.tcl:111
+#: ../components/fsdialog.tcl:1050
+#: ../contrib/ui/openimage.tcl:95
+#: ../jabber/History.tcl:994
+#: ../whiteboard/Whiteboard.tcl:450
+#: ../whiteboard/Whiteboard.tcl:2933
 #: ../whiteboard/Whiteboard.tcl:2935
 msgid "Clear"
 msgstr "Leegmaken"
@@ -2003,8 +2326,10 @@ msgstr "Mappen eerst"
 msgid "Filter"
 msgstr "Filter"
 
-#: ../components/fsdialog.tcl:492 ../jabber/Emoticons.tcl:603
-#: ../jabber/History.tcl:950 ../jabber/MailBox.tcl:689
+#: ../components/fsdialog.tcl:492
+#: ../jabber/Emoticons.tcl:603
+#: ../jabber/History.tcl:950
+#: ../jabber/MailBox.tcl:689
 #: ../jabber/NewMsg.tcl:446
 msgid "Date"
 msgstr "Datum"
@@ -2013,12 +2338,15 @@ msgstr "Datum"
 msgid "Permissions"
 msgstr "Toegangsrechten"
 
-#: ../components/fsdialog.tcl:496 ../jabber/MUC.tcl:516
+#: ../components/fsdialog.tcl:496
+#: ../jabber/MUC.tcl:516
 msgid "Owner"
 msgstr "Eigenaarsprivileges"
 
-#: ../components/fsdialog.tcl:498 ../jabber/JUser.tcl:184
-#: ../jabber/JUser.tcl:741 ../jabber/Subscribe.tcl:324
+#: ../components/fsdialog.tcl:498
+#: ../jabber/JUser.tcl:184
+#: ../jabber/JUser.tcl:741
+#: ../jabber/Subscribe.tcl:324
 #: ../jabber/Subscribe.tcl:1287
 msgid "Group"
 msgstr "Groep"
@@ -2046,12 +2374,14 @@ msgstr "Bestand %s bestaat niet."
 msgid "Cannot change to the directory %s. Permission denied."
 msgstr "U hebt geen toegangsrechten voor de map %s."
 
-#: ../components/fsdialog.tcl:1361 ../plugins/PluginTextPlain.tcl:222
+#: ../components/fsdialog.tcl:1361
+#: ../plugins/PluginTextPlain.tcl:222
 #: ../whiteboard/Import.tcl:1802
 msgid "Save As"
 msgstr "Opslaan als"
 
-#: ../components/fsdialog.tcl:1363 ../jabber/AvatarMB.tcl:567
+#: ../components/fsdialog.tcl:1363
+#: ../jabber/AvatarMB.tcl:567
 #: ../whiteboard/Multicast.tcl:90
 msgid "Open"
 msgstr "Openen"
@@ -2060,32 +2390,47 @@ msgstr "Openen"
 msgid "Folder"
 msgstr "Map"
 
-#: ../components/taskbar/Taskbar.tcl:186 ../components/taskbar/Taskbar.tcl:374
+#: ../components/taskbar/Taskbar.tcl:186
+#: ../components/taskbar/Taskbar.tcl:374
 msgid "Mi&nimize"
 msgstr "Mi&nimaliseren"
 
 #. TRANSLATORS; menu item for sending normal message (no chat!)
-#: ../components/taskbar/Taskbar.tcl:187 ../jabber/Disco.tcl:155
-#: ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:176 ../jabber/JUI.tcl:1832
-#: ../jabber/JUI.tcl:1852 ../jabber/Roster.tcl:122 ../jabber/Search.tcl:33
+#: ../components/taskbar/Taskbar.tcl:187
+#: ../jabber/Disco.tcl:155
+#: ../jabber/GroupChat.tcl:221
+#: ../jabber/JUI.tcl:176
+#: ../jabber/JUI.tcl:1832
+#: ../jabber/JUI.tcl:1852
+#: ../jabber/Roster.tcl:122
+#: ../jabber/Search.tcl:33
 #: ../jabber/Search.tcl:41
 msgid "&Message"
 msgstr "&Bericht"
 
-#: ../components/taskbar/Taskbar.tcl:188 ../jabber/JUI.tcl:166
-#: ../whiteboard/Whiteboard.tcl:579 ../whiteboard/Whiteboard.tcl:2208
+#: ../components/taskbar/Taskbar.tcl:188
+#: ../jabber/JUI.tcl:166
+#: ../whiteboard/Whiteboard.tcl:579
+#: ../whiteboard/Whiteboard.tcl:2208
 #: ../whiteboard/Whiteboard.tcl:2285
 msgid "&Preferences"
 msgstr "&Voorkeuren"
 
-#: ../components/taskbar/Taskbar.tcl:189 ../jabber/JUI.tcl:181
-#: ../jabber/JUI.tcl:1831 ../jabber/JUI.tcl:1851 ../jabber/Roster.tcl:127
-#: ../jabber/Roster.tcl:188 ../jabber/Search.tcl:32 ../jabber/Search.tcl:40
+#: ../components/taskbar/Taskbar.tcl:189
+#: ../jabber/JUI.tcl:181
+#: ../jabber/JUI.tcl:1831
+#: ../jabber/JUI.tcl:1851
+#: ../jabber/Roster.tcl:127
+#: ../jabber/Roster.tcl:188
+#: ../jabber/Search.tcl:32
+#: ../jabber/Search.tcl:40
 msgid "&Add Contact"
 msgstr "&Contactpersoon toevoegen"
 
-#: ../components/taskbar/Taskbar.tcl:190 ../jabber/JUI.tcl:1267
-#: ../whiteboard/Whiteboard.tcl:2209 ../whiteboard/Whiteboard.tcl:2287
+#: ../components/taskbar/Taskbar.tcl:190
+#: ../jabber/JUI.tcl:1267
+#: ../whiteboard/Whiteboard.tcl:2209
+#: ../whiteboard/Whiteboard.tcl:2287
 msgid "&Info"
 msgstr "&Info"
 
@@ -2093,16 +2438,20 @@ msgstr "&Info"
 msgid "&About Coccinella"
 msgstr "&Over Coccinella"
 
-#: ../components/taskbar/Taskbar.tcl:192 ../jabber/JUI.tcl:227
+#: ../components/taskbar/Taskbar.tcl:192
+#: ../jabber/JUI.tcl:227
 msgid "&Home Page"
 msgstr "&Startpagina"
 
-#: ../components/taskbar/Taskbar.tcl:193 ../jabber/JUI.tcl:225
+#: ../components/taskbar/Taskbar.tcl:193
+#: ../jabber/JUI.tcl:225
 msgid "&Report Bug"
 msgstr "Bug &rapporteren"
 
-#: ../components/taskbar/Taskbar.tcl:197 ../jabber/JUI.tcl:167
-#: ../whiteboard/Whiteboard.tcl:432 ../whiteboard/Whiteboard.tcl:610
+#: ../components/taskbar/Taskbar.tcl:197
+#: ../jabber/JUI.tcl:167
+#: ../whiteboard/Whiteboard.tcl:432
+#: ../whiteboard/Whiteboard.tcl:610
 msgid "&Quit"
 msgstr "&Afsluiten"
 
@@ -2139,11 +2488,13 @@ msgstr "Tekst tonen"
 msgid "Show Icon"
 msgstr "Pictogram tonen"
 
-#: ../contrib/ui/dialog.tcl:244 ../jabber/Subscribe.tcl:351
+#: ../contrib/ui/dialog.tcl:244
+#: ../jabber/Subscribe.tcl:351
 msgid "Yes"
 msgstr "Ja"
 
-#: ../contrib/ui/dialog.tcl:245 ../jabber/Subscribe.tcl:353
+#: ../contrib/ui/dialog.tcl:245
+#: ../jabber/Subscribe.tcl:353
 msgid "No"
 msgstr "Nee"
 
@@ -2159,33 +2510,42 @@ msgstr "Afbreken"
 msgid "Ignore"
 msgstr "Negeren"
 
-#: ../contrib/ui/fontselector.tcl:20 ../jabber/JPrefs.tcl:194
+#: ../contrib/ui/fontselector.tcl:20
+#: ../jabber/JPrefs.tcl:194
 msgid "Select Font"
 msgstr "Lettertype selecteren"
 
-#: ../contrib/ui/fontselector.tcl:114 ../whiteboard/ItemInspector.tcl:365
+#: ../contrib/ui/fontselector.tcl:114
+#: ../whiteboard/ItemInspector.tcl:365
 #: ../whiteboard/ItemInspector.tcl:377
 msgid "Font size"
 msgstr "Lettergrootte"
 
-#: ../contrib/ui/fontselector.tcl:124 ../whiteboard/ItemInspector.tcl:366
+#: ../contrib/ui/fontselector.tcl:124
+#: ../whiteboard/ItemInspector.tcl:366
 #: ../whiteboard/ItemInspector.tcl:378
 msgid "Font weight"
 msgstr "Lettertypegewicht"
 
-#: ../contrib/ui/fontselector.tcl:126 ../jabber/JUI.tcl:205
-#: ../whiteboard/CanvasUtils.tcl:189 ../whiteboard/ItemInspector.tcl:242
+#: ../contrib/ui/fontselector.tcl:126
+#: ../jabber/JUI.tcl:205
+#: ../whiteboard/CanvasUtils.tcl:189
+#: ../whiteboard/ItemInspector.tcl:242
 #: ../whiteboard/Whiteboard.tcl:571
 msgid "Normal"
 msgstr "Normaal"
 
-#: ../contrib/ui/fontselector.tcl:127 ../whiteboard/CanvasUtils.tcl:191
-#: ../whiteboard/ItemInspector.tcl:243 ../whiteboard/Whiteboard.tcl:573
+#: ../contrib/ui/fontselector.tcl:127
+#: ../whiteboard/CanvasUtils.tcl:191
+#: ../whiteboard/ItemInspector.tcl:243
+#: ../whiteboard/Whiteboard.tcl:573
 msgid "Bold"
 msgstr "Vet"
 
-#: ../contrib/ui/fontselector.tcl:128 ../whiteboard/CanvasUtils.tcl:193
-#: ../whiteboard/ItemInspector.tcl:244 ../whiteboard/Whiteboard.tcl:575
+#: ../contrib/ui/fontselector.tcl:128
+#: ../whiteboard/CanvasUtils.tcl:193
+#: ../whiteboard/ItemInspector.tcl:244
+#: ../whiteboard/Whiteboard.tcl:575
 msgid "Italic"
 msgstr "Cursief"
 
@@ -2193,11 +2553,13 @@ msgstr "Cursief"
 msgid "Image Files"
 msgstr "Afbeeldingsbestanden"
 
-#: ../contrib/ui/openimage.tcl:93 ../contrib/ui/openimage.tcl:151
+#: ../contrib/ui/openimage.tcl:93
+#: ../contrib/ui/openimage.tcl:151
 msgid "Open Image"
 msgstr "Openen Afbeelding"
 
-#: ../contrib/ui/progress.tcl:24 ../contrib/ui/progress.tcl:33
+#: ../contrib/ui/progress.tcl:24
+#: ../contrib/ui/progress.tcl:33
 #: ../contrib/ui/progress.tcl:44
 msgid "Progress"
 msgstr "Voortgang"
@@ -2207,18 +2569,23 @@ msgid "Remaining"
 msgstr "Resterend"
 
 #. TRANSLATORS; see File menu in main window
-#: ../contrib/wizard.tcl:206 ../jabber/SetupAss.tcl:81
-#: ../jabber/SetupAss.tcl:98 ../jabber/SetupAss.tcl:342
+#: ../contrib/wizard.tcl:206
+#: ../jabber/SetupAss.tcl:81
+#: ../jabber/SetupAss.tcl:98
+#: ../jabber/SetupAss.tcl:342
 msgid "Setup Assistant"
 msgstr "Installatieassistent"
 
-#: ../contrib/wizard.tcl:583 ../jabber/Adhoc.tcl:425
+#: ../contrib/wizard.tcl:583
+#: ../jabber/Adhoc.tcl:425
 msgid "Finish"
 msgstr "Voltooien"
 
 #. TRANSLATORS; balloon mouse over texts in control panel (menu at the bottom of the main window) for arrow and close button
-#: ../jabber/AppStatusSlot.tcl:64 ../jabber/MegaPresence.tcl:80
-#: ../jabber/Search.tcl:900 ../jabber/StatusSlot.tcl:62
+#: ../jabber/AppStatusSlot.tcl:64
+#: ../jabber/MegaPresence.tcl:80
+#: ../jabber/Search.tcl:900
+#: ../jabber/StatusSlot.tcl:62
 msgid "Right click to open menu"
 msgstr "Klik met de rechtermuisknop om het menu te openen"
 
@@ -2226,8 +2593,12 @@ msgstr "Klik met de rechtermuisknop om het menu te openen"
 msgid "Application Status"
 msgstr "Programmastatus"
 
-#: ../jabber/AppStatusSlot.tcl:88 ../jabber/JUI.tcl:586 ../jabber/JUI.tcl:655
-#: ../jabber/Roster.tcl:87 ../jabber/Roster.tcl:95 ../jabber/Status.tcl:42
+#: ../jabber/AppStatusSlot.tcl:88
+#: ../jabber/JUI.tcl:586
+#: ../jabber/JUI.tcl:655
+#: ../jabber/Roster.tcl:87
+#: ../jabber/Roster.tcl:95
+#: ../jabber/Status.tcl:42
 #: ../jabber/Status.tcl:50
 msgid "Not Available"
 msgstr "Niet beschikbaar"
@@ -2243,7 +2614,8 @@ msgid "New chat with %s"
 msgstr "Nieuwe chatsessie met %s"
 
 #. TRANSLATORS; see preferences
-#: ../jabber/AutoAway.tcl:249 ../jabber/AutoAway.tcl:272
+#: ../jabber/AutoAway.tcl:249
+#: ../jabber/AutoAway.tcl:272
 msgid "Auto Away"
 msgstr "Automatisch afwezig"
 
@@ -2251,7 +2623,8 @@ msgstr "Automatisch afwezig"
 msgid "Away after"
 msgstr "Afwezig na"
 
-#: ../jabber/AutoAway.tcl:286 ../jabber/AutoAway.tcl:309
+#: ../jabber/AutoAway.tcl:286
+#: ../jabber/AutoAway.tcl:309
 #: ../jabber/AutoAway.tcl:332
 msgid "Minutes"
 msgstr "minuten"
@@ -2274,12 +2647,8 @@ msgid "Apply auto-away on hidden chat tabs"
 msgstr "Automatisch afwezig toepassen op verborgen tabbladen"
 
 #: ../jabber/AutoAway.tcl:366
-msgid ""
-"If activated then directed auto-away presence will be sent to users on "
-"hidden chat tabs"
-msgstr ""
-"Als geactiveerd, stuur dan gefocuste automatisch afewzig "
-"aanwezigheidsinformatie naar contactpersonen in verborgen tabbladen"
+msgid "If activated then directed auto-away presence will be sent to users on hidden chat tabs"
+msgstr "Als geactiveerd, stuur dan gefocuste automatisch afewzig aanwezigheidsinformatie naar contactpersonen in verborgen tabbladen"
 
 #. TRANSLATORS; this preference option automatically sets the user's presence to Do Not Disturb when he or she is chatting with too much contacts at the same moment (this number is configurable). There also is a delay until the presence is automatically changed back to the previous presence state when the number of active chats is down again.
 #: ../jabber/AutoAway.tcl:372
@@ -2287,15 +2656,12 @@ msgid "Do Not Disturb when (active chat sessions)"
 msgstr "Niet storen bij (actieve chatsessies)"
 
 #: ../jabber/AutoAway.tcl:389
-msgid ""
-"When you have <number> or more active chat sessions, presence state will be "
-"automatically changed to Do Not Disturb."
-msgstr ""
-"Bij evenveel of meer actieve chatsessies dan het opgegeven aantal wordt de "
-"aanwezigheid automatisch verandert naar Niet storen."
+msgid "When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb."
+msgstr "Bij evenveel of meer actieve chatsessies dan het opgegeven aantal wordt de aanwezigheid automatisch verandert naar Niet storen."
 
 #. TRANSLATORS; first Control Panel, then Avatar, then Open, then putting an asterisk (*) in the filter field, pressing return and trying to open a non-image file
-#: ../jabber/Avatar.tcl:366 ../jabber/Disco.tcl:874
+#: ../jabber/Avatar.tcl:366
+#: ../jabber/Disco.tcl:874
 #: ../jabber/RosterTree.tcl:805
 msgid "The supported image formats are"
 msgstr "Ondersteunde afbeeldingsformaten:"
@@ -2314,7 +2680,8 @@ msgstr "De avatar moet vierkant zijn met de grootte %s."
 msgid "Recent Avatars"
 msgstr "Recente avatars"
 
-#: ../jabber/AvatarMB.tcl:573 ../jabber/MUC.tcl:990
+#: ../jabber/AvatarMB.tcl:573
+#: ../jabber/MUC.tcl:990
 #: ../whiteboard/Multicast.tcl:94
 msgid "Edit"
 msgstr "Bewerken"
@@ -2323,30 +2690,45 @@ msgstr "Bewerken"
 msgid "Clear Menu"
 msgstr "Menu wissen"
 
-#: ../jabber/AvatarMB.tcl:741 ../jabber/VCard.tcl:412 ../jabber/VCard.tcl:645
+#: ../jabber/AvatarMB.tcl:741
+#: ../jabber/VCard.tcl:412
+#: ../jabber/VCard.tcl:645
 msgid "Select Avatar"
 msgstr "Avatar selecteren"
 
-#: ../jabber/Chat.tcl:313 ../jabber/Chat.tcl:325 ../jabber/Chat.tcl:2110
-#: ../jabber/Chat.tcl:3224 ../jabber/Chat.tcl:4209 ../jabber/JUI.tcl:1245
+#: ../jabber/Chat.tcl:313
+#: ../jabber/Chat.tcl:325
+#: ../jabber/Chat.tcl:2110
+#: ../jabber/Chat.tcl:3224
+#: ../jabber/Chat.tcl:4209
+#: ../jabber/JUI.tcl:1245
 msgid "Chat"
 msgstr "Chat"
 
-#: ../jabber/Chat.tcl:343 ../jabber/JUser.tcl:180 ../jabber/JWB.tcl:450
-#: ../jabber/Login.tcl:168 ../jabber/MUC.tcl:242 ../jabber/Profiles.tcl:1082
-#: ../jabber/Subscribe.tcl:1087 ../jabber/VCard.tcl:309
+#: ../jabber/Chat.tcl:343
+#: ../jabber/JUser.tcl:180
+#: ../jabber/JWB.tcl:450
+#: ../jabber/Login.tcl:168
+#: ../jabber/MUC.tcl:242
+#: ../jabber/Profiles.tcl:1082
+#: ../jabber/Subscribe.tcl:1087
+#: ../jabber/VCard.tcl:309
 msgid "Contact ID"
 msgstr "Contact ID"
 
 #. TRANSLATORS; Control + T (or Command + T on Mac OS X), then enter @ and proceed
-#: ../jabber/Chat.tcl:407 ../jabber/Chat.tcl:3133 ../jabber/Disco.tcl:1783
+#: ../jabber/Chat.tcl:407
+#: ../jabber/Chat.tcl:3133
+#: ../jabber/Disco.tcl:1783
 #: ../jabber/MUC.tcl:1248
 #, tcl-format
 msgid "%s is invalid. Do you want to continue anyway?"
 msgstr "%s is ongeldig. Wilt u toch doorgaan?"
 
 #. TRANSLATORS; composing events in chat window
-#: ../jabber/Chat.tcl:685 ../jabber/Chat.tcl:687 ../jabber/Chat.tcl:3716
+#: ../jabber/Chat.tcl:685
+#: ../jabber/Chat.tcl:687
+#: ../jabber/Chat.tcl:3716
 #, tcl-format
 msgid "%s is composing a reply"
 msgstr "%s stelt momenteel een antwoord op"
@@ -2371,49 +2753,76 @@ msgstr "%s verliet de chatsessie voor een tijdje"
 msgid "%s has closed the chat"
 msgstr "%s sloot de chatsessie"
 
-#: ../jabber/Chat.tcl:853 ../jabber/Chat.tcl:1589 ../jabber/GotMsg.tcl:261
-#: ../jabber/GroupChat.tcl:2365 ../jabber/History.tcl:800
-#: ../jabber/MailBox.tcl:683 ../jabber/NewMsg.tcl:367 ../jabber/NewMsg.tcl:450
+#: ../jabber/Chat.tcl:853
+#: ../jabber/Chat.tcl:1589
+#: ../jabber/GotMsg.tcl:261
+#: ../jabber/GroupChat.tcl:2365
+#: ../jabber/History.tcl:800
+#: ../jabber/MailBox.tcl:683
+#: ../jabber/NewMsg.tcl:367
+#: ../jabber/NewMsg.tcl:450
 msgid "Subject"
 msgstr "Onderwerp"
 
-#: ../jabber/Chat.tcl:1337 ../jabber/FTrans.tcl:218
-#: ../jabber/GroupChat.tcl:658 ../jabber/GroupChat.tcl:863
+#: ../jabber/Chat.tcl:1337
+#: ../jabber/FTrans.tcl:218
+#: ../jabber/GroupChat.tcl:658
+#: ../jabber/GroupChat.tcl:863
 #: ../jabber/NewMsg.tcl:302
 msgid "Send"
 msgstr "Verzenden"
 
-#: ../jabber/Chat.tcl:1341 ../jabber/FTrans.tcl:38 ../jabber/FTrans.tcl:182
+#: ../jabber/Chat.tcl:1341
+#: ../jabber/FTrans.tcl:38
+#: ../jabber/FTrans.tcl:182
 msgid "Send File"
 msgstr "Bestand verzenden"
 
-#: ../jabber/Chat.tcl:1345 ../jabber/Chat.tcl:3298 ../jabber/GroupChat.tcl:661
-#: ../jabber/GroupChat.tcl:3183 ../jabber/History.tcl:998
-#: ../jabber/History.tcl:1351 ../jabber/JUser.tcl:801
-#: ../jabber/Jabber.tcl:1944 ../jabber/MailBox.tcl:508
-#: ../jabber/NewMsg.tcl:309 ../jabber/Profiles.tcl:920
-#: ../jabber/UserInfo.tcl:406 ../jabber/VCard.tcl:248 ../lib/Bookmarks.tcl:122
-#: ../lib/Dialogs.tcl:339 ../lib/EditDialogs.tcl:140
-#: ../lib/EditDialogs.tcl:284 ../lib/Preferences.tcl:237
-#: ../whiteboard/CanvasFile.tcl:686 ../whiteboard/FilePrefs.tcl:526
-#: ../whiteboard/ItemInspector.tcl:505 ../whiteboard/ItemInspector.tcl:866
+#: ../jabber/Chat.tcl:1345
+#: ../jabber/Chat.tcl:3298
+#: ../jabber/GroupChat.tcl:661
+#: ../jabber/GroupChat.tcl:3183
+#: ../jabber/History.tcl:998
+#: ../jabber/History.tcl:1351
+#: ../jabber/JUser.tcl:801
+#: ../jabber/Jabber.tcl:1944
+#: ../jabber/MailBox.tcl:508
+#: ../jabber/NewMsg.tcl:309
+#: ../jabber/Profiles.tcl:920
+#: ../jabber/UserInfo.tcl:406
+#: ../jabber/VCard.tcl:248
+#: ../lib/Bookmarks.tcl:122
+#: ../lib/Dialogs.tcl:339
+#: ../lib/EditDialogs.tcl:140
+#: ../lib/EditDialogs.tcl:284
+#: ../lib/Preferences.tcl:237
+#: ../whiteboard/CanvasFile.tcl:686
+#: ../whiteboard/FilePrefs.tcl:526
+#: ../whiteboard/ItemInspector.tcl:505
+#: ../whiteboard/ItemInspector.tcl:866
 msgid "Save"
 msgstr "Opslaan"
 
 #. TRANSLATORS; history of past chat conversations
-#: ../jabber/Chat.tcl:1350 ../jabber/GroupChat.tcl:664
+#: ../jabber/Chat.tcl:1350
+#: ../jabber/GroupChat.tcl:664
 #: ../jabber/History.tcl:946
 msgid "History"
 msgstr "Geschiedenis"
 
-#: ../jabber/Chat.tcl:1354 ../jabber/GroupChat.tcl:673
-#: ../jabber/History.tcl:996 ../jabber/MailBox.tcl:511
-#: ../jabber/NewMsg.tcl:312 ../lib/Dialogs.tcl:103 ../lib/Dialogs.tcl:115
+#: ../jabber/Chat.tcl:1354
+#: ../jabber/GroupChat.tcl:673
+#: ../jabber/History.tcl:996
+#: ../jabber/MailBox.tcl:511
+#: ../jabber/NewMsg.tcl:312
+#: ../lib/Dialogs.tcl:103
+#: ../lib/Dialogs.tcl:115
 #: ../lib/Dialogs.tcl:130
 msgid "Print"
 msgstr "Afdrukken"
 
-#: ../jabber/Chat.tcl:1364 ../jabber/GroupChat.tcl:480
+#: ../jabber/Chat.tcl:1364
+#: ../jabber/GroupChat.tcl:480
 #: ../jabber/GroupChat.tcl:667
 msgid "Invite"
 msgstr "Uitnodigen"
@@ -2427,17 +2836,18 @@ msgstr "Voer het onderwerp van het gesprek in, stel in met Enter"
 msgid "Show or hide the chat history"
 msgstr "Geschiedenis tonen/verbergen"
 
-#: ../jabber/Chat.tcl:1649 ../jabber/GroupChat.tcl:917
+#: ../jabber/Chat.tcl:1649
+#: ../jabber/GroupChat.tcl:917
 msgid "If checked, Return sends message, else use Ctrl/Cmd-Return"
-msgstr ""
-"Als dit is aangevinkt, zal de Enter-toets het bericht verzenden. Anders moet "
-"u Ctrl/Cmd + Enter gebruiken."
+msgstr "Als dit is aangevinkt, zal de Enter-toets het bericht verzenden. Anders moet u Ctrl/Cmd + Enter gebruiken."
 
-#: ../jabber/Chat.tcl:1650 ../jabber/NewMsg.tcl:375
+#: ../jabber/Chat.tcl:1650
+#: ../jabber/NewMsg.tcl:375
 msgid "Insert emoticon"
 msgstr "Emoticon invoegen"
 
-#: ../jabber/Chat.tcl:1651 ../jabber/GroupChat.tcl:919
+#: ../jabber/Chat.tcl:1651
+#: ../jabber/GroupChat.tcl:919
 msgid "Show or hide status changes in chat"
 msgstr "Aanwezigheidsveranderingen in het chatvenster tonen of verbergen"
 
@@ -2446,29 +2856,44 @@ msgid "Enter your message and press Return or Shift-Return"
 msgstr "Voer uw bericht in en druk op Enter of Shift-Enter"
 
 #. TRANSLATORS; Control + F (or Command + F on Mac OS X)
-#: ../jabber/Chat.tcl:1898 ../jabber/GroupChat.tcl:1170
-#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:254 ../jabber/JUI.tcl:1786
+#: ../jabber/Chat.tcl:1898
+#: ../jabber/GroupChat.tcl:1170
+#: ../jabber/History.tcl:1077
+#: ../jabber/JUI.tcl:254
+#: ../jabber/JUI.tcl:1786
 #: ../jabber/RosterTree.tcl:1995
 msgid "Find"
 msgstr "Zoeken"
 
-#: ../jabber/Chat.tcl:1900 ../jabber/GroupChat.tcl:1172
-#: ../jabber/History.tcl:1080 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
+#: ../jabber/Chat.tcl:1900
+#: ../jabber/GroupChat.tcl:1172
+#: ../jabber/History.tcl:1080
+#: ../jabber/JUI.tcl:255
+#: ../jabber/JUI.tcl:1787
 #: ../jabber/RosterTree.tcl:1997
 msgid "Find Next"
 msgstr "Volgende zoeken"
 
-#: ../jabber/Chat.tcl:1901 ../jabber/GroupChat.tcl:1173
-#: ../jabber/History.tcl:1081 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
+#: ../jabber/Chat.tcl:1901
+#: ../jabber/GroupChat.tcl:1173
+#: ../jabber/History.tcl:1081
+#: ../jabber/JUI.tcl:256
+#: ../jabber/JUI.tcl:1788
 #: ../jabber/RosterTree.tcl:1998
 msgid "Find Previous"
 msgstr "Vorige zoeken"
 
-#: ../jabber/Chat.tcl:1973 ../jabber/Create.tcl:723 ../jabber/NewMsg.tcl:1066
-#: ../jabber/NewMsg.tcl:1097 ../jabber/Profiles.tcl:983
-#: ../jabber/Profiles.tcl:1606 ../jabber/Register.tcl:84
-#: ../lib/EditDialogs.tcl:226 ../lib/Preferences.tcl:393
-#: ../lib/Preferences.tcl:454 ../lib/Preferences.tcl:497
+#: ../jabber/Chat.tcl:1973
+#: ../jabber/Create.tcl:723
+#: ../jabber/NewMsg.tcl:1066
+#: ../jabber/NewMsg.tcl:1097
+#: ../jabber/Profiles.tcl:983
+#: ../jabber/Profiles.tcl:1606
+#: ../jabber/Register.tcl:84
+#: ../lib/EditDialogs.tcl:226
+#: ../lib/Preferences.tcl:393
+#: ../lib/Preferences.tcl:454
+#: ../lib/Preferences.tcl:497
 #: ../whiteboard/CanvasFile.tcl:548
 msgid "Warning"
 msgstr "Waarschuwing"
@@ -2477,32 +2902,34 @@ msgstr "Waarschuwing"
 msgid "Do you want to invite this contact to a new chatroom?"
 msgstr "Wilt u deze contactpersoon uitnodigen op een nieuwe chatruimte?"
 
-#: ../jabber/Chat.tcl:2247 ../jabber/GroupChat.tcl:1239
+#: ../jabber/Chat.tcl:2247
+#: ../jabber/GroupChat.tcl:1239
 msgid "Close tab"
 msgstr "Tabblad sluiten"
 
 #: ../jabber/Chat.tcl:2569
 msgid "You need to be logged in to see the presence of this contact"
-msgstr ""
-"U moet aangemeld zijn om de aanwezigheid van deze contactpersoon te zien"
+msgstr "U moet aangemeld zijn om de aanwezigheid van deze contactpersoon te zien"
 
 #: ../jabber/Chat.tcl:2771
 msgid "Converting Chat into Conference"
 msgstr "Bezig met omzetten van chatsessie in chatruimte"
 
-#: ../jabber/Chat.tcl:2786 ../jabber/Create.tcl:314 ../jabber/Create.tcl:581
+#: ../jabber/Chat.tcl:2786
+#: ../jabber/Create.tcl:314
+#: ../jabber/Create.tcl:581
 #: ../jabber/GroupChat.tcl:366
 msgid "Cannot find any chatroom service."
 msgstr "Kan geen dienst voor chatruimtes vinden."
 
-#: ../jabber/Chat.tcl:3085 ../jabber/GroupChat.tcl:2721
+#: ../jabber/Chat.tcl:3085
+#: ../jabber/GroupChat.tcl:2721
 #: ../jabber/NewMsg.tcl:888
 msgid "Cannot send when not logged in."
 msgstr "Kan niet verzenden wanneer niet aangemeld."
 
 #: ../jabber/Chat.tcl:3576
-msgid ""
-"Do you want to close this chat window and lose the complete conversation?"
+msgid "Do you want to close this chat window and lose the complete conversation?"
 msgstr "Wilt u dit chatvenster sluiten en de volledige conversatie verliezen?"
 
 #. TRANSLATORS; see Chat settings in preferences
@@ -2575,49 +3002,64 @@ msgstr "Uw bijnaam voor lokale weergave"
 msgid "Create Chatroom"
 msgstr "Chatruimte aanmaken"
 
-#: ../jabber/Create.tcl:81 ../jabber/GroupChat.tcl:197
-#: ../whiteboard/WDialogs.tcl:202 ../whiteboard/WDialogs.tcl:203
-#: ../whiteboard/WDialogs.tcl:204 ../whiteboard/WDialogs.tcl:205
-#: ../whiteboard/WDialogs.tcl:213 ../whiteboard/WDialogs.tcl:214
+#: ../jabber/Create.tcl:81
+#: ../jabber/GroupChat.tcl:197
+#: ../whiteboard/WDialogs.tcl:202
+#: ../whiteboard/WDialogs.tcl:203
+#: ../whiteboard/WDialogs.tcl:204
+#: ../whiteboard/WDialogs.tcl:205
+#: ../whiteboard/WDialogs.tcl:213
+#: ../whiteboard/WDialogs.tcl:214
 msgid "not available"
 msgstr "niet beschikbaar"
 
 #: ../jabber/Create.tcl:96
-msgid ""
-"Select a service, and enter a chatroom and nickname. Optionally, you can "
-"configure the chatroom."
-msgstr ""
-"Selecteer een dienst en voer een chatruimte en bijnaam in. Optioneel kunt u "
-"de chatruimte instellen."
+msgid "Select a service, and enter a chatroom and nickname. Optionally, you can configure the chatroom."
+msgstr "Selecteer een dienst en voer een chatruimte en bijnaam in. Optioneel kunt u de chatruimte instellen."
 
-#: ../jabber/Create.tcl:105 ../jabber/Create.tcl:627 ../jabber/Enter.tcl:128
-#: ../jabber/Register.tcl:1124 ../jabber/Register.tcl:1451
-#: ../jabber/Search.tcl:154 ../jabber/UserInfo.tcl:566
+#: ../jabber/Create.tcl:105
+#: ../jabber/Create.tcl:627
+#: ../jabber/Enter.tcl:128
+#: ../jabber/Register.tcl:1124
+#: ../jabber/Register.tcl:1451
+#: ../jabber/Search.tcl:154
+#: ../jabber/UserInfo.tcl:566
 msgid "Service"
 msgstr "Dienst"
 
-#: ../jabber/Create.tcl:108 ../jabber/Create.tcl:632 ../jabber/Enter.tcl:162
-#: ../jabber/GroupChat.tcl:1548 ../jabber/GroupChat.tcl:1551
-#: ../jabber/GroupChat.tcl:3463 ../jabber/GroupChat.tcl:3665
+#: ../jabber/Create.tcl:108
+#: ../jabber/Create.tcl:632
+#: ../jabber/Enter.tcl:162
+#: ../jabber/GroupChat.tcl:1548
+#: ../jabber/GroupChat.tcl:1551
+#: ../jabber/GroupChat.tcl:3463
+#: ../jabber/GroupChat.tcl:3665
 msgid "Chatroom"
 msgstr "Chatruimte"
 
-#: ../jabber/Create.tcl:122 ../jabber/Enter.tcl:186
+#: ../jabber/Create.tcl:122
+#: ../jabber/Enter.tcl:186
 msgid "Select or manually enter a chatroom service"
 msgstr "Selecteer of voer een dienst voor chatruimtes in"
 
-#: ../jabber/Create.tcl:123 ../jabber/Enter.tcl:188
+#: ../jabber/Create.tcl:123
+#: ../jabber/Enter.tcl:188
 msgid "Select or manually enter the name of a chatroom"
 msgstr "Selecteer of voer de naam van een chatruimte in"
 
-#: ../jabber/Create.tcl:124 ../jabber/Enter.tcl:189
-#: ../jabber/GroupChat.tcl:3741 ../jabber/JForms.tcl:305
-#: ../jabber/JUser.tcl:200 ../jabber/Profiles.tcl:1126
-#: ../jabber/Register.tcl:716 ../jabber/VCard.tcl:323
+#: ../jabber/Create.tcl:124
+#: ../jabber/Enter.tcl:189
+#: ../jabber/GroupChat.tcl:3741
+#: ../jabber/JForms.tcl:305
+#: ../jabber/JUser.tcl:200
+#: ../jabber/Profiles.tcl:1126
+#: ../jabber/Register.tcl:716
+#: ../jabber/VCard.tcl:323
 msgid "Familiar name"
 msgstr "Bijnaam"
 
-#: ../jabber/Create.tcl:147 ../jabber/GroupChat.tcl:670
+#: ../jabber/Create.tcl:147
+#: ../jabber/GroupChat.tcl:670
 msgid "Configure"
 msgstr "Instellen"
 
@@ -2633,7 +3075,9 @@ msgstr "U moet een naam voor de chatruimte opgeven."
 msgid "You must provide a nickname."
 msgstr "U moet een bijnaam opgeven."
 
-#: ../jabber/Create.tcl:332 ../jabber/Create.tcl:515 ../jabber/JUser.tcl:294
+#: ../jabber/Create.tcl:332
+#: ../jabber/Create.tcl:515
+#: ../jabber/JUser.tcl:294
 #: ../jabber/Profiles.tcl:1455
 msgid "Invalid Contact ID."
 msgstr "Ongeldige Contact ID."
@@ -2642,23 +3086,40 @@ msgstr "Ongeldige Contact ID."
 msgid "Downloading configuration form"
 msgstr "Formulier voor instellingen wordt opgehaald"
 
-#: ../jabber/Create.tcl:423 ../jabber/Create.tcl:465 ../jabber/Enter.tcl:646
+#: ../jabber/Create.tcl:423
+#: ../jabber/Create.tcl:465
+#: ../jabber/Enter.tcl:646
 msgid "Cannot download the configuration form of the chatroom."
 msgstr "Kan het formulier voor instellingen van de chatruimte niet downloaden."
 
-#: ../jabber/Create.tcl:425 ../jabber/Create.tcl:467 ../jabber/Create.tcl:545
-#: ../jabber/Create.tcl:753 ../jabber/Enter.tcl:648 ../jabber/Enter.tcl:691
-#: ../jabber/FTrans.tcl:502 ../jabber/FTrans.tcl:534 ../jabber/JUser.tcl:384
-#: ../jabber/Jabber.tcl:617 ../jabber/Jabber.tcl:861 ../jabber/Jabber.tcl:2022
-#: ../jabber/Login.tcl:942 ../jabber/Login.tcl:966 ../jabber/Profiles.tcl:1645
-#: ../jabber/Register.tcl:120 ../jabber/Register.tcl:660
-#: ../jabber/Register.tcl:1289 ../jabber/Register.tcl:1354
-#: ../jabber/Register.tcl:1538 ../jabber/Search.tcl:349
-#: ../jabber/Search.tcl:424 ../lib/HttpTrpt.tcl:243
+#: ../jabber/Create.tcl:425
+#: ../jabber/Create.tcl:467
+#: ../jabber/Create.tcl:545
+#: ../jabber/Create.tcl:753
+#: ../jabber/Enter.tcl:648
+#: ../jabber/Enter.tcl:691
+#: ../jabber/FTrans.tcl:502
+#: ../jabber/FTrans.tcl:534
+#: ../jabber/JUser.tcl:384
+#: ../jabber/Jabber.tcl:617
+#: ../jabber/Jabber.tcl:861
+#: ../jabber/Jabber.tcl:2022
+#: ../jabber/Login.tcl:942
+#: ../jabber/Login.tcl:966
+#: ../jabber/Profiles.tcl:1645
+#: ../jabber/Register.tcl:120
+#: ../jabber/Register.tcl:660
+#: ../jabber/Register.tcl:1289
+#: ../jabber/Register.tcl:1354
+#: ../jabber/Register.tcl:1538
+#: ../jabber/Search.tcl:349
+#: ../jabber/Search.tcl:424
+#: ../lib/HttpTrpt.tcl:243
 msgid "Error code"
 msgstr "Foutcode"
 
-#: ../jabber/Create.tcl:433 ../jabber/Register.tcl:1223
+#: ../jabber/Create.tcl:433
+#: ../jabber/Register.tcl:1223
 msgid "Waiting for Get to be pressed"
 msgstr "Klik nu op Volgende"
 
@@ -2675,69 +3136,97 @@ msgstr "Chatruimte betreden/aanmaken"
 msgid "Select a chatroom service, a chatroom, and a nickname."
 msgstr "Kies een dienst voor chatruimtes, een chatruimte en een bijnaam."
 
-#: ../jabber/Create.tcl:724 ../jabber/Enter.tcl:493
+#: ../jabber/Create.tcl:724
+#: ../jabber/Enter.tcl:493
 msgid "Please fill in all fields before entering chatroom."
 msgstr "Voer eerst alle velden in voor u de chatruimte betreedt."
 
-#: ../jabber/Create.tcl:747 ../jabber/Enter.tcl:685
+#: ../jabber/Create.tcl:747
+#: ../jabber/Enter.tcl:685
 #, tcl-format
 msgid "Cannot enter chatroom %s."
 msgstr "Kan chatruimte %s niet betreden."
 
-#: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:222 ../jabber/JUI.tcl:177
-#: ../jabber/JUI.tcl:1833 ../jabber/JUI.tcl:1853 ../jabber/Roster.tcl:121
-#: ../jabber/Roster.tcl:527 ../jabber/Search.tcl:34 ../jabber/Search.tcl:42
+#: ../jabber/Disco.tcl:156
+#: ../jabber/GroupChat.tcl:222
+#: ../jabber/JUI.tcl:177
+#: ../jabber/JUI.tcl:1833
+#: ../jabber/JUI.tcl:1853
+#: ../jabber/Roster.tcl:121
+#: ../jabber/Roster.tcl:527
+#: ../jabber/Search.tcl:34
+#: ../jabber/Search.tcl:42
 msgid "Cha&t"
 msgstr "Cha&t"
 
-#: ../jabber/Disco.tcl:157 ../jabber/JUI.tcl:185 ../jabber/JUI.tcl:1835
+#: ../jabber/Disco.tcl:157
+#: ../jabber/JUI.tcl:185
+#: ../jabber/JUI.tcl:1835
 #: ../jabber/JUI.tcl:1855
 msgid "Enter Chat&room"
 msgstr "Chat&ruimte betreden"
 
-#: ../jabber/Disco.tcl:160 ../jabber/JUI.tcl:186 ../jabber/JUI.tcl:1836
+#: ../jabber/Disco.tcl:160
+#: ../jabber/JUI.tcl:186
+#: ../jabber/JUI.tcl:1836
 #: ../jabber/JUI.tcl:1856
 msgid "&Create Chatroom"
 msgstr "Chatruimte &aanmaken"
 
-#: ../jabber/Disco.tcl:164 ../jabber/GroupChat.tcl:224
-#: ../jabber/Roster.tcl:126 ../jabber/Roster.tcl:187 ../jabber/Search.tcl:35
+#: ../jabber/Disco.tcl:164
+#: ../jabber/GroupChat.tcl:224
+#: ../jabber/Roster.tcl:126
+#: ../jabber/Roster.tcl:187
+#: ../jabber/Search.tcl:35
 #: ../jabber/Search.tcl:43
 msgid "View &Business Card"
 msgstr "Visite&kaart weergeven"
 
-#: ../jabber/Disco.tcl:166 ../jabber/JUI.tcl:180 ../jabber/JUI.tcl:1830
+#: ../jabber/Disco.tcl:166
+#: ../jabber/JUI.tcl:180
+#: ../jabber/JUI.tcl:1830
 #: ../jabber/JUI.tcl:1850
 msgid "&Search"
 msgstr "&Zoeken"
 
-#: ../jabber/Disco.tcl:169 ../jabber/JUI.tcl:182 ../jabber/JUI.tcl:1826
+#: ../jabber/Disco.tcl:169
+#: ../jabber/JUI.tcl:182
+#: ../jabber/JUI.tcl:1826
 #: ../jabber/JUI.tcl:1841
 msgid "Re&gister"
 msgstr "R&egistreren"
 
-#: ../jabber/Disco.tcl:172 ../jabber/Roster.tcl:194
+#: ../jabber/Disco.tcl:172
+#: ../jabber/Roster.tcl:194
 msgid "&Unregister"
 msgstr "Registratie verwij&deren"
 
-#: ../jabber/Disco.tcl:174 ../jabber/JUI.tcl:214 ../jabber/JUI.tcl:1911
-#: ../jabber/JUI.tcl:1925 ../jabber/Roster.tcl:132
+#: ../jabber/Disco.tcl:174
+#: ../jabber/JUI.tcl:214
+#: ../jabber/JUI.tcl:1911
+#: ../jabber/JUI.tcl:1925
+#: ../jabber/Roster.tcl:132
 msgid "Show"
 msgstr "&Tonen"
 
 #. TRANSLATORS; to set the background image in the main window
-#: ../jabber/Disco.tcl:176 ../jabber/Roster.tcl:138
+#: ../jabber/Disco.tcl:176
+#: ../jabber/Roster.tcl:138
 msgid "&Background Image"
 msgstr "&Achtergrondafbeelding"
 
 #. TRANSLATORS; refresh the listed items
-#: ../jabber/Disco.tcl:179 ../jabber/MUC.tcl:484 ../jabber/Roster.tcl:144
+#: ../jabber/Disco.tcl:179
+#: ../jabber/MUC.tcl:484
+#: ../jabber/Roster.tcl:144
 #: ../jabber/Roster.tcl:195
 msgid "Refresh"
 msgstr "&Verversen"
 
 #. TRANSLATORS; look for available services on a server
-#: ../jabber/Disco.tcl:181 ../jabber/JUI.tcl:183 ../jabber/JUI.tcl:1838
+#: ../jabber/Disco.tcl:181
+#: ../jabber/JUI.tcl:183
+#: ../jabber/JUI.tcl:1838
 #: ../jabber/JUI.tcl:1858
 msgid "&Discover Server"
 msgstr "&Server waarnemen"
@@ -2750,7 +3239,9 @@ msgstr "Waarneming verwijdere&n"
 msgid "C&ommands"
 msgstr "C&ommando's"
 
-#: ../jabber/Disco.tcl:187 ../jabber/GroupChat.tcl:232 ../jabber/JUI.tcl:192
+#: ../jabber/Disco.tcl:187
+#: ../jabber/GroupChat.tcl:232
+#: ../jabber/JUI.tcl:192
 #: ../jabber/Roster.tcl:172
 msgid "&Whiteboard"
 msgstr "&Whiteboard"
@@ -2760,36 +3251,42 @@ msgid "Services"
 msgstr "Diensten"
 
 #. TRANSLATORS: to set background image in services or contacts tab
-#: ../jabber/Disco.tcl:873 ../jabber/RosterTree.tcl:804
-msgid ""
-"Select an image file for the background. To remove a background image press "
-"Remove and Save."
-msgstr ""
-"Selecteer een achtergrondafbeelding. U kunt de achtergrondafbeelding "
-"verwijderen door op Leegmaken en OK te drukken."
+#: ../jabber/Disco.tcl:873
+#: ../jabber/RosterTree.tcl:804
+msgid "Select an image file for the background. To remove a background image press Remove and Save."
+msgstr "Selecteer een achtergrondafbeelding. U kunt de achtergrondafbeelding verwijderen door op Leegmaken en OK te drukken."
 
-#: ../jabber/Disco.tcl:881 ../jabber/RosterTree.tcl:812
+#: ../jabber/Disco.tcl:881
+#: ../jabber/RosterTree.tcl:812
 msgid "Background Image"
 msgstr "Achtergrondafbeelding"
 
-#: ../jabber/Disco.tcl:1491 ../jabber/Disco.tcl:1676 ../jabber/Enter.tcl:131
-#: ../jabber/MUC.tcl:1616 ../jabber/UserInfo.tcl:175
+#: ../jabber/Disco.tcl:1491
+#: ../jabber/Disco.tcl:1676
+#: ../jabber/Enter.tcl:131
+#: ../jabber/MUC.tcl:1616
+#: ../jabber/UserInfo.tcl:175
 msgid "Discover"
 msgstr "Waarnemen"
 
-#: ../jabber/Disco.tcl:1622 ../jabber/Disco.tcl:1637
+#: ../jabber/Disco.tcl:1622
+#: ../jabber/Disco.tcl:1637
 msgid "Discover Server"
 msgstr "Server waarnemen"
 
 #: ../jabber/Disco.tcl:1650
 msgid "Enter a server to discover and use its services."
-msgstr ""
-"Voer een te waarnemen server in zodat u de diensten ervan kunt gebruiken."
+msgstr "Voer een te waarnemen server in zodat u de diensten ervan kunt gebruiken."
 
-#: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:531 ../jabber/Login.tcl:171
-#: ../jabber/Profiles.tcl:1084 ../jabber/Profiles.tcl:1864
-#: ../jabber/Register.tcl:274 ../jabber/SetupAss.tcl:137
-#: ../jabber/SetupAss.tcl:165 ../jabber/StatusSlot.tcl:34
+#: ../jabber/Disco.tcl:1657
+#: ../jabber/JUI.tcl:531
+#: ../jabber/Login.tcl:171
+#: ../jabber/Profiles.tcl:1084
+#: ../jabber/Profiles.tcl:1864
+#: ../jabber/Register.tcl:274
+#: ../jabber/SetupAss.tcl:137
+#: ../jabber/SetupAss.tcl:165
+#: ../jabber/StatusSlot.tcl:34
 #: ../whiteboard/WDialogs.tcl:172
 msgid "Server"
 msgstr "Server"
@@ -2803,26 +3300,34 @@ msgstr "Altijd waarnemen"
 msgid "Author"
 msgstr "Auteur"
 
-#: ../jabber/Emoticons.tcl:600 ../jabber/VCard.tcl:450
+#: ../jabber/Emoticons.tcl:600
+#: ../jabber/VCard.tcl:450
 msgid "Home"
 msgstr "Thuis"
 
-#: ../jabber/Emoticons.tcl:602 ../jabber/Jabber.tcl:1685
-#: ../jabber/Jabber.tcl:1696 ../jabber/Roster.tcl:190
-#: ../jabber/UserInfo.tcl:211 ../jabber/UserInfo.tcl:220
-#: ../jabber/UserInfo.tcl:225 ../whiteboard/WDialogs.tcl:133
+#: ../jabber/Emoticons.tcl:602
+#: ../jabber/Jabber.tcl:1685
+#: ../jabber/Jabber.tcl:1696
+#: ../jabber/Roster.tcl:190
+#: ../jabber/UserInfo.tcl:211
+#: ../jabber/UserInfo.tcl:220
+#: ../jabber/UserInfo.tcl:225
+#: ../whiteboard/WDialogs.tcl:133
 msgid "Version"
 msgstr "Versie"
 
-#: ../jabber/Emoticons.tcl:615 ../whiteboard/ItemInspector.tcl:367
+#: ../jabber/Emoticons.tcl:615
+#: ../whiteboard/ItemInspector.tcl:367
 msgid "Image"
 msgstr "Afbeelding"
 
-#: ../jabber/Emoticons.tcl:639 ../jabber/Emoticons.tcl:835
+#: ../jabber/Emoticons.tcl:639
+#: ../jabber/Emoticons.tcl:835
 msgid "Iconset Archive"
 msgstr "Emoticon-thema"
 
-#: ../jabber/Emoticons.tcl:641 ../jabber/Emoticons.tcl:775
+#: ../jabber/Emoticons.tcl:641
+#: ../jabber/Emoticons.tcl:775
 #: ../jabber/Emoticons.tcl:837
 msgid "Import Iconset"
 msgstr "Emoticon-thema importeren"
@@ -2835,7 +3340,8 @@ msgstr "Emoticons"
 msgid "The selected iconset will become the default."
 msgstr "Het geselecteerde emoticon-thema zal gebruikt worden."
 
-#: ../jabber/Emoticons.tcl:813 ../jabber/Emoticons.tcl:861
+#: ../jabber/Emoticons.tcl:813
+#: ../jabber/Emoticons.tcl:861
 #, tcl-format
 msgid "Cannot load iconset %s."
 msgstr "Kan emoticon-thema %s niet laden."
@@ -2850,32 +3356,38 @@ msgid "Enter Chatroom"
 msgstr "Chatruimte betreden"
 
 #: ../jabber/Enter.tcl:117
-msgid ""
-"Select a service, and enter a chatroom and nickname. You can discover the "
-"available chatrooms on the selected service. Some chatrooms may require a "
-"password."
-msgstr ""
-"Selecteer een dienst en voer een chatruimte en een bijnaam in. U kunt de "
-"beschikbare chatruimtes op de geselecteerde dienst waarnemen. Sommige "
-"chatruimtes vereisten een wachtwoord."
+msgid "Select a service, and enter a chatroom and nickname. You can discover the available chatrooms on the selected service. Some chatrooms may require a password."
+msgstr "Selecteer een dienst en voer een chatruimte en een bijnaam in. U kunt de beschikbare chatruimtes op de geselecteerde dienst waarnemen. Sommige chatruimtes vereisten een wachtwoord."
 
-#: ../jabber/Enter.tcl:166 ../jabber/GroupChat.tcl:3464
-#: ../jabber/Login.tcl:179 ../jabber/Login.tcl:666 ../jabber/Login.tcl:668
-#: ../jabber/Login.tcl:733 ../jabber/Login.tcl:735 ../jabber/Profiles.tcl:1090
-#: ../jabber/Register.tcl:1458 ../jabber/SetupAss.tcl:168 ../lib/Proxy.tcl:211
+#: ../jabber/Enter.tcl:166
+#: ../jabber/GroupChat.tcl:3464
+#: ../jabber/Login.tcl:179
+#: ../jabber/Login.tcl:666
+#: ../jabber/Login.tcl:668
+#: ../jabber/Login.tcl:733
+#: ../jabber/Login.tcl:735
+#: ../jabber/Profiles.tcl:1090
+#: ../jabber/Register.tcl:1458
+#: ../jabber/SetupAss.tcl:168
+#: ../lib/Proxy.tcl:211
 msgid "Password"
 msgstr "Wachtwoord"
 
-#: ../jabber/Enter.tcl:187 ../jabber/Enter.tcl:261
+#: ../jabber/Enter.tcl:187
+#: ../jabber/Enter.tcl:261
 msgid "Bookmarks"
 msgstr "Bladwijzers"
 
-#: ../jabber/Enter.tcl:190 ../jabber/JForms.tcl:306 ../jabber/Login.tcl:224
-#: ../jabber/Profiles.tcl:1125 ../jabber/Register.tcl:717
+#: ../jabber/Enter.tcl:190
+#: ../jabber/JForms.tcl:306
+#: ../jabber/Login.tcl:224
+#: ../jabber/Profiles.tcl:1125
+#: ../jabber/Register.tcl:717
 msgid "Password or secret"
 msgstr "Wachtwoord"
 
-#: ../jabber/Enter.tcl:403 ../jabber/Enter.tcl:453
+#: ../jabber/Enter.tcl:403
+#: ../jabber/Enter.tcl:453
 #, tcl-format
 msgid "Cannot find any chatrooms at %s."
 msgstr "Kan geen chatruimtes vinden op %s."
@@ -2894,11 +3406,14 @@ msgstr "Kan de chatruimte %s niet betreden: %s Wilt u het opnieuw proberen?"
 msgid "Send a file to %s. A description is optional."
 msgstr "Verzend een bestand naar %s. Een beschrijving is optioneel."
 
-#: ../jabber/FTrans.tcl:201 ../jabber/FTrans.tcl:284
+#: ../jabber/FTrans.tcl:201
+#: ../jabber/FTrans.tcl:284
 msgid "Select File"
 msgstr "Bestand selecteren"
 
-#: ../jabber/FTrans.tcl:372 ../jabber/FTrans.tcl:408 ../jabber/FTrans.tcl:459
+#: ../jabber/FTrans.tcl:372
+#: ../jabber/FTrans.tcl:408
+#: ../jabber/FTrans.tcl:459
 #, tcl-format
 msgid "%s does not support file transfer."
 msgstr "%s ondersteunt geen bestandsoverdracht."
@@ -2915,30 +3430,36 @@ msgstr "U moet een te verzenden bestand selecteren."
 msgid "The selected file does not exist. Select a new one."
 msgstr "Het geselecteerde bestand bestaat niet. Selecteer een ander bestand."
 
-#: ../jabber/FTrans.tcl:497 ../jabber/FTrans.tcl:529
+#: ../jabber/FTrans.tcl:497
+#: ../jabber/FTrans.tcl:529
 #, tcl-format
 msgid "%s did not accepted the file %s."
 msgstr "%s aanvaardde het bestand %s niet."
 
-#: ../jabber/FTrans.tcl:500 ../jabber/FTrans.tcl:532
+#: ../jabber/FTrans.tcl:500
+#: ../jabber/FTrans.tcl:532
 #, tcl-format
 msgid "Cannot send the file %s to %s."
 msgstr "Kan het bestand %s niet verzenden naar %s."
 
-#: ../jabber/FTrans.tcl:513 ../jabber/FTrans.tcl:543
+#: ../jabber/FTrans.tcl:513
+#: ../jabber/FTrans.tcl:543
 msgid "File Transfer"
 msgstr "Bestandsoverdracht"
 
-#: ../jabber/FTrans.tcl:514 ../jabber/FTrans.tcl:544
+#: ../jabber/FTrans.tcl:514
+#: ../jabber/FTrans.tcl:544
 #, tcl-format
 msgid "File transfer of %s to %s was successful."
 msgstr "Bestandsoverdracht van %s naar %s is voltooid."
 
-#: ../jabber/FTrans.tcl:654 ../lib/HttpTrpt.tcl:181
+#: ../jabber/FTrans.tcl:654
+#: ../lib/HttpTrpt.tcl:181
 msgid "Rate"
 msgstr "Snelheid"
 
-#: ../jabber/FTrans.tcl:658 ../lib/HttpTrpt.tcl:162
+#: ../jabber/FTrans.tcl:658
+#: ../lib/HttpTrpt.tcl:162
 #: ../whiteboard/GetFileIface.tcl:513
 msgid "Writing file"
 msgstr "Bezig met wegschrijven bestand"
@@ -2950,11 +3471,12 @@ msgstr "Kan bestand %s van %s niet downloaden."
 
 #: ../jabber/FTrans.tcl:694
 msgid "The MD5 checksums did not match. The file may be corrupt."
-msgstr ""
-"De MD5controlesommen komt niet overeen. Het bestand is misschien beschadigd."
+msgstr "De MD5controlesommen komt niet overeen. Het bestand is misschien beschadigd."
 
-#: ../jabber/Gateway.tcl:63 ../jabber/Rosticons.tcl:587
-#: ../jabber/Search.tcl:936 ../jabber/VCard.tcl:308
+#: ../jabber/Gateway.tcl:63
+#: ../jabber/Rosticons.tcl:587
+#: ../jabber/Search.tcl:936
+#: ../jabber/VCard.tcl:308
 msgid "Email"
 msgstr "E-mail"
 
@@ -2976,8 +3498,11 @@ msgstr "ICQ-nummer"
 msgid "IRC"
 msgstr "IRC"
 
-#: ../jabber/Gateway.tcl:80 ../jabber/Gateway.tcl:86 ../jabber/JForms.tcl:300
-#: ../jabber/Register.tcl:711 ../jabber/VCard.tcl:324
+#: ../jabber/Gateway.tcl:80
+#: ../jabber/Gateway.tcl:86
+#: ../jabber/JForms.tcl:300
+#: ../jabber/Register.tcl:711
+#: ../jabber/VCard.tcl:324
 msgid "Email address"
 msgstr "E-mailadres"
 
@@ -2995,10 +3520,13 @@ msgstr "Tlen-adres"
 
 #: ../jabber/Gateway.tcl:90
 msgid "Twitter user"
-msgstr ""
+msgstr "Twitteraar"
 
-#: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
-#: ../jabber/Profiles.tcl:1124 ../jabber/VCard.tcl:322
+#: ../jabber/Gateway.tcl:91
+#: ../jabber/JUser.tcl:193
+#: ../jabber/Login.tcl:223
+#: ../jabber/Profiles.tcl:1124
+#: ../jabber/VCard.tcl:322
 msgid "Chat address"
 msgstr "Chatadres"
 
@@ -3011,11 +3539,13 @@ msgstr "Yahoo ID"
 msgid "Incoming Message"
 msgstr "Inkomend bericht"
 
-#: ../jabber/GotMsg.tcl:227 ../jabber/MailBox.tcl:505
+#: ../jabber/GotMsg.tcl:227
+#: ../jabber/MailBox.tcl:505
 msgid "Forward"
 msgstr "Doorsturen"
 
-#: ../jabber/GotMsg.tcl:229 ../jabber/MailBox.tcl:502
+#: ../jabber/GotMsg.tcl:229
+#: ../jabber/MailBox.tcl:502
 msgid "Reply"
 msgstr "Beantwoorden"
 
@@ -3023,7 +3553,9 @@ msgstr "Beantwoorden"
 msgid "Show incoming messages in this window"
 msgstr "Inkomende berichten in dit venster tonen"
 
-#: ../jabber/GotMsg.tcl:251 ../jabber/MailBox.tcl:686 ../jabber/NewMsg.tcl:442
+#: ../jabber/GotMsg.tcl:251
+#: ../jabber/MailBox.tcl:686
+#: ../jabber/NewMsg.tcl:442
 msgid "From"
 msgstr "Van"
 
@@ -3067,7 +3599,8 @@ msgstr "langdurig afwezig"
 msgid "invisible"
 msgstr "onzichtbaar"
 
-#: ../jabber/GroupChat.tcl:223 ../jabber/Roster.tcl:123
+#: ../jabber/GroupChat.tcl:223
+#: ../jabber/Roster.tcl:123
 msgid "Send &File"
 msgstr "Bestand ver&zenden"
 
@@ -3102,7 +3635,9 @@ msgstr "U melde af en verliet de chatruimte"
 msgid "Do you want to exit the chatroom %s?"
 msgstr "Wilt u de chatruimte %s verlaten?"
 
-#: ../jabber/GroupChat.tcl:2708 ../jabber/MUC.tcl:1715 ../jabber/MUC.tcl:1738
+#: ../jabber/GroupChat.tcl:2708
+#: ../jabber/MUC.tcl:1715
+#: ../jabber/MUC.tcl:1738
 #, tcl-format
 msgid "Cannot interact with the chatroom %s."
 msgstr "Kan niet communiceren met de chatruimte %s."
@@ -3133,7 +3668,8 @@ msgid "Choose Color"
 msgstr "Kleur kiezen"
 
 #. TRANSLATORS; this string shows when a new conversation thread has been started
-#: ../jabber/History.tcl:840 ../jabber/History.tcl:1160
+#: ../jabber/History.tcl:840
+#: ../jabber/History.tcl:1160
 msgid "Thread started"
 msgstr "Conversatie begonnen op"
 
@@ -3150,57 +3686,63 @@ msgid "No registered history for"
 msgstr "Geen geschiedenis voor"
 
 #: ../jabber/JForms.tcl:269
-msgid ""
-"You are already registered with this service. These are your current "
-"registration settings."
-msgstr ""
-"U hebt al een account op deze dienst. Dit zijn uw huidige instellingen."
+msgid "You are already registered with this service. These are your current registration settings."
+msgstr "U hebt al een account op deze dienst. Dit zijn uw huidige instellingen."
 
-#: ../jabber/JForms.tcl:297 ../jabber/Register.tcl:708
+#: ../jabber/JForms.tcl:297
+#: ../jabber/Register.tcl:708
 msgid "Street portion of a physical or mailing address"
 msgstr "Straat"
 
-#: ../jabber/JForms.tcl:298 ../jabber/Register.tcl:709
+#: ../jabber/JForms.tcl:298
+#: ../jabber/Register.tcl:709
 msgid "Locality portion of a physical or mailing address"
 msgstr "Stad/gemeente"
 
-#: ../jabber/JForms.tcl:299 ../jabber/Register.tcl:710
+#: ../jabber/JForms.tcl:299
+#: ../jabber/Register.tcl:710
 msgid "Some date (e.g., birth date, hire date, sign-up date)"
 msgstr "Een datum (bv.: geboortedatum, inschrijvingsdatum)"
 
-#: ../jabber/JForms.tcl:301 ../jabber/Register.tcl:712
+#: ../jabber/JForms.tcl:301
+#: ../jabber/Register.tcl:712
 msgid "First name or given name"
 msgstr "Voornaam"
 
-#: ../jabber/JForms.tcl:302 ../jabber/Register.tcl:713
+#: ../jabber/JForms.tcl:302
+#: ../jabber/Register.tcl:713
 #: ../jabber/Register.tcl:796
-msgid ""
-"You are already registered with this service. These are your current login "
-"settings."
-msgstr ""
-"U hebt al een account op deze dienst. Dit zijn uw huidige instellingen."
+msgid "You are already registered with this service. These are your current login settings."
+msgstr "U hebt al een account op deze dienst. Dit zijn uw huidige instellingen."
 
-#: ../jabber/JForms.tcl:303 ../jabber/Register.tcl:714
+#: ../jabber/JForms.tcl:303
+#: ../jabber/Register.tcl:714
 msgid "Last name, surname, or family name"
 msgstr "Achternaam"
 
-#: ../jabber/JForms.tcl:304 ../jabber/Register.tcl:715
+#: ../jabber/JForms.tcl:304
+#: ../jabber/Register.tcl:715
 msgid "Full name"
 msgstr "Volledige naam"
 
-#: ../jabber/JForms.tcl:307 ../jabber/Register.tcl:718
+#: ../jabber/JForms.tcl:307
+#: ../jabber/Register.tcl:718
 msgid "Telephone number"
 msgstr "Telefoonnummer"
 
-#: ../jabber/JForms.tcl:309 ../jabber/Register.tcl:720 ../jabber/VCard.tcl:389
+#: ../jabber/JForms.tcl:309
+#: ../jabber/Register.tcl:720
+#: ../jabber/VCard.tcl:389
 msgid "URL to personal website"
 msgstr "Het adres van de persoonlijke website"
 
-#: ../jabber/JForms.tcl:310 ../jabber/Register.tcl:721
+#: ../jabber/JForms.tcl:310
+#: ../jabber/Register.tcl:721
 msgid "Account name associated with the user"
 msgstr "De accountnaam van de gebruiker"
 
-#: ../jabber/JForms.tcl:311 ../jabber/Register.tcl:722
+#: ../jabber/JForms.tcl:311
+#: ../jabber/Register.tcl:722
 msgid "Postal code portion of a physical or mailing address"
 msgstr "Postcode"
 
@@ -3209,11 +3751,13 @@ msgid "Labels with (*) are required."
 msgstr "Labels met (*) zijn verplicht."
 
 #. TRANSLATORS; see preferences
-#: ../jabber/JPrefs.tcl:110 ../jabber/JPrefs.tcl:178
+#: ../jabber/JPrefs.tcl:110
+#: ../jabber/JPrefs.tcl:178
 msgid "Appearance"
 msgstr "Uiterlijk"
 
-#: ../jabber/JPrefs.tcl:111 ../jabber/JPrefs.tcl:304
+#: ../jabber/JPrefs.tcl:111
+#: ../jabber/JPrefs.tcl:304
 msgid "Customization"
 msgstr "Varia"
 
@@ -3229,8 +3773,10 @@ msgstr "Chatvenster"
 msgid "Theme"
 msgstr "Thema"
 
-#: ../jabber/JPrefs.tcl:203 ../jabber/SetupAss.tcl:127
-#: ../lib/PrefGeneral.tcl:105 ../lib/PrefGeneral.tcl:117
+#: ../jabber/JPrefs.tcl:203
+#: ../jabber/SetupAss.tcl:127
+#: ../lib/PrefGeneral.tcl:105
+#: ../lib/PrefGeneral.tcl:117
 #: ../whiteboard/Plugins.tcl:1347
 #, tcl-format
 msgid "Requires a restart of %s"
@@ -3261,34 +3807,48 @@ msgstr "Geopende vensters onthouden tusses sessies"
 msgid "Show notifier window"
 msgstr "Notificatievenster tonen"
 
-#: ../jabber/JUI.tcl:144 ../jabber/JUI.tcl:1721 ../jabber/JUI.tcl:1725
-#: ../jabber/JUI.tcl:1737 ../jabber/JUI.tcl:1740
+#: ../jabber/JUI.tcl:144
+#: ../jabber/JUI.tcl:1721
+#: ../jabber/JUI.tcl:1725
+#: ../jabber/JUI.tcl:1737
+#: ../jabber/JUI.tcl:1740
 msgid "&New Account"
 msgstr "&Nieuwe account"
 
-#: ../jabber/JUI.tcl:145 ../jabber/JUI.tcl:1726 ../jabber/JUI.tcl:1745
+#: ../jabber/JUI.tcl:145
+#: ../jabber/JUI.tcl:1726
+#: ../jabber/JUI.tcl:1745
 msgid "&Remove Account"
 msgstr "Account ve&rwijderen"
 
-#: ../jabber/JUI.tcl:146 ../jabber/JUI.tcl:1727 ../jabber/JUI.tcl:1742
+#: ../jabber/JUI.tcl:146
+#: ../jabber/JUI.tcl:1727
+#: ../jabber/JUI.tcl:1742
 msgid "New P&assword"
 msgstr "Nieuw &Wachtwoord"
 
-#: ../jabber/JUI.tcl:147 ../jabber/JUI.tcl:1722 ../jabber/JUI.tcl:1728
+#: ../jabber/JUI.tcl:147
+#: ../jabber/JUI.tcl:1722
+#: ../jabber/JUI.tcl:1728
 #: ../jabber/JUI.tcl:1743
 msgid "&Setup Assistant"
 msgstr "&Installatieassistent"
 
-#: ../jabber/JUI.tcl:149 ../jabber/JUI.tcl:1729 ../jabber/JUI.tcl:1736
+#: ../jabber/JUI.tcl:149
+#: ../jabber/JUI.tcl:1729
+#: ../jabber/JUI.tcl:1736
 #: ../jabber/JUI.tcl:1739
 msgid "&Edit Profiles"
 msgstr "Profielen &bewerken"
 
-#: ../jabber/JUI.tcl:150 ../jabber/JUI.tcl:1730 ../jabber/JUI.tcl:1744
+#: ../jabber/JUI.tcl:150
+#: ../jabber/JUI.tcl:1730
+#: ../jabber/JUI.tcl:1744
 msgid "Edit &Business Card"
 msgstr "Visite&kaart bewerken"
 
-#: ../jabber/JUI.tcl:152 ../whiteboard/WBPrefs.tcl:185
+#: ../jabber/JUI.tcl:152
+#: ../whiteboard/WBPrefs.tcl:185
 msgid "Import"
 msgstr "Importeren"
 
@@ -3296,13 +3856,20 @@ msgstr "Importeren"
 msgid "Icon &Set"
 msgstr "&Emoticon-thema"
 
-#: ../jabber/JUI.tcl:154 ../jabber/JUI.tcl:159 ../jabber/JUI.tcl:1710
-#: ../jabber/JUI.tcl:1713 ../jabber/JUI.tcl:1732 ../jabber/RosterTree.tcl:1981
-#: ../jabber/UserInfo.tcl:663 ../jabber/VCard.tcl:800
+#: ../jabber/JUI.tcl:154
+#: ../jabber/JUI.tcl:159
+#: ../jabber/JUI.tcl:1710
+#: ../jabber/JUI.tcl:1713
+#: ../jabber/JUI.tcl:1732
+#: ../jabber/RosterTree.tcl:1981
+#: ../jabber/UserInfo.tcl:663
+#: ../jabber/VCard.tcl:800
 msgid "&Business Card"
 msgstr "&Visitekaart"
 
-#: ../jabber/JUI.tcl:156 ../jabber/UserInfo.tcl:418 ../jabber/VCard.tcl:264
+#: ../jabber/JUI.tcl:156
+#: ../jabber/UserInfo.tcl:418
+#: ../jabber/VCard.tcl:264
 msgid "Export"
 msgstr "Exporteren"
 
@@ -3310,28 +3877,43 @@ msgstr "Exporteren"
 msgid "&Contacts"
 msgstr "&Contactpersonen"
 
-#: ../jabber/JUI.tcl:158 ../jabber/JUI.tcl:202
+#: ../jabber/JUI.tcl:158
+#: ../jabber/JUI.tcl:202
 msgid "&Inbox"
 msgstr "Postvak &in"
 
-#: ../jabber/JUI.tcl:163 ../jabber/JUI.tcl:1701 ../jabber/JUI.tcl:1704
-#: ../jabber/JWB.tcl:161 ../whiteboard/Whiteboard.tcl:424
+#: ../jabber/JUI.tcl:163
+#: ../jabber/JUI.tcl:1701
+#: ../jabber/JUI.tcl:1704
+#: ../jabber/JWB.tcl:161
+#: ../whiteboard/Whiteboard.tcl:424
 #: ../whiteboard/Whiteboard.tcl:608
 msgid "&Close Window"
 msgstr "Venster s&luiten"
 
-#: ../jabber/JUI.tcl:173 ../jabber/JUI.tcl:1229 ../jabber/JUI.tcl:1844
-#: ../jabber/JUI.tcl:1847 ../jabber/JUI.tcl:2004 ../jabber/Login.tcl:111
-#: ../jabber/Login.tcl:124 ../jabber/Login.tcl:267 ../jabber/Profiles.tcl:1835
+#: ../jabber/JUI.tcl:173
+#: ../jabber/JUI.tcl:1229
+#: ../jabber/JUI.tcl:1844
+#: ../jabber/JUI.tcl:1847
+#: ../jabber/JUI.tcl:2004
+#: ../jabber/Login.tcl:111
+#: ../jabber/Login.tcl:124
+#: ../jabber/Login.tcl:267
+#: ../jabber/Profiles.tcl:1835
 msgid "Login"
 msgstr "Aanmelden"
 
-#: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1829 ../jabber/JUI.tcl:1849
-#: ../jabber/Jabber.tcl:2097 ../jabber/Jabber.tcl:2109
+#: ../jabber/JUI.tcl:174
+#: ../jabber/JUI.tcl:1829
+#: ../jabber/JUI.tcl:1849
+#: ../jabber/Jabber.tcl:2097
+#: ../jabber/Jabber.tcl:2109
 msgid "Logout With Message"
 msgstr "Met bericht afmel&den"
 
-#: ../jabber/JUI.tcl:187 ../jabber/JUI.tcl:1837 ../jabber/JUI.tcl:1857
+#: ../jabber/JUI.tcl:187
+#: ../jabber/JUI.tcl:1837
+#: ../jabber/JUI.tcl:1857
 msgid "Edit &Bookmarks"
 msgstr "B&ladwijzers bewerken"
 
@@ -3339,8 +3921,10 @@ msgstr "B&ladwijzers bewerken"
 msgid "Font Size"
 msgstr "Letter&grootte"
 
-#: ../jabber/JUI.tcl:207 ../whiteboard/Whiteboard.tcl:457
-#: ../whiteboard/Whiteboard.tcl:2943 ../whiteboard/Whiteboard.tcl:2965
+#: ../jabber/JUI.tcl:207
+#: ../whiteboard/Whiteboard.tcl:457
+#: ../whiteboard/Whiteboard.tcl:2943
+#: ../whiteboard/Whiteboard.tcl:2965
 #: ../whiteboard/Whiteboard.tcl:2968
 msgid "Larger"
 msgstr "Breder"
@@ -3373,63 +3957,87 @@ msgstr "&Foutmeldingen"
 msgid "&Debug"
 msgstr "&Debug"
 
-#: ../jabber/JUI.tcl:231 ../jabber/JUI.tcl:826 ../jabber/JUI.tcl:998
+#: ../jabber/JUI.tcl:231
+#: ../jabber/JUI.tcl:826
+#: ../jabber/JUI.tcl:998
 #: ../jabber/JUI.tcl:1935
 msgid "Show Control Panel"
 msgstr "Controlepaneel tonen"
 
-#: ../jabber/JUI.tcl:238 ../whiteboard/Whiteboard.tcl:414
+#: ../jabber/JUI.tcl:238
+#: ../whiteboard/Whiteboard.tcl:414
 #: ../whiteboard/Whiteboard.tcl:416
 #, tcl-format
 msgid "&About %s"
 msgstr "Over %s"
 
-#: ../jabber/JUI.tcl:245 ../jabber/JUI.tcl:1768 ../jabber/JUI.tcl:1777
-#: ../whiteboard/Whiteboard.tcl:443 ../whiteboard/Whiteboard.tcl:2897
+#: ../jabber/JUI.tcl:245
+#: ../jabber/JUI.tcl:1768
+#: ../jabber/JUI.tcl:1777
+#: ../whiteboard/Whiteboard.tcl:443
+#: ../whiteboard/Whiteboard.tcl:2897
 #: ../whiteboard/Whiteboard.tcl:2899
 msgid "&Undo"
 msgstr "&Ongedaan maken"
 
-#: ../jabber/JUI.tcl:246 ../jabber/JUI.tcl:1769 ../jabber/JUI.tcl:1779
-#: ../whiteboard/Whiteboard.tcl:444 ../whiteboard/Whiteboard.tcl:2902
+#: ../jabber/JUI.tcl:246
+#: ../jabber/JUI.tcl:1769
+#: ../jabber/JUI.tcl:1779
+#: ../whiteboard/Whiteboard.tcl:444
+#: ../whiteboard/Whiteboard.tcl:2902
 #: ../whiteboard/Whiteboard.tcl:2904
 msgid "Re&do"
 msgstr "Opnie&uw"
 
-#: ../jabber/JUI.tcl:248 ../whiteboard/Whiteboard.tcl:446
-#: ../whiteboard/Whiteboard.tcl:613 ../whiteboard/Whiteboard.tcl:2910
-#: ../whiteboard/Whiteboard.tcl:2912 ../whiteboard/Whiteboard.tcl:2916
+#: ../jabber/JUI.tcl:248
+#: ../whiteboard/Whiteboard.tcl:446
+#: ../whiteboard/Whiteboard.tcl:613
+#: ../whiteboard/Whiteboard.tcl:2910
+#: ../whiteboard/Whiteboard.tcl:2912
+#: ../whiteboard/Whiteboard.tcl:2916
 #: ../whiteboard/Whiteboard.tcl:2919
 msgid "Cu&t"
 msgstr "Kni&ppen"
 
-#: ../jabber/JUI.tcl:249 ../whiteboard/Whiteboard.tcl:447
-#: ../whiteboard/Whiteboard.tcl:614 ../whiteboard/Whiteboard.tcl:2914
-#: ../whiteboard/Whiteboard.tcl:2917 ../whiteboard/Whiteboard.tcl:2920
+#: ../jabber/JUI.tcl:249
+#: ../whiteboard/Whiteboard.tcl:447
+#: ../whiteboard/Whiteboard.tcl:614
+#: ../whiteboard/Whiteboard.tcl:2914
+#: ../whiteboard/Whiteboard.tcl:2917
+#: ../whiteboard/Whiteboard.tcl:2920
 msgid "&Copy"
 msgstr "&Kopiëren"
 
-#: ../jabber/JUI.tcl:250 ../whiteboard/Whiteboard.tcl:448
-#: ../whiteboard/Whiteboard.tcl:615 ../whiteboard/Whiteboard.tcl:2923
-#: ../whiteboard/Whiteboard.tcl:2925 ../whiteboard/Whiteboard.tcl:2927
+#: ../jabber/JUI.tcl:250
+#: ../whiteboard/Whiteboard.tcl:448
+#: ../whiteboard/Whiteboard.tcl:615
+#: ../whiteboard/Whiteboard.tcl:2923
+#: ../whiteboard/Whiteboard.tcl:2925
+#: ../whiteboard/Whiteboard.tcl:2927
 msgid "&Paste"
 msgstr "P&lakken"
 
-#: ../jabber/JUI.tcl:252 ../jabber/JUI.tcl:1767 ../jabber/JUI.tcl:1775
-#: ../jabber/JUI.tcl:1782 ../jabber/Subscribe.tcl:1091
+#: ../jabber/JUI.tcl:252
+#: ../jabber/JUI.tcl:1767
+#: ../jabber/JUI.tcl:1775
+#: ../jabber/JUI.tcl:1782
+#: ../jabber/Subscribe.tcl:1091
 msgid "All"
 msgstr "Alles"
 
-#: ../jabber/JUI.tcl:485 ../jabber/Roster.tcl:1589
+#: ../jabber/JUI.tcl:485
+#: ../jabber/Roster.tcl:1589
 msgid "Contacts"
 msgstr "Contactpersonen"
 
 #. TRANSLATORS; right mouse click menu (on arrow) in control panel (bottom of main window): status info slot
-#: ../jabber/JUI.tcl:529 ../jabber/StatusSlot.tcl:32
+#: ../jabber/JUI.tcl:529
+#: ../jabber/StatusSlot.tcl:32
 msgid "Own Contact ID"
 msgstr "Eigen Contact ID"
 
-#: ../jabber/JUI.tcl:530 ../jabber/StatusSlot.tcl:33
+#: ../jabber/JUI.tcl:530
+#: ../jabber/StatusSlot.tcl:33
 msgid "Own Full Contact ID"
 msgstr "Eigen volledige Contact ID"
 
@@ -3437,15 +4045,19 @@ msgstr "Eigen volledige Contact ID"
 msgid "Displays your Contact ID or nickname"
 msgstr "Toont uw Contact ID of bijnaam"
 
-#: ../jabber/JUI.tcl:607 ../jabber/JUI.tcl:613
+#: ../jabber/JUI.tcl:607
+#: ../jabber/JUI.tcl:613
 msgid "Set your status message"
 msgstr "Uw statusbericht instellen"
 
-#: ../jabber/JUI.tcl:992 ../jabber/JUI.tcl:1932
+#: ../jabber/JUI.tcl:992
+#: ../jabber/JUI.tcl:1932
 msgid "Hide Control Panel"
 msgstr "Controlepaneel verbergen"
 
-#: ../jabber/JUI.tcl:1233 ../jabber/JUI.tcl:1237 ../jabber/MailBox.tcl:465
+#: ../jabber/JUI.tcl:1233
+#: ../jabber/JUI.tcl:1237
+#: ../jabber/MailBox.tcl:465
 #: ../jabber/MailBox.tcl:1955
 msgid "Inbox"
 msgstr "Postvak in"
@@ -3454,11 +4066,14 @@ msgstr "Postvak in"
 msgid "Contact"
 msgstr "Contactpersoon"
 
-#: ../jabber/JUI.tcl:1244 ../jabber/JUser.tcl:101 ../jabber/JUser.tcl:152
+#: ../jabber/JUI.tcl:1244
+#: ../jabber/JUser.tcl:101
+#: ../jabber/JUser.tcl:152
 msgid "Add Contact"
 msgstr "Contactpersoon toevoegen"
 
-#: ../jabber/JUI.tcl:1265 ../whiteboard/Whiteboard.tcl:2207
+#: ../jabber/JUI.tcl:1265
+#: ../whiteboard/Whiteboard.tcl:2207
 msgid "&File"
 msgstr "&Bestand"
 
@@ -3466,7 +4081,8 @@ msgstr "&Bestand"
 msgid "&Action"
 msgstr "&Actie"
 
-#: ../jabber/JUI.tcl:1268 ../lib/EditDialogs.tcl:126
+#: ../jabber/JUI.tcl:1268
+#: ../lib/EditDialogs.tcl:126
 #: ../whiteboard/Whiteboard.tcl:2210
 msgid "&Edit"
 msgstr "Be&werken"
@@ -3488,7 +4104,9 @@ msgstr "De verbinding is onveilig"
 msgid "Logged out"
 msgstr "Afgemeld"
 
-#: ../jabber/JUI.tcl:1823 ../jabber/JUI.tcl:1828 ../jabber/JUI.tcl:1994
+#: ../jabber/JUI.tcl:1823
+#: ../jabber/JUI.tcl:1828
+#: ../jabber/JUI.tcl:1994
 #: ../jabber/Jabber.tcl:2137
 msgid "Logout"
 msgstr "Afmelden"
@@ -3498,17 +4116,12 @@ msgid "Stop"
 msgstr "Stoppen"
 
 #: ../jabber/JUser.tcl:163
-msgid ""
-"Select the chat system and contact ID of the contact you would like to add."
-msgstr ""
-"Selecteer het chatsysteem en de contact ID van de contactpersoon die u wilt "
-"toevoegen."
+msgid "Select the chat system and contact ID of the contact you would like to add."
+msgstr "Selecteer het chatsysteem en de contact ID van de contactpersoon die u wilt toevoegen."
 
 #: ../jabber/JUser.tcl:165
 msgid "Nickname and group are optional and can be set or changed later."
-msgstr ""
-"Een bijnaam en een groep zijn optioneel en kunnen later ingesteld of "
-"veranderd worden."
+msgstr "Een bijnaam en een groep zijn optioneel en kunnen later ingesteld of veranderd worden."
 
 #: ../jabber/JUser.tcl:177
 msgid "Chat system"
@@ -3518,42 +4131,38 @@ msgstr "Chatsysteem"
 msgid "Group to which this contact should belong to"
 msgstr "Groep waartoe deze contactpersoon moet behoren"
 
-#: ../jabber/JUser.tcl:228 ../jabber/MUC.tcl:988 ../lib/EditDialogs.tcl:119
-#: ../lib/EditDialogs.tcl:279 ../whiteboard/Multicast.tcl:96
+#: ../jabber/JUser.tcl:228
+#: ../jabber/MUC.tcl:988
+#: ../lib/EditDialogs.tcl:119
+#: ../lib/EditDialogs.tcl:279
+#: ../whiteboard/Multicast.tcl:96
 msgid "Add"
 msgstr "Toevoegen"
 
-#: ../jabber/JUser.tcl:302 ../jabber/Search.tcl:257 ../jabber/Search.tcl:770
+#: ../jabber/JUser.tcl:302
+#: ../jabber/Search.tcl:257
+#: ../jabber/Search.tcl:770
 #, tcl-format
 msgid "%s is already in your list. Do you want to continue anyway?"
 msgstr "%s is al in uw lijst. Wilt u toch doorgaan?"
 
-#: ../jabber/JUser.tcl:323 ../jabber/JUser.tcl:477 ../jabber/JUser.tcl:534
+#: ../jabber/JUser.tcl:323
+#: ../jabber/JUser.tcl:477
+#: ../jabber/JUser.tcl:534
 #, tcl-format
-msgid ""
-"To add a contact from a chat system without open federation, you need an "
-"account on this closed system, plus you need to register this account with "
-"the corresponding transport (%s). Do you want to do this now?"
-msgstr ""
-"Voor een contactpersoon op een chatsysteem zonder open federatie hebt u een "
-"account nodig op dit gesloten systeem. Daarnaast moet u deze account "
-"registreren op het transport %s. Wilt u dit nu doen?"
+msgid "To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?"
+msgstr "Voor een contactpersoon op een chatsysteem zonder open federatie hebt u een account nodig op dit gesloten systeem. Daarnaast moet u deze account registreren op het transport %s. Wilt u dit nu doen?"
 
 #: ../jabber/JUser.tcl:382
 #, tcl-format
 msgid "Cannot set %s's nickname or group."
 msgstr "Kan %s's bijnaam of groep niet instellen."
 
-#: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:701
+#: ../jabber/JUser.tcl:591
+#: ../jabber/JUser.tcl:701
 #, tcl-format
-msgid ""
-"This is your own account at %s that acts as a service that transports "
-"messages to that IM system. It needs to be in your list. You have a "
-"subscription for %s: %s."
-msgstr ""
-"Dit is uw eigen account op %s dat gebruikt wordt als een dienst die "
-"berichten verstuurt naar dat chatsysteem. Het moet in uw lijst staan. U hebt "
-"een abonnement voor %s: %s."
+msgid "This is your own account at %s that acts as a service that transports messages to that IM system. It needs to be in your list. You have a subscription for %s: %s."
+msgstr "Dit is uw eigen account op %s dat gebruikt wordt als een dienst die berichten verstuurt naar dat chatsysteem. Het moet in uw lijst staan. U hebt een abonnement voor %s: %s."
 
 #: ../jabber/JUser.tcl:644
 msgid "Transport Details"
@@ -3565,12 +4174,8 @@ msgstr "Contactpersoon bewerken"
 
 #: ../jabber/JUser.tcl:703
 #, tcl-format
-msgid ""
-"Edit nickname and group of %s. You also can request or remove presence "
-"subscription."
-msgstr ""
-"Bewerk bijnaam en groep van %s. U kunt ook een abonnement aanvragen op de "
-"aanwezigheid van deze contactpersoon of dit abonnement verwijderen."
+msgid "Edit nickname and group of %s. You also can request or remove presence subscription."
+msgstr "Bewerk bijnaam en groep van %s. U kunt ook een abonnement aanvragen op de aanwezigheid van deze contactpersoon of dit abonnement verwijderen."
 
 #: ../jabber/JUser.tcl:756
 msgid "Request presence subscription"
@@ -3587,39 +4192,42 @@ msgstr "U en uw contactpersoon kunnen elkaars aanwezigheid zien."
 
 #: ../jabber/JUser.tcl:770
 msgid "You cannot see your contact's presence, but your contact can see yours."
-msgstr ""
-"U kunt de aanwezigheid van uw contactpersoon niet zien, maar uw "
-"contactpersoon kan de jouwe wel zien."
+msgstr "U kunt de aanwezigheid van uw contactpersoon niet zien, maar uw contactpersoon kan de jouwe wel zien."
 
 #: ../jabber/JUser.tcl:771
 msgid "Both you and your contact cannot see eachother's presence."
 msgstr "U en uw contactpersoon kunnen elkaars aanwezigheid niet zien."
 
-#: ../jabber/JUser.tcl:772 ../jabber/Roster.tcl:1632
+#: ../jabber/JUser.tcl:772
+#: ../jabber/Roster.tcl:1632
 msgid "You can see your contact's presence, but your contact can't see yours."
-msgstr ""
-"U kunt de aanwezigheid van uw contactpersoon zien, maar uw contactpersoon "
-"kan de jouwe niet zien."
+msgstr "U kunt de aanwezigheid van uw contactpersoon zien, maar uw contactpersoon kan de jouwe niet zien."
 
-#: ../jabber/JUser.tcl:819 ../jabber/Subscribe.tcl:332
-#: ../jabber/Subscribe.tcl:368 ../jabber/Subscribe.tcl:1302
+#: ../jabber/JUser.tcl:819
+#: ../jabber/Subscribe.tcl:332
+#: ../jabber/Subscribe.tcl:368
+#: ../jabber/Subscribe.tcl:1302
 #: ../jabber/Subscribe.tcl:1562
 msgid "View business card"
 msgstr "Visitekaart bekijken"
 
-#: ../jabber/JWB.tcl:154 ../whiteboard/Whiteboard.tcl:607
+#: ../jabber/JWB.tcl:154
+#: ../whiteboard/Whiteboard.tcl:607
 msgid "New &Window"
 msgstr "&Nieuw venster"
 
-#: ../jabber/JWB.tcl:155 ../whiteboard/Whiteboard.tcl:422
+#: ../jabber/JWB.tcl:155
+#: ../whiteboard/Whiteboard.tcl:422
 msgid "&Open File"
 msgstr "Bestand &openen"
 
-#: ../jabber/JWB.tcl:156 ../whiteboard/Whiteboard.tcl:420
+#: ../jabber/JWB.tcl:156
+#: ../whiteboard/Whiteboard.tcl:420
 msgid "&Import Image/Movie"
 msgstr "Afbeelding/Film &importeren"
 
-#: ../jabber/JWB.tcl:157 ../whiteboard/Whiteboard.tcl:421
+#: ../jabber/JWB.tcl:157
+#: ../whiteboard/Whiteboard.tcl:421
 #: ../whiteboard/Whiteboard.tcl:2774
 msgid "Open St&ream"
 msgstr "St&ream openen"
@@ -3628,27 +4236,33 @@ msgstr "St&ream openen"
 msgid "Stop &Transactions"
 msgstr "&Transacties beëindigen"
 
-#: ../jabber/JWB.tcl:162 ../whiteboard/Whiteboard.tcl:425
+#: ../jabber/JWB.tcl:162
+#: ../whiteboard/Whiteboard.tcl:425
 msgid "&Save"
 msgstr "Op&slaan"
 
-#: ../jabber/JWB.tcl:163 ../whiteboard/Whiteboard.tcl:426
+#: ../jabber/JWB.tcl:163
+#: ../whiteboard/Whiteboard.tcl:426
 msgid "Save &As"
 msgstr "Opslaan &als"
 
-#: ../jabber/JWB.tcl:164 ../whiteboard/Whiteboard.tcl:427
+#: ../jabber/JWB.tcl:164
+#: ../whiteboard/Whiteboard.tcl:427
 msgid "Sa&ve As Item"
 msgstr "Als item opslaan"
 
-#: ../jabber/JWB.tcl:166 ../whiteboard/Whiteboard.tcl:429
+#: ../jabber/JWB.tcl:166
+#: ../whiteboard/Whiteboard.tcl:429
 msgid "Page Set&up"
 msgstr "&Pagina-instellingen"
 
-#: ../jabber/JWB.tcl:167 ../whiteboard/Whiteboard.tcl:430
+#: ../jabber/JWB.tcl:167
+#: ../whiteboard/Whiteboard.tcl:430
 msgid "&Print"
 msgstr "Af&drukken"
 
-#: ../jabber/JWB.tcl:332 ../jabber/JWB.tcl:334
+#: ../jabber/JWB.tcl:332
+#: ../jabber/JWB.tcl:334
 #, tcl-format
 msgid "Chat With %s"
 msgstr "Chatten met %s"
@@ -3657,7 +4271,8 @@ msgstr "Chatten met %s"
 msgid "Send Live"
 msgstr "Live verzenden"
 
-#: ../jabber/JWB.tcl:631 ../jabber/JWB.tcl:646
+#: ../jabber/JWB.tcl:631
+#: ../jabber/JWB.tcl:646
 msgid "Do you want to close this whiteboard and lose the complete session?"
 msgstr "Wilt u dit whiteboard sluiten en de volledige sessie verliezen?"
 
@@ -3670,41 +4285,32 @@ msgid "This whiteboard document has been changed."
 msgstr "Dit whiteboard-document is veranderd."
 
 #: ../jabber/JWB.tcl:815
-msgid ""
-"This contact is not online anymore and the message is therefore not sent."
-msgstr ""
-"Deze contactpersoon is niet meer online en het bericht is daarom niet "
-"verzonden."
+msgid "This contact is not online anymore and the message is therefore not sent."
+msgstr "Deze contactpersoon is niet meer online en het bericht is daarom niet verzonden."
 
 #: ../jabber/JWB.tcl:977
 #, tcl-format
-msgid ""
-"%s is not online. If your message contains any images or other multimedia, "
-"your contact will not see them unless you are online while he/she reads your "
-"message. Do you want to send it anyway?"
-msgstr ""
-"%s is niet online. Als uw bericht afbeeldingen of andere multimedia bevat, "
-"zal uw contactpersoon die niet zien tenzij u online bent wanneer hij/zij uw "
-"bericht leest. Wilt u toch verzenden?"
+msgid "%s is not online. If your message contains any images or other multimedia, your contact will not see them unless you are online while he/she reads your message. Do you want to send it anyway?"
+msgstr "%s is niet online. Als uw bericht afbeeldingen of andere multimedia bevat, zal uw contactpersoon die niet zien tenzij u online bent wanneer hij/zij uw bericht leest. Wilt u toch verzenden?"
 
-#: ../jabber/JWB.tcl:986 ../jabber/JWB.tcl:2080
-msgid ""
-"Invalid Contact ID. You need to enter a valid one at the bottom (e.g. "
-"user@example.org)."
-msgstr ""
-"Ongeldige Contact ID. U moet een geldige opgeven onderaan (bv. "
-"gebruiker@jabber.org)."
+#: ../jabber/JWB.tcl:986
+#: ../jabber/JWB.tcl:2080
+msgid "Invalid Contact ID. You need to enter a valid one at the bottom (e.g. user@example.org)."
+msgstr "Ongeldige Contact ID. U moet een geldige opgeven onderaan (bv. gebruiker@jabber.org)."
 
-#: ../jabber/JWB.tcl:1522 ../whiteboard/GetFileIface.tcl:286
+#: ../jabber/JWB.tcl:1522
+#: ../whiteboard/GetFileIface.tcl:286
 msgid "Request To User"
 msgstr "Aanvraag aan gebruiker"
 
-#: ../jabber/JWB.tcl:1523 ../whiteboard/GetFileIface.tcl:287
+#: ../jabber/JWB.tcl:1523
+#: ../whiteboard/GetFileIface.tcl:287
 #, tcl-format
 msgid "We are about to receive the file %s. Do you want to receive it?"
 msgstr "Wilt u bestand %s ontvangen?"
 
-#: ../jabber/JWB.tcl:2058 ../whiteboard/Import.tcl:79
+#: ../jabber/JWB.tcl:2058
+#: ../whiteboard/Import.tcl:79
 #: ../whiteboard/Whiteboard.tcl:3277
 #, tcl-format
 msgid "Cannot find importer for the MIME type %s"
@@ -3717,31 +4323,30 @@ msgstr "Kan bericht niet verzenden aan %s."
 
 #: ../jabber/Jabber.tcl:718
 #, tcl-format
-msgid ""
-"Your registered account with the %s service will be put in your list of "
-"contacts to work as a transport with this service."
-msgstr ""
-"Uw account op de dienst %s zal in uw lijst geplaatst worden en zal dienen "
-"als transport voor die dienst."
+msgid "Your registered account with the %s service will be put in your list of contacts to work as a transport with this service."
+msgstr "Uw account op de dienst %s zal in uw lijst geplaatst worden en zal dienen als transport voor die dienst."
 
-#: ../jabber/Jabber.tcl:769 ../jabber/Jabber.tcl:774 ../jabber/Jabber.tcl:780
-#: ../jabber/Jabber.tcl:829 ../jabber/Subscribe.tcl:210
-#: ../jabber/Subscribe.tcl:243 ../jabber/Subscribe.tcl:996
-#: ../jabber/Subscribe.tcl:1015 ../jabber/Subscribe.tcl:1411
-#: ../jabber/Subscribe.tcl:1439 ../jabber/Subscribe.tcl:1448
-#: ../jabber/Subscribe.tcl:1492 ../jabber/Subscribe.tcl:1600
+#: ../jabber/Jabber.tcl:769
+#: ../jabber/Jabber.tcl:774
+#: ../jabber/Jabber.tcl:780
+#: ../jabber/Jabber.tcl:829
+#: ../jabber/Subscribe.tcl:210
+#: ../jabber/Subscribe.tcl:243
+#: ../jabber/Subscribe.tcl:996
+#: ../jabber/Subscribe.tcl:1015
+#: ../jabber/Subscribe.tcl:1411
+#: ../jabber/Subscribe.tcl:1439
+#: ../jabber/Subscribe.tcl:1448
+#: ../jabber/Subscribe.tcl:1492
+#: ../jabber/Subscribe.tcl:1600
 #: ../jabber/Subscribe.tcl:1620
 msgid "Presence Subscription"
 msgstr "Aanwezigheidsabonnement"
 
 #: ../jabber/Jabber.tcl:770
 #, tcl-format
-msgid ""
-"Because %s does not allow you to see his/her presence anymore, he/she is "
-"removed."
-msgstr ""
-"Omdat %s u niet meer toestaat zijn/haar aanwezigheid te zien, werd hij/zij "
-"uit uw lijst verwijderd."
+msgid "Because %s does not allow you to see his/her presence anymore, he/she is removed."
+msgstr "Omdat %s u niet meer toestaat zijn/haar aanwezigheid te zien, werd hij/zij uit uw lijst verwijderd."
 
 #: ../jabber/Jabber.tcl:775
 #, tcl-format
@@ -3750,21 +4355,13 @@ msgstr "%s staat u niet meer toe zijn/haar aanwezigheid te zien."
 
 #: ../jabber/Jabber.tcl:782
 #, tcl-format
-msgid ""
-"%s does not allow you to see his/her presence anymore. Do you want to remove "
-"%s?"
-msgstr ""
-"%s staat u niet meer toe zijn/haar aanwezigheid te zien. Wilt u %s uit uw "
-"lijst verwijderen?"
+msgid "%s does not allow you to see his/her presence anymore. Do you want to remove %s?"
+msgstr "%s staat u niet meer toe zijn/haar aanwezigheid te zien. Wilt u %s uit uw lijst verwijderen?"
 
 #: ../jabber/Jabber.tcl:815
 #, tcl-format
-msgid ""
-"Cannot subscribe to %s's presence. The contact does not allow you to see his/"
-"her presence."
-msgstr ""
-"Kan niet abonneren op %s's aanwezigheid. Uw contactpersoon staat u niet toe "
-"zijn/haar aanwezigheid te zien."
+msgid "Cannot subscribe to %s's presence. The contact does not allow you to see his/her presence."
+msgstr "Kan niet abonneren op %s's aanwezigheid. Uw contactpersoon staat u niet toe zijn/haar aanwezigheid te zien."
 
 #: ../jabber/Jabber.tcl:820
 msgid "Subscription Failed"
@@ -3779,11 +4376,14 @@ msgstr "U kunt %s's aanwezigheid niet meer zien."
 msgid "Presence Error"
 msgstr "Aanwezigheidsfout"
 
-#: ../jabber/Jabber.tcl:913 ../jabber/Jabber.tcl:941
+#: ../jabber/Jabber.tcl:913
+#: ../jabber/Jabber.tcl:941
 msgid "The connection was unexpectedly broken."
 msgstr "De verbinding werd onverwachts verbroken."
 
-#: ../jabber/Jabber.tcl:918 ../jabber/Jabber.tcl:920 ../jabber/Jabber.tcl:930
+#: ../jabber/Jabber.tcl:918
+#: ../jabber/Jabber.tcl:920
+#: ../jabber/Jabber.tcl:930
 #: ../jabber/Jabber.tcl:932
 #, tcl-format
 msgid "Received a fatal error: %s The connection is closed."
@@ -3793,17 +4393,20 @@ msgstr "Fatale fout ontvangen: %s De verbinding werd verbroken."
 msgid "Error Log (noncriticals)"
 msgstr "Foutmedlingen (niet kritisch)"
 
-#: ../jabber/Jabber.tcl:1491 ../jabber/UserInfo.tcl:263
+#: ../jabber/Jabber.tcl:1491
+#: ../jabber/UserInfo.tcl:263
 #, tcl-format
 msgid "Cannot query %s's last activity."
 msgstr "Kan %s's laatste activiteit niet opvragen."
 
-#: ../jabber/Jabber.tcl:1503 ../jabber/Jabber.tcl:1506
+#: ../jabber/Jabber.tcl:1503
+#: ../jabber/Jabber.tcl:1506
 #: ../jabber/UserInfo.tcl:261
 msgid "Last Activity"
 msgstr "Laatste Activiteit"
 
-#: ../jabber/Jabber.tcl:1504 ../jabber/Jabber.tcl:1517
+#: ../jabber/Jabber.tcl:1504
+#: ../jabber/Jabber.tcl:1517
 #: ../jabber/Jabber.tcl:1519
 #, tcl-format
 msgid "Cannot query %s's local time information."
@@ -3828,24 +4431,28 @@ msgstr "Tijd sinds opstarten server %s"
 msgid "The uptime/last activity is"
 msgstr "De uptime/laatste activiteit is"
 
-#: ../jabber/Jabber.tcl:1574 ../jabber/UserInfo.tcl:295
+#: ../jabber/Jabber.tcl:1574
+#: ../jabber/UserInfo.tcl:295
 #: ../jabber/UserInfo.tcl:325
 #, tcl-format
 msgid "Cannot query %s's local time."
 msgstr "Kan %s's lokale tijd niet opvragen."
 
-#: ../jabber/Jabber.tcl:1582 ../jabber/UserInfo.tcl:293
+#: ../jabber/Jabber.tcl:1582
+#: ../jabber/UserInfo.tcl:293
 #: ../jabber/UserInfo.tcl:323
 msgid "Local Time"
 msgstr "Lokale tijd"
 
-#: ../jabber/Jabber.tcl:1583 ../jabber/UserInfo.tcl:303
+#: ../jabber/Jabber.tcl:1583
+#: ../jabber/UserInfo.tcl:303
 #: ../jabber/UserInfo.tcl:332
 #, tcl-format
 msgid "%s's local time is: %s"
 msgstr "%s's lokale tijd is: %s"
 
-#: ../jabber/Jabber.tcl:1671 ../jabber/UserInfo.tcl:213
+#: ../jabber/Jabber.tcl:1671
+#: ../jabber/UserInfo.tcl:213
 #, tcl-format
 msgid "Cannot query %s's version."
 msgstr "Kan %s's versie niet opvragen."
@@ -3855,7 +4462,8 @@ msgstr "Kan %s's versie niet opvragen."
 msgid "Version information for %s."
 msgstr "Versiegegevens van %s."
 
-#: ../jabber/Jabber.tcl:1907 ../jabber/Jabber.tcl:2035
+#: ../jabber/Jabber.tcl:1907
+#: ../jabber/Jabber.tcl:2035
 msgid "New Password"
 msgstr "Nieuw wachtwoord"
 
@@ -3867,12 +4475,14 @@ msgstr "Nieuw wachtwoord instellen voor"
 msgid "New password"
 msgstr "Nieuw wachtwoord"
 
-#: ../jabber/Jabber.tcl:1930 ../jabber/Register.tcl:746
+#: ../jabber/Jabber.tcl:1930
+#: ../jabber/Register.tcl:746
 #: ../jabber/SetupAss.tcl:169
 msgid "Retype password"
 msgstr "Wachtwoord herhalen"
 
-#: ../jabber/Jabber.tcl:1996 ../jabber/Register.tcl:834
+#: ../jabber/Jabber.tcl:1996
+#: ../jabber/Register.tcl:834
 #: ../jabber/SetupAss.tcl:311
 msgid "Passwords do not match. Please try again."
 msgstr "Wachtwoorden komen niet overeen. Probeer het nogmaals."
@@ -3887,30 +4497,18 @@ msgstr "Het nieuwe wachtwoord is ingesteld."
 
 #. TRANSLATORS; see login dialog
 #: ../jabber/Login.tcl:138
-msgid ""
-"Enter your account as user@example.org, or choose a profile. You should "
-"already have an account."
-msgstr ""
-"Voer uw account in als gebruiker@voorbeeld.org of kies een profiel. U moet "
-"al een account hebben."
+msgid "Enter your account as user@example.org, or choose a profile. You should already have an account."
+msgstr "Voer uw account in als gebruiker@voorbeeld.org of kies een profiel. U moet al een account hebben."
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
 #: ../jabber/Login.tcl:141
-msgid ""
-"Enter your Contact ID as user@example.org. You should already have an "
-"account with this server."
-msgstr ""
-"Voer uw Contact ID in in de vorm gebruiker@voorbeeld.org. U moet al een "
-"account hebben."
+msgid "Enter your Contact ID as user@example.org. You should already have an account with this server."
+msgstr "Voer uw Contact ID in in de vorm gebruiker@voorbeeld.org. U moet al een account hebben."
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
 #: ../jabber/Login.tcl:144
-msgid ""
-"Write XMPP server IP number or name, or choose from the popup menu. You "
-"should already have an account with this server."
-msgstr ""
-"Voer het IP-nummer of de naam van de server in, of kies een server uit het "
-"popupmenu. Verzeker u ervan dat u al een account hebt op deze server."
+msgid "Write XMPP server IP number or name, or choose from the popup menu. You should already have an account with this server."
+msgstr "Voer het IP-nummer of de naam van de server in, of kies een server uit het popupmenu. Verzeker u ervan dat u al een account hebt op deze server."
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
 #: ../jabber/Login.tcl:148
@@ -3918,36 +4516,49 @@ msgstr ""
 msgid "Enter your username and password to login to %s."
 msgstr "Voer uw gebruikersnaam en wachtwoord in om aan te melden op %s."
 
-#: ../jabber/Login.tcl:159 ../jabber/Profiles.tcl:1062
+#: ../jabber/Login.tcl:159
+#: ../jabber/Profiles.tcl:1062
 msgid "Profile"
 msgstr "Profiel"
 
-#: ../jabber/Login.tcl:175 ../jabber/Profiles.tcl:1087
-#: ../jabber/Register.tcl:1454 ../jabber/Search.tcl:935
-#: ../jabber/SetupAss.tcl:167 ../lib/Proxy.tcl:209
+#: ../jabber/Login.tcl:175
+#: ../jabber/Profiles.tcl:1087
+#: ../jabber/Register.tcl:1454
+#: ../jabber/Search.tcl:935
+#: ../jabber/SetupAss.tcl:167
+#: ../lib/Proxy.tcl:209
 #: ../whiteboard/WDialogs.tcl:192
 msgid "Username"
 msgstr "Gebruikersnaam"
 
-#: ../jabber/Login.tcl:183 ../jabber/Profiles.tcl:1094
+#: ../jabber/Login.tcl:183
+#: ../jabber/Profiles.tcl:1094
 msgid "Resource"
 msgstr "Bron"
 
-#: ../jabber/Login.tcl:235 ../jabber/Login.tcl:239 ../jabber/Login.tcl:243
-#: ../jabber/Login.tcl:409 ../jabber/Profiles.tcl:1162
-#: ../jabber/Profiles.tcl:1166 ../jabber/Profiles.tcl:1170
-#: ../jabber/Profiles.tcl:1261 ../jabber/Register.tcl:293
-#: ../jabber/Register.tcl:297 ../jabber/Register.tcl:301
+#: ../jabber/Login.tcl:235
+#: ../jabber/Login.tcl:239
+#: ../jabber/Login.tcl:243
+#: ../jabber/Login.tcl:409
+#: ../jabber/Profiles.tcl:1162
+#: ../jabber/Profiles.tcl:1166
+#: ../jabber/Profiles.tcl:1170
+#: ../jabber/Profiles.tcl:1261
+#: ../jabber/Register.tcl:293
+#: ../jabber/Register.tcl:297
+#: ../jabber/Register.tcl:301
 #: ../jabber/Register.tcl:541
 msgid "More"
 msgstr "Meer"
 
-#: ../jabber/Login.tcl:271 ../jabber/Profiles.tcl:891
+#: ../jabber/Login.tcl:271
+#: ../jabber/Profiles.tcl:891
 #: ../jabber/Profiles.tcl:903
 msgid "Edit Profiles"
 msgstr "Profielen bewerken"
 
-#: ../jabber/Login.tcl:394 ../jabber/Profiles.tcl:1242
+#: ../jabber/Login.tcl:394
+#: ../jabber/Profiles.tcl:1242
 #: ../jabber/Register.tcl:530
 msgid "Less"
 msgstr "Minder"
@@ -3957,37 +4568,36 @@ msgstr "Minder"
 msgid "The %s is missing or is too short!"
 msgstr "%s is afwezig of is te kort!"
 
-#: ../jabber/Login.tcl:522 ../jabber/Register.tcl:590
+#: ../jabber/Login.tcl:522
+#: ../jabber/Register.tcl:590
 #, tcl-format
 msgid "Illegal character(s) in %s: %s!"
 msgstr "Ongeldig(e) teken(s) in %s: %s!"
 
 #: ../jabber/Login.tcl:574
-msgid ""
-"The Contact ID differs from your profile. Do you want to save a new profile?"
-msgstr ""
-"De Contact ID verschilt van uw profiel. Wilt u een nieuw profiel opslaan?"
+msgid "The Contact ID differs from your profile. Do you want to save a new profile?"
+msgstr "De Contact ID verschilt van uw profiel. Wilt u een nieuw profiel opslaan?"
 
-#: ../jabber/Login.tcl:579 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1533
+#: ../jabber/Login.tcl:579
+#: ../jabber/MUC.tcl:780
+#: ../jabber/Profiles.tcl:1533
 msgid "Profile Name"
 msgstr "Profielnaam"
 
-#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1137
+#: ../jabber/Login.tcl:581
+#: ../jabber/Profiles.tcl:1137
 #: ../jabber/Profiles.tcl:1535
 msgid "Add Profile"
 msgstr "Profiel toevoegen"
 
-#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1535
+#: ../jabber/Login.tcl:581
+#: ../jabber/Profiles.tcl:1535
 msgid "Enter the name for the new profile."
 msgstr "Voer de naam in voor het nieuwe profiel."
 
 #: ../jabber/Login.tcl:604
-msgid ""
-"Your current login settings differ from your profile settings. Do you want "
-"to save them to your profile?"
-msgstr ""
-"Uw huidige instellingen verschillen van die van in uw profiel . Wilt u de "
-"nieuwe instellingen opslaan in uw profiel?"
+msgid "Your current login settings differ from your profile settings. Do you want to save them to your profile?"
+msgstr "Uw huidige instellingen verschillen van die van in uw profiel . Wilt u de nieuwe instellingen opslaan in uw profiel?"
 
 #: ../jabber/Login.tcl:819
 #, tcl-format
@@ -4006,18 +4616,12 @@ msgstr "Bezig met beveiligd verbinden via TLS"
 #: ../jabber/Login.tcl:877
 #, tcl-format
 msgid "Authorization to server %s was successful. Downloading contacts..."
-msgstr ""
-"Autorisatie met server %s is geslaagd. Bezig met downloaden van "
-"contactpersonen..."
+msgstr "Autorisatie met server %s is geslaagd. Bezig met downloaden van contactpersonen..."
 
 #: ../jabber/Login.tcl:933
 #, tcl-format
-msgid ""
-"Cannot connect to %s. Either there are server or network issues, or you "
-"misspelled the server's name."
-msgstr ""
-"Kan niet verbinden met %s. Ofwel zijn er netwerkproblemen, ofwel hebt u de "
-"naam van de server verkeerd gespeld."
+msgid "Cannot connect to %s. Either there are server or network issues, or you misspelled the server's name."
+msgstr "Kan niet verbinden met %s. Ofwel zijn er netwerkproblemen, ofwel hebt u de naam van de server verkeerd gespeld."
 
 #: ../jabber/Login.tcl:939
 #, tcl-format
@@ -4026,11 +4630,8 @@ msgstr "Server %s antwoorde niet: wachttijd versteken."
 
 #: ../jabber/Login.tcl:944
 #, tcl-format
-msgid ""
-"Cannot login because this username is already in use by someone else (%s)."
-msgstr ""
-"Kan niet aanmelden omdat deze gebruikersnaam al in gebruik is door iemand "
-"anders (%s)."
+msgid "Cannot login because this username is already in use by someone else (%s)."
+msgstr "Kan niet aanmelden omdat deze gebruikersnaam al in gebruik is door iemand anders (%s)."
 
 #: ../jabber/Login.tcl:947
 #, tcl-format
@@ -4059,32 +4660,37 @@ msgstr "Streamfout van de server ontvangen met foutcode: %s"
 msgid "The proxy server reported an error."
 msgstr "De proxyserver rapporteerde een fout."
 
-#: ../jabber/Login.tcl:976 ../jabber/Register.tcl:961
+#: ../jabber/Login.tcl:976
+#: ../jabber/Register.tcl:961
 msgid "The login process was aborted."
 msgstr "Aanmelden mislukte."
 
-#: ../jabber/Login.tcl:977 ../jabber/Login.tcl:978 ../jabber/Login.tcl:979
-#: ../jabber/Login.tcl:980 ../jabber/Login.tcl:982 ../jabber/Register.tcl:962
-#: ../jabber/Register.tcl:963 ../jabber/Register.tcl:964
-#: ../jabber/Register.tcl:965 ../jabber/Register.tcl:967
+#: ../jabber/Login.tcl:977
+#: ../jabber/Login.tcl:978
+#: ../jabber/Login.tcl:979
+#: ../jabber/Login.tcl:980
+#: ../jabber/Login.tcl:982
+#: ../jabber/Register.tcl:962
+#: ../jabber/Register.tcl:963
+#: ../jabber/Register.tcl:964
+#: ../jabber/Register.tcl:965
+#: ../jabber/Register.tcl:967
 msgid "Protocol error during the login process."
 msgstr "Protocolfout bij aanmelden."
 
-#: ../jabber/Login.tcl:981 ../jabber/Register.tcl:966
+#: ../jabber/Login.tcl:981
+#: ../jabber/Register.tcl:966
 msgid "Login failed because of unknown account or wrong password."
 msgstr "Aanmelden mislukte: onbekende gebruiker of foutief wachtwoord."
 
 #: ../jabber/Login.tcl:985
 #, tcl-format
-msgid ""
-"Invalid server response due to bug in server software:  error <%s/> is not "
-"defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting "
-"this bug to your server administrator."
-msgstr ""
+msgid "Invalid server response due to bug in server software:  error <%s/> is not defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting this bug to your server administrator."
+msgstr "Ongeldig antwoord van server door een fout in de serversoftware: fout <%s/> is niet gedefiniëerd in sectie 6.4 SASL Errors van RFC 3920. Overweeg om deze fout te melden aan uw serverbeheerder."
 
 #: ../jabber/Login.tcl:1011
 msgid "Do you want to retry a different password or profile?"
-msgstr ""
+msgstr "Wilt u opnieuw proberen met een ander wachtwoord of profiel?"
 
 #: ../jabber/Login.tcl:1041
 #, tcl-format
@@ -4092,7 +4698,8 @@ msgid "Do you want to register a new account with %s."
 msgstr "Wilt u registreren op %s?"
 
 #. TRANSLATORS: strings related to Multi-User Chat (MUC) chatrooms
-#: ../jabber/MUC.tcl:136 ../jabber/MUC.tcl:164
+#: ../jabber/MUC.tcl:136
+#: ../jabber/MUC.tcl:164
 msgid "Invite Contact"
 msgstr "Contactpersoon uitnodigen"
 
@@ -4124,7 +4731,9 @@ msgstr "Wilt u de chatruimte nu betreden?"
 msgid "Invitation"
 msgstr "Uitnodiging"
 
-#: ../jabber/MUC.tcl:427 ../jabber/MUC.tcl:440 ../jabber/MUC.tcl:552
+#: ../jabber/MUC.tcl:427
+#: ../jabber/MUC.tcl:440
+#: ../jabber/MUC.tcl:552
 #: ../jabber/MUC.tcl:1423
 msgid "Configure Chatroom"
 msgstr "Chatruimte instellen"
@@ -4161,7 +4770,8 @@ msgstr "Beheerdersprivileges"
 msgid "Revoke"
 msgstr "Intrekken van"
 
-#: ../jabber/MUC.tcl:548 ../jabber/MUC.tcl:809
+#: ../jabber/MUC.tcl:548
+#: ../jabber/MUC.tcl:809
 msgid "Kick Participant"
 msgstr "Deelnemer kicken"
 
@@ -4169,7 +4779,8 @@ msgstr "Deelnemer kicken"
 msgid "Ban Participant"
 msgstr "Deelnemer verbannen"
 
-#: ../jabber/MUC.tcl:554 ../jabber/MUC.tcl:1591
+#: ../jabber/MUC.tcl:554
+#: ../jabber/MUC.tcl:1591
 msgid "Destroy Chatroom"
 msgstr "Chatruimte vernietigen"
 
@@ -4221,25 +4832,21 @@ msgstr "Nog niet geïmplementeerd"
 
 #: ../jabber/MUC.tcl:1605
 #, tcl-format
-msgid ""
-"Do you want to destroy the chatroom %s? Optionally, you can point present "
-"chatroom participants to an alternative chatroom and tell why the chatroom "
-"is destroyed."
-msgstr ""
-"Wilt u de chatruimte %s vernietigen? U kunt optioneel de huidige deelnemers "
-"van de chatruimte verwijzen naar een alternatieve chatruimte en ze vertellen "
-"waarom de chatruimte vernietigd wordt."
+msgid "Do you want to destroy the chatroom %s? Optionally, you can point present chatroom participants to an alternative chatroom and tell why the chatroom is destroyed."
+msgstr "Wilt u de chatruimte %s vernietigen? U kunt optioneel de huidige deelnemers van de chatruimte verwijzen naar een alternatieve chatruimte en ze vertellen waarom de chatruimte vernietigd wordt."
 
 #: ../jabber/MUC.tcl:1614
 msgid "Alternative chatroom"
 msgstr "Alternatieve chatruimte"
 
-#: ../jabber/MailBox.tcl:514 ../lib/Bookmarks.tcl:129
+#: ../jabber/MailBox.tcl:514
+#: ../lib/Bookmarks.tcl:129
 #: ../whiteboard/FilePrefs.tcl:144
 msgid "Delete"
 msgstr "Verwijderen"
 
-#: ../jabber/MailBox.tcl:1176 ../jabber/NewMsg.tcl:1008
+#: ../jabber/MailBox.tcl:1176
+#: ../jabber/NewMsg.tcl:1008
 #: ../jabber/NewMsg.tcl:1101
 msgid "Save Message"
 msgstr "Bericht opslaan"
@@ -4248,17 +4855,20 @@ msgstr "Bericht opslaan"
 msgid "Open Failed"
 msgstr "Openen mislukte"
 
-#: ../jabber/MailBox.tcl:1598 ../jabber/MailBox.tcl:1676
+#: ../jabber/MailBox.tcl:1598
+#: ../jabber/MailBox.tcl:1676
 #, tcl-format
 msgid "Cannot open the inbox file %s when trying to save it."
 msgstr "Kan het postvak-inbestand %s niet openen en niet opslaan."
 
-#: ../jabber/MailBox.tcl:1783 ../jabber/MailBox.tcl:1817
+#: ../jabber/MailBox.tcl:1783
+#: ../jabber/MailBox.tcl:1817
 #, tcl-format
 msgid "Cannot read the inbox file %s: %s"
 msgstr "Kan het postvak-inbestand %s niet lezen: %s"
 
-#: ../jabber/MegaPresence.tcl:102 ../jabber/MegaPresence.tcl:111
+#: ../jabber/MegaPresence.tcl:102
+#: ../jabber/MegaPresence.tcl:111
 #: ../jabber/VCard.tcl:411
 msgid "Avatar"
 msgstr "Avatar"
@@ -4278,8 +4888,7 @@ msgstr "Doorgestuurd bericht"
 #: ../jabber/NewMsg.tcl:901
 #, tcl-format
 msgid "Contact ID %s is invalid. Do you want to skip it and send to the rest?"
-msgstr ""
-"Contact ID %s is ongeldig. Wilt u deze overslaan en naar de rest verzenden?"
+msgstr "Contact ID %s is ongeldig. Wilt u deze overslaan en naar de rest verzenden?"
 
 #: ../jabber/NewMsg.tcl:904
 #, tcl-format
@@ -4308,18 +4917,15 @@ msgid "Accounts"
 msgstr "Accounts"
 
 #. TRANSLATORS: string shown if you change anything in an existing account profile in the login dialog
-#: ../jabber/Profiles.tcl:982 ../jabber/Profiles.tcl:1581
-msgid ""
-"You changed one or more values. Do you want to save them before closing?"
+#: ../jabber/Profiles.tcl:982
+#: ../jabber/Profiles.tcl:1581
+msgid "You changed one or more values. Do you want to save them before closing?"
 msgstr "U veranderde één of meerdere waarden. Wilt u ze opslaan?"
 
 #. TRANSLATORS: See File in the main window, and then Edit Profiles...
 #: ../jabber/Profiles.tcl:1056
-msgid ""
-"Edit, add or delete profiles. The selected profile will become the default."
-msgstr ""
-"Profielen bewerken, toevoegen of verwijderen. Het geselecteerde profiel "
-"wordt de standaard."
+msgid "Edit, add or delete profiles. The selected profile will become the default."
+msgstr "Profielen bewerken, toevoegen of verwijderen. Het geselecteerde profiel wordt de standaard."
 
 #: ../jabber/Profiles.tcl:1139
 msgid "Delete Profile"
@@ -4334,16 +4940,11 @@ msgid "Do you want to register a new account?"
 msgstr "Wilt u een nieuwe account aanmaken?"
 
 #: ../jabber/Profiles.tcl:1608
-msgid ""
-"The selected profile will be deleted. Do you also want to delete the account "
-"for this profile? This action cannot be undone. Press Cancel to abort "
-"deletion of account and profile."
-msgstr ""
-"Het geselecteerde profiel zal verwijderd worden. Wilt u ook de account voor "
-"dit profiel verwijderen? Deze actie kan niet teruggedraaid worden. Klik op "
-"Annuleren om de account en het profiel niet te verwijderen."
+msgid "The selected profile will be deleted. Do you also want to delete the account for this profile? This action cannot be undone. Press Cancel to abort deletion of account and profile."
+msgstr "Het geselecteerde profiel zal verwijderd worden. Wilt u ook de account voor dit profiel verwijderen? Deze actie kan niet teruggedraaid worden. Klik op Annuleren om de account en het profiel niet te verwijderen."
 
-#: ../jabber/Profiles.tcl:1643 ../jabber/Register.tcl:118
+#: ../jabber/Profiles.tcl:1643
+#: ../jabber/Register.tcl:118
 #, tcl-format
 msgid "Cannot unregister from %s."
 msgstr "Kan registratie op %s niet verwijderen."
@@ -4388,12 +4989,14 @@ msgstr "Prioriteit"
 msgid "Login as invisible"
 msgstr "Onzichtbaar aanmelden"
 
-#: ../jabber/Profiles.tcl:1872 ../lib/Proxy.tcl:204
+#: ../jabber/Profiles.tcl:1872
+#: ../lib/Proxy.tcl:204
 #: ../whiteboard/WDialogs.tcl:191
 msgid "Host"
 msgstr "Host"
 
-#: ../jabber/Profiles.tcl:1874 ../lib/Proxy.tcl:206
+#: ../jabber/Profiles.tcl:1874
+#: ../lib/Proxy.tcl:206
 #: ../whiteboard/WDialogs.tcl:193
 msgid "Port"
 msgstr "Poort"
@@ -4402,7 +5005,9 @@ msgstr "Poort"
 msgid "Use HTTP transport"
 msgstr "HTTP-transport gebruiken"
 
-#: ../jabber/Profiles.tcl:1903 ../lib/PrefNet.tcl:98 ../lib/Proxy.tcl:144
+#: ../jabber/Profiles.tcl:1903
+#: ../lib/PrefNet.tcl:98
+#: ../lib/Proxy.tcl:144
 msgid "Proxy"
 msgstr "Proxy"
 
@@ -4412,20 +5017,12 @@ msgid "Remove Account"
 msgstr "Account verwijderen"
 
 #: ../jabber/Register.tcl:77
-msgid ""
-"Do you really want to remove your account? This process cannot be undone."
-msgstr ""
-"Wilt u deze account verwijderen? Deze actie kan niet teruggedraaid worden."
+msgid "Do you really want to remove your account? This process cannot be undone."
+msgstr "Wilt u deze account verwijderen? Deze actie kan niet teruggedraaid worden."
 
 #: ../jabber/Register.tcl:85
-msgid ""
-"You are about to unregister a transport with a number of dependent contacts. "
-"Do you want to remove these contacts as well (Yes), keep them (No), or "
-"cancel everything (Cancel)?"
-msgstr ""
-"U gaat uw account verwijderen van een transport dat nodig is voor enkele van "
-"uw contactpersonen. Wilt u deze contactpersonenn ook verwijderen (Ja), ze "
-"behouden (Nee), of alles Annuleren?"
+msgid "You are about to unregister a transport with a number of dependent contacts. Do you want to remove these contacts as well (Yes), keep them (No), or cancel everything (Cancel)?"
+msgstr "U gaat uw account verwijderen van een transport dat nodig is voor enkele van uw contactpersonen. Wilt u deze contactpersonenn ook verwijderen (Ja), ze behouden (Nee), of alles Annuleren?"
 
 #: ../jabber/Register.tcl:133
 msgid "Unregister"
@@ -4436,61 +5033,58 @@ msgstr "Registratie verwijderen"
 msgid "You are unregistered from %s."
 msgstr "Uw registratie op %s is verwijderd."
 
-#: ../jabber/Register.tcl:233 ../jabber/Register.tcl:248
-#: ../jabber/SetupAss.tcl:192 ../jabber/SetupAss.tcl:196
+#: ../jabber/Register.tcl:233
+#: ../jabber/Register.tcl:248
+#: ../jabber/SetupAss.tcl:192
+#: ../jabber/SetupAss.tcl:196
 msgid "New Account"
 msgstr "Nieuwe account"
 
 #: ../jabber/Register.tcl:260
 #, tcl-format
-msgid ""
-"Register with the service %s. You may need to press the Next button to "
-"retrieve the registration instructions."
-msgstr ""
-"Registreer op de dienst %s. U moet misschien op Volgende drukken om de "
-"instructies op te halen."
+msgid "Register with the service %s. You may need to press the Next button to retrieve the registration instructions."
+msgstr "Registreer op de dienst %s. U moet misschien op Volgende drukken om de instructies op te halen."
 
 #: ../jabber/Register.tcl:262
-msgid ""
-"Select a server from the list or manually enter one. Then press Next to "
-"retrieve the registration instructions. Follow the instructions and hit "
-"Register."
-msgstr ""
-"Selecteer een server of voer er zelf een in. Druk daarna op Volgende om de "
-"instructies op te halen. Volg de instructies op en druk op Aanmaken."
+msgid "Select a server from the list or manually enter one. Then press Next to retrieve the registration instructions. Follow the instructions and hit Register."
+msgstr "Selecteer een server of voer er zelf een in. Druk daarna op Volgende om de instructies op te halen. Volg de instructies op en druk op Aanmaken."
 
-#: ../jabber/Register.tcl:584 ../jabber/Register.tcl:1256
+#: ../jabber/Register.tcl:584
+#: ../jabber/Register.tcl:1256
 #: ../jabber/Search.tcl:310
 msgid "Please first enter or select a server."
 msgstr "Selecteer eerst een server."
 
-#: ../jabber/Register.tcl:594 ../jabber/Register.tcl:1263
+#: ../jabber/Register.tcl:594
+#: ../jabber/Register.tcl:1263
 #: ../jabber/Search.tcl:315
 msgid "Waiting for server response"
 msgstr "Wachten op server"
 
-#: ../jabber/Register.tcl:658 ../jabber/Register.tcl:1287
+#: ../jabber/Register.tcl:658
+#: ../jabber/Register.tcl:1287
 msgid "Cannot obtain registration information."
 msgstr "Kan registratie-informatie niet verkrijgen."
 
-#: ../jabber/Register.tcl:670 ../jabber/Register.tcl:1039
-#: ../jabber/Register.tcl:1076 ../jabber/Register.tcl:1088
-#: ../jabber/Register.tcl:1170 ../jabber/Register.tcl:1418
-#: ../jabber/Register.tcl:1430 ../jabber/Register.tcl:1483
+#: ../jabber/Register.tcl:670
+#: ../jabber/Register.tcl:1039
+#: ../jabber/Register.tcl:1076
+#: ../jabber/Register.tcl:1088
+#: ../jabber/Register.tcl:1170
+#: ../jabber/Register.tcl:1418
+#: ../jabber/Register.tcl:1430
+#: ../jabber/Register.tcl:1483
 msgid "Register"
 msgstr "Registreren"
 
-#: ../jabber/Register.tcl:792 ../jabber/SetupAss.tcl:177
+#: ../jabber/Register.tcl:792
+#: ../jabber/SetupAss.tcl:177
 msgid "Save password"
 msgstr "Wachtwoord opslaan"
 
 #: ../jabber/Register.tcl:891
-msgid ""
-"The registration failed because this username is already in use by someone "
-"else."
-msgstr ""
-"Kan niet registreren omdat deze gebruikersnaam al door iemand anders "
-"gebruikt wordt."
+msgid "The registration failed because this username is already in use by someone else."
+msgstr "Kan niet registreren omdat deze gebruikersnaam al door iemand anders gebruikt wordt."
 
 #: ../jabber/Register.tcl:896
 msgid "The registration failed."
@@ -4498,58 +5092,72 @@ msgstr "Kan niet registreren."
 
 #: ../jabber/Register.tcl:924
 #, tcl-format
-msgid ""
-"The registration with %s was successful. Now you just need to Login using "
-"the same username and password."
-msgstr ""
-"Uw account op %s werd aangemaakt. U moet nu Aanmelden met dezelfde account "
-"en wachtwoord."
+msgid "The registration with %s was successful. Now you just need to Login using the same username and password."
+msgstr "Uw account op %s werd aangemaakt. U moet nu Aanmelden met dezelfde account en wachtwoord."
 
 #: ../jabber/Register.tcl:954
 #, tcl-format
 msgid "You are now registered and automatically logged in as %s"
 msgstr "Uw account werd aangemaakt en u bent automatisch aangemeld als %s"
 
-#: ../jabber/Register.tcl:1119 ../jabber/Register.tcl:1442
+#: ../jabber/Register.tcl:1119
+#: ../jabber/Register.tcl:1442
 msgid "Select a service and press Next"
 msgstr "Selecteer een dienst en klik op Volgende"
 
-#: ../jabber/Register.tcl:1352 ../jabber/Register.tcl:1536
+#: ../jabber/Register.tcl:1352
+#: ../jabber/Register.tcl:1536
 #, tcl-format
 msgid "Cannot register with service %s."
 msgstr "Kan niet registreren op de dienst %s."
 
-#: ../jabber/Register.tcl:1361 ../jabber/Register.tcl:1544
+#: ../jabber/Register.tcl:1361
+#: ../jabber/Register.tcl:1544
 #, tcl-format
 msgid "Registration with service %s was successful."
 msgstr "Uw registratie op %s is geslaagd."
 
-#: ../jabber/Roster.tcl:81 ../jabber/Roster.tcl:89 ../jabber/Status.tcl:36
+#: ../jabber/Roster.tcl:81
+#: ../jabber/Roster.tcl:89
+#: ../jabber/Status.tcl:36
 #: ../jabber/Status.tcl:44
 msgid "Available"
 msgstr "Beschikbaar"
 
-#: ../jabber/Roster.tcl:82 ../jabber/Roster.tcl:90 ../jabber/Roster.tcl:135
-#: ../jabber/Status.tcl:37 ../jabber/Status.tcl:45
+#: ../jabber/Roster.tcl:82
+#: ../jabber/Roster.tcl:90
+#: ../jabber/Roster.tcl:135
+#: ../jabber/Status.tcl:37
+#: ../jabber/Status.tcl:45
 msgid "Away"
 msgstr "Afwezig"
 
-#: ../jabber/Roster.tcl:83 ../jabber/Roster.tcl:91 ../jabber/Status.tcl:38
+#: ../jabber/Roster.tcl:83
+#: ../jabber/Roster.tcl:91
+#: ../jabber/Status.tcl:38
 #: ../jabber/Status.tcl:46
 msgid "Free For Chat"
 msgstr "Vrij voor chat"
 
-#: ../jabber/Roster.tcl:84 ../jabber/Roster.tcl:92 ../jabber/Roster.tcl:134
-#: ../jabber/Status.tcl:39 ../jabber/Status.tcl:47
+#: ../jabber/Roster.tcl:84
+#: ../jabber/Roster.tcl:92
+#: ../jabber/Roster.tcl:134
+#: ../jabber/Status.tcl:39
+#: ../jabber/Status.tcl:47
 msgid "Do Not Disturb"
 msgstr "Niet storen"
 
-#: ../jabber/Roster.tcl:85 ../jabber/Roster.tcl:93 ../jabber/Roster.tcl:136
-#: ../jabber/Status.tcl:40 ../jabber/Status.tcl:48
+#: ../jabber/Roster.tcl:85
+#: ../jabber/Roster.tcl:93
+#: ../jabber/Roster.tcl:136
+#: ../jabber/Status.tcl:40
+#: ../jabber/Status.tcl:48
 msgid "Extended Away"
 msgstr "Langdurig afwezig"
 
-#: ../jabber/Roster.tcl:86 ../jabber/Roster.tcl:94 ../jabber/Status.tcl:41
+#: ../jabber/Roster.tcl:86
+#: ../jabber/Roster.tcl:94
+#: ../jabber/Status.tcl:41
 #: ../jabber/Status.tcl:49
 msgid "Invisible"
 msgstr "Onzichtbaar"
@@ -4558,7 +5166,8 @@ msgstr "Onzichtbaar"
 msgid "&History"
 msgstr "&Geschiedenis"
 
-#: ../jabber/Roster.tcl:128 ../jabber/Roster.tcl:189
+#: ../jabber/Roster.tcl:128
+#: ../jabber/Roster.tcl:189
 msgid "&Edit Contact"
 msgstr "C&ontactpersoon bewerken"
 
@@ -4566,7 +5175,8 @@ msgstr "C&ontactpersoon bewerken"
 msgid "&Remove Contact"
 msgstr "Contactpersoon ve&rwijderen"
 
-#: ../jabber/Roster.tcl:131 ../whiteboard/ItemInspector.tcl:375
+#: ../jabber/Roster.tcl:131
+#: ../whiteboard/ItemInspector.tcl:375
 msgid "Style"
 msgstr "Stijl"
 
@@ -4602,16 +5212,15 @@ msgstr "Transport aanmelden"
 msgid "Logout from Transport"
 msgstr "Transport afmelden"
 
-#: ../jabber/Roster.tcl:394 ../jabber/Roster.tcl:405
+#: ../jabber/Roster.tcl:394
+#: ../jabber/Roster.tcl:405
 msgid "Remove Contact"
 msgstr "Contactpersoon verwijderen"
 
-#: ../jabber/Roster.tcl:395 ../jabber/Roster.tcl:406
-msgid ""
-"Do you really want to remove this contact? This action cannot be undone."
-msgstr ""
-"Wilt u deze contactpersoon verwijderen? Deze actie kan niet teruggedraaid "
-"worden."
+#: ../jabber/Roster.tcl:395
+#: ../jabber/Roster.tcl:406
+msgid "Do you really want to remove this contact? This action cannot be undone."
+msgstr "Wilt u deze contactpersoon verwijderen? Deze actie kan niet teruggedraaid worden."
 
 #: ../jabber/Roster.tcl:598
 #, tcl-format
@@ -4677,12 +5286,8 @@ msgid "Contact Icons"
 msgstr "Contactpersoonpictogrammen"
 
 #: ../jabber/Rosticons.tcl:483
-msgid ""
-"Select iconsets for each group. A deselected group will use the normal "
-"iconset."
-msgstr ""
-"Selecteer pictogrammen voor elke groep. Een gedeselecteerde groep zal de "
-"standaardpictogrammen gebruiken."
+msgid "Select iconsets for each group. A deselected group will use the normal iconset."
+msgstr "Selecteer pictogrammen voor elke groep. Een gedeselecteerde groep zal de standaardpictogrammen gebruiken."
 
 #: ../jabber/Rosticons.tcl:581
 msgid "Standard"
@@ -4700,24 +5305,25 @@ msgstr "Sleutel"
 msgid "Icon"
 msgstr "Pictogram"
 
-#: ../jabber/Search.tcl:88 ../jabber/Search.tcl:129 ../jabber/Search.tcl:1149
-#: ../lib/TSearch.tcl:76 ../lib/WSearch.tcl:68
+#: ../jabber/Search.tcl:88
+#: ../jabber/Search.tcl:129
+#: ../jabber/Search.tcl:1149
+#: ../lib/TSearch.tcl:76
+#: ../lib/WSearch.tcl:68
 msgid "Search"
 msgstr "Zoeken"
 
 #: ../jabber/Search.tcl:117
-msgid ""
-"Search contacts with the selected service. A new search form will empty the "
-"previous one."
-msgstr ""
-"Zoek contactpersonen met de geselecteerde dienst. Een nieuw zoekformulier "
-"zal het vorige leegmaken."
+msgid "Search contacts with the selected service. A new search form will empty the previous one."
+msgstr "Zoek contactpersonen met de geselecteerde dienst. Een nieuw zoekformulier zal het vorige leegmaken."
 
 #: ../jabber/Search.tcl:155
 msgid "New Form"
 msgstr "Nieuw formulier"
 
-#: ../jabber/Search.tcl:203 ../jabber/Search.tcl:321 ../jabber/Search.tcl:544
+#: ../jabber/Search.tcl:203
+#: ../jabber/Search.tcl:321
+#: ../jabber/Search.tcl:544
 msgid "Search results"
 msgstr "Zoekresultaten"
 
@@ -4733,7 +5339,9 @@ msgstr "Er was een ongeldig veld. Verbeter het."
 msgid "Cannot search."
 msgstr "Kan niet zoeken."
 
-#: ../jabber/Search.tcl:929 ../jabber/Search.tcl:945 ../jabber/Search.tcl:1022
+#: ../jabber/Search.tcl:929
+#: ../jabber/Search.tcl:945
+#: ../jabber/Search.tcl:1022
 msgid "Search People"
 msgstr "Mensen zoeken"
 
@@ -4743,20 +5351,15 @@ msgstr "Volledige naam"
 
 #: ../jabber/SetupAss.tcl:101
 #, tcl-format
-msgid ""
-"This setup assistant will help you to configure the most important settings "
-"to get started with %s."
-msgstr ""
-"Deze installatieassistant zal u helpen bij de belangrijkste instellingen om "
-"te kunnen starten met %s."
+msgid "This setup assistant will help you to configure the most important settings to get started with %s."
+msgstr "Deze installatieassistant zal u helpen bij de belangrijkste instellingen om te kunnen starten met %s."
 
 #: ../jabber/SetupAss.tcl:103
 msgid "Any time you can press Previous to go back. Press Next to proceed."
-msgstr ""
-"U kunt altijd op Vorige drukken om terug te keren. Druk Volgende om door te "
-"gaan."
+msgstr "U kunt altijd op Vorige drukken om terug te keren. Druk Volgende om door te gaan."
 
-#: ../jabber/SetupAss.tcl:111 ../lib/PrefGeneral.tcl:103
+#: ../jabber/SetupAss.tcl:111
+#: ../lib/PrefGeneral.tcl:103
 msgid "Language"
 msgstr "Taal"
 
@@ -4768,33 +5371,22 @@ msgstr "Kies uw taal"
 msgid "Select Server"
 msgstr "Server selecteren"
 
-#: ../jabber/SetupAss.tcl:135 ../jabber/SetupAss.tcl:320
-msgid ""
-"Select or enter a server you wish to have your account on. If you already "
-"have an account, use the server of this account."
-msgstr ""
-"Selecteer of voer de server in waarop u een account wilt hebben. Als u al "
-"een account hebt, gebruik dan de server van die account."
+#: ../jabber/SetupAss.tcl:135
+#: ../jabber/SetupAss.tcl:320
+msgid "Select or enter a server you wish to have your account on. If you already have an account, use the server of this account."
+msgstr "Selecteer of voer de server in waarop u een account wilt hebben. Als u al een account hebt, gebruik dan de server van die account."
 
 #: ../jabber/SetupAss.tcl:160
 msgid "Username & Password"
 msgstr "Gebruikersnaam & wachtwoord"
 
 #: ../jabber/SetupAss.tcl:164
-msgid ""
-"Enter your username and password. If the chosen username is already in use "
-"by someone else, you will not be able to register."
-msgstr ""
-"Voer uw gebruikersnaam en wachtwoord in. Als de gekozen gebruikersnaam al "
-"door iemand anders in gebruik is, kunt u uw account niet aanmaken."
+msgid "Enter your username and password. If the chosen username is already in use by someone else, you will not be able to register."
+msgstr "Voer uw gebruikersnaam en wachtwoord in. Als de gekozen gebruikersnaam al door iemand anders in gebruik is, kunt u uw account niet aanmaken."
 
 #: ../jabber/SetupAss.tcl:195
-msgid ""
-"Click on the button below to create a new account. You must be connected to "
-"the Internet. Pay attention to a possible firewall!"
-msgstr ""
-"Druk op de knop hieronder om een nieuwe account aan te maken. U moet "
-"verbonden zijn met het internet. Let op een eventuele firewall!"
+msgid "Click on the button below to create a new account. You must be connected to the Internet. Pay attention to a possible firewall!"
+msgstr "Druk op de knop hieronder om een nieuwe account aan te maken. U moet verbonden zijn met het internet. Let op een eventuele firewall!"
 
 #: ../jabber/SetupAss.tcl:207
 msgid "Finished"
@@ -4809,14 +5401,12 @@ msgid "Be sure to fill in all entries before you continue."
 msgstr "Vul eerst alle velden in."
 
 #: ../jabber/SetupAss.tcl:342
-msgid ""
-"Are you sure you want to close the setup assistant? You may start it any "
-"time later from the menu."
-msgstr ""
-"Wilt u de installatieassistent afsluiten? U kunt hem later altijd starten "
-"vanuit het menu."
+msgid "Are you sure you want to close the setup assistant? You may start it any time later from the menu."
+msgstr "Wilt u de installatieassistent afsluiten? U kunt hem later altijd starten vanuit het menu."
 
-#: ../jabber/Status.tcl:256 ../jabber/Status.tcl:274 ../jabber/Status.tcl:335
+#: ../jabber/Status.tcl:256
+#: ../jabber/Status.tcl:274
+#: ../jabber/Status.tcl:335
 msgid "Attach Message"
 msgstr "Bericht toevoegen"
 
@@ -4832,7 +5422,8 @@ msgstr "Status"
 msgid "Status message"
 msgstr "Bericht"
 
-#: ../jabber/Status.tcl:756 ../jabber/Status.tcl:864
+#: ../jabber/Status.tcl:756
+#: ../jabber/Status.tcl:864
 msgid "Custom Status"
 msgstr "Aangepaste aanwezigheid"
 
@@ -4843,8 +5434,7 @@ msgstr "Selecteer uw aanwezigheid en voer eventueel een bericht in."
 
 #: ../jabber/Status.tcl:862
 msgid "The most frequent combinations are easily reachable as menu entries."
-msgstr ""
-"De meestvoorkomende combinaties zijn makkelijk bereikbaar als menu-ingangen."
+msgstr "De meestvoorkomende combinaties zijn makkelijk bereikbaar als menu-ingangen."
 
 #: ../jabber/StatusSlot.tcl:84
 msgid "Status Info"
@@ -4857,64 +5447,71 @@ msgstr "Mag %s uw aanwezigheid zien?"
 
 #. TRANSLATORS: shown in subscription request dialog when someone tries to add the user to his or her list
 #: ../jabber/Subscribe.tcl:262
-msgid ""
-"Entering a nickname and group is optional, and for your personal use only."
-msgstr ""
-"Een bijnaam en groep invoeren is optioneel en enkel voor persoonlijk gebruik."
+msgid "Entering a nickname and group is optional, and for your personal use only."
+msgstr "Een bijnaam en groep invoeren is optioneel en enkel voor persoonlijk gebruik."
 
 #. TRANSLATORS: shown in subscription request dialog if auto-accept and the timer option are both enabled in the preferences
-#: ../jabber/Subscribe.tcl:277 ../jabber/Subscribe.tcl:450
-#: ../jabber/Subscribe.tcl:812 ../jabber/Subscribe.tcl:828
-#: ../jabber/Subscribe.tcl:1037 ../jabber/Subscribe.tcl:1145
+#: ../jabber/Subscribe.tcl:277
+#: ../jabber/Subscribe.tcl:450
+#: ../jabber/Subscribe.tcl:812
+#: ../jabber/Subscribe.tcl:828
+#: ../jabber/Subscribe.tcl:1037
+#: ../jabber/Subscribe.tcl:1145
 #, tcl-format
 msgid "Subscription request will be accepted in: %s secs."
 msgstr "Abonnementsaanvraag wordt aanvaard in: %s seconden."
 
-#: ../jabber/Subscribe.tcl:280 ../jabber/Subscribe.tcl:301
-#: ../jabber/Subscribe.tcl:1040 ../jabber/Subscribe.tcl:1060
+#: ../jabber/Subscribe.tcl:280
+#: ../jabber/Subscribe.tcl:301
+#: ../jabber/Subscribe.tcl:1040
+#: ../jabber/Subscribe.tcl:1060
 msgid "Pause"
 msgstr "Pauzeren"
 
 #. TRANSLATORS: shown in subscription request dialog if auto-rejept and the timer option are both enabled in the preferences
-#: ../jabber/Subscribe.tcl:298 ../jabber/Subscribe.tcl:470
-#: ../jabber/Subscribe.tcl:878 ../jabber/Subscribe.tcl:894
-#: ../jabber/Subscribe.tcl:1057 ../jabber/Subscribe.tcl:1162
+#: ../jabber/Subscribe.tcl:298
+#: ../jabber/Subscribe.tcl:470
+#: ../jabber/Subscribe.tcl:878
+#: ../jabber/Subscribe.tcl:894
+#: ../jabber/Subscribe.tcl:1057
+#: ../jabber/Subscribe.tcl:1162
 #, tcl-format
 msgid "Subscription request will be rejected in: %s secs."
 msgstr "Abonnementsaanvraag wordt geweigerd in: %s seconden."
 
-#: ../jabber/Subscribe.tcl:446 ../jabber/Subscribe.tcl:666
+#: ../jabber/Subscribe.tcl:446
+#: ../jabber/Subscribe.tcl:666
 #: ../jabber/Subscribe.tcl:825
 #, tcl-format
 msgid "%s can see your presence."
 msgstr "%s kan uw aanwezigheid zien."
 
-#: ../jabber/Subscribe.tcl:466 ../jabber/Subscribe.tcl:699
+#: ../jabber/Subscribe.tcl:466
+#: ../jabber/Subscribe.tcl:699
 #: ../jabber/Subscribe.tcl:891
 #, tcl-format
 msgid "%s cannot see your presence."
 msgstr "%s kan uw aanwezigheid niet zien."
 
-#: ../jabber/Subscribe.tcl:1030 ../jabber/Subscribe.tcl:1220
+#: ../jabber/Subscribe.tcl:1030
+#: ../jabber/Subscribe.tcl:1220
 #: ../jabber/Subscribe.tcl:1449
 #, tcl-format
-msgid ""
-"%s contacts want to see your presence. Select those who may see your "
-"presence."
-msgstr ""
-"%s contactpersonen willen uw aanwezigheid zien. Selecteer diegenen die uw "
-"aanwezigheid mogen zien."
+msgid "%s contacts want to see your presence. Select those who may see your presence."
+msgstr "%s contactpersonen willen uw aanwezigheid zien. Selecteer diegenen die uw aanwezigheid mogen zien."
 
 #: ../jabber/Subscribe.tcl:1086
 msgid "Allow"
 msgstr "Toestaan"
 
-#: ../jabber/Subscribe.tcl:1412 ../jabber/Subscribe.tcl:1440
+#: ../jabber/Subscribe.tcl:1412
+#: ../jabber/Subscribe.tcl:1440
 #, tcl-format
 msgid "%s allows you to see his/her presence."
 msgstr "%s staat u toe zijn/haar aanwezigheid te zien."
 
-#: ../jabber/Subscribe.tcl:1491 ../jabber/Subscribe.tcl:1538
+#: ../jabber/Subscribe.tcl:1491
+#: ../jabber/Subscribe.tcl:1538
 #, tcl-format
 msgid "%s additional contacts can see your presence."
 msgstr "%s extra contactpersonen kunnen uw aanwezigheid zien."
@@ -4931,7 +5528,8 @@ msgstr "niet in mijn lijst is"
 msgid "is in my list"
 msgstr "in mijn lijst is"
 
-#: ../jabber/Subscribe.tcl:1638 ../whiteboard/FilePrefs.tcl:492
+#: ../jabber/Subscribe.tcl:1638
+#: ../whiteboard/FilePrefs.tcl:492
 msgid "Always ask"
 msgstr "Altijd vragen"
 
@@ -4959,7 +5557,8 @@ msgstr "Contactpersonen die mij toevoegen aan hun lijst plaatsen in"
 msgid "Default group"
 msgstr "Standaardgroep"
 
-#: ../jabber/UserInfo.tcl:142 ../jabber/VCard.tcl:82
+#: ../jabber/UserInfo.tcl:142
+#: ../jabber/VCard.tcl:82
 #, tcl-format
 msgid "Downloading business card from %s"
 msgstr "Downloaden van visitekaart van %s"
@@ -4968,11 +5567,14 @@ msgstr "Downloaden van visitekaart van %s"
 msgid "Operating system"
 msgstr "Besturinssysteem"
 
-#: ../jabber/UserInfo.tcl:356 ../jabber/VCard.tcl:102 ../jabber/VCard.tcl:844
+#: ../jabber/UserInfo.tcl:356
+#: ../jabber/VCard.tcl:102
+#: ../jabber/VCard.tcl:844
 msgid "Cannot download business card."
 msgstr "Kan visitekaart niet downloaden."
 
-#: ../jabber/UserInfo.tcl:384 ../jabber/VCard.tcl:227
+#: ../jabber/UserInfo.tcl:384
+#: ../jabber/VCard.tcl:227
 #, tcl-format
 msgid "Business Card: %s"
 msgstr "Visitekaart: %s"
@@ -4980,7 +5582,7 @@ msgstr "Visitekaart: %s"
 #: ../jabber/UserInfo.tcl:474
 #, tcl-format
 msgid "Failed to obtain personal notes: %s"
-msgstr ""
+msgstr "Kan persoonlijke notities niet verkrijgen: %s"
 
 #. TRANSLATORS: in the business card dialog, there can be made notes about each contact
 #: ../jabber/UserInfo.tcl:529
@@ -5087,15 +5689,18 @@ msgstr "Visitekaart openen"
 msgid "Edit Bookmarks"
 msgstr "Bladwijzers bewerken"
 
-#: ../lib/Bookmarks.tcl:127 ../lib/Bookmarks.tcl:172
+#: ../lib/Bookmarks.tcl:127
+#: ../lib/Bookmarks.tcl:172
 msgid "New Bookmark"
 msgstr "Nieuwe bladwijzer"
 
-#: ../lib/Component.tcl:59 ../whiteboard/WDialogs.tcl:39
+#: ../lib/Component.tcl:59
+#: ../whiteboard/WDialogs.tcl:39
 msgid "There are no plugins or helper applications identified on this system."
 msgstr "Kan geen plugins of hulpprogramma's op dit systeem vinden."
 
-#: ../lib/Component.tcl:68 ../whiteboard/Plugins.tcl:1326
+#: ../lib/Component.tcl:68
+#: ../whiteboard/Plugins.tcl:1326
 #: ../whiteboard/WDialogs.tcl:47
 msgid "Plugins"
 msgstr "Plugins"
@@ -5105,14 +5710,17 @@ msgstr "Plugins"
 msgid "Shell print command, edit if desired"
 msgstr "Afdrukcommando. Bewerk indien gewenst."
 
-#: ../lib/Dialogs.tcl:470 ../lib/Splash.tcl:83 ../lib/UI.tcl:488
+#: ../lib/Dialogs.tcl:470
+#: ../lib/Splash.tcl:83
+#: ../lib/UI.tcl:488
 #: ../lib/UI.tcl:490
 #, tcl-format
 msgid "About %s"
 msgstr "Over %s"
 
 #. TRANSLATORS: some old whiteboard feature
-#: ../lib/EditDialogs.tcl:81 ../lib/EditDialogs.tcl:93
+#: ../lib/EditDialogs.tcl:81
+#: ../lib/EditDialogs.tcl:93
 msgid "Edit Shortcuts"
 msgstr "Sneltoetsen bewerken"
 
@@ -5128,7 +5736,8 @@ msgstr "Sneltoets toevoegen"
 msgid "New shortcut"
 msgstr "Nieuwe sneltoets"
 
-#: ../lib/EditDialogs.tcl:278 ../lib/EditDialogs.tcl:283
+#: ../lib/EditDialogs.tcl:278
+#: ../lib/EditDialogs.tcl:283
 msgid "Complete ip number or name"
 msgstr "Vervolledig het IP-nummer of de naam"
 
@@ -5155,9 +5764,7 @@ msgstr "Cache wissen"
 
 #: ../lib/FileCache.tcl:636
 msgid "Amount of cache to store recent whiteboard files to increase speed."
-msgstr ""
-"Hoeveelheid cache om recente whiteboardbestanden in te bewaren en de "
-"snelheid te verhogen."
+msgstr "Hoeveelheid cache om recente whiteboardbestanden in te bewaren en de snelheid te verhogen."
 
 #: ../lib/FileCache.tcl:648
 msgid "Synchronise cache"
@@ -5180,18 +5787,23 @@ msgstr "Nooit"
 msgid "Cannot open file %s"
 msgstr "Kan het bestand %s niet openen"
 
-#: ../lib/HttpTrpt.tcl:100 ../lib/HttpTrpt.tcl:133 ../lib/HttpTrpt.tcl:227
+#: ../lib/HttpTrpt.tcl:100
+#: ../lib/HttpTrpt.tcl:133
+#: ../lib/HttpTrpt.tcl:227
 #: ../lib/HttpTrpt.tcl:241
 #, tcl-format
 msgid "Cannot download the file %s."
 msgstr "Kan het bestand %s niet downloaden."
 
-#: ../lib/HttpTrpt.tcl:102 ../lib/HttpTrpt.tcl:135 ../lib/HttpTrpt.tcl:229
+#: ../lib/HttpTrpt.tcl:102
+#: ../lib/HttpTrpt.tcl:135
+#: ../lib/HttpTrpt.tcl:229
 #, tcl-format
 msgid "File transport error: %s"
 msgstr "Kan het bestand %s niet downloaden."
 
-#: ../lib/HttpTrpt.tcl:169 ../lib/HttpTrpt.tcl:188
+#: ../lib/HttpTrpt.tcl:169
+#: ../lib/HttpTrpt.tcl:188
 msgid "Downloading"
 msgstr "Downloaden van"
 
@@ -5222,15 +5834,20 @@ msgstr "Bestandsoverdracht van %s werd opnieuw geïnitialiseerd."
 msgid "Cannot start the internal HTTP server: %s"
 msgstr "Kan de interne HTTP-server niet starten: %s"
 
-#: ../lib/Init.tcl:741 ../lib/Init.tcl:762 ../lib/Media.tcl:179
+#: ../lib/Init.tcl:741
+#: ../lib/Init.tcl:762
+#: ../lib/Media.tcl:179
 #: ../whiteboard/Plugins.tcl:445
 #, tcl-format
 msgid "Looking for %s"
 msgstr "%s wordt opgezocht"
 
-#: ../lib/MacintoshUtils.tcl:56 ../lib/MacintoshUtils.tcl:78
-#: ../lib/MacintoshUtils.tcl:100 ../lib/UserActions.tcl:45
-#: ../lib/UserActions.tcl:73 ../lib/UserActions.tcl:94
+#: ../lib/MacintoshUtils.tcl:56
+#: ../lib/MacintoshUtils.tcl:78
+#: ../lib/MacintoshUtils.tcl:100
+#: ../lib/UserActions.tcl:45
+#: ../lib/UserActions.tcl:73
+#: ../lib/UserActions.tcl:94
 msgid "Cannot find necessary Tcl extension."
 msgstr "Kan benodigde Tcl-extensie niet vinden."
 
@@ -5247,29 +5864,17 @@ msgid "Store preferences in same folder as program"
 msgstr "Voorkeuren opslaan in dezelfde map als het programma"
 
 #: ../lib/PrefGeneral.tcl:129
-msgid ""
-"You have chosen to store your preferences on the same drive as the "
-"application. If this drive is not a removable device your personal settings "
-"could be visible. Do you want to continue?"
-msgstr ""
-"U koos om uw voorkeuren te bewaren op hetzelfde station als het programma. "
-"Als dit station niet verwijderbaar is dan kunnen anderen uw voorkeuren zien. "
-"Wilt u doorgaan?"
+msgid "You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible. Do you want to continue?"
+msgstr "U koos om uw voorkeuren te bewaren op hetzelfde station als het programma. Als dit station niet verwijderbaar is dan kunnen anderen uw voorkeuren zien. Wilt u doorgaan?"
 
-#: ../lib/PrefGeneral.tcl:144 ../lib/PrefGeneral.tcl:168
+#: ../lib/PrefGeneral.tcl:144
+#: ../lib/PrefGeneral.tcl:168
 #, tcl-format
-msgid ""
-"You have chosen to store your preferences in the default location. If you "
-"remove or move your personal settings at %s, the preferences in the default "
-"location will be used the next time you start %s. Do you want to remove the "
-"old preferences?"
-msgstr ""
-"U koos om uw voorkeuren op te slaan op de standaardlocatie. Als u uw "
-"voorkeuren verwijdert of verplaatst op %s, dan worden de voorkeuren op de "
-"standaardlocatie gebruikt bij de volgende sessie van %s. Wilt u de oude "
-"voorkeuren verwijderen?"
+msgid "You have chosen to store your preferences in the default location. If you remove or move your personal settings at %s, the preferences in the default location will be used the next time you start %s. Do you want to remove the old preferences?"
+msgstr "U koos om uw voorkeuren op te slaan op de standaardlocatie. Als u uw voorkeuren verwijdert of verplaatst op %s, dan worden de voorkeuren op de standaardlocatie gebruikt bij de volgende sessie van %s. Wilt u de oude voorkeuren verwijderen?"
 
-#: ../lib/PrefHelpers.tcl:73 ../lib/PrefHelpers.tcl:116
+#: ../lib/PrefHelpers.tcl:73
+#: ../lib/PrefHelpers.tcl:116
 msgid "Default Applications"
 msgstr "Standaardtoepassingen"
 
@@ -5305,15 +5910,18 @@ msgstr "Ingebouwde server"
 msgid "File transfer"
 msgstr "Bestandsoverdracht"
 
-#: ../lib/PrefNet.tcl:168 ../lib/PrefNet.tcl:194
+#: ../lib/PrefNet.tcl:168
+#: ../lib/PrefNet.tcl:194
 msgid "TLS certificate file"
 msgstr "TLS-certificaatbestand"
 
-#: ../lib/PrefNet.tcl:171 ../lib/PrefNet.tcl:177
+#: ../lib/PrefNet.tcl:171
+#: ../lib/PrefNet.tcl:177
 msgid "Browse"
 msgstr "Bladeren"
 
-#: ../lib/PrefNet.tcl:174 ../lib/PrefNet.tcl:203
+#: ../lib/PrefNet.tcl:174
+#: ../lib/PrefNet.tcl:203
 msgid "TLS private key file"
 msgstr "TLS-privaat-sleutelbestand"
 
@@ -5348,19 +5956,17 @@ msgid "NAT Address"
 msgstr "NAT-adres"
 
 #: ../lib/Proxy.tcl:196
-msgid ""
-"Usage of this HTTP proxy settings is determined by each profile's settings. "
-"File transfers will not work if you use an HTTP proxy."
-msgstr ""
-"Het gebruik van de proxyinstellingen wordt bepaald door de instellingen van "
-"elk profiel. Bestandsoverdracht werkt niet met een proxy."
+msgid "Usage of this HTTP proxy settings is determined by each profile's settings. File transfers will not work if you use an HTTP proxy."
+msgstr "Het gebruik van de proxyinstellingen wordt bepaald door de instellingen van elk profiel. Bestandsoverdracht werkt niet met een proxy."
 
 #: ../lib/Proxy.tcl:197
 msgid "Use proxy"
 msgstr "Proxy gebruiken"
 
-#: ../lib/Proxy.tcl:200 ../whiteboard/FilePrefs.tcl:462
-#: ../whiteboard/ItemInspector.tcl:289 ../whiteboard/WDialogs.tcl:123
+#: ../lib/Proxy.tcl:200
+#: ../whiteboard/FilePrefs.tcl:462
+#: ../whiteboard/ItemInspector.tcl:289
+#: ../whiteboard/WDialogs.tcl:123
 msgid "Type"
 msgstr "Soort"
 
@@ -5424,7 +6030,8 @@ msgstr "PDF-document"
 msgid "PostScript Document"
 msgstr "PostScript-document"
 
-#: ../lib/Types.tcl:588 ../lib/Types.tcl:617
+#: ../lib/Types.tcl:588
+#: ../lib/Types.tcl:617
 msgid "RTF Document"
 msgstr "RTF-document"
 
@@ -5580,14 +6187,17 @@ msgstr "Afsluiten"
 msgid "Do you actually want to quit?"
 msgstr "Wilt u afsluiten?"
 
-#: ../whiteboard/CanvasCmd.tcl:447 ../whiteboard/CanvasFile.tcl:737
+#: ../whiteboard/CanvasCmd.tcl:447
+#: ../whiteboard/CanvasFile.tcl:737
 #: ../whiteboard/CanvasFile.tcl:768
 #, tcl-format
 msgid "Cannot write to %s: %s"
 msgstr "Kan niet naar % schrijven: %s"
 
-#: ../whiteboard/CanvasCmd.tcl:455 ../whiteboard/CanvasFile.tcl:52
-#: ../whiteboard/CanvasFile.tcl:71 ../whiteboard/CanvasFile.tcl:500
+#: ../whiteboard/CanvasCmd.tcl:455
+#: ../whiteboard/CanvasFile.tcl:52
+#: ../whiteboard/CanvasFile.tcl:71
+#: ../whiteboard/CanvasFile.tcl:500
 #: ../whiteboard/CanvasFile.tcl:843
 #, tcl-format
 msgid "Cannot read %s: %s"
@@ -5597,11 +6207,11 @@ msgstr "Kan %s niet lezen: %s"
 msgid "Arc tool, click and drag"
 msgstr "Boog, klik en sleep"
 
-#: ../whiteboard/CanvasDraw.tcl:1462 ../whiteboard/CanvasDraw.tcl:1519
+#: ../whiteboard/CanvasDraw.tcl:1462
+#: ../whiteboard/CanvasDraw.tcl:1519
 #: ../whiteboard/Whiteboard.tcl:87
 msgid "Arc tool, click to set center, spacebar to cancel"
-msgstr ""
-"Boog, klik om het centrum in te stellen, spatiebalk om ongedaan te maken"
+msgstr "Boog, klik om het centrum in te stellen, spatiebalk om ongedaan te maken"
 
 #: ../whiteboard/CanvasFile.tcl:549
 msgid "Opening a whiteboard file clears the current whiteboard!"
@@ -5615,34 +6225,41 @@ msgstr "Bestand openen"
 msgid "Save Canvas Item"
 msgstr "Item opslaan"
 
-#: ../whiteboard/CanvasUtils.tcl:90 ../whiteboard/Whiteboard.tcl:475
+#: ../whiteboard/CanvasUtils.tcl:90
+#: ../whiteboard/Whiteboard.tcl:475
 msgid "Thickness"
 msgstr "Dikte"
 
-#: ../whiteboard/CanvasUtils.tcl:101 ../whiteboard/Whiteboard.tcl:486
+#: ../whiteboard/CanvasUtils.tcl:101
+#: ../whiteboard/Whiteboard.tcl:486
 msgid "Brush Thickness"
 msgstr "Penseeldikte"
 
-#: ../whiteboard/CanvasUtils.tcl:112 ../whiteboard/Whiteboard.tcl:516
+#: ../whiteboard/CanvasUtils.tcl:112
+#: ../whiteboard/Whiteboard.tcl:516
 msgid "Arcs"
 msgstr "Bogen"
 
-#: ../whiteboard/CanvasUtils.tcl:113 ../whiteboard/ItemInspector.tcl:230
+#: ../whiteboard/CanvasUtils.tcl:113
+#: ../whiteboard/ItemInspector.tcl:230
 #: ../whiteboard/Whiteboard.tcl:517
 msgid "Pieslice"
 msgstr "Taartspie"
 
-#: ../whiteboard/CanvasUtils.tcl:115 ../whiteboard/ItemInspector.tcl:231
+#: ../whiteboard/CanvasUtils.tcl:115
+#: ../whiteboard/ItemInspector.tcl:231
 #: ../whiteboard/Whiteboard.tcl:519
 msgid "Chord"
 msgstr "Koorde"
 
-#: ../whiteboard/CanvasUtils.tcl:117 ../whiteboard/ItemInspector.tcl:232
+#: ../whiteboard/CanvasUtils.tcl:117
+#: ../whiteboard/ItemInspector.tcl:232
 #: ../whiteboard/Whiteboard.tcl:521
 msgid "Arc"
 msgstr "Boog"
 
-#: ../whiteboard/CanvasUtils.tcl:121 ../whiteboard/CanvasUtils.tcl:1607
+#: ../whiteboard/CanvasUtils.tcl:121
+#: ../whiteboard/CanvasUtils.tcl:1607
 msgid "Color"
 msgstr "Kleur"
 
@@ -5654,9 +6271,12 @@ msgstr "Vulkleur"
 msgid "Outline Color"
 msgstr "Omlijningskleur"
 
-#: ../whiteboard/CanvasUtils.tcl:127 ../whiteboard/CanvasUtils.tcl:129
-#: ../whiteboard/CanvasUtils.tcl:149 ../whiteboard/Whiteboard.tcl:452
-#: ../whiteboard/Whiteboard.tcl:2940 ../whiteboard/Whiteboard.tcl:2949
+#: ../whiteboard/CanvasUtils.tcl:127
+#: ../whiteboard/CanvasUtils.tcl:129
+#: ../whiteboard/CanvasUtils.tcl:149
+#: ../whiteboard/Whiteboard.tcl:452
+#: ../whiteboard/Whiteboard.tcl:2940
+#: ../whiteboard/Whiteboard.tcl:2949
 msgid "&Edit Item"
 msgstr "Item &bewerken"
 
@@ -5664,14 +6284,18 @@ msgstr "Item &bewerken"
 msgid "Save Image As"
 msgstr "Afbeelding opslaan als"
 
-#: ../whiteboard/CanvasUtils.tcl:133 ../whiteboard/Whiteboard.tcl:463
-#: ../whiteboard/Whiteboard.tcl:2946 ../whiteboard/Whiteboard.tcl:2958
+#: ../whiteboard/CanvasUtils.tcl:133
+#: ../whiteboard/Whiteboard.tcl:463
+#: ../whiteboard/Whiteboard.tcl:2946
+#: ../whiteboard/Whiteboard.tcl:2958
 #: ../whiteboard/Whiteboard.tcl:2961
 msgid "Image Larger"
 msgstr "Afbeelding vergroten"
 
-#: ../whiteboard/CanvasUtils.tcl:135 ../whiteboard/Whiteboard.tcl:464
-#: ../whiteboard/Whiteboard.tcl:2947 ../whiteboard/Whiteboard.tcl:2959
+#: ../whiteboard/CanvasUtils.tcl:135
+#: ../whiteboard/Whiteboard.tcl:464
+#: ../whiteboard/Whiteboard.tcl:2947
+#: ../whiteboard/Whiteboard.tcl:2959
 #: ../whiteboard/Whiteboard.tcl:2962
 msgid "Image Smaller"
 msgstr "Afbeelding verkleinen"
@@ -5696,8 +6320,10 @@ msgstr "Tijdcode"
 msgid "Reload Image"
 msgstr "Afbeelding herladen"
 
-#: ../whiteboard/CanvasUtils.tcl:153 ../whiteboard/CanvasUtils.tcl:166
-#: ../whiteboard/Whiteboard.tcl:500 ../whiteboard/Whiteboard.tcl:513
+#: ../whiteboard/CanvasUtils.tcl:153
+#: ../whiteboard/CanvasUtils.tcl:166
+#: ../whiteboard/Whiteboard.tcl:500
+#: ../whiteboard/Whiteboard.tcl:513
 msgid "Line Smoothness"
 msgstr "Lijngladheid"
 
@@ -5705,11 +6331,13 @@ msgstr "Lijngladheid"
 msgid "Straighten"
 msgstr "Scherper maken"
 
-#: ../whiteboard/CanvasUtils.tcl:171 ../whiteboard/Whiteboard.tcl:553
+#: ../whiteboard/CanvasUtils.tcl:171
+#: ../whiteboard/Whiteboard.tcl:553
 msgid "Font"
 msgstr "Lettertype"
 
-#: ../whiteboard/CanvasUtils.tcl:188 ../whiteboard/Whiteboard.tcl:570
+#: ../whiteboard/CanvasUtils.tcl:188
+#: ../whiteboard/Whiteboard.tcl:570
 msgid "Weight"
 msgstr "Opmaakprofiel"
 
@@ -5717,23 +6345,28 @@ msgstr "Opmaakprofiel"
 msgid "Add Speech Bubble"
 msgstr "Tekstballon toevoegen"
 
-#: ../whiteboard/CanvasUtils.tcl:205 ../whiteboard/ItemInspector.tcl:221
+#: ../whiteboard/CanvasUtils.tcl:205
+#: ../whiteboard/ItemInspector.tcl:221
 #: ../whiteboard/Whiteboard.tcl:531
 msgid "Dotted"
 msgstr "Gestippeld"
 
-#: ../whiteboard/CanvasUtils.tcl:206 ../whiteboard/ItemInspector.tcl:223
+#: ../whiteboard/CanvasUtils.tcl:206
+#: ../whiteboard/ItemInspector.tcl:223
 #: ../whiteboard/Whiteboard.tcl:532
 msgid "Dashed"
 msgstr "Onderstreept"
 
-#: ../whiteboard/CanvasUtils.tcl:207 ../whiteboard/ItemInspector.tcl:222
+#: ../whiteboard/CanvasUtils.tcl:207
+#: ../whiteboard/ItemInspector.tcl:222
 #: ../whiteboard/Whiteboard.tcl:533
 msgid "Dash-dotted"
 msgstr "Stippen en strepen"
 
-#: ../whiteboard/CanvasUtils.tcl:217 ../whiteboard/CanvasUtils.tcl:1431
-#: ../whiteboard/ItemInspector.tcl:362 ../whiteboard/Whiteboard.tcl:543
+#: ../whiteboard/CanvasUtils.tcl:217
+#: ../whiteboard/CanvasUtils.tcl:1431
+#: ../whiteboard/ItemInspector.tcl:362
+#: ../whiteboard/Whiteboard.tcl:543
 #: ../whiteboard/Whiteboard.tcl:2539
 msgid "Dash"
 msgstr "Streep"
@@ -5754,7 +6387,8 @@ msgstr "Bestandstype toevoegen"
 msgid "File Type"
 msgstr "Bestandstype"
 
-#: ../whiteboard/FilePrefs.tcl:179 ../whiteboard/FilePrefs.tcl:484
+#: ../whiteboard/FilePrefs.tcl:179
+#: ../whiteboard/FilePrefs.tcl:484
 msgid "Open with"
 msgstr "Openen met"
 
@@ -5766,7 +6400,8 @@ msgstr "Bestandstype toevoegen/bewerken"
 msgid "MIME type"
 msgstr "Mime-bestandstype"
 
-#: ../whiteboard/FilePrefs.tcl:468 ../whiteboard/WDialogs.tcl:138
+#: ../whiteboard/FilePrefs.tcl:468
+#: ../whiteboard/WDialogs.tcl:138
 msgid "Extensions"
 msgstr "Extensies"
 
@@ -5794,8 +6429,10 @@ msgstr "Op schijf opslaan"
 msgid "One or more fields are missing. Try again or cancel."
 msgstr "Minstens één veld ontbreekt. Probeer opnieuw of annuleer."
 
-#: ../whiteboard/GetFileIface.tcl:130 ../whiteboard/GetFileIface.tcl:232
-#: ../whiteboard/GetFileIface.tcl:233 ../whiteboard/PutFileIface.tcl:248
+#: ../whiteboard/GetFileIface.tcl:130
+#: ../whiteboard/GetFileIface.tcl:232
+#: ../whiteboard/GetFileIface.tcl:233
+#: ../whiteboard/PutFileIface.tcl:248
 msgid "File Transfer Error"
 msgstr "Bestandsoverdracht mislukte"
 
@@ -5810,37 +6447,44 @@ msgstr ""
 " Foutcode %s\n"
 "Bericht: %s"
 
-#: ../whiteboard/GetFileIface.tcl:468 ../whiteboard/PutFileIface.tcl:177
+#: ../whiteboard/GetFileIface.tcl:468
+#: ../whiteboard/PutFileIface.tcl:177
 #, tcl-format
 msgid "Contacting %s. Waiting for response"
 msgstr "Bezig met %s te contacteren. Wachten op antwoord"
 
-#: ../whiteboard/GetFileIface.tcl:469 ../whiteboard/PutFileIface.tcl:178
+#: ../whiteboard/GetFileIface.tcl:469
+#: ../whiteboard/PutFileIface.tcl:178
 #, tcl-format
 msgid "Connection to %s failed: received an eof."
 msgstr "Kan niet verbinden met %s: eof."
 
-#: ../whiteboard/GetFileIface.tcl:470 ../whiteboard/PutFileIface.tcl:179
+#: ../whiteboard/GetFileIface.tcl:470
+#: ../whiteboard/PutFileIface.tcl:179
 #, tcl-format
 msgid "Connection to %s failed."
 msgstr "Kan niet verbinden met %s."
 
-#: ../whiteboard/GetFileIface.tcl:471 ../whiteboard/PutFileIface.tcl:180
+#: ../whiteboard/GetFileIface.tcl:471
+#: ../whiteboard/PutFileIface.tcl:180
 #, tcl-format
 msgid "Contacted %s. Negotiating"
 msgstr "%s werd gecontacteerd. Bezig met verbinden"
 
-#: ../whiteboard/GetFileIface.tcl:472 ../whiteboard/PutFileIface.tcl:181
+#: ../whiteboard/GetFileIface.tcl:472
+#: ../whiteboard/PutFileIface.tcl:181
 #, tcl-format
 msgid "Cannot read server response from %s."
 msgstr "Kan serverantwoord van %s niet lezen."
 
-#: ../whiteboard/GetFileIface.tcl:473 ../whiteboard/PutFileIface.tcl:182
+#: ../whiteboard/GetFileIface.tcl:473
+#: ../whiteboard/PutFileIface.tcl:182
 #, tcl-format
 msgid "The server at %s did not respond with a well formed protocol."
 msgstr "De server op %s antwoorde met een slecht gevormd protocol."
 
-#: ../whiteboard/GetFileIface.tcl:474 ../whiteboard/PutFileIface.tcl:183
+#: ../whiteboard/GetFileIface.tcl:474
+#: ../whiteboard/PutFileIface.tcl:183
 #, tcl-format
 msgid "%s accepted file %s. Initiating file transfer"
 msgstr "%s aanvaardde bestand %s. Het verzenden is gestart"
@@ -5872,7 +6516,8 @@ msgstr "Opslaan als GIF"
 msgid "Edit Item"
 msgstr "Item bewerken"
 
-#: ../whiteboard/ItemInspector.tcl:211 ../whiteboard/ItemInspector.tcl:363
+#: ../whiteboard/ItemInspector.tcl:211
+#: ../whiteboard/ItemInspector.tcl:363
 #: ../whiteboard/Whiteboard.tcl:497
 msgid "Fill"
 msgstr "Vullen"
@@ -5901,11 +6546,13 @@ msgstr "Schuin"
 msgid "Miter"
 msgstr "Verstek"
 
-#: ../whiteboard/ItemInspector.tcl:224 ../whiteboard/ItemInspector.tcl:831
+#: ../whiteboard/ItemInspector.tcl:224
+#: ../whiteboard/ItemInspector.tcl:831
 msgid "False"
 msgstr "Nee"
 
-#: ../whiteboard/ItemInspector.tcl:225 ../whiteboard/ItemInspector.tcl:831
+#: ../whiteboard/ItemInspector.tcl:225
+#: ../whiteboard/ItemInspector.tcl:831
 msgid "True"
 msgstr "Ja"
 
@@ -6013,11 +6660,13 @@ msgstr "Stippels"
 msgid "Tags"
 msgstr "Tags"
 
-#: ../whiteboard/ItemInspector.tcl:373 ../whiteboard/WBPrefs.tcl:108
+#: ../whiteboard/ItemInspector.tcl:373
+#: ../whiteboard/WBPrefs.tcl:108
 msgid "Width"
 msgstr "Breedte"
 
-#: ../whiteboard/ItemInspector.tcl:374 ../whiteboard/ItemInspector.tcl:381
+#: ../whiteboard/ItemInspector.tcl:374
+#: ../whiteboard/ItemInspector.tcl:381
 msgid "Outline stipple"
 msgstr "Gestippelde omtrek"
 
@@ -6059,11 +6708,7 @@ msgid "Write URL or choose from shortcut"
 msgstr "Schrijf URL of kies van sneltoets"
 
 #: ../whiteboard/Multicast.tcl:78
-msgid ""
-"Open a URL which contains a SDP file with extension .mov for a QuickTime "
-"realtime live streaming sending. Can be audio (radio) or video (TV). "
-"Alternatively, use your web browser to find the SDP file for a live "
-"transmission, download it on disk and open it is an ordinary movie."
+msgid "Open a URL which contains a SDP file with extension .mov for a QuickTime realtime live streaming sending. Can be audio (radio) or video (TV). Alternatively, use your web browser to find the SDP file for a live transmission, download it on disk and open it is an ordinary movie."
 msgstr ""
 
 #: ../whiteboard/Plugins.tcl:1346
@@ -6148,23 +6793,15 @@ msgstr "Bewerk alleen lokale whiteboarditems"
 
 #: ../whiteboard/WBPrefs.tcl:136
 msgid "Items created by others cannot be edited when enabled"
-msgstr ""
-"Items gemaakt door anderen kunnen niet bewerkt worden als deze optie "
-"ingeschakeld is"
+msgstr "Items gemaakt door anderen kunnen niet bewerkt worden als deze optie ingeschakeld is"
 
 #: ../whiteboard/WBPrefs.tcl:155
 msgid "System"
 msgstr "Systeem"
 
 #: ../whiteboard/WBPrefs.tcl:212
-msgid ""
-"Warning: by importing any other fonts than the standard three ones (Times, "
-"Helvetica or Courier), you must be confident that all remote clients also "
-"have this font installed on their system."
-msgstr ""
-"Waarschuwing: als u een ander lettertype importeert dan Times, Helvetica of "
-"Courier dan moet u er zeker van zijn dat uw contactpersonen dit ook hebben "
-"geïnstalleerd op hun systeem."
+msgid "Warning: by importing any other fonts than the standard three ones (Times, Helvetica or Courier), you must be confident that all remote clients also have this font installed on their system."
+msgstr "Waarschuwing: als u een ander lettertype importeert dan Times, Helvetica of Courier dan moet u er zeker van zijn dat uw contactpersonen dit ook hebben geïnstalleerd op hun systeem."
 
 #: ../whiteboard/WBPrefs.tcl:299
 msgid "The standard fonts, Times, Helvetica, and Courier, may not be removed."
@@ -6194,11 +6831,10 @@ msgstr "Ondersteund blokkeren"
 msgid "Secured"
 msgstr "Beveiligd"
 
-#: ../whiteboard/Whiteboard.tcl:76 ../whiteboard/Whiteboard.tcl:1665
-msgid ""
-"Point tool, click to mark, double click to inspect, right click to popup"
-msgstr ""
-"Selectie, dubbelklik om te bewerken, klik op de rechtermuisknop voor menu"
+#: ../whiteboard/Whiteboard.tcl:76
+#: ../whiteboard/Whiteboard.tcl:1665
+msgid "Point tool, click to mark, double click to inspect, right click to popup"
+msgstr "Selectie, dubbelklik om te bewerken, klik op de rechtermuisknop voor menu"
 
 #: ../whiteboard/Whiteboard.tcl:77
 msgid "Move tool"
@@ -6248,27 +6884,34 @@ msgstr "Draaien, kies eerst een item"
 msgid "Text tool"
 msgstr "Tekst"
 
-#: ../whiteboard/Whiteboard.tcl:449 ../whiteboard/Whiteboard.tcl:2931
+#: ../whiteboard/Whiteboard.tcl:449
+#: ../whiteboard/Whiteboard.tcl:2931
 msgid "Select &All"
 msgstr "&Alles selecteren"
 
-#: ../whiteboard/Whiteboard.tcl:454 ../whiteboard/Whiteboard.tcl:2941
+#: ../whiteboard/Whiteboard.tcl:454
+#: ../whiteboard/Whiteboard.tcl:2941
 #: ../whiteboard/Whiteboard.tcl:2950
 msgid "&Raise"
 msgstr "Naar &voorgrond"
 
-#: ../whiteboard/Whiteboard.tcl:455 ../whiteboard/Whiteboard.tcl:2942
+#: ../whiteboard/Whiteboard.tcl:455
+#: ../whiteboard/Whiteboard.tcl:2942
 #: ../whiteboard/Whiteboard.tcl:2951
 msgid "&Lower"
 msgstr "Naar a&chtergrond"
 
-#: ../whiteboard/Whiteboard.tcl:458 ../whiteboard/Whiteboard.tcl:2944
-#: ../whiteboard/Whiteboard.tcl:2966 ../whiteboard/Whiteboard.tcl:2969
+#: ../whiteboard/Whiteboard.tcl:458
+#: ../whiteboard/Whiteboard.tcl:2944
+#: ../whiteboard/Whiteboard.tcl:2966
+#: ../whiteboard/Whiteboard.tcl:2969
 msgid "Smaller"
 msgstr "Smaller"
 
-#: ../whiteboard/Whiteboard.tcl:459 ../whiteboard/Whiteboard.tcl:2945
-#: ../whiteboard/Whiteboard.tcl:2953 ../whiteboard/Whiteboard.tcl:2955
+#: ../whiteboard/Whiteboard.tcl:459
+#: ../whiteboard/Whiteboard.tcl:2945
+#: ../whiteboard/Whiteboard.tcl:2953
+#: ../whiteboard/Whiteboard.tcl:2955
 msgid "Flip"
 msgstr "Draaien"
 
@@ -6304,28 +6947,18 @@ msgstr "45 graden draaien"
 msgid "&Server"
 msgstr "&Server"
 
-#: ../whiteboard/Whiteboard.tcl:1662 ../whiteboard/Whiteboard.tcl:2452
+#: ../whiteboard/Whiteboard.tcl:1662
+#: ../whiteboard/Whiteboard.tcl:2452
 msgid "Point tool, click to mark, double click to inspect, press to popup"
 msgstr "Selectie, dubbelklik om te bewerken, drukken voor menu"
 
-#: ../whiteboard/Whiteboard.tcl:2211 ../whiteboard/Whiteboard.tcl:2286
+#: ../whiteboard/Whiteboard.tcl:2211
+#: ../whiteboard/Whiteboard.tcl:2286
 msgid "&Library"
 msgstr "Bib&liotheek"
 
 #~ msgid "Useful Tips"
 #~ msgstr "Tip van de dag"
-
 #~ msgid "chat"
 #~ msgstr "chat"
 
-#~| msgid "Normal"
-#~ msgid "normal"
-#~ msgstr "normaal"
-
-#~| msgid "Italic"
-#~ msgid "italic"
-#~ msgstr "cursief"
-
-#~| msgid "cold"
-#~ msgid "bold"
-#~ msgstr "vet"
