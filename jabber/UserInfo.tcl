@@ -471,9 +471,7 @@ proc ::UserInfo::NotesSendGetCB {token type queryElem args} {
 
     if {$type eq "error"} {
         ::UI::MessageBox -type ok -icon error -title [mc "Error"] \
-       -message [mc "Failed to obtain personal notes: %s", [lindex $queryElem 1]]
-#       -message "Failed to obtain personal notes: [lindex $queryElem 1]"
-       destroy $dlg
+       -message [mc "Failed to obtain personal notes: %s" [lindex $queryElem 1]]
     } else {
         # Extract the relevant Note element
        array set rosternotes [NotesExtractFromElem $queryElem]
