@@ -114,9 +114,16 @@ proc ::Totd::Build {} {
     pack $frbot.c -side left
     pack $frbot -side bottom -fill x
 
-    set wtext $wbox.t
-    text $wbox.t -width 52 -height 12 -wrap word
-    pack $wbox.t -side right -fill both -expand 1
+    set wpage $wbox.f
+    ttk::frame $wpage -padding [option get . notebookPagePadding {}]
+    pack $wpage -side right -fill x -anchor [option get . dialogAnchor {}]
+    set wtext $wpage.t
+    set wysc  $wpage.s
+    ttk::scrollbar $wysc -orient vertical -command [list $wtext yview]
+    text $wpage.t -width 52 -height 12 -wrap word \
+	-yscrollcommand [list ::UI::ScrollSet $wysc [list pack $wysc -side right -fill y]]
+    pack $wpage.t -side left -fill both -expand 1
+    pack $wysc -side right -fill y
     
     ttk::label $wbox.icon -compound image -image $icon -padding {0 0 6 0}
     pack $wbox.icon -side top
