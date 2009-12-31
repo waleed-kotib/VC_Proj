@@ -208,6 +208,8 @@ namespace eval jlib {
     }
     
     set jxmlns(entitytime) "urn:xmpp:time"
+    set jxmlns(time) "jabber:iq:time"
+    set jxmlns(last) "jabber:iq:last"
     
     # Auto away and extended away are only set when the
     # current status has a lower priority than away or xa respectively.
@@ -353,9 +355,9 @@ proc jlib::new {clientcmd args} {
     groupchat::init $jlibname
         
     # Register some standard iq handlers that are handled internally.
-    iq_register $jlibname get jabber:iq:last    \
+    iq_register $jlibname get $jxmlns(last)    \
       [namespace current]::handle_get_last
-    iq_register $jlibname get jabber:iq:time    \
+    iq_register $jlibname get $jxmlns(time)    \
       [namespace current]::handle_get_time
     # This overrides any client handler which is bad.
     #iq_register $jlibname get jabber:iq:version \
@@ -1476,13 +1478,14 @@ proc jlib::send_message_error {jlibname jid id errcode errtype stanza {extraElem
 
 proc jlib::presence_handler {jlibname xmldata} { 
     variable statics
+    variable jxmlns
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::prescmd prescmd
     upvar ${jlibname}::opts opts
     upvar ${jlibname}::locals locals
     
     set id [wrapper::getattribute $xmldata id]
-    
+
     # Handle callbacks specific for 'type' that have been registered with 
     # 'presence_register(_ex)'.
     
@@ -1502,8 +1505,35 @@ proc jlib::presence_handler {jlibname xmldata} {
     if {[info exists prescmd($id)]} {
 	uplevel #0 $prescmd($id) [list $jlibname $xmldata]
 	unset -nocomplain prescmd($id)
-    }	
-    
+    } else {
+    	foreach child [wrapper::getchildren $xmldata] {
+            wrapper::splitxml $child tag attr chdata children
+            set xmlns [wrapper::getattribute $child xmlns]
+            # if the xmlns is not set, continue searching
+	    # the xmlns is only interesting for us, if it is a $jxmlns(muc,user)
+            if {$xmlns eq ""} {
+          	continue
+            } elseif {[string equal $jxmlns(muc,user) $xmlns]} {
+		# get a list of discovered conferences
+		set services [::Jabber::Jlib disco getconferences]
+		# get the domain from where the presence arrived, and check if 
+		# it is in the list of known conference services
+        	set from [wrapper::getattribute $xmldata from]
+		jlib::splitjidex $from node domain -
+		if { [lsearch -exact $services $domain] } {
+        	    set hasmuc [::Jabber::Jlib disco hasfeature $jxmlns(muc) $domain]
+		    if {$hasmuc} {
+			# in case the conference service is able to handle muc protocol
+			uplevel #0 [list ::jlib::muc::parse_enter {::Enter::MUCCallback ::Enter::[incr uid]}] [list $jlibname $xmldata]
+		    } else {
+			# otherwise take the fallback to the old gc-1.0 protocol
+			uplevel #0 [list ::jlib::muc::parse_enter {::Enter::GCCallback ::Enter::[incr uid]}] [list $jlibname $xmldata]
+		    }
+		}
+            break
+            }
+        }	
+    }
     # This is the last station.
     if {[string length $opts(-presencecommand)]} {
 	uplevel #0 $opts(-presencecommand) [list $jlibname $xmldata]
@@ -1817,7 +1847,6 @@ proc jlib::xmlerror {jlibname args} {
 #       none.
 
 proc jlib::reset {jlibname} {
-
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::iqcmd iqcmd
     upvar ${jlibname}::prescmd prescmd
@@ -1835,7 +1864,7 @@ proc jlib::reset {jlibname} {
     set num $prescmd(uid)
     unset -nocomplain prescmd
     set prescmd(uid) $num
-    
+
     unset -nocomplain locals
     unset -nocomplain features
     
@@ -2326,7 +2355,6 @@ proc jlib::presence_register_ex {jlibname func args} {
 }
 
 proc jlib::pres_reg_ex {jlibname int func args} {
-    
     upvar ${jlibname}::expreshook expreshook
 
     set type  "*"
@@ -2364,7 +2392,6 @@ proc jlib::pres_reg_ex {jlibname int func args} {
 }
 
 proc jlib::presence_ex_run_hook {jlibname int xmldata} {
-
     upvar ${jlibname}::expreshook expreshook
     upvar ${jlibname}::locals locals
     
@@ -2378,12 +2405,10 @@ proc jlib::presence_ex_run_hook {jlibname int xmldata} {
     }
     set from2 [barejid $from]
     set pkey "$int,$type,$from,$from2"
-            
     # Make matching in two steps, attributes and elements.
     # First the attributes.
     set matched [list]
     foreach {pat value} [array get expreshook $int,*] {
-
 	if {[string match $pat $pkey]} {
 	    
 	    foreach spec $value {
@@ -3437,9 +3462,10 @@ proc jlib::oob_set {jlibname to cmd url args} {
 #       Query the 'last' of 'to' using 'jabber:iq:last' get.
 
 proc jlib::get_last {jlibname to cmd} {
+    variable jxmlns
     
     set xmllist [wrapper::createtag "query"  \
-      -attrlist {xmlns jabber:iq:last}]
+      -attrlist {xmlns $jxmlns(last)}]
     send_iq $jlibname "get" [list $xmllist] -to $to -command   \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
     return
@@ -3450,14 +3476,14 @@ proc jlib::get_last {jlibname to cmd} {
 #       Seconds since last activity. Response to 'jabber:iq:last' get.
 
 proc jlib::handle_get_last {jlibname from subiq args} {    
-
+    variable jxmlns 
     upvar ${jlibname}::locals locals
     
     array set argsA $args
 
     set secs [expr [clock seconds] - $locals(last)]
     set xmllist [wrapper::createtag "query"  \
-      -attrlist [list xmlns jabber:iq:last seconds $secs]]
+      -attrlist [list xmlns $jxmlns(last) seconds $secs]]
     
     set opts [list]
     if {[info exists argsA(-from)]} {
@@ -3477,9 +3503,10 @@ proc jlib::handle_get_last {jlibname from subiq args} {
 #       Query the 'time' of 'to' using 'jabber:iq:time' get.
 
 proc jlib::get_time {jlibname to cmd} {
+    variable jxmlns
     
     set xmllist [wrapper::createtag "query"  \
-      -attrlist {xmlns jabber:iq:time}]
+      -attrlist {xmlns $jxmlns(time)}]
     send_iq $jlibname "get" [list $xmllist] -to $to -command        \
       [list [namespace current]::invoke_iq_callback $jlibname $cmd]
     return
@@ -3490,7 +3517,7 @@ proc jlib::get_time {jlibname to cmd} {
 #       Send our time. Response to 'jabber:iq:time' get.
 
 proc jlib::handle_get_time {jlibname from subiq args} {
-    
+    variable jxmlns
     array set argsA $args
     
     # Applications using 'jabber:iq:time' SHOULD use the old format, 
@@ -3504,7 +3531,7 @@ proc jlib::handle_get_time {jlibname from subiq args} {
       [wrapper::createtag "tz" -chdata $tz]  \
       [wrapper::createtag "display" -chdata $display] ]
     set xmllist [wrapper::createtag "query" -subtags $subtags  \
-      -attrlist {xmlns jabber:iq:time}]
+      -attrlist {xmlns $jxmlns(time)}]
 
     set opts [list]
     if {[info exists argsA(-from)]} {
