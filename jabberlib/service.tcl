@@ -166,6 +166,42 @@ proc jlib::service::setroomprotocol {jlibname roomjid protocol} {
     set serv(roomprot,$roomjid) $protocol
 }
 
+# jlib::service::handle_unsolicited_roommessages
+#
+#       Handle incoming messages from unknown rooms
+#       This may happen when trying to enter IRC channels with mode +r
+#       and while loggin in, we are redirected to a different channel
+
+proc jlib::service::handle_unsolicited_roommessages {jlibname room} {
+    upvar ${jlibname}::muc::cache muccache
+    upvar ${jlibname}::muc::rooms mucrooms
+    upvar ${jlibname}::groupchat::cache gccache
+    upvar ${jlibname}::groupchat::rooms gcrooms
+    upvar jlib::jxmlns jxmlns
+
+    # because we are redirected from another room on the same service, the 
+    # service must exist in our list
+    set services [::Jabber::Jlib disco getconferences]
+    # get the domain from where the presence arrived, and check if
+    # it is in the list of known conference services
+    jlib::splitjidex $room node domain -
+    set nick [jlib::service::nick $jlibname $room]
+    if { [lsearch -exact $services $domain] } {
+        set hasmuc [::Jabber::Jlib disco hasfeature $jxmlns(muc) $domain]
+        if {$hasmuc} {
+            # in case the conference service is able to handle muc protocol
+            set muccache($room,mynick) $nick            
+            set mucrooms($room) 1
+            $jlibname service setroomprotocol $room "muc"
+        } else {
+            # otherwise take the fallback to the old gc-1.0 protocol
+            set gccache($room,mynick) $nick
+            set gcrooms($room) 1  
+            $jlibname service setroomprotocol $room "muc"
+        } 
+    }
+}
+
 # jlib::service::isroom --
 # 
 #       Try to figure out if the jid is a room.
@@ -226,7 +262,8 @@ proc jlib::service::mynick {jlibname room} {
     # All kind of conference components seem to support the old 'gc-1.0'
     # protocol, and we therefore must query our method for entering the room.
     if {![info exists serv(roomprot,$room)]} {
-	return -code error "Does not know which protocol to use in $room"
+        # need to figure out which room protocol to use
+	jlib::service::handle_unsolicited_roommessages $jlibname $room
     }
     
     switch -- $serv(roomprot,$room) {
