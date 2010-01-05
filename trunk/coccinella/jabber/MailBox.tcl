@@ -1177,7 +1177,7 @@ proc ::MailBox::SaveMsg {} {
     if {[string length $ans]} {
 	if {[catch {open $ans w} fd]} {
 	    ::UI::MessageBox -title [mc "Open Failed"] -parent $wtbl -type ok \
-	      -message "Failed opening file [file tail $ans]: $fd"
+	      -message [mc "Failed opening file %s: %s" [file tail $ans] $fd]
 	    return
 	}
 	#fconfigure $fd -encoding utf-8
@@ -1288,10 +1288,10 @@ proc ::MailBox::DisplayWhiteboardFile {jid3 fileName} {
 	
 	# Perhaps we shall inform the user that no binary entities
 	# could be obtained.
-	::UI::MessageBox -type ok -title {Missing Entities}  \
-	  -icon info -message "There were $numImports images or\
+	::UI::MessageBox -type ok -title [mc "Missing Entities"]  \
+	  -icon info -message [mc "There were %s images or\
 	  similar entities that could not be obtained because the user\
-	  is not online."
+	  is not online." $numImports]
     }
 }
 
@@ -1618,7 +1618,7 @@ proc ::MailBox::SaveMailboxVer1 {} {
     puts $fid "}"
     close $fid
     if {[catch {file rename -force $tmpFile $this(inboxFile)} msg]} {
-	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
+	::UI::MessageBox -type ok -title [mc "Error"] -message [mc "Error renaming Inbox file."]  \
 	  -icon error
 	return
     }
@@ -1685,7 +1685,7 @@ proc ::MailBox::SaveMailboxVer2 {args} {
     }
     close $fid
     if {[catch {file rename -force $tmpFile $this(inboxFile)} msg]} {
-	::UI::MessageBox -type ok -message {Error renaming preferences file.}  \
+	::UI::MessageBox -type ok -title [mc "Error"] -message [mc "Error renaming Inbox file."]  \
 	  -icon error
 	return
     }
