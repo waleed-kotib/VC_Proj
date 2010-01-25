@@ -661,6 +661,7 @@ proc ::JUser::EditUserDlg {jid} {
     set jlib [::Jabber::GetJlib]
 
     # Find all our groups for any jid.
+    set allGroups [list]
     set allGroups [$jlib roster getgroups]
 
     # Get 'name' and 'group(s)'.
@@ -678,21 +679,15 @@ proc ::JUser::EditUserDlg {jid} {
     set groups [lsort -unique $groups]
     set group [lindex $groups 0]
 
-    # We need at least one entry here even if no groups.
-    if {$groups eq {}} {
-	set groups "None"
-    }
-
     set state(jid)         $jid
     set state(name)        $name
     set state(group)       $group
     set state(origname)    $name
     set state(origgroup)   $group
     set state(origgroups)  $groups
-    set state(ngroups)     [llength $groups]
+    set state(newgroups)   $groups
     set state(subscribe)   $subscribe
     set state(unsubscribe) $unsubscribe
-    
     set ujid [jlib::unescapejid $jid]
     if {$istransport} {
 	jlib::splitjidex $jid node host res
@@ -733,19 +728,52 @@ proc ::JUser::EditUserDlg {jid} {
     grid  $frmid.lnick   $frmid.enick   -pady 2
     grid  $frmid.lnick  -sticky e
     grid  $frmid.enick  -sticky ew
+    ttk::separator $wall.s2 -orient horizontal                                 
+    pack $wall.s2 -side top -fill x                                         
+                                                                               
+    # the group editor frame
+    set gf $wall.gf                                                            
+    ttk::frame $gf                                                             
+    pack $gf -side top -fill both -expand yes                                  
+    # available groups
+    ttk::frame $gf.ga                                                          
+    pack $gf.ga -side left -expand yes -fill both                              
+    ttk::label $gf.ga.title -text [mc "Available groups"]                      
+    pack $gf.ga.title -side top -anchor w                                      
+    ttk::frame $gf.ga.gr                                                       
+    ttk::label $gf.ga.gr.lab -text [mc "Group:"]                               
+    ttk::entry $gf.ga.gr.oup                                                   
+    pack $gf.ga.gr.lab -side left                                              
+    pack $gf.ga.gr.oup -side left -fill x -expand yes                          
+    pack $gf.ga.gr -side top -fill x                                           
+    # available groups listbox
+    set gal [listbox $gf.ga.gal]
+    pack $gal -side top -expand yes -fill both
 
-    set igroup 0
-    foreach group $groups {
-	set wglabel $frmid.lgroup${igroup}
-	set wgcombo $frmid.egroup${igroup}
-	ttk::label $wglabel -text [mc "Group"]: -anchor e
-	ttk::combobox $wgcombo  \
-	  -textvariable $token\(group${igroup}) -values [concat None $allGroups]
-	set state(group${igroup}) $group
-	grid  $wglabel  $wgcombo  -pady 2 -sticky e
-	grid  $wgcombo  -sticky ew
-	incr igroup
+    # current groups 
+    ttk::frame $gf.gc
+    pack $gf.gc -side right -expand yes -fill both
+    ttk::label $gf.gc.title -text [mc "Current groups"]
+    pack $gf.gc.title -side top -anchor w
+    # current groups listbox
+    set gcl [listbox $gf.gc.gcl]
+    pack $gcl -side top -expand yes -fill both
+
+
+    foreach group $allGroups {
+	$gal insert end $group
     }
+    foreach group $groups {
+	$gcl insert end $group
+    }
+    # add remove button frame
+    ttk::frame $gf.bf
+    ttk::button $gf.bf.add -text [mc "Add ->"] \
+       -command "[namespace current]::AddAvailableGroup $token $gcl \[$gf.ga.gr.oup get\]"
+    ttk::button $gf.bf.remove -text [mc "<- Remove"] \
+       -command [list [namespace current]::RemoveCurrentGroup $token $gcl]
+    pack $gf.bf.add $gf.bf.remove -side top -fill x -anchor c
+    pack $gf.bf -side left
 
     if {!$istransport} {
 
@@ -796,7 +824,7 @@ proc ::JUser::EditUserDlg {jid} {
     set state(wgroup) $frmid.egroup
     
     # Button part.
-    set frbot $wbox.b
+    set frbot $wall.b
     ttk::frame $frbot -padding [option get . okcancelTopPadding {}]
     ttk::button $frbot.btok -text [mc "Save"] -default active \
       -command [list [namespace current]::DoEdit $token]
@@ -833,8 +861,41 @@ proc ::JUser::EditUserDlg {jid} {
     bind $frmid.enick <Map> { focus %W }
     bind $w <Destroy> \
       +[subst { if {"%W" eq "$w"} { [namespace code [list Free $token]] } }]
+    bindtags $gal [list Listbox $gal . all]
+    bind $gal <1> [list [namespace current]::SelectAvailableGroup $gal $gf.ga.gr.oup]
     
     return $token
+}
+
+proc JUser::AddAvailableGroup {token grlist group} {
+    variable $token
+    upvar 0 $token state
+    set group [string trim $group]
+    if {$group ne ""} {
+        set groups [$grlist get 0 end]
+        lappend groups $group
+        set groups [lsort -unique $groups]
+        $grlist delete 0 end
+        eval $grlist insert end $groups
+	set state(newgroups) $groups
+    }
+}
+
+proc JUser::RemoveCurrentGroup {token grlist} {
+    variable $token
+    upvar 0 $token state
+    if {[$grlist curselection] ne ""} {
+        $grlist delete [$grlist curselection]
+	set state(newgroups) [$grlist get 0 end]
+    }
+}
+
+proc JUser::SelectAvailableGroup {grlist grentry} {
+    if {[$grlist curselection] ne ""} {
+        set group [$grlist get [$grlist curselection]]
+        $grentry delete 0 end
+        $grentry insert 0 $group
+    }
 }
 
 proc ::JUser::CancelEdit {token} {
@@ -860,8 +921,8 @@ proc ::JUser::DoEdit {token} {
     set origgroups  $state(origgroups)
     set subscribe   $state(subscribe)
     set unsubscribe $state(unsubscribe)
-
-    set haveName 0
+    set newgroups   $state(newgroups)
+    set changedName 0
     set haveGroup 0
 	
     # This is the only situation when a client "sets" a roster item.
@@ -869,25 +930,37 @@ proc ::JUser::DoEdit {token} {
     set opts [list]
     if {[string length $name]} {
 	lappend opts -name $name
-	set haveName 1
     }
-    set groups [list]
-    for {set igroup 0} {$igroup < $state(ngroups)} {incr igroup} { 
-	if {[info exists state(group${igroup})]} {
-	    set group $state(group${igroup})
-	    if {($group ne "None") && ($group ne "")} {
-		lappend groups $group
+    if {[string compare $name $origname]} {
+	set changedName 1
+    }
+    set groups [lsort -unique $newgroups]
+    set ogroups [lsort -unique $origgroups]
+    set l1 [llength $groups]
+    set l2 [llength $ogroups]
+    if { $l1 ne $l2 } {
+	set haveGroup 1
+    } else {
+	set i 0
+	set j 0
+	while {($i < $l1) && ($j < $l2)} {
+	    if {[set w [string compare [lindex $groups $i] [lindex $ogroups $j]]] == 0} {
+		# equal
+		incr i
+		incr j
+	    } else {
+		# not equal
+		set haveGroup 1
+		break
 	    }
 	}
     }
-    set groups [lsort -unique $groups]
-    if {$groups ne $origgroups} {
+
+    if {$haveGroup == 1} {
 	lappend opts -groups $groups
-	set haveGroup 1
     }
     set jlib [::Jabber::GetJlib]
-
-    if {$haveName || $haveGroup} {
+    if {$changedName || $haveGroup} {
 	set cb [list [namespace code SetCB] $jid]
 	eval {$jlib roster send_set $jid -command $cb} $opts    
     }
