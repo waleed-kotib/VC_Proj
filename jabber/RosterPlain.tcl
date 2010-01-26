@@ -564,11 +564,11 @@ proc ::RosterPlain::SetAltImage {jid key image} {
     # altImageKeyToElem maps: key -> element name
     # 
     # We use a static mapping: BAD?
-    
+
     set mjid [jlib::jidmap $jid]
     set tag [list jid $mjid]
-    set item [FindWithTag $tag]
-    if {$item eq ""} {
+    set items [FindWithTag $tag]
+    if {$items eq ""} {
 	return
     }
     
@@ -585,9 +585,13 @@ proc ::RosterPlain::SetAltImage {jid key image} {
 	set elem eAltImage${size}
 	set altImageKeyToElem($key) $elem
     }  
-    $T item element configure $item cTree $elem -image $image
+    # a user might be in more than one group, therefore may
+    # be get multiple items
+    foreach item $items {
+        $T item element configure $item cTree $elem -image $image
+    }
 
-    return [list $T $item cTree $elem]
+    return [list $T $items cTree $elem]
 }
 
 proc ::RosterPlain::FreeAltCache {} {
