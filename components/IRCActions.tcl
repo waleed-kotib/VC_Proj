@@ -189,11 +189,14 @@ proc ::IRCActions::Leave {roomjid value} {
 
 proc ::IRCActions::BuildGroupChatHook {roomjid} {
     set wtextsend [::GroupChat::GetWidget $roomjid wtextsend]
-    bind $wtextsend <Tab> +[namespace code [list Complete $roomjid]]
+    # need to escape the % here (used for IRC transports), because otherwise
+    # it may be strangely interpreted by the bind command
+    bind $wtextsend <Tab> +[namespace code [list Complete [string map {% __PERCENT__} $roomjid]]]
 }
 
 proc ::IRCActions::Complete {roomjid} {
-    
+    # need to revert the % mapping done in the BuildGroupChatHook here again
+    set roomjid [string map {__PERCENT__ %} $roomjid]
     set wtext [::GroupChat::GetWidget $roomjid wtextsend]
     set start [$wtext index "insert -1 c wordstart"]
     set stop  [$wtext index "insert -1 c wordend"]
