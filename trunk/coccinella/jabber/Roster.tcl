@@ -145,7 +145,7 @@ proc ::Roster::InitMenus {} {
     }
     set mTypes {
 	{mMessage...      {user}                }
-	{mChat...         {user available}      }
+	{mChat...         {user}      		}
 	{mWhiteboard      {wb available}        }
 	{mSendFile...     {user available}      }
 	{mAddContact...   {}                    }
