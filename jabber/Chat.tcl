@@ -274,10 +274,8 @@ proc ::Chat::OnMenu {} {
 proc ::Chat::StartThreadJIDList {jidL} {
 
     foreach jid $jidL {
-	if {[::Jabber::RosterCmd isavailable $jid]} {
-	    set jid2 [jlib::barejid $jid]
-	    StartThread $jid2
-	}
+	set jid2 [jlib::barejid $jid]
+	StartThread $jid2
     }
 }
 
@@ -411,20 +409,10 @@ proc ::Chat::DoStart {w} {
 	}
     }    
     
-    # If we have got a full JID warn if not available.
-    if {[jlib::isfulljid $jid] && ![::Jabber::Jlib roster isavailable $jid]} {
-# 	set ans [::UI::MessageBox -icon warning -type yesno -parent $w  \
-# 	  -default no -message "The user you intend chatting with,\
-# 	  \"$user\", is not online, and this chat makes no sense.\
-# 	  Do you want to chat anyway?"]
-    }
-    
     ::UI::SaveWinGeom $w
     set finished 1
     destroy $w
-    if {$ans eq "yes"} {
-	StartThread $jid
-    }
+    StartThread $jid
 }
 
 # Chat::StartThread --
@@ -2107,7 +2095,11 @@ proc ::Chat::SetTitle {chattoken} {
     variable $chattoken
     upvar 0 $chattoken chatstate
         
-    set str [mc "Chat"]
+    if {[::Jabber::Jlib roster isavailable $chatstate(fromjid)]} {
+        set str [mc "Chat"]
+    } else {
+	set str [mc "Offline Chat"]
+    }
     append str ": $chatstate(displayname)"
     if {$chatstate(displayname) ne $chatstate(fromjid)} {
 	set ujid [jlib::unescapestr $chatstate(fromjid)]
@@ -2504,11 +2496,7 @@ proc ::Chat::SetThreadState {dlgtoken chattoken} {
     set jid2 [jlib::barejid $chatstate(jid)]
     set myjid2 [::Jabber::Jlib myjid2]
     set isme [jlib::jidequal $jid2 $myjid2]
-    if {[::Jabber::Jlib roster isavailable $jid2] || $isme} {
-	SetState $chattoken normal
-    } else {
-	SetState $chattoken disabled
-    }
+    SetState $chattoken normal
     if {[winfo exists $dlgstate(wnb)]} {
 	$dlgstate(wnb) tab $chatstate(wpage) -image ""  \
 	  -text $chatstate(displayname)
