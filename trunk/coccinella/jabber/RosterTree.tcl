@@ -39,6 +39,7 @@ package provide RosterTree 1.0
 
 namespace eval ::RosterTree {
 
+    ::hooks::register initHook               ::RosterTree::InitHook
     ::hooks::register logoutHook             ::RosterTree::LogoutHook
     ::hooks::register quitAppHook            ::RosterTree::QuitHook
     ::hooks::register menuJMainFilePostHook  ::RosterTree::FileMenuPostHook
@@ -565,54 +566,118 @@ proc ::RosterTree::DnDLeave {win data dndtype} {
     focus [winfo toplevel $win] 
 }
 
+# copy or move a contacts between roster groups
+# a contact can be a member of multiple groups
 proc ::RosterTree::NotifyDragReceive {T dragged target} {
-    
+    global  wDlgs
+    variable popMenuDefs
+
     set jlib [::Jabber::GetJlib]
         
     # Protect for a situation where items have disapperared.
     if {[$T item id $target] eq ""} {
 	return
     }
-    
+
     # Find target group or empty.
     set tag [GetTagOfItem $target]
     set tag0 [lindex $tag 0]
     if {$tag0 eq "jid"} {
 	set parent [$T item parent $target]
-	set ptag [GetTagOfItem $parent]
-	set ptag0 [lindex $ptag 0]
-	if {$ptag0 eq "group"} {
-	    set groups [list [lindex $ptag 1]]
-	} elseif {$ptag0 eq "head"} {
-	    set groups ""
+	# some styles, like the avatar, do not have a "head"
+	if {$parent eq 0} {
+	    set tgroup ""
 	} else {
-	    return
+	    set ptag [GetTagOfItem $parent]
+	    set ptag0 [lindex $ptag 0]
+	    if {$ptag0 eq "group"} {
+	        set tgroup [list [lindex $ptag 1]]
+	    } elseif {$ptag0 eq "head"} {
+	        set tgroup ""
+	    } else {
+	        return
+	    }
 	}
     } elseif {$tag0 eq "group"} {
-	set groups [list [lindex $tag 1]]
+	set tgroup [list [lindex $tag 1]]
     } elseif {$tag0 eq "head"} {
-	set groups ""	
+	set tgroup ""	
     } else {
 	return
     }
-    
+    # due to the fact that a contact can belong to
+    # multiple groups, we need to ask the user whether
+    # he wants to copy or move the contact to the new group
+    # using a small popup menu
+    set m $wDlgs(jpopuproster)
+    destroy $m
+    menu $m -tearoff 0
+    set mDef $popMenuDefs(rostertree,dnd,def)
+    set mType $popMenuDefs(rostertree,dnd,type)
+
+    ::AMenu::Build $m $mDef -varlist [list T $T dragged $dragged tgroup $tgroup]
+    # put the popup menu below the mouse pointer
+    set X [winfo pointerx $T]
+    set Y [winfo pointery $T]
+    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]
+}
+
+proc ::RosterTree::DnDCopyOrMoveContact {T action dragged targetgroup} {
+    set jlib [::Jabber::GetJlib]
+    if {$action eq "cancel"} {
+	return
+    }
     foreach item $dragged {
-	if {[$T item id $item] eq ""} {
-	    continue
-	}
-	set tag [GetTagOfItem $item]
-	if {[lindex $tag 0] eq "jid"} {
-	    set jid [lindex $tag 1]
-	    set jid [$jlib roster getrosterjid $jid]
-	    array unset rostA
-	    set rostA(-groups) [list]
-	    array set rostA [$jlib roster getrosteritem $jid]
-	    if {$rostA(-groups) ne $groups} {
-		unset -nocomplain rostA(-subscription)
-		set rostA(-groups) $groups
-		eval {$jlib roster send_set $jid} [array get rostA]    
+        set jid ""
+        set origgroups ""
+        set sparent ""
+        set sptag ""
+        set tag ""
+        if {[$T item id $item] eq ""} {
+            continue
+        }
+        set tag [GetTagOfItem $item]
+        if {[lindex $tag 0] eq "jid" } {
+            set jid [lindex $tag 1]
+            set jid [$jlib roster getrosterjid $jid]
+            # because the user can be a member of multiple groups, we need to figure
+            # out to which groups the user actually belongs to
+            set origgroups [::Jabber::Jlib roster getgroups $jid]
+            if { $action eq "copy" } {
+                set groups [lsearch -all -inline -not -exact $origgroups $targetgroup]
+                lappend groups $targetgroup
+                lsort -unique $groups
+            } else {
+                # when we move the contact, we also need to know the group from which
+                # the contact needs to be removed
+                set sparent [$T item parent $item]
+		# some styles do not have a "head" in the tree
+		if {$sparent eq 0} {
+                    set groups [lappend origgroups $targetgroup]
+                    lsort -unique $groups
+		} else {
+                    set sptag [GetTagOfItem $sparent]
+                    if {[lindex $sptag 0] eq "group" } {
+                        set sgroup [lindex $sptag 1]
+                        set groups [lsearch -all -inline -not -exact $origgroups $sgroup]
+                        lappend groups $targetgroup
+                        lsort -unique $groups
+                    } elseif {[lindex $sptag 0] eq "head" } {
+                        set groups [lappend origgroups $targetgroup]
+                        lsort -unique $groups
+                   }
+               }
 	    }
-	}
+            array unset rostA
+            set rostA(-groups) [list]
+            array set rostA [$jlib roster getrosteritem $jid]
+            if {$rostA(-groups) ne $groups} {
+                unset -nocomplain rostA(-subscription)
+                set rostA(-groups) $groups
+                eval {$jlib roster send_set $jid} [array get rostA]
+            }
+
+        }
     }
 }
 
@@ -1705,7 +1770,7 @@ proc ::RosterTree::Balloon {jid presence item args} {
     }
     
     ::balloonhelp::treectrl $T $item $msg
-    
+
     ::hooks::run rosterBalloonhelp $T $item $jid
 }
 
@@ -1759,6 +1824,27 @@ proc ::RosterTree::BalloonSetForJID {jid} {
 	    }
 	}
     }
+}
+
+proc ::RosterTree::InitHook {} {
+    InitMenus
+}
+
+proc ::RosterTree::InitMenus {} {
+    # Template for the DnD popup menu.
+    variable popMenuDefs
+    set mDefs {
+        {command        mCopy   {[mc "copy"]} {::RosterTree::DnDCopyOrMoveContact $T "copy" $dragged $tgroup}}
+        {command        mMove   {[mc "move"]} {::RosterTree::DnDCopyOrMoveContact $T "move" $dragged $tgroup}}
+        {command        mCancel {[mc "cancel"]} {::RosterTree::DnDCopyOrMoveContact $T "cancel" $dragged $tgroup}}
+    }
+    set mTypes {
+        {mCopy          {normal}                }
+        {mMove          {normal}                }
+        {mCancel        {normal}                }
+    }
+    set popMenuDefs(rostertree,dnd,def)  $mDefs
+    set popMenuDefs(rostertree,dnd,type) $mTypes
 }
 
 proc ::RosterTree::LogoutHook {} {

@@ -2605,7 +2605,6 @@ proc ::Chat::SetFocus {dlgtoken chattoken} {
 proc ::Chat::GetDlgTokenValue {dlgtoken key} {
     variable $dlgtoken
     upvar 0 $dlgtoken dlgstate
-    
     return $dlgstate($key)
 }
 
@@ -2613,6 +2612,7 @@ proc ::Chat::GetChatTokenValue {chattoken key} {
     variable $chattoken
     upvar 0 $chattoken chatstate
     
+parray chatstate
     return $chatstate($key)
 }
 
