@@ -101,8 +101,18 @@ proc ::RosterTwo::Configure {_T} {
     set S [$T style create styTag]
     $T style elements $S {eText}
     
-    ::TreeCtrl::DnDSetDragSources $T {}
-    ::TreeCtrl::DnDSetDropTargets $T {}
+    # List of lists: {column style element ...} specifying elements  
+    # added to the drag image when dragging selected items.
+    ::TreeCtrl::DnDSetDragSources $T {
+        {cTree styStd   eImage eText eText2}
+    }
+
+    # List of lists: {column style element ...} specifying elements
+    # the user can drop items on.
+    ::TreeCtrl::DnDSetDropTargets $T {
+        {cTree styStd   eBorder eBox1 eBox2 eImage eText eText2}
+    }
+
 }
 
 # RosterTwo::Init --

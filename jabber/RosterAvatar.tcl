@@ -489,8 +489,30 @@ proc ::RosterAvatar::Configure {_T} {
 	%T column move %C %b
     }
         
-    ::TreeCtrl::DnDSetDragSources $T {}
-    ::TreeCtrl::DnDSetDropTargets $T {}
+    # List of lists: {column style element ...} specifying elements
+    # added to the drag image when dragging selected items.
+    ::TreeCtrl::DnDSetDragSources $T {
+        {cTree styAvailable eOnText}
+        {cTree styUnavailable eOffText}
+    }
+
+    # List of lists: {column style element ...} specifying elements
+    # the user can drop items on.
+    if {$styleClass eq "avatar"} {
+        ::TreeCtrl::DnDSetDropTargets $T {
+             {cTree styFolder      eBorder eFolderImage eFolderText eNumText}
+             {cTree styAvailable   eImage eBorder eNotify eIndent eOnText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
+             {cTree styUnavailable   eImage eBorder eNotify eIndent eOffText eAltImage1 eAltImage0 eAvBorder eAvatarImage}
+	}
+    } else {
+        ::TreeCtrl::DnDSetDropTargets $T {
+             {cTree styFolder      eBorder eFolderImage eFolderText eNumText}
+             {cTree styAvailable   eImage eBorder eNotify eIndent eOnText eAltImage1 eAltImage0}
+             {cTree styUnavailable   eImage eBorder eNotify eIndent eOffText eAltImage1 eAltImage0}
+	}
+
+    }
+
 
     ::RosterTree::DBOptions $rosterBaseStyle
     ::RosterTree::DBOptions $optionClass
