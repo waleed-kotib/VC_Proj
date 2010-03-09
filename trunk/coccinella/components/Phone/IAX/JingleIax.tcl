@@ -565,12 +565,10 @@ proc ::JingleIAX::SendJinglePresence {type} {
 #-------------------------------------------------------------------------
 
 proc ::JingleIAX::BuildChatButtonTrayHook {wtray dlgtoken args} {
-
     # @@@ We must have a way to set state of this button when tab changes!!!
     set w [::Chat::GetDlgTokenValue $dlgtoken w]
     set iconCall    [::Theme::Find32Icon $w callImage]
     set iconCallDis [::Theme::Find32Icon $w callDisImage]
-
     $wtray newbutton call  \
       -text [mc "Call"] -image $iconCall  \
       -disabledimage $iconCallDis   \
@@ -581,9 +579,8 @@ proc ::JingleIAX::BuildChatButtonTrayHook {wtray dlgtoken args} {
 }
 
 proc ::JingleIAX::ChatCall {dlgtoken} {
-
     set chattoken [::Chat::GetActiveChatToken $dlgtoken]
-    set jid [::Chat::GetChatTokenValue $chattoken jid]
+    set jid [::Chat::GetChatTokenValue $chattoken jid3]
     set xelem [::Jabber::RosterCmd getx $jid "jingle/media/audio"]
     if {$xelem ne {}} {
 	SessionInitiate $jid
