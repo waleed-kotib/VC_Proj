@@ -646,7 +646,7 @@ proc ::RosterTree::DnDCopyOrMoveContact {T action dragged targetgroup} {
             if { $action eq "copy" } {
                 set groups [lsearch -all -inline -not -exact $origgroups $targetgroup]
                 lappend groups $targetgroup
-                lsort -unique $groups
+                set groups [lsort -unique $groups]
             } else {
                 # when we move the contact, we also need to know the group from which
                 # the contact needs to be removed
@@ -654,24 +654,24 @@ proc ::RosterTree::DnDCopyOrMoveContact {T action dragged targetgroup} {
 		# some styles do not have a "head" in the tree
 		if {$sparent eq 0} {
                     set groups [lappend origgroups $targetgroup]
-                    lsort -unique $groups
+                    set groups [lsort -unique $groups]
 		} else {
                     set sptag [GetTagOfItem $sparent]
                     if {[lindex $sptag 0] eq "group" } {
                         set sgroup [lindex $sptag 1]
                         set groups [lsearch -all -inline -not -exact $origgroups $sgroup]
                         lappend groups $targetgroup
-                        lsort -unique $groups
+                        set groups [lsort -unique $groups]
                     } elseif {[lindex $sptag 0] eq "head" } {
                         set groups [lappend origgroups $targetgroup]
-                        lsort -unique $groups
+                        set groups [lsort -unique $groups]
                    }
                }
 	    }
             array unset rostA
             set rostA(-groups) [list]
             array set rostA [$jlib roster getrosteritem $jid]
-            if {$rostA(-groups) ne $groups} {
+            if {[lsort $rostA(-groups)] ne $groups} {
                 unset -nocomplain rostA(-subscription)
                 set rostA(-groups) $groups
                 eval {$jlib roster send_set $jid} [array get rostA]
@@ -1834,9 +1834,9 @@ proc ::RosterTree::InitMenus {} {
     # Template for the DnD popup menu.
     variable popMenuDefs
     set mDefs {
-        {command        mCopy   {[mc "copy"]} {::RosterTree::DnDCopyOrMoveContact $T "copy" $dragged $tgroup}}
-        {command        mMove   {[mc "move"]} {::RosterTree::DnDCopyOrMoveContact $T "move" $dragged $tgroup}}
-        {command        mCancel {[mc "cancel"]} {::RosterTree::DnDCopyOrMoveContact $T "cancel" $dragged $tgroup}}
+        {command        mCopy   {[mc "&Copy"]} {::RosterTree::DnDCopyOrMoveContact $T "copy" $dragged $tgroup}}
+        {command        mMove   {[mc "&Move"]} {::RosterTree::DnDCopyOrMoveContact $T "move" $dragged $tgroup}}
+        {command        mCancel {[mc "Canc&el"]} {::RosterTree::DnDCopyOrMoveContact $T "cancel" $dragged $tgroup}}
     }
     set mTypes {
         {mCopy          {normal}                }
