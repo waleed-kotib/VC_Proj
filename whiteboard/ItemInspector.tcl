@@ -355,31 +355,29 @@ proc ::ItemInspector::Build {wcan itemid args} {
 	    set val $oneliner
 	}
     set Op [dict create]
+    dict set Op anchor [mc "Anchor"]:
     dict set Op arrow [mc "Arrow"]:
     dict set Op arrowshape [mc "Arrow shape"]:
     dict set Op capstyle [mc "Cap style"]:
-    dict set Op joinstyle [mc "Join style"]:
     dict set Op dash [mc "Dash"]:
+    dict set Op extend [mc "Extend"]:
+    dict set Op file [mc "File"]:
     dict set Op fill [mc "Fill"]:
     dict set Op fontfamily [mc "Font familiy"]:
     dict set Op fontsize [mc "Font size"]:
     dict set Op fontweight [mc "Font weight"]:
     dict set Op image [mc "Image"]:
-    dict set Op underline [mc "Underline"]:
-    dict set Op smooth [mc "Smooth"]:
-    dict set Op stipple [mc "Stipple"]:
-    dict set Op tags [mc "Tags"]:
-    dict set Op text [mc "Text"]:
-    dict set Op width [mc "Width"]:
-    dict set Op outlinestipple [mc "Outline stipple"]:
-    dict set Op style [mc "Style"]:
-    dict set Op anchor [mc "Anchor"]:
-    dict set Op fontsize [mc "Font size"]:
-    dict set Op fontweight [mc "Font weight"]:
+    dict set Op joinstyle [mc "Join style"]:
     dict set Op justify [mc "Justify"]:
     dict set Op outline [mc "Outline"]:
     dict set Op outlinestipple [mc "Outline stipple"]:
-    dict set Op extend [mc "Extend"]:
+    dict set Op tags [mc "Tags"]:
+    dict set Op text [mc "Text"]:
+    dict set Op smooth [mc "Smooth"]:
+    dict set Op stipple [mc "Stipple"]:
+    dict set Op style [mc "Style"]:
+    dict set Op underline [mc "Underline"]:
+    dict set Op width [mc "Width"]:
 	ttk::label $frtot.l$line -text [dict get $Op $opname]
 	
 	# Intercept options for nontext output.
