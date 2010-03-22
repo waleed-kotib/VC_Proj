@@ -1999,7 +1999,7 @@ proc ::Import::TimeCode {w winfr} {
 #       Reloads a binary entity, image and such.
 
 proc ::Import::ReloadImage {w id} {
-        
+
     ::Debug 3 "::Import::ReloadImage"
     
     # Need to have an url stored here.
@@ -2009,8 +2009,18 @@ proc ::Import::ReloadImage {w id} {
     set coords [$wcan coords $id]
         
     if {![info exists optsArr(-url)]} {
+	if {[info exists optsArr(-file)]} {
+		set fileName $optsArr(-file)
+	} else {
+		set fileName [mc "unknown file"]
+	}
+	if {[info exists optsArr(-mime)]} {
+		set mime $optsArr(-mime)
+	} else {
+		set mime [mc "Unknown file"]
+	}
 	::UI::MessageBox -icon error -title [mc "Error"] -type ok -message \
-	  "No url found for the file \"$fileTail\" with MIME type $mime"
+	  [mc "No url found for the file \"%s\" with MIME type %s" $fileName $mime]
 	return
     }
 
