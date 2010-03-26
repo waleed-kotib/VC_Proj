@@ -281,7 +281,7 @@ proc ::Utils::UnixGetWebBrowser {} {
 proc ::Utils::UnixGetAllWebBrowsers {} {
     set browsers [KDEGetBrowser]
     foreach name {
-	firefox galeon konqueror mozilla-firefox
+	firefox galeon konqueror mozilla-firefox google-chrome
 	mozilla-firebird mozilla netscape iexplorer opera
     } {
 	if {[llength [set e [auto_execok $name]]]} {
