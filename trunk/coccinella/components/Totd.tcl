@@ -50,9 +50,9 @@ proc ::Totd::Init {} {
                      participants by clicking the whiteboard icon in a\
                      chatroom. All participants using %s will be invited." $prefs(appName)]
     dict set tips 4 [mc "Documentation is available at http://coccinella.im/documentation"]
-    dict set tips 5 [mc "To override the auto creation of the XMPP resource you can add /resourcename to your Jabber ID."]
-    dict set tips 6 [mc "Nick names in chat rooms can be automatically completed using the TAB key.\
-		     Just enter the first letter(s) of the nick and then use the TAB key to complete it."]
+    dict set tips 5 [mc "To override the automatic creation of the XMPP resource you can add /resourcename to your Contact ID."]
+    dict set tips 6 [mc "Nicknames in chatrooms can be automatically completed using the TAB key.\
+		     Enter the first letter(s) of the nickname and then use the TAB key to complete it."]
     ::hooks::register launchFinalHook ::Totd::LaunchHook
     ::hooks::register prefsInitHook   ::Totd::InitPrefsHook
 
