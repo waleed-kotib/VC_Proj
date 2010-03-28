@@ -5,6 +5,16 @@
 
 Not to mention all bugfixes and rewrites.
 
+Coccinella-0.96.18 (20100331)
+ o enabled DnD of contacts within the roster works now with all styles (507360)
+ o enhancd management of contacts which are members of multiple groups (507360)
+ o in IRC, now all participants are shown in the member list (432076)
+ o fix exception trying to enter IRC room with +r mode (434196)
+ o fix exception using nick completion in IRC MUC rooms (516436)
+ o fix exception opening the business card editor (497409)
+ o fix exception opening the item editor in the whiteboard (540445)
+ o fix exception trying to reload broken images in whiteboard (544183)
+
 Coccinella-0.96.16 (20091201)
 
  o XEP-0202 support Entity Time enabled (441223)
