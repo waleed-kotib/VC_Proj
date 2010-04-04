@@ -272,7 +272,7 @@ proc ::Multicast::ProgressMulticastQTStream {wtop fileTail token totalBytes curr
     
     # Access state as a Tcl array.
     if {$totalBytes != 0} {
-	set percentLeft [expr ($totalBytes - $currentBytes)/$totalBytes]
+	set percentLeft [expr {($totalBytes - $currentBytes)/$totalBytes}]
 	set txtLeft ", $percentLeft% left"
     } else {
 	set txtLeft ""

@@ -225,7 +225,7 @@ proc ::WBPrefs::BuildFontsPage {page} {
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s.msg configure -wraplength [expr [winfo reqwidth %s] - 20]
+	%s.msg configure -wraplength [expr {[winfo reqwidth %s] - 20}]
     } $wc $wc]    
     after idle $script
 }
