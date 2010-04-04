@@ -668,7 +668,7 @@ proc jlib::disco::hasfeature {jlibname feature jid {node ""}} {
     set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,features)]} {
 	set features $info($jid,$node,features)
-	return [expr [lsearch -exact $features $feature] < 0 ? 0 : 1]
+	return [expr {[lsearch -exact $features $feature] < 0 ? 0 : 1}]
     } else {
 	return 0
     }
@@ -701,7 +701,7 @@ proc jlib::disco::iscategorytype {jlibname cattype jid {node ""}} {
     set jid [jlib::jidmap $jid]
     if {[info exists info($jid,$node,cattypes)]} {
 	set types $info($jid,$node,cattypes)
-	return [expr [lsearch -glob $types $cattype] < 0 ? 0 : 1]
+	return [expr {[lsearch -glob $types $cattype] < 0 ? 0 : 1}]
     } else {
 	return 0
     }

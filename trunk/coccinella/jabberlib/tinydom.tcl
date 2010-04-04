@@ -79,7 +79,7 @@ proc tinydom::ElementEnd {token tagname args} {
     if {$level > 1} {
     
 	# Insert the child tree in the parent tree.
-	Append $token [expr $level-1] $state($level)
+	Append $token [expr {$level-1}] $state($level)
     }
     incr state(level) -1
 }

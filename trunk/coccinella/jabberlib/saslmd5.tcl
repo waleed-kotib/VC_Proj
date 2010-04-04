@@ -447,21 +447,21 @@ proc saslmd5::parse_challenge {str} {
     while {1} {
 	set n [string first = $str $idx]
 	if {$n == -1} break
-	set key [string range $str $idx [expr $n-1]]
-	set idx [expr $n+1]
+	set key [string range $str $idx [expr {$n-1}]]
+	set idx [expr {$n+1}]
 	if {[string index $str $idx] eq "\""} {
 	    incr idx
 	    set n [string first "\"" $str $idx]
 	    if {$n == -1} break
-	    set value [string range $str $idx [expr $n-1]]
+	    set value [string range $str $idx [expr {$n-1}]]
 	    set idx [incr n]
 	} else {
 	    set n [string first , $str $idx]
 	    if {$n == -1} {
 		set value [string range $str $idx end]
-		set idx [expr [string length $str] - 1]
+		set idx [expr {[string length $str] - 1}]
 	    } else {
-		set value [string range $str $idx [expr $n-1]]
+		set value [string range $str $idx [expr {$n-1}]]
 		set idx $n
 	    }
 	}

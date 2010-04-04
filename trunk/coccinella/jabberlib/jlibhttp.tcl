@@ -389,7 +389,7 @@ proc jlib::http::SchedulePost {jlibname when} {
     if {$afterms < 0} {
 	set afterms 0
     }
-    set priv(afterms)    [expr int($afterms)]
+    set priv(afterms)    [expr {int($afterms)}]
     set priv(nextpostms) [expr {$nowms + $afterms}]
     set priv(postms)     [expr {$priv(nextpostms) - $priv(lastpostms)}]
 

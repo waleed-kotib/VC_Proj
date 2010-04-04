@@ -727,7 +727,7 @@ proc jlib::initsocket {jlibname} {
     # Schedule keep-alives to keep socket open in case anyone want's to close it.
     # Be sure to not send any keep-alives before the stream is inited.
     if {$opts(-keepalivesecs)} {
-	after [expr 1000 * $opts(-keepalivesecs)] \
+	after [expr {1000 * $opts(-keepalivesecs)}] \
 	  [list [namespace current]::schedule_keepalive $jlibname]
     }
 }
@@ -3481,7 +3481,7 @@ proc jlib::handle_get_last {jlibname from subiq args} {
     
     array set argsA $args
 
-    set secs [expr [clock seconds] - $locals(last)]
+    set secs [expr {[clock seconds] - $locals(last)}]
     set xmllist [wrapper::createtag "query"  \
       -attrlist [list xmlns $jxmlns(last) seconds $secs]]
     
@@ -3579,8 +3579,8 @@ proc jlib::handle_entity_time {jlibname from subiq args} {
     # Remove leading zeros since they will be interpreted as octals.
     regsub -all {0+([1-9]+)} $local {\1} local
     regsub -all {0+([1-9]+)} $gmt   {\1} gmt
-    set local [expr $local]
-    set gmt [expr $gmt]
+    set local [expr {$local}]
+    set gmt [expr {$gmt}]
     set mindiff [expr {($local - $gmt)/60}]
     set sign [expr {$mindiff >= 0 ? "" : "-"}]
     set zhour [expr {abs($mindiff)/60}]
@@ -3671,7 +3671,7 @@ proc jlib::schedule_keepalive {jlibname} {
 	    kill $jlibname
 	    invoke_async_error $jlibname networkerror
 	} else {
-	    set locals(aliveid) [after [expr 1000 * $opts(-keepalivesecs)] \
+	    set locals(aliveid) [after [expr {1000 * $opts(-keepalivesecs)}] \
 	      [list [namespace current]::schedule_keepalive $jlibname]]
 	}
     }
@@ -3692,11 +3692,11 @@ proc jlib::schedule_auto_away {jlibname} {
     
     cancel_auto_away $jlibname
     if {$opts(-autoawaymins) > 0} {
-	set locals(afterawayid) [after [expr 60000 * $opts(-autoawaymins)] \
+	set locals(afterawayid) [after [expr {60000 * $opts(-autoawaymins)}] \
 	  [list [namespace current]::auto_away_cmd $jlibname away]]
     }
     if {$opts(-xautoawaymins) > 0} {
-	set locals(afterxawayid) [after [expr 60000 * $opts(-xautoawaymins)] \
+	set locals(afterxawayid) [after [expr {60000 * $opts(-xautoawaymins)}] \
 	  [list [namespace current]::auto_away_cmd $jlibname xaway]]
     }    
 }

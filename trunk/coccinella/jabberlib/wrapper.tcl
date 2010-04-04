@@ -662,7 +662,7 @@ proc wrapper::createtag {tagname args} {
 #       Makes a primitive check to see if this is a valid xmllist.
 
 proc wrapper::validxmllist {xmllist} {
-    return [expr ([llength $xmllist] == 5) ? 1 : 0]
+    return [expr {([llength $xmllist] == 5) ? 1 : 0}]
 }
 
 # wrapper::getattr --
