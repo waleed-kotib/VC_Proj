@@ -20,8 +20,15 @@ proc jlib::tls_configure {jlibname args} {
     
     foreach {key val} $args {
 	switch -- $key {
-	    -certfile -
-	    -keyfile -
+	    -certfile {
+		set locals($key) $val
+	    }
+	    -keyfile {
+		set locals($key) $val
+	    }
+	    -cafile {
+		set locals($key) $val
+	    }
 	    -command {
 		set locals($key) $val
 	    }
@@ -97,15 +104,36 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
 
     upvar ${jlibname}::lib lib
     upvar ${jlibname}::locals locals
+    global jprefs
     
     Debug 2 "jlib::tls_proceed"
     
     set sock $lib(sock)
-    
+    # prepare the connection parameteters
+    if {[info exists jprefs(tls,certfile)] && [info exists jprefs(tls,usecertfile)] \
+      && $jprefs(tls,usecertfile) eq 1 } {
+	set certfile $jprefs(tls,certfile)
+    } else {
+	set certfile ""
+    } 
+    if {[info exists jprefs(tls,keyfile)] && [info exists jprefs(tls,usekeyfile)] \
+      && $jprefs(tls,usekeyfile) eq 1 } {
+	set keyfile $jprefs(tls,keyfile)
+    } else {
+	set keyfile ""
+    } 
+    if {[info exists jprefs(tls,cafile)] && [info exists jprefs(tls,usecafile)] \
+      && $jprefs(tls,usecafile) eq 1 } {
+	set cafile $jprefs(tls,cafile)
+	set require 1
+    } else {
+	set cafile ""
+	set require 0
+    } 
     # Make it a SSL connection.
     if {[catch {
-	tls::import $sock -cafile "" -certfile "" -keyfile "" \
-	  -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
+	tls::import $sock -cafile $cafile -certfile $certfile -keyfile $keyfile \
+	  -request 1 -server 0 -require $require -ssl2 no -ssl3 yes -tls1 yes
     } err]} {
 	close $sock
 	tls_finish $jlibname starttls-failure $err

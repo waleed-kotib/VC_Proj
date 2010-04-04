@@ -616,6 +616,7 @@ proc jlib::connect::socks_cb {jlibname status} {
 
 proc jlib::connect::tcp_writable {jlibname} {    
     upvar ${jlibname}::connect::state state
+    global jprefs
     
     debug "jlib::connect::tcp_writable"
     
@@ -641,14 +642,34 @@ proc jlib::connect::tcp_writable {jlibname} {
     catch {fconfigure $sock -encoding utf-8}
 
     $jlibname setsockettransport $sock
-    
     # Do SSL handshake. See jlib::tls_handshake for a better way!
     if {$state(usessl)} {
+        # prepare the connection parameteters
+        if {[info exists jprefs(tls,certfile)] && [info exists jprefs(tls,usecertfile)] \
+	  && $jprefs(tls,usecertfile) eq 1 } {
+            set certfile $jprefs(tls,certfile)
+        } else {
+            set certfile ""
+        }
+        if {[info exists jprefs(tls,keyfile)] && [info exists jprefs(tls,usekeyfile)] \
+	  && $jprefs(tls,usekeyfile) eq 1 } {
+            set keyfile $jprefs(tls,keyfile)
+        } else {
+            set keyfile ""
+        }
+        if {[info exists jprefs(tls,cafile)] && [info exists jprefs(tls,usecafile)] \
+	  && $jprefs(tls,usecafile) eq 1 } {
+            set cafile $jprefs(tls,cafile)
+            set require 1
+        } else {
+            set cafile ""
+            set require 0
+        }
 
 	# Make it a SSL connection.
 	if {[catch {
-	    tls::import $sock -cafile "" -certfile "" -keyfile "" \
-	      -request 1 -server 0 -require 0 -ssl2 no -ssl3 yes -tls1 yes
+	    tls::import $sock -cafile $cafile  -certfile $certfile -keyfile $keyfile \
+	      -request 1 -server 0 -require $require -ssl2 no -ssl3 yes -tls1 yes
 	} err]} {
 	    close $sock
 	    finish $jlibname tls-failure $err
