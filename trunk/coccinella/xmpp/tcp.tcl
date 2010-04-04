@@ -43,7 +43,7 @@ proc xmpp::tcp::initsocket {this} {
     # Schedule keep-alives to keep socket open in case anyone want's to close it.
     # Be sure to not send any keep-alives before the stream is inited.
     if {$opts(-keepalivesecs)} {
-	after [expr 1000 * $opts(-keepalivesecs)] \
+	after [expr {1000 * $opts(-keepalivesecs)}] \
 	  [list [namespace current]::schedule_keepalive $jlibname]
     }
 }
