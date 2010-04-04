@@ -44,6 +44,8 @@ proc ::PrefNet::InitPrefsHook { } {
     set jprefs(tls,certfile) ""
     set jprefs(tls,usekeyfile) 0
     set jprefs(tls,keyfile) ""
+    set jprefs(tls,usecafile) 0
+    set jprefs(tls,cafile) ""
 
     ::PrefUtils::Add [list  \
       [list prefs(thisServPort)    prefs_thisServPort    $prefs(thisServPort)]   \
@@ -52,6 +54,8 @@ proc ::PrefNet::InitPrefsHook { } {
       [list jprefs(tls,certfile)     jprefs_tls_certfile     $jprefs(tls,certfile)]   \
       [list jprefs(tls,usekeyfile)   jprefs_tls_usekeyfile   $jprefs(tls,usekeyfile)]   \
       [list jprefs(tls,keyfile)      jprefs_tls_keyfile      $jprefs(tls,keyfile)]   \
+      [list jprefs(tls,usecafile)   jprefs_tls_usecafile   $jprefs(tls,usecafile)]   \
+      [list jprefs(tls,cafile)      jprefs_tls_cafile      $jprefs(tls,cafile)]   \
       ]    
 }
 
@@ -72,7 +76,7 @@ proc ::PrefNet::SavePrefsHook { } {
 
 proc ::PrefNet::CancelPrefsHook { } {
     ::Proxy::CancelPrefsHook
-    ServersCancelHook
+    NetworkCancelHook
 }
 
 proc ::PrefNet::UserDefaultsHook { } {
@@ -152,12 +156,14 @@ proc ::PrefNet::BuildServersFrame {w} {
 
 proc ::PrefNet::BuildCertFrame {w} {
     global  this prefs jprefs
-    variable certs
+    variable tmpCertPrefs
     
-    set certs(usecertfile) $jprefs(tls,usecertfile)
-    set certs(certfile)    $jprefs(tls,certfile)
-    set certs(usekeyfile)  $jprefs(tls,usekeyfile)
-    set certs(keyfile)     $jprefs(tls,keyfile)
+    set tmpCertPrefs(usecertfile) $jprefs(tls,usecertfile)
+    set tmpCertPrefs(certfile)    $jprefs(tls,certfile)
+    set tmpCertPrefs(usekeyfile)  $jprefs(tls,usekeyfile)
+    set tmpCertPrefs(keyfile)     $jprefs(tls,keyfile)
+    set tmpCertPrefs(usecafile)   $jprefs(tls,usecafile)
+    set tmpCertPrefs(cafile)      $jprefs(tls,cafile)
     
     ttk::frame $w
     
@@ -166,17 +172,23 @@ proc ::PrefNet::BuildCertFrame {w} {
     pack $f -side top -anchor [option get . dialogAnchor {}]
     
     ttk::checkbutton $f.ccert -text [mc "TLS certificate file"] \
-      -variable [namespace current]::certs(usecertfile)
-    ttk::entry $f.ecert -textvariable [namespace current]::certs(certfile)
+      -variable [namespace current]::tmpCertPrefs(usecertfile)
+    ttk::entry $f.ecert -textvariable [namespace current]::tmpCertPrefs(certfile)
     ttk::button $f.bcert -text [mc "Browse"]... \
       -command [namespace code BrowseCertFile]
     
     ttk::checkbutton $f.ckey -text [mc "TLS private key file"] \
-      -variable [namespace current]::certs(usekeyfile)
-    ttk::entry $f.ekey -textvariable [namespace current]::certs(keyfile)
+      -variable [namespace current]::tmpCertPrefs(usekeyfile)
+    ttk::entry $f.ekey -textvariable [namespace current]::tmpCertPrefs(keyfile)
     ttk::button $f.bkey -text [mc "Browse"]... \
       -command [namespace code BrowseKeyFile]    
     
+    ttk::checkbutton $f.cacert -text [mc "TLS CA certificate file"] \
+      -variable [namespace current]::tmpCertPrefs(usecafile)
+    ttk::entry $f.ecacert -textvariable [namespace current]::tmpCertPrefs(cafile)
+    ttk::button $f.bcacert -text [mc "Browse"]... \
+      -command [namespace code BrowseCACertFile]    
+
     grid  $f.ccert  -  -sticky w
     grid  $f.ecert  $f.bcert
     grid $f.ecert -sticky ew
@@ -185,38 +197,49 @@ proc ::PrefNet::BuildCertFrame {w} {
     grid  $f.ekey  $f.bkey
     grid $f.ekey -sticky ew
         
+    grid  $f.cacert  -  -sticky w
+    grid  $f.ecacert  $f.bcacert
+    grid $f.ecacert -sticky ew
     return $w
 }
 
 proc ::PrefNet::BrowseCertFile {} {
-    variable certs
+    variable tmpCertPrefs
     
     set fileName [tk_getOpenFile -title [mc "TLS certificate file"] -filetypes {}]
     if {[file exists $fileName]} {
-	set cert(certfile) $fileName
+	set tmpCertPrefs(certfile) $fileName
     }
 }
 
 proc ::PrefNet::BrowseKeyFile {} {
-    variable certs
+    variable tmpCertPrefs
     
     set fileName [tk_getOpenFile -title [mc "TLS private key file"] -filetypes {}]
     if {[file exists $fileName]} {
-	set cert(keyfile) $fileName
+	set tmpCertPrefs(keyfile) $fileName
+    }
+}
+
+proc ::PrefNet::BrowseCACertFile {} {
+    variable tmpCertPrefs
+    
+    set fileName [tk_getOpenFile -title [mc "TLS CA certificate file"] -filetypes {}]
+    if {[file exists $fileName]} {
+	set tmpCertPrefs(cafile) $fileName
     }
 }
 
 proc ::PrefNet::ServersSaveHook {} {
     global  prefs jprefs
     variable tmpServPrefs
-    variable certs
 
     set prefs(thisServPort)      $tmpServPrefs(thisServPort)
     set prefs(httpdPort)         $tmpServPrefs(httpdPort)
     set jprefs(bytestreams,port) $tmpServPrefs(bytestreams,port)   
     
-    foreach key {usecertfile certfile usekeyfile keyfile} {
-	set jprefs(tls,$key) $certs($key)
+    foreach key {usecertfile certfile usekeyfile keyfile usecafile cafile} {
+	set jprefs(tls,$key) $tmpCertPrefs($key)
     }
     if {$jprefs(tls,usecertfile)} {
 	::Jabber::Jlib tls_configure -certfile $jprefs(tls,certfile)
@@ -224,17 +247,29 @@ proc ::PrefNet::ServersSaveHook {} {
     if {$jprefs(tls,usekeyfile)} {
 	::Jabber::Jlib tls_configure -keyfile $jprefs(tls,keyfile)
     }
+    if {$jprefs(tls,usecafile)} {
+	::Jabber::Jlib tls_configure -cafile $jprefs(tls,cafile)
+    }
 }
 
-proc ::PrefNet::ServersCancelHook {} {
+proc ::PrefNet::NetworkCancelHook {} {
     global  prefs jprefs
     variable tmpServPrefs
+    variable tmpCertPrefs
 
     if {![string equal $prefs(thisServPort) $tmpServPrefs(thisServPort)] || \
       ![string equal $prefs(httpdPort) $tmpServPrefs(httpdPort)] || \
       ![string equal $jprefs(bytestreams,port) $tmpServPrefs(bytestreams,port)]} {
 	::Preferences::HasChanged
       }
+    if {![string equal $jprefs(tls,usecertfile) $tmpCertPrefs(usecertfile)] || \
+      ![string equal $jprefs(tls,certfile) $tmpCertPrefs(certfile)] || \
+      ![string equal $jprefs(tls,usekeyfile) $tmpCertPrefs(usekeyfile)] || \
+      ![string equal $jprefs(tls,keyfile) $tmpCertPrefs(keyfile)] || \
+      ![string equal $jprefs(tls,usecafile) $tmpCertPrefs(usecafile)] || \
+      ![string equal $jprefs(tls,cafile) $tmpCertPrefs(cafile)]} {
+	::Preferences::HasChanged
+     }
 }
 
 proc ::PrefNet::ServersUserDefaultsHook {} {

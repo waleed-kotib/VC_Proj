@@ -1512,8 +1512,9 @@ proc ::JUI::RosterSelectionHook {} {
 }
 
 proc ::JUI::SetSecurityIcons {} {
+    global jprefs
     variable jwapp
-    
+
     if {[llength $jwapp(securityWinL)]} {
 	
 	# security-high: SASL+TLS with a certificate signed by a trusted source
@@ -1524,9 +1525,13 @@ proc ::JUI::SetSecurityIcons {} {
 	set sasl [::Jabber::Jlib connect feature sasl]
 	set ssl  [::Jabber::Jlib connect feature ssl]
 	set tls  [::Jabber::Jlib connect feature tls]
-	set cert 0
+	if {$jprefs(tls,usecafile) && $jprefs(tls,cafile) ne ""} {
+	    set cert 1
+	} else {
+	    set cert 0
+	}
 	set w $jwapp(w)
-	if {$sasl && $tls && $cert} {
+	if {$sasl && $tls && $cert || $ssl && $cert } {
 	    # TRANSLATORS; code for these strings is not finished
 	    set str [mc "The connection is secure"]
 	    set image [::Theme::Find16Icon $w secureHighImage]
