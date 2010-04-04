@@ -57,7 +57,7 @@ proc ::CanvasUtils::Init { } {
     if {[catch {
         set utaguid [format %i 0x[string range [sha1::sha1 [clock clicks]$this(hostname)] 0 6]]
     }]} {
-        set utaguid [string trimleft [string range [expr rand()] 2 10] 0]
+        set utaguid [string trimleft [string range [expr {rand()}] 2 10] 0]
     }
     
     # Unique tag prefix for items created by this client.
@@ -507,8 +507,8 @@ proc ::CanvasUtils::ReplaceUtagPrefix {str prefix} {
 
 proc ::CanvasUtils::FindIdFromOverlapping {c x y type} {    
     
-    set ids [$c find overlapping [expr $x-2] [expr $y-2]  \
-      [expr $x+2] [expr $y+2]]
+    set ids [$c find overlapping [expr {$x-2}] [expr {$y-2}]  \
+      [expr {$x+2}] [expr {$y+2}]]
     set id {}
     
     # Choose the first item with tags $type.
@@ -601,12 +601,12 @@ proc ::CanvasUtils::GetUndoCommand {w cmd} {
 	}
 	insert {
 	    foreach {dum utag ind str} $cmd break
-	    set canUndo [list dchars $utag $ind [expr $ind + [string length $str]]]
+	    set canUndo [list dchars $utag $ind [expr {$ind + [string length $str]}]]
 	    set undo [list ::CanvasUtils::Command $w $canUndo]	
 	}
 	move {
 	    foreach {dum utag dx dy} $cmd break
-	    set canUndo [list move $utag [expr -$dx] [expr -$dy]]
+	    set canUndo [list move $utag [expr {-$dx}] [expr {-$dy}]]
 	    set undo [list ::CanvasUtils::Command $w $canUndo]	
 	}
 	lower - raise {
@@ -646,7 +646,7 @@ proc ::CanvasUtils::GetOneLinerForAny {wcan id args} {
     
     set tags [$wcan gettags $id]
     set type [$wcan type $id]
-    set havestd [expr [lsearch -exact $tags std] < 0 ? 0 : 1]
+    set havestd [expr {[lsearch -exact $tags std] < 0 ? 0 : 1}]
     set line ""
  
     switch -glob -- $type,$havestd {
@@ -828,7 +828,7 @@ proc ::CanvasUtils::GetOnelinerForImage {wcan id args} {
     
     # The 'broken image' options are cached.
     # This can be anything imported, it is just represented as an image.
-    set isbroken [expr {[lsearch [$wcan itemcget $id -tags] broken] < 0} ? 0 : 1]
+    set isbroken [expr {[lsearch [$wcan itemcget $id -tags] broken] < 0 ? 0 : 1}]
     array set impArr [ItemCGet $w $id]
         
     # Real images needs more processing.
@@ -902,9 +902,9 @@ proc ::CanvasUtils::GetImportCmdForQTMovie {cmd args} {
 
     # 'create window 0 0 -window ...'
     set indopts [lsearch -regexp $cmd {^-[a-z]}]
-    set coords [lrange $cmd 2 [expr $indopts-1]]
+    set coords [lrange $cmd 2 [expr {$indopts-1}]]
     array set optsArr [lrange $cmd $indopts end]
-    set windowName [lindex $cmd [expr [lsearch $cmd -window] + 1]]
+    set windowName [lindex $cmd [expr {[lsearch $cmd -window] + 1}]]
     
     set movieName   [lindex [winfo children $windowName] 0]
     set movFile     [$movieName cget -file]
@@ -953,9 +953,9 @@ proc ::CanvasUtils::GetImportCmdForSnack {cmd args} {
     
     # 'create window 0 0 -window ...'
     set indopts [lsearch -regexp $cmd {^-[a-z]}]
-    set coords [lrange $cmd 2 [expr $indopts-1]]
+    set coords [lrange $cmd 2 [expr {$indopts-1}]]
     array set optsArr [lrange $cmd $indopts end]
-    set windowName [lindex $cmd [expr [lsearch $cmd -window] + 1]]
+    set windowName [lindex $cmd [expr {[lsearch $cmd -window] + 1}]]
 
     set movieName   [lindex [winfo children $windowName] 0]
     set soundObject [$movieName cget -snacksound]
@@ -1004,7 +1004,7 @@ proc ::CanvasUtils::GetSVGForeignFromWindowItem {cmd args} {
     
     ::Debug 2 "::CanvasUtils::GetSVGForeignFromWindowItem cmd=$cmd, args='$args'"
     
-    set windowName  [lindex $cmd [expr [lsearch $cmd -window] + 1]]
+    set windowName  [lindex $cmd [expr {[lsearch $cmd -window] + 1}]]
     set windowClass [winfo class $windowName]
     
     switch -- $windowClass {
@@ -1292,8 +1292,8 @@ proc ::CanvasUtils::DuplicateItem {wcan id args} {
 }
 
 proc ::CanvasUtils::IsLocked {wcan id} {
-    return [expr {[lsearch -exact [$wcan itemcget $id -tags] "locked"] >= 0} \
-      ? 1 : 0]
+    return [expr {[lsearch -exact [$wcan itemcget $id -tags] "locked"] >= 0 \
+      ? 1 : 0}]
 }
 
 # CanvasUtils::StartTimerToItemPopup --
@@ -1421,7 +1421,7 @@ proc ::CanvasUtils::DoItemPopup {wcan x y} {
     
     # Set actual values for this particular item.
     if {[regexp {arc|line|oval|rectangle|polygon} $type]} {
-	set popupVars(-width) [expr int([$wcan itemcget $id -width])]
+	set popupVars(-width) [expr {int([$wcan itemcget $id -width])}]
 	set dashShort [$wcan itemcget $id -dash]
 	if {$dashShort eq ""} {
 	    set dashShort " "
@@ -1452,7 +1452,7 @@ proc ::CanvasUtils::DoItemPopup {wcan x y} {
     }
     
     # Post popup menu.
-    tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
+    tk_popup $m [expr {int($x) - 10}] [expr {int($y) - 10}]
 }
 
 proc ::CanvasUtils::BuildCanvasPopupFontMenu {wcan wmenu id allFonts} {
@@ -1499,7 +1499,7 @@ proc ::CanvasUtils::DoLockedPopup {wcan x y} {
     }
     
     # Post popup menu.
-    tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
+    tk_popup $m [expr {int($x) - 10}] [expr {int($y) - 10}]
 }
 
 proc ::CanvasUtils::DoQuickTimePopup {win x y} {
@@ -1535,7 +1535,7 @@ proc ::CanvasUtils::DoQuickTimePopup {win x y} {
     update idletasks
     
     # Post popup menu.
-    tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
+    tk_popup $m [expr {int($x) - 10}] [expr {int($y) - 10}]
 }
 
 proc ::CanvasUtils::PostGeneralMenu {win x y m mDef} {
@@ -1550,7 +1550,7 @@ proc ::CanvasUtils::PostGeneralMenu {win x y m mDef} {
     update idletasks
     
     # Post popup menu.
-    tk_popup $m [expr int($x) - 10] [expr int($y) - 10]
+    tk_popup $m [expr {int($x) - 10}] [expr {int($y) - 10}]
 }
     
 # SetItemColorDialog, SetTextItemFontFamily, SetTextItemFontSize, 
@@ -1572,7 +1572,7 @@ proc ::CanvasUtils::ItemStraighten {wcan id} {
     
     set frac $prefs(straightenFrac)
     set coords [$wcan coords $id]
-    set len [expr [llength $coords]/2]
+    set len [expr {[llength $coords]/2}]
     set type [$wcan type $id]
     
     switch -- $type {
@@ -1588,7 +1588,7 @@ proc ::CanvasUtils::ItemStraighten {wcan id} {
 	}
     }
     set dsorted [lsort -real [::CanvasDraw::GetDistList $coords]]
-    set dlimit [lindex $dsorted [expr int($len * $frac + 1)]]
+    set dlimit [lindex $dsorted [expr {int($len * $frac + 1)}]]
     set coords [::CanvasDraw::StripClosePoints $coords $dlimit]
     ItemCoords $wcan $id $coords
     
@@ -1669,8 +1669,8 @@ proc ::CanvasUtils::NewImportAnchor {wcan} {
 	set width [winfo reqwidth $wcan]
 	set height [winfo reqheight $wcan]
     }
-    if {($importAnchor(x) > [expr $width - 60]) ||   \
-      ($importAnchor(y) > [expr $height - 60])} {
+    if {($importAnchor(x) > [expr {$width - 60}]) ||   \
+      ($importAnchor(y) > [expr {$height - 60}])} {
 	set importAnchor(x) $prefs(offsetCopy)
 	set importAnchor(y) $prefs(offsetCopy)
     }
@@ -1797,7 +1797,7 @@ proc ::CanvasUtils::SkipStackingOptions {cmd} {
 
     foreach name {-above -below} {
 	if {[set ind [lsearch -exact $cmd $name]] != -1} {
-	    set cmd [lreplace $cmd $ind [expr $ind + 1]]
+	    set cmd [lreplace $cmd $ind [expr {$ind + 1}]]
 	}
     }
     return $cmd
@@ -1876,7 +1876,7 @@ proc ::CanvasUtils::FontHtmlToPixelSize {canCmd {inverse 0}} {
 	return $canCmd
     }
     set fontSpec [lindex $canCmd [incr ind]]
-    set fontSize [expr abs([lindex $fontSpec 1])]
+    set fontSize [expr {abs([lindex $fontSpec 1])}]
     
     if {!$inverse} {
 	
@@ -1947,7 +1947,7 @@ proc ::CanvasUtils::CreateFontSizeMapping { } {
 	default {
 	    foreach htmlSize {1 2 3 4 5 6} {
 		set fontSize2Points($htmlSize)  \
-		  [expr int( ($refHtmlSizeToLength($htmlSize) - $m)/$k + 0.9)]
+		  [expr {int( ($refHtmlSizeToLength($htmlSize) - $m)/$k + 0.9)}]
 	    }
 	}
     }

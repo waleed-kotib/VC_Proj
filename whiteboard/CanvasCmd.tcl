@@ -219,20 +219,20 @@ proc ::CanvasCmd::DoCanvasGrid {w} {
 	return
     }
     if {$this(platform) eq "windows"} {
-	for {set x $gridDist} {$x <= $length} {set x [expr $x + $gridDist]} {
+	for {set x $gridDist} {$x <= $length} {set x [expr {$x + $gridDist}]} {
 	    $wcan create line $x 0 $x $length  \
 	      -width 1 -fill gray50 -tags {notactive grid}
 	}
-	for {set y $gridDist} {$y <= $length} {set y [expr $y + $gridDist]} {
+	for {set y $gridDist} {$y <= $length} {set y [expr {$y + $gridDist}]} {
 	    $wcan create line 0 $y $length $y  \
 	      -width 1 -fill gray50 -tags {notactive grid}
 	}
     } else {
-	for {set x $gridDist} {$x <= $length} {set x [expr $x + $gridDist]} {
+	for {set x $gridDist} {$x <= $length} {set x [expr {$x + $gridDist}]} {
 	    $wcan create line $x 0 $x $length  \
 	      -width 1 -fill gray50 -tags {notactive grid} -stipple gray50
 	}
-	for {set y $gridDist} {$y <= $length} {set y [expr $y + $gridDist]} {
+	for {set y $gridDist} {$y <= $length} {set y [expr {$y + $gridDist}]} {
 	    $wcan create line 0 $y $length $y  \
 	      -width 1 -fill gray50 -tags {notactive grid} -stipple gray50
 	}
@@ -262,12 +262,12 @@ proc ::CanvasCmd::ResizeItem {wcan factor} {
     }
     if {$prefs(scaleCommonCG)} {
 	set bbox [eval $wcan bbox $ids]
-	set cgx [expr ([lindex $bbox 0] + [lindex $bbox 2])/2.0]
-	set cgy [expr ([lindex $bbox 1] + [lindex $bbox 3])/2.0]
+	set cgx [expr {([lindex $bbox 0] + [lindex $bbox 2])/2.0}]
+	set cgy [expr {([lindex $bbox 1] + [lindex $bbox 3])/2.0}]
     }
     set cmdList {}
     set undoList {}
-    set invfactor [expr 1.0/$factor]
+    set invfactor [expr {1.0/$factor}]
     foreach id $ids {
 	set utag [::CanvasUtils::GetUtag $wcan $id]
 	if {$utag eq ""} {
@@ -283,8 +283,8 @@ proc ::CanvasCmd::ResizeItem {wcan factor} {
 	}
 	if {!$prefs(scaleCommonCG)} {
 	    foreach {left top right bottom} [$wcan bbox $id] break
-	    set cgx [expr ($left + $right)/2.0]
-	    set cgy [expr ($top + $bottom)/2.0]
+	    set cgx [expr {($left + $right)/2.0}]
+	    set cgy [expr {($top + $bottom)/2.0}]
 	}
 	lappend cmdList [list scale $utag $cgx $cgy $factor $factor]
 	lappend undoList [list scale $utag $cgx $cgy $invfactor $invfactor]
@@ -321,17 +321,17 @@ proc ::CanvasCmd::FlipItem {wcan direction} {
     }
     set utag [::CanvasUtils::GetUtag $wcan $id]
     foreach {left top right bottom} [$wcan bbox $id] break
-    set xmid [expr ($left + $right)/2]
-    set ymid [expr ($top + $bottom)/2]
+    set xmid [expr {($left + $right)/2}]
+    set ymid [expr {($top + $bottom)/2}]
     set flipco {}
     set coords [$wcan coords $id]
     if {[string equal $direction "horizontal"]} {
 	foreach {x y} $coords {
-	    lappend flipco [expr 2*$xmid - $x] $y
+	    lappend flipco [expr {2*$xmid - $x}] $y
 	}	
     } elseif {[string equal $direction "vertical"]} {
 	foreach {x y} $coords {
-	    lappend flipco $x [expr 2*$ymid - $y]
+	    lappend flipco $x [expr {2*$ymid - $y}]
 	}	
     }
     set cmd [concat coords $utag $flipco]
