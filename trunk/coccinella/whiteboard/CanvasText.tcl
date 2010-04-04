@@ -246,7 +246,7 @@ proc ::CanvasText::SetFocus {wcan x y {forceNew 0}} {
 	
 	# No text item under cursor, make a new empty text item.
 	set utag [::CanvasUtils::NewUtag]
-	set y [expr $y - [font metrics [list $state(font)] -linespace]/2]
+	set y [expr {$y - [font metrics [list $state(font)] -linespace]/2}]
 	set cmd [list create text $x $y -text ""   \
 	  -tags [list std text $utag] -anchor nw -fill $state(fgCol)]
 	set fontsLocal [list $state(font) $fontSize2Points($state(fontSize)) \
@@ -335,7 +335,7 @@ proc ::CanvasText::Insert {wcan char} {
     
     # The actual canvas text insertion; note that 'ind' is found above.
     set cmd [list insert $itfocus insert $char]
-    set undocmd [list dchars $utag $ind [expr $ind + [string length $char]]]
+    set undocmd [list dchars $utag $ind [expr {$ind + [string length $char]}]]
     set redo [list ::CanvasUtils::Command $w $cmd]
     set undo [list ::CanvasUtils::Command $w $undocmd]    
     eval {$wcan} $cmd
@@ -448,14 +448,14 @@ proc ::CanvasText::MoveRight {wcan} {
 	# If selection.
 	if {![catch {selection get} s]} {
 	    if {$s ne ""} {
-		$wcan icursor $foc [expr [$wcan index $foc sel.last] + 1]
+		$wcan icursor $foc [expr {[$wcan index $foc sel.last] + 1}]
 		$wcan select clear
 	    }
 	} else {
-	    $wcan icursor $foc [expr [$wcan index $foc insert] + 1]
+	    $wcan icursor $foc [expr {[$wcan index $foc insert] + 1}]
 	}
     } else {
-	$wcan icursor $foc [expr [$wcan index $foc insert] + 1]
+	$wcan icursor $foc [expr {[$wcan index $foc insert] + 1}]
     }
 }
 
@@ -481,14 +481,14 @@ proc ::CanvasText::MoveLeft {wcan} {
 	# If selection.
 	if {![catch {selection get} s]} {
 	    if {$s ne ""} {
-		$wcan icursor $foc [expr [$wcan index $foc sel.first] + 0]
+		$wcan icursor $foc [expr {[$wcan index $foc sel.first] + 0}]
 		$wcan select clear
 	    }
 	} else {
-	    $wcan icursor $foc [expr [$wcan index $foc insert] - 1]
+	    $wcan icursor $foc [expr {[$wcan index $foc insert] - 1}]
 	}
     } else {
-	$wcan icursor $foc [expr [$wcan index $foc insert] - 1]
+	$wcan icursor $foc [expr {[$wcan index $foc insert] - 1}]
     }
 }
 
@@ -514,9 +514,9 @@ proc ::CanvasText::UpDownLine {wcan dir} {
     } else {
 	
 	# Down one line.
-	set prevNL  [string last \n $str [expr $ind - 1]]
-	set nextNL  [string first \n $str [expr $prevNL + 1]]
-	set next2NL [string first \n $str [expr $nextNL + 1]]
+	set prevNL  [string last \n $str [expr {$ind - 1}]]
+	set nextNL  [string first \n $str [expr {$prevNL + 1}]]
+	set next2NL [string first \n $str [expr {$nextNL + 1}]]
 	
 	# If last line.
 	if {$nextNL == -1} {
@@ -555,8 +555,8 @@ proc ::CanvasText::KeySelect {wcan new} {
 	set first [$wcan index $id sel.first]
 	set last  [$wcan index $id sel.last]
 	incr last
-	set right  [expr {$new > $insert} ? 1 : 0]
-	set inside [expr {($new >= $first) && ($new <= $last)} ? 1 : 0]
+	set right  [expr {$new > $insert ? 1 : 0}]
+	set inside [expr {($new >= $first) && ($new <= $last) ? 1 : 0}]
 	if {$new == $first} {
 	    $wcan select clear
 	} elseif {$new == $last && $right} {
@@ -582,9 +582,9 @@ proc ::CanvasText::InsertBegin {wcan} {
     set foc [$wcan focus]
     
     # Find index of new character. Only for left justified text.
-    set ind [expr [$wcan index $foc insert] - 1]
+    set ind [expr {[$wcan index $foc insert] - 1}]
     set str [$wcan itemcget $foc -text]
-    set prevNL [expr [string last \n $str $ind] + 1]
+    set prevNL [expr {[string last \n $str $ind] + 1}]
     if {$prevNL == -1} {
 	$wcan icursor $foc 0
     } else {
@@ -680,7 +680,7 @@ proc ::CanvasText::SelectWord {wcan x y} {
     
     # Find the boundaries of the word and select word.
     $wcan select from   $id [string wordstart $txt $ind]
-    $wcan select adjust $id [expr [string wordend $txt $ind] - 1]
+    $wcan select adjust $id [expr {[string wordend $txt $ind] - 1}]
 }
 
 # ::CanvasText::NewLine --
@@ -799,7 +799,7 @@ proc ::CanvasText::Delete {wcan {offset 0}} {
 	set cmd [list dchars $utag $sfirst $slast]
 	set undocmd [list insert $utag $sfirst $str]
     } elseif {$idfocus ne {}} {
-	set ind [expr [$wcan index $idfocus insert] - 1 + $offset]
+	set ind [expr {[$wcan index $idfocus insert] - 1 + $offset}]
 	set str [$wcan itemcget $idfocus -text]
 	set str [string index $str $ind]
 	set cmd [list dchars $utag $ind]
@@ -859,7 +859,7 @@ proc ::CanvasText::ScheduleTextBuffer {wcan} {
     if {[info exists buffer(afterid)]} {
 	after cancel $buffer(afterid)
     }
-    set buffer(afterid) [after [expr $prefs(batchTextms)]   \
+    set buffer(afterid) [after [expr {$prefs(batchTextms)}]   \
       [list [namespace current]::EvalBufferedText $wcan]]
 }
 

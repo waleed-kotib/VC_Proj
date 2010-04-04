@@ -141,10 +141,10 @@ namespace eval ::WB {
     # @@@ BAD!!!!!!!!!!!!!!!!!!!!!!???????????????
     # Canvas size; these are also min sizes. Add new line of tools.
     set dims(wCanOri) 350
-    set dims(hCanOri) [expr 328 + 28]
+    set dims(hCanOri) [expr {328 + 28}]
     # Canvas size; with border.
-    set dims(wMinCanvas) [expr $dims(wCanOri) + 2]
-    set dims(hMinCanvas) [expr $dims(hCanOri) + 2]
+    set dims(wMinCanvas) [expr {$dims(wCanOri) + 2}]
+    set dims(hMinCanvas) [expr {$dims(hCanOri) + 2}]
     set dims(x) 30
     set dims(y) 30
     # Total size of the application (not including menu); only temporary values.
@@ -192,7 +192,7 @@ namespace eval ::WB {
     
     # Scale factor used when scaling canvas items.
     set prefs(scaleFactor) 1.2
-    set prefs(invScaleFac) [expr 1.0/$prefs(scaleFactor)]
+    set prefs(invScaleFac) [expr {1.0/$prefs(scaleFactor)}]
 
     # Use common CG when scaling more than one item?
     set prefs(scaleCommonCG) 0
@@ -1213,7 +1213,7 @@ proc ::WB::SaveWhiteboardDims {w} {
     } else {
 	set dims(hMenu) 0
     }
-    set dims(hTot) [expr $dims(hRoot) + $dims(hMenu)]
+    set dims(hTot) [expr {$dims(hRoot) + $dims(hMenu)}]
     set dims(wCanvas) [winfo width $wcan]
     set dims(hCanvas) [winfo height $wcan]
 
@@ -1238,9 +1238,9 @@ proc ::WB::SaveCleanWhiteboardDims {w} {
 	return
     }
     foreach {dims(wRoot) hRoot dims(x) dims(y)} [::UI::ParseWMGeometry [wm geometry .]] break
-    set dims(hRoot) [expr $dims(hCanvas) + $dims(hStatus) +  \
-      $dims(hCommClean) + $dims(hTop) + $dims(hFakeMenu)]
-    incr dims(hRoot) [expr [winfo height $wapp(xsc)] + 4]
+    set dims(hRoot) [expr {$dims(hCanvas) + $dims(hStatus) +  \
+      $dims(hCommClean) + $dims(hTop) + $dims(hFakeMenu)}]
+    incr dims(hRoot) [expr {[winfo height $wapp(xsc)] + 4}]
 }
 
 # WB::ConfigureMain --
@@ -2573,7 +2573,7 @@ proc ::WB::DoToolPopup {w wbutton name} {
     set wpop $wtool.pop${name}
     if {[winfo exists $wpop]} {
 	set x [winfo rootx $w]
-	set y [expr [winfo rooty $wbutton] + [winfo height $wbutton]]
+	set y [expr {[winfo rooty $wbutton] + [winfo height $wbutton]}]
 	tk_popup $wpop $x $y
     }
 }
@@ -2715,13 +2715,13 @@ proc ::WB::SetCanvasSize {w cw ch} {
     upvar ::WB::${w}::wapp wapp
 
     # Compute new root size from the desired canvas size.
-    set thick [expr int([$wapp(can) cget -highlightthickness])]
-    set widthtot  [expr $cw + [winfo reqwidth $wapp(tool)]]
-    set heighttot [expr $ch + \
+    set thick [expr {int([$wapp(can) cget -highlightthickness])}]
+    set widthtot  [expr {$cw + [winfo reqwidth $wapp(tool)]}]
+    set heighttot [expr {$ch + \
       [winfo reqheight $wapp(comm)] + \
-      [winfo reqheight $wapp(tbar)]]
-    incr widthtot  [expr [winfo reqwidth $wapp(ysc)] + 4 + $thick]
-    incr heighttot [expr [winfo reqheight $wapp(xsc)] + 4 + $thick]
+      [winfo reqheight $wapp(tbar)]}]
+    incr widthtot  [expr {[winfo reqwidth $wapp(ysc)] + 4 + $thick}]
+    incr heighttot [expr {[winfo reqheight $wapp(xsc)] + 4 + $thick}]
     
     # Menu is a bit tricky. Not needed since wm geometry doesn't count it!
     if {0} {
@@ -3220,13 +3220,13 @@ proc ::WB::CreateBrokenImage {wcan width height} {
     if {($width == 0) || ($height == 0)} {
 	set name $icons(brokenImage)
     } else {
-	set zoomx [expr $width/[image width $icons(brokenImage)]]
-	set zoomy [expr $height/[image height $icons(brokenImage)]]
+	set zoomx [expr {$width/[image width $icons(brokenImage)]}]
+	set zoomy [expr {$height/[image height $icons(brokenImage)]}]
 	if {($zoomx < 1) && ($zoomy < 1)} {
 	    set name $icons(brokenImage)
 	} else {
-	    set zoomx [expr $zoomx < 1 ? 1 : $zoomx]
-	    set zoomy [expr $zoomy < 1 ? 1 : $zoomy]
+	    set zoomx [expr {$zoomx < 1 ? 1 : $zoomx}]
+	    set zoomy [expr {$zoomy < 1 ? 1 : $zoomy}]
 	    set name [image create photo -width $width -height $height]
 	    $name blank
 	    $name copy $icons(brokenImage) -to 0 0 $width $height  \
