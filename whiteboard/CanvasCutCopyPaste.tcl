@@ -125,7 +125,7 @@ proc ::CanvasCCP::SelectionHandle {wcan offset maxbytes} {
 	return "ERROR: $str"
     }
     puts "\t str=$str"
-    return [string range $str $offset [expr $offset + $maxbytes]]
+    return [string range $str $offset [expr {$offset + $maxbytes}]]
 }
 
 # CanvasCCP::CopySingle --
@@ -264,8 +264,8 @@ proc ::CanvasCCP::PasteSingleOnCanvas {wcan cmd} {
 	import {
 	    set utag [::CanvasUtils::NewUtag]
 	    set cmd [CanvasUtils::ReplaceUtag $cmd $utag]
-	    set x [expr [lindex $cmd 1] + $prefs(offsetCopy)]
-	    set y [expr [lindex $cmd 2] + $prefs(offsetCopy)]
+	    set x [expr {[lindex $cmd 1] + $prefs(offsetCopy)}]
+	    set y [expr {[lindex $cmd 2] + $prefs(offsetCopy)}]
 	    set cmd [lreplace $cmd 1 2 $x $y]
 	    set cmd [::CanvasUtils::SkipStackingOptions $cmd]
 	    ::Import::HandleImportCmd $wcan $cmd
@@ -289,16 +289,16 @@ proc ::CanvasCCP::PasteSingleOnCanvas {wcan cmd} {
 	    
 	    # make coordinate offset, first get coords
 	    set ind1 [lsearch $cmd \[0-9.\]*]
-	    set ind2 [expr [lsearch $cmd -*\[a-z\]*] - 1]
+	    set ind2 [expr {[lsearch $cmd -*\[a-z\]*] - 1}]
 	    set theCoords [lrange $cmd $ind1 $ind2]
 	    set cooOffset {}
 	    foreach coo $theCoords {
-		lappend cooOffset [expr $coo + $prefs(offsetCopy)]
+		lappend cooOffset [expr {$coo + $prefs(offsetCopy)}]
 	    }
 	    
 	    # paste back coordinates in cmd
-	    set newcmd [concat [lrange $cmd 0 [expr $ind1 - 1]] $cooOffset  \
-	      [lrange $cmd [expr $ind2 + 1] end]]
+	    set newcmd [concat [lrange $cmd 0 [expr {$ind1 - 1}]] $cooOffset  \
+	      [lrange $cmd [expr {$ind2 + 1}] end]]
 	    set undocmd [list delete $utag]
 	    
 	    # Change font size from points to html size when sending it to clients.
@@ -357,12 +357,12 @@ proc ::CanvasCCP::CmdToken {cmdName separator} {
     }
     
     # If separator in -text then ???.
-    if {[lindex $theCmd [expr $indSep - 1]] ne "-text"} {
-	set firstPart [lrange $theCmd 0 [expr $indSep - 1]]
+    if {[lindex $theCmd [expr {$indSep - 1}]] ne "-text"} {
+	set firstPart [lrange $theCmd 0 [expr {$indSep - 1}]]
     } else {
 	puts "Warning in CmdToken: -text part wrong"
     }
-    set theCmd [lrange $theCmd [expr $indSep + 1] end]
+    set theCmd [lrange $theCmd [expr {$indSep + 1}] end]
     return $firstPart
 }
 
