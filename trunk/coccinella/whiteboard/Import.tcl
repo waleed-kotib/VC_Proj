@@ -426,7 +426,7 @@ proc ::Import::DrawImage {wcan optsVar args} {
 	if {$zoomFactor > 0} {
 	    $newImName copy $imageName -zoom $zoomFactor
 	} else {
-	    $newImName copy $imageName -subsample [expr abs($zoomFactor)]
+	    $newImName copy $imageName -subsample [expr {abs($zoomFactor)}]
 	}
 	set imageName $newImName
     }
@@ -569,9 +569,9 @@ proc ::Import::QuickTimeBalloonMsg {wmovie fileName} {
 	}
     }
     array set qtTime [$wmovie gettime]
-    set lenSecs [expr $qtTime(-movieduration)/$qtTime(-movietimescale)]
-    set lenMin [expr $lenSecs/60]
-    set secs [format "%02i" [expr $lenSecs % 60]]
+    set lenSecs [expr {$qtTime(-movieduration)/$qtTime(-movietimescale)}]
+    set lenMin [expr {$lenSecs/60}]
+    set secs [format "%02i" [expr {$lenSecs % 60}]]
     append msg "\nLength: ${lenMin}:$secs"
     return $msg
 }
@@ -703,7 +703,7 @@ proc ::Import::DrawXanim {wcan optsVar args} {
     }
     set width [lindex $size 0]
     set height [lindex $size 1]
-    $wfr configure -width [expr $width + 6] -height [expr $height + 6]
+    $wfr configure -width [expr {$width + 6}] -height [expr {$height + 6}]
     $wcan create window $x $y -anchor nw -window $wfr -tags [list frame $utag]
     
     # Make special frame for xanim to draw in.
@@ -883,7 +883,7 @@ proc ::Import::ObjectProgress {token size bytes} {
     ::timing::setbytes $token $bytes
     set ms [clock clicks -milliseconds]
     
-    if {[expr $ms - $state(last)] > $prefs(progUpdateMillis)} {
+    if {[expr {$ms - $state(last)}] > $prefs(progUpdateMillis)} {
 	set tmsg [::timing::getmessage $token $total]
 
 	# see commit 1870, string needed, translation, code: progress-Receiving
@@ -1661,19 +1661,19 @@ proc ::Import::ResizeImage {wcan zoomFactor which newTag {where all}} {
 		# This image already resized.
 		if {$zoomFactor == 2} {
 		    if {$sizeNo >= 2} {
-			set newSizeNo [expr $sizeNo * $zoomFactor]
+			set newSizeNo [expr {$sizeNo * $zoomFactor}]
 		    } elseif {$sizeNo == -2} {
 			set newSizeNo 0
 		    } else {
-			set newSizeNo [expr $sizeNo/$zoomFactor]
+			set newSizeNo [expr {$sizeNo/$zoomFactor}]
 		    }
 		} elseif {$zoomFactor == -2} {
 		    if {$sizeNo <= -2} {
-			set newSizeNo [expr -$sizeNo * $zoomFactor]
+			set newSizeNo [expr {-$sizeNo * $zoomFactor}]
 		    } elseif {$sizeNo == 2} {
 			set newSizeNo 0
 		    } else {
-			set newSizeNo [expr -$sizeNo/$zoomFactor]
+			set newSizeNo [expr {-$sizeNo/$zoomFactor}]
 		    }
 		}
 
@@ -1697,7 +1697,7 @@ proc ::Import::ResizeImage {wcan zoomFactor which newTag {where all}} {
 		if {$zoomFactor > 0} {
 		    $newImName copy $theIm -zoom $theScale
 		} else {
-		    $newImName copy $theIm -subsample [expr round(1.0/$theScale)]
+		    $newImName copy $theIm -subsample [expr {round(1.0/$theScale)}]
 		}
 	    }
 	    
@@ -1732,7 +1732,7 @@ proc ::Import::ResizeImage {wcan zoomFactor which newTag {where all}} {
 	# Assemble remote command.
 	if {$where ne "local"} {
 	    set cmdremote "RESIZE IMAGE: $utagOrig $useTag $zoomFactor"
-	    set undocmdremote "RESIZE IMAGE: $useTag $utagOrig [expr -$zoomFactor]"
+	    set undocmdremote "RESIZE IMAGE: $useTag $utagOrig [expr {-$zoomFactor}]"
 	    if {$where eq "remote" || $where eq "all"} {
 		lappend cmdExList [list $cmdremote remote]
 		lappend undocmdExList [list $undocmdremote remote]
@@ -1776,10 +1776,10 @@ proc ::Import::GetAutoFitSize {wcan theMovie} {
     set msize [$theMovie size]
     set imw [lindex $msize 0]
     set imh [lindex $msize 1]
-    set maxRatio [max [expr $imw/($canw + 0.0)] [expr $imh/($canh + 0.0)]]
+    set maxRatio [max [expr {$imw/($canw + 0.0)}] [expr {$imh/($canh + 0.0)}]]
     if {$maxRatio >= 1.0} {
-	set k [expr ceil(log($maxRatio)/log(2.0))]
-	return [list [expr int($imw/pow(2.0, $k))] [expr int($imh/pow(2.0, $k))]]
+	set k [expr {ceil(log($maxRatio)/log(2.0))}]
+	return [list [expr {int($imw/pow(2.0, $k))}] [expr {int($imh/pow(2.0, $k))}]]
     } else {
 	return [list $imw $imh]
     }
@@ -1958,7 +1958,7 @@ proc ::Import::TakeShot {w winfr} {
     set coo [$wcan coords $utag]
     set height [winfo height $winfr]
     set x [lindex $coo 0]
-    set y [expr [lindex $coo 1] + $height]
+    set y [expr {[lindex $coo 1] + $height}]
     
     set opts [list -coords [list $x $y]]
     DoImport $wcan $opts -file $tmpfile
@@ -1982,7 +1982,7 @@ proc ::Import::TimeCode {w winfr} {
 	array set moarr [$wmov gettime]
 	set frameduration $tmarr(-sampleduration)
 	set timescale $moarr(-movietimescale)
-	set framespersecond [expr $timescale/$frameduration]
+	set framespersecond [expr {$timescale/$frameduration}]
 	
 	set res [$wmov timecode new $videoTrackID -foreground black \
 	  -background white -frameduration $tmarr(-sampleduration) \
