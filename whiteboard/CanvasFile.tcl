@@ -175,7 +175,7 @@ proc ::CanvasFile::FileToCanvasVer1 {wcan fd absPath args} {
 	set type [lindex $line 1]	
 	set ind [lsearch -exact $line "-tags"]
 	if {$ind >= 0} {
-	    set tagInd [expr $ind + 1]
+	    set tagInd [expr {$ind + 1}]
 	    set tags [lindex $line $tagInd]
 	} else {
 	    continue
@@ -214,7 +214,7 @@ proc ::CanvasFile::FileToCanvasVer1 {wcan fd absPath args} {
 	    if {$previousImageOrMovieCmd ne ""} {
 		set ind [lsearch -exact $previousImageOrMovieCmd "-file"]
 		if {$ind >= 0} {
-		    set filePath [lindex $previousImageOrMovieCmd [expr $ind + 1]]
+		    set filePath [lindex $previousImageOrMovieCmd [expr {$ind + 1}]]
 		}
 		
 		# Translate to native file path? Useful if want to have
@@ -237,7 +237,7 @@ proc ::CanvasFile::FileToCanvasVer1 {wcan fd absPath args} {
 	    if {[string equal $type "image"]} {
 		set ind [lsearch -exact $line "-image"]
 		if {$ind >= 0} {
-		    set imageName [lindex $line [expr $ind + 1]]
+		    set imageName [lindex $line [expr {$ind + 1}]]
 
 		    # Find out if zoomed.
 		    if {[regexp {(.+)_zoom(|-)([0-9]+)} $imageName   \
@@ -409,7 +409,7 @@ proc ::CanvasFile::FileToCanvasVer2 {wcan fd absPath args} {
 		foreach key {-above -below} {
 		    set ind [lsearch $line $key]
 		    if {$ind >= 0} {
-			set line [lreplace $line $ind [expr $ind+1]]
+			set line [lreplace $line $ind [expr {$ind+1}]]
 		    }
 		}
 		
@@ -814,10 +814,10 @@ proc ::CanvasFile::ImagePathTranslation {optList absFilePath} {
     # If any file path, make sure it is relative if requested.
     set ind [lsearch $optList "-file"]
     if {$ind >= 0} {
-	set absImPath [lindex $optList [expr $ind + 1]]
+	set absImPath [lindex $optList [expr {$ind + 1}]]
 	if {$absImPath ne ""} {
 	    set newOptList [lreplace $optList   \
-	      [expr $ind + 1] [expr $ind + 1]   \
+	      [expr {$ind + 1}] [expr {$ind + 1}]   \
 	      [::tfileutils::relative $absFilePath $absImPath]]
 	} else {
 	    set newOptList $optList

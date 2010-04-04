@@ -376,7 +376,7 @@ proc ::GetFileIface::Progress {gettoken token total current} {
       {$ms - $getstate(firstmillis) >= $prefs(millisToProgWin)} ? 1 : 0]
     if {$wantProgWin && ![winfo exists $getstate(wprog)]} {
 	::GetFileIface::UpdateProgress $gettoken $total $current
-    } elseif {[expr $ms - $getstate(lastmillis)] > $prefs(progUpdateMillis)} {
+    } elseif {[expr {$ms - $getstate(lastmillis)}] > $prefs(progUpdateMillis)} {
 	set getstate(lastmillis) $ms	    
 	::GetFileIface::UpdateProgress $gettoken $total $current
     }
@@ -502,7 +502,7 @@ proc ::GetFileIface::UpdateProgress {gettoken total current} {
     if {[winfo exists $getstate(wprog)]} {
 
 	# Update the progress window.
-	set percent [expr 100.0 * $current/($total + 1.0)]
+	set percent [expr {100.0 * $current/($total + 1.0)}]
 	$getstate(wprog) configuredelayed -percent $percent   \
 	  -text2 $msg2 -text3 $msg3
     } else {

@@ -400,7 +400,7 @@ proc ::ItemInspector::Build {wcan itemid args} {
 		    set rgb8 {}
 		    # winfo rgb . white -> 65535 65535 65535
 		    foreach rgb [winfo rgb . $val] {
-			lappend rgb8 [expr $rgb >> 8]
+			lappend rgb8 [expr {$rgb >> 8}]
 		    }
 		    set val [eval {format "#%02x%02x%02x"} $rgb8]
 		    $wentry configure -disabledbackground $val
@@ -605,7 +605,7 @@ proc ::ItemInspector::Configure {token} {
 		    set rgb8 {}
 		    # winfo rgb . white -> 65535 65535 65535
 		    foreach rgb [winfo rgb . $newVal] {
-			lappend rgb8 [expr $rgb >> 8]
+			lappend rgb8 [expr {$rgb >> 8}]
 		    }
 		    set newVal [eval {format "#%02x%02x%02x"} $rgb8]
 		}
