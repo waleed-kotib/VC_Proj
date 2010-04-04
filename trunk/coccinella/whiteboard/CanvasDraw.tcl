@@ -1661,7 +1661,7 @@ proc ::CanvasDraw::FinalizePoly {wcan x y} {
     # Find out if closed polygon or open line item. If closed, remove duplicate.
     set isClosed 0
     if {[expr   \
-      hypot([lindex $thePoly(0) 0] - $x, [lindex $thePoly(0) 1] - $y)] < 4} {
+      {hypot([lindex $thePoly(0) 0] - $x, [lindex $thePoly(0) 1] - $y)}] < 4} {
 	set isClosed 1
 	unset thePoly($thePoly(N))
 	incr thePoly(N) -1
@@ -2111,30 +2111,30 @@ proc ::CanvasDraw::DoPaint {wcan x y {shift 0}} {
 		if {$rp > $r} {
 		    continue
 		}
-		set phi [expr $kRad2Grad * atan2(-($y - $cy),$x - $cx)]
+		set phi [expr {$kRad2Grad * atan2(-($y - $cy),$x - $cx)}]
 		if {$phi < 0} {
-		    set phi [expr $phi + 360]
+		    set phi [expr {$phi + 360}]
 		}
 		set startPhi  [$wcan itemcget $id -start]
 		set extentPhi [$wcan itemcget $id -extent]
 		if {$extentPhi >= 0} {
 		    set phi1 $startPhi
-		    set phi2 [expr $startPhi + $extentPhi]
+		    set phi2 [expr {$startPhi + $extentPhi}]
 		} else {
-		    set phi1 [expr $startPhi + $extentPhi]
+		    set phi1 [expr {$startPhi + $extentPhi}]
 		    set phi2 $startPhi
 		}
 		
 		# Put branch cut at 360 degrees. Count CCW.
 		if {$phi1 > 360} {
-		    set phi1 [expr $phi1 - 360]
+		    set phi1 [expr {$phi1 - 360}]
 		} elseif {$phi1 < 0} {
-		    set phi1 [expr $phi1 + 360]
+		    set phi1 [expr {$phi1 + 360}]
 		}
 		if {$phi2 > 360} {
-		    set phi2 [expr $phi2 - 360]
+		    set phi2 [expr {$phi2 - 360}]
 		} elseif {$phi2 < 0} {
-		    set phi2 [expr $phi2 + 360]
+		    set phi2 [expr {$phi2 + 360}]
 		}
 		set inside 0
 		
@@ -2215,8 +2215,8 @@ proc ::CanvasDraw::InitRotateItem {wcan x y} {
 	set colist [$wcan bbox $id]
 	set rotDrag(undocmd) [concat coords $utag [$wcan coords $utag]]
     }
-    set rotDrag(cgX) [expr ([lindex $colist 0] + [lindex $colist 2])/2.0]
-    set rotDrag(cgY) [expr ([lindex $colist 1] + [lindex $colist 3])/2.0]
+    set rotDrag(cgX) [expr {([lindex $colist 0] + [lindex $colist 2])/2.0}]
+    set rotDrag(cgY) [expr {([lindex $colist 1] + [lindex $colist 3])/2.0}]
     set rotDrag(anchorX) $x
     set rotDrag(anchorY) $y
     set rotDrag(id)   $id
@@ -2225,16 +2225,16 @@ proc ::CanvasDraw::InitRotateItem {wcan x y} {
     
     # Save coordinates relative cg.
     set theCoords [$wcan coords $id]
-    set rotDrag(n) [expr [llength $theCoords]/2]    ;# Number of points.
+    set rotDrag(n) [expr {[llength $theCoords]/2}]    ;# Number of points.
     set i 0
     foreach {cx cy} $theCoords {
-	set rotDrag(x,$i) [expr $cx - $rotDrag(cgX)]
-	set rotDrag(y,$i) [expr $cy - $rotDrag(cgY)]
+	set rotDrag(x,$i) [expr {$cx - $rotDrag(cgX)}]
+	set rotDrag(y,$i) [expr {$cy - $rotDrag(cgY)}]
 	incr i
     }
     
     # Observe coordinate system.
-    set rotDrag(startAng) [expr atan2($y - $rotDrag(cgY), $x - $rotDrag(cgX)) ]
+    set rotDrag(startAng) [expr {atan2($y - $rotDrag(cgY), $x - $rotDrag(cgX))}]
 
     # Keep an invisible fake copy to deal with constraints (scroll region).
     set cmdFake [::CanvasUtils::DuplicateItem $wcan $id -fill {} -outline {}]
@@ -2261,8 +2261,8 @@ proc ::CanvasDraw::DoRotateItem {wcan x y {shift 0}} {
     if {![info exists rotDrag]} {
 	return
     }
-    set newAng [expr atan2($y - $rotDrag(cgY), $x - $rotDrag(cgX))]
-    set deltaAng [expr $rotDrag(startAng) - $newAng]
+    set newAng [expr {atan2($y - $rotDrag(cgY), $x - $rotDrag(cgX))}]
+    set deltaAng [expr {$rotDrag(startAng) - $newAng}]
     set angle 0.0
     
     # Certain items are only rotated in 90 degree intervals, other continuously.
@@ -2270,9 +2270,9 @@ proc ::CanvasDraw::DoRotateItem {wcan x y {shift 0}} {
 	arc - line - polygon {
 	    if {$shift} {
 		if {!$prefs(45)} {
-		    set angle [expr ($kPI/2.0) * round($deltaAng/($kPI/2.0))]
+		    set angle [expr {($kPI/2.0) * round($deltaAng/($kPI/2.0))}]
 		} elseif {$prefs(45)} {
-		    set angle [expr ($kPI/4.0) * round($deltaAng/($kPI/4.0))]
+		    set angle [expr {($kPI/4.0) * round($deltaAng/($kPI/4.0))}]
 		}
 	    } else {
 		set angle $deltaAng
@@ -2281,21 +2281,21 @@ proc ::CanvasDraw::DoRotateItem {wcan x y {shift 0}} {
 	rectangle - oval {
 	
 	    # Find the rotated angle in steps of 90 degrees.
-	    set angle [expr ($kPI/2.0) * round($deltaAng/($kPI/2.0))]
+	    set angle [expr {($kPI/2.0) * round($deltaAng/($kPI/2.0))}]
 	}
     }
     
     # Find the new coordinates; arc: only start angle.
-    if {[expr abs($angle)] > 1e-4 ||   \
-      [expr abs($rotDrag(lastAng) - $angle)] > 1e-4} {
-	set sinAng [expr sin($angle)]
-	set cosAng [expr cos($angle)]
+    if {[expr {abs($angle)}] > 1e-4 ||   \
+      [expr {abs($rotDrag(lastAng) - $angle)}] > 1e-4} {
+	set sinAng [expr {sin($angle)}]
+	set cosAng [expr {cos($angle)}]
 	set id  $rotDrag(id)
 	set idx $rotDrag(idx)
 	if {[string equal $rotDrag(type) "arc"]} {
 	    
 	    # Different coordinate system for arcs...and units...
-	    set start [expr $kRad2Grad * $angle + $rotDrag(arcStart)]
+	    set start [expr {$kRad2Grad * $angle + $rotDrag(arcStart)}]
 	    set cmdReal [list $wcan itemconfigure $id -start $start]
 	    set cmdFake [list $wcan itemconfigure $idx -start $start]
 	} else {
@@ -2303,10 +2303,10 @@ proc ::CanvasDraw::DoRotateItem {wcan x y {shift 0}} {
 	    # Compute new coordinates from the original ones.
 	    set new {}
 	    for {set i 0} {$i < $rotDrag(n)} {incr i} {
-		lappend new [expr $rotDrag(cgX) + $cosAng * $rotDrag(x,$i) +  \
-		  $sinAng * $rotDrag(y,$i)]
-		lappend new [expr $rotDrag(cgY) - $sinAng * $rotDrag(x,$i) +  \
-		  $cosAng * $rotDrag(y,$i)]
+		lappend new [expr {$rotDrag(cgX) + $cosAng * $rotDrag(x,$i) +  \
+		  $sinAng * $rotDrag(y,$i)}]
+		lappend new [expr {$rotDrag(cgY) - $sinAng * $rotDrag(x,$i) +  \
+		  $cosAng * $rotDrag(y,$i)}]
 	    }
 	    set cmdReal [list $wcan coords $id $new]
 	    set cmdFake [list $wcan coords $idx $new]
@@ -2424,7 +2424,7 @@ proc ::CanvasDraw::DeleteIds {wcan ids where args} {
 	}
 	set tags [$wcan gettags $id]
 	set type [$wcan type $id]
-	set havestd [expr [lsearch -exact $tags std] < 0 ? 0 : 1]
+	set havestd [expr {[lsearch -exact $tags std] < 0 ? 0 : 1}]
 	
 	# We are only allowed to delete 'std' items.
 	switch -glob -- $type,$havestd {
@@ -2535,8 +2535,8 @@ proc ::CanvasDraw::DeleteFrame {wcan wframe x y {where all}} {
     ::Debug 2 "::CanvasDraw::DeleteFrame wframe=$wframe, x=$x, y=$y"
     
     # Fix x and y (frame to canvas coordinates).
-    set x [$wcan canvasx [expr [winfo x $wframe] + $x]]
-    set y [$wcan canvasx [expr [winfo y $wframe] + $y]]
+    set x [$wcan canvasx [expr {[winfo x $wframe] + $x]}]
+    set y [$wcan canvasx [expr {[winfo y $wframe] + $y]}]
     set w [winfo toplevel $wcan]
     set cmdList {}
     set canUndoList {}
@@ -2582,8 +2582,8 @@ proc ::CanvasDraw::DeleteWindow {wcan win x y {where all}} {
     ::Debug 2 "::CanvasDraw::DeleteWindow win=$win, x=$x, y=$y"
     
     # Fix x and y (frame to canvas coordinates).
-    set x [$wcan canvasx [expr [winfo x $win] + $x]]
-    set y [$wcan canvasx [expr [winfo y $win] + $y]]
+    set x [$wcan canvasx [expr {[winfo x $win] + $x]}]
+    set y [$wcan canvasx [expr {[winfo y $win] + $y]}]
     set w [winfo toplevel $wcan]
     set cmdList {}
     set canUndoList {}
@@ -2699,12 +2699,12 @@ proc ::CanvasDraw::DeleteSelection {wcan which} {
 
 proc ::CanvasDraw::IsSelected {wcan which} {
     
-    return [expr [lsearch [$wcan gettags $which] "selected"] < 0 ? 0 : 1]
+    return [expr {[lsearch [$wcan gettags $which] "selected"] < 0 ? 0 : 1}]
 }
 
 proc ::CanvasDraw::AnySelected {wcan} {
     
-    return [expr {[$wcan find withtag "selected"] eq ""} ? 0 : 1]
+    return [expr {[$wcan find withtag "selected"] eq "" ? 0 : 1}]
 }
 
 # CanvasDraw::DrawItemSelection --
@@ -2732,13 +2732,13 @@ proc ::CanvasDraw::DrawItemSelection {wcan which tmark} {
       || ($type eq "rectangle") || ($type eq "image")} {
 
 	foreach {x1 y1 x2 y2} $bbox break
-	$wcan create rectangle [expr $x1-$a] [expr $y1-$a] [expr $x1+$a] [expr $y1+$a] \
+	$wcan create rectangle [expr {$x1-$a}] [expr {$y1-$a}] [expr {$x1+$a}] [expr {$y1+$a}] \
 	  -tags $tmark -fill white -outline $fg
-	$wcan create rectangle [expr $x1-$a] [expr $y2-$a] [expr $x1+$a] [expr $y2+$a] \
+	$wcan create rectangle [expr {$x1-$a}] [expr {$y2-$a}] [expr {$x1+$a}] [expr {$y2+$a}] \
 	  -tags $tmark -fill white -outline $fg
-	$wcan create rectangle [expr $x2-$a] [expr $y1-$a] [expr $x2+$a] [expr $y1+$a] \
+	$wcan create rectangle [expr {$x2-$a}] [expr {$y1-$a}] [expr {$x2+$a}] [expr {$y1+$a}] \
 	  -tags $tmark -fill white -outline $fg
-	$wcan create rectangle [expr $x2-$a] [expr $y2-$a] [expr $x2+$a] [expr $y2+$a] \
+	$wcan create rectangle [expr {$x2-$a}] [expr {$y2-$a}] [expr {$x2+$a}] [expr {$y2+$a}] \
 	  -tags $tmark -fill white -outline $fg
     } else {
 	
@@ -2755,27 +2755,27 @@ proc ::CanvasDraw::DrawItemSelection {wcan which tmark} {
 		return
 	    }
 	    foreach {x1 y1 x2 y2} $coords break
-	    set r [expr abs(($x1 - $x2)/2.0)]
-	    set cx [expr ($x1 + $x2)/2.0]
-	    set cy [expr ($y1 + $y2)/2.0]
+	    set r [expr {abs(($x1 - $x2)/2.0)}]
+	    set cx [expr {($x1 + $x2)/2.0}]
+	    set cy [expr {($y1 + $y2)/2.0}]
 	    set startAng [$wcan itemcget $id -start]
 	    set extentAng [$wcan itemcget $id -extent]
-	    set xstart [expr $cx + $r * cos($kGrad2Rad * $startAng)]
-	    set ystart [expr $cy - $r * sin($kGrad2Rad * $startAng)]
-	    set xfin [expr $cx + $r * cos($kGrad2Rad * ($startAng + $extentAng))]
-	    set yfin [expr $cy - $r * sin($kGrad2Rad * ($startAng + $extentAng))]
-	    $wcan create rectangle [expr $xstart-$a] [expr $ystart-$a]   \
-	      [expr $xstart+$a] [expr $ystart+$a] -tags $tmark -fill white \
+	    set xstart [expr {$cx + $r * cos($kGrad2Rad * $startAng)}]
+	    set ystart [expr {$cy - $r * sin($kGrad2Rad * $startAng)}]
+	    set xfin [expr {$cx + $r * cos($kGrad2Rad * ($startAng + $extentAng))}]
+	    set yfin [expr {$cy - $r * sin($kGrad2Rad * ($startAng + $extentAng))}]
+	    $wcan create rectangle [expr {$xstart-$a}] [expr {$ystart-$a}]   \
+	      [expr {$xstart+$a}] [expr {$ystart+$a}] -tags $tmark -fill white \
 	      -outline $fg
-	    $wcan create rectangle [expr $xfin-$a] [expr $yfin-$a]   \
-	      [expr $xfin+$a] [expr $yfin+$a] -tags $tmark -fill white \
+	    $wcan create rectangle [expr {$xfin-$a}] [expr {$yfin-$a}]   \
+	      [expr {$xfin+$a}] [expr {$yfin+$a}] -tags $tmark -fill white \
 	      -outline $fg
 	    
 	} else {
 	    
 	    # Mark each coordinate. {x0 y0 x1 y1 ... }
 	    foreach {x y} $coords {
-		$wcan create rectangle [expr $x-$a] [expr $y-$a] [expr $x+$a] [expr $y+$a] \
+		$wcan create rectangle [expr {$x-$a}] [expr {$y-$a}] [expr {$x+$a}] [expr {$y+$a}] \
 		  -tags $tmark -fill white -outline $fg
 	    }
 	}
@@ -2912,7 +2912,7 @@ proc ::CanvasDraw::ConstrainedDrag {x y xanch yanch} {
     
     # Constrain movements to 90 degree intervals.
     if {!$prefs(45)} {
-	if {[expr abs($x - $xanch)] > [expr abs($y - $yanch)]} {
+	if {[expr {abs($x - $xanch)}] > [expr {abs($y - $yanch)}]} {
 	    set y $yanch
 	} else {
 	    set x $xanch
@@ -2923,12 +2923,12 @@ proc ::CanvasDraw::ConstrainedDrag {x y xanch yanch} {
 	# 45 degree intervals.
 	set deltax [expr {int($x - $xanch)}]
 	set deltay [expr {int($y - $yanch)}]
-	if {[expr abs($deltay/($deltax + 0.5))] <= $kTan225} {
+	if {[expr {abs($deltay/($deltax + 0.5))}] <= $kTan225} {
 	    
 	    # constrain to x-axis.
 	    set y $yanch
 	    return [list $x $y]
-	} elseif {[expr abs($deltay/($deltax + 0.5))] >= $kTan675} {
+	} elseif {[expr {abs($deltay/($deltax + 0.5))}] >= $kTan675} {
 	    
 	    # constrain to y-axis.
 	    set x $xanch
@@ -2936,18 +2936,18 @@ proc ::CanvasDraw::ConstrainedDrag {x y xanch yanch} {
 	} else { 
 	
 	    # Do the same analysis in the coordinate system rotated 45 degree CCW.
-	    set deltaxprim [expr 1./sqrt(2.0) * ($deltax + $deltay)]
-	    set deltayprim [expr 1./sqrt(2.0) * (-$deltax + $deltay)]
-	    if {[expr abs($deltayprim/($deltaxprim + 0.5))] <= $kTan225} {
+	    set deltaxprim [expr {1./sqrt(2.0) * ($deltax + $deltay)}]
+	    set deltayprim [expr {1./sqrt(2.0) * (-$deltax + $deltay)}]
+	    if {[expr {abs($deltayprim/($deltaxprim + 0.5))}] <= $kTan225} {
 		
 		# constrain to x'-axis.
-		set x [expr $xanch + ($deltax + $deltay)/2.0]
-		set y [expr $yanch + $x - $xanch]
+		set x [expr {$xanch + ($deltax + $deltay)/2.0}]
+		set y [expr {$yanch + $x - $xanch}]
 	    } else {
 		
 		# constrain to y'-axis.
-		set y [expr $yanch + (-$deltax + $deltay)/2.0]
-		set x [expr $xanch - $y + $yanch]
+		set y [expr {$yanch + (-$deltax + $deltay)/2.0}]
+		set x [expr {$xanch - $y + $yanch}]
 	    }
 	    return [list $x $y]
 	}
@@ -2981,21 +2981,21 @@ proc ::CanvasDraw::SpeechBubbleCmd {wcan bbox args} {
     set c 40
     set d 20
     foreach {left top right bottom} $bbox break
-    set midw [expr ($right+$left)/2.0]
-    set midh [expr ($bottom+$top)/2.0]
+    set midw [expr {($right+$left)/2.0}]
+    set midh [expr {($bottom+$top)/2.0}]
     set coords [list  \
-      [expr $left-$a] [expr $top-$a]  \
-      $midw [expr $top-$b]  \
-      [expr $right+$a] [expr $top-$a]  \
-      [expr $right+$b] $midh  \
-      [expr $right+$a] [expr $bottom+$a]  \
-      [expr $right+$a] [expr $bottom+$c]  \
-      [expr $right+$a] [expr $bottom+$c]  \
-      [expr $right-$d+10] [expr $bottom+$a]  \
-      [expr $right-$d] [expr $bottom+$a]  \
-      $midw [expr $bottom+$b]  \
-      [expr $left-$a] [expr $bottom+$a]  \
-      [expr $left-$b] $midh  \
+      [expr {$left-$a}] [expr {$top-$a}]  \
+      $midw [expr {$top-$b}]  \
+      [expr {$right+$a}] [expr {$top-$a}]  \
+      [expr {$right+$b}] $midh  \
+      [expr {$right+$a}] [expr {$bottom+$a}]  \
+      [expr {$right+$a}] [expr {$bottom+$c}]  \
+      [expr {$right+$a}] [expr {$bottom+$c}]  \
+      [expr {$right-$d+10}] [expr {$bottom+$a}]  \
+      [expr {$right-$d}] [expr {$bottom+$a}]  \
+      $midw [expr {$bottom+$b}]  \
+      [expr {$left-$a}] [expr {$bottom+$a}]  \
+      [expr {$left-$b}] $midh  \
     ]
     array set optsArr {-outline black -fill white -smooth 1 -splinesteps 10}
     array set optsArr $args
@@ -3023,11 +3023,11 @@ proc ::CanvasDraw::StripClosePoints {coords dmax} {
     }
     set tmp [lrange $coords 0 1]
     for {set i1 0; set i2 2} {$i2 < $len} { } {
-	foreach {x1 y1} [lrange $coords $i1 [expr $i1+1]] break
-	foreach {x2 y2} [lrange $coords $i2 [expr $i2+1]] break
-	set d [expr hypot($x2-$x1, $y2-$y1)]
+	foreach {x1 y1} [lrange $coords $i1 [expr {$i1+1}]] break
+	foreach {x2 y2} [lrange $coords $i2 [expr {$i2+1}]] break
+	set d [expr {hypot($x2-$x1, $y2-$y1)}]
 	
-	if {$i2 < [expr $len - 2]} {
+	if {$i2 < [expr {$len - 2}]} {
 	    
 	    # To accept or not to accept.
 	    if {$d < $dmax} {
@@ -3056,9 +3056,9 @@ proc ::CanvasDraw::GetDistList {coords} {
     set dlist {}
     set len [llength $coords]
     for {set i1 0; set i2 2} {$i2 < $len} {incr i1 2; incr i2 2} {
-	foreach {x1 y1} [lrange $coords $i1 [expr $i1+1]] break
-	foreach {x2 y2} [lrange $coords $i2 [expr $i2+1]] break
-	lappend dlist [expr hypot($x2-$x1, $y2-$y1)]
+	foreach {x1 y1} [lrange $coords $i1 [expr {$i1+1}]] break
+	foreach {x2 y2} [lrange $coords $i2 [expr {$i2+1}]] break
+	lappend dlist [expr {hypot($x2-$x1, $y2-$y1)}]
     }
     return $dlist
 }
@@ -3083,12 +3083,12 @@ proc ::CanvasDraw::StripExtremeRadius {coords rmin rmax} {
     }
     set tmp [lrange $coords 0 1]
     for {set i1 0; set i2 2; set i3 4} {$i3 < $len} { } {
-	foreach {x1 y1} [lrange $coords $i1 [expr $i1+1]] break
-	foreach {x2 y2} [lrange $coords $i2 [expr $i2+1]] break
-	foreach {x3 y3} [lrange $coords $i3 [expr $i3+1]] break
+	foreach {x1 y1} [lrange $coords $i1 [expr {$i1+1}]] break
+	foreach {x2 y2} [lrange $coords $i2 [expr {$i2+1}]] break
+	foreach {x3 y3} [lrange $coords $i3 [expr {$i3+1}]] break
 	set r [ThreePointRadius [list $x1 $y1 $x2 $y2 $x3 $y3]]
 	
-	if {$i2 < [expr $len - 4]} {
+	if {$i2 < [expr {$len - 4}]} {
 	    
 	    # To accept or not to accept.
 	    if {($r > $rmax) || ($r < $rmin)} {
@@ -3113,10 +3113,10 @@ proc ::CanvasDraw::StripExtremeRadius {coords rmin rmax} {
 proc ::CanvasDraw::GetRadiusList {coords} {
     
     set rlist {}
-    set imax [expr [llength $coords] - 4]
+    set imax [expr {[llength $coords] - 4}]
     for {set i 0} {$i < $imax} {incr i 2} {
 	lappend rlist [ThreePointRadius  \
-	  [lrange $coords $i [expr $i + 5]]]
+	  [lrange $coords $i [expr {$i + 5}]]]
     }
     return $rlist
 }
@@ -3135,23 +3135,23 @@ proc ::CanvasDraw::GetRadiusList {coords} {
 proc ::CanvasDraw::ThreePointRadius {p} {
     
     foreach {x1 y1 x2 y2 x3 y3} $p break
-    set a [expr $x1 - $x2]
-    set b [expr $y1 - $y2]
-    set c [expr $x1 - $x3]
-    set d [expr $y1 - $y3]
-    set e [expr 0.5 * ($x1*$x1 + $y1*$y1 - ($x2*$x2 + $y2*$y2))]
-    set f [expr 0.5 * ($x1*$x1 + $y1*$y1 - ($x3*$x3 + $y3*$y3))]
-    set det [expr $a*$d - $b*$c]
-    if {[expr abs($det)] < 1e-16} {
+    set a [expr {$x1 - $x2}]
+    set b [expr {$y1 - $y2}]
+    set c [expr {$x1 - $x3}]
+    set d [expr {$y1 - $y3}]
+    set e [expr {0.5 * ($x1*$x1 + $y1*$y1 - ($x2*$x2 + $y2*$y2))}]
+    set f [expr {0.5 * ($x1*$x1 + $y1*$y1 - ($x3*$x3 + $y3*$y3))}]
+    set det [expr {$a*$d - $b*$c}]
+    if {[expr {abs($det)}] < 1e-16} {
 	
 	# Straight line.
 	return 1e+16
     }
-    set rx [expr ($d*$e - $b*$f)/$det]
-    set ry [expr ($a*$f - $c*$e)/$det]
-    set dx [expr $rx - $x1]
-    set dy [expr $ry - $y1]
-    return [expr sqrt($dx*$dx + $dy*$dy)]
+    set rx [expr {($d*$e - $b*$f)/$det}]
+    set ry [expr {($a*$f - $c*$e)/$det}]
+    set dx [expr {$rx - $x1}]
+    set dy [expr {$ry - $y1}]
+    return [expr {sqrt($dx*$dx + $dy*$dy)}]
 }
 
 # CanvasDraw::EvalCommandList --
