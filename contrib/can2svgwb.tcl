@@ -259,7 +259,7 @@ proc can2svgwb::Parsescale {cmd} {
     if {($xOrig = 0.0) && ($yOrig = 0.0)} {
 	set xmllist [list [wrapper::createtag transform -attrlist $attrlist]]
     } else {
-	set xml1 [parsemove [list move $id [expr -1*$xOrig] [expr -1*$yOrig]]]
+	set xml1 [parsemove [list move $id [expr {-1*$xOrig}] [expr {-1*$yOrig}]]]
 	set xml2 [list [wrapper::createtag transform -attrlist $attrlist]]
 	set xml3 [parsemove [list move $id $xOrig $yOrig]]
 	set xmllist [concat $xml1 $xml2 $xml3]

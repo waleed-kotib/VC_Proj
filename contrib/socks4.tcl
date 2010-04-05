@@ -153,13 +153,13 @@ proc socks4::response {token} {
     set addr ""
     foreach n [list $i0 $i1 $i2 $i3] {
 	# Translate to unsigned!
-	append addr [expr ( $n + 0x100 ) % 0x100]
+	append addr [expr {( $n + 0x100 ) % 0x100}]
 	if {$n <= 2} {
 	    append addr .
 	}
     }
     # Translate to unsigned!
-    set port [expr ( $port + 0x10000 ) % 0x10000]
+    set port [expr {( $port + 0x10000 ) % 0x10000}]
     set state(bnd_port) $port
     set state(bnd_addr) $addr
     

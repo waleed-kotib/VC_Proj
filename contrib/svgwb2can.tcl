@@ -159,7 +159,7 @@ proc svgwb2can::parseconfigure {xmllist args} {
 		if {$idx < 1} {
 		    set idx end
 		}
-		set coo [lrange $cmd 2 [expr $idx - 1]]
+		set coo [lrange $cmd 2 [expr {$idx - 1}]]
 		lappend cmdList [list coords $id $coo]
 	    }
 	}

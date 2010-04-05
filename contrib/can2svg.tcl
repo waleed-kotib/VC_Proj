@@ -96,7 +96,7 @@ namespace eval can2svg {
     variable defaultFont {Helvetica 12}
 
     variable pi 3.14159265359
-    variable anglesToRadians [expr $pi/180.0]
+    variable anglesToRadians [expr {$pi/180.0}]
     variable grayStipples {gray75 gray50 gray25 gray12}
         
     # Make 4x4 squares. Perhaps could be improved.
@@ -219,7 +219,7 @@ proc can2svg::svgasxmllist {cmd args} {
 	set ind end
 	set opts [list]
     } else {
-	set ind [expr $indopt - 1]
+	set ind [expr {$indopt - 1}]
 	set opts [lrange $rest $indopt end]
     }
     
@@ -352,7 +352,7 @@ proc can2svg::svgasxmllist {cmd args} {
 	oval {
 	    set attr [CoordsToAttr $type $coo $opts elem]	    
 	    foreach {x y w h} [NormalizeRectCoords $coo] break
-	    if {[expr $w == $h] && !$argsA(-ovalasellipse)} {
+	    if {[expr {$w == $h}] && !$argsA(-ovalasellipse)} {
 		# set elem "circle";# circle needs an r: not an rx & ry
 		set elem "ellipse"
 	    } else {
@@ -414,11 +414,11 @@ proc can2svg::svgasxmllist {cmd args} {
 		    set chdata [join $newlines \n]
 		    if {!$argsA(-allownewlines) || \
 		      ([llength $newlines] > [llength $lines])} {
-			set nlines [expr [regexp -all "\n" $chdata] + 1]
+			set nlines [expr {[regexp -all "\n" $chdata] + 1}]
 		    }
 		} else {
 		    if {!$argsA(-allownewlines)} {
-			set nlines [expr [regexp -all "\n" $chdata] + 1]
+			set nlines [expr {[regexp -all "\n" $chdata] + 1}]
 		    }
 		}
 	    }
@@ -523,8 +523,8 @@ proc can2svg::CoordsToAttr {type coo opts svgElementVar} {
 	    set elem "ellipse"
 	    foreach {x y w h} [NormalizeRectCoords $coo] break
 	    set attr [list  \
-	      "cx" [expr $x + $w/2.0] "cy" [expr $y + $h/2.0]  \
-	      "rx" [expr $w/2.0]      "ry" [expr $h/2.0]]
+	      "cx" [expr {$x + $w/2.0}] "cy" [expr {$y + $h/2.0}]  \
+	      "rx" [expr {$w/2.0}]      "ry" [expr {$h/2.0}]]
 	}
 	polygon {
 	    if {$haveSpline} {
@@ -570,32 +570,32 @@ proc can2svg::MakeArcPath {coo opts} {
 
     # Extract center and radius from bounding box.
     foreach {x1 y1 x2 y2} $coo break
-    set cx [expr ($x1 + $x2)/2.0]
-    set cy [expr ($y1 + $y2)/2.0]
-    set rx [expr abs($x1 - $x2)/2.0]
-    set ry [expr abs($y1 - $y2)/2.0]
+    set cx [expr {($x1 + $x2)/2.0}]
+    set cy [expr {($y1 + $y2)/2.0}]
+    set rx [expr {abs($x1 - $x2)/2.0}]
+    set ry [expr {abs($y1 - $y2)/2.0}]
 
-    set start  [expr $anglesToRadians * $optA(-start)]
-    set extent [expr $anglesToRadians * $optA(-extent)]
+    set start  [expr {$anglesToRadians * $optA(-start)}]
+    set extent [expr {$anglesToRadians * $optA(-extent)}]
 
     # NOTE: direction of angles are opposite for Tk and SVG!    
-    set theta1 [expr -1*$start]
-    set delta  [expr -1*$extent]
-    set theta2 [expr $theta1 + $delta]
+    set theta1 [expr {-1*$start}]
+    set delta  [expr {-1*$extent}]
+    set theta2 [expr {$theta1 + $delta}]
     set phi 0.0
 
     # F.6.4 Conversion from center to endpoint parameterization.
-    set x1 [expr $cx + $rx * cos($theta1) * cos($phi) -  \
-      $ry * sin($theta1) * sin($phi)]
-    set y1 [expr $cy + $rx * cos($theta1) * sin($phi) +  \
-      $ry * sin($theta1) * cos($phi)]
-    set x2 [expr $cx + $rx * cos($theta2) * cos($phi) -  \
-      $ry * sin($theta2) * sin($phi)]
-    set y2 [expr $cy + $rx * cos($theta2) * sin($phi) +  \
-      $ry * sin($theta2) * cos($phi)]
+    set x1 [expr {$cx + $rx * cos($theta1) * cos($phi) -  \
+      $ry * sin($theta1) * sin($phi)}]
+    set y1 [expr {$cy + $rx * cos($theta1) * sin($phi) +  \
+      $ry * sin($theta1) * cos($phi)}]
+    set x2 [expr {$cx + $rx * cos($theta2) * cos($phi) -  \
+      $ry * sin($theta2) * sin($phi)}]
+    set y2 [expr {$cy + $rx * cos($theta2) * sin($phi) +  \
+      $ry * sin($theta2) * cos($phi)}]
     
-    set fa [expr {abs($delta) > $pi} ? 1 : 0]
-    set fs [expr {$delta > 0.0} ? 1 : 0]
+    set fa [expr {abs($delta) > $pi ? 1 : 0}]
+    set fs [expr {$delta > 0.0 ? 1 : 0}]
     
     set data [format "M %.1f %.1f A" $x1 $y1]
     append data [format " %.1f %.1f %.1f %1d %1d %.1f %.1f"  \
@@ -626,24 +626,24 @@ proc can2svg::MakeArcPathNonA {coo opts} {
     array set optA $opts
     
     foreach {x1 y1 x2 y2} $coo break
-    set cx [expr ($x1 + $x2)/2.0]
-    set cy [expr ($y1 + $y2)/2.0]
-    set rx [expr abs($x1 - $x2)/2.0]
-    set ry [expr abs($y1 - $y2)/2.0]
-    set rmin [expr $rx > $ry ? $ry : $rx]
+    set cx [expr {($x1 + $x2)/2.0}]
+    set cy [expr {($y1 + $y2)/2.0}]
+    set rx [expr {abs($x1 - $x2)/2.0}]
+    set ry [expr {abs($y1 - $y2)/2.0}]
+    set rmin [expr {$rx > $ry ? $ry : $rx}]
     
     # This approximation gives a maximum half pixel error.
-    set deltaPhi [expr 2.0/sqrt($rmin)]
-    set extent   [expr $anglesToRadians * $optA(-extent)]
-    set start    [expr $anglesToRadians * $optA(-start)]
-    set nsteps   [expr int(abs($extent)/$deltaPhi) + 2]
-    set delta    [expr $extent/$nsteps]
+    set deltaPhi [expr {2.0/sqrt($rmin)}]
+    set extent   [expr {$anglesToRadians * $optA(-extent)}]
+    set start    [expr {$anglesToRadians * $optA(-start)}]
+    set nsteps   [expr {int(abs($extent)/$deltaPhi) + 2}]
+    set delta    [expr {$extent/$nsteps}]
     set data [format "M %.1f %.1f L"  \
-      [expr $cx + $rx*cos($start)] [expr $cy - $ry*sin($start)]]
+      [expr {$cx + $rx*cos($start)}] [expr {$cy - $ry*sin($start)}]]
     for {set i 0} {$i <= $nsteps} {incr i} {
-	set phi [expr $start + $i * $delta]
+	set phi [expr {$start + $i * $delta}]
 	append data [format " %.1f %.1f"  \
-	  [expr $cx + $rx*cos($phi)] [expr $cy - $ry*sin($phi)]]
+	  [expr {$cx + $rx*cos($phi)}] [expr {$cy - $ry*sin($phi)}]]
     }
     if {[info exists optA(-style)]} {
 	
@@ -836,7 +836,7 @@ proc can2svg::MakeStyleList {type opts args} {
 		set dashOrig $dash
 		set dash {}
 		foreach num $dashOrig {
-		    lappend dash [expr int($width * $num)]
+		    lappend dash [expr {int($width * $num)}]
 		}
 	    }
 	    set styleArr(stroke-dasharray) [string trim $dash]
@@ -867,7 +867,7 @@ proc can2svg::FormatColorName {value} {
 	
 	    # winfo rgb . white -> 65535 65535 65535
 	    foreach rgb [winfo rgb . $value] {
-		lappend rgbx [expr $rgb >> 8]
+		lappend rgbx [expr {$rgb >> 8}]
 	    }
 	    set col [eval {format "#%02x%02x%02x"} $rgbx]
 	}
@@ -901,7 +901,7 @@ proc can2svg::MakeFontStyleList {fontDesc} {
 	    # pixels (actually user units)
 	    set funit px
 	}	
-	set styleArr(font-size) "[expr abs($fsize)]$funit"
+	set styleArr(font-size) "[expr {abs($fsize)}]$funit"
 	if {[font config $font -slant] == "italic"} {
 	    set styleArr(font-style) italic
 	}
@@ -926,7 +926,7 @@ proc can2svg::MakeFontStyleList {fontDesc} {
 		# pixels (actually user units)
 		set funit px
 	    }
-	    set styleArr(font-size) "[expr abs($fsize)]$funit"
+	    set styleArr(font-size) "[expr {abs($fsize)}]$funit"
 	}
 	if {[llength $fontDesc] > 2} {
 	    set tkstyle [lindex $fontDesc 2]
@@ -973,7 +973,7 @@ proc can2svg::SplitWrappedLines {line font wgtWidth} {
 
      # Go back till we find a nonwhite char
      set char [string index $line $endchar]
-     set default [expr $endchar -1]
+     set default [expr {$endchar -1}]
      while {[BreakChar $char] == 0} {
 	if {$endchar == 0} {
 	    # we got to the front without breaking, so break midword
@@ -983,7 +983,7 @@ proc can2svg::SplitWrappedLines {line font wgtWidth} {
 	set char [string index $line [incr endchar -1]]
      }
      set first [string range $line 0 $endchar]
-     set rest [string range $line [expr $endchar+1] end]
+     set rest [string range $line [expr {$endchar+1}] end]
      return [concat [list $first] [SplitWrappedLines $rest $font $wgtWidth]]
 }
 
@@ -1091,36 +1091,36 @@ proc can2svg::ImageCoordsToAttrBU {coo opts} {
 	    set y $y0
 	}
 	n {
-	    set x [expr $x0 - $w/2.0]
+	    set x [expr {$x0 - $w/2.0}]
 	    set y $y0
 	}
 	ne {
-	    set x [expr $x0 - $w]
+	    set x [expr {$x0 - $w}]
 	    set y $y0
 	}
 	e {
 	    set x $x0
-	    set y [expr $y0 - $h/2.0]
+	    set y [expr {$y0 - $h/2.0}]
 	}
 	se {
-	    set x [expr $x0 - $w]
-	    set y [expr $y0 - $h]
+	    set x [expr {$x0 - $w}]
+	    set y [expr {$y0 - $h}]
 	}
 	s {
-	    set x [expr $x0 - $w/2.0]
-	    set y [expr $y0 - $h]
+	    set x [expr {$x0 - $w/2.0}]
+	    set y [expr {$y0 - $h}]
 	}
 	sw {
 	    set x $x0
-	    set y [expr $y0 - $h]
+	    set y [expr {$y0 - $h}]
 	} 
 	w {
 	    set x $x0
-	    set y [expr $y0 - $h/2.0]
+	    set y [expr {$y0 - $h/2.0}]
 	}
 	center {
-	    set x [expr $x0 - $w/2.0]
-	    set y [expr $y0 - $h/2.0]
+	    set x [expr {$x0 - $w/2.0}]
+	    set y [expr {$y0 - $h/2.0}]
 	}
     }
     set attrList [list "x" $x "y" $y "width" $w "height" $h]
@@ -1166,39 +1166,39 @@ proc can2svg::GetTextSVGCoords {coo anchor chdata theFont nlines} {
     switch -- $anchor {
 	nw {
 	    set xbase $x
-	    set ybase [expr $y + $ascent]
+	    set ybase [expr {$y + $ascent}]
 	}
 	w {
 	    set xbase $x
-	    set ybase [expr $y - $nlines*$lineSpace/2.0 + $ascent]
+	    set ybase [expr {$y - $nlines*$lineSpace/2.0 + $ascent}]
 	}
 	sw {
 	    set xbase $x
-	    set ybase [expr $y - $nlines*$lineSpace + $ascent]
+	    set ybase [expr {$y - $nlines*$lineSpace + $ascent}]
 	}
 	s {
-	    set xbase [expr $x - $textWidth/2.0]
-	    set ybase [expr $y - $nlines*$lineSpace + $ascent]
+	    set xbase [expr {$x - $textWidth/2.0}]
+	    set ybase [expr {$y - $nlines*$lineSpace + $ascent}]
 	}
 	se {
-	    set xbase [expr $x - $textWidth]
-	    set ybase [expr $y - $nlines*$lineSpace + $ascent]
+	    set xbase [expr {$x - $textWidth}]
+	    set ybase [expr {$y - $nlines*$lineSpace + $ascent}]
 	}
 	e {
-	    set xbase [expr $x - $textWidth]
-	    set ybase [expr $y - $nlines*$lineSpace/2.0 + $ascent]
+	    set xbase [expr {$x - $textWidth}]
+	    set ybase [expr {$y - $nlines*$lineSpace/2.0 + $ascent}]
 	}
 	ne {
-	    set xbase [expr $x - $textWidth]
-	    set ybase [expr $y + $ascent]
+	    set xbase [expr {$x - $textWidth}]
+	    set ybase [expr {$y + $ascent}]
 	} 
 	n {
-	    set xbase [expr $x - $textWidth/2.0]
-	    set ybase [expr $y + $ascent]
+	    set xbase [expr {$x - $textWidth/2.0}]
+	    set ybase [expr {$y + $ascent}]
 	}
 	center {
-	    set xbase [expr $x - $textWidth/2.0]
-	    set ybase [expr $y - $nlines*$lineSpace/2.0 + $ascent]
+	    set xbase [expr {$x - $textWidth/2.0}]
+	    set ybase [expr {$y - $nlines*$lineSpace/2.0 + $ascent}]
 	}
     }
     
@@ -1218,7 +1218,7 @@ proc can2svg::GetTextSVGCoords {coo anchor chdata theFont nlines} {
 
 proc can2svg::ParseSplineToPath {type coo} {
     
-    set npts [expr [llength $coo]/2]
+    set npts [expr {[llength $coo]/2}]
     
     # line is open ended while the polygon must be closed.
     # Need to construct a closed smooth polygon with path instructions.
@@ -1235,14 +1235,14 @@ proc can2svg::ParseSplineToPath {type coo} {
 	}
 	default {
 	    if {[string equal $type "polygon"]} {
-		set x0s [expr ([lindex $coo 0] + [lindex $coo end-1])/2.]
-		set y0s [expr ([lindex $coo 1] + [lindex $coo end])/2.]
+		set x0s [expr {([lindex $coo 0] + [lindex $coo end-1])/2.}]
+		set y0s [expr {([lindex $coo 1] + [lindex $coo end])/2.}]
 		set data "M $x0s $y0s"
 		    
 		# Add Q1 and Q2 points.
 		append data " Q [lrange $coo 0 1]"
-		set x0 [expr ([lindex $coo 0] + [lindex $coo 2])/2.]
-		set y0 [expr ([lindex $coo 1] + [lindex $coo 3])/2.]
+		set x0 [expr {([lindex $coo 0] + [lindex $coo 2])/2.}]
+		set y0 [expr {([lindex $coo 1] + [lindex $coo 3])/2.}]
 		append data " $x0 $y0"
 		set xctrlp [lindex $coo 2]
 		set yctrlp [lindex $coo 3]
@@ -1252,8 +1252,8 @@ proc can2svg::ParseSplineToPath {type coo} {
 		    
 		# Add Q1 and Q2 points.
 		append data " Q [lrange $coo 2 3]"
-		set x0 [expr ([lindex $coo 2] + [lindex $coo 4])/2.]
-		set y0 [expr ([lindex $coo 3] + [lindex $coo 5])/2.]
+		set x0 [expr {([lindex $coo 2] + [lindex $coo 4])/2.}]
+		set y0 [expr {([lindex $coo 3] + [lindex $coo 5])/2.}]
 		append data " $x0 $y0"
 		set xctrlp [lindex $coo 4]
 		set yctrlp [lindex $coo 5]
@@ -1265,16 +1265,16 @@ proc can2svg::ParseSplineToPath {type coo} {
 		
 		# The T point is the midpoint between the
 		# two control points.
-		set x0 [expr ($x + $xctrlp)/2.0]
-		set y0 [expr ($y + $yctrlp)/2.0]
+		set x0 [expr {($x + $xctrlp)/2.0}]
+		set y0 [expr {($y + $yctrlp)/2.0}]
 		set xctrlp $x
 		set yctrlp $y
 		append data " $x0 $y0"
 		#puts "data=$data"
 	    }
 	    if {[string equal $type "polygon"]} {
-		set x0 [expr ([lindex $coo end-1] + $xctrlp)/2.0]
-		set y0 [expr ([lindex $coo end] + $yctrlp)/2.0]
+		set x0 [expr {([lindex $coo end-1] + $xctrlp)/2.0}]
+		set y0 [expr {([lindex $coo end] + $yctrlp)/2.0}]
 		append data " $x0 $y0"
 		append data " $x0s $y0s"
 	    } else {
@@ -1335,11 +1335,11 @@ proc can2svg::MakeArrowMarker {a b c col} {
     
     # Figure out the order of all %s substitutions.
     set markerXML [format $formatArrowMarker $idKey  \
-      $b [expr 2*$c] 0 $c  \
-      $c $b $a $c $b [expr 2*$c] $col $col]
+      $b [expr {2*$c}] 0 $c  \
+      $c $b $a $c $b [expr {2*$c}] $col $col]
     set markerLastXML [format $formatArrowMarkerLast $idKeyLast  \
-      $b [expr 2*$c] $b $c \
-      $b $c [expr 2*$c] [expr $b-$a] $c $col $col]
+      $b [expr {2*$c}] $b $c \
+      $b $c [expr {2*$c}] [expr {$b-$a}] $c $col $col]
     
     return [list $markerXML $markerLastXML]
 }
@@ -1393,10 +1393,10 @@ proc can2svg::MapEmptyToNone {val} {
 proc can2svg::NormalizeRectCoords {coo} {
     
     foreach {x1 y1 x2 y2} $coo {}
-    return [list [expr $x2 > $x1 ? $x1 : $x2]  \
-      [expr $y2 > $y1 ? $y1 : $y2]  \
-      [expr abs($x1-$x2)]  \
-      [expr abs($y1-$y2)]]
+    return [list [expr {$x2 > $x1 ? $x1 : $x2}]  \
+      [expr {$y2 > $y1 ? $y1 : $y2}]  \
+      [expr {abs($x1-$x2)}]  \
+      [expr {abs($y1-$y2)}]]
 }
 
 # can2svg::makedocument --

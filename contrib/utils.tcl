@@ -71,7 +71,7 @@ proc lprune {listName elem} {
 proc lrevert {args} {
     set tmp [list]
     set args [lindex $args 0]
-    for {set i [expr [llength $args] - 1]} {$i >= 0} {incr i -1} {
+    for {set i [expr {[llength $args] - 1}]} {$i >= 0} {incr i -1} {
 	lappend tmp [lindex $args $i]
     }
     return $tmp

@@ -272,17 +272,17 @@ IRULECFGAAA7}
     set widgetGlobals(vol_bg)      #adadad
     set widgetGlobals(hvol_top)    8
     set widgetGlobals(hvol_bot)    7
-    set widgetGlobals(hvol_scaleh) [expr $widgetGlobals(vol_h) -  \
-      $widgetGlobals(hvol_top) - $widgetGlobals(hvol_bot)]
+    set widgetGlobals(hvol_scaleh) [expr {$widgetGlobals(vol_h) -  \
+      $widgetGlobals(hvol_top) - $widgetGlobals(hvol_bot)}]
     
     # Depending on the volume percentage, show different loud speakers on the
     # volume button. Here are the boundaries in pixels found from the 
     # percentages. Pixels relative top of volume canvas. Limits at 25% and 75%.
     
-    set widgetGlobals(hvol_off) [expr int($widgetGlobals(hvol_top) +  \
-      0.75 * $widgetGlobals(hvol_scaleh))]
-    set widgetGlobals(hvol_full) [expr int($widgetGlobals(hvol_top) +  \
-      0.25 * $widgetGlobals(hvol_scaleh))]
+    set widgetGlobals(hvol_off) [expr {int($widgetGlobals(hvol_top) +  \
+      0.75 * $widgetGlobals(hvol_scaleh))}]
+    set widgetGlobals(hvol_full) [expr {int($widgetGlobals(hvol_top) +  \
+      0.25 * $widgetGlobals(hvol_scaleh))}]
     
     # The slide ruler as canvas drawing commands plus black frame.
     set widgetGlobals(todraw) {
@@ -300,7 +300,7 @@ IRULECFGAAA7}
 	line tline12 #adadad {$lmark 12 $rmark 12}  \
 	line tline13 #adadad {$lmark 13 $rmark 13}  \
 	line tline14 #9c9c9c {$lmark 14 $rmark 14}  \
-	line tfr0 #000000 {0 0 [expr $width-1] 0 [expr $width-1] 15 0 15 0 0} \
+	line tfr0 #000000 {0 0 [expr {$width-1}] 0 [expr {$width-1}] 15 0 15 0 0} \
     }
     
     # The icons to draw. Note that 'qtmc_vol' is drawn last on top of the other.
@@ -315,11 +315,11 @@ IRULECFGAAA7}
 	image tstop         qtmc_stop          {$xplay 1} nw \
 	image tplaypu       qtmc_play_push     {$xplay 1} nw \
 	image tplay         qtmc_play          {$xplay 1} nw \
-	image tleft         qtmc_left          {[expr $xplay+14] 1} nw \
-	image trewpu        qtmc_rew_push      {[expr $rmark+7] 1} nw \
+	image tleft         qtmc_left          {[expr {$xplay+14}] 1} nw \
+	image trewpu        qtmc_rew_push      {[expr {$rmark+7}] 1} nw \
 	image trew          qtmc_rew           {$rmark 1} nw \
-	image tffpu         qtmc_ff_push       {[expr $rmark+21] 1} nw \
-	image tff           qtmc_ff            {[expr $rmark+21] 1} nw \
+	image tffpu         qtmc_ff_push       {[expr {$rmark+21}] 1} nw \
+	image tff           qtmc_ff            {[expr {$rmark+21}] 1} nw \
 	image tdragpu       qtmc_drag_push     {$xmark 1} n  \
 	image tdrag         qtmc_drag          {$xmark 1} n  \
     }
@@ -680,8 +680,8 @@ proc ::moviecontroller::Configure { w args }  {
     # Only for the snack sound binding. Necessary to do after 'Draw' since
     # we need the 'maxmin' value.
     if {[llength $options(-snacksound)] > 0}  {
-	set wlocals(afterms) [expr int((1000. * $wlocals(lengthSecs))/ \
-		$wlocals(maxmin))]
+	set wlocals(afterms) [expr {int((1000. * $wlocals(lengthSecs))/ \
+		$wlocals(maxmin))}]
 	if {$wlocals(afterms) < 500} {
 	    set wlocals(afterms) 500
 	}
@@ -711,7 +711,7 @@ proc ::moviecontroller::ConfigurePercent  { w per }  {
 	set per 100
     }
     set options(-percent) $per
-    set xmark [expr $wlocals(min) + $wlocals(maxmin) * $per/100.0]
+    set xmark [expr {$wlocals(min) + $wlocals(maxmin) * $per/100.0}]
     eval $widgets(canvas) coords tdrag $xmark 1
     eval $widgets(canvas) coords tdragpu $xmark 1
 
@@ -758,17 +758,17 @@ proc ::moviecontroller::Draw { w }  {
     set percent $options(-percent)
     
     if {$options(-audio)}  {
-	set xplay [expr $widgetGlobals(w_vol) + 1]
+	set xplay [expr {$widgetGlobals(w_vol) + 1}]
     } else  {
 	set xplay 1
     }
-    set lmark [expr $xplay + $widgetGlobals(w_play)]
-    set rmark [expr $width - ($widgetGlobals(w_rew) + $widgetGlobals(w_ff) + 1)]
-    set xmark [expr $lmark + ($rmark - $lmark)*$percent/100.0]
+    set lmark [expr {$xplay + $widgetGlobals(w_play)}]
+    set rmark [expr {$width - ($widgetGlobals(w_rew) + $widgetGlobals(w_ff) + 1)}]
+    set xmark [expr {$lmark + ($rmark - $lmark)*$percent/100.0}]
     set wlocals(min) $lmark
     set wlocals(max) $rmark
     set wlocals(xmark) $xmark
-    set wlocals(maxmin) [expr $wlocals(max) - $wlocals(min)]
+    set wlocals(maxmin) [expr {$wlocals(max) - $wlocals(min)}]
 
     # ...and finally, the actual drawing. Only first time.
     if {![winfo exists $widgets(canvas)]}  {
@@ -868,7 +868,7 @@ proc ::moviecontroller::DrawVolumeScale { w }  {
 
     set volume $options(-volume)
     set ytop $widgetGlobals(hvol_top)
-    set ybot [expr $widgetGlobals(vol_h) - $widgetGlobals(hvol_bot)]
+    set ybot [expr {$widgetGlobals(vol_h) - $widgetGlobals(hvol_bot)}]
      
     toplevel $widgets(volctrltop) -bg $widgetGlobals(vol_bg)
     wm overrideredirect $widgets(volctrltop) 1
@@ -884,7 +884,7 @@ proc ::moviecontroller::DrawVolumeScale { w }  {
     
     $widgets(volctrlcan) create image 0 0  \
       -image $widgetGlobals(qtmcvol_win) -anchor nw
-    $widgets(volctrlcan) create image 1 [expr $widgetGlobals(vol_h)/2]  \
+    $widgets(volctrlcan) create image 1 [expr {$widgetGlobals(vol_h)/2}]  \
       -image $widgetGlobals(qtmcvol_drag) -tags tdrag -anchor w
     $widgets(volctrlcan) bind tdrag <B1-Motion>  \
       [list ::moviecontroller::VolDrag $w %x]
@@ -920,7 +920,7 @@ proc ::moviecontroller::DragInit { w x }  {
     
     # Save the x offset between the mouse and the center of the mark 
     # (a few pixels).
-    set wlocals(xoff) [expr $x - $wlocals(xmark)]
+    set wlocals(xoff) [expr {$x - $wlocals(xmark)}]
     
     # If we've got a snack sound playing, cancel the scheduling of the drag
     # button.
@@ -948,28 +948,28 @@ proc ::moviecontroller::Drag { w x }  {
 
     # Mouse moved by 'dx' without any min/max constraints.
     set xanch $wlocals(anchor)
-    set dx [expr $x - $xanch]
+    set dx [expr {$x - $xanch}]
     set wlocals(anchor) $x
     
     # The new mark position.
     set wlocals(xmark) [lindex [$widgets(canvas) coords tdrag] 0]
-    set newxmark [expr $wlocals(xmark) + $dx]
+    set newxmark [expr {$wlocals(xmark) + $dx}]
     
     # Take care of the max/min values.
     
     if {$newxmark > $wlocals(max)}  {
-	set dx [expr $wlocals(max) - $wlocals(xmark)]
-	set wlocals(anchor) [expr $wlocals(max) + $wlocals(xoff)]
+	set dx [expr {$wlocals(max) - $wlocals(xmark)}]
+	set wlocals(anchor) [expr {$wlocals(max) + $wlocals(xoff)}]
     } elseif {$newxmark < $wlocals(min)}  {
-	set dx [expr $wlocals(min) - $wlocals(xmark)]
-	set wlocals(anchor) [expr $wlocals(min) + $wlocals(xoff)]
+	set dx [expr {$wlocals(min) - $wlocals(xmark)}]
+	set wlocals(anchor) [expr {$wlocals(min) + $wlocals(xoff)}]
     }
     
     # Move both the normal and the highlighted knob.
     $widgets(canvas) move tdrag $dx 0
     $widgets(canvas) move tdragpu $dx 0
-    set options(-percent) [expr   \
-      100.0 * ($wlocals(xmark) - $wlocals(min))/$wlocals(maxmin)]
+    set options(-percent) [expr {  \
+      100.0 * ($wlocals(xmark) - $wlocals(min))/$wlocals(maxmin)}]
     
     # Any command should be evaluated in the global namespace.   
     if {[llength $options(-command)] > 0} {
@@ -1019,17 +1019,17 @@ proc ::moviecontroller::DragRelease { w x }  {
     if {[llength $options(-snacksound)] > 0} {
 	if {$widgetGlobals(milliSecs)}  {
 	    set wlocals(movieTime)  \
-		    [expr $wlocals(lengthMilliSecs) * $options(-percent)/100.0]
+		    [expr {$wlocals(lengthMilliSecs) * $options(-percent)/100.0}]
 	} else {
 	    set wlocals(movieTime)  \
-		    [expr $wlocals(lengthSecs) * $options(-percent)/100.0]
+		    [expr {$wlocals(lengthSecs) * $options(-percent)/100.0}]
 	}
 	set wlocals(movieTimeStart) $wlocals(movieTime)
 	
 	# If playing start play from this point.
 	if {$wlocals(plays)} {
 	    $wlocals(sound) play -start  \
-	      [expr int($wlocals(lengthSamp) * $options(-percent)/100.0)]  \
+	      [expr {int($wlocals(lengthSamp) * $options(-percent)/100.0)}]  \
 	      -command [list ::moviecontroller::SnackEnd $w $wlocals(sound)] 
 	    if {$widgetGlobals(milliSecs)}  {
 		set wlocals(startTime) [clock clicks -milliseconds]
@@ -1186,15 +1186,15 @@ proc ::moviecontroller::Volume  { w y show }  {
 	}
 
 	# Position the scale so that the volume control is centralized.
-	set yposlow [expr int($widgetGlobals(hvol_bot) +  \
-	  $volume/100.0 * $widgetGlobals(hvol_scaleh))]
+	set yposlow [expr {int($widgetGlobals(hvol_bot) +  \
+	  $volume/100.0 * $widgetGlobals(hvol_scaleh))}]
 	
 	# Keep track of the relative y position of the mc canvas and the
 	# pop up volume canvas; necessary when dragging volume control.
 	
-	set wlocals(yvolrel) [expr $widgetGlobals(vol_h) - $yposlow - 7]
-	set xnw [expr [winfo rootx $w] - 20]
-	set ynw [expr [winfo rooty $w] - $wlocals(yvolrel)]
+	set wlocals(yvolrel) [expr {$widgetGlobals(vol_h) - $yposlow - 7}]
+	set xnw [expr {[winfo rootx $w] - 20}]
+	set ynw [expr {[winfo rooty $w] - $wlocals(yvolrel)}]
 	wm geometry $widgets(volctrltop) +${xnw}+${ynw}
 	wm deiconify $widgets(volctrltop)
 	raise $widgets(volctrltop)
@@ -1235,34 +1235,34 @@ proc ::moviecontroller::VolDrag  { w y }  {
 
     # Mouse moved by 'dy'.
     set yanch $wlocals(volanch)
-    set dy [expr $y - $yanch]
+    set dy [expr {$y - $yanch}]
 
     # Set new anchor point for the volume drag.
     set wlocals(volanch) $y
     
     # Get actual position of the volume drag button.
     set ypos [lindex [$widgets(volctrlcan) coords tdrag] 1]
-    set ybot [expr $widgetGlobals(hvol_top) + $widgetGlobals(hvol_scaleh)]
-    set newymark [expr $ypos + $dy]
+    set ybot [expr {$widgetGlobals(hvol_top) + $widgetGlobals(hvol_scaleh)}]
+    set newymark [expr {$ypos + $dy}]
 
     # Impose min and max constraints. Note: y-axis upside down.
     # It is necessary to translate anchor point to mc canvas coords.
     
     if {$newymark < $widgetGlobals(hvol_top)}  {
-	set dy [expr $widgetGlobals(hvol_top) - $ypos]
+	set dy [expr {$widgetGlobals(hvol_top) - $ypos}]
 	set wlocals(volanch) \
-	  [expr $widgetGlobals(hvol_top) - $wlocals(yvolrel)]
+	  [expr {$widgetGlobals(hvol_top) - $wlocals(yvolrel)}]
     } elseif {$newymark > $ybot}  {
-	set dy [expr $ybot - $ypos]
-	set wlocals(volanch) [expr $ybot - $wlocals(yvolrel)]
+	set dy [expr {$ybot - $ypos}]
+	set wlocals(volanch) [expr {$ybot - $wlocals(yvolrel)}]
     }
     $widgets(volctrlcan) move tdrag 0 $dy    
     
     # Check to see if volume icon needs to be raised to indicate the present
     # volume setting.
     
-    set yvol_off [expr $widgetGlobals(hvol_off) - $wlocals(yvolrel)]
-    set yvol_full [expr $widgetGlobals(hvol_full) - $wlocals(yvolrel)]
+    set yvol_off [expr {$widgetGlobals(hvol_off) - $wlocals(yvolrel)}]
+    set yvol_full [expr {$widgetGlobals(hvol_full) - $wlocals(yvolrel)}]
     if {($y > $yvol_off) && ($wlocals(vol_icon) != 0)} {
 	$widgets(canvas) raise tvoloffpu
 	set wlocals(vol_icon) 0
@@ -1277,7 +1277,7 @@ proc ::moviecontroller::VolDrag  { w y }  {
     
     # Set the actual volume option variable.
     set options(-volume)   \
-      [expr 100.0 * ($ybot - $ypos)/$widgetGlobals(hvol_scaleh)]
+      [expr {100.0 * ($ybot - $ypos)/$widgetGlobals(hvol_scaleh)}]
     
     # Any command should be evaluated in the global namespace.   
     if {[llength $options(-command)] > 0} {
@@ -1311,14 +1311,14 @@ proc ::moviecontroller::PlayCallback  { w }  {
     # and find the percentage from that.
     
     if {$widgetGlobals(milliSecs)}  {
-	set runTime [expr [clock clicks -milliseconds] - $wlocals(startTime)]
-	set wlocals(movieTime) [expr $wlocals(movieTimeStart) + $runTime]
-	set percentage [expr (100.0 * $wlocals(movieTime))/  \
-		$wlocals(lengthMilliSecs)]
+	set runTime [expr {[clock clicks -milliseconds] - $wlocals(startTime)}]
+	set wlocals(movieTime) [expr {$wlocals(movieTimeStart) + $runTime}]
+	set percentage [expr {(100.0 * $wlocals(movieTime))/  \
+		$wlocals(lengthMilliSecs)}]
     } else {
-	set runTime [expr [clock seconds] - $wlocals(startTime)]
-	set wlocals(movieTime) [expr $wlocals(movieTimeStart) + $runTime]
-	set percentage [expr (100.0 * $wlocals(movieTime))/$wlocals(lengthSecs)]
+	set runTime [expr {[clock seconds] - $wlocals(startTime)}]
+	set wlocals(movieTime) [expr {$wlocals(movieTimeStart) + $runTime}]
+	set percentage [expr {(100.0 * $wlocals(movieTime))/$wlocals(lengthSecs)}]
     }
     ConfigurePercent $w $percentage
     
@@ -1345,8 +1345,8 @@ proc ::moviecontroller::FFRewCallback  { w direction }  {
     upvar ::moviecontroller::${w}::wlocals wlocals
  
     # Find new percentage.
-    set percentage [expr $options(-percent) +  \
-      $direction * $wlocals(ffrewSpeed) * $wlocals(ffrewAfterms)/1000.0]
+    set percentage [expr {$options(-percent) +  \
+      $direction * $wlocals(ffrewSpeed) * $wlocals(ffrewAfterms)/1000.0}]
     if {$percentage < 0} {
 	set percentage 0
     } elseif {$percentage > 100} {
@@ -1354,9 +1354,9 @@ proc ::moviecontroller::FFRewCallback  { w direction }  {
     }
     ConfigurePercent $w $percentage
     if {$widgetGlobals(milliSecs)}  {
-	set wlocals(movieTime) [expr $wlocals(lengthMilliSecs) * $percentage/100.0]
+	set wlocals(movieTime) [expr {$wlocals(lengthMilliSecs) * $percentage/100.0}]
     } else {
-	set wlocals(movieTime) [expr $wlocals(lengthSecs) * $percentage/100.0]
+	set wlocals(movieTime) [expr {$wlocals(lengthSecs) * $percentage/100.0}]
     }
 
     # Reschedule updating the drag.
@@ -1390,9 +1390,9 @@ proc ::moviecontroller::InitSnackSound  { w snd }  {
     
     set wlocals(lengthSecs) [$snd length -units seconds]
     set wlocals(lengthSamp) [$snd length]
-    set wlocals(lengthMilliSecs) [expr (1000.0 * $wlocals(lengthSamp))/  \
-	    [$snd cget -frequency]]
-    set wlocals(sampPerSec) [expr $wlocals(lengthSamp)/$wlocals(lengthSecs)]
+    set wlocals(lengthMilliSecs) [expr {(1000.0 * $wlocals(lengthSamp))/  \
+	    [$snd cget -frequency]}]
+    set wlocals(sampPerSec) [expr {$wlocals(lengthSamp)/$wlocals(lengthSecs)}]
     set wlocals(movieTime) 0
     set wlocals(movieTimeStart) 0
     
@@ -1405,7 +1405,7 @@ proc ::moviecontroller::InitSnackSound  { w snd }  {
     
     # The time period for scheduling updating the drag; roughly one pixel at
     # a time.
-    set wlocals(afterms) [expr int(1000 * $wlocals(lengthSecs)/120.)]
+    set wlocals(afterms) [expr {int(1000 * $wlocals(lengthSecs)/120.)}]
     if {$wlocals(afterms) < 500} {
 	set wlocals(afterms) 500
     }
@@ -1457,27 +1457,27 @@ proc ::moviecontroller::SnackCmd  { w snd args }  {
 	    }
 	    set wlocals(movieTimeStart) $wlocals(movieTime)
 	    $snd play -command [list ::moviecontroller::SnackEnd $w $snd]  \
-	      -start [expr int($wlocals(lengthSamp) * $options(-percent)/100.0)]
+	      -start [expr {int($wlocals(lengthSamp) * $options(-percent)/100.0)}]
 	}
 	stop  {
 	    $snd stop
 	    catch {after cancel $wlocals(afterid)}
 
 	    if {$widgetGlobals(milliSecs)}  {
-		set wlocals(movieTime) [expr $wlocals(movieTimeStart) +  \
-			[clock clicks -milliseconds] - $wlocals(startTime)]
+		set wlocals(movieTime) [expr {$wlocals(movieTimeStart) +  \
+			[clock clicks -milliseconds] - $wlocals(startTime)}]
 	    } else {
-		set wlocals(movieTime) [expr $wlocals(movieTimeStart) +  \
-			[clock seconds] - $wlocals(startTime)]
+		set wlocals(movieTime) [expr {$wlocals(movieTimeStart) +  \
+			[clock seconds] - $wlocals(startTime)}]
 	    }
 
 	    # Need to find the exact percentage and configure percent with it.
 	    if {$widgetGlobals(milliSecs)}  {
-		set percent [expr (100.0 * $wlocals(movieTime))/  \
-			$wlocals(lengthMilliSecs)]
+		set percent [expr {(100.0 * $wlocals(movieTime))/  \
+			$wlocals(lengthMilliSecs)}]
 	    } else {
-		set percent [expr (100.0 * $wlocals(movieTime))/  \
-			$wlocals(lengthSecs)]
+		set percent [expr {(100.0 * $wlocals(movieTime))/  \
+			$wlocals(lengthSecs)}]
 	    }
 	    ConfigurePercent $w $percent
 	}
@@ -1486,7 +1486,7 @@ proc ::moviecontroller::SnackCmd  { w snd args }  {
 	    
 	    # How to set the sound volume?
 	    # only a test...
-	    snack::audio play_gain [expr int($theVol)]
+	    snack::audio play_gain [expr {int($theVol)}]
 	}
 	rew          -
 	ff           {
@@ -1520,8 +1520,8 @@ proc ::moviecontroller::SnackCmd  { w snd args }  {
 		if {$wlocals(plays)} {
 		    $snd play -command  \
 		      [list ::moviecontroller::SnackEnd $w $snd]  \
-		      -start [expr int($wlocals(lengthSamp) *   \
-		      $options(-percent)/100.0)]
+		      -start [expr {int($wlocals(lengthSamp) *   \
+		      $options(-percent)/100.0)}]
 	    
 		    # Reschedule updating the drag.
 		    set wlocals(afterid)   \

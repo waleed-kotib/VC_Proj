@@ -136,8 +136,8 @@ proc ::canvasex::Create {w args} {
     set wcan $priv(canvas)
     set ind [lsearch -exact $args "-group"]
     if {$ind >= 0} {
-	set gid [lindex $args [expr $ind + 1]]
-	set args [lreplace $args $ind [expr $ind + 1]]
+	set gid [lindex $args [expr {$ind + 1}]]
+	set args [lreplace $args $ind [expr {$ind + 1}]]
     }
     
     switch -- [lindex $args 0] {

@@ -50,7 +50,7 @@ proc ::tfileutils::relative {srcpath dstpath} {
     }
     set lensrc [llength $srclist]
     set lendst [llength $dstlist]
-    set minlen [expr ($lensrc < $lendst) ? $lensrc : $lendst]
+    set minlen [expr {($lensrc < $lendst) ? $lensrc : $lendst}]
 
     # Find first nonidentical dir; n = the number of common dirs
     # If there are no common dirs we are left with n = 0???    
@@ -59,7 +59,7 @@ proc ::tfileutils::relative {srcpath dstpath} {
       ($n < $minlen)} {
 	incr n
     }
-    set numUp [expr $lensrc - $n]
+    set numUp [expr {$lensrc - $n}]
     set tmp {}
     for {set i 1} {$i <=$numUp} {incr i} {
 	append tmp $up
@@ -135,13 +135,13 @@ proc addabsolutepathwithrelative {absPath relPath} {
     # If any up dir (../ ::  ), find how many. Only unix style.
     set nup [regsub -all {\.\./} $relPath {} newRelPath]
     # Mac???
-    #set nup [expr [regsub -all : $part "" x] - 1]
+    #set nup [expr {[regsub -all : $part "" x] - 1}]
    
     # Delete the same number of elements from the end of the absolute path
     # as there are up dirs in the relative path.    
     if {$nup > 0} {
-	set iend [expr [llength $absP] - 1]
-	set upAbsP [lreplace $absP [expr $iend - $nup + 1] $iend]
+	set iend [expr {[llength $absP] - 1}]
+	set upAbsP [lreplace $absP [expr {$iend - $nup + 1] $iend}]
     } else {
 	set upAbsP $absP
     }

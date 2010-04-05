@@ -324,8 +324,8 @@ proc ::balloonhelp::Show {win type} {
 		set scrollregion [$win cget -scrollregion]
 		if {[llength $scrollregion] > 0} {
 		    foreach {sx sy swidth sheight} $scrollregion break
-		    set xoff [expr int($swidth * [lindex [$win xview] 0])]
-		    set yoff [expr int($sheight * [lindex [$win yview] 0])]
+		    set xoff [expr {int($swidth * [lindex [$win xview] 0])}]
+		    set yoff [expr {int($sheight * [lindex [$win yview] 0])}]
 		}
 		set itemid $locals($win,itemid)
 		set msg $locals($win,$itemid)
@@ -336,7 +336,7 @@ proc ::balloonhelp::Show {win type} {
 		    set exists 1
 		    foreach {x0 y0 x1 y1} $bbox break
 		    set x $locals($win,x)
-		    set y [expr [winfo rooty $win] - $yoff + $y1 + 2]
+		    set y [expr {[winfo rooty $win] - $yoff + $y1 + 2}]
 		}
 	    }
 	    text {
@@ -349,9 +349,9 @@ proc ::balloonhelp::Show {win type} {
 		if {[llength $bbox] == 4} {
 		    set exists 1
 		    foreach {x0 y0 w0 h0} $bbox break
-		    set ymax [expr $y0+$h0]
+		    set ymax [expr {$y0+$h0}]
 		    set x $locals($win,x)
-		    set y [expr [winfo rooty $win] + $ymax + 2]
+		    set y [expr {[winfo rooty $win] + $ymax + 2}]
 		}
 	    }
 	    window {
