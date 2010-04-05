@@ -126,8 +126,8 @@ proc ::StatusSlot::Popup {w x y} {
     }
     update idletasks
     
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
+    set X [expr {[winfo rootx $w] + $x}]
+    set Y [expr {[winfo rooty $w] + $y}]
     tk_popup $m [expr {int($X) - 0}] [expr {int($Y) - 0}]   
     
     return -code break

@@ -1121,8 +1121,8 @@ proc ::JUI::SlotPopup {W x y} {
         
     set m $jwapp(slotmenu)
     
-    set X [expr [winfo rootx $W] + $x]
-    set Y [expr [winfo rooty $W] + $y]
+    set X [expr {[winfo rootx $W] + $x}]
+    set Y [expr {[winfo rooty $W] + $y}]
     tk_popup $m [expr {int($X) - 0}] [expr {int($Y) - 0}]   
     
     update idletasks
@@ -1576,7 +1576,7 @@ proc ::JUI::LoginHook {} {
     # The Login/Logout button strings may have different widths.
     set w $jwapp(w)
     set minwidth [$jwapp(wtbar) minwidth]
-    set minW [expr $minwidth > 200 ? $minwidth : 200]
+    set minW [expr {$minwidth > 200 ? $minwidth : 200}]
     wm minsize $w $minW 300    
 }
 

@@ -166,7 +166,7 @@ proc ::JWB::InitUI { } {
 	{command   mPageSetup             {[mc "Page Set&up"]...} {::WB::OnMenuPageSetup}       {}}
 	{command   mPrint...              {[mc "&Print"]...} {::WB::OnMenuPrintCanvas}     P}
     }
-    if {[expr ![catch {package require QuickTimeTcl}]]} {
+    if {[expr {![catch {package require QuickTimeTcl}]}]} {
 	package require Multicast
     }
     ::WB::SetMenuDefs file $menuDefsFile
@@ -569,7 +569,7 @@ proc ::JWB::SetMinsize {w} {
     set wMinEntry [winfo reqwidth  $jwbstate($w,wfrja)]
     set hMinEntry [winfo reqheight $jwbstate($w,wframe)]
     set wMin [max $wMin $wMinEntry]
-    set hMin [expr $hMin + $hMinEntry]
+    set hMin [expr {$hMin + $hMinEntry}]
     wm minsize $w $wMin $hMin
 }
 

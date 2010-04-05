@@ -1382,7 +1382,7 @@ proc ::Chat::Build {threadID jid} {
     set minsize [$wtray minwidth]
     if {[lsearch [grid slaves $wtop] $wavatar] >= 0} {
 	array set gridInfo [grid info $wavatar]
-	incr minsize [expr 2*$gridInfo(-padx)]
+	incr minsize [expr {2*$gridInfo(-padx)}]
 	incr minsize [winfo reqwidth $wavatar]	
     }
     wm minsize $w [expr {$minsize < 220} ? 220 : $minsize] 320

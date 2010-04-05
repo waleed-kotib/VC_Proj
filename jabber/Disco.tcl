@@ -1108,9 +1108,9 @@ proc ::Disco::Popup {w vstruct x y} {
     update idletasks
     
     # Post popup menu.	
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
-    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+    set X [expr {[winfo rootx $w] + $x}]
+    set Y [expr {[winfo rooty $w] + $y}]
+    tk_popup $m [expr {int($X) - 10}] [expr {int($Y) - 10}]   
 }
 
 proc ::Disco::PostMenuCmd {m mType clicked jid node} {
@@ -1531,7 +1531,7 @@ proc ::Disco::BuildInfoPage {win jid {node ""}} {
     set wtext $win.t
     text $wtext -wrap word -width 60 -bg gray80 \
       -highlightthickness 0 -tabs {180} -spacing1 3 -spacing3 2 -bd 0
-    set twidth [expr 10*[font measure [$wtext cget -font] "sixmmm"] + 10]
+    set twidth [expr {10*[font measure [$wtext cget -font] "sixmmm"] + 10}]
     $win.l configure -wraplength $twidth
 
     pack $wtext -side top -anchor w
@@ -1553,7 +1553,7 @@ proc ::Disco::BuildInfoPage {win jid {node ""}} {
 	    }
 	}
     }
-    $wtext configure -tabs [expr $maxw + 20]
+    $wtext configure -tabs [expr {$maxw + 20}]
     
     set n 1
     foreach ns $features {
@@ -1924,7 +1924,7 @@ proc ::Disco::AccessHasFeature {feature jid {node ""}} {
     set jid [jlib::jidmap $jid]
     if {[info exists cacheInfo($jid,$node,features)]} {
 	set features $cacheInfo($jid,$node,features)
-	return [expr [lsearch -exact $features $feature] < 0 ? 0 : 1]
+	return [expr {[lsearch -exact $features $feature] < 0 ? 0 : 1}]
     } else {
 	return [::Jabber::Jlib disco features $jid $node]
     }
@@ -1947,7 +1947,7 @@ proc ::Disco::AccessIsCategoryType {cattype jid {node ""}} {
     set jid [jlib::jidmap $jid]
     if {[info exists cacheInfo($jid,$node,cattypes)]} {
 	set types $cacheInfo($jid,$node,cattypes)
-	return [expr [lsearch -glob $types $cattype] < 0 ? 0 : 1]
+	return [expr {[lsearch -glob $types $cattype] < 0 ? 0 : 1}]
     } else {
 	return [::Jabber::Jlib disco iscategorytype $cattype $jid $node]
     }

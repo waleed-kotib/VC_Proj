@@ -423,7 +423,7 @@ proc ::MailBox::ShowHide {args} {
 	Build
     } else {
 	set ismapped [winfo ismapped $w]
-	set targetstate [expr $ismapped ? 0 : 1]
+	set targetstate [expr {$ismapped ? 0 : 1}]
 	if {[info exists argsA(-visible)]} {
 	    set targetstate $argsA(-visible)
 	}
@@ -1053,7 +1053,7 @@ proc ::MailBox::IsLastMessage {uid} {
 	variable mailbox
 	
 	set sorted [lsort -integer [array names mailbox]]
-	return [expr ($uid >= [lindex $sorted end]) ? 1 : 0]
+	return [expr {($uid >= [lindex $sorted end]) ? 1 : 0}]
     }
 }
 
@@ -1088,7 +1088,7 @@ proc ::MailBox::GetNextMsgID {uid} {
 	set nextid $uid
 	set sorted [lsort -integer [array names mailbox]]
 	set ind [lsearch $sorted $uid]
-	if {($ind >= 0) && ([expr $ind + 1] < [llength $sorted])} {
+	if {($ind >= 0) && ([expr {$ind + 1}] < [llength $sorted])} {
 	    set next [lindex $sorted [incr ind]]
 	}
 	return $next
@@ -1261,7 +1261,7 @@ proc ::MailBox::GetAnySVGElements {row} {
     set svgElem {}
     set idx [lsearch $row -x]
     if {$idx > 0} {
-	set xlist [lindex $row [expr $idx+1]]
+	set xlist [lindex $row [expr {$idx+1}]]
 	set svgElem [wrapper::getnamespacefromchilds $xlist x $xmlns(svg)]
     }
     return $svgElem
@@ -1829,7 +1829,7 @@ proc ::MailBox::ReadMailboxVer2 {} {
 	    }
 	    
 	    # Consistency check.
-	    if {[expr [llength $mailbox($id)] % 2] == 1} {
+	    if {[expr {[llength $mailbox($id)] % 2}] == 1} {
 	    	set mailbox($id) [lrange $mailbox($id) 0 5]
 	    }
 	}

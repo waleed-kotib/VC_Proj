@@ -194,8 +194,8 @@ proc ::MegaPresence::Popup {W w x y} {
     
     update idletasks
     
-    set X [expr [winfo rootx $W] + $x]
-    set Y [expr [winfo rooty $W] + $y]
+    set X [expr {[winfo rootx $W] + $x}]
+    set Y [expr {[winfo rooty $W] + $y}]
     tk_popup $m [expr {int($X) - 0}] [expr {int($Y) - 0}]   
     
     return -code break

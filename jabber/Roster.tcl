@@ -545,9 +545,9 @@ proc ::Roster::DoPopup {jidL groupL x y} {
     update idletasks
         
     # Post popup menu.
-    set X [expr [winfo rootx $wtree] + $x]
-    set Y [expr [winfo rooty $wtree] + $y]
-    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+    set X [expr {[winfo rootx $wtree] + $x}]
+    set Y [expr {[winfo rooty $wtree] + $y}]
+    tk_popup $m [expr {int($X) - 10}] [expr {int($Y) - 10}]   
 }
 
 proc ::Roster::FindClickTypesFromJIDList {jidL} {

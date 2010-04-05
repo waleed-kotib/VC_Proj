@@ -619,7 +619,7 @@ proc ::RosterTree::NotifyDragReceive {T dragged target} {
     # put the popup menu below the mouse pointer
     set X [winfo pointerx $T]
     set Y [winfo pointery $T]
-    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]
+    tk_popup $m [expr {int($X) - 10}] [expr {int($Y) - 10}]
 }
 
 proc ::RosterTree::DnDCopyOrMoveContact {T action dragged targetgroup} {

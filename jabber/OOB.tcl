@@ -229,7 +229,7 @@ proc ::OOB::BuildText {w xml args} {
 	switch -- [wrapper::gettag $c] {
 	    desc {
 		set desc [wrapper::getcdata $c]
-		set nlines [expr [string length $desc]/$argsA(-width) + 1]
+		set nlines [expr {[string length $desc]/$argsA(-width) + 1}]
 	    }
 	    url {
 		set url [wrapper::getcdata $c]

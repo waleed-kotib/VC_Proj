@@ -587,7 +587,7 @@ proc ::MUC::BuildInfo {roomjid} {
     if {0} {
 	set idleScript [format {
 	    update idletasks
-	    %s configure -wraplength [expr [winfo reqwidth %s] - 20]
+	    %s configure -wraplength [expr {[winfo reqwidth %s] - 20}]
 	} $wbox.msg $w]
 	after idle $idleScript
     }
@@ -903,7 +903,7 @@ proc ::MUC::EditListBuild {roomjid type} {
     upvar 0 $token state
 
     set titleType [string totitle $type]
-    set tblwidth [expr 10 + 12 * [llength $setListDefs($type)]]
+    set tblwidth [expr {10 + 12 * [llength $setListDefs($type)]}]
     set roomName [::Jabber::Jlib disco name $roomjid]
     if {$roomName eq ""} {
 	jlib::splitjidex $roomjid roomName x y

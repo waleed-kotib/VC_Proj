@@ -250,7 +250,7 @@ proc ::JUser::NewDlg {args} {
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 30]
+	%s configure -wraplength [expr {[winfo reqwidth %s] - 30}]
     } $wbox.msg $w]    
     after idle $script
     
@@ -854,7 +854,7 @@ proc ::JUser::EditUserDlg {jid} {
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 40]
+	%s configure -wraplength [expr {[winfo reqwidth %s] - 40}]
     } $wbox.msg $w]    
     after idle $script
 
