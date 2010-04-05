@@ -89,7 +89,7 @@ namespace eval ::FileCache:: {
     
     # Keep track of total size of cache in bytes (double).
     variable totbytes 0.0
-    variable maxbytes [expr 200e6]
+    variable maxbytes [expr {200e6}]
     
     # Keep a time ordered list of keys.
     variable keylist {}
@@ -160,10 +160,10 @@ proc ::FileCache::Set {key {fileName ""}} {
     }
     set nkey [Normalize $key]
     lappend keylist $nkey
-    set totbytes [expr $totbytes + double([file size $absFileName])]
+    set totbytes [expr {$totbytes + double([file size $absFileName])}]
     set rmkey [lindex $keylist 0]
     
-    while {[expr $totbytes > $maxbytes] && ([llength $keylist] > 2)} {	
+    while {[expr {$totbytes > $maxbytes}] && ([llength $keylist] > 2)} {	
 	Remove $rmkey
 	set rmkey [lindex $keylist 0]
     }
@@ -245,7 +245,7 @@ proc ::FileCache::Remove {key} {
     set nkey [Normalize $key]
     if {[info exists cache($nkey)]} {
 	set f $cache($nkey)
-	set totbytes [expr $totbytes - double([file size $f])]
+	set totbytes [expr {$totbytes - double([file size $f])}]
 	set ind [lsearch -exact $keylist $nkey]
 	set keylist [lreplace $keylist $ind $ind]
 	catch {file delete $f}
@@ -461,7 +461,7 @@ proc ::FileCache::ReadTable {} {
 	    if {[file exists $f]} {
 		set cache($key) $f
 		lappend keylist $key
-		set totbytes [expr $totbytes + double([file size $f])]
+		set totbytes [expr {$totbytes + double([file size $f])}]
 	    }
 	}	
 	close $fd
@@ -610,7 +610,7 @@ proc ::FileCache::BuildPage {page} {
     variable tmpPrefs
         
     set tmpPrefs(checkCache) $prefs(checkCache)
-    set tmpPrefs(mbsize)     [expr wide($prefs(cacheSize)/1e6)]
+    set tmpPrefs(mbsize)     [expr {wide($prefs(cacheSize)/1e6)}]
     
     set wc $page.c
     ttk::frame $wc -padding [option get . notebookPageSmallPadding {}]
@@ -683,7 +683,7 @@ proc ::FileCache::SaveHook {} {
     variable tmpPrefs
     variable maxbytes
 
-    set maxbytes [expr 1e6 * double( $tmpPrefs(mbsize) )]
+    set maxbytes [expr {1e6 * double( $tmpPrefs(mbsize) )}]
     set prefs(checkCache) $tmpPrefs(checkCache)
     set prefs(cacheSize) $maxbytes
     
@@ -707,7 +707,7 @@ proc ::FileCache::UserDefaultsHook {} {
     variable tmpPrefs
     
     set tmpPrefs(checkCache) $prefs(checkCache)
-    set tmpPrefs(mbsize)     [expr wide($prefs(cacheSize)/1e6)]
+    set tmpPrefs(mbsize)     [expr {wide($prefs(cacheSize)/1e6)}]
 }
 
 #-------------------------------------------------------------------------------

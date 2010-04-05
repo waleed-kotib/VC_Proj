@@ -169,7 +169,7 @@ proc ::Init::SetThis {mainScript} {
     
     # Need a tmp directory, typically in a StarKit when QuickTime movies are opened.
     set MAX_INT 0x7FFFFFFF
-    set hex [format {%x} [expr int($MAX_INT*rand())]]
+    set hex [format {%x} [expr {int($MAX_INT*rand())}]]
     set tail coccinella[pid]-$hex
     set this(tmpPath) [file join [TempDir] $tail]
     if {![file isdirectory $this(tmpPath)]} {

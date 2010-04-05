@@ -493,7 +493,7 @@ proc ::UI::InitMenuDefs {} {
     set menuDefs(main,apple) [list $menuDefs(main,info,aboutwhiteboard)]
     
     # Make platform specific things.
-    set haveQuickTimeTcl [expr ![catch {package require QuickTimeTcl}]]
+    set haveQuickTimeTcl [expr {![catch {package require QuickTimeTcl}]}]
     if {$haveAppleMenu && $haveQuickTimeTcl} {
 	lappend menuDefs(main,apple) $menuDefs(main,info,aboutquicktimetcl)
     }
@@ -551,7 +551,7 @@ proc ::UI::IsAppInFront {} {
     if {[tk windowingsystem] eq "aqua" \
       && [info exists this(package,carbon)]  \
       && $this(package,carbon)} {
-	return [expr [carbon::process current] == [carbon::process front]]
+	return [expr {[carbon::process current] == [carbon::process front]}]
     } else {
 	
 	# The 'wm stackorder' is not reliable in sorting windows!
@@ -616,9 +616,9 @@ proc ::UI::FormatTextForMessageBox {txt {width ""}} {
 	set newtxt {}
 	while {([set ind [tcl_wordBreakBefore $txt $start]] > 0) &&  \
 	  ($start < $len)} {	    
-	    append newtxt [string trim [string range $txt $first [expr $ind-1]]]
+	    append newtxt [string trim [string range $txt $first [expr {$ind-1}]]]
 	    append newtxt "\n"
-	    set start [expr $ind + $width]
+	    set start [expr {$ind + $width}]
 	    set first $ind
 	}
 	append newtxt [string trim [string range $txt $first end]]
@@ -1760,7 +1760,7 @@ proc ::UI::DoTopMenuPopup {w wmenu} {
     
     if {[winfo exists $wmenu]} {
 	set x [winfo rootx $w]
-	set y [expr [winfo rooty $w] + [winfo height $w]]
+	set y [expr {[winfo rooty $w] + [winfo height $w]}]
 	tk_popup $wmenu $x $y
     }
 }
@@ -1863,16 +1863,16 @@ proc ::UI::OkCancelButtons {args} {
 	foreach spec $args {
 	    set wbt [eval {ttk::button} $spec]
 	    pack $wbt -side right
-	    if {[expr $i & 2] == 1} {
+	    if {[expr {$i & 2}] == 1} {
 		pack $wbt -padx $padx
 	    }
 	    incr i
 	}
     } else {
-	for {set i [expr [llength $args] - 1]} {$i >= 0} {incr i -1} {
+	for {set i [expr {[llength $args] - 1}]} {$i >= 0} {incr i -1} {
 	    set wbt [eval {ttk::button} [lindex $args $i]]
 	    pack $wbt -side right
-	    if {[expr $i & 2] == 1} {
+	    if {[expr {$i & 2}] == 1} {
 		pack $wbt -padx $padx
 	    }
 	}
@@ -2069,8 +2069,8 @@ proc ::UI::CenterWindow {win} {
 	set win %s
 	set sw [winfo screenwidth $win]
 	set sh [winfo screenheight $win]
-	set x [expr ($sw - [winfo reqwidth $win])/2]
-	set y [expr ($sh - [winfo reqheight $win])/2]
+	set x [expr {($sw - [winfo reqwidth $win])/2}]
+	set y [expr {($sh - [winfo reqheight $win])/2}]
 	wm geometry $win "+$x+$y"
     } $win]
 }
@@ -2092,8 +2092,8 @@ proc ::UI::StartStopAnimatedWave {w theimage start} {
     # Define speed and update frequency. Pix per sec and times per sec.
     set speed 150
     set freq 16
-    set animateWave(pix) [expr int($speed/$freq)]
-    set animateWave(wait) [expr int(1000.0/$freq)]
+    set animateWave(pix) [expr {int($speed/$freq)}]
+    set animateWave(wait) [expr {int(1000.0/$freq)}]
 
     if {$start} {
 	
@@ -2118,9 +2118,9 @@ proc ::UI::StartStopAnimatedWave {w theimage start} {
 proc ::UI::AnimateWave {w} {
     variable animateWave
     
-    set deltax [expr $animateWave($w,dir) * $animateWave(pix)]
+    set deltax [expr {$animateWave($w,dir) * $animateWave(pix)}]
     incr animateWave($w,x) $deltax
-    if {$animateWave($w,x) > [expr [winfo width $w] - 80]} {
+    if {$animateWave($w,x) > [expr {[winfo width $w] - 80}]} {
 	set animateWave($w,dir) -1
     } elseif {$animateWave($w,x) <= -60} {
 	set animateWave($w,dir) 1

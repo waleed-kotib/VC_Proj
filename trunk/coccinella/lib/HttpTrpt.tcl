@@ -173,14 +173,14 @@ proc ::HttpTrpt::ProgressWindow {token total current} {
 	set state(startmillis) $ms
 	set state(lastmillis)  $ms
 	set state(first) 0
-    } elseif {[expr $ms - $state(lastmillis)] > $prefs(progUpdateMillis)} {
+    } elseif {[expr {$ms - $state(lastmillis)}] > $prefs(progUpdateMillis)} {
 
 	# Update the progress window.
 	set timsg [::timing::getmessage $state(timetok) $total]
 	if {$state(-dialog)} {
 	    set msg3 [mc "Rate"]
 	    append msg3 ": $timsg"	
-	    set percent [expr 100.0 * $current/($total + 0.001)]
+	    set percent [expr {100.0 * $current/($total + 0.001)}]
 	    $w configuredelayed -percent $percent -text2 $msg3
 	    set needupdate 1
 	}

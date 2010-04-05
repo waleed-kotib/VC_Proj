@@ -85,7 +85,7 @@ proc ::Splash::SplashScreen {} {
     set screenW [winfo vrootwidth .]
     set screenH [winfo vrootheight .]
 
-    wm geometry $w +[expr ($screenW - 450)/2]+[expr ($screenH - 300)/2]
+    wm geometry $w +[expr {($screenW - 450)/2}]+[expr {($screenH - 300)/2}]
     set showMinor     [option get $w showMinor {}]
     set showCopyright [option get $w showCopyright {}]
     set copyrightX    [option get $w copyrightX {}]
@@ -100,10 +100,10 @@ proc ::Splash::SplashScreen {} {
 	set copyrightX 50
     }
     if {$copyrightY eq ""} {
-	set copyrightY [expr $imHeight - 70]
+	set copyrightY [expr {$imHeight - 70}]
     }
-    foreach {r g b} [$imsplash get 50 [expr $imHeight - 20]] break
-    if {[expr $r + $g + $b] > [expr 2*255]} {
+    foreach {r g b} [$imsplash get 50 [expr {$imHeight - 20}]] break
+    if {[expr {$r + $g + $b}] > [expr {2*255}]} {
 	set textcol black
     } else {
 	set textcol white
@@ -111,7 +111,7 @@ proc ::Splash::SplashScreen {} {
     set canwin $w.can
     canvas $w.can -width $imWidth -height $imHeight -bd 0 -highlightthickness 0
     $w.can create image 0 0 -anchor nw -image $imsplash
-    $w.can create text 50 [expr $imHeight - 20] -anchor nw -tags tsplash  \
+    $w.can create text 50 [expr {$imHeight - 20}] -anchor nw -tags tsplash  \
       -font CociTinyFont -text $startMsg -fill $textcol
     
     # Print patch level for dev versions.
@@ -127,7 +127,7 @@ proc ::Splash::SplashScreen {} {
 	set text2 [option get $w copyrightText2 {}]
 	$w.can create text $copyrightX $copyrightY -anchor nw \
 	  -font CociSmallFont -text $text1 -fill $textcol
-	$w.can create text $copyrightX [expr $copyrightY - 15] -anchor nw \
+	$w.can create text $copyrightX [expr {$copyrightY - 15}] -anchor nw \
 	  -font CociSmallFont -text $text2 -fill $textcol
     }
     

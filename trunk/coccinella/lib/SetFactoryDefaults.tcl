@@ -94,7 +94,7 @@ proc FactoryDefaults { } {
     # Maximum time to wait for any network action to respond. (secs and millisecs)
     set prefs(timeoutSecs) 30
     #set prefs(timeoutSecs) 4
-    set prefs(timeoutMillis) [expr 1000 * $prefs(timeoutSecs)]
+    set prefs(timeoutMillis) [expr {1000 * $prefs(timeoutSecs)}]
     
     # How many milliseconds shall we wait before showing the progress window?
     set prefs(millisToProgWin) 0
@@ -126,18 +126,18 @@ proc FactoryDefaults { } {
     
     # Useful time constants in seconds. Not used.
     set tmsec(min) 60
-    set tmsec(hour)   [expr 60*$tmsec(min)]
-    set tmsec(day)    [expr 24*$tmsec(hour)]
-    set tmsec(week)   [expr 7*$tmsec(day)]
-    set tmsec(30days) [expr 30*$tmsec(day)]
+    set tmsec(hour)   [expr {60*$tmsec(min)}]
+    set tmsec(day)    [expr {24*$tmsec(hour)}]
+    set tmsec(week)   [expr {7*$tmsec(day)}]
+    set tmsec(30days) [expr {30*$tmsec(day)}]
     
     # Various constants.
     set kPI 3.14159265359
     set kPI 3.141592653
-    set kRad2Grad [expr 180.0/$kPI]
-    set kGrad2Rad [expr $kPI/180.0]
-    set kTan225   [expr tan($kPI/8.0)]
-    set kTan675   [expr tan(3.0 * $kPI/8.0)]
+    set kRad2Grad [expr {180.0/$kPI}]
+    set kGrad2Rad [expr {$kPI/180.0}]
+    set kTan225   [expr {tan($kPI/8.0)}]
+    set kTan675   [expr {tan(3.0 * $kPI/8.0)}]
     
     #---- The state variables: 'state' ------------------------------------------
     

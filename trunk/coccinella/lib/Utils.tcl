@@ -175,7 +175,7 @@ proc ::Utils::SmartClockFormat {secs args} {
     
     # 'days': 0=today, -1=yesterday etc.
     set secs00 [clock scan "today 00:00"]
-    set days [expr ($secs - $secs00)/(60*60*24)]
+    set days [expr {($secs - $secs00)/(60*60*24)}]
     
     switch -regexp -- $days {
 	^1$ {
@@ -211,7 +211,7 @@ proc ::Utils::SmartClockFormat {secs args} {
 
     if {$opts(-detail) && ($days == 0)} {
 	set now [clock seconds]
-	set minutes [expr ($now - $secs)/60]
+	set minutes [expr {($now - $secs)/60}]
 	if {$minutes == 0} {
 	    set time [clock format $secs -format $fmt]
 	} elseif {$minutes == 1} {
@@ -232,7 +232,7 @@ proc ::Utils::SmartClockFormat {secs args} {
 }
 
 proc ::Utils::IsToday {secs} {
-    return [expr ($secs - [clock scan "today 00:00"])/(60*60*24) >= 0 ? 1 : 0]
+    return [expr {($secs - [clock scan "today 00:00"])/(60*60*24) >= 0 ? 1 : 0}]
 }
 
 proc ::Utils::FormatBytes {bytes} {
@@ -240,9 +240,9 @@ proc ::Utils::FormatBytes {bytes} {
     if {$bytes < 1000} {
 	set str "$bytes bytes"
     } elseif {$bytes < 1000000} {
-	set str "[format %.1f [expr $bytes/1000.0] ]Kb"
+	set str "[format %.1f [expr {$bytes/1000.0}] ]Kb"
     } else {
-	set str "[format %.1f [expr $bytes/1000000.0] ]Mb"
+	set str "[format %.1f [expr {$bytes/1000000.0}] ]Mb"
     }
 
     return $str

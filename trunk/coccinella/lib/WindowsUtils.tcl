@@ -243,19 +243,19 @@ proc ::Windows::Printer::PrintText {w hdc pName} {
     }
     
     # Common scale factors etc.
-    set facx [expr $p(resx)/1000.0]
-    set facy [expr $p(resy)/1000.0]
-    set lm [expr round($p(lm) * $facx)]
-    set tm [expr round($p(tm) * $facy)]
-    set pw [expr round(($p(pw) - $p(lm) - $p(rm)) * $facx)]
-    set pl [expr round(($p(pl) - $p(tm) - $p(bm)) * $facy)]
+    set facx [expr {$p(resx)/1000.0}]
+    set facy [expr {$p(resy)/1000.0}]
+    set lm [expr {round($p(lm) * $facx)}]
+    set tm [expr {round($p(tm) * $facy)}]
+    set pw [expr {round(($p(pw) - $p(lm) - $p(rm)) * $facx)}]
+    set pl [expr {round(($p(pl) - $p(tm) - $p(bm)) * $facy)}]
     if {$::tcl_platform(platform) eq "windows"} {
 	set ppiScreen 94
     } else {
 	set ppiScreen 72
     }
-    set pix2dcx [expr double($p(resx))/$ppiScreen]
-    set pix2dcy [expr double($p(resy))/$ppiScreen]
+    set pix2dcx [expr {double($p(resx))/$ppiScreen}]
+    set pix2dcy [expr {double($p(resy))/$ppiScreen}]
     
     # Init state vars.
     set attrList {-background -borderwidth -font -foreground \
@@ -284,7 +284,7 @@ proc ::Windows::Printer::PrintText {w hdc pName} {
     foreach tag [array names tagConfig] {
 	set ind [lsearch $tagConfig($tag) "-font"]
 	if {$ind >= 0} {
-	    set font [lindex $tagConfig($tag) [expr $ind+1]]
+	    set font [lindex $tagConfig($tag) [expr {$ind+1}]]
 	    regsub " " $font "" fkey
 	    if {![info exists fmArr${fkey}]} {
 		
@@ -373,8 +373,8 @@ proc ::Windows::Printer::TextDumpCallback {hdc key value index} {
 	    
 		# If not the complete string used up. Break on a word.
 		if {$i < $maxlen} {
-		    set endi [expr [string wordstart $str $endi] - 1]
-		    set starti [expr $endi + 1]
+		    set endi [expr {[string wordstart $str $endi] - 1}]
+		    set starti [expr {$endi + 1}]
 		    
 		    # No word boundary found. Cut.
 		    if {$endi <= 1} {
@@ -391,7 +391,7 @@ proc ::Windows::Printer::TextDumpCallback {hdc key value index} {
 		    set dcyMax 0
 		} else {
 		    set y [lindex $res 1]
-		    set dcyMax [expr $y > $dcyMax ? $y : $dcyMax]
+		    set dcyMax [expr {$y > $dcyMax ? $y : $dcyMax}]
 		}
 		
 	    }
@@ -399,12 +399,12 @@ proc ::Windows::Printer::TextDumpCallback {hdc key value index} {
 	image {
 	    
 	    # value is image name?
-	    set dcImw [expr round( $facx * [image width $value] )]
- 	    set dcImh [expr round( $facy * [image height $value] )]
+	    set dcImw [expr {round( $facx * [image width $value] )}]
+ 	    set dcImh [expr {round( $facy * [image height $value] )}]
 	    
 	    # Fix anchor later. Wrong position.
-	    gdi rectangle $hdc $dcx $dcy [expr $dcx + $dcImw]  \
-	      [expr $dcy - $dcImh]
+	    gdi rectangle $hdc $dcx $dcy [expr {$dcx + $dcImw}]  \
+	      [expr {$dcy - $dcImh}]
 	}
     }
     
