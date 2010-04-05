@@ -165,7 +165,7 @@ if {[itcl::find classes Dice] == ""} {
 	if {[info exists animateuid]} {
 	    return
 	}
-	set n [expr [UnifRand 6] + 1]
+	set n [expr {[UnifRand 6] + 1}]
 	AnimateAndSet  $n
 	GenCommand "DICE: turn $utagdice $n" remote
     }

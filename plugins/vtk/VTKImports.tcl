@@ -130,7 +130,7 @@ proc ::vtkImport::ImportProc  { w fileNameOrUrl optList {where all} }  {
 	
 	set width 300
 	set height 300
-	$fr configure -width [expr $width + 6] -height [expr $height + 6]
+	$fr configure -width [expr {$width + 6}] -height [expr {$height + 6}]
 
 	# Added the 'movie' tag just for the tool bindings. Bad???
 	$w create window $x $y -anchor nw -window $fr -tags "vtk movie $useTag"
@@ -336,18 +336,18 @@ proc ::vtkImport::VTKClickToolButton {btName} {
 
 	    bind VTKFrame <Button-1> {
 		::CanvasDraw::InitMove $wCan  \
-		  [$wCan canvasx [expr [winfo x %W] + %x]]  \
-		  [$wCan canvasy [expr [winfo y %W] + %y]] movie
+		  [$wCan canvasx [expr {[winfo x %W] + %x}]]  \
+		  [$wCan canvasy [expr {[winfo y %W] + %y}]] movie
 	    }
 	    bind VTKFrame <B1-Motion> {
 		DoMove $wCan  \
-		  [$wCan canvasx [expr [winfo x %W] + %x]]  \
-		  [$wCan canvasy [expr [winfo y %W] + %y]] movie
+		  [$wCan canvasx [expr {[winfo x %W] + %x}]]  \
+		  [$wCan canvasy [expr {[winfo y %W] + %y}]] movie
 	    }
 	    bind VTKFrame <ButtonRelease-1> {
 		FinalizeMove $wCan  \
-		  [$wCan canvasx [expr [winfo x %W] + %x]]  \
-		  [$wCan canvasy [expr [winfo y %W] + %y]] movie
+		  [$wCan canvasx [expr {[winfo x %W] + %x}]]  \
+		  [$wCan canvasy [expr {[winfo y %W] + %y}]] movie
 	    }
 	}
     }
