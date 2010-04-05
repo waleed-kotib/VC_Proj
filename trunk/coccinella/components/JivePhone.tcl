@@ -753,8 +753,8 @@ proc ::JivePhone::Popup {w v x y} {
     if {[string length $jid] == 0} {
         set typeClicked ""     
     }
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
+    set X [expr {[winfo rootx $w] + $x}]
+    set Y [expr {[winfo rooty $w] + $y}]
 
     ::Debug 2 "\t jid=$jid, typeClicked=$typeClicked"
 
@@ -824,7 +824,7 @@ proc ::JivePhone::Popup {w v x y} {
     update idletasks
 
     # Post popup menu.
-    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]
+    tk_popup $m [expr {int($X) - 10}] [expr {int($Y) - 10}]
 
     # Mac bug... (else can't post menu while already posted if toplevel...)
     if {[string equal "macintosh" $this(platform)]} {
@@ -839,7 +839,7 @@ proc ::JivePhone::RemoveAddressbookDlg {jid} {
 
     set index [lsearch -exact $abline $jid]
 
-    set tmp [lreplace $abline [expr $index-1] $index]
+    set tmp [lreplace $abline [expr {$index-1}] $index]
     set abline $tmp
 
     eval {::ITree::DeleteItem $wtree $jid} 
@@ -922,7 +922,7 @@ proc ::JivePhone::NewAddressbookDlg {} {
     # Trick to resize the labels wraplength.
     set script [format {
         update idletasks
-        %s configure -wraplength [expr [winfo reqwidth %s] - 20]
+        %s configure -wraplength [expr {[winfo reqwidth %s] - 20}]
     } $wbox.msg $w]   
     after idle $script
 }
@@ -936,8 +936,8 @@ proc ::JivePhone::ModifyAddressbookDlg {jid} {
 
     #Get Entry data from abline list
     set index [lsearch -exact $abline $jid]
-    set abName [lindex $abline [expr $index-1]]
-    set abPhoneNumber [lindex $abline [expr $index]]
+    set abName [lindex $abline [expr {$index-1}]]
+    set abPhoneNumber [lindex $abline [expr {$index}]]
     set oldPhoneNumber $abPhoneNumber
 
     set w ".madbdlg"
@@ -1004,7 +1004,7 @@ proc ::JivePhone::ModifyAddressbookDlg {jid} {
     # Trick to resize the labels wraplength.
     set script [format {
         update idletasks
-        %s configure -wraplength [expr [winfo reqwidth %s] - 20]
+        %s configure -wraplength [expr {[winfo reqwidth %s] - 20}]
     } $wbox.msg $w]
     after idle $script
 }
@@ -1039,7 +1039,7 @@ proc ::JivePhone::modifyItemAddressBook {w oldPhoneNumber} {
         #---------- Updates Memory Addressbook -----------------
         set index [lsearch -exact $abline $oldPhoneNumber]
 
-        set tmp [lreplace $abline [expr $index-1] $index $abName $abPhoneNumber]
+        set tmp [lreplace $abline [expr {$index-1}] $index $abName $abPhoneNumber]
         set abline $tmp
 
         #----- Updates GUI ---------

@@ -220,7 +220,7 @@ proc ::Taskbar::WinCmd {event x y} {
 	    ToggleVisibility
 	}
 	WM_RBUTTONUP {
-	    tk_popup $wmenu [expr {$x - 40}] [expr $y] [$wmenu index end]
+	    tk_popup $wmenu [expr {$x - 40}] [expr {$y}] [$wmenu index end]
 	}
     }
 }
