@@ -586,9 +586,9 @@ proc ::UserInfo::LastAndVersionPage {token} {
     set script [format {
 	update idletasks
 	set wpage %s
-	$wpage.last configure -wraplength [expr [winfo reqwidth $wpage] - 10]
-	$wpage.time configure -wraplength [expr [winfo reqwidth $wpage] - 10]
-	$wpage.vers configure -wraplength [expr [winfo reqwidth $wpage] - 10]
+	$wpage.last configure -wraplength [expr {[winfo reqwidth $wpage] - 10}]
+	$wpage.time configure -wraplength [expr {[winfo reqwidth $wpage] - 10}]
+	$wpage.vers configure -wraplength [expr {[winfo reqwidth $wpage] - 10}]
     } $wpage]    
     after idle $script
 }

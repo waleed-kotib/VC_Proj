@@ -143,8 +143,8 @@ proc ::Privacy::BuildPrefsPage {page} {
     
     set width1 [winfo reqwidth $wlabfr.def]
     set width2 [winfo reqwidth $wlabfr.act]
-    set tabs [list [expr $width1/2] center [expr $width1 + $width2/2] center \
-      [expr $width1 + $width2] left]
+    set tabs [list [expr {$width1/2}] center [expr {$width1 + $width2/2}] center \
+      [expr {$width1 + $width2}] left]
     $wtable configure -tabs $tabs
         
     grid $wlabfr -column 0 -row 0 -sticky ew
@@ -183,7 +183,7 @@ proc ::Privacy::BuildPrefsPage {page} {
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s.lmsg configure -wraplength [expr [winfo reqwidth %s] - 20]
+	%s.lmsg configure -wraplength [expr {[winfo reqwidth %s] - 20}]
     } $wfi $wfi]    
     after idle $script
     
@@ -687,7 +687,7 @@ proc ::Privacy::List::Build { } {
 	ttk::menubutton $wtmp -text $labels(max,$what)
 	set maxwidth [winfo reqwidth $wtmp]
 	destroy $wtmp
-	frame ${wit}.${what}$i -width [expr $maxwidth + 20]
+	frame ${wit}.${what}$i -width [expr {$maxwidth + 20}]
     }
     grid $wit.type$i x $wit.block$i $wit.action$i
     
@@ -727,7 +727,7 @@ proc ::Privacy::List::Build { } {
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 30]
+	%s configure -wraplength [expr {[winfo reqwidth %s] - 30}]
     } $wbox.msg $w]    
     after idle $script
     

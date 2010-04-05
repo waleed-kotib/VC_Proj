@@ -272,7 +272,7 @@ proc ::Enter::Build {protocol args} {
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 20]
+	%s configure -wraplength [expr {[winfo reqwidth %s] - 20}]
     } $wbox.msg $w]    
     after idle $script
     

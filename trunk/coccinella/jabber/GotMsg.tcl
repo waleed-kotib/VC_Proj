@@ -37,7 +37,7 @@ namespace eval ::GotMsg:: {
     
     variable locals
     set locals(updateDateid)  ""
-    set locals(updateDatems)  [expr 1000*60]
+    set locals(updateDatems)  [expr {1000*60}]
 }
 
 proc ::GotMsg::QuitAppHook {} {

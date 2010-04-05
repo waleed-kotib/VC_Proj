@@ -1232,7 +1232,7 @@ proc ::GenRegister::NewDlg {args} {
     if {[winfo exists $wbox.msg]} {
 	set script [format {
 	    update idletasks
-	    %s configure -wraplength [expr [winfo reqwidth %s] - 30]
+	    %s configure -wraplength [expr {[winfo reqwidth %s] - 30}]
 	    wm minsize %s [winfo reqwidth %s] 300
 	} $wbox.msg $w $w $w]    
 	#after idle $script

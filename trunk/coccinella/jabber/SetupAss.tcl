@@ -222,7 +222,7 @@ proc ::SetupAss::SetupAss {} {
     set script [format {
 	update idletasks
 	set wrapthese [list %s]
-	set width [expr [winfo reqwidth %s] - 20]
+	set width [expr {[winfo reqwidth %s] - 20}]
 	foreach wl $wrapthese {
 	    $wl configure -wraplength $width
 	}

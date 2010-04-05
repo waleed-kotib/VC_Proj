@@ -467,7 +467,7 @@ proc ::NewMsg::Build {args} {
 	set height [winfo reqheight $waddr]
 	set canwidth [winfo reqwidth $waddcan]
 	set bbox [grid bbox $waddr 0 1] 
-	set hline [expr [lindex $bbox 3] - [lindex $bbox 0]]
+	set hline [expr {[lindex $bbox 3] - [lindex $bbox 0]}]
 	$waddcan configure -width $width -height $height -yscrollincrement $hline
     } $waddr $waddcan $wspacer]
     after idle $script
@@ -608,7 +608,7 @@ proc ::NewMsg::NewAddrLine {w wfr n} {
     grid  $wfr.f$n  -padx 1 -pady 1 -column 0 -row $n -sticky news
     grid  $wentry   -padx 1 -pady 1 -column 1 -row $n -sticky news
     grid columnconfigure $wfr 1 -weight 1
-    grid rowconfigure $wfr $n -minsize [expr $locals(minheight) + 2]
+    grid rowconfigure $wfr $n -minsize [expr {$locals(minheight) + 2}]
     
     ::JUI::DnDXmppBindTarget $wentry
     
@@ -639,7 +639,7 @@ proc ::NewMsg::ButtonInAddr {w wfr n} {
     variable locals
     
     if {$n > $locals($w,fillline)} {
-	set new [expr $locals($w,fillline) + 1]
+	set new [expr {$locals($w,fillline) + 1}]
 	FillAddrLine $w $wfr $new
 	focus $wfr.addr$new
     }
@@ -654,13 +654,13 @@ proc ::NewMsg::TabInAddr {w wfr n} {
 
     # If last line then insert new line.
     if {$n == $locals($w,addrline)} {
-	NewAddrLine $w $wfr [expr $n + 1]
+	NewAddrLine $w $wfr [expr {$n + 1}]
 	if {$n >= 4} {
-	    FillAddrLine $w $wfr [expr $n + 1]
+	    FillAddrLine $w $wfr [expr {$n + 1}]
 	}
 	update idletasks
-	focus "$wfr.addr[expr $n + 1]"
-	SeeLine $w [expr $n + 1]
+	focus "$wfr.addr[expr {$n + 1}]"
+	SeeLine $w [expr {$n + 1}]
     } else {
 	focus $wsubject
     }
@@ -674,7 +674,7 @@ proc ::NewMsg::ReturnInAddr {w wfr n} {
     variable locals
     
     if {$n == $locals($w,fillline)} {
-	set new [expr $locals($w,fillline) + 1]
+	set new [expr {$locals($w,fillline) + 1}]
 
 	# If last line then insert new line.
 	if {$n == $locals($w,addrline)} {
@@ -683,9 +683,9 @@ proc ::NewMsg::ReturnInAddr {w wfr n} {
 	FillAddrLine $w $wfr $new
 	focus $wfr.addr$new
     } elseif {$n < $locals($w,fillline)} {
-	focus $wfr.addr[expr $n + 1]
+	focus $wfr.addr[expr {$n + 1}]
     }
-    SeeLine $w [expr $n + 1]
+    SeeLine $w [expr {$n + 1}]
 }
 
 #       Remove this line if empty and shift all lines below up.
@@ -704,11 +704,11 @@ proc ::NewMsg::BackSpaceInAddr {w wfr n} {
 	# and if more than 4 lines, delete it completely.
 	set last $locals($w,fillline)
 	if {$n > 1} {
-	    focus "$wfr.addr[expr $n - 1]"
+	    focus "$wfr.addr[expr {$n - 1}]"
 	}
 	for {set i $n} {$i < $last} {incr i} {
 	    set to $i
-	    set from [expr $i + 1]
+	    set from [expr {$i + 1}]
 	    set locals($w,poptrpt$to) $locals($w,poptrpt$from)
 	    set locals($w,addr$to) $locals($w,addr$from)
 	}	
@@ -733,7 +733,7 @@ proc ::NewMsg::EmptyAddrLine {w wfr n} {
     set locals($w,poptrpt$n) ""
     set locals($w,addr$n) ""
     set locals($w,enttrpt$n) ""
-    set locals($w,fillline) [expr $n - 1]
+    set locals($w,fillline) [expr {$n - 1}]
     bind $wfr.f$n.la <Button-1> {}
     bind $wfr.f$n.la <ButtonRelease-1> {}    
 }
@@ -757,13 +757,13 @@ proc ::NewMsg::SeeLine {w n} {
 
     set totlines $locals($w,addrline)
     set can $locals($w,waddcan)
-    set top [expr [lindex [$can yview] 0] * $totlines + 1]
-    set bot [expr $top + 3]
+    set top [expr {[lindex [$can yview] 0] * $totlines + 1}]
+    set bot [expr {$top + 3}]
 
     if {$n > $bot} {
-	$can yview moveto [expr ($n - 4.0)/$totlines]
+	$can yview moveto [expr {($n - 4.0)/$totlines}]
     } elseif {$n < $top} {
-	$can yview moveto [expr ($n - 1.0)/$totlines]
+	$can yview moveto [expr {($n - 1.0)/$totlines}]
     }
 }
 
@@ -771,7 +771,7 @@ proc ::NewMsg::KeyUpDown {updown w wfr n} {
     
     variable locals
 
-    set newfocus [expr $n + $updown]
+    set newfocus [expr {$n + $updown}]
     if {$newfocus < 1} {
 	set newfocus 1
     } elseif {$newfocus > $locals($w,fillline)} {
@@ -811,8 +811,8 @@ proc ::NewMsg::ResizeCan {w} {
     set can     $locals($w,waddcan)
     set waddr   $locals($w,wfrport)
     set wspacer $locals($w,wspacer)
-    set width [expr [winfo width $can] - 2*[$waddr cget -padx] - \
-      2*[$can cget -highlightthickness]]
+    set width [expr {[winfo width $can] - 2*[$waddr cget -padx] - \
+      2*[$can cget -highlightthickness]}]
     $wspacer configure -width $width
 }
 
@@ -840,7 +840,7 @@ proc ::NewMsg::TrptPopup {w n x y} {
     set wfr $locals($w,wfrport)
     set ind 0
     if {$ind > 0} {
-	set ind [expr ($ind - 1)/2]
+	set ind [expr {($ind - 1)/2}]
     } else {
 	set ind 0
     }
@@ -857,7 +857,7 @@ proc ::NewMsg::TrptPopup {w n x y} {
     if {![string equal $this(platform) "unix"]} {
 	$wfr.f$n.la configure -image $locals(popupbtpush)
     }
-    tk_popup $m [expr int($x)] [expr int($y)]
+    tk_popup $m [expr {int($x)}] [expr {int($y)}]
 }
 
 proc ::NewMsg::TrptPopupRelease {w n} {

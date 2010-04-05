@@ -68,7 +68,7 @@ if {0} {
     set f /Users/matben/Library/Preferences/Coccinella/History/mari@localhost-0.nxml
     set f /Users/matben/Desktop/mariShort.xml
     set f /Users/matben/Desktop/mari.xml
-    set age [expr [clock seconds] - [clock scan 20070124T14:17:54]]
+    set age [expr {[clock seconds] - [clock scan 20070124T14:17:54]}]
     ::History::XFastSelection $f 10 $age  
     
     ::History::XFastParseFiles mari@localhost 2 0

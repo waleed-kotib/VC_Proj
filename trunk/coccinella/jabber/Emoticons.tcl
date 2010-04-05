@@ -71,8 +71,8 @@ proc ::Emoticons::Init {} {
 
     # Cache stuff we need later.
     set priv(havepng) 1
-    set priv(QuickTimeTcl) [expr ![catch {package require QuickTimeTcl}]]
-    set priv(Img)          [expr ![catch {package require Img}]]
+    set priv(QuickTimeTcl) [expr {![catch {package require QuickTimeTcl}]}]
+    set priv(Img)          [expr {![catch {package require Img}]}]
     if {$priv(Img)} {
 	set priv(needtmp)   0
 	set priv(pngformat) [list -format png]
@@ -531,7 +531,7 @@ proc ::Emoticons::BuildMenu {wmenu args} {
 	
 	# Figure out a reasonable width and height.
 	set len [llength $ims]
-	set nheight [expr int(sqrt($len/1.4)) + 1]
+	set nheight [expr {int(sqrt($len/1.4)) + 1}]
 
 	set i 0
 	foreach im $ims {
@@ -542,7 +542,7 @@ proc ::Emoticons::BuildMenu {wmenu args} {
 		set mcmd [concat $cmd [list $im $key]]
 	    }
 	    set opts {-hidemargin 1}
-	    if {$i && ([expr $i % $nheight] == 0)} {
+	    if {$i && ([expr {$i % $nheight}] == 0)} {
 		lappend opts -columnbreak 1
 	    }
 	    eval {$m add command -image $im -command $mcmd} $opts
@@ -563,13 +563,13 @@ proc ::Emoticons::BuildMenu {wmenu args} {
 
 proc ::Emoticons::SortLength {str1 str2} {
     
-    return [expr {[string length $str1] < [string length $str2]} ? -1 : 1]
+    return [expr {[string length $str1] < [string length $str2] ? -1 : 1}]
 }
 
 proc ::Emoticons::PostMenu {w m x y} {
 
     if {![string equal [$w cget -state] "disabled"]} {
-	tk_popup $m [expr int($x)] [expr int($y)]
+	tk_popup $m [expr {int($x)}] [expr {int($y)}]
     }
 }
 
@@ -589,7 +589,7 @@ proc ::Emoticons::InsertTextLegend {w name args} {
     eval {$w configure} [array get argsArr]
     $w configure -state normal
     $w tag configure tmeta -spacing1 1 -spacing3 1 -lmargin1 10 -lmargin2 20 \
-      -tabs [expr [font measure [$w cget -font] Description] + 30]
+      -tabs [expr {[font measure [$w cget -font] Description] + 30}]
     $w delete 1.0 end
     
     # Meta data:

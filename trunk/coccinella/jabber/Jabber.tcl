@@ -1518,7 +1518,7 @@ proc ::Jabber::GetLastString {jid subiq} {
     } elseif {![string is integer -strict $attrArr(seconds)]} {
 	set str [mc "Cannot query %s's local time information." $ujid]
     } else {
-	set secs [expr [clock seconds] - $attrArr(seconds)]
+	set secs [expr {[clock seconds] - $attrArr(seconds)}]
 	set uptime [clock format $secs -format "%a %b %d %H:%M:%S %Y"]
 	if {[wrapper::getcdata $subiq] ne ""} {
 	    set msg [mc "Message"]

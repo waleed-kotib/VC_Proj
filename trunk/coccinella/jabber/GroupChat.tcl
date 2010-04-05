@@ -681,7 +681,7 @@ proc ::GroupChat::Build {roomjid} {
     
     ::hooks::run buildGroupChatButtonTrayHook $wtray $roomjid
     
-    set shortBtWidth [expr [$wtray minwidth] + 8]
+    set shortBtWidth [expr {[$wtray minwidth] + 8}]
 
     # Top separator.
     ttk::separator $w.frall.divt -orient horizontal
@@ -711,7 +711,7 @@ proc ::GroupChat::Build {roomjid} {
     }
     SetTitle $chattoken
     
-    wm minsize $w [expr {$shortBtWidth < 240} ? 240 : $shortBtWidth] 320
+    wm minsize $w [expr {$shortBtWidth < 240 ? 240 : $shortBtWidth}] 320
     
     bind $w <<Find>>         [namespace code [list Find $dlgtoken]]
     bind $w <<FindAgain>>    [namespace code [list FindAgain $dlgtoken]]  
@@ -3097,9 +3097,9 @@ proc ::GroupChat::Popup {chattoken w tag x y} {
     update idletasks
     
     # Post popup menu.
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
-    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]   
+    set X [expr {[winfo rootx $w] + $x}]
+    set Y [expr {[winfo rooty $w] + $y}]
+    tk_popup $m [expr {int($X) - 10}] [expr {int($Y) - 10}]   
 }
 
 proc ::GroupChat::PostMenuCmd {m mType clicked} {
