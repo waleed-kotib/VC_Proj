@@ -46,7 +46,7 @@ proc ::CallTrace {num} {
     global  debugLevel
     if {$num <= $debugLevel} {
 	puts "Tcl call trace:"
-	for {set i [expr [info level] - 1]} {$i > 0} {incr i -1} {
+	for {set i [expr {[info level] - 1}]} {$i > 0} {incr i -1} {
 	    puts "\t$i: [string range [info level $i] 0 80] ..."
 	}
     }
@@ -59,7 +59,7 @@ set ::dbgt 0
 
 proc ::Timer {str} {
     if {$::dbgt} {
-	puts "milliseconds ($str): [expr [clock clicks -milliseconds]-$::t]"
+	puts "milliseconds ($str): [expr {[clock clicks -milliseconds]-$::t}]"
 	set ::t [clock clicks -milliseconds]
 	flush stdout
     }   

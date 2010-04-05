@@ -474,7 +474,7 @@ proc ::Dialogs::AboutQuickTimeTcl {} {
     set mw [lindex $theSize 0]
     set mh [lindex $theSize 1]
     lassign [::UI::GetScreenSize] screenW screenH
-    wm geometry $w +[expr ($screenW - $mw)/2]+[expr ($screenH - $mh)/2]
+    wm geometry $w +[expr {($screenW - $mw)/2}]+[expr {($screenH - $mh)/2}]
     update
     wm resizable $w 0 0
     $w.m play
