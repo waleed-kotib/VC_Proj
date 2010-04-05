@@ -137,7 +137,7 @@ body CardStack::CreateEmptyPileImage {} {
 
 body CardStack::CreateHalfCardImages {} {
     
-    set h2 [expr $height/2]
+    set h2 [expr {$height/2}]
     foreach card $cardsSorted {
 	set im [image create photo ${imgbase}::${card}2 \
 	  -width $width -height $height]

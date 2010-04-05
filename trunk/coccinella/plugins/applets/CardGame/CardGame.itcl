@@ -360,15 +360,15 @@ if {[itcl::find classes CardGame] == ""} {
 	
 	set x [$tkCanvas canvasx $x]
 	set y [$tkCanvas canvasy $y]
-	set dx [expr $x - $move(x)]
-	set dy [expr $y - $move(y)]
+	set dx [expr {$x - $move(x)}]
+	set dy [expr {$y - $move(y)}]
 	$tkCanvas move $move(id) $dx $dy
 	$tkCanvas move $move(idshadow) $dx $dy
 	set move(x) $x
 	set move(y) $y
 	
 	if {$sound && !$played && \
-	  [expr hypot($x - $move(x0), $y - $move(y0))] > $stickyDistance} {
+	  [expr {hypot($x - $move(x0), $y - $move(y0))}] > $stickyDistance} {
 	    ::Sounds::Play swash
 	    set played 1
 	}
@@ -380,7 +380,7 @@ if {[itcl::find classes CardGame] == ""} {
 	$tkCanvas delete $move(idshadow)
 	set x [$tkCanvas canvasx $x]
 	set y [$tkCanvas canvasy $y]
-	if {[expr hypot($x - $move(x0), $y - $move(y0))] < $stickyDistance} {
+	if {[expr {hypot($x - $move(x0), $y - $move(y0))}] < $stickyDistance} {
 	    $tkCanvas delete $idcard
 	} else {
 	    set coo [$tkCanvas coords $idcard]
@@ -457,7 +457,7 @@ if {[itcl::find classes CardGame] == ""} {
     body CardGame::StackPopup {x y} {
 	
 	set idpopup [$tkCanvas find withtag current]
-	tk_popup $cardstackMenu [expr int($x) - 10] [expr int($y) - 10] 
+	tk_popup $cardstackMenu [expr {int($x) - 10}] [expr {int($y) - 10}] 
     }
 
     body CardGame::CardPopup {x y} {
@@ -466,7 +466,7 @@ if {[itcl::find classes CardGame] == ""} {
 	set im [$tkCanvas itemcget $idpopup -image]
 	set state [$csObj CardSideFromImage $im]
 	set cardStatePopup $state
-	tk_popup $cardMenu [expr int($x) - 10] [expr int($y) - 10]   
+	tk_popup $cardMenu [expr {int($x) - 10}] [expr {int($y) - 10}]   
     }
     
     body CardGame::PopupRelease {} {
@@ -502,7 +502,7 @@ if {[itcl::find classes CardGame] == ""} {
 	NewCard
 	if {$idcard != ""} {
 	    foreach {xstack ystack} [$tkCanvas coords $idstack] break
-	    set x [expr $xstack + $stickyDistance + 20]
+	    set x [expr {$xstack + $stickyDistance + 20}]
 	    set y $ystack	    
 	    set cmd [list create image $x $y \
 	      -image [$tkCanvas itemcget $idcard -image] -anchor nw \
