@@ -295,7 +295,7 @@ proc ::SlideShow::Previous {w} {
 
     SaveCurrentCanvas $w
     set ind [lsearch -exact $priv(pages) $priv($w,current)]
-    OpenPage $w [lindex $priv(pages) [expr $ind - 1]]
+    OpenPage $w [lindex $priv(pages) [expr {$ind - 1}]]
     SetButtonState $w
 }
 
@@ -304,7 +304,7 @@ proc ::SlideShow::Next {w} {
 
     SaveCurrentCanvas $w
     set ind [lsearch -exact $priv(pages) $priv($w,current)]
-    OpenPage $w [lindex $priv(pages) [expr $ind + 1]]
+    OpenPage $w [lindex $priv(pages) [expr {$ind + 1}]]
     SetButtonState $w
 }
 

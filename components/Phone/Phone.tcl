@@ -197,9 +197,9 @@ proc ::Phone::LoadPrefs { } {
     set statePhone(inputVolume0) [CommandPhone getinputlevel]
     set statePhone(outputVolume0) [CommandPhone getoutputlevel]
 
-    SetInputLevel [expr double($statePhone(inputVolume0))*100]
+    SetInputLevel [expr {double($statePhone(inputVolume0))*100}]
     # This seems to be a bad idea since volume is set globally!
-    # SetOutputLevel [expr double($statePhone(outputVolume0))*100]
+    # SetOutputLevel [expr {double($statePhone(outputVolume0))*100}]
 
     InitPhone
     ::hooks::run phoneInit
@@ -332,7 +332,7 @@ proc ::Phone::UpdateLevels {in out} {
     # Update Call Length
     if { $statePhone(initDate0) >= 0 } {
         set tempDate [clock seconds]
-        set statePhone(callLength0) [expr $tempDate - $statePhone(initDate0)]
+        set statePhone(callLength0) [expr {$tempDate - $statePhone(initDate0)}]
 	if {[winfo exists $wphone]} {
 	    ::TPhone::TimeUpdate $wphone  \
 	      [clock format [expr {$statePhone(callLength0) - 3600}] -format %X]
@@ -530,7 +530,7 @@ proc ::Phone::Touch {{key ""} {alt_key ""}} {
     if { $key eq "" && $alt_key eq "" } {
         set last [string length $phonenumber]
         if { $last > 0} {
-            set phonenumber [string range $phonenumber 0 [expr $last - 2] ]
+            set phonenumber [string range $phonenumber 0 [expr {$last - 2}] ]
             set phoneNumberInput $phonenumber
             ::TPhone::KeyDelete $wphone
         } else {
@@ -725,9 +725,9 @@ proc ::Phone::Mute {type onoff} {
         "1" {
             set statePhone($onHoldLine) "no"
             if {$type eq "microphone"} {
-                SetInputLevel [expr double($statePhone(inputMuteVolume$line))*100]
+                SetInputLevel [expr {double($statePhone(inputMuteVolume$line))*100}]
             } else {
-                SetOutputLevel [expr double($statePhone(outputMuteVolume$line))*100]
+                SetOutputLevel [expr {double($statePhone(outputMuteVolume$line))*100}]
             }
         }
         "0" {
@@ -749,7 +749,7 @@ proc ::Phone::SetInputLevel {args} {
     variable statePhone
     variable wphone
 
-    set inputLevel [expr double($args)/100.0]
+    set inputLevel [expr {double($args)/100.0}]
     CommandPhone inputlevel $inputLevel
     set statePhone(inputVolume0) $inputLevel
     if {[winfo exists $wphone]} {
@@ -761,7 +761,7 @@ proc ::Phone::SetOutputLevel {args} {
     variable statePhone
     variable wphone
 
-    set outputLevel [expr double($args)/100.0]
+    set outputLevel [expr {double($args)/100.0}]
     CommandPhone outputlevel $outputLevel
     set statePhone(outputVolume0) $outputLevel
 

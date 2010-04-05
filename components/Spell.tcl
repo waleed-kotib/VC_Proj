@@ -163,9 +163,9 @@ proc ::Spell::Popup {w x y} {
 	    $menu add separator
 	    $menu add command -label [mc "Add to Dictionary"] \
 	      -command [namespace code [list AddWord $w]]
-	    set X [expr [winfo rootx $w] + $x]
-	    set Y [expr [winfo rooty $w] + $y]
-	    tk_popup $menu [expr int($X) - 10] [expr int($Y) - 10]   
+	    set X [expr {[winfo rootx $w] + $x}]
+	    set Y [expr {[winfo rooty $w] + $y}]
+	    tk_popup $menu [expr {int($X) - 10}] [expr {int($Y) - 10}]   
 	    update
 	    bind $menu <Unmap> {after idle {catch {destroy %W}}}	    
 	}

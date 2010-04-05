@@ -227,8 +227,8 @@ proc ::AddressBook::Popup {w v x y} {
     if {[string length $phone] == 0} {
         set typeClicked ""     
     }
-    set X [expr [winfo rootx $w] + $x]
-    set Y [expr [winfo rooty $w] + $y]
+    set X [expr {[winfo rootx $w] + $x}]
+    set Y [expr {[winfo rooty $w] + $y}]
     
     ::Debug 2 "\t phone=$phone, typeClicked=$typeClicked"
 
@@ -299,7 +299,7 @@ proc ::AddressBook::Popup {w v x y} {
     update idletasks
 
     # Post popup menu.
-    tk_popup $m [expr int($X) - 10] [expr int($Y) - 10]
+    tk_popup $m [expr {int($X) - 10}] [expr {int($Y) - 10}]
 
     # Mac bug... (else can't post menu while already posted if toplevel...)
     if {[string equal "macintosh" $this(platform)]} {
@@ -316,7 +316,7 @@ proc ::AddressBook::RemoveAddressbookDlg {phone} {
 
     set index [lsearch -exact $abline $removePhone]
 
-    set tmp [lreplace $abline [expr $index-1] $index]
+    set tmp [lreplace $abline [expr {$index-1}] $index]
     set abline $tmp
     
     set v [list "AddressBook" $phone]
@@ -401,7 +401,7 @@ proc ::AddressBook::NewAddressbookDlg {{phonenumber ""}} {
     # Trick to resize the labels wraplength.
     set script [format {
         update idletasks
-        %s configure -wraplength [expr [winfo reqwidth %s] - 20]
+        %s configure -wraplength [expr {[winfo reqwidth %s] - 20}]
     } $wbox.msg $w]   
     after idle $script
 }
@@ -415,8 +415,8 @@ proc ::AddressBook::ModifyAddressbookDlg {phone} {
     #Get Entry data from abline list
     set modifyPhone [lindex [lindex $phone end] end]
     set index [lsearch -exact $abline $modifyPhone]
-    set abName [lindex $abline [expr $index-1]]
-    set abPhoneNumber [lindex $abline [expr $index]]
+    set abName [lindex $abline [expr {$index-1}]]
+    set abPhoneNumber [lindex $abline [expr {$index}]]
     set oldPhoneNumber $abPhoneNumber
 
 
@@ -484,7 +484,7 @@ proc ::AddressBook::ModifyAddressbookDlg {phone} {
     # Trick to resize the labels wraplength.
     set script [format {
         update idletasks
-        %s configure -wraplength [expr [winfo reqwidth %s] - 20]
+        %s configure -wraplength [expr {[winfo reqwidth %s] - 20}]
     } $wbox.msg $w]
     after idle $script
 }
@@ -537,7 +537,7 @@ proc ::AddressBook::modifyItemAddressBook {w phone} {
         #---------- Updates Memory Addressbook -----------------
         set index [lsearch -exact $abline $phone]
 
-        set tmp [lreplace $abline [expr $index-1] $index $abName $abPhoneNumber]
+        set tmp [lreplace $abline [expr {$index-1}] $index $abName $abPhoneNumber]
         set abline $tmp
 
         #----- Updates GUI ---------
@@ -708,7 +708,7 @@ proc ::AddressBook::UpdateLogs {type remote remote_name initDate callLength} {
             }
         } else {
             if { [::ITree::IsItem $wtree $v] > 0 } {
-                set textUpdate "$textDate ([clock format [expr $callLength - 3600] -format %X]) $remote_name $remote"
+                set textUpdate "$textDate ([clock format [expr {$callLength - 3600}] -format %X]) $remote_name $remote"
                 set opts {-text $textUpdate}
                 eval {::ITree::ItemConfigure $wtree $v} $opts
             }
@@ -724,7 +724,7 @@ proc ::AddressBook::Search {phonenumber} {
     if {[info exists abline]} {    
         set index [lsearch $abline $phonenumber]
         if { $index >= 0 } {
-            set name [lindex $abline [expr $index-1]]
+            set name [lindex $abline [expr {$index-1}]]
         }
     }
     return $name

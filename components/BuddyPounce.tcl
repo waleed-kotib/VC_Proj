@@ -316,7 +316,7 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     # Trick to resize the labels wraplength.
     set script [format {
 	update idletasks
-	%s configure -wraplength [expr [winfo reqwidth %s] - 12]
+	%s configure -wraplength [expr {[winfo reqwidth %s] - 12}]
     } $wbox.msg $w]    
     after idle $script
 

@@ -44,8 +44,8 @@ proc ::Sounds::AfterFinalHook {} {
     
     set priv(canPlay)      0
     set priv(inited)       0
-    set priv(QuickTimeTcl) [expr ![catch {package require QuickTimeTcl}]]
-    set priv(snack)        [expr ![catch {package require snack}]]
+    set priv(QuickTimeTcl) [expr {![catch {package require QuickTimeTcl}]}]
+    set priv(snack)        [expr {![catch {package require snack}]}]
 
     # Skip if both 0.
     if {!$priv(QuickTimeTcl) && !$priv(snack)} {
@@ -673,7 +673,7 @@ proc ::Sounds::SavePrefsHook {} {
     
     # The snack play_gain seems to be set globally on the machine which is BAD!
     if {$priv(snack)} {
-	snack::audio play_gain [expr int($sprefs(volume))]
+	snack::audio play_gain [expr {int($sprefs(volume))}]
 	snack::audio selectOutput $sprefs(outputDevice)
     }
     set sprefs(midiCmd) $tmpPrefs(midiCmd)
