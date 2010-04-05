@@ -37,8 +37,8 @@ namespace eval ::notebox {
     variable this
     set this(w) $w
     set this(uid) 0
-    set this(x) [expr [winfo screenwidth .] - 30]
-    set this(y) [expr [winfo screenheight .] - 30]    
+    set this(x) [expr {[winfo screenwidth .] - 30}]
+    set this(y) [expr {[winfo screenheight .] - 30}]    
 }
 
 proc ::notebox::setposition {x y} {

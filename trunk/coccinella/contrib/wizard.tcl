@@ -568,7 +568,7 @@ proc ::wizard::Display {w name} {
     }
 
     set ind [lsearch -exact $suInfo(pages) $name]
-    set lastInd [expr [llength $suInfo(pages)] - 1]
+    set lastInd [expr {[llength $suInfo(pages)] - 1}]
     if {$widgetGlobals(debug) > 1} {
 	puts "ind=$ind, lastInd=$lastInd"
     }

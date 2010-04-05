@@ -35,7 +35,7 @@ proc ::timing::setbytes {key bytes} {
     variable priv
     
     set ms [clock clicks -milliseconds]
-    lappend priv($key) [list [expr double($ms)] $bytes]
+    lappend priv($key) [list [expr {double($ms)}] $bytes]
     return
 }
 

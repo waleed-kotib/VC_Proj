@@ -1072,7 +1072,7 @@ proc ttk::optionmenuex {w varName args} {
     variable $w
     upvar #0 $w state
 
-    if {[expr [llength $args] % 2 == 1]} {
+    if {[expr {[llength $args}] % 2 == 1]} {
 	return -code "args must have an even number of elements"
     }
     set state(varName) $varName

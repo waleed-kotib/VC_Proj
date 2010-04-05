@@ -57,10 +57,10 @@ proc ::md5::MD5Init {} {
     # RFC1321:3.3 - Initialize MD5 state structure
     array set tok \
         [list \
-             A [expr 0x67452301] \
-             B [expr 0xefcdab89] \
-             C [expr 0x98badcfe] \
-             D [expr 0x10325476] \
+             A [expr {0x67452301}] \
+             B [expr {0xefcdab89}] \
+             C [expr {0x98badcfe}] \
+             D [expr {0x10325476}] \
              n 0 i "" ]
     return $token
 }

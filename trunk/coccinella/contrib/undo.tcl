@@ -74,7 +74,7 @@ proc undo::add {token undocmd redocmd} {
     variable opts
     
     if {$stackPtr($token) < [llength $undoStack($token)]} {
-	set ind [expr $stackPtr($token) - 1]
+	set ind [expr {$stackPtr($token) - 1}]
 	set undoStack($token) [lrange $undoStack($token) 0 $ind]
 	set histStack($token) [lrange $histStack($token) 0 $ind]
     } elseif {[llength $undoStack($token)] == 50} {

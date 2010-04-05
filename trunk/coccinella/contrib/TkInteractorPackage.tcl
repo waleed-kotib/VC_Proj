@@ -88,19 +88,19 @@ proc vtkInteract {} {
     set vtkInteractCommandIndex 0
     
     bind .vtkInteract <Down> {
-      if { $vtkInteractCommandIndex < [expr $vtkInteractTagcount - 1] } {
+      if { $vtkInteractCommandIndex < [expr {$vtkInteractTagcount - 1}] } {
         incr vtkInteractCommandIndex
         set command_string [lindex $vtkInteractCommandList $vtkInteractCommandIndex]
         .vtkInteract.file.entry delete 0 end
         .vtkInteract.file.entry insert end $command_string
-      } elseif { $vtkInteractCommandIndex == [expr $vtkInteractTagcount - 1] } {
+      } elseif { $vtkInteractCommandIndex == [expr {$vtkInteractTagcount - 1}] } {
         .vtkInteract.file.entry delete 0 end
       }
     }
 
     bind .vtkInteract <Up> {
       if { $vtkInteractCommandIndex > 0 } { 
-        set vtkInteractCommandIndex [expr $vtkInteractCommandIndex - 1]
+        set vtkInteractCommandIndex [expr {$vtkInteractCommandIndex - 1}]
         set command_string [lindex $vtkInteractCommandList $vtkInteractCommandIndex]
         .vtkInteract.file.entry delete 0 end
         .vtkInteract.file.entry insert end $command_string
@@ -233,8 +233,8 @@ proc UpdateRenderer {widget x y} {
     $renderers InitTraversal; set RendererFound 0
     for {set i 0} {$i < $numRenderers} {incr i} {
         set CurrentRenderer [$renderers GetNextItem]
-        set vx [expr double($x) / $WindowX]
-        set vy [expr ($WindowY - double($y)) / $WindowY]
+        set vx [expr {double($x) / $WindowX}]
+        set vy [expr {($WindowY - double($y)) / $WindowY}]
         set viewport [$CurrentRenderer GetViewport]
         set vpxmin [lindex $viewport 0]
         set vpymin [lindex $viewport 1]
@@ -243,10 +243,10 @@ proc UpdateRenderer {widget x y} {
         if { $vx >= $vpxmin && $vx <= $vpxmax && \
         $vy >= $vpymin && $vy <= $vpymax} {
             set RendererFound 1
-            set WindowCenterX [expr double($WindowX)*(($vpxmax - $vpxmin)/2.0\
-                                + $vpxmin)]
-            set WindowCenterY [expr double($WindowY)*(($vpymax - $vpymin)/2.0\
-                                + $vpymin)]
+            set WindowCenterX [expr {double($WindowX)*(($vpxmax - $vpxmin)/2.0\
+                                + $vpxmin)}]
+            set WindowCenterY [expr {double($WindowY)*(($vpymax - $vpymin)/2.0\
+                                + $vpymin)}]
             break
         }
     }
@@ -295,8 +295,8 @@ proc Rotate {widget x y} {
 
     if { ! $RendererFound } { return }
 
-    $CurrentCamera Azimuth [expr ($LastX - $x)]
-    $CurrentCamera Elevation [expr ($y - $LastY)]
+    $CurrentCamera Azimuth [expr {($LastX - $x)}]
+    $CurrentCamera Elevation [expr {($y - $LastY)}]
     $CurrentCamera OrthogonalizeViewUp
 
     set LastX $x
@@ -327,8 +327,8 @@ proc Pan {widget x y} {
     set DPoint [$CurrentRenderer GetDisplayPoint]
     set focalDepth [lindex $DPoint 2]
 
-    set APoint0 [expr $WindowCenterX + ($x - $LastX)]
-    set APoint1 [expr $WindowCenterY - ($y - $LastY)]
+    set APoint0 [expr {$WindowCenterX + ($x - $LastX)}]
+    set APoint1 [expr {$WindowCenterY - ($y - $LastY)}]
 
     $CurrentRenderer SetDisplayPoint $APoint0 $APoint1 $focalDepth
     $CurrentRenderer DisplayToWorld
@@ -338,20 +338,20 @@ proc Pan {widget x y} {
         set RPoint2 [lindex $RPoint 2]
         set RPoint3 [lindex $RPoint 3]
     if { $RPoint3 != 0.0 } {
-        set RPoint0 [expr $RPoint0 / $RPoint3]
-        set RPoint1 [expr $RPoint1 / $RPoint3]
-        set RPoint2 [expr $RPoint2 / $RPoint3]
+        set RPoint0 [expr {$RPoint0 / $RPoint3}]
+        set RPoint1 [expr {$RPoint1 / $RPoint3}]
+        set RPoint2 [expr {$RPoint2 / $RPoint3}]
     }
 
     $CurrentCamera SetFocalPoint \
-      [expr ($FPoint0 - $RPoint0)/2.0 + $FPoint0] \
-      [expr ($FPoint1 - $RPoint1)/2.0 + $FPoint1] \
-      [expr ($FPoint2 - $RPoint2)/2.0 + $FPoint2]
+      [expr {($FPoint0 - $RPoint0)/2.0 + $FPoint0}] \
+      [expr {($FPoint1 - $RPoint1)/2.0 + $FPoint1}] \
+      [expr {($FPoint2 - $RPoint2)/2.0 + $FPoint2}]
 
     $CurrentCamera SetPosition \
-      [expr ($FPoint0 - $RPoint0)/2.0 + $PPoint0] \
-      [expr ($FPoint1 - $RPoint1)/2.0 + $PPoint1] \
-      [expr ($FPoint2 - $RPoint2)/2.0 + $PPoint2]
+      [expr {($FPoint0 - $RPoint0)/2.0 + $PPoint0}] \
+      [expr {($FPoint1 - $RPoint1)/2.0 + $PPoint1}] \
+      [expr {($FPoint2 - $RPoint2)/2.0 + $PPoint2}]
 
     set LastX $x
     set LastY $y
@@ -366,17 +366,17 @@ proc Zoom {widget x y} {
 
     if { ! $RendererFound } { return }
 
-    set zoomFactor [expr pow(1.02,(0.5*($y - $LastY)))]
+    set zoomFactor [expr {pow(1.02,(0.5*($y - $LastY)))}]
 
     if {[$CurrentCamera GetParallelProjection]} {
-      set parallelScale [expr [$CurrentCamera GetParallelScale] * $zoomFactor];
+      set parallelScale [expr {[$CurrentCamera GetParallelScale] * $zoomFactor}];
       $CurrentCamera SetParallelScale $parallelScale;
     } else {
       set clippingRange [$CurrentCamera GetClippingRange]
       set minRange [lindex $clippingRange 0]
       set maxRange [lindex $clippingRange 1]
-      $CurrentCamera SetClippingRange [expr $minRange / $zoomFactor] \
-                                      [expr $maxRange / $zoomFactor]
+      $CurrentCamera SetClippingRange [expr {$minRange / $zoomFactor}] \
+                                      [expr {$maxRange / $zoomFactor}]
       $CurrentCamera Dolly $zoomFactor
     }
 
@@ -403,8 +403,8 @@ proc Reset {widget x y} {
     $renderers InitTraversal; set RendererFound 0
     for {set i 0} {$i < $numRenderers} {incr i} {
         set CurrentRenderer [$renderers GetNextItem]
-        set vx [expr double($x) / $WindowX]
-        set vy [expr ($WindowY - double($y)) / $WindowY]
+        set vx [expr {double($x) / $WindowX}]
+        set vy [expr {($WindowY - double($y)) / $WindowY}]
 
         set viewport [$CurrentRenderer GetViewport]
         set vpxmin [lindex $viewport 0]
@@ -468,7 +468,7 @@ proc PickActor {widget x y} {
     set WindowY [lindex [$widget configure -height] 4]
 
     if { ! $RendererFound } { return }
-    ActorPicker Pick $x [expr $WindowY - $y - 1] 0.0 $CurrentRenderer
+    ActorPicker Pick $x [expr {$WindowY - $y - 1}] 0.0 $CurrentRenderer
     set assembly [ActorPicker GetAssembly]
 
     if { $PickedAssembly != "" && $PrePickedProperty != "" } {

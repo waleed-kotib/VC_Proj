@@ -534,8 +534,8 @@ proc svg2can::ParseEllipse {xmllist paropts transformL args} {
 	}
     }
     lappend opts -tags $tags
-    set coords [list [expr $cx - $rx] [expr $cy - $ry] \
-      [expr $cx + $rx] [expr $cy + $ry]]
+    set coords [list [expr {$cx - $rx}] [expr {$cy - $ry}] \
+      [expr {$cx + $rx}] [expr {$cy + $ry}]]
     set opts [MergePresentationAttr oval $opts $presAttr]
     set cmdList [list [concat create oval $coords $opts]]
 
@@ -895,10 +895,10 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
     
     set i 0
     set len  [llength $path]
-    set len1 [expr $len - 1]
-    set len2 [expr $len - 2]
-    set len4 [expr $len - 4]
-    set len6 [expr $len - 6]
+    set len1 [expr {$len - 1}]
+    set len2 [expr {$len - 2}]
+    set len4 [expr {$len - 4}]
+    set len6 [expr {$len - 6}]
     
     # 'i' is the index into the path list; points to the command (character).
     
@@ -913,10 +913,10 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 	    A - a {
 		# Not part of Tiny SVG.
 		incr i
-		foreach {rx ry phi fa fs x y} [lrange $path $i [expr $i + 6]] break
+		foreach {rx ry phi fa fs x y} [lrange $path $i [expr {$i + 6}]] break
 		if {!$isabsolute} {
-		    set x [expr $cpx + $x] 
-		    set y [expr $cpy + $y]
+		    set x [expr {$cpx + $x}] 
+		    set y [expr {$cpy + $y}]
 		    
 		}
 		set arcpars \
@@ -928,8 +928,8 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 			# Empty
 		    }
 		    lineto {
-			lappend co [lindex $path [expr $i + 5]] \
-			  [lindex $path [expr $i + 6]]
+			lappend co [lindex $path [expr {$i + 5}]] \
+			  [lindex $path [expr {$i + 6}]]
 		    }
 		    default {
 			
@@ -941,22 +941,22 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 
 			# Cannot handle rotations.
 			foreach {cx cy rx ry theta delta phi} $arcpars break
-			set box [list [expr $cx-$rx] [expr $cy-$ry] \
-			  [expr $cx+$rx] [expr $cy+$ry]]
+			set box [list [expr {$cx-$rx}] [expr {$cy-$ry}] \
+			  [expr {$cx+$rx}] [expr {$cy+$ry}]]
 			set itemopts [list -start $theta -extent $delta]
 			
 			# Try to interpret any subsequent data as a
 			# -style chord | pieslice.
 			# Z: chord; float float Z: pieslice.
-			set ia [expr $i + 7]
-			set ib [expr $i + 10]
+			set ia [expr {$i + 7}]
+			set ib [expr {$i + 10}]
 			
 			if {[regexp -nocase {z} [lrange $path $ia $ia]]} {
 			    lappend itemopts -style chord
 			    incr i 1
 			} elseif {[regexp -nocase {l +([-0-9\.]+) +([-0-9\.]+) +z} \
 			  [lrange $path $ia $ib] m mx my] &&  \
-			  [expr hypot($mx-$cx, $my-$cy)] < 4.0} {
+			  [expr {hypot($mx-$cx, $my-$cy)}] < 4.0} {
 			    lappend itemopts -style pieslice
 			    incr i 4
 			} else {
@@ -977,7 +977,7 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 		# C (p1 p2 p3) (p4 p5 p6)...           finalize item
 		# C (p1 p2 p3) S (p4 p5)...            let S trigger below
 		# C p1 p2 p3 anything else             finalize here
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		while {![regexp {[a-zA-Z]} [lindex $path [expr {$i+1}]]] && \
 		  ($i < $len6)} {
 		    set co [list $cpx $cpy] 
 		    if {$isabsolute} {
@@ -993,7 +993,7 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 		    }
 		    
 		    # Do not finalize item if S instruction.
-		    if {![string equal -nocase [lindex $path [expr $i+1]] "S"]} {
+		    if {![string equal -nocase [lindex $path [expr {$i+1}]] "S"]} {
 			lappend itemopts -smooth 1
 			set opts [concat $lineopts $itemopts]
 			lappend cmdList [concat create line $co $opts]
@@ -1004,31 +1004,31 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 		incr i
 	    }
 	    H {
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		while {![regexp {[a-zA-Z]} [lindex $path [expr {$i+1}]]] && \
 		  ($i < $len1)} {
 		    lappend co [lindex $path [incr i]] $cpy
 		}
 		incr i
 	    }
 	    h {
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		while {![regexp {[a-zA-Z]} [lindex $path [expr {$i+1}]]] && \
 		  ($i < $len1)} {
-		    lappend co [expr $cpx + [lindex $path [incr i]]] $cpy
+		    lappend co [expr {$cpx + [lindex $path [incr i]]}] $cpy
 		}
 		incr i
 	    }
 	    L - {[0-9]+} - {-[0-9]+} {
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		while {![regexp {[a-zA-Z]} [lindex $path [expr {$i+1}]]] && \
 		  ($i < $len2)} {
 		    lappend co [lindex $path [incr i]] [lindex $path [incr i]]
 		}
 		incr i
 	    }
 	    l {
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		while {![regexp {[a-zA-Z]} [lindex $path [expr {$i+1}]]] && \
 		  ($i < $len2)} {
-		    lappend co [expr $cpx + [lindex $path [incr i]]] \
-		      [expr $cpy + [lindex $path [incr i]]]
+		    lappend co [expr {$cpx + [lindex $path [incr i]]}] \
+		      [expr {$cpy + [lindex $path [incr i]]}]
 		}
 		incr i
 	    }
@@ -1040,8 +1040,8 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 		}
 		if {!$isabsolute && [info exists cpx]} {
 		    set co [list  \
-		      [expr $cpx + [lindex $path [incr i]]]
-		      [expr $cpy + [lindex $path [incr i]]]]
+		      [expr {$cpx + [lindex $path [incr i]]}]
+		      [expr {$cpy + [lindex $path [incr i]]}]]
 		} else {
 		    set co [list [lindex $path [incr i]] [lindex $path [incr i]]]
 		}
@@ -1056,7 +1056,7 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 		
 		# We may have a sequence of pairs of points following the Q.
 		# Make a fresh item for each.
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		while {![regexp {[a-zA-Z]} [lindex $path [expr {$i+1}]]] && \
 		  ($i < $len4)} {
 		    set co [list $cpx $cpy] 
 		    if {$isabsolute} {
@@ -1070,7 +1070,7 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 		    }
 		    
 		    # Do not finalize item if T instruction.
-		    if {![string equal -nocase [lindex $path [expr $i+1]] "T"]} {
+		    if {![string equal -nocase [lindex $path [expr {$i+1}]] "T"]} {
 			lappend itemopts -smooth 1
 			set opts [concat $lineopts $itemopts]
 			lappend cmdList [concat create line $co $opts]
@@ -1082,12 +1082,12 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 	    }
 	    S - s {
 		# Must annihilate last point added and use its mirror instead.
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		while {![regexp {[a-zA-Z]} [lindex $path [expr {$i+1}]]] && \
 		  ($i < $len4)} {
 		    
 		    # Control point from mirroring.
-		    set ctrlpx [expr 2 * $cpx - [lindex $co end-3]]
-		    set ctrlpy [expr 2 * $cpy - [lindex $co end-2]]
+		    set ctrlpx [expr {2 * $cpx - [lindex $co end-3]}]
+		    set ctrlpy [expr {2 * $cpy - [lindex $co end-2]}]
 		    lset co end-1 $ctrlpx
 		    lset co end $ctrlpy
 		    if {$isabsolute} {
@@ -1103,12 +1103,12 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 		
 		# Finalize item.
 		lappend itemopts -smooth 1
-		set dx [expr [lindex $co 0] - [lindex $co end-1]]
-		set dy [expr [lindex $co 1] - [lindex $co end]]
+		set dx [expr {[lindex $co 0] - [lindex $co end-1]}]
+		set dy [expr {[lindex $co 1] - [lindex $co end]}]
 		
 		# Check endpoints to see if closed polygon.
 		# Remove first AND end points if closed!
-		if {[expr hypot($dx, $dy)] < 0.5} {
+		if {[expr {hypot($dx, $dy)}] < 0.5} {
 		    set opts [concat $polygonopts $itemopts]
 		    set co [lrange $co 2 end-2]
 		    lappend cmdList [concat create polygon $co $opts]
@@ -1122,12 +1122,12 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 	    }
 	    T - t {
 		# Must annihilate last point added and use its mirror instead.
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		while {![regexp {[a-zA-Z]} [lindex $path [expr {$i+1}]]] && \
 		  ($i < $len2)} {
 		    
 		    # Control point from mirroring.
-		    set ctrlpx [expr 2 * $cpx - [lindex $co end-3]]
-		    set ctrlpy [expr 2 * $cpy - [lindex $co end-2]]
+		    set ctrlpx [expr {2 * $cpx - [lindex $co end-3]}]
+		    set ctrlpy [expr {2 * $cpy - [lindex $co end-2]}]
 		    lset co end-1 $ctrlpx
 		    lset co end $ctrlpy
 		    if {$isabsolute} {
@@ -1141,12 +1141,12 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 		
 		# Finalize item.
 		lappend itemopts -smooth 1
-		set dx [expr [lindex $co 0] - [lindex $co end-1]]
-		set dy [expr [lindex $co 1] - [lindex $co end]]
+		set dx [expr {[lindex $co 0] - [lindex $co end-1]}]
+		set dy [expr {[lindex $co 1] - [lindex $co end]}]
 		
 		# Check endpoints to see if closed polygon.
 		# Remove first AND end points if closed!
-		if {[expr hypot($dx, $dy)] < 0.5} {
+		if {[expr {hypot($dx, $dy)}] < 0.5} {
 		    set opts [concat $polygonopts $itemopts]
 		    set co [lrange $co 2 end-2]
 		    lappend cmdList [concat create polygon $co $opts]
@@ -1159,16 +1159,16 @@ proc svg2can::ParsePath {xmllist paropts transformL args} {
 		incr i
 	    }
 	    V {
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		while {![regexp {[a-zA-Z]} [lindex $path [expr {$i+1}]]] && \
 		  ($i < $len1)} {
 		    lappend co $cpx [lindex $path [incr i]]
 		}
 		incr i
 	    }
 	    v {
-		while {![regexp {[a-zA-Z]} [lindex $path [expr $i+1]]] && \
+		while {![regexp {[a-zA-Z]} [lindex $path [expr {$i+1}]]] && \
 		  ($i < $len1)} {
-		    lappend co $cpx [expr $cpy + [lindex $path [incr i]]]
+		    lappend co $cpx [expr {$cpy + [lindex $path [incr i]]}]
 		}
 		incr i
 	    }
@@ -1436,10 +1436,10 @@ proc svg2can::ParseRect {xmllist paropts transformL args} {
 	lset coords 1 $y
     }
     if {[info exists width]} {
-	lset coords 2 [expr [lindex $coords 0] + $width]
+	lset coords 2 [expr {[lindex $coords 0] + $width}]
     }
     if {[info exists height]} {
-	lset coords 3 [expr [lindex $coords 1] + $height]
+	lset coords 3 [expr {[lindex $coords 1] + $height}]
     }
     lappend opts -tags $tags
     set opts [MergePresentationAttr rectangle $opts $presAttr]
@@ -1572,14 +1572,14 @@ proc svg2can::ParseTspan {xmllist transformL xVar yVar xAttrVar yAttrVar opts} {
 	# nw to baseline
 	set ascent [font metrics $theFont -ascent]
 	set cmdList [list [concat create text  \
-	  $xAttr [expr $yAttr - $ascent + $baselineShift] $opts]]	
+	  $xAttr [expr {$yAttr - $ascent + $baselineShift}] $opts]]	
 	set cmdList [AddAnyTransformCmds $cmdList $transformL]
 	
 	# Each text insert moves both the running coordinate sets.
 	# newlines???
 	set deltax [font measure $theFont $str]
-	set x     [expr $x + $deltax]
-	set xAttr [expr $xAttr + $deltax]
+	set x     [expr {$x + $deltax}]
+	set xAttr [expr {$xAttr + $deltax}]
     }
     return $cmdList
 }
@@ -1609,10 +1609,10 @@ proc svg2can::ParseTextAttr {xmllist xVar yVar baselineShiftVar} {
 		set baselineShiftSet $value
 	    }
 	    dx {
-		set x [expr $x + $value]
+		set x [expr {$x + $value}]
 	    }
 	    dy {
-		set y [expr $y + $value]
+		set y [expr {$y + $value}]
 	    }
 	    id {
 		lappend opts -tags $value
@@ -1674,13 +1674,13 @@ proc svg2can::AttrToCoords {type attrlist} {
     switch -- $type {
 	circle {
 	    set coords [list  \
-	      [expr $attr(cx) - $attr(r)] [expr $attr(cy) - $attr(r)] \
-	      [expr $attr(cx) + $attr(r)] [expr $attr(cy) + $attr(r)]]	
+	      [expr {$attr(cx) - $attr(r)}] [expr {$attr(cy) - $attr(r)}] \
+	      [expr {$attr(cx) + $attr(r)}] [expr {$attr(cy) + $attr(r)}]]	
 	}
 	ellipse {
 	    set coords [list  \
-	      [expr $attr(cx) - $attr(rx)] [expr $attr(cy) - $attr(ry)] \
-	      [expr $attr(cx) + $attr(rx)] [expr $attr(cy) + $attr(ry)]]
+	      [expr {$attr(cx) - $attr(rx)}] [expr {$attr(cy) - $attr(ry)}] \
+	      [expr {$attr(cx) + $attr(rx)}] [expr {$attr(cy) + $attr(ry)}]]
 	}
 	image {
 	    set coords [list $attr(x) $attr(y)]
@@ -1699,7 +1699,7 @@ proc svg2can::AttrToCoords {type attrlist} {
 	}
 	rect {
 	    set coords [list $attr(x) $attr(y) \
-	      [expr $attr(x) + $attr(width)] [expr $attr(y) + $attr(height)]]
+	      [expr {$attr(x) + $attr(width)}] [expr {$attr(y) + $attr(height)}]]
 	}
 	text {
 	    set coords [list $attr(x) $attr(y)]
@@ -1919,7 +1919,7 @@ proc svg2can::parseColor {color} {
       $color - r g b]} {
 	set col "#"
 	foreach c [list $r $g $b] {
-	    append col [format %02x [expr round(2.55 * $c)]]
+	    append col [format %02x [expr {round(2.55 * $c)}]]
 	}
     } elseif {[regexp {rgb\(([0-9]{1,3}), *([0-9]{1,3}), *([0-9]{1,3})\)}  \
       $color - r g b]} {
@@ -2023,12 +2023,12 @@ proc svg2can::StyleToOpts {type styleList args} {
 		
 		# Use pixels instead of points.
 		if {[regexp {([0-9\.]+)pt} $value match pts]} {
-		    set pix [expr int($pts * [tk scaling] + 0.01)]
+		    set pix [expr {int($pts * [tk scaling] + 0.01)}]
 		    lset fontSpec 1 "-$pix"
 		} elseif {[regexp {([0-9\.]+)px} $value match pix]} {
-		    lset fontSpec 1 [expr int(-$pix)]
+		    lset fontSpec 1 [expr {int(-$pix)}]
 		} else {
-		    lset fontSpec 1 [expr int(-$value)]
+		    lset fontSpec 1 [expr {int(-$value)}]
 		}
 		set haveFont 1
 	    }
@@ -2066,7 +2066,7 @@ proc svg2can::StyleToOpts {type styleList args} {
 	    }
 	    stroke-dasharray {
 		set dash [split $value ,]
-		if {[expr [llength $dash]%2 == 1]} {
+		if {[expr {[llength $dash]%2 == 1}]} {
 		    set dash [concat $dash $dash]
 		}
 	    }
@@ -2201,12 +2201,12 @@ proc svg2can::EllipticArcParameters {x1 y1 rx ry phi fa fs x2 y2} {
     if {($x1 == $x2) && ($y1 == $y2)} {
 	return skip
     }
-    if {[expr $rx == 0] || [expr $ry == 0]} {
+    if {[expr {$rx == 0}] || [expr {$ry == 0}]} {
 	return lineto
     }
-    set rx [expr abs($rx)]
-    set ry [expr abs($ry)]
-    set phi [expr fmod($phi, 360) * $pi/180.0]
+    set rx [expr {abs($rx)}]
+    set ry [expr {abs($ry)}]
+    set phi [expr {fmod($phi, 360) * $pi/180.0}]
     if {$fa != 0} {
 	set fa 1
     }
@@ -2215,66 +2215,66 @@ proc svg2can::EllipticArcParameters {x1 y1 rx ry phi fa fs x2 y2} {
     }
     
     # F.6.5 Conversion from endpoint to center parameterization 
-    set dx [expr ($x1-$x2)/2.0]
-    set dy [expr ($y1-$y2)/2.0]
-    set x1prime [expr cos($phi) * $dx + sin($phi) * $dy]
-    set y1prime [expr -sin($phi) * $dx + cos($phi) * $dy]
+    set dx [expr {($x1-$x2)/2.0}]
+    set dy [expr {($y1-$y2)/2.0}]
+    set x1prime [expr {cos($phi) * $dx + sin($phi) * $dy}]
+    set y1prime [expr {-sin($phi) * $dx + cos($phi) * $dy}]
     
     # F.6.6 Correction of out-of-range radii
-    set rx [expr abs($rx)]
-    set ry [expr abs($ry)]
-    set x1prime2 [expr $x1prime * $x1prime]
-    set y1prime2 [expr $y1prime * $y1prime]
-    set rx2 [expr $rx * $rx]
-    set ry2 [expr $ry * $ry]
-    set lambda [expr $x1prime2/$rx2 + $y1prime2/$ry2]
+    set rx [expr {abs($rx)}]
+    set ry [expr {abs($ry)}]
+    set x1prime2 [expr {$x1prime * $x1prime}]
+    set y1prime2 [expr {$y1prime * $y1prime}]
+    set rx2 [expr {$rx * $rx}]
+    set ry2 [expr {$ry * $ry}]
+    set lambda [expr {$x1prime2/$rx2 + $y1prime2/$ry2}]
     if {$lambda > 1.0} {
-	set rx [expr sqrt($lambda) * $rx]
-	set ry [expr sqrt($lambda) * $ry]
-	set rx2 [expr $rx * $rx]
-	set ry2 [expr $ry * $ry]
+	set rx [expr {sqrt($lambda) * $rx}]
+	set ry [expr {sqrt($lambda) * $ry}]
+	set rx2 [expr {$rx * $rx}]
+	set ry2 [expr {$ry * $ry}]
     }    
     
     # Compute cx' and cy'
-    set sign [expr {$fa == $fs} ? -1 : 1]
-    set square [expr ($rx2 * $ry2 - $rx2 * $y1prime2 - $ry2 * $x1prime2) /  \
-      ($rx2 * $y1prime2 + $ry2 * $x1prime2)]
-    set root [expr sqrt(abs($square))]
-    set cxprime [expr  $sign * $root * $rx * $y1prime/$ry]
-    set cyprime [expr -$sign * $root * $ry * $x1prime/$rx]
+    set sign [expr {$fa == $fs ? -1 : 1}]
+    set square [expr {($rx2 * $ry2 - $rx2 * $y1prime2 - $ry2 * $x1prime2) /  \
+      ($rx2 * $y1prime2 + $ry2 * $x1prime2)}]
+    set root [expr {sqrt(abs($square))}]
+    set cxprime [expr {$sign * $root * $rx * $y1prime/$ry}]
+    set cyprime [expr {-$sign * $root * $ry * $x1prime/$rx}]
     
     # Compute cx and cy from cx' and cy'
-    set cx [expr $cxprime * cos($phi) - $cyprime * sin($phi) + ($x1 + $x2)/2.0]
-    set cy [expr $cxprime * sin($phi) + $cyprime * cos($phi) + ($y1 + $y2)/2.0]
+    set cx [expr {$cxprime * cos($phi) - $cyprime * sin($phi) + ($x1 + $x2)/2.0}]
+    set cy [expr {$cxprime * sin($phi) + $cyprime * cos($phi) + ($y1 + $y2)/2.0}]
 
     # Compute start angle and extent
-    set ux [expr ($x1prime - $cxprime)/double($rx)]
-    set uy [expr ($y1prime - $cyprime)/double($ry)]
-    set vx [expr (-$x1prime - $cxprime)/double($rx)]
-    set vy [expr (-$y1prime - $cyprime)/double($ry)]
+    set ux [expr {($x1prime - $cxprime)/double($rx)}]
+    set uy [expr {($y1prime - $cyprime)/double($ry)}]
+    set vx [expr {(-$x1prime - $cxprime)/double($rx)}]
+    set vy [expr {(-$y1prime - $cyprime)/double($ry)}]
 
-    set sign [expr {$uy > 0} ? 1 : -1]
-    set theta [expr $sign * acos( $ux/hypot($ux, $uy) )]
+    set sign [expr {$uy > 0 ? 1 : -1}]
+    set theta [expr {$sign * acos( $ux/hypot($ux, $uy) )}]
 
-    set sign [expr {$ux * $vy - $uy * $vx > 0} ? 1 : -1]
-    set delta [expr $sign * acos( ($ux * $vx + $uy * $vy) /  \
-      (hypot($ux, $uy) * hypot($vx, $vy)) )]
+    set sign [expr {$ux * $vy - $uy * $vx > 0 ? 1 : -1}]
+    set delta [expr {$sign * acos( ($ux * $vx + $uy * $vy) /  \
+      (hypot($ux, $uy) * hypot($vx, $vy)) )}]
     
     # To degrees
-    set theta [expr $theta * 180.0/$pi]
-    set delta [expr $delta * 180.0/$pi]
-    #set delta [expr fmod($delta, 360)]
-    set phi   [expr fmod($phi, 360)]
+    set theta [expr {$theta * 180.0/$pi}]
+    set delta [expr {$delta * 180.0/$pi}]
+    #set delta [expr {fmod($delta, 360)}]
+    set phi   [expr {fmod($phi, 360)}]
     
     if {($fs == 0) && ($delta > 0)} {
-	set delta [expr $delta - 360]
+	set delta [expr {$delta - 360}]
     } elseif {($fs ==1) && ($delta < 0)} {
-	set delta [expr $delta + 360]
+	set delta [expr {$delta + 360}]
     }
 
     # NOTE: direction of angles are opposite for Tk and SVG!
-    set theta [expr -1*$theta]
-    set delta [expr -1*$delta]
+    set theta [expr {-1*$theta}]
+    set delta [expr {-1*$delta}]
     
     return [list $cx $cy $rx $ry $theta $delta $phi]
 }
@@ -2313,13 +2313,13 @@ proc svg2can::BaselineShiftToDy {baselineshift fontSpec} {
     
     switch -regexp -- $baselineshift {
 	sub {
-	    set dy [expr 0.8 * $linespace]
+	    set dy [expr {0.8 * $linespace}]
 	}
 	super {
-	    set dy [expr -0.8 * $linespace]
+	    set dy [expr {-0.8 * $linespace}]
 	}
 	{-?[0-9]+%} {
-	    set dy [expr 0.01 * $linespace * [string trimright $baselineshift %]]
+	    set dy [expr {0.01 * $linespace * [string trimright $baselineshift %]}]
 	}
 	default {
 	    # 0.5em ?
@@ -2340,8 +2340,8 @@ proc svg2can::PathAddRelative {path coVar iVar cpxVar cpyVar} {
     upvar $cpxVar cpx
     upvar $cpyVar cpy
 
-    set newx [expr $cpx + [lindex $path [incr i]]]
-    set newy [expr $cpy + [lindex $path [incr i]]]
+    set newx [expr {$cpx + [lindex $path [incr i]]}]
+    set newy [expr {$cpy + [lindex $path [incr i]]}]
     lappend co $newx $newy
     set cpx $newx
     set cpy $newy
@@ -2399,8 +2399,8 @@ proc svg2can::TransformAttrListToMatrix {transform} {
 	    }
 	    rotate {
 		set phi [lindex $value 0]
-		set cosPhi  [expr cos($degrees2Radians*$phi)]
-		set sinPhi  [expr sin($degrees2Radians*$phi)]
+		set cosPhi  [expr {cos($degrees2Radians*$phi)}]
+		set sinPhi  [expr {sin($degrees2Radians*$phi)}]
 		set msinPhi [expr {-1.0*$sinPhi}]
 		if {[llength $value] == 1} {
 		    set m([incr i])  \

@@ -408,13 +408,13 @@ proc socks5::parse_atyp_addr {token addrVar portVar} {
 	    set addr ""
 	    foreach n [list $i0 $i1 $i2 $i3] {
 		# Translate to unsigned!
-		append addr [expr ( $n + 0x100 ) % 0x100]
+		append addr [expr {( $n + 0x100 ) % 0x100}]
 		if {$n <= 2} {
 		    append addr .
 		}
 	    }
 	    # Translate to unsigned!
-	    set port [expr ( $port + 0x10000 ) % 0x10000]
+	    set port [expr {( $port + 0x10000 ) % 0x10000}]
 	}
 	3 {
 	    if {[catch {read $sock 1} data] || [eof $sock]} {
@@ -422,7 +422,7 @@ proc socks5::parse_atyp_addr {token addrVar portVar} {
 	    }        
 	    binary scan $data c len
 	    debug 2 "\tlen=$len"
-	    set len [expr ( $len + 0x100 ) % 0x100]
+	    set len [expr {( $len + 0x100 ) % 0x100}]
 	    if {[catch {read $sock $len} data] || [eof $sock]} {
 		return -code error network-failure
 	    }        
@@ -433,7 +433,7 @@ proc socks5::parse_atyp_addr {token addrVar portVar} {
 	    }        
 	    binary scan $data S port
 	    # Translate to unsigned!
-	    set port [expr ( $port + 0x10000 ) % 0x10000]
+	    set port [expr {( $port + 0x10000 ) % 0x10000}]
 	    debug 2 "\tport=$port"
 	}
 	4 {
@@ -547,7 +547,7 @@ proc socks5::serverinit {sock ip port command args} {
     set ver ""
     set method $const(nomatchingmethod)
     binary scan $data cc ver nmethods
-    set nmethods [expr ( $nmethods + 0x100 ) % 0x100]
+    set nmethods [expr {( $nmethods + 0x100 ) % 0x100}]
     debug 2 "\tver=$ver, nmethods=$nmethods"
     
     # Error checking. Must have either noauth or userpasswdauth.
@@ -561,7 +561,7 @@ proc socks5::serverinit {sock ip port command args} {
 	    return
 	}    
 	binary scan $data c method
-	set method [expr ( $method + 0x100 ) % 0x100]
+	set method [expr {( $method + 0x100 ) % 0x100}]
 	debug 2 "\tmethod=$method"
 	if {[string equal $method 0]} {
 	    set noauthmethod 1
@@ -620,7 +620,7 @@ proc socks5::serv_auth {token} {
     set auth_ver ""
     set method $const(nomatchingmethod)
     binary scan $data cc auth_ver ulen
-    set ulen [expr ( $ulen + 0x100 ) % 0x100]
+    set ulen [expr {( $ulen + 0x100 ) % 0x100}]
     debug 2 "\tauth_ver=$auth_ver, ulen=$ulen"
     if {![string equal $auth_ver 2]} {
 	serv_finish $token "Wrong authorization method"
@@ -636,7 +636,7 @@ proc socks5::serv_auth {token} {
 	return
     }        
     binary scan $data c plen
-    set plen [expr ( $plen + 0x100 ) % 0x100]
+    set plen [expr {( $plen + 0x100 ) % 0x100}]
     debug 2 "\tplen=$plen"
     if {[catch {read $sock $plen} data] || [eof $sock]} {
 	serv_finish $token network-failure

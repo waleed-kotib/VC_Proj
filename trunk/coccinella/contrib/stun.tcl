@@ -308,7 +308,7 @@ proc stun::NewID {} {
     variable MAX_INT
     
     for {set i 0} {$i < 4} {incr i} {
-	set r [expr int($MAX_INT * rand())]
+	set r [expr {int($MAX_INT * rand())}]
 	set b$i [binary format I $r]
     }
     return $b0$b1$b2$b3

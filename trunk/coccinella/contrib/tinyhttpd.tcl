@@ -990,7 +990,7 @@ proc ::tinyhttpd::CopyDone {token bytes {error {}}} {
     } elseif {[catch {eof $fd} iseof] || $iseof} {
 	Finish $token
     } elseif {$state(haverange) && \
-      ([tell $state(fd)] >= [expr $state(range,end) + 1])} {
+      ([tell $state(fd)] >= [expr {$state(range,end) + 1}])} {
 	Finish $token
     } else {
 	CopyStart $s $token
@@ -1025,7 +1025,7 @@ proc tinyhttpd::Write {s token} {
     } elseif {[catch {eof $fd} iseof] || $iseof} {
 	Finish $token
     } elseif {$state(haverange) && \
-      ([tell $state(fd)] >= [expr $state(range,end) + 1])} {
+      ([tell $state(fd)] >= [expr {$state(range,end) + 1}])} {
 	Finish $token	
     } else {
 	if {[catch {
@@ -1230,7 +1230,7 @@ proc ::tinyhttpd::BuildHtmlForDir {token} {
 	    set type $name
 	}
 	if {[string equal $style "css"]} {
-	    set class $html(class,css,[expr $i%2])
+	    set class $html(class,css,[expr {$i%2}])
 	    append htmlStuff [format $html(line,css) \
 	      $class $link $img $name $size $type $dateAndTime]
 	} else {
@@ -1334,7 +1334,7 @@ proc ::tinyhttpd::stop {} {
 
 proc ::tinyhttpd::anyactive {} {
 
-    return [expr {[llength [getTokenList]] > 1} ? 1 : 0]
+    return [expr {[llength [getTokenList]] > 1 ? 1 : 0}]
 }
 
 proc tinyhttpd::getTokenList {} {
@@ -1373,8 +1373,8 @@ proc ::tinyhttpd::avergaebytespersec {} {
     set totms 0
     foreach key [array names timing "*"] {
 	incr totbytes [lindex $timing($key) end]
-	incr totms [expr [lindex $timing($key) end-1] - \
-	  [lindex $timing($key) 0]]
+	incr totms [expr {[lindex $timing($key) end-1] - \
+	  [lindex $timing($key) 0]}]
     }
     return [expr {1000 * $totbytes / ($totms+1)}]
 }
@@ -1445,11 +1445,11 @@ proc ::tinyhttpd::FormatBytesText {bytes} {
     if {$bytes < 1} {
 	return 0
     }
-    set log10 [expr log10($bytes)]
+    set log10 [expr {log10($bytes)}]
     if {$log10 >= 6} {
-	set text "[format "%3.1f" [expr $bytes/1000000.0]]M"
+	set text "[format "%3.1f" [expr {$bytes/1000000.0}]]M"
     } elseif {$log10>= 3} {
-	set text "[format "%3.1f" [expr $bytes/1000.0]]k"
+	set text "[format "%3.1f" [expr {$bytes/1000.0}]]k"
     } else {
 	set text $bytes
     }
