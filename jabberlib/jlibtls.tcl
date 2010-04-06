@@ -131,6 +131,7 @@ proc jlib::tls_proceed {jlibname tag xmllist} {
 	set require 0
     } 
     # Make it a SSL connection.
+::Debug 2 "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA using cafile: $cafile require: $require"
     if {[catch {
 	tls::import $sock -cafile $cafile -certfile $certfile -keyfile $keyfile \
 	  -request 1 -server 0 -require $require -ssl2 no -ssl3 yes -tls1 yes
@@ -174,7 +175,7 @@ proc jlib::tls_handshake {jlibname} {
 	      [namespace code [list tls_handshake $jlibname]]
 	} else {
 	    close $sock
-	    tls_finish $jlibname starttls-failure $err
+	    tls_finish $jlibname starttls-failure $complete
 	}
     } elseif {$complete} {
 	Debug 2 "\t number of TLS handshakes=$locals(tls,retry)"
