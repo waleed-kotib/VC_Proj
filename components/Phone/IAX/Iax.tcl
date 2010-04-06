@@ -31,7 +31,8 @@ namespace eval ::Iax {
     if {![component::exists Phone]} {
 	return
     }
-    if {[catch {package require iaxclient}]} {
+    if {[catch {package require iaxclient} err]} {
+        ::Debug 2 "Iax.tcl unable to load/find iaxclient package: $err"
 	return
     }
     if {[catch {package require IaxPrefs}]} {
