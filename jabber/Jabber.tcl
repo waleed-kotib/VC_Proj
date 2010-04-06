@@ -377,7 +377,7 @@ proc ::Jabber::FactoryDefaults {} {
       [lindex $jserver(profile) 0]
     
     #
-    set jprefs(urlServersList) "http://www.jabber.org/basicservers.xml"
+    set jprefs(urlServersList) "http://xmpp.org/services/services.xml"
         
     # Menu definitions for the Roster/services window. Collects minimal Jabber
     # stuff.

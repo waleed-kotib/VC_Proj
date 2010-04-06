@@ -244,7 +244,7 @@ proc ::SetupAss::HttpCommand {htoken} {
 	
 	    # Get and parse xml.
 	    set xml [::httpex::data $htoken]    
-	    set xtoken [tinydom::parse $xml -package qdxml]
+	    set xtoken [tinydom::parse $xml -package xml]
 	    set xmllist [tinydom::documentElement $xtoken]
 	    set jidL [list]
 	    
