@@ -22,7 +22,6 @@
 package require chasearrows
 package require httpex
 package require tinydom
-package require qdxml
 
 package provide JPubServers 1.0
 
@@ -223,7 +222,7 @@ proc ::JPubServers::HttpCommand {w token} {
 	    
 	    # Get and parse xml.
 	    set xml [::httpex::data $token]    
-	    set xtoken [tinydom::parse $xml -package qdxml]
+	    set xtoken [tinydom::parse $xml -package xml]
 	    set xmllist [tinydom::documentElement $xtoken]
 	    set jidL [list]
 	    

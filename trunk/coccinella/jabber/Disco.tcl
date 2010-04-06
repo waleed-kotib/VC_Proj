@@ -1716,7 +1716,7 @@ proc ::Disco::AddHttpCommand {token} {
 	
 	    # Get and parse xml.
 	    set xml [::httpex::data $token]    
-	    set xtoken [tinydom::parse $xml -package qdxml]
+	    set xtoken [tinydom::parse $xml -package xml]
 	    set xmllist [tinydom::documentElement $xtoken]
 	    set jidL [list]
 	    
