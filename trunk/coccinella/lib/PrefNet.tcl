@@ -233,6 +233,7 @@ proc ::PrefNet::BrowseCACertFile {} {
 proc ::PrefNet::ServersSaveHook {} {
     global  prefs jprefs
     variable tmpServPrefs
+    variable tmpCertPrefs
 
     set prefs(thisServPort)      $tmpServPrefs(thisServPort)
     set prefs(httpdPort)         $tmpServPrefs(httpdPort)
