@@ -141,7 +141,7 @@ proc addabsolutepathwithrelative {absPath relPath} {
     # as there are up dirs in the relative path.    
     if {$nup > 0} {
 	set iend [expr {[llength $absP] - 1}]
-	set upAbsP [lreplace $absP [expr {$iend - $nup + 1] $iend}]
+	set upAbsP [lreplace $absP [expr {$iend - $nup + 1}] $iend]
     } else {
 	set upAbsP $absP
     }
