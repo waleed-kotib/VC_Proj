@@ -126,7 +126,7 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     ::Debug 2 "::BuddyPounce::Build typeselected=$typeselected, item=$item, groupL=$groupL"
 
     # Initialize the state variable, an array, that keeps is the storage.
-    set uid [join [split [jlib::barejid $item] "@."] ""]
+    set uid [join [split [jlib::barejid $item] "@. "] ""]
     set token [namespace current]::$uid
     variable $token
     upvar 0 $token state
@@ -230,7 +230,6 @@ proc ::BuddyPounce::Build {typeselected item groupL} {
     foreach estr $events(str) ekey $events(keys) {
 
 	$wnb add [ttk::frame $wnb.$ekey] -text [mc $estr] -sticky news
-		
 	# Action
 	set wact $wnb.$ekey.f
 	ttk::frame $wact -padding [option get . notebookPagePadding {}]
