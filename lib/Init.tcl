@@ -409,6 +409,7 @@ proc ::Init::SetPrefsPaths {} {
     set this(recentAvatarPath)  [file join $path avatar recent]
     set this(scriptsPath)       [file join $path scripts]
     set this(backgroundsPath)   [file join $path backgrounds]
+    set this(certificatesPath)  [file join $path certificates]
 
     set pname $this(prefsName)
 
