@@ -32,7 +32,7 @@ namespace eval ::PrefNet:: {
 }
 
 proc ::PrefNet::InitPrefsHook { } {
-    global  prefs jprefs
+    global  prefs jprefs this
         
     # ip numbers, port numbers, and names.
     set prefs(thisServPort) 8235
@@ -45,7 +45,7 @@ proc ::PrefNet::InitPrefsHook { } {
     set jprefs(tls,usekeyfile) 0
     set jprefs(tls,keyfile) ""
     set jprefs(tls,usecafile) 0
-    set jprefs(tls,cafile) ""
+    set jprefs(tls,cafile) [file join $this(certificatesPath) cacerts.pem]
 
     ::PrefUtils::Add [list  \
       [list prefs(thisServPort)    prefs_thisServPort    $prefs(thisServPort)]   \
@@ -57,6 +57,14 @@ proc ::PrefNet::InitPrefsHook { } {
       [list jprefs(tls,usecafile)   jprefs_tls_usecafile   $jprefs(tls,usecafile)]   \
       [list jprefs(tls,cafile)      jprefs_tls_cafile      $jprefs(tls,cafile)]   \
       ]    
+    # in case the default certificate location is used, check whether the default 
+    # certificate file is in place, if not, copy it.
+    if { $jprefs(tls,cafile) eq [file join $this(certificatesPath) cacerts.pem]} {
+        if {![file exists $jprefs(tls,cafile)]} { 
+            file mkdir $this(certificatesPath)
+	    file copy [file join $this(appPath) certificates cacerts.pem] $jprefs(tls,cafile)
+	}
+    }
 }
 
 proc ::PrefNet::BuildPrefsHook {wtree nbframe} {
