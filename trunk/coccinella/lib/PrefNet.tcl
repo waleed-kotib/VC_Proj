@@ -62,7 +62,11 @@ proc ::PrefNet::InitPrefsHook { } {
     if { $jprefs(tls,cafile) eq [file join $this(certificatesPath) cacerts.pem]} {
         if {![file exists $jprefs(tls,cafile)]} { 
             file mkdir $this(certificatesPath)
-	    file copy [file join $this(appPath) certificates cacerts.pem] $jprefs(tls,cafile)
+	    if {[info exists starkit::topdir]} {
+	        file copy [file join $starkit::topdir certificates cacerts.pem] $jprefs(tls,cafile)
+	    } else {
+	        file copy [file join $this(appPath) certificates cacerts.pem] $jprefs(tls,cafile)
+	    }
 	}
     }
 }
