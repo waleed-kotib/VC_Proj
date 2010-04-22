@@ -909,7 +909,9 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    #::Jabber::DoCloseClientConnection
 	    SetClosedState
-	    ui::dialog -icon error -title [mc "Error"] -type ok \
+	    # Added the arbitrary -timeout argument, necessary
+	    # to allow the start of ::Login::AutoReLogin mechanism.
+	    ui::dialog -icon error -title [mc "Error"] -type ok -timeout 10000 \
 	      -message [mc "The connection was unexpectedly broken."]
 	}
 	streamerror - xmpp-streams-error* {
@@ -919,7 +921,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    } else {
 		set msg [mc "Received a fatal error: %s The connection is closed." ""]
 	    }
-	    ui::dialog -title [mc "Error"] -icon error -type ok -message $msg
+	    ui::dialog -title [mc "Error"] -icon error -type ok -timeout 10000 -message $msg
 	}
 	xmlerror {
 	    
@@ -931,7 +933,9 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    } else {
 		set msg [mc "Received a fatal error: %s The connection is closed." ""]
 	    }
-	    ui::dialog -title [mc "Error"] -icon error -type ok -message $msg
+	    # Added the arbitrary -timeout argument, necessary
+	    # to allow the start of ::Login::AutoReLogin mechanism.
+	    ui::dialog -title [mc "Error"] -icon error -type ok -timeout 10000 -message $msg
 	}
 	networkerror {
 	    
@@ -943,9 +947,13 @@ proc ::Jabber::ClientProc {jlibName what args} {
 		append msg "\n"
 		append msg $argsA(-errormsg)
 	    }
-	    ui::dialog -icon error -title [mc "Error"] -type ok -message $msg
+	    # Added the arbitrary -timeout argument, necessary
+	    # to allow the start of ::Login::AutoReLogin mechanism.
+	    ui::dialog -icon error -title [mc "Error"] -type ok -timeout 10000 -message $msg
 	}
     }
+    # start the automatic relogin procedure
+    ::Login::AutoReLogin
     return $ishandled
 }
 
