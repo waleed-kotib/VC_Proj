@@ -63,7 +63,8 @@ proc ::PrefNet::InitPrefsHook { } {
         if {![file exists $jprefs(tls,cafile)]} { 
             file mkdir $this(certificatesPath)
 	    if {[info exists ::starkit::topdir]} {
-	        file copy [file join $::starkit::topdir certificates cacerts.pem] $jprefs(tls,cafile)
+		# This file should always be available in the binary, no need to catch an exception here
+	        file copy [file join $::starkit::topdir lib app-Coccinella certificates cacerts.pem] $jprefs(tls,cafile)
 	    } else {
     		if {[catch {
         	    file copy [file join $this(appPath) certificates cacerts.pem] $jprefs(tls,cafile)
