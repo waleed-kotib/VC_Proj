@@ -33,6 +33,7 @@ namespace eval ::Login {
     variable password
     variable uid 0
     variable pending 0
+    variable reconnecting 0
     
     # Add all event hooks.
     ::hooks::register quitAppHook     ::Login::QuitAppHook
@@ -639,6 +640,22 @@ proc ::Login::LaunchHook {} {
     }
 }
 
+# Called by ::Login::AutoLoginCB.
+# Starts a ::Login::LoginCmd after an arbitrary timeout.
+# This is my solution to: https://bugs.launchpad.net/coccinella/+bug/140408
+#
+# 26/06/2009 - Mirko Graziani coccinella@mirkobau.it
+# ------------------------------------------------------
+proc ::Login::AutoReLogin {} {
+   # Coccinella will relogin automatically every minute.
+   #ui::dialog -icon error -title [mc "Info"] -type ok -timeout 1000 -message "AutoReLogin in progress..."
+   variable reconnecting
+   ::JUI::SetAppMessage [mc "Lost connection to server, reconnecting"]...
+   set reconnecting 1
+   after 60000 {::Login::LoginCmd}
+   
+}
+
 # Login::LoginCmd --
 # 
 #       A way to login using the currently selected profile without using dialog.
@@ -761,7 +778,7 @@ proc ::Login::QuitAppHook {} {
 }
 
 proc ::Login::AutoLoginCB {token {errcode ""} {errmsg ""}} {
-    # empty
+    AutoReLogin
 }
 
 #-------------------------------------------------------------------------------
@@ -868,6 +885,7 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
     variable $token
     upvar 0 $token highstate
     variable pending
+    variable reconnecting
     
     set pending 0
 
@@ -878,9 +896,11 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
 	    ::JUI::FixUIWhen "connectfin"
 	    ::JUI::SetConnectState "connectfin"
 	    SetLoginStateRunHook
+	    set reconnecting 0
 	    
 	    # Important to send presence *after* we request the roster (loginHook)!
 	    eval {SetStatus} $highstate(args)
+	
 	}
 	error {
 	    set msg ""
@@ -922,7 +942,7 @@ proc ::Login::SetStatus {args} {
 }
 
 proc ::Login::GetErrorStr {errcode {errmsg ""}} {
-    
+
     ::Debug 2 "::Login::GetErrorStr errcode=$errcode, errmsg=$errmsg"
 
     array set state [jlib::connect::get_state [::Jabber::GetJlib]]
@@ -1024,6 +1044,7 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 
 proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
     global  config
+    variable reconnecting 
     
     ::Debug 2 "::Login::HandleErrorCode errcode=$errcode, errmsg=$errmsg"
     
@@ -1046,8 +1067,17 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
         set type yesno
         set default yes
     }
-    set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type \
-      -default $default -message $str]
+    if {$reconnecting eq "1"} {
+	# do not open popup messages on subsequent reconnection errors
+	return
+    }
+    if {$type eq "ok"} {
+    	set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type -timeout 10000 \
+        -default $default -message $str]
+    } else {
+    	set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type \
+        -default $default -message $str]
+   }
     if {$ans eq "yes"} {
 	if {$errcode eq "not-authorized"} {
             # in case the user wants to try relogin
