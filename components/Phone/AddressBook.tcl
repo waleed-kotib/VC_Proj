@@ -32,7 +32,7 @@ proc ::AddressBook::Init {} {
     # Add event hooks.
     
     ############################# Direct from Phone User Interface #############################
-    #::hooks::register phoneInit                       ::AddressBook::NewPage
+    ::hooks::register phoneInit                       ::AddressBook::NewPage
     
     #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
     variable wtab -
@@ -155,8 +155,10 @@ proc ::AddressBook::Build {w args} {
     grid columnconfigure $wbox 0 -weight 1
     grid rowconfigure $wbox 0 -weight 1
 
-    set iconImage  [::Theme::Find16Icon icons/16x16/view-history]
-    set opts {-text AddressBook -button 1 -image $iconImage -open 1}
+    # below two lines create exception when called, because of missing second parameter in first line
+    #set iconImage  [::Theme::Find16Icon icons/16x16/view-history]
+    #set opts {-text AddressBook -button 1 -image $iconImage -open 1}
+    set opts {-text AddressBook -button 1 -open 1}
     eval {::ITree::Item $wtree "AddressBook"} $opts
 
     #--------- Load Entries of AddressBook into NewPage Tab --------
@@ -216,7 +218,7 @@ proc ::AddressBook::Popup {w v x y} {
 
     set typeClicked ""
 
-    set phoneEntry [split $v " "]
+    set phoneEntry $v
     set phone [lindex $phoneEntry 1]
     set section [lindex $phoneEntry 0]
     
@@ -413,7 +415,7 @@ proc ::AddressBook::ModifyAddressbookDlg {phone} {
     variable abline
 
     #Get Entry data from abline list
-    set modifyPhone [lindex [lindex $phone end] end]
+    set modifyPhone $phone
     set index [lsearch -exact $abline $modifyPhone]
     set abName [lindex $abline [expr {$index-1}]]
     set abPhoneNumber [lindex $abline [expr {$index}]]
