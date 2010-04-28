@@ -474,27 +474,23 @@ proc ::Iax::LoadPrefs {} {
 
     iaxclient::applyfilters $agc $aagc $comfort $noise $echo
 
-    # Switch off devices since can create a misery for some users!
-    if {0} {
-	# Pick matching device name.
-	foreach device [iaxclient::devices output] {
-	    if { [lindex $device 0] eq $outputDevices} {
-		iaxclient::setdevices output [lindex $device 1]
-		break
-	    }
+    # Pick matching device name.
+    foreach device [iaxclient::devices output] {
+	if { [lindex $device 0] eq $outputDevices} {
+	    iaxclient::setdevices output [lindex $device 1]
+	    break
 	}
-	foreach device [iaxclient::devices input] {
-	    if { [lindex $device 0] eq $inputDevices} {
-		iaxclient::setdevices input [lindex $device 1]
-		break
-	    }
-	}
+    }
+    foreach device [iaxclient::devices input] {
+	if { [lindex $device 0] eq $inputDevices} {
+   	    iaxclient::setdevices input [lindex $device 1]
+       	    break
+        }
     }
     
     iaxclient::callerid $cidname $cidnum
     if {$codec ne ""} {
-	# We skip this since it is unclear how it works. Use hardcoded in lib.
-        #iaxclient::formats $codec
+        iaxclient::formats $codec
     }
 
     iaxclient::toneinit 880 960 16000 48000 10
