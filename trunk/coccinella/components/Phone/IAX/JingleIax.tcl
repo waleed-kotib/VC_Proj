@@ -21,10 +21,12 @@
 # $Id: JingleIax.tcl,v 1.43 2008-05-27 08:03:55 matben Exp $
 
 if {[catch {package require stun}]} {
+    ::Debug 2 "JingleIax.tcl: Package stun not found"
     return
-}
+} 
 
 if {[catch {package require jlib::jingle}]} {
+    ::Debug 2 "JingleIax.tcl: Package jlib::jingle not found"
     return
 }
 
