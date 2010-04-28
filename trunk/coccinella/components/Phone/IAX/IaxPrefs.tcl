@@ -123,9 +123,9 @@ proc ::IaxPrefs::BuildPage {page} {
     grid  $wnb       -sticky ew
     
     # Switch off devices since can create a misery for some users!
-    #$wnb add [DevicesFrame $wnb.de] -text [mc "Devices"]
+    $wnb add [DevicesFrame $wnb.de] -text [mc "Devices"]
     $wnb add [FiltersFrame $wnb.fi] -text [mc "Filters"]
-    #$wnb add [CodecsFrame  $wnb.co] -text [mc "Codecs"]
+    $wnb add [CodecsFrame  $wnb.co] -text [mc "Codecs"]
 
     bind $page <Destroy> +[namespace current]::Free
 }
