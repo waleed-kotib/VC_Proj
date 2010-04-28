@@ -32,7 +32,7 @@ proc ::AddressBook::Init {} {
     # Add event hooks.
     
     ############################# Direct from Phone User Interface #############################
-    ::hooks::register phoneInit                       ::AddressBook::NewPage
+    #::hooks::register phoneInit                       ::AddressBook::NewPage
     
     #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
     variable wtab -
