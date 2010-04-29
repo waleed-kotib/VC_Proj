@@ -117,8 +117,10 @@ proc jlib::connect::init_static {} {
 	jlib::bind
     } {
 	set have($name) 0
-	if {![catch {package require $name}]} {
+	if {![catch {package require $name} err]} {
 	    set have($name) 1
+	} else {
+	    ::Debug 2 "connect.tcl unable to load/find $name package: $err"
 	}	
     }
     
