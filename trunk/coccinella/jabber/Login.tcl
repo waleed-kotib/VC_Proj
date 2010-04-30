@@ -978,7 +978,7 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 	xmpp-streams-error* {
 	    set streamstag ""
 	    regexp {xmpp-streams-error-(.+)$} $errcode - streamstag
-	    set str [mc "Stream error received from the server with code: %s" $streamstag]
+	    set str [mc "Stream error received from the server with code: %s, %s" $streamstag $errmsg]
 	}
 	proxy-failure {
 	    set str [mc "The proxy server reported an error."]
