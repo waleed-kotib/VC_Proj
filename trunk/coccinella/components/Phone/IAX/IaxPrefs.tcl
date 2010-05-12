@@ -24,10 +24,10 @@ package provide IaxPrefs 0.1
 namespace eval ::IaxPrefs {
 
     ::hooks::register prefsInitHook             ::IaxPrefs::InitPrefsHook
-    #::hooks::register prefsBuildHook            ::IaxPrefs::BuildPrefsHook
-    #::hooks::register prefsSaveHook             ::IaxPrefs::SavePrefsHook
-    #::hooks::register prefsCancelHook           ::IaxPrefs::CancelPrefsHook
-    #::hooks::register prefsUserDefaultsHook     ::IaxPrefs::UserDefaultsHook
+    ::hooks::register prefsBuildHook            ::IaxPrefs::BuildPrefsHook
+    ::hooks::register prefsSaveHook             ::IaxPrefs::SavePrefsHook
+    ::hooks::register prefsCancelHook           ::IaxPrefs::CancelPrefsHook
+    ::hooks::register prefsUserDefaultsHook     ::IaxPrefs::UserDefaultsHook
 }
 
 ################## Preferences Stuff ###################

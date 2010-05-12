@@ -22,17 +22,17 @@
 
 namespace eval ::AddressBook { 
 
-    component::define AddressBook "Address book for softphones"
+    #component::define AddressBook "Address book for softphones"
 }
 
 proc ::AddressBook::Init {} {
     
-    component::register AddressBook
+    #component::register AddressBook
         
     # Add event hooks.
     
     ############################# Direct from Phone User Interface #############################
-    #::hooks::register phoneInit                       ::AddressBook::NewPage
+    ::hooks::register phoneInit                       ::AddressBook::NewPage
     
     #--------------- Variables Uses For SpeedDial Addressbook Tab ----------------
     variable wtab -
