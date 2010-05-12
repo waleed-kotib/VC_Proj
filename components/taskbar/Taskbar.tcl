@@ -482,13 +482,13 @@ proc ::Taskbar::BuildCustomPrefsHook {win} {
     switch -- [tk windowingsystem] {
 	win32 {
 	    set str [mc "Start minimized in taskbar"]
-	    set strHide [mc "Hide all on taskbar click"]
 	}
 	x11 {
 	    set str [mc "Start minimized in system tray"]
-	    set strHide [mc "Hide all on system tray click"]
 	}
     }
+    set strHide [mc "Hide/Show all when main window is hidden/shown"]
+
     ttk::checkbutton $win.tskbmini -text $str \
       -variable [namespace current]::tmpPrefs(startMini)
     ttk::checkbutton $win.tskbhide -text $strHide \
