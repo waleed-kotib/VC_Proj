@@ -57,7 +57,7 @@ namespace eval ::Phone {
     if {[catch {package require NotifyCall}]} {
 	return
     }
-    component::define Phone "Protocol abstraction for softphones"
+    component::define Phone "Protocol abstraction for softphones including an address book"
 
     set phone(selected) ""
     set phone(previous) ""
