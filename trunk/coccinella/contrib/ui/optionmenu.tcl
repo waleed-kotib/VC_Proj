@@ -99,7 +99,11 @@ snit::widgetadaptor ui::optionmenu::widget {
     }
     
     method Command {} {
-	set nameVar $val2name($menuVar)
+        if {$menuVar ne ""} {
+	    set nameVar $val2name($menuVar)
+        } else {
+	    set nameVar ""
+        }
 	if {[info exists val2im($menuVar)]} {
 	    $win configure -image $val2im($menuVar)
 	} else {
@@ -235,8 +239,13 @@ snit::widgetadaptor ui::optionmenu::widget {
 	    # If removing selected one then pick first.
 	    if {$name eq $nameVar} {
 		set nameVar [lindex $options(-menulist) 0 0]
-		set menuVar $name2val($nameVar)
-		$self Command
+		# when removing the last entry in the list, nameVar can be empty
+		if {$nameVar ne ""} { 
+		    set menuVar $name2val($nameVar)
+		} else {
+		    set menuVar ""
+		}
+		    $self Command
 	    }
 	    $self BuildMenuList
 	}
