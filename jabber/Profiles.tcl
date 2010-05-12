@@ -1037,17 +1037,25 @@ proc ::Profiles::FrameWidget {w moreless args} {
     set selected [GetSelectedName]
     set state(selected) $selected
     set profile $selected
-    
+
     # We keep two state arrays: 'state' and 'mstate'.
     # The 'state' array keeps temporary space for all profiles and
     # contains the text variables of the actual frame but not the notebook.
     # The 'mstate' array keep tracks of the notebook textvariables.
     
-    # Init textvariables.
-    set state(profile)  $selected
-    set state(server)   $state(prof,$profile,server)
-    set state(username) $state(prof,$profile,username)
-    set state(password) $state(prof,$profile,password)
+    # Init textvariables, check whether $profile is empty, which means,
+    # the user deleted all profiles.
+    if {$profile ne ""} {
+        set state(profile)  $selected
+        set state(server)   $state(prof,$profile,server)
+        set state(username) $state(prof,$profile,username)
+        set state(password) $state(prof,$profile,password)
+    } else {
+        set state(profile)  ""
+        set state(server)   ""
+        set state(username) ""
+        set state(password) ""
+    }
         
     eval {ttk::frame $w -class JProfileFrame} $args
     
@@ -1060,7 +1068,7 @@ proc ::Profiles::FrameWidget {w moreless args} {
     ttk::frame $wui
     
     ttk::label $wui.lpop -text [mc "Profile"]: -anchor e
-    
+::Debug 2 "::Profiles::FrameWidget $token\(profile)"    
     if {0} {
 	set wmenu [eval {
 	    ttk::optionmenu $wui.pop $token\(profile)
@@ -1349,13 +1357,22 @@ proc ::Profiles::FrameSetCurrentFromTmp {w pname} {
     upvar 0 $w state
 
     Debug 2 "::Profiles::FrameSetCurrentFromTmp pname=$pname"
-    
-    set state(server)   $state(prof,$pname,server)
-    set state(username) $state(prof,$pname,username)
-    set state(password) $state(prof,$pname,password)
-    set state(jid)      $state(prof,$pname,jid)
-    set state(resource) ""
-    set state(nickname) ""
+    # check whether pname is empty, that means the user deleted all profiles
+    if { $pname ne ""} { 
+        set state(server)   $state(prof,$pname,server)
+        set state(username) $state(prof,$pname,username)
+        set state(password) $state(prof,$pname,password)
+        set state(jid)      $state(prof,$pname,jid)
+        set state(resource) ""
+        set state(nickname) ""
+    } else {
+        set state(server)   ""
+        set state(username) ""
+        set state(password) ""
+        set state(jid)      ""
+        set state(resource) ""
+        set state(nickname) ""
+    }
     
     # Escaping...
     set state(username) [jlib::unescapestr $state(username)]
