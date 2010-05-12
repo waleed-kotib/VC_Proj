@@ -146,7 +146,8 @@ proc ::IaxPrefs::AccountFrame {win} {
     ttk::entry $win.user -textvariable [namespace current]::tmpPrefs(user)
 
     ttk::label $win.lpassword -text [mc "Password"]:
-    ttk::entry $win.password -textvariable [namespace current]::tmpPrefs(password)
+    ttk::entry $win.password -textvariable [namespace current]::tmpPrefs(password) \
+	-show {*}
 
     ttk::label $win.lhost -text [mc "Host"]:
     ttk::entry $win.host -textvariable [namespace current]::tmpPrefs(host)
