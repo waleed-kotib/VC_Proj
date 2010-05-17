@@ -39,7 +39,7 @@ proc ::IaxPrefs::InitPrefsHook { } {
     set prefs(iaxPhone,host)          "" ;# Was 0
     set prefs(iaxPhone,cidnum)        0
     set prefs(iaxPhone,cidname)       ""
-    set prefs(iaxPhone,codec)         ""
+    set prefs(iaxPhone,codec)         "SPEEX"
     set prefs(iaxPhone,inputDevices)  ""
     set prefs(iaxPhone,outputDevices) ""
     set prefs(iaxPhone,agc)           0
