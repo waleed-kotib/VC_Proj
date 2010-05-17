@@ -305,6 +305,9 @@ namespace eval ::Jabber {
 	set ::config(caps,vers) "9.9"
 	set ::config(vers,full) "9.9"
     }
+
+    # the error messages stating connection problems will disappear after $errormessagetimeout
+    variable errormessagetimeout 10000
 }
 
 # If the whiteboard/ complete dir is there we get whiteboard support.
@@ -891,6 +894,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
     global  wDlgs jprefs
     
     variable jstate
+    variable errormessagetimeout
     
     ::Debug 2 "::Jabber::ClientProc: jlibName=$jlibName, what=$what, args='$args'"
     
@@ -911,7 +915,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    SetClosedState
 	    # Added the arbitrary -timeout argument, necessary
 	    # to allow the start of ::Login::AutoReLogin mechanism.
-	    ui::dialog -icon error -title [mc "Error"] -type ok -timeout 10000 \
+	    ui::dialog -icon error -title [mc "Error"] -type ok -timeout $errormessagetimeout \
 	      -message [mc "The connection was unexpectedly broken."]
 	}
 	streamerror - xmpp-streams-error* {
@@ -921,7 +925,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    } else {
 		set msg [mc "Received a fatal error: %s The connection is closed." ""]
 	    }
-	    ui::dialog -title [mc "Error"] -icon error -type ok -timeout 10000 -message $msg
+	    ui::dialog -title [mc "Error"] -icon error -type ok -timeout $errormessagetimeout -message $msg
 	}
 	xmlerror {
 	    
@@ -935,7 +939,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    }
 	    # Added the arbitrary -timeout argument, necessary
 	    # to allow the start of ::Login::AutoReLogin mechanism.
-	    ui::dialog -title [mc "Error"] -icon error -type ok -timeout 10000 -message $msg
+	    ui::dialog -title [mc "Error"] -icon error -type ok -timeout $errormessagetimeout -message $msg
 	}
 	networkerror {
 	    
@@ -949,7 +953,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    }
 	    # Added the arbitrary -timeout argument, necessary
 	    # to allow the start of ::Login::AutoReLogin mechanism.
-	    ui::dialog -icon error -title [mc "Error"] -type ok -timeout 10000 -message $msg
+	    ui::dialog -icon error -title [mc "Error"] -type ok -timeout $errormessagetimeout -message $msg
 	}
     }
     # start the automatic relogin procedure
