@@ -183,7 +183,7 @@ proc ::Init::SetThis {mainScript} {
 	    set machine "i686"
 	} elseif {$tcl_platform(machine) eq "x86_64"} {
 	    # x86_64
-	    set machine "i686"
+	    set machine "x86_64"
 	}
 	set machineSpecPath [file join $tcl_platform(os) $machine]
     } elseif {$this(platform) eq "macosx"} {
