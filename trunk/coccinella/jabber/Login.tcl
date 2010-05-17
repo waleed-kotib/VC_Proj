@@ -33,7 +33,12 @@ namespace eval ::Login {
     variable password
     variable uid 0
     variable pending 0
+    # keep state whether we are in the phase of reconnecting
     variable reconnecting 0
+    # the error messages stating connection problems will disappear after $errormessagetimeout
+    variable errormessagetimeout 10000
+    # in case of connection problems, a reconnection retry is started after $reconnectwait
+    variable reconnectwait 60000
     
     # Add all event hooks.
     ::hooks::register quitAppHook     ::Login::QuitAppHook
@@ -647,12 +652,13 @@ proc ::Login::LaunchHook {} {
 # 26/06/2009 - Mirko Graziani coccinella@mirkobau.it
 # ------------------------------------------------------
 proc ::Login::AutoReLogin {} {
+   variable reconnectwait
    # Coccinella will relogin automatically every minute.
    #ui::dialog -icon error -title [mc "Info"] -type ok -timeout 1000 -message "AutoReLogin in progress..."
    variable reconnecting
    ::JUI::SetAppMessage [mc "Lost connection to server, reconnecting"]...
    set reconnecting 1
-   after 60000 {::Login::LoginCmd}
+   after $reconnectwait {::Login::LoginCmd}
    
 }
 
@@ -1045,6 +1051,7 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
     global  config
     variable reconnecting 
+    variable errormessagetimeout
     
     ::Debug 2 "::Login::HandleErrorCode errcode=$errcode, errmsg=$errmsg"
     
@@ -1072,7 +1079,7 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
 	return
     }
     if {$type eq "ok"} {
-    	set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type -timeout 10000 \
+    	set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type -timeout $errormessagetimeout \
         -default $default -message $str]
     } else {
     	set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type \
