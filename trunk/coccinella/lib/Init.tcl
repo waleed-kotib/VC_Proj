@@ -763,6 +763,8 @@ proc ::Init::LoadPackages {} {
 	::Splash::SetMsg [mc "Looking for %s" $name]...
 	if {![catch {package require $name} msg]} {
 	    set this(package,$name) 1
+	} else {
+	    ::Debug 2 "unable to load package: $name, reason: $msg"
 	}
     }
     if {$this(package,Itcl)} {
