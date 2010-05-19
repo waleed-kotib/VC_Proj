@@ -400,7 +400,7 @@ proc ::Roster::SendRemove {jid} {
 }
 
 proc ::Roster::RemoveJIDList {jidL} {
-    
+
     # @@@ We could use a plural text here.
     set ans [::UI::MessageBox -title [mc "Remove Contact"] \
       -message [mc "Do you really want to remove this contact? This action cannot be undone."] -icon warning -type yesno -default no]
@@ -1637,10 +1637,21 @@ proc ::Roster::SavePrefsHook {} {
     variable tmpJPrefs
     
     #::Avatar::PrefsSave
-    
+    set repopulatetree 0
     # Need to repopulate the roster?
     if {$jprefs(rost,showOffline) != $tmpJPrefs(rost,showOffline)} {
 	set jprefs(rost,showOffline) $tmpJPrefs(rost,showOffline)
+	set repopulatetree 1
+    }
+    if {$jprefs(rost,showTrpts) != $tmpJPrefs(rost,showTrpts)} {
+	set jprefs(rost,showTrpts) $tmpJPrefs(rost,showTrpts)
+	set repopulatetree 1
+    }
+    if {$jprefs(rost,showSubNone) != $tmpJPrefs(rost,showSubNone)} {
+	set jprefs(rost,showSubNone) $tmpJPrefs(rost,showSubNone)
+	set repopulatetree 1
+    }
+    if {$repopulatetree eq 1} {
 	RepopulateTree
     }
     array set jprefs [array get tmpJPrefs]
