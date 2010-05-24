@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Coccinella 0.96.15\n"
+"Project-Id-Version: Coccinella 0.96.19\n"
 "\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2009-11-23 23:35+0100\n"
+"POT-Creation-Date: 2010-05-24 14:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,8 +50,8 @@ msgstr ""
 #: ../components/AutoUpdate.tcl:122 ../components/ImageMagic.tcl:77
 #: ../components/ImageMagic.tcl:93 ../components/JivePhone.tcl:612
 #: ../jabber/Adhoc.tcl:143 ../jabber/Adhoc.tcl:383 ../jabber/Avatar.tcl:337
-#: ../jabber/Chat.tcl:408 ../jabber/Chat.tcl:2785 ../jabber/Chat.tcl:3084
-#: ../jabber/Chat.tcl:3134 ../jabber/Create.tcl:314 ../jabber/Create.tcl:319
+#: ../jabber/Chat.tcl:406 ../jabber/Chat.tcl:2773 ../jabber/Chat.tcl:3072
+#: ../jabber/Chat.tcl:3122 ../jabber/Create.tcl:314 ../jabber/Create.tcl:319
 #: ../jabber/Create.tcl:324 ../jabber/Create.tcl:332 ../jabber/Create.tcl:429
 #: ../jabber/Create.tcl:471 ../jabber/Create.tcl:515 ../jabber/Create.tcl:549
 #: ../jabber/Create.tcl:580 ../jabber/Create.tcl:759 ../jabber/Disco.tcl:1784
@@ -69,42 +69,43 @@ msgstr ""
 #: ../jabber/GroupChat.tcl:2720 ../jabber/GroupChat.tcl:3491
 #: ../jabber/JUser.tcl:295 ../jabber/JUser.tcl:303 ../jabber/JUser.tcl:322
 #: ../jabber/JUser.tcl:388 ../jabber/JUser.tcl:412 ../jabber/JWB.tcl:2052
-#: ../jabber/JWB.tcl:2057 ../jabber/Jabber.tcl:621 ../jabber/Jabber.tcl:868
-#: ../jabber/Jabber.tcl:912 ../jabber/Jabber.tcl:922 ../jabber/Jabber.tcl:934
-#: ../jabber/Jabber.tcl:946 ../jabber/Jabber.tcl:1493
-#: ../jabber/Jabber.tcl:1497 ../jabber/Jabber.tcl:1576
-#: ../jabber/Jabber.tcl:1578 ../jabber/Jabber.tcl:1673
-#: ../jabber/Jabber.tcl:1677 ../jabber/Jabber.tcl:1995
-#: ../jabber/Jabber.tcl:2026 ../jabber/Login.tcl:493 ../jabber/Login.tcl:521
-#: ../jabber/Login.tcl:530 ../jabber/Login.tcl:935 ../jabber/Login.tcl:1049
-#: ../jabber/MUC.tcl:318 ../jabber/MUC.tcl:321 ../jabber/MUC.tcl:1162
-#: ../jabber/MUC.tcl:1247 ../jabber/MUC.tcl:1356 ../jabber/MUC.tcl:1514
-#: ../jabber/MUC.tcl:1541 ../jabber/MUC.tcl:1717 ../jabber/MUC.tcl:1719
-#: ../jabber/MUC.tcl:1740 ../jabber/MUC.tcl:1742 ../jabber/MailBox.tcl:1597
-#: ../jabber/MailBox.tcl:1675 ../jabber/MailBox.tcl:1782
-#: ../jabber/MailBox.tcl:1816 ../jabber/NewMsg.tcl:888
-#: ../jabber/NewMsg.tcl:924 ../jabber/Profiles.tcl:1455
-#: ../jabber/Profiles.tcl:1463 ../jabber/Profiles.tcl:1649
-#: ../jabber/Register.tcl:124 ../jabber/Register.tcl:583
-#: ../jabber/Register.tcl:589 ../jabber/Register.tcl:664
-#: ../jabber/Register.tcl:833 ../jabber/Register.tcl:893
-#: ../jabber/Register.tcl:898 ../jabber/Register.tcl:901
-#: ../jabber/Register.tcl:970 ../jabber/Register.tcl:1255
-#: ../jabber/Register.tcl:1293 ../jabber/Register.tcl:1358
-#: ../jabber/Register.tcl:1542 ../jabber/Search.tcl:258
-#: ../jabber/Search.tcl:309 ../jabber/Search.tcl:353 ../jabber/Search.tcl:430
-#: ../jabber/Search.tcl:771 ../jabber/SetupAss.tcl:306
-#: ../jabber/SetupAss.tcl:310 ../jabber/SetupAss.tcl:319
-#: ../jabber/UserInfo.tcl:215 ../jabber/UserInfo.tcl:265
-#: ../jabber/UserInfo.tcl:297 ../jabber/UserInfo.tcl:326
-#: ../jabber/UserInfo.tcl:473 ../jabber/UserInfo.tcl:604
-#: ../jabber/VCard.tcl:104 ../jabber/VCard.tcl:106 ../jabber/VCard.tcl:785
-#: ../jabber/VCard.tcl:845 ../jabber/VCard.tcl:847 ../jabber/VCard.tcl:893
-#: ../jabber/VCard.tcl:914 ../lib/Dialogs.tcl:162 ../lib/Dialogs.tcl:169
-#: ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71 ../lib/HttpTrpt.tcl:107
-#: ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226 ../lib/HttpTrpt.tcl:233
-#: ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78 ../lib/Init.tcl:722
-#: ../lib/Init.tcl:744 ../lib/MacintoshUtils.tcl:55
+#: ../jabber/JWB.tcl:2057 ../jabber/Jabber.tcl:624 ../jabber/Jabber.tcl:871
+#: ../jabber/Jabber.tcl:918 ../jabber/Jabber.tcl:928 ../jabber/Jabber.tcl:942
+#: ../jabber/Jabber.tcl:956 ../jabber/Jabber.tcl:1505
+#: ../jabber/Jabber.tcl:1509 ../jabber/Jabber.tcl:1588
+#: ../jabber/Jabber.tcl:1590 ../jabber/Jabber.tcl:1685
+#: ../jabber/Jabber.tcl:1689 ../jabber/Jabber.tcl:2007
+#: ../jabber/Jabber.tcl:2038 ../jabber/Login.tcl:499 ../jabber/Login.tcl:527
+#: ../jabber/Login.tcl:536 ../jabber/Login.tcl:961 ../jabber/Login.tcl:1082
+#: ../jabber/Login.tcl:1085 ../jabber/MUC.tcl:318 ../jabber/MUC.tcl:321
+#: ../jabber/MUC.tcl:1162 ../jabber/MUC.tcl:1247 ../jabber/MUC.tcl:1356
+#: ../jabber/MUC.tcl:1514 ../jabber/MUC.tcl:1541 ../jabber/MUC.tcl:1717
+#: ../jabber/MUC.tcl:1719 ../jabber/MUC.tcl:1740 ../jabber/MUC.tcl:1742
+#: ../jabber/MailBox.tcl:1597 ../jabber/MailBox.tcl:1621
+#: ../jabber/MailBox.tcl:1675 ../jabber/MailBox.tcl:1688
+#: ../jabber/MailBox.tcl:1782 ../jabber/MailBox.tcl:1816
+#: ../jabber/NewMsg.tcl:888 ../jabber/NewMsg.tcl:924
+#: ../jabber/Profiles.tcl:1472 ../jabber/Profiles.tcl:1480
+#: ../jabber/Profiles.tcl:1666 ../jabber/Register.tcl:124
+#: ../jabber/Register.tcl:583 ../jabber/Register.tcl:589
+#: ../jabber/Register.tcl:664 ../jabber/Register.tcl:833
+#: ../jabber/Register.tcl:893 ../jabber/Register.tcl:898
+#: ../jabber/Register.tcl:901 ../jabber/Register.tcl:970
+#: ../jabber/Register.tcl:1255 ../jabber/Register.tcl:1293
+#: ../jabber/Register.tcl:1358 ../jabber/Register.tcl:1542
+#: ../jabber/Search.tcl:258 ../jabber/Search.tcl:309 ../jabber/Search.tcl:353
+#: ../jabber/Search.tcl:430 ../jabber/Search.tcl:771
+#: ../jabber/SetupAss.tcl:306 ../jabber/SetupAss.tcl:310
+#: ../jabber/SetupAss.tcl:319 ../jabber/UserInfo.tcl:215
+#: ../jabber/UserInfo.tcl:265 ../jabber/UserInfo.tcl:297
+#: ../jabber/UserInfo.tcl:326 ../jabber/UserInfo.tcl:473
+#: ../jabber/UserInfo.tcl:602 ../jabber/VCard.tcl:104 ../jabber/VCard.tcl:106
+#: ../jabber/VCard.tcl:785 ../jabber/VCard.tcl:845 ../jabber/VCard.tcl:847
+#: ../jabber/VCard.tcl:893 ../jabber/VCard.tcl:914 ../lib/Dialogs.tcl:162
+#: ../lib/Dialogs.tcl:169 ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71
+#: ../lib/HttpTrpt.tcl:107 ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226
+#: ../lib/HttpTrpt.tcl:233 ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78
+#: ../lib/Init.tcl:723 ../lib/Init.tcl:745 ../lib/MacintoshUtils.tcl:55
 #: ../lib/MacintoshUtils.tcl:77 ../lib/MacintoshUtils.tcl:99
 #: ../lib/PrefUtils.tcl:91 ../lib/PrefUtils.tcl:217 ../lib/TheServer.tcl:65
 #: ../lib/UserActions.tcl:44 ../lib/UserActions.tcl:72
@@ -119,7 +120,7 @@ msgstr ""
 #: ../whiteboard/GetFileIface.tcl:401 ../whiteboard/Import.tcl:74
 #: ../whiteboard/Import.tcl:78 ../whiteboard/Import.tcl:1172
 #: ../whiteboard/Import.tcl:1206 ../whiteboard/Import.tcl:1309
-#: ../whiteboard/Import.tcl:2012 ../whiteboard/Import.tcl:2033
+#: ../whiteboard/Import.tcl:2022 ../whiteboard/Import.tcl:2043
 #: ../whiteboard/Multicast.tcl:198 ../whiteboard/Multicast.tcl:234
 #: ../whiteboard/Multicast.tcl:239 ../whiteboard/Multicast.tcl:247
 #: ../whiteboard/Multicast.tcl:254 ../whiteboard/PutFileIface.tcl:77
@@ -194,7 +195,7 @@ msgid "Any"
 msgstr ""
 
 #: ../components/BuddyPounce.tcl:186 ../components/BuddyPounce.tcl:187
-#: ../components/BuddyPounce.tcl:626 ../components/Mood.tcl:296
+#: ../components/BuddyPounce.tcl:625 ../components/Mood.tcl:296
 #: ../components/Mood.tcl:478 ../components/Mood.tcl:629
 #: ../components/Mood.tcl:670 ../components/UserActivity.tcl:245
 #: ../components/UserActivity.tcl:401 ../components/UserActivity.tcl:652
@@ -211,23 +212,23 @@ msgstr ""
 msgid "None"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:239
+#: ../components/BuddyPounce.tcl:238
 msgid "Show popup"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:242
+#: ../components/BuddyPounce.tcl:241
 msgid "Play sound"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:247
+#: ../components/BuddyPounce.tcl:246
 msgid "Start chat"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:255
+#: ../components/BuddyPounce.tcl:254
 msgid "Send message with subject"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:263 ../components/Carbon.tcl:184
+#: ../components/BuddyPounce.tcl:262 ../components/Carbon.tcl:184
 #: ../components/Growl.tcl:71 ../components/Growl.tcl:74
 #: ../components/Growl.tcl:93 ../components/Growl.tcl:106
 #: ../components/Mood.tcl:490 ../components/UserActivity.tcl:258
@@ -236,11 +237,11 @@ msgstr ""
 #: ../jabber/Create.tcl:427 ../jabber/Create.tcl:469 ../jabber/Create.tcl:547
 #: ../jabber/Create.tcl:756 ../jabber/Enter.tcl:650 ../jabber/Enter.tcl:694
 #: ../jabber/FTrans.tcl:505 ../jabber/FTrans.tcl:537 ../jabber/JUser.tcl:386
-#: ../jabber/Jabber.tcl:619 ../jabber/Jabber.tcl:863 ../jabber/Jabber.tcl:1524
-#: ../jabber/Jabber.tcl:2024 ../jabber/Jabber.tcl:2126 ../jabber/MUC.tcl:189
+#: ../jabber/Jabber.tcl:622 ../jabber/Jabber.tcl:866 ../jabber/Jabber.tcl:1536
+#: ../jabber/Jabber.tcl:2036 ../jabber/Jabber.tcl:2138 ../jabber/MUC.tcl:189
 #: ../jabber/MUC.tcl:365 ../jabber/MUC.tcl:811 ../jabber/MUC.tcl:840
 #: ../jabber/MUC.tcl:1618 ../jabber/MailBox.tcl:499 ../jabber/NewMsg.tcl:232
-#: ../jabber/Profiles.tcl:1647 ../jabber/Register.tcl:122
+#: ../jabber/Profiles.tcl:1664 ../jabber/Register.tcl:122
 #: ../jabber/Register.tcl:662 ../jabber/Register.tcl:1291
 #: ../jabber/Register.tcl:1356 ../jabber/Register.tcl:1540
 #: ../jabber/Search.tcl:351 ../jabber/Search.tcl:419 ../jabber/Search.tcl:427
@@ -248,31 +249,31 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:293 ../components/ImageMagic.tcl:143
-#: ../components/Totd.tcl:107 ../components/XMLConsole.tcl:109
+#: ../components/BuddyPounce.tcl:292 ../components/ImageMagic.tcl:143
+#: ../components/Totd.tcl:110 ../components/XMLConsole.tcl:109
 #: ../components/fsdialog.tcl:427 ../components/fsdialog.tcl:1052
 #: ../components/fsdialog.tcl:1444 ../contrib/ui/dialog.tcl:242
-#: ../contrib/ui/fontselector.tcl:152 ../jabber/Chat.tcl:356
-#: ../jabber/Jabber.tcl:1730 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
+#: ../contrib/ui/fontselector.tcl:152 ../jabber/Chat.tcl:354
+#: ../jabber/Jabber.tcl:1742 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
 #: ../jabber/MUC.tcl:1439 ../jabber/MUC.tcl:1632 ../jabber/Status.tcl:428
 #: ../jabber/Subscribe.tcl:1107 ../lib/Component.tcl:80
-#: ../whiteboard/ItemInspector.tcl:991 ../whiteboard/WDialogs.tcl:60
+#: ../whiteboard/ItemInspector.tcl:989 ../whiteboard/WDialogs.tcl:60
 #: ../whiteboard/WDialogs.tcl:232
 msgid "OK"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:295 ../components/ImageMagic.tcl:145
+#: ../components/BuddyPounce.tcl:294 ../components/ImageMagic.tcl:145
 #: ../components/JivePhone.tcl:905 ../components/JivePhone.tcl:987
 #: ../components/Phone/Phone.tcl:432 ../components/fsdialog.tcl:430
 #: ../components/fsdialog.tcl:1054 ../components/fsdialog.tcl:1446
 #: ../contrib/ui/dialog.tcl:243 ../contrib/ui/fontselector.tcl:154
 #: ../contrib/ui/progress.tcl:316 ../contrib/wizard.tcl:227
-#: ../jabber/Adhoc.tcl:201 ../jabber/Adhoc.tcl:396 ../jabber/Chat.tcl:358
+#: ../jabber/Adhoc.tcl:201 ../jabber/Adhoc.tcl:396 ../jabber/Chat.tcl:356
 #: ../jabber/Create.tcl:151 ../jabber/Create.tcl:670 ../jabber/Disco.tcl:1509
 #: ../jabber/Disco.tcl:1678 ../jabber/Enter.tcl:222 ../jabber/FTrans.tcl:220
-#: ../jabber/History.tcl:992 ../jabber/JUser.tcl:230 ../jabber/JUser.tcl:803
-#: ../jabber/Jabber.tcl:1008 ../jabber/Jabber.tcl:1946
-#: ../jabber/Jabber.tcl:2139 ../jabber/Login.tcl:269 ../jabber/MUC.tcl:204
+#: ../jabber/History.tcl:992 ../jabber/JUser.tcl:230 ../jabber/JUser.tcl:831
+#: ../jabber/Jabber.tcl:1020 ../jabber/Jabber.tcl:1958
+#: ../jabber/Jabber.tcl:2151 ../jabber/Login.tcl:275 ../jabber/MUC.tcl:204
 #: ../jabber/MUC.tcl:462 ../jabber/MUC.tcl:1011 ../jabber/MUC.tcl:1441
 #: ../jabber/MUC.tcl:1634 ../jabber/Profiles.tcl:923
 #: ../jabber/Register.tcl:329 ../jabber/Register.tcl:1172
@@ -281,36 +282,36 @@ msgstr ""
 #: ../jabber/VCard.tcl:260 ../lib/Bookmarks.tcl:125 ../lib/Component.tcl:82
 #: ../lib/Dialogs.tcl:132 ../lib/Dialogs.tcl:341 ../lib/EditDialogs.tcl:143
 #: ../lib/EditDialogs.tcl:332 ../lib/Preferences.tcl:240
-#: ../whiteboard/FilePrefs.tcl:529 ../whiteboard/ItemInspector.tcl:507
-#: ../whiteboard/ItemInspector.tcl:868 ../whiteboard/Multicast.tcl:92
+#: ../whiteboard/FilePrefs.tcl:529 ../whiteboard/ItemInspector.tcl:505
+#: ../whiteboard/ItemInspector.tcl:866 ../whiteboard/Multicast.tcl:92
 msgid "Cancel"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:297
+#: ../components/BuddyPounce.tcl:296
 msgid "Disable All"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:567
+#: ../components/BuddyPounce.tcl:566
 #, tcl-format
 msgid "%s just went online!"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:568
+#: ../components/BuddyPounce.tcl:567
 #, tcl-format
 msgid "%s just went offline!"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:569
+#: ../components/BuddyPounce.tcl:568
 #, tcl-format
 msgid "%s just sent you a message!"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:570
+#: ../components/BuddyPounce.tcl:569
 #, tcl-format
 msgid "%s just started a chat!"
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:596
+#: ../components/BuddyPounce.tcl:595
 msgid "Auto Reply"
 msgstr ""
 
@@ -475,7 +476,7 @@ msgid "Street"
 msgstr ""
 
 #: ../components/Geolocation.tcl:88 ../jabber/Emoticons.tcl:617
-#: ../whiteboard/FilePrefs.tcl:473 ../whiteboard/ItemInspector.tcl:372
+#: ../whiteboard/FilePrefs.tcl:473 ../whiteboard/ItemInspector.tcl:375
 msgid "Text"
 msgstr ""
 
@@ -514,8 +515,8 @@ msgid "This is location data for %s"
 msgstr ""
 
 #: ../components/Growl.tcl:162 ../components/taskbar/Taskbar.tcl:185
-#: ../jabber/JUI.tcl:178 ../jabber/JUI.tcl:532 ../jabber/JUI.tcl:1834
-#: ../jabber/JUI.tcl:1854 ../jabber/MegaPresence.tcl:96
+#: ../jabber/JUI.tcl:178 ../jabber/JUI.tcl:532 ../jabber/JUI.tcl:1839
+#: ../jabber/JUI.tcl:1859 ../jabber/MegaPresence.tcl:96
 #: ../jabber/StatusSlot.tcl:35
 msgid "Status"
 msgstr ""
@@ -526,7 +527,7 @@ msgstr ""
 
 #: ../components/Growl.tcl:172 ../components/Growl.tcl:178
 #: ../components/Notifier.tcl:133 ../jabber/FTrans.tcl:565
-#: ../jabber/OOB.tcl:92
+#: ../jabber/OOB.tcl:92 ../whiteboard/ItemInspector.tcl:364
 msgid "File"
 msgstr ""
 
@@ -896,7 +897,7 @@ msgstr ""
 msgid "Dial"
 msgstr ""
 
-#: ../components/JivePhone.tcl:613 ../components/Phone/IAX/JingleIax.tcl:231
+#: ../components/JivePhone.tcl:613 ../components/Phone/IAX/JingleIax.tcl:233
 #, tcl-format
 msgid "Failed calling %s"
 msgstr ""
@@ -1276,8 +1277,8 @@ msgstr ""
 msgid "Call VM?"
 msgstr ""
 
-#: ../components/ParseURI.tcl:220 ../jabber/Login.tcl:668
-#: ../jabber/Login.tcl:735
+#: ../components/ParseURI.tcl:220 ../jabber/Login.tcl:691
+#: ../jabber/Login.tcl:758
 #, tcl-format
 msgid "Enter the password for your account %s"
 msgstr ""
@@ -1290,7 +1291,7 @@ msgstr ""
 #: ../components/ParseURI.tcl:392 ../components/ParseURI.tcl:396
 #: ../jabber/Create.tcl:111 ../jabber/Create.tcl:636 ../jabber/Enter.tcl:164
 #: ../jabber/GroupChat.tcl:3464 ../jabber/JUser.tcl:182
-#: ../jabber/JUser.tcl:731 ../jabber/MUC.tcl:478 ../jabber/Profiles.tcl:1097
+#: ../jabber/JUser.tcl:726 ../jabber/MUC.tcl:478 ../jabber/Profiles.tcl:1105
 #: ../jabber/Subscribe.tcl:322 ../jabber/Subscribe.tcl:1285
 #: ../jabber/VCard.tcl:307
 msgid "Nickname"
@@ -1301,7 +1302,7 @@ msgstr ""
 msgid "Save File"
 msgstr ""
 
-#: ../components/Phone/IAX/JingleIax.tcl:61
+#: ../components/Phone/IAX/JingleIax.tcl:63
 msgid "&Call"
 msgstr ""
 
@@ -1318,7 +1319,7 @@ msgid "Answer"
 msgstr ""
 
 #: ../components/Phone/NotifyCall.tcl:275 ../jabber/JUser.tcl:593
-#: ../jabber/Jabber.tcl:717 ../jabber/Subscribe.tcl:447
+#: ../jabber/Jabber.tcl:720 ../jabber/Subscribe.tcl:447
 #: ../jabber/Subscribe.tcl:467 ../jabber/Subscribe.tcl:667
 #: ../jabber/Subscribe.tcl:700 ../jabber/Subscribe.tcl:779
 #: ../jabber/Subscribe.tcl:826 ../jabber/Subscribe.tcl:892
@@ -1369,14 +1370,14 @@ msgstr ""
 
 #: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:358
 #: ../components/SlideShow.tcl:362 ../components/SlideShow.tcl:369
-#: ../components/Totd.tcl:111 ../contrib/wizard.tcl:224
+#: ../components/Totd.tcl:114 ../contrib/wizard.tcl:224
 #: ../jabber/Adhoc.tcl:209
 msgid "Previous"
 msgstr ""
 
 #: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:359
 #: ../components/SlideShow.tcl:364 ../components/SlideShow.tcl:370
-#: ../components/Totd.tcl:109 ../contrib/wizard.tcl:219
+#: ../components/Totd.tcl:112 ../contrib/wizard.tcl:219
 #: ../contrib/wizard.tcl:586 ../jabber/Adhoc.tcl:207 ../jabber/GotMsg.tcl:225
 #: ../jabber/Register.tcl:327 ../jabber/Register.tcl:1168
 #: ../lib/TSearch.tcl:81 ../lib/WSearch.tcl:72
@@ -1393,7 +1394,7 @@ msgstr ""
 msgid "Last"
 msgstr ""
 
-#: ../components/SlideShow.tcl:121 ../jabber/Chat.tcl:1359
+#: ../components/SlideShow.tcl:121 ../jabber/Chat.tcl:1347
 #: ../jabber/GroupChat.tcl:677 ../lib/FileCache.tcl:599
 #: ../whiteboard/FilePrefs.tcl:77 ../whiteboard/Plugins.tcl:1324
 #: ../whiteboard/WBPrefs.tcl:74
@@ -1539,7 +1540,7 @@ msgstr ""
 msgid "Add to Dictionary"
 msgstr ""
 
-#: ../components/Totd.tcl:18 ../components/Totd.tcl:90
+#: ../components/Totd.tcl:18 ../components/Totd.tcl:93
 msgid "Tip of the Day"
 msgstr ""
 
@@ -1585,7 +1586,20 @@ msgstr ""
 msgid "Documentation is available at http://coccinella.im/documentation"
 msgstr ""
 
-#: ../components/Totd.tcl:105
+#: ../components/Totd.tcl:53
+msgid ""
+"To override the automatic creation of the XMPP resource you can add /"
+"resourcename to your Contact ID."
+msgstr ""
+
+#: ../components/Totd.tcl:54
+msgid ""
+"Nicknames in chatrooms can be automatically completed using the TAB key. "
+"Enter the first letter(s) of the nickname and then use the TAB key to "
+"complete it."
+msgstr ""
+
+#: ../components/Totd.tcl:108
 #, tcl-format
 msgid "Show tips on %s startup"
 msgstr ""
@@ -1610,7 +1624,7 @@ msgid "User Activity"
 msgstr ""
 
 #: ../components/UserActivity.tcl:252 ../jabber/VCard.tcl:287
-#: ../lib/PrefHelpers.tcl:71 ../lib/PrefNet.tcl:61 ../lib/Preferences.tcl:217
+#: ../lib/PrefHelpers.tcl:71 ../lib/PrefNet.tcl:82 ../lib/Preferences.tcl:217
 msgid "General"
 msgstr ""
 
@@ -1991,8 +2005,7 @@ msgid "Owner"
 msgstr ""
 
 #: ../components/fsdialog.tcl:498 ../jabber/JUser.tcl:184
-#: ../jabber/JUser.tcl:741 ../jabber/Subscribe.tcl:324
-#: ../jabber/Subscribe.tcl:1287
+#: ../jabber/Subscribe.tcl:324 ../jabber/Subscribe.tcl:1287
 msgid "Group"
 msgstr ""
 
@@ -2039,8 +2052,8 @@ msgstr ""
 
 #. TRANSLATORS; menu item for sending normal message (no chat!)
 #: ../components/taskbar/Taskbar.tcl:187 ../jabber/Disco.tcl:155
-#: ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:176 ../jabber/JUI.tcl:1832
-#: ../jabber/JUI.tcl:1852 ../jabber/Roster.tcl:122 ../jabber/Search.tcl:33
+#: ../jabber/GroupChat.tcl:221 ../jabber/JUI.tcl:176 ../jabber/JUI.tcl:1837
+#: ../jabber/JUI.tcl:1857 ../jabber/Roster.tcl:122 ../jabber/Search.tcl:33
 #: ../jabber/Search.tcl:41
 msgid "&Message"
 msgstr ""
@@ -2052,7 +2065,7 @@ msgid "&Preferences"
 msgstr ""
 
 #: ../components/taskbar/Taskbar.tcl:189 ../jabber/JUI.tcl:181
-#: ../jabber/JUI.tcl:1831 ../jabber/JUI.tcl:1851 ../jabber/Roster.tcl:127
+#: ../jabber/JUI.tcl:1836 ../jabber/JUI.tcl:1856 ../jabber/Roster.tcl:127
 #: ../jabber/Roster.tcl:188 ../jabber/Search.tcl:32 ../jabber/Search.tcl:40
 msgid "&Add Contact"
 msgstr ""
@@ -2087,16 +2100,12 @@ msgstr ""
 msgid "Start minimized in taskbar"
 msgstr ""
 
-#: ../components/taskbar/Taskbar.tcl:485
-msgid "Hide all on taskbar click"
-msgstr ""
-
-#: ../components/taskbar/Taskbar.tcl:488
+#: ../components/taskbar/Taskbar.tcl:487
 msgid "Start minimized in system tray"
 msgstr ""
 
-#: ../components/taskbar/Taskbar.tcl:489
-msgid "Hide all on system tray click"
+#: ../components/taskbar/Taskbar.tcl:490
+msgid "Hide/Show all when main window is hidden/shown"
 msgstr ""
 
 #. TRANSLATORS; right-click menu of the toolbars
@@ -2132,17 +2141,15 @@ msgstr ""
 msgid "Ignore"
 msgstr ""
 
-#: ../contrib/ui/fontselector.tcl:20 ../jabber/JPrefs.tcl:194
+#: ../contrib/ui/fontselector.tcl:20 ../jabber/JPrefs.tcl:193
 msgid "Select Font"
 msgstr ""
 
-#: ../contrib/ui/fontselector.tcl:114 ../whiteboard/ItemInspector.tcl:365
-#: ../whiteboard/ItemInspector.tcl:377
+#: ../contrib/ui/fontselector.tcl:114 ../whiteboard/ItemInspector.tcl:367
 msgid "Font size"
 msgstr ""
 
-#: ../contrib/ui/fontselector.tcl:124 ../whiteboard/ItemInspector.tcl:366
-#: ../whiteboard/ItemInspector.tcl:378
+#: ../contrib/ui/fontselector.tcl:124 ../whiteboard/ItemInspector.tcl:368
 msgid "Font weight"
 msgstr ""
 
@@ -2265,7 +2272,7 @@ msgstr ""
 
 #. TRANSLATORS; first Control Panel, then Avatar, then Open, then putting an asterisk (*) in the filter field, pressing return and trying to open a non-image file
 #: ../jabber/Avatar.tcl:366 ../jabber/Disco.tcl:874
-#: ../jabber/RosterTree.tcl:805
+#: ../jabber/RosterTree.tcl:870
 msgid "The supported image formats are"
 msgstr ""
 
@@ -2296,244 +2303,248 @@ msgstr ""
 msgid "Select Avatar"
 msgstr ""
 
-#: ../jabber/Chat.tcl:313 ../jabber/Chat.tcl:325 ../jabber/Chat.tcl:2110
-#: ../jabber/Chat.tcl:3224 ../jabber/Chat.tcl:4209 ../jabber/JUI.tcl:1245
+#: ../jabber/Chat.tcl:311 ../jabber/Chat.tcl:323 ../jabber/Chat.tcl:2099
+#: ../jabber/Chat.tcl:3212 ../jabber/Chat.tcl:4197 ../jabber/JUI.tcl:1245
 msgid "Chat"
 msgstr ""
 
-#: ../jabber/Chat.tcl:343 ../jabber/JUser.tcl:180 ../jabber/JWB.tcl:450
-#: ../jabber/Login.tcl:168 ../jabber/MUC.tcl:242 ../jabber/Profiles.tcl:1082
+#: ../jabber/Chat.tcl:341 ../jabber/JUser.tcl:180 ../jabber/JWB.tcl:450
+#: ../jabber/Login.tcl:174 ../jabber/MUC.tcl:242 ../jabber/Profiles.tcl:1090
 #: ../jabber/Subscribe.tcl:1087 ../jabber/VCard.tcl:309
 msgid "Contact ID"
 msgstr ""
 
 #. TRANSLATORS; Control + T (or Command + T on Mac OS X), then enter @ and proceed
-#: ../jabber/Chat.tcl:407 ../jabber/Chat.tcl:3133 ../jabber/Disco.tcl:1783
+#: ../jabber/Chat.tcl:405 ../jabber/Chat.tcl:3121 ../jabber/Disco.tcl:1783
 #: ../jabber/MUC.tcl:1248
 #, tcl-format
 msgid "%s is invalid. Do you want to continue anyway?"
 msgstr ""
 
 #. TRANSLATORS; composing events in chat window
-#: ../jabber/Chat.tcl:685 ../jabber/Chat.tcl:687 ../jabber/Chat.tcl:3716
+#: ../jabber/Chat.tcl:673 ../jabber/Chat.tcl:675 ../jabber/Chat.tcl:3704
 #, tcl-format
 msgid "%s is composing a reply"
 msgstr ""
 
-#: ../jabber/Chat.tcl:686
+#: ../jabber/Chat.tcl:674
 #, tcl-format
 msgid "%s is on the chat"
 msgstr ""
 
-#: ../jabber/Chat.tcl:688
+#: ../jabber/Chat.tcl:676
 #, tcl-format
 msgid "%s is thinking what to write"
 msgstr ""
 
-#: ../jabber/Chat.tcl:689
+#: ../jabber/Chat.tcl:677
 #, tcl-format
 msgid "%s has left the chat for a while"
 msgstr ""
 
-#: ../jabber/Chat.tcl:690
+#: ../jabber/Chat.tcl:678
 #, tcl-format
 msgid "%s has closed the chat"
 msgstr ""
 
-#: ../jabber/Chat.tcl:853 ../jabber/Chat.tcl:1589 ../jabber/GotMsg.tcl:261
+#: ../jabber/Chat.tcl:841 ../jabber/Chat.tcl:1577 ../jabber/GotMsg.tcl:261
 #: ../jabber/GroupChat.tcl:2365 ../jabber/History.tcl:800
 #: ../jabber/MailBox.tcl:683 ../jabber/NewMsg.tcl:367 ../jabber/NewMsg.tcl:450
 msgid "Subject"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1337 ../jabber/FTrans.tcl:218
+#: ../jabber/Chat.tcl:1325 ../jabber/FTrans.tcl:218
 #: ../jabber/GroupChat.tcl:658 ../jabber/GroupChat.tcl:863
 #: ../jabber/NewMsg.tcl:302
 msgid "Send"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1341 ../jabber/FTrans.tcl:38 ../jabber/FTrans.tcl:182
+#: ../jabber/Chat.tcl:1329 ../jabber/FTrans.tcl:38 ../jabber/FTrans.tcl:182
 msgid "Send File"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1345 ../jabber/Chat.tcl:3298 ../jabber/GroupChat.tcl:661
+#: ../jabber/Chat.tcl:1333 ../jabber/Chat.tcl:3286 ../jabber/GroupChat.tcl:661
 #: ../jabber/GroupChat.tcl:3183 ../jabber/History.tcl:998
-#: ../jabber/History.tcl:1351 ../jabber/JUser.tcl:801
-#: ../jabber/Jabber.tcl:1944 ../jabber/MailBox.tcl:508
+#: ../jabber/History.tcl:1351 ../jabber/JUser.tcl:829
+#: ../jabber/Jabber.tcl:1956 ../jabber/MailBox.tcl:508
 #: ../jabber/NewMsg.tcl:309 ../jabber/Profiles.tcl:920
 #: ../jabber/UserInfo.tcl:406 ../jabber/VCard.tcl:248 ../lib/Bookmarks.tcl:122
 #: ../lib/Dialogs.tcl:339 ../lib/EditDialogs.tcl:140
 #: ../lib/EditDialogs.tcl:284 ../lib/Preferences.tcl:237
 #: ../whiteboard/CanvasFile.tcl:686 ../whiteboard/FilePrefs.tcl:526
-#: ../whiteboard/ItemInspector.tcl:505 ../whiteboard/ItemInspector.tcl:866
+#: ../whiteboard/ItemInspector.tcl:503 ../whiteboard/ItemInspector.tcl:864
 msgid "Save"
 msgstr ""
 
 #. TRANSLATORS; history of past chat conversations
-#: ../jabber/Chat.tcl:1350 ../jabber/GroupChat.tcl:664
+#: ../jabber/Chat.tcl:1338 ../jabber/GroupChat.tcl:664
 #: ../jabber/History.tcl:946
 msgid "History"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1354 ../jabber/GroupChat.tcl:673
+#: ../jabber/Chat.tcl:1342 ../jabber/GroupChat.tcl:673
 #: ../jabber/History.tcl:996 ../jabber/MailBox.tcl:511
 #: ../jabber/NewMsg.tcl:312 ../lib/Dialogs.tcl:103 ../lib/Dialogs.tcl:115
 #: ../lib/Dialogs.tcl:130
 msgid "Print"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1364 ../jabber/GroupChat.tcl:480
+#: ../jabber/Chat.tcl:1352 ../jabber/GroupChat.tcl:480
 #: ../jabber/GroupChat.tcl:667
 msgid "Invite"
 msgstr ""
 
 #. TRANSLATORS; balloon mouse over texts in chat dialog
-#: ../jabber/Chat.tcl:1611
+#: ../jabber/Chat.tcl:1599
 msgid "Enter the subject of the conversation, set by pressing Return"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1648
+#: ../jabber/Chat.tcl:1636
 msgid "Show or hide the chat history"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1649 ../jabber/GroupChat.tcl:917
+#: ../jabber/Chat.tcl:1637 ../jabber/GroupChat.tcl:917
 msgid "If checked, Return sends message, else use Ctrl/Cmd-Return"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1650 ../jabber/NewMsg.tcl:375
+#: ../jabber/Chat.tcl:1638 ../jabber/NewMsg.tcl:375
 msgid "Insert emoticon"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1651 ../jabber/GroupChat.tcl:919
+#: ../jabber/Chat.tcl:1639 ../jabber/GroupChat.tcl:919
 msgid "Show or hide status changes in chat"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1742
+#: ../jabber/Chat.tcl:1730
 msgid "Enter your message and press Return or Shift-Return"
 msgstr ""
 
 #. TRANSLATORS; Control + F (or Command + F on Mac OS X)
-#: ../jabber/Chat.tcl:1898 ../jabber/GroupChat.tcl:1170
-#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:254 ../jabber/JUI.tcl:1786
-#: ../jabber/RosterTree.tcl:1995
+#: ../jabber/Chat.tcl:1886 ../jabber/GroupChat.tcl:1170
+#: ../jabber/History.tcl:1077 ../jabber/JUI.tcl:254 ../jabber/JUI.tcl:1791
+#: ../jabber/RosterTree.tcl:2081
 msgid "Find"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1900 ../jabber/GroupChat.tcl:1172
-#: ../jabber/History.tcl:1080 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1787
-#: ../jabber/RosterTree.tcl:1997
+#: ../jabber/Chat.tcl:1888 ../jabber/GroupChat.tcl:1172
+#: ../jabber/History.tcl:1080 ../jabber/JUI.tcl:255 ../jabber/JUI.tcl:1792
+#: ../jabber/RosterTree.tcl:2083
 msgid "Find Next"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1901 ../jabber/GroupChat.tcl:1173
-#: ../jabber/History.tcl:1081 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1788
-#: ../jabber/RosterTree.tcl:1998
+#: ../jabber/Chat.tcl:1889 ../jabber/GroupChat.tcl:1173
+#: ../jabber/History.tcl:1081 ../jabber/JUI.tcl:256 ../jabber/JUI.tcl:1793
+#: ../jabber/RosterTree.tcl:2084
 msgid "Find Previous"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1973 ../jabber/Create.tcl:723 ../jabber/NewMsg.tcl:1066
+#: ../jabber/Chat.tcl:1961 ../jabber/Create.tcl:723 ../jabber/NewMsg.tcl:1066
 #: ../jabber/NewMsg.tcl:1097 ../jabber/Profiles.tcl:983
-#: ../jabber/Profiles.tcl:1606 ../jabber/Register.tcl:84
+#: ../jabber/Profiles.tcl:1623 ../jabber/Register.tcl:84
 #: ../lib/EditDialogs.tcl:226 ../lib/Preferences.tcl:393
 #: ../lib/Preferences.tcl:454 ../lib/Preferences.tcl:497
 #: ../whiteboard/CanvasFile.tcl:548
 msgid "Warning"
 msgstr ""
 
-#: ../jabber/Chat.tcl:1974
+#: ../jabber/Chat.tcl:1962
 msgid "Do you want to invite this contact to a new chatroom?"
 msgstr ""
 
-#: ../jabber/Chat.tcl:2247 ../jabber/GroupChat.tcl:1239
+#: ../jabber/Chat.tcl:2101
+msgid "Offline Chat"
+msgstr ""
+
+#: ../jabber/Chat.tcl:2239 ../jabber/GroupChat.tcl:1239
 msgid "Close tab"
 msgstr ""
 
-#: ../jabber/Chat.tcl:2569
+#: ../jabber/Chat.tcl:2557
 msgid "You need to be logged in to see the presence of this contact"
 msgstr ""
 
-#: ../jabber/Chat.tcl:2771
+#: ../jabber/Chat.tcl:2759
 msgid "Converting Chat into Conference"
 msgstr ""
 
-#: ../jabber/Chat.tcl:2786 ../jabber/Create.tcl:314 ../jabber/Create.tcl:581
+#: ../jabber/Chat.tcl:2774 ../jabber/Create.tcl:314 ../jabber/Create.tcl:581
 #: ../jabber/GroupChat.tcl:366
 msgid "Cannot find any chatroom service."
 msgstr ""
 
-#: ../jabber/Chat.tcl:3085 ../jabber/GroupChat.tcl:2721
+#: ../jabber/Chat.tcl:3073 ../jabber/GroupChat.tcl:2721
 #: ../jabber/NewMsg.tcl:888
 msgid "Cannot send when not logged in."
 msgstr ""
 
-#: ../jabber/Chat.tcl:3576
+#: ../jabber/Chat.tcl:3564
 msgid ""
 "Do you want to close this chat window and lose the complete conversation?"
 msgstr ""
 
 #. TRANSLATORS; see Chat settings in preferences
-#: ../jabber/Chat.tcl:4232
+#: ../jabber/Chat.tcl:4220
 msgid "By default use active <Return> to send messages"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4234
+#: ../jabber/Chat.tcl:4222
 msgid "Show incoming messages in new window"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4236
+#: ../jabber/Chat.tcl:4224
 msgid "Treat normal messages as chat messages"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4241
+#: ../jabber/Chat.tcl:4229
 msgid "Double click message in inbox"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4242
+#: ../jabber/Chat.tcl:4230
 msgid "Open message in new window"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4245
+#: ../jabber/Chat.tcl:4233
 msgid "Reply to sender"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4252
+#: ../jabber/Chat.tcl:4240
 msgid "History length"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4255
+#: ../jabber/Chat.tcl:4243
 msgid "More recent than"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4258
+#: ../jabber/Chat.tcl:4246
 msgid "Ten seconds"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4259
+#: ../jabber/Chat.tcl:4247
 msgid "One minute"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4260
+#: ../jabber/Chat.tcl:4248
 msgid "Ten minutes"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4261
+#: ../jabber/Chat.tcl:4249
 msgid "One hour"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4262
+#: ../jabber/Chat.tcl:4250
 msgid "No restriction"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4272
+#: ../jabber/Chat.tcl:4260
 msgid "Number of messages to display"
 msgstr ""
 
 #. TRANSLATORS; the user's name that is showed in the in the user's chat dialog, but not on the screen of the remote contact
-#: ../jabber/Chat.tcl:4279
+#: ../jabber/Chat.tcl:4267
 msgid "Local nickname"
 msgstr ""
 
-#: ../jabber/Chat.tcl:4284
+#: ../jabber/Chat.tcl:4272
 msgid "Your nickname for local display"
 msgstr ""
 
@@ -2556,7 +2567,7 @@ msgstr ""
 
 #: ../jabber/Create.tcl:105 ../jabber/Create.tcl:627 ../jabber/Enter.tcl:128
 #: ../jabber/Register.tcl:1124 ../jabber/Register.tcl:1451
-#: ../jabber/Search.tcl:154 ../jabber/UserInfo.tcl:566
+#: ../jabber/Search.tcl:154 ../jabber/UserInfo.tcl:564
 msgid "Service"
 msgstr ""
 
@@ -2576,7 +2587,7 @@ msgstr ""
 
 #: ../jabber/Create.tcl:124 ../jabber/Enter.tcl:189
 #: ../jabber/GroupChat.tcl:3741 ../jabber/JForms.tcl:305
-#: ../jabber/JUser.tcl:200 ../jabber/Profiles.tcl:1126
+#: ../jabber/JUser.tcl:200 ../jabber/Profiles.tcl:1134
 #: ../jabber/Register.tcl:716 ../jabber/VCard.tcl:323
 msgid "Familiar name"
 msgstr ""
@@ -2598,7 +2609,7 @@ msgid "You must provide a nickname."
 msgstr ""
 
 #: ../jabber/Create.tcl:332 ../jabber/Create.tcl:515 ../jabber/JUser.tcl:294
-#: ../jabber/Profiles.tcl:1455
+#: ../jabber/Profiles.tcl:1472
 msgid "Invalid Contact ID."
 msgstr ""
 
@@ -2613,8 +2624,8 @@ msgstr ""
 #: ../jabber/Create.tcl:425 ../jabber/Create.tcl:467 ../jabber/Create.tcl:545
 #: ../jabber/Create.tcl:753 ../jabber/Enter.tcl:648 ../jabber/Enter.tcl:691
 #: ../jabber/FTrans.tcl:502 ../jabber/FTrans.tcl:534 ../jabber/JUser.tcl:384
-#: ../jabber/Jabber.tcl:617 ../jabber/Jabber.tcl:861 ../jabber/Jabber.tcl:2022
-#: ../jabber/Login.tcl:942 ../jabber/Login.tcl:966 ../jabber/Profiles.tcl:1645
+#: ../jabber/Jabber.tcl:620 ../jabber/Jabber.tcl:864 ../jabber/Jabber.tcl:2034
+#: ../jabber/Login.tcl:968 ../jabber/Login.tcl:992 ../jabber/Profiles.tcl:1662
 #: ../jabber/Register.tcl:120 ../jabber/Register.tcl:660
 #: ../jabber/Register.tcl:1289 ../jabber/Register.tcl:1354
 #: ../jabber/Register.tcl:1538 ../jabber/Search.tcl:349
@@ -2649,18 +2660,18 @@ msgid "Cannot enter chatroom %s."
 msgstr ""
 
 #: ../jabber/Disco.tcl:156 ../jabber/GroupChat.tcl:222 ../jabber/JUI.tcl:177
-#: ../jabber/JUI.tcl:1833 ../jabber/JUI.tcl:1853 ../jabber/Roster.tcl:121
+#: ../jabber/JUI.tcl:1838 ../jabber/JUI.tcl:1858 ../jabber/Roster.tcl:121
 #: ../jabber/Roster.tcl:527 ../jabber/Search.tcl:34 ../jabber/Search.tcl:42
 msgid "Cha&t"
 msgstr ""
 
-#: ../jabber/Disco.tcl:157 ../jabber/JUI.tcl:185 ../jabber/JUI.tcl:1835
-#: ../jabber/JUI.tcl:1855
+#: ../jabber/Disco.tcl:157 ../jabber/JUI.tcl:185 ../jabber/JUI.tcl:1840
+#: ../jabber/JUI.tcl:1860
 msgid "Enter Chat&room"
 msgstr ""
 
-#: ../jabber/Disco.tcl:160 ../jabber/JUI.tcl:186 ../jabber/JUI.tcl:1836
-#: ../jabber/JUI.tcl:1856
+#: ../jabber/Disco.tcl:160 ../jabber/JUI.tcl:186 ../jabber/JUI.tcl:1841
+#: ../jabber/JUI.tcl:1861
 msgid "&Create Chatroom"
 msgstr ""
 
@@ -2670,13 +2681,13 @@ msgstr ""
 msgid "View &Business Card"
 msgstr ""
 
-#: ../jabber/Disco.tcl:166 ../jabber/JUI.tcl:180 ../jabber/JUI.tcl:1830
-#: ../jabber/JUI.tcl:1850
+#: ../jabber/Disco.tcl:166 ../jabber/JUI.tcl:180 ../jabber/JUI.tcl:1835
+#: ../jabber/JUI.tcl:1855
 msgid "&Search"
 msgstr ""
 
-#: ../jabber/Disco.tcl:169 ../jabber/JUI.tcl:182 ../jabber/JUI.tcl:1826
-#: ../jabber/JUI.tcl:1841
+#: ../jabber/Disco.tcl:169 ../jabber/JUI.tcl:182 ../jabber/JUI.tcl:1831
+#: ../jabber/JUI.tcl:1846
 msgid "Re&gister"
 msgstr ""
 
@@ -2684,8 +2695,8 @@ msgstr ""
 msgid "&Unregister"
 msgstr ""
 
-#: ../jabber/Disco.tcl:174 ../jabber/JUI.tcl:214 ../jabber/JUI.tcl:1911
-#: ../jabber/JUI.tcl:1925 ../jabber/Roster.tcl:132
+#: ../jabber/Disco.tcl:174 ../jabber/JUI.tcl:214 ../jabber/JUI.tcl:1916
+#: ../jabber/JUI.tcl:1930 ../jabber/Roster.tcl:132
 msgid "Show"
 msgstr ""
 
@@ -2701,8 +2712,8 @@ msgid "Refresh"
 msgstr ""
 
 #. TRANSLATORS; look for available services on a server
-#: ../jabber/Disco.tcl:181 ../jabber/JUI.tcl:183 ../jabber/JUI.tcl:1838
-#: ../jabber/JUI.tcl:1858
+#: ../jabber/Disco.tcl:181 ../jabber/JUI.tcl:183 ../jabber/JUI.tcl:1843
+#: ../jabber/JUI.tcl:1863
 msgid "&Discover Server"
 msgstr ""
 
@@ -2724,13 +2735,13 @@ msgid "Services"
 msgstr ""
 
 #. TRANSLATORS: to set background image in services or contacts tab
-#: ../jabber/Disco.tcl:873 ../jabber/RosterTree.tcl:804
+#: ../jabber/Disco.tcl:873 ../jabber/RosterTree.tcl:869
 msgid ""
 "Select an image file for the background. To remove a background image press "
 "Remove and Save."
 msgstr ""
 
-#: ../jabber/Disco.tcl:881 ../jabber/RosterTree.tcl:812
+#: ../jabber/Disco.tcl:881 ../jabber/RosterTree.tcl:877
 msgid "Background Image"
 msgstr ""
 
@@ -2747,8 +2758,8 @@ msgstr ""
 msgid "Enter a server to discover and use its services."
 msgstr ""
 
-#: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:531 ../jabber/Login.tcl:171
-#: ../jabber/Profiles.tcl:1084 ../jabber/Profiles.tcl:1864
+#: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:531 ../jabber/Login.tcl:177
+#: ../jabber/Profiles.tcl:1092 ../jabber/Profiles.tcl:1881
 #: ../jabber/Register.tcl:274 ../jabber/SetupAss.tcl:137
 #: ../jabber/SetupAss.tcl:165 ../jabber/StatusSlot.tcl:34
 #: ../whiteboard/WDialogs.tcl:172
@@ -2768,14 +2779,14 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: ../jabber/Emoticons.tcl:602 ../jabber/Jabber.tcl:1685
-#: ../jabber/Jabber.tcl:1696 ../jabber/Roster.tcl:190
+#: ../jabber/Emoticons.tcl:602 ../jabber/Jabber.tcl:1697
+#: ../jabber/Jabber.tcl:1708 ../jabber/Roster.tcl:190
 #: ../jabber/UserInfo.tcl:211 ../jabber/UserInfo.tcl:220
 #: ../jabber/UserInfo.tcl:225 ../whiteboard/WDialogs.tcl:133
 msgid "Version"
 msgstr ""
 
-#: ../jabber/Emoticons.tcl:615 ../whiteboard/ItemInspector.tcl:367
+#: ../jabber/Emoticons.tcl:615 ../whiteboard/ItemInspector.tcl:369
 msgid "Image"
 msgstr ""
 
@@ -2818,8 +2829,8 @@ msgid ""
 msgstr ""
 
 #: ../jabber/Enter.tcl:166 ../jabber/GroupChat.tcl:3464
-#: ../jabber/Login.tcl:179 ../jabber/Login.tcl:666 ../jabber/Login.tcl:668
-#: ../jabber/Login.tcl:733 ../jabber/Login.tcl:735 ../jabber/Profiles.tcl:1090
+#: ../jabber/Login.tcl:185 ../jabber/Login.tcl:689 ../jabber/Login.tcl:691
+#: ../jabber/Login.tcl:756 ../jabber/Login.tcl:758 ../jabber/Profiles.tcl:1098
 #: ../jabber/Register.tcl:1458 ../jabber/SetupAss.tcl:168 ../lib/Proxy.tcl:211
 msgid "Password"
 msgstr ""
@@ -2828,8 +2839,8 @@ msgstr ""
 msgid "Bookmarks"
 msgstr ""
 
-#: ../jabber/Enter.tcl:190 ../jabber/JForms.tcl:306 ../jabber/Login.tcl:224
-#: ../jabber/Profiles.tcl:1125 ../jabber/Register.tcl:717
+#: ../jabber/Enter.tcl:190 ../jabber/JForms.tcl:306 ../jabber/Login.tcl:230
+#: ../jabber/Profiles.tcl:1133 ../jabber/Register.tcl:717
 msgid "Password or secret"
 msgstr ""
 
@@ -2954,8 +2965,8 @@ msgstr ""
 msgid "Twitter user"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:223
-#: ../jabber/Profiles.tcl:1124 ../jabber/VCard.tcl:322
+#: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:229
+#: ../jabber/Profiles.tcl:1132 ../jabber/VCard.tcl:322
 msgid "Chat address"
 msgstr ""
 
@@ -3164,82 +3175,82 @@ msgid "Labels with (*) are required."
 msgstr ""
 
 #. TRANSLATORS; see preferences
-#: ../jabber/JPrefs.tcl:110 ../jabber/JPrefs.tcl:178
+#: ../jabber/JPrefs.tcl:110 ../jabber/JPrefs.tcl:177
 msgid "Appearance"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:111 ../jabber/JPrefs.tcl:304
+#: ../jabber/JPrefs.tcl:111 ../jabber/JPrefs.tcl:289
 msgid "Customization"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:189
+#: ../jabber/JPrefs.tcl:188
 msgid "Use tabbed interface"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:193
+#: ../jabber/JPrefs.tcl:192
 msgid "Chat window"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:197
+#: ../jabber/JPrefs.tcl:196
 msgid "Theme"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:203 ../jabber/SetupAss.tcl:127
+#: ../jabber/JPrefs.tcl:202 ../jabber/SetupAss.tcl:127
 #: ../lib/PrefGeneral.tcl:105 ../lib/PrefGeneral.tcl:117
 #: ../whiteboard/Plugins.tcl:1347
 #, tcl-format
 msgid "Requires a restart of %s"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:209
+#: ../jabber/JPrefs.tcl:208
 msgid "Skin"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:236
+#: ../jabber/JPrefs.tcl:234
 msgid "Windows opacity"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:315
+#: ../jabber/JPrefs.tcl:300
 msgid "Save message inbox between sessions"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:317
+#: ../jabber/JPrefs.tcl:302
 #, tcl-format
 msgid "Login on %s startup"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:319
+#: ../jabber/JPrefs.tcl:304
 msgid "Remember open windows between sessions"
 msgstr ""
 
-#: ../jabber/JPrefs.tcl:322
+#: ../jabber/JPrefs.tcl:307
 msgid "Show notifier window"
 msgstr ""
 
-#: ../jabber/JUI.tcl:144 ../jabber/JUI.tcl:1721 ../jabber/JUI.tcl:1725
-#: ../jabber/JUI.tcl:1737 ../jabber/JUI.tcl:1740
+#: ../jabber/JUI.tcl:144 ../jabber/JUI.tcl:1726 ../jabber/JUI.tcl:1730
+#: ../jabber/JUI.tcl:1742 ../jabber/JUI.tcl:1745
 msgid "&New Account"
 msgstr ""
 
-#: ../jabber/JUI.tcl:145 ../jabber/JUI.tcl:1726 ../jabber/JUI.tcl:1745
+#: ../jabber/JUI.tcl:145 ../jabber/JUI.tcl:1731 ../jabber/JUI.tcl:1750
 msgid "&Remove Account"
 msgstr ""
 
-#: ../jabber/JUI.tcl:146 ../jabber/JUI.tcl:1727 ../jabber/JUI.tcl:1742
+#: ../jabber/JUI.tcl:146 ../jabber/JUI.tcl:1732 ../jabber/JUI.tcl:1747
 msgid "New P&assword"
 msgstr ""
 
-#: ../jabber/JUI.tcl:147 ../jabber/JUI.tcl:1722 ../jabber/JUI.tcl:1728
-#: ../jabber/JUI.tcl:1743
+#: ../jabber/JUI.tcl:147 ../jabber/JUI.tcl:1727 ../jabber/JUI.tcl:1733
+#: ../jabber/JUI.tcl:1748
 msgid "&Setup Assistant"
 msgstr ""
 
-#: ../jabber/JUI.tcl:149 ../jabber/JUI.tcl:1729 ../jabber/JUI.tcl:1736
-#: ../jabber/JUI.tcl:1739
+#: ../jabber/JUI.tcl:149 ../jabber/JUI.tcl:1734 ../jabber/JUI.tcl:1741
+#: ../jabber/JUI.tcl:1744
 msgid "&Edit Profiles"
 msgstr ""
 
-#: ../jabber/JUI.tcl:150 ../jabber/JUI.tcl:1730 ../jabber/JUI.tcl:1744
+#: ../jabber/JUI.tcl:150 ../jabber/JUI.tcl:1735 ../jabber/JUI.tcl:1749
 msgid "Edit &Business Card"
 msgstr ""
 
@@ -3251,9 +3262,9 @@ msgstr ""
 msgid "Icon &Set"
 msgstr ""
 
-#: ../jabber/JUI.tcl:154 ../jabber/JUI.tcl:159 ../jabber/JUI.tcl:1710
-#: ../jabber/JUI.tcl:1713 ../jabber/JUI.tcl:1732 ../jabber/RosterTree.tcl:1981
-#: ../jabber/UserInfo.tcl:663 ../jabber/VCard.tcl:800
+#: ../jabber/JUI.tcl:154 ../jabber/JUI.tcl:159 ../jabber/JUI.tcl:1715
+#: ../jabber/JUI.tcl:1718 ../jabber/JUI.tcl:1737 ../jabber/RosterTree.tcl:2067
+#: ../jabber/UserInfo.tcl:661 ../jabber/VCard.tcl:800
 msgid "&Business Card"
 msgstr ""
 
@@ -3269,24 +3280,24 @@ msgstr ""
 msgid "&Inbox"
 msgstr ""
 
-#: ../jabber/JUI.tcl:163 ../jabber/JUI.tcl:1701 ../jabber/JUI.tcl:1704
+#: ../jabber/JUI.tcl:163 ../jabber/JUI.tcl:1706 ../jabber/JUI.tcl:1709
 #: ../jabber/JWB.tcl:161 ../whiteboard/Whiteboard.tcl:424
 #: ../whiteboard/Whiteboard.tcl:608
 msgid "&Close Window"
 msgstr ""
 
-#: ../jabber/JUI.tcl:173 ../jabber/JUI.tcl:1229 ../jabber/JUI.tcl:1844
-#: ../jabber/JUI.tcl:1847 ../jabber/JUI.tcl:2004 ../jabber/Login.tcl:111
-#: ../jabber/Login.tcl:124 ../jabber/Login.tcl:267 ../jabber/Profiles.tcl:1835
+#: ../jabber/JUI.tcl:173 ../jabber/JUI.tcl:1229 ../jabber/JUI.tcl:1849
+#: ../jabber/JUI.tcl:1852 ../jabber/JUI.tcl:2009 ../jabber/Login.tcl:117
+#: ../jabber/Login.tcl:130 ../jabber/Login.tcl:273 ../jabber/Profiles.tcl:1852
 msgid "Login"
 msgstr ""
 
-#: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1829 ../jabber/JUI.tcl:1849
-#: ../jabber/Jabber.tcl:2097 ../jabber/Jabber.tcl:2109
+#: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1834 ../jabber/JUI.tcl:1854
+#: ../jabber/Jabber.tcl:2109 ../jabber/Jabber.tcl:2121
 msgid "Logout With Message"
 msgstr ""
 
-#: ../jabber/JUI.tcl:187 ../jabber/JUI.tcl:1837 ../jabber/JUI.tcl:1857
+#: ../jabber/JUI.tcl:187 ../jabber/JUI.tcl:1842 ../jabber/JUI.tcl:1862
 msgid "Edit &Bookmarks"
 msgstr ""
 
@@ -3329,7 +3340,7 @@ msgid "&Debug"
 msgstr ""
 
 #: ../jabber/JUI.tcl:231 ../jabber/JUI.tcl:826 ../jabber/JUI.tcl:998
-#: ../jabber/JUI.tcl:1935
+#: ../jabber/JUI.tcl:1940
 msgid "Show Control Panel"
 msgstr ""
 
@@ -3339,13 +3350,13 @@ msgstr ""
 msgid "&About %s"
 msgstr ""
 
-#: ../jabber/JUI.tcl:245 ../jabber/JUI.tcl:1768 ../jabber/JUI.tcl:1777
+#: ../jabber/JUI.tcl:245 ../jabber/JUI.tcl:1773 ../jabber/JUI.tcl:1782
 #: ../whiteboard/Whiteboard.tcl:443 ../whiteboard/Whiteboard.tcl:2897
 #: ../whiteboard/Whiteboard.tcl:2899
 msgid "&Undo"
 msgstr ""
 
-#: ../jabber/JUI.tcl:246 ../jabber/JUI.tcl:1769 ../jabber/JUI.tcl:1779
+#: ../jabber/JUI.tcl:246 ../jabber/JUI.tcl:1774 ../jabber/JUI.tcl:1784
 #: ../whiteboard/Whiteboard.tcl:444 ../whiteboard/Whiteboard.tcl:2902
 #: ../whiteboard/Whiteboard.tcl:2904
 msgid "Re&do"
@@ -3358,9 +3369,10 @@ msgstr ""
 msgid "Cu&t"
 msgstr ""
 
-#: ../jabber/JUI.tcl:249 ../whiteboard/Whiteboard.tcl:447
-#: ../whiteboard/Whiteboard.tcl:614 ../whiteboard/Whiteboard.tcl:2914
-#: ../whiteboard/Whiteboard.tcl:2917 ../whiteboard/Whiteboard.tcl:2920
+#: ../jabber/JUI.tcl:249 ../jabber/RosterTree.tcl:1837
+#: ../whiteboard/Whiteboard.tcl:447 ../whiteboard/Whiteboard.tcl:614
+#: ../whiteboard/Whiteboard.tcl:2914 ../whiteboard/Whiteboard.tcl:2917
+#: ../whiteboard/Whiteboard.tcl:2920
 msgid "&Copy"
 msgstr ""
 
@@ -3370,8 +3382,8 @@ msgstr ""
 msgid "&Paste"
 msgstr ""
 
-#: ../jabber/JUI.tcl:252 ../jabber/JUI.tcl:1767 ../jabber/JUI.tcl:1775
-#: ../jabber/JUI.tcl:1782 ../jabber/Subscribe.tcl:1091
+#: ../jabber/JUI.tcl:252 ../jabber/JUI.tcl:1772 ../jabber/JUI.tcl:1780
+#: ../jabber/JUI.tcl:1787 ../jabber/Subscribe.tcl:1091
 msgid "All"
 msgstr ""
 
@@ -3396,7 +3408,7 @@ msgstr ""
 msgid "Set your status message"
 msgstr ""
 
-#: ../jabber/JUI.tcl:992 ../jabber/JUI.tcl:1932
+#: ../jabber/JUI.tcl:992 ../jabber/JUI.tcl:1937
 msgid "Hide Control Panel"
 msgstr ""
 
@@ -3427,28 +3439,28 @@ msgid "&Edit"
 msgstr ""
 
 #. TRANSLATORS; code for these strings is not finished
-#: ../jabber/JUI.tcl:1531
+#: ../jabber/JUI.tcl:1536
 msgid "The connection is secure"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1535
+#: ../jabber/JUI.tcl:1540
 msgid "The connection is medium secure"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1539
+#: ../jabber/JUI.tcl:1544
 msgid "The connection is insecure"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1581
+#: ../jabber/JUI.tcl:1586
 msgid "Logged out"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1823 ../jabber/JUI.tcl:1828 ../jabber/JUI.tcl:1994
-#: ../jabber/Jabber.tcl:2137
+#: ../jabber/JUI.tcl:1828 ../jabber/JUI.tcl:1833 ../jabber/JUI.tcl:1999
+#: ../jabber/Jabber.tcl:2149
 msgid "Logout"
 msgstr ""
 
-#: ../jabber/JUI.tcl:1985
+#: ../jabber/JUI.tcl:1990
 msgid "Stop"
 msgstr ""
 
@@ -3492,7 +3504,7 @@ msgstr ""
 msgid "Cannot set %s's nickname or group."
 msgstr ""
 
-#: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:701
+#: ../jabber/JUser.tcl:591 ../jabber/JUser.tcl:696
 #, tcl-format
 msgid ""
 "This is your own account at %s that acts as a service that transports "
@@ -3508,39 +3520,59 @@ msgstr ""
 msgid "Edit Contact"
 msgstr ""
 
-#: ../jabber/JUser.tcl:703
+#: ../jabber/JUser.tcl:698
 #, tcl-format
 msgid ""
 "Edit nickname and group of %s. You also can request or remove presence "
 "subscription."
 msgstr ""
 
+#: ../jabber/JUser.tcl:741
+msgid "Available groups"
+msgstr ""
+
+#: ../jabber/JUser.tcl:744
+msgid "Group:"
+msgstr ""
+
 #: ../jabber/JUser.tcl:756
+msgid "Current groups"
+msgstr ""
+
+#: ../jabber/JUser.tcl:771
+msgid "Add ->"
+msgstr ""
+
+#: ../jabber/JUser.tcl:773
+msgid "<- Remove"
+msgstr ""
+
+#: ../jabber/JUser.tcl:784
 msgid "Request presence subscription"
 msgstr ""
 
-#: ../jabber/JUser.tcl:761
+#: ../jabber/JUser.tcl:789
 msgid "Remove presence subscription"
 msgstr ""
 
 #. TRANSLATORS; these strings are balloon mouse over tooltips in the edit contact dialog
-#: ../jabber/JUser.tcl:769
+#: ../jabber/JUser.tcl:797
 msgid "Both you and your contact can see eachother's presence."
 msgstr ""
 
-#: ../jabber/JUser.tcl:770
+#: ../jabber/JUser.tcl:798
 msgid "You cannot see your contact's presence, but your contact can see yours."
 msgstr ""
 
-#: ../jabber/JUser.tcl:771
+#: ../jabber/JUser.tcl:799
 msgid "Both you and your contact cannot see eachother's presence."
 msgstr ""
 
-#: ../jabber/JUser.tcl:772 ../jabber/Roster.tcl:1632
+#: ../jabber/JUser.tcl:800 ../jabber/Roster.tcl:1632
 msgid "You can see your contact's presence, but your contact can't see yours."
 msgstr ""
 
-#: ../jabber/JUser.tcl:819 ../jabber/Subscribe.tcl:332
+#: ../jabber/JUser.tcl:847 ../jabber/Subscribe.tcl:332
 #: ../jabber/Subscribe.tcl:368 ../jabber/Subscribe.tcl:1302
 #: ../jabber/Subscribe.tcl:1562
 msgid "View business card"
@@ -3642,20 +3674,20 @@ msgstr ""
 msgid "Cannot find importer for the MIME type %s"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:615
+#: ../jabber/Jabber.tcl:618
 #, tcl-format
 msgid "Cannot send message to %s."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:718
+#: ../jabber/Jabber.tcl:721
 #, tcl-format
 msgid ""
 "Your registered account with the %s service will be put in your list of "
 "contacts to work as a transport with this service."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:769 ../jabber/Jabber.tcl:774 ../jabber/Jabber.tcl:780
-#: ../jabber/Jabber.tcl:829 ../jabber/Subscribe.tcl:210
+#: ../jabber/Jabber.tcl:772 ../jabber/Jabber.tcl:777 ../jabber/Jabber.tcl:783
+#: ../jabber/Jabber.tcl:832 ../jabber/Subscribe.tcl:210
 #: ../jabber/Subscribe.tcl:243 ../jabber/Subscribe.tcl:996
 #: ../jabber/Subscribe.tcl:1015 ../jabber/Subscribe.tcl:1411
 #: ../jabber/Subscribe.tcl:1439 ../jabber/Subscribe.tcl:1448
@@ -3664,326 +3696,331 @@ msgstr ""
 msgid "Presence Subscription"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:770
+#: ../jabber/Jabber.tcl:773
 #, tcl-format
 msgid ""
 "Because %s does not allow you to see his/her presence anymore, he/she is "
 "removed."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:775
+#: ../jabber/Jabber.tcl:778
 #, tcl-format
 msgid "%s does not allow you to see his/her presence anymore."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:782
+#: ../jabber/Jabber.tcl:785
 #, tcl-format
 msgid ""
 "%s does not allow you to see his/her presence anymore. Do you want to remove "
 "%s?"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:815
+#: ../jabber/Jabber.tcl:818
 #, tcl-format
 msgid ""
 "Cannot subscribe to %s's presence. The contact does not allow you to see his/"
 "her presence."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:820
+#: ../jabber/Jabber.tcl:823
 msgid "Subscription Failed"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:830
+#: ../jabber/Jabber.tcl:833
 #, tcl-format
 msgid "You cannot see %s's presence anymore."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:859
+#: ../jabber/Jabber.tcl:862
 msgid "Presence Error"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:913 ../jabber/Jabber.tcl:941
+#: ../jabber/Jabber.tcl:919 ../jabber/Jabber.tcl:949
 msgid "The connection was unexpectedly broken."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:918 ../jabber/Jabber.tcl:920 ../jabber/Jabber.tcl:930
-#: ../jabber/Jabber.tcl:932
+#: ../jabber/Jabber.tcl:924 ../jabber/Jabber.tcl:926 ../jabber/Jabber.tcl:936
+#: ../jabber/Jabber.tcl:938
 #, tcl-format
 msgid "Received a fatal error: %s The connection is closed."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:995
+#: ../jabber/Jabber.tcl:1007
 msgid "Error Log (noncriticals)"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1491 ../jabber/UserInfo.tcl:263
+#: ../jabber/Jabber.tcl:1503 ../jabber/UserInfo.tcl:263
 #, tcl-format
 msgid "Cannot query %s's last activity."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1503 ../jabber/Jabber.tcl:1506
+#: ../jabber/Jabber.tcl:1515 ../jabber/Jabber.tcl:1518
 #: ../jabber/UserInfo.tcl:261
 msgid "Last Activity"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1504 ../jabber/Jabber.tcl:1517
-#: ../jabber/Jabber.tcl:1519
+#: ../jabber/Jabber.tcl:1516 ../jabber/Jabber.tcl:1529
+#: ../jabber/Jabber.tcl:1531
 #, tcl-format
 msgid "Cannot query %s's local time information."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1533
+#: ../jabber/Jabber.tcl:1545
 #, tcl-format
 msgid "Time since client %s was last active"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1535
+#: ../jabber/Jabber.tcl:1547
 #, tcl-format
 msgid "Time since %s was last connected"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1537
+#: ../jabber/Jabber.tcl:1549
 #, tcl-format
 msgid "Time since server %s was started"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1540
+#: ../jabber/Jabber.tcl:1552
 msgid "The uptime/last activity is"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1574 ../jabber/UserInfo.tcl:295
+#: ../jabber/Jabber.tcl:1586 ../jabber/UserInfo.tcl:295
 #: ../jabber/UserInfo.tcl:325
 #, tcl-format
 msgid "Cannot query %s's local time."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1582 ../jabber/UserInfo.tcl:293
+#: ../jabber/Jabber.tcl:1594 ../jabber/UserInfo.tcl:293
 #: ../jabber/UserInfo.tcl:323
 msgid "Local Time"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1583 ../jabber/UserInfo.tcl:303
+#: ../jabber/Jabber.tcl:1595 ../jabber/UserInfo.tcl:303
 #: ../jabber/UserInfo.tcl:332
 #, tcl-format
 msgid "%s's local time is: %s"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1671 ../jabber/UserInfo.tcl:213
+#: ../jabber/Jabber.tcl:1683 ../jabber/UserInfo.tcl:213
 #, tcl-format
 msgid "Cannot query %s's version."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1710
+#: ../jabber/Jabber.tcl:1722
 #, tcl-format
 msgid "Version information for %s."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1907 ../jabber/Jabber.tcl:2035
+#: ../jabber/Jabber.tcl:1919 ../jabber/Jabber.tcl:2047
 msgid "New Password"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1924
+#: ../jabber/Jabber.tcl:1936
 msgid "Set a new password for"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1926
+#: ../jabber/Jabber.tcl:1938
 msgid "New password"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1930 ../jabber/Register.tcl:746
+#: ../jabber/Jabber.tcl:1942 ../jabber/Register.tcl:746
 #: ../jabber/SetupAss.tcl:169
 msgid "Retype password"
 msgstr ""
 
-#: ../jabber/Jabber.tcl:1996 ../jabber/Register.tcl:834
+#: ../jabber/Jabber.tcl:2008 ../jabber/Register.tcl:834
 #: ../jabber/SetupAss.tcl:311
 msgid "Passwords do not match. Please try again."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:2020
+#: ../jabber/Jabber.tcl:2032
 msgid "Cannot set new password."
 msgstr ""
 
-#: ../jabber/Jabber.tcl:2036
+#: ../jabber/Jabber.tcl:2048
 msgid "Setting new password was successful."
 msgstr ""
 
 #. TRANSLATORS; see login dialog
-#: ../jabber/Login.tcl:138
+#: ../jabber/Login.tcl:144
 msgid ""
 "Enter your account as user@example.org, or choose a profile. You should "
 "already have an account."
 msgstr ""
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
-#: ../jabber/Login.tcl:141
+#: ../jabber/Login.tcl:147
 msgid ""
 "Enter your Contact ID as user@example.org. You should already have an "
 "account with this server."
 msgstr ""
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
-#: ../jabber/Login.tcl:144
+#: ../jabber/Login.tcl:150
 msgid ""
 "Write XMPP server IP number or name, or choose from the popup menu. You "
 "should already have an account with this server."
 msgstr ""
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
-#: ../jabber/Login.tcl:148
+#: ../jabber/Login.tcl:154
 #, tcl-format
 msgid "Enter your username and password to login to %s."
 msgstr ""
 
-#: ../jabber/Login.tcl:159 ../jabber/Profiles.tcl:1062
+#: ../jabber/Login.tcl:165 ../jabber/Profiles.tcl:1070
 msgid "Profile"
 msgstr ""
 
-#: ../jabber/Login.tcl:175 ../jabber/Profiles.tcl:1087
+#: ../jabber/Login.tcl:181 ../jabber/Profiles.tcl:1095
 #: ../jabber/Register.tcl:1454 ../jabber/Search.tcl:935
 #: ../jabber/SetupAss.tcl:167 ../lib/Proxy.tcl:209
 #: ../whiteboard/WDialogs.tcl:192
 msgid "Username"
 msgstr ""
 
-#: ../jabber/Login.tcl:183 ../jabber/Profiles.tcl:1094
+#: ../jabber/Login.tcl:189 ../jabber/Profiles.tcl:1102
 msgid "Resource"
 msgstr ""
 
-#: ../jabber/Login.tcl:235 ../jabber/Login.tcl:239 ../jabber/Login.tcl:243
-#: ../jabber/Login.tcl:409 ../jabber/Profiles.tcl:1162
-#: ../jabber/Profiles.tcl:1166 ../jabber/Profiles.tcl:1170
-#: ../jabber/Profiles.tcl:1261 ../jabber/Register.tcl:293
+#: ../jabber/Login.tcl:241 ../jabber/Login.tcl:245 ../jabber/Login.tcl:249
+#: ../jabber/Login.tcl:415 ../jabber/Profiles.tcl:1170
+#: ../jabber/Profiles.tcl:1174 ../jabber/Profiles.tcl:1178
+#: ../jabber/Profiles.tcl:1269 ../jabber/Register.tcl:293
 #: ../jabber/Register.tcl:297 ../jabber/Register.tcl:301
 #: ../jabber/Register.tcl:541
 msgid "More"
 msgstr ""
 
-#: ../jabber/Login.tcl:271 ../jabber/Profiles.tcl:891
+#: ../jabber/Login.tcl:277 ../jabber/Profiles.tcl:891
 #: ../jabber/Profiles.tcl:903
 msgid "Edit Profiles"
 msgstr ""
 
-#: ../jabber/Login.tcl:394 ../jabber/Profiles.tcl:1242
+#: ../jabber/Login.tcl:400 ../jabber/Profiles.tcl:1250
 #: ../jabber/Register.tcl:530
 msgid "Less"
 msgstr ""
 
-#: ../jabber/Login.tcl:494
+#: ../jabber/Login.tcl:500
 #, tcl-format
 msgid "The %s is missing or is too short!"
 msgstr ""
 
-#: ../jabber/Login.tcl:522 ../jabber/Register.tcl:590
+#: ../jabber/Login.tcl:528 ../jabber/Register.tcl:590
 #, tcl-format
 msgid "Illegal character(s) in %s: %s!"
 msgstr ""
 
-#: ../jabber/Login.tcl:574
+#: ../jabber/Login.tcl:580
 msgid ""
 "The Contact ID differs from your profile. Do you want to save a new profile?"
 msgstr ""
 
-#: ../jabber/Login.tcl:579 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1533
+#: ../jabber/Login.tcl:585 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1550
 msgid "Profile Name"
 msgstr ""
 
-#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1137
-#: ../jabber/Profiles.tcl:1535
+#: ../jabber/Login.tcl:587 ../jabber/Profiles.tcl:1145
+#: ../jabber/Profiles.tcl:1552
 msgid "Add Profile"
 msgstr ""
 
-#: ../jabber/Login.tcl:581 ../jabber/Profiles.tcl:1535
+#: ../jabber/Login.tcl:587 ../jabber/Profiles.tcl:1552
 msgid "Enter the name for the new profile."
 msgstr ""
 
-#: ../jabber/Login.tcl:604
+#: ../jabber/Login.tcl:610
 msgid ""
 "Your current login settings differ from your profile settings. Do you want "
 "to save them to your profile?"
 msgstr ""
 
-#: ../jabber/Login.tcl:819
+#: ../jabber/Login.tcl:659
+msgid "Lost connection to server, reconnecting"
+msgstr ""
+
+#: ../jabber/Login.tcl:842
 #, tcl-format
 msgid "Contacted %s. Waiting for response"
 msgstr ""
 
-#: ../jabber/Login.tcl:858
+#: ../jabber/Login.tcl:881
 #, tcl-format
 msgid "Connected to %s. Initializing the XML stream"
 msgstr ""
 
-#: ../jabber/Login.tcl:861
+#: ../jabber/Login.tcl:884
 msgid "Negotiating TLS security"
 msgstr ""
 
-#: ../jabber/Login.tcl:877
+#: ../jabber/Login.tcl:901
 #, tcl-format
 msgid "Authorization to server %s was successful. Downloading contacts..."
 msgstr ""
 
-#: ../jabber/Login.tcl:933
+#: ../jabber/Login.tcl:959
 #, tcl-format
 msgid ""
 "Cannot connect to %s. Either there are server or network issues, or you "
 "misspelled the server's name."
 msgstr ""
 
-#: ../jabber/Login.tcl:939
+#: ../jabber/Login.tcl:965
 #, tcl-format
 msgid "Server %s did not respond: timeout."
 msgstr ""
 
-#: ../jabber/Login.tcl:944
+#: ../jabber/Login.tcl:970
 #, tcl-format
 msgid ""
 "Cannot login because this username is already in use by someone else (%s)."
 msgstr ""
 
-#: ../jabber/Login.tcl:947
+#: ../jabber/Login.tcl:973
 #, tcl-format
 msgid "The server %s has no support for TLS."
 msgstr ""
 
-#: ../jabber/Login.tcl:950
+#: ../jabber/Login.tcl:976
 #, tcl-format
 msgid "Cannot negotiate TLS with server %s."
 msgstr ""
 
-#: ../jabber/Login.tcl:953
+#: ../jabber/Login.tcl:979
 msgid "The server has no support for SASL authentication."
 msgstr ""
 
-#: ../jabber/Login.tcl:956
+#: ../jabber/Login.tcl:982
 msgid "Cannot authenticate due to internal protocol error."
 msgstr ""
 
-#: ../jabber/Login.tcl:961
+#: ../jabber/Login.tcl:987
 #, tcl-format
-msgid "Stream error received from the server with code: %s"
+msgid "Stream error received from the server with code: %s, %s"
 msgstr ""
 
-#: ../jabber/Login.tcl:964
+#: ../jabber/Login.tcl:990
 msgid "The proxy server reported an error."
 msgstr ""
 
-#: ../jabber/Login.tcl:976 ../jabber/Register.tcl:961
+#: ../jabber/Login.tcl:1002 ../jabber/Register.tcl:961
 msgid "The login process was aborted."
 msgstr ""
 
-#: ../jabber/Login.tcl:977 ../jabber/Login.tcl:978 ../jabber/Login.tcl:979
-#: ../jabber/Login.tcl:980 ../jabber/Login.tcl:982 ../jabber/Register.tcl:962
-#: ../jabber/Register.tcl:963 ../jabber/Register.tcl:964
-#: ../jabber/Register.tcl:965 ../jabber/Register.tcl:967
+#: ../jabber/Login.tcl:1003 ../jabber/Login.tcl:1004 ../jabber/Login.tcl:1005
+#: ../jabber/Login.tcl:1006 ../jabber/Login.tcl:1008
+#: ../jabber/Register.tcl:962 ../jabber/Register.tcl:963
+#: ../jabber/Register.tcl:964 ../jabber/Register.tcl:965
+#: ../jabber/Register.tcl:967
 msgid "Protocol error during the login process."
 msgstr ""
 
-#: ../jabber/Login.tcl:981 ../jabber/Register.tcl:966
+#: ../jabber/Login.tcl:1007 ../jabber/Register.tcl:966
 msgid "Login failed because of unknown account or wrong password."
 msgstr ""
 
-#: ../jabber/Login.tcl:985
+#: ../jabber/Login.tcl:1011
 #, tcl-format
 msgid ""
 "Invalid server response due to bug in server software:  error <%s/> is not "
@@ -3991,11 +4028,11 @@ msgid ""
 "this bug to your server administrator."
 msgstr ""
 
-#: ../jabber/Login.tcl:1011
+#: ../jabber/Login.tcl:1037
 msgid "Do you want to retry a different password or profile?"
 msgstr ""
 
-#: ../jabber/Login.tcl:1041
+#: ../jabber/Login.tcl:1069
 #, tcl-format
 msgid "Do you want to register a new account with %s."
 msgstr ""
@@ -4154,9 +4191,29 @@ msgstr ""
 msgid "Open Failed"
 msgstr ""
 
+#: ../jabber/MailBox.tcl:1180
+#, tcl-format
+msgid "Failed opening file %s: %s"
+msgstr ""
+
+#: ../jabber/MailBox.tcl:1291
+msgid "Missing Entities"
+msgstr ""
+
+#: ../jabber/MailBox.tcl:1292
+#, tcl-format
+msgid ""
+"There were %s images or similar entities that could not be obtained because "
+"the user is not online."
+msgstr ""
+
 #: ../jabber/MailBox.tcl:1598 ../jabber/MailBox.tcl:1676
 #, tcl-format
 msgid "Cannot open the inbox file %s when trying to save it."
+msgstr ""
+
+#: ../jabber/MailBox.tcl:1621 ../jabber/MailBox.tcl:1688
+msgid "Error renaming Inbox file."
 msgstr ""
 
 #: ../jabber/MailBox.tcl:1783 ../jabber/MailBox.tcl:1817
@@ -4213,96 +4270,96 @@ msgid "Accounts"
 msgstr ""
 
 #. TRANSLATORS: string shown if you change anything in an existing account profile in the login dialog
-#: ../jabber/Profiles.tcl:982 ../jabber/Profiles.tcl:1581
+#: ../jabber/Profiles.tcl:982 ../jabber/Profiles.tcl:1598
 msgid ""
 "You changed one or more values. Do you want to save them before closing?"
 msgstr ""
 
 #. TRANSLATORS: See File in the main window, and then Edit Profiles...
-#: ../jabber/Profiles.tcl:1056
+#: ../jabber/Profiles.tcl:1064
 msgid ""
 "Edit, add or delete profiles. The selected profile will become the default."
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1139
+#: ../jabber/Profiles.tcl:1147
 msgid "Delete Profile"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1463
+#: ../jabber/Profiles.tcl:1480
 msgid "You need to fill in at least the server name and user name."
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1568
+#: ../jabber/Profiles.tcl:1585
 msgid "Do you want to register a new account?"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1608
+#: ../jabber/Profiles.tcl:1625
 msgid ""
 "The selected profile will be deleted. Do you also want to delete the account "
 "for this profile? This action cannot be undone. Press Cancel to abort "
 "deletion of account and profile."
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1643 ../jabber/Register.tcl:118
+#: ../jabber/Profiles.tcl:1660 ../jabber/Register.tcl:118
 #, tcl-format
 msgid "Cannot unregister from %s."
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1785
+#: ../jabber/Profiles.tcl:1802
 msgid "Connection"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1801
+#: ../jabber/Profiles.tcl:1818
 msgid "Use secure connection"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1804
+#: ../jabber/Profiles.tcl:1821
 msgid "Certificate"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1807
+#: ../jabber/Profiles.tcl:1824
 msgid "Use SASL authentication"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1810
+#: ../jabber/Profiles.tcl:1827
 msgid "Use TLS and SASL"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1813
+#: ../jabber/Profiles.tcl:1830
 msgid "Use TLS on separate port (old)"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1816
+#: ../jabber/Profiles.tcl:1833
 msgid "Use compression"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1846
+#: ../jabber/Profiles.tcl:1863
 msgid "Plain text password"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1849
+#: ../jabber/Profiles.tcl:1866
 msgid "Priority"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1856
+#: ../jabber/Profiles.tcl:1873
 msgid "Login as invisible"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1872 ../lib/Proxy.tcl:204
+#: ../jabber/Profiles.tcl:1889 ../lib/Proxy.tcl:204
 #: ../whiteboard/WDialogs.tcl:191
 msgid "Host"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1874 ../lib/Proxy.tcl:206
+#: ../jabber/Profiles.tcl:1891 ../lib/Proxy.tcl:206
 #: ../whiteboard/WDialogs.tcl:193
 msgid "Port"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1898
+#: ../jabber/Profiles.tcl:1915
 msgid "Use HTTP transport"
 msgstr ""
 
-#: ../jabber/Profiles.tcl:1903 ../lib/PrefNet.tcl:98 ../lib/Proxy.tcl:144
+#: ../jabber/Profiles.tcl:1920 ../lib/PrefNet.tcl:119 ../lib/Proxy.tcl:144
 msgid "Proxy"
 msgstr ""
 
@@ -4454,7 +4511,7 @@ msgstr ""
 msgid "&Remove Contact"
 msgstr ""
 
-#: ../jabber/Roster.tcl:131 ../whiteboard/ItemInspector.tcl:375
+#: ../jabber/Roster.tcl:131 ../whiteboard/ItemInspector.tcl:378
 msgid "Style"
 msgstr ""
 
@@ -4541,20 +4598,28 @@ msgstr ""
 msgid "Show contacts without any subscription"
 msgstr ""
 
-#: ../jabber/RosterTree.tcl:67
+#: ../jabber/RosterTree.tcl:68
 msgid "Online"
 msgstr ""
 
-#: ../jabber/RosterTree.tcl:68
+#: ../jabber/RosterTree.tcl:69
 msgid "Offline"
 msgstr ""
 
-#: ../jabber/RosterTree.tcl:69
+#: ../jabber/RosterTree.tcl:70
 msgid "Transports"
 msgstr ""
 
-#: ../jabber/RosterTree.tcl:70
+#: ../jabber/RosterTree.tcl:71
 msgid "Subscription Pending"
+msgstr ""
+
+#: ../jabber/RosterTree.tcl:1838
+msgid "&Move"
+msgstr ""
+
+#: ../jabber/RosterTree.tcl:1839
+msgid "Canc&el"
 msgstr ""
 
 #. TRANSLATORS: themes for the contact icons (different presence state icons); see preferences
@@ -4849,15 +4914,15 @@ msgid "Failed to obtain personal notes: %s"
 msgstr ""
 
 #. TRANSLATORS: in the business card dialog, there can be made notes about each contact
-#: ../jabber/UserInfo.tcl:529
+#: ../jabber/UserInfo.tcl:527
 msgid "Notes"
 msgstr ""
 
-#: ../jabber/UserInfo.tcl:535
+#: ../jabber/UserInfo.tcl:533
 msgid "Add your personal notes about this contact."
 msgstr ""
 
-#: ../jabber/UserInfo.tcl:564
+#: ../jabber/UserInfo.tcl:562
 msgid "Client"
 msgstr ""
 
@@ -5086,7 +5151,7 @@ msgstr ""
 msgid "Cannot start the internal HTTP server: %s"
 msgstr ""
 
-#: ../lib/Init.tcl:741 ../lib/Init.tcl:762 ../lib/Media.tcl:179
+#: ../lib/Init.tcl:742 ../lib/Init.tcl:763 ../lib/Media.tcl:179
 #: ../whiteboard/Plugins.tcl:445
 #, tcl-format
 msgid "Looking for %s"
@@ -5138,40 +5203,44 @@ msgstr ""
 msgid "Email client"
 msgstr ""
 
-#: ../lib/PrefNet.tcl:63
+#: ../lib/PrefNet.tcl:84
 msgid "Network"
 msgstr ""
 
-#: ../lib/PrefNet.tcl:102
+#: ../lib/PrefNet.tcl:123
 msgid "NAT"
 msgstr ""
 
-#: ../lib/PrefNet.tcl:106
+#: ../lib/PrefNet.tcl:127
 msgid "Ports"
 msgstr ""
 
-#: ../lib/PrefNet.tcl:110
+#: ../lib/PrefNet.tcl:131
 msgid "Certificates"
 msgstr ""
 
-#: ../lib/PrefNet.tcl:130
+#: ../lib/PrefNet.tcl:151
 msgid "Built in server"
 msgstr ""
 
-#: ../lib/PrefNet.tcl:132
+#: ../lib/PrefNet.tcl:153
 msgid "File transfer"
 msgstr ""
 
-#: ../lib/PrefNet.tcl:168 ../lib/PrefNet.tcl:194
+#: ../lib/PrefNet.tcl:191 ../lib/PrefNet.tcl:226
 msgid "TLS certificate file"
 msgstr ""
 
-#: ../lib/PrefNet.tcl:171 ../lib/PrefNet.tcl:177
+#: ../lib/PrefNet.tcl:194 ../lib/PrefNet.tcl:200 ../lib/PrefNet.tcl:206
 msgid "Browse"
 msgstr ""
 
-#: ../lib/PrefNet.tcl:174 ../lib/PrefNet.tcl:203
+#: ../lib/PrefNet.tcl:197 ../lib/PrefNet.tcl:235
 msgid "TLS private key file"
+msgstr ""
+
+#: ../lib/PrefNet.tcl:203 ../lib/PrefNet.tcl:244
+msgid "TLS CA certificate file"
 msgstr ""
 
 #: ../lib/PrefUtils.tcl:218
@@ -5719,11 +5788,24 @@ msgstr ""
 msgid "Save As GIF"
 msgstr ""
 
+#: ../whiteboard/Import.tcl:2015
+msgid "unknown file"
+msgstr ""
+
+#: ../whiteboard/Import.tcl:2020
+msgid "Unknown file"
+msgstr ""
+
+#: ../whiteboard/Import.tcl:2023
+#, tcl-format
+msgid "No url found for the file \"%s\" with MIME type %s"
+msgstr ""
+
 #: ../whiteboard/ItemInspector.tcl:193
 msgid "Edit Item"
 msgstr ""
 
-#: ../whiteboard/ItemInspector.tcl:211 ../whiteboard/ItemInspector.tcl:363
+#: ../whiteboard/ItemInspector.tcl:211 ../whiteboard/ItemInspector.tcl:365
 #: ../whiteboard/Whiteboard.tcl:497
 msgid "Fill"
 msgstr ""
@@ -5752,11 +5834,11 @@ msgstr ""
 msgid "Miter"
 msgstr ""
 
-#: ../whiteboard/ItemInspector.tcl:224 ../whiteboard/ItemInspector.tcl:831
+#: ../whiteboard/ItemInspector.tcl:224 ../whiteboard/ItemInspector.tcl:829
 msgid "False"
 msgstr ""
 
-#: ../whiteboard/ItemInspector.tcl:225 ../whiteboard/ItemInspector.tcl:831
+#: ../whiteboard/ItemInspector.tcl:225 ../whiteboard/ItemInspector.tcl:829
 msgid "True"
 msgstr ""
 
@@ -5829,70 +5911,70 @@ msgid "Coordinates"
 msgstr ""
 
 #: ../whiteboard/ItemInspector.tcl:358
-msgid "Arrow"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:359
-msgid "Arrow shape"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:360
-msgid "Cap style"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:361
-msgid "Join style"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:364
-msgid "Font familiy"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:368
-msgid "Underline"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:369
-msgid "Smooth"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:370
-msgid "Stipple"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:371
-msgid "Tags"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:373 ../whiteboard/WBPrefs.tcl:108
-msgid "Width"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:374 ../whiteboard/ItemInspector.tcl:381
-msgid "Outline stipple"
-msgstr ""
-
-#: ../whiteboard/ItemInspector.tcl:376
 msgid "Anchor"
 msgstr ""
 
-#: ../whiteboard/ItemInspector.tcl:379
-msgid "Justify"
+#: ../whiteboard/ItemInspector.tcl:359
+msgid "Arrow"
 msgstr ""
 
-#: ../whiteboard/ItemInspector.tcl:380
-msgid "Outline"
+#: ../whiteboard/ItemInspector.tcl:360
+msgid "Arrow shape"
 msgstr ""
 
-#: ../whiteboard/ItemInspector.tcl:382
+#: ../whiteboard/ItemInspector.tcl:361
+msgid "Cap style"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:363
 msgid "Extend"
 msgstr ""
 
-#: ../whiteboard/ItemInspector.tcl:491
+#: ../whiteboard/ItemInspector.tcl:366
+msgid "Font familiy"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:370
+msgid "Join style"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:371
+msgid "Justify"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:372
+msgid "Outline"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:373
+msgid "Outline stipple"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:374
+msgid "Tags"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:376
+msgid "Smooth"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:377
+msgid "Stipple"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:379
+msgid "Underline"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:380 ../whiteboard/WBPrefs.tcl:108
+msgid "Width"
+msgstr ""
+
+#: ../whiteboard/ItemInspector.tcl:489
 msgid "Lock this item from being edited"
 msgstr ""
 
-#: ../whiteboard/ItemInspector.tcl:957
+#: ../whiteboard/ItemInspector.tcl:955
 msgid "Broken Image"
 msgstr ""
 
