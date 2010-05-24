@@ -1,7 +1,7 @@
 #
 # Copyright (C) 1997-2000 Matt Newman <matt@novadigm.com> 
 #
-# $Header: /cvsroot/tls/tls/tls.tcl,v 1.6 2004/02/11 22:36:31 razzell Exp $
+# $Header: /cvsroot/tls/tls/tls.tcl,v 1.10 2008/03/19 02:34:21 patthoyts Exp $
 #
 namespace eval tls {
     variable logcmd tclLog
@@ -13,7 +13,29 @@ namespace eval tls {
     # Maps UID to Server Socket
     variable srvmap
     variable srvuid 0
+
+    # Over-ride this if you are using a different socket command
+    variable socketCmd
+    if {![info exists socketCmd]} {
+        set socketCmd [info command ::socket]
+    }
 }
+
+proc tls::initlib {dir dll} {
+    # Package index cd's into the package directory for loading.
+    # Irrelevant to unixoids, but for Windows this enables the OS to find
+    # the dependent DLL's in the CWD, where they may be.
+    set cwd [pwd]
+    catch {cd $dir}
+    set res [catch {uplevel #0 [list load [file join [pwd] $dll]]} err]
+    catch {cd $cwd}
+    if {$res} {
+	namespace eval [namespace parent] {namespace delete tls}
+	return -code $res $err
+    }
+    rename tls::initlib {}
+}
+
 #
 # Backwards compatibility, also used to set the default
 # context options
@@ -27,6 +49,8 @@ proc tls::init {args} {
 # Helper function - behaves exactly as the native socket command.
 #
 proc tls::socket {args} {
+    variable socketCmd
+    variable defaults
     set idx [lsearch $args -server]
     if {$idx != -1} {
 	set server 1
@@ -43,7 +67,7 @@ proc tls::socket {args} {
     }
     set argc [llength $args]
     set sopts {}
-    set iopts [concat [list -server $server] ${tls::defaults}]	;# Import options
+    set iopts [concat [list -server $server] $defaults]	;# Import options
 
     for {set idx 0} {$idx < $argc} {incr idx} {
 	set arg [lindex $args $idx]
@@ -89,7 +113,7 @@ proc tls::socket {args} {
     #
     # Create TCP/IP socket
     #
-    set chan [eval ::socket $sopts]
+    set chan [eval $socketCmd $sopts]
     if {!$server && [catch {
 	#
 	# Push SSL layer onto socket
