@@ -182,8 +182,11 @@ proc ::Init::SetThis {mainScript} {
 	if {[regexp {[2-9]86} $tcl_platform(machine)]} {
 	    set machine "i686"
 	} elseif {$tcl_platform(machine) eq "x86_64"} {
-	    # x86_64
-	    set machine "x86_64"
+	    if {[info exists ::starkit::topdir]} {
+	        set machine "i686"
+	    } else {
+	        set machine "x86_64"
+	    }
 	}
 	set machineSpecPath [file join $tcl_platform(os) $machine]
     } elseif {$this(platform) eq "macosx"} {
