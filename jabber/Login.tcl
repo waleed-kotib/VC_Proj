@@ -33,8 +33,6 @@ namespace eval ::Login {
     variable password
     variable uid 0
     variable pending 0
-    # keep state whether we are in the phase of reconnecting
-    variable reconnecting 0
     # the error messages stating connection problems will disappear after $errormessagetimeout
     variable errormessagetimeout 10000
     # in case of connection problems, a reconnection retry is started after $reconnectwait
@@ -653,11 +651,19 @@ proc ::Login::LaunchHook {} {
 # ------------------------------------------------------
 proc ::Login::AutoReLogin {} {
    variable reconnectwait
+
+   variable ::JUI::jwapp
+   set w $::JUI::jwapp(jmain)
+   set wtbar $::JUI::jwapp(wtbar)
+
+   set stopImage [::Theme::Find32Icon $w stopImage]
    # Coccinella will relogin automatically every minute.
    #ui::dialog -icon error -title [mc "Info"] -type ok -timeout 1000 -message "AutoReLogin in progress..."
-   variable reconnecting
    ::JUI::SetAppMessage [mc "Lost connection to server, reconnecting"]...
-   set reconnecting 1
+   ::JUI::SetConnectState reconnecting
+   $wtbar buttonconfigure connect -text [mc "Stop"] \
+   -image $stopImage -disabledimage $stopImage \
+   -command ::Jabber::OnMenuLogInOut
    after $reconnectwait {::Login::LoginCmd}
    
 }
@@ -784,7 +790,9 @@ proc ::Login::QuitAppHook {} {
 }
 
 proc ::Login::AutoLoginCB {token {errcode ""} {errmsg ""}} {
-    AutoReLogin
+    if {[::JUI::GetConnectState] eq "reconnecting"} {
+        AutoReLogin
+    }
 }
 
 #-------------------------------------------------------------------------------
@@ -841,7 +849,9 @@ proc ::Login::HighLogin {server username resource password cmd args} {
 
     ::JUI::SetAppMessage [mc "Contacted %s. Waiting for response" $server]...
     ::JUI::FixUIWhen "connectinit"
-    ::JUI::SetConnectState "connectinit"
+    if {[::JUI::GetConnectState] ne "reconnecting"} {
+    	::JUI::SetConnectState "connectinit"
+    }
         
     set pending 1
     set defResource [::Profiles::MachineResource]
@@ -891,7 +901,6 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
     variable $token
     upvar 0 $token highstate
     variable pending
-    variable reconnecting
     
     set pending 0
 
@@ -902,7 +911,6 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
 	    ::JUI::FixUIWhen "connectfin"
 	    ::JUI::SetConnectState "connectfin"
 	    SetLoginStateRunHook
-	    set reconnecting 0
 	    
 	    # Important to send presence *after* we request the roster (loginHook)!
 	    eval {SetStatus} $highstate(args)
@@ -911,7 +919,9 @@ proc ::Login::HighFinal {token jlibname status {errcode ""} {errmsg ""}} {
 	error {
 	    set msg ""
 	    ::JUI::FixUIWhen "disconnect"
-	    ::JUI::SetConnectState "disconnect"
+            if {[::JUI::GetConnectState] ne "reconnecting"} {
+	    	::JUI::SetConnectState "disconnect"
+	    }
 	    HandleErrorCode $errcode $errmsg
 	}
     }        
@@ -1050,7 +1060,6 @@ proc ::Login::GetErrorStr {errcode {errmsg ""}} {
 
 proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
     global  config
-    variable reconnecting 
     variable errormessagetimeout
     
     ::Debug 2 "::Login::HandleErrorCode errcode=$errcode, errmsg=$errmsg"
@@ -1074,7 +1083,7 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
         set type yesno
         set default yes
     }
-    if {$reconnecting eq "1"} {
+    if {[::JUI::GetConnectState] eq "reconnecting"} {
 	# do not open popup messages on subsequent reconnection errors
 	return
     }

@@ -1736,7 +1736,7 @@ proc ::JUI::FilePostCommand {wmenu} {
 		
 		::UI::MenuMethod $mimport entryconfigure mBC... -state normal -label [mc "&Business Card"]...
 	    }
-	    disconnect {
+	    disconnect - reconnecting {
 		if {[llength [ui::findalltoplevelwithclass JLogin]]} {
 		    ::UI::MenuMethod $wmenu entryconfigure mEditProfiles... -state disabled -label [mc "&Edit Profiles"]...
 		    ::UI::MenuMethod $wmenu entryconfigure mNewAccount... -state disabled -label [mc "&New Account"]...
@@ -1949,7 +1949,6 @@ proc ::JUI::InfoPostCommand {wmenu} {
 
 namespace eval ::JUI {
     variable connectState
-    
     set connectState disconnect
 }
 
@@ -1961,7 +1960,6 @@ proc ::JUI::GetConnectState {} {
 
 proc ::JUI::SetConnectState {state} {
     variable connectState
-    
     set connectState $state
     ::hooks::run connectState $state
     
