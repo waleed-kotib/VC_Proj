@@ -945,7 +945,7 @@ proc ::Jabber::ClientProc {jlibName what args} {
 	    
 	    # Disconnect. This should reset both wrapper and XML parser!
 	    #::Jabber::DoCloseClientConnection
-	    SetClosedState
+	    SetReconnectState
 	    set msg [mc "The connection was unexpectedly broken."]
 	    if {[info exists argsA(-errormsg)]} {
 		append msg "\n"
@@ -1101,7 +1101,6 @@ proc ::Jabber::DoCloseClientConnection {args} {
 
 proc ::Jabber::SetClosedState {} {
     variable jstate
-    
     ::Debug 2 "::Jabber::SetClosedState"
 
     # Ourself.
@@ -1117,6 +1116,11 @@ proc ::Jabber::SetClosedState {} {
     
     # Run all logout hooks.
     ::hooks::run logoutHook
+}
+
+proc ::Jabber::SetReconnectState {} {
+    SetClosedState
+    ::JUI::SetConnectState "reconnecting"
 }
 
 # Jabber::EndSession --
@@ -2061,7 +2065,7 @@ proc ::Jabber::OnMenuLogInOut {} {
 	connect - connectfin {
 	    DoCloseClientConnection
 	}
-	connectinit {
+	connectinit - reconnecting {
 	    ::Login::Reset
 	}
 	disconnect {
