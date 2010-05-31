@@ -6,7 +6,7 @@
 #  Copyright (c) 2006 Mats Bengtsson
 #  Copyright (c) 2006 Antonio Cano damas
 #
-# $Id: iaxclient.tcl,v 1.1 2006-11-02 14:13:56 matben Exp $
+# $Id$
 
 namespace eval iaxclient {
 
@@ -223,8 +223,7 @@ proc iaxclient::CEvent {action args} {
 	    
 	    # IMPORTANT: this is a workaround for bug
 	    #     1587718 EXC_BAD_ACCESS in iax_hangup 
-	    # 100ms can still crash WinXP!
-	    after 1000 [namespace code [list dial ${host}:${port}/]]
+	    after 100 [namespace code [list dial ${host}:${port}/]]
 	} else {
 	    set type "error"
 	    uplevel #0 $cmd [list $candidate $type] $args
