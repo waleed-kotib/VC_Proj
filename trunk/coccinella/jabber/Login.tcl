@@ -446,6 +446,7 @@ proc ::Login::Close {w} {
 
 proc ::Login::Reset {} {
     variable pending
+    variable ::JUI::jwapp
 
     set pending 0
     ::Jabber::Jlib connect reset
@@ -453,6 +454,11 @@ proc ::Login::Reset {} {
     ::JUI::SetAppMessage ""
     ::JUI::FixUIWhen "disconnect"
     ::JUI::SetConnectState "disconnect"
+    if {[info exists ::JUI::jwapp(reconnectid)]} {
+    	after cancel $::JUI::jwapp(reconnectid)
+    	unset ::JUI::jwapp(reconnectid)
+    }
+
 }
 
 # Login::DoLogin --
