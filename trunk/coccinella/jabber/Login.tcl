@@ -664,8 +664,7 @@ proc ::Login::AutoReLogin {} {
    $wtbar buttonconfigure connect -text [mc "Stop"] \
    -image $stopImage -disabledimage $stopImage \
    -command ::Jabber::OnMenuLogInOut
-   after $reconnectwait {::Login::LoginCmd}
-   
+   set ::JUI::jwapp(reconnectid) [after $reconnectwait {::Login::LoginCmd}]
 }
 
 # Login::LoginCmd --
