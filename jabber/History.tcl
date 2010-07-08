@@ -191,7 +191,7 @@ proc ::History::XGetAllNXMLFileNames {jid} {
     if {$jid ne ""} {
 	set mjid [jlib::jidmap $jid]
 	set rootTail [::uri::urn::quote $mjid]
-	set nfiles [glob -nocomplain -directory $this(historyPath) ${rootTail}-*.nxml]
+	set nfiles [glob -nocomplain -directory $this(historyPath) -- ${rootTail}-*.nxml]
 	return [lsort -dictionary $nfiles]
     }
     return
@@ -202,7 +202,7 @@ proc ::History::XGetAllXMLFileNames {jid} {
     
     set mjid [jlib::jidmap $jid]
     set rootTail [::uri::urn::quote $mjid]
-    set xfiles [glob -nocomplain -directory $this(historyPath) ${rootTail}-*.xml]
+    set xfiles [glob -nocomplain -directory $this(historyPath) -- ${rootTail}-*.xml]
     return [lsort -dictionary $xfiles]
 }
 
