@@ -19,7 +19,7 @@ proc ::ItclApplets::Init {} {
     if {[lsearch $auto_path $this(appletsPath)] == -1} {
 	lappend auto_path $this(appletsPath)
     }
-    foreach f [glob -nocomplain -directory $this(appletsPath) -type d *] {
+    foreach f [glob -nocomplain -directory $this(appletsPath) -type d -- *] {
 	if {[lsearch $auto_path $f] == -1} {
 	    lappend auto_path $f
 	}

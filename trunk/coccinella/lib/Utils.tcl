@@ -525,7 +525,7 @@ proc ::Utils::LanguageMenubutton {w varName args} {
 	zh_cn {简体中文}
     }
     set langs [list]
-    foreach f [glob -nocomplain -tails -directory $this(msgcatPath) *.msg] {
+    foreach f [glob -nocomplain -tails -directory $this(msgcatPath) -- *.msg] {
 	set code [file rootname $f]
 	if {[info exists code2Name($code)]} {
 	    set str $code2Name($code)
