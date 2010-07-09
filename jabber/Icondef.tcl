@@ -103,7 +103,7 @@ proc ::Icondef::Load {path imageArr metaArr} {
 	    
 	    # We cannot be sure of that the name of the archive is identical 
 	    # with the name of the original directory.
-	    set zipdir [lindex [glob -nocomplain -directory $mountpath *] 0]
+	    set zipdir [lindex [glob -nocomplain -directory $mountpath -- *] 0]
 	    set dir $zipdir
 	} else {
 	    return -code error "Cannot read jisp archive without vfs::zip"

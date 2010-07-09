@@ -237,7 +237,7 @@ proc ::Avatar::QuitHook {} {
 proc ::Avatar::ClearCache {} {
     variable options
     
-    set files [glob -nocomplain -dir $options(-cachedir) *]
+    set files [glob -nocomplain -dir $options(-cachedir) -- *]
     if {[llength $files]} {
 	eval {file delete} $files
     }
@@ -309,7 +309,7 @@ proc ::Avatar::WriteBase64ToFile {data mime} {
     set dir [file normalize $this(myAvatarPath)]
 
     # Store the avatar file in prefs folder to protect it from being removed.
-    foreach f [glob -nocomplain -directory $dir *] {
+    foreach f [glob -nocomplain -directory $dir -- *] {
 	file delete $f
     }
     set suff [GetSuffForMime $mime]
@@ -441,7 +441,7 @@ proc ::Avatar::UnsetMyPhotoAndFile {} {
     set myphoto(hash) ""
     set aprefs(fileName) ""
     set dir $this(myAvatarPath)
-    foreach f [glob -nocomplain -directory $dir *] {
+    foreach f [glob -nocomplain -directory $dir -- *] {
 	file delete $f
     }
 }
@@ -480,7 +480,7 @@ proc ::Avatar::SaveMyImageFile {fileName} {
     } else {
 	
 	# Store the avatar file in prefs folder to protect it from being removed.
-	foreach f [glob -nocomplain -directory $dir *] {
+	foreach f [glob -nocomplain -directory $dir -- *] {
 	    file delete $f
 	}
 	file copy $fileName $dir
@@ -496,7 +496,7 @@ proc ::Avatar::GetMyAvatarFile {} {
     Debug "::Avatar::GetMyAvatarFile"
     
     set fileNames [glob -nocomplain -types f  \
-      -directory $this(myAvatarPath) *.gif *.png *.jpg *.jpeg]
+      -directory $this(myAvatarPath) -- *.gif *.png *.jpg *.jpeg]
     set fileName [lindex $fileNames 0]
     if {[file isfile $fileName]} {
 	return $fileName
@@ -642,7 +642,7 @@ proc ::Avatar::ClearRecent {} {
     variable aprefs
     
     set dir $this(recentAvatarPath)
-    foreach f [glob -nocomplain -directory $dir *] {
+    foreach f [glob -nocomplain -directory $dir -- *] {
 	file delete $f
     }
     set aprefs(recent) {}

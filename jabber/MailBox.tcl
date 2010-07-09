@@ -1853,7 +1853,7 @@ proc ::MailBox::DeleteMailbox {} {
     if {[file exist $this(inboxFile)]} {
 	catch {file delete $this(inboxFile)}
     }    
-    foreach f [glob -nocomplain -directory $this(inboxCanvasPath) *.can] {
+    foreach f [glob -nocomplain -directory $this(inboxCanvasPath) -- *.can] {
 	catch {file delete $f}
     }
 }

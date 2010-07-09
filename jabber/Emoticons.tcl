@@ -159,7 +159,7 @@ proc ::Emoticons::GetAllSets {} {
     set setList [list]
     set paths [::Theme::GetPathsFor $this(emoticons)]
     foreach path $paths {
-	foreach f [glob -nocomplain -directory $path *] {
+	foreach f [glob -nocomplain -directory $path -- *] {
 	    set name [file tail $f]
 	    set name [file rootname $name]
 	    if {[string equal [file extension $f] ".jisp"] && $priv(havezip)} {
@@ -217,7 +217,7 @@ proc ::Emoticons::LoadTmpIconSet {path} {
 	    
 	    # We cannot be sure of that the name of the archive is identical 
 	    # with the name of the original directory.
-	    set zipdir [lindex [glob -nocomplain -directory $mountpath *] 0]
+	    set zipdir [lindex [glob -nocomplain -directory $mountpath -- *] 0]
 	    set dir $zipdir
 	} else {
 	    return -code error "Cannot read jisp archive without vfs::zip"

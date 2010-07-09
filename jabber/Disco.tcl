@@ -936,7 +936,7 @@ proc ::Disco::BackgroundImageGetFile {suffL defaultFile} {
 	    foreach suff $suffL {
 		lappend pattern "disco$suff"
 	    }    
-	    set files [eval {glob -nocomplain -directory $this(backgroundsPath)} $pattern]
+	    set files [eval {glob -nocomplain -directory $this(backgroundsPath)} -- $pattern]
 	    set fileName [lindex $files 0]
 	}
     }    
