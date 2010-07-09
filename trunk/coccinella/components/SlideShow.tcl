@@ -219,7 +219,7 @@ proc ::SlideShow::LoadFolder {w} {
     set dir $priv($w,dir)
     set files {}
     foreach suff $priv(suffixes) {
-	set flist [glob -nocomplain -directory $dir -types f -tails *$suff]
+	set flist [glob -nocomplain -directory $dir -types f -tails -- *$suff]
 	set files [concat $files $flist]
     }
     set pages {}

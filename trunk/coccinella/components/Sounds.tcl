@@ -213,7 +213,7 @@ proc ::Sounds::GetAllSoundSetPaths {} {
     set soundPaths [list]
     set paths [::Theme::GetAllPathsWithFilter sound]
     foreach path $paths {
-	foreach dir [glob -nocomplain -types d -directory $path *] {
+	foreach dir [glob -nocomplain -types d -directory $path -- *] {
 	    set indFile [file join $dir soundIndex.tcl]
 	    if {[file exists $indFile]} {
 		lappend soundPaths $dir
