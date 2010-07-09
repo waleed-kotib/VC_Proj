@@ -307,7 +307,7 @@ proc ::Theme::GetAllPathsWithFilter {{filterL {}}} {
     
     set paths [list]
     foreach dir [list $this(themesPath) $this(altThemesPath)] {
-	foreach path [glob -nocomplain -types d -directory $dir *] {
+	foreach path [glob -nocomplain -types d -directory $dir -- *] {
 	    set name [file tail $path]
 	    if {$name eq "CVS"} { continue }
 	    if {[llength $filterL]} {
@@ -328,7 +328,7 @@ proc ::Theme::GetAllThemePaths {} {
     
     set paths [list]
     foreach dir [list $this(themesPath) $this(altThemesPath)] {
-	foreach path [glob -nocomplain -types d -directory $dir *] {
+	foreach path [glob -nocomplain -types d -directory $dir -- *] {
 	    if {[file tail $path] eq "CVS"} { continue }
 	    if {[file exists [file join $path themeInfo]]} {
 		lappend paths $path
@@ -341,7 +341,7 @@ proc ::Theme::GetAllThemePaths {} {
 proc ::Theme::GetRootTheme {} {
     global  this
     
-    foreach path [glob -nocomplain -types d -directory $this(themesPath) *] {
+    foreach path [glob -nocomplain -types d -directory $this(themesPath) -- *] {
 	if {[file tail $path] eq "CVS"} { continue }
 	if {"root" in [GetInfo $path]} {
 	    return [file tail $path]

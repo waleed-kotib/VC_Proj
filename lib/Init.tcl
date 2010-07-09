@@ -626,7 +626,7 @@ proc ::Init::Msgcat {} {
 
     set this(systemLocale) $locale
     set lang [lindex [split [file rootname $locale] _] 0]
-    set langs [glob -nocomplain -tails -directory $this(msgcatPath) *.msg]
+    set langs [glob -nocomplain -tails -directory $this(msgcatPath) -- *.msg]
     set havecat 0
     foreach f $langs {
 	set langcode [lindex [split [file rootname $f] _] 0]

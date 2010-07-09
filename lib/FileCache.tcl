@@ -266,7 +266,7 @@ proc ::FileCache::SetDirFiles {dir {pattern *}} {
 
     # glob returns absolute paths but we must store them relative 'basedir'
     # and the key must be uri encoded!
-    foreach f [glob -nocomplain -directory $dir $pattern] {
+    foreach f [glob -nocomplain -directory $dir -- $pattern] {
 	Set $f
     }
 }
@@ -552,7 +552,7 @@ proc ::FileCache::ClearCache {} {
     
     set oldcwd [pwd]
     cd $prefs(incomingPath)
-    foreach f [glob -nocomplain *] {
+    foreach f [glob -nocomplain -- *] {
 	catch {file delete $f}
     }
     unset -nocomplain cache
