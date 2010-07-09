@@ -116,7 +116,7 @@ proc ::ChatTheme::GetAllStylePaths {} {
     
     set pathL [list]
     foreach path [::Theme::GetAllPathsWithFilter chatstyles] {
-	set dirs [glob -nocomplain -directory [file join $path chatstyles] -types d *]
+	set dirs [glob -nocomplain -directory [file join $path chatstyles] -types d -- *]
 	foreach dir $dirs {
 	    
 	    # Do some rudimentary checking.
@@ -161,7 +161,7 @@ proc ::ChatTheme::Variants {name} {
 	return -code error "unknown theme \"$name\""
     }
     set varDir [file join $dir Variants]
-    set all [glob -nocomplain -directory $varDir -types f -tails *.css]
+    set all [glob -nocomplain -directory $varDir -types f -tails -- *.css]
     return [lapply {file rootname} $all]
 }
 
