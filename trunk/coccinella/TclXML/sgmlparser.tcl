@@ -950,7 +950,7 @@ proc sgml::ParseEvent:ElementOpen {tag attr opts args} {
 	    unset attrlist($attrName)
 	    set colon [set prefix {}]
 	    if {[regexp {^xmlns(:(.+))?$} $attrName discard colon prefix]} {
-		switch -glob [string length $colon],[string length $prefix] {
+		switch -glob -- [string length $colon],[string length $prefix] {
 		    0,0 {
 			# default NS declaration
 			lappend state(defaultNSURI) $attrValue
@@ -1808,7 +1808,7 @@ proc sgml::ParseDTD:External {opts dtd} {
 	}
 
 	# Now expand the PE reference, if any
-	switch -glob $mode,[string length $PEref],$n {
+	switch -glob -- $mode,[string length $PEref],$n {
 	    ignore,0,* {
 		set dtd $text
 	    }
@@ -2636,7 +2636,7 @@ proc sgml::DTD:ENTITY {opts name param value} {
 	    if {[catch {uplevel #0 $options(-parseentitydeclcommand) [list $value]} value]} {
 		return -code error "unable to parse entity declaration due to \"$value\""
 	    }
-	    switch -glob [lindex $value 0],[lindex $value 3] {
+	    switch -glob -- [lindex $value 0],[lindex $value 3] {
 		internal, {
 		    set ents($name) [EntitySubst [array get options] [lindex $value 1]]
 		    uplevel #0 $options(-entitydeclcommand) [list $name $ents($name)]
