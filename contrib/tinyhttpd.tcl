@@ -1163,7 +1163,7 @@ proc ::tinyhttpd::BuildHtmlForDir {token} {
     set imgup     /$priv(rpath,imgs,up)
     
     # Start by finding the directory content. 
-    set allFiles [glob -directory $abspath -nocomplain *]
+    set allFiles [glob -directory $abspath -nocomplain -- *]
     set num [llength $allFiles]
     if {$relpath ne ""} {
 	set rellist [file split $relpath]

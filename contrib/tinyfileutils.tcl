@@ -250,7 +250,7 @@ proc ::tfileutils::TempFile {tmpdir prefix} {
 #       Deletes all files in a directory but keeps the directory.
 
 proc ::tfileutils::deleteallfiles {dir {pattern *}} {
-    set files [eval {glob -nocomplain -directory $dir} $pattern]
+    set files [eval {glob -nocomplain -directory $dir} -- $pattern]
     if {[llength $files]} {
 	eval {file delete -force} $files
     }
