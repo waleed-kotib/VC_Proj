@@ -665,7 +665,7 @@ proc ::ttk::dialog::file::Update {w} {
 	# Make the directory list
 	set dlist ""
 	foreach f [eval glob -nocomplain -tails \
-		-directory $cwd -type d $pattern] {
+		-directory $cwd -type d -- $pattern] {
 		if {[string equal $f .]} continue
 		if {[string equal $f ..]} continue
 		lappend dlist [list $f dir]
@@ -1515,7 +1515,7 @@ proc ::ttk::dialog::file::treeOpen {w path {index insert} {subdir .}} {
 
 	$txt configure -state normal
 	$txt mark set insert $index
-	set list [glob -nocomplain -tails -dir $path -type d * .*]
+	set list [glob -nocomplain -tails -dir $path -type d -- * .*]
 	foreach d [lsort -dictionary $list] {
 		# Skip . and ..
 		if {[string equal $d .] || [string equal $d ..]} continue
@@ -1638,7 +1638,7 @@ proc ::ttk::dialog::file::TreeRelease1 {w} {
 	if {![catch {$txt image cget sel.first-2c -image} name]} {
 		set index [$txt index sel.last-1c]
 		$txt mark set selmark sel.first
-		switch -glob $name {
+		switch -glob -- $name {
 			*::diropen {
 				treeOpen $w [file join $path $dir] $index
 			}

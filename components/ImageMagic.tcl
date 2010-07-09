@@ -188,7 +188,7 @@ proc ::ImageMagic::ClearImportFiles {wcan} {
 	file mkdir $prefs(incomingFilePath)
     }
     
-    set all_files [glob -nocomplain [file join $prefs(incomingFilePath) {*}]]
+    set all_files [glob -nocomplain [file join $prefs(incomingFilePath) -- {*}]]
     if {$all_files == ""} {
 	return
     }
