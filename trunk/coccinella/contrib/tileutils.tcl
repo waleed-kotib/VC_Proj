@@ -842,7 +842,7 @@ proc tileutils::configstyles {name} {
 proc tileutils::LoadImages {imgdir {patterns {*.gif}}} {
     variable tiles
     
-    foreach file [eval {glob -nocomplain -directory $imgdir} $patterns] {
+    foreach file [eval {glob -nocomplain -directory $imgdir} -- $patterns] {
 	set name [file tail [file rootname $file]]
 	if {![info exists tiles($name)]} {
 	    set ext [file extension $file]
