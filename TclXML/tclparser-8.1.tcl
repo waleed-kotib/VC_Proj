@@ -285,7 +285,7 @@ proc xml::tclparser::parse {name xml args} {
 #	Return value of e
 
 proc xml::tclparser::ParseEmpty {tag attr e} {
-    switch -glob [string length $e],[regexp "/[::xml::cl $::xml::Wsp]*$" $attr] {
+    switch -glob -- [string length $e],[regexp "/[::xml::cl $::xml::Wsp]*$" $attr] {
 	0,0 {
 	    return {}
 	}

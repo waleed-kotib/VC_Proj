@@ -3012,7 +3012,7 @@ proc ::WB::GetFocus {w wevent} {
 proc ::WB::MakeItemMenuDef {dir} {
     
     set mdef {}
-    foreach f [glob -nocomplain -directory $dir *] {
+    foreach f [glob -nocomplain -directory $dir -- *] {
 	
 	# Sort out directories we shouldn't search.
 	switch -- [string tolower [file tail $f]] {
@@ -3063,7 +3063,7 @@ proc ::WB::BuildItemsMenu {w m} {
 proc ::WB::AddItemsMenu {w m dir} {
     
     set n 0
-    foreach f [glob -nocomplain -directory $dir *] {
+    foreach f [glob -nocomplain -directory $dir -- *] {
 	
 	# Sort out directories we shouldn't search.
 	switch -- [string tolower [file tail $f]] {
@@ -3089,7 +3089,7 @@ proc ::WB::AddItemsMenu {w m dir} {
 
 proc ::WB::HaveAnyCanFiles {dir} {
     
-    foreach f [glob -nocomplain -directory $dir *] {
+    foreach f [glob -nocomplain -directory $dir -- *] {
 	if {[file isdirectory $f]} {
 	    if {[HaveAnyCanFiles $f]} {
 		return 1
