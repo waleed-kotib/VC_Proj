@@ -650,7 +650,13 @@ proc ::BuddyPounce::NewChatMsgHook {xmldata} {
 
     set from [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $from]
-    Event $jid2 chat -xmldata $xmldata
+    set msgChatState ""
+    # only in case a body is in the chat message, produce a chat 
+    # state notificaton, otherwise it would also trigger on chat
+    # state notifications from the other user
+    if {[wrapper::havechildtag $xmldata body]} {
+        Event $jid2 chat -xmldata $xmldata
+    }
 }
 
 proc ::BuddyPounce::NewMsgHook {xmldata uuid} {
