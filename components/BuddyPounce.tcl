@@ -40,6 +40,7 @@ proc ::BuddyPounce::Init {} {
     
     # Add all hooks we need.
     ::hooks::register quitAppHook              ::BuddyPounce::QuitHook
+    ::hooks::register logoutHook               ::BuddyPounce::LogoutHook
     ::hooks::register newMessageHook           ::BuddyPounce::NewMsgHook
     ::hooks::register newChatMessageHook       ::BuddyPounce::NewChatMsgHook
     ::hooks::register presenceHook             ::BuddyPounce::PresenceHook    
@@ -80,6 +81,9 @@ proc ::BuddyPounce::Init {} {
     
     # And for 'any' which is not an array.
     variable budprefsany {}
+
+    # To save thread Id seen already, and to lookup on subsequent messages
+    variable threadids
         
     variable alertTitle 
     array set alertTitle {
@@ -566,7 +570,7 @@ proc ::BuddyPounce::Event {from eventkey args} {
     dict set budpounce available [mc "%s just went online!" $from]
     dict set budpounce unavailable [mc "%s just went offline!" $from]
     dict set budpounce msg [mc "%s just sent you a message!" $from]
-    dict set budpounce chat [mc "%s just started a chat!" $from]
+    dict set budpounce chat [mc "%s just started a chat session!" $from]
 
     foreach action $actions {
 	
@@ -639,6 +643,12 @@ proc ::BuddyPounce::QuitHook {} {
     ::UI::SaveWinPrefixGeom $wdlg
 }
 
+proc ::BuddyPounce::LogoutHook {} {
+    variable threadids
+
+    array unset threadids *
+}
+
 proc ::BuddyPounce::CloseHook {wclose} {
     variable wdlg
 
@@ -647,6 +657,7 @@ proc ::BuddyPounce::CloseHook {wclose} {
 }
 
 proc ::BuddyPounce::NewChatMsgHook {xmldata} {
+    variable threadids
 
     set from [wrapper::getattribute $xmldata from]
     set jid2 [jlib::barejid $from]
@@ -655,7 +666,19 @@ proc ::BuddyPounce::NewChatMsgHook {xmldata} {
     # state notificaton, otherwise it would also trigger on chat
     # state notifications from the other user
     if {[wrapper::havechildtag $xmldata body]} {
-        Event $jid2 chat -xmldata $xmldata
+	# now check whether we already know this thread
+	# since we only want to trigger an event on thread start
+	set threadid [wrapper::getcdata [wrapper::getfirstchildwithtag $xmldata thread]]
+	if { $threadid ne "" } { 
+	    if {![info exists threadids($threadid)]} {
+		# we haven't seen the thread yet, lets save the ID
+		# and trigger an event
+		set threadids($threadid) $threadid
+                Event $jid2 chat -xmldata $xmldata
+	    }
+	} else {
+            Event $jid2 chat -xmldata $xmldata
+	}
     }
 }
 
