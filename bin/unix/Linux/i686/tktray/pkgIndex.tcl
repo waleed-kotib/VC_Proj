@@ -1,5 +1,7 @@
 #
 # Tcl package index file
 #
-package ifneeded tktray 1.1 \
-    [list load [file join $dir libtktray1.1.so] tktray]
+if {[package vcompare [info tclversion] 8.4] < 0} return
+
+package ifneeded tktray 1.3.8 \
+    [list load [file join $dir libtktray1.3.8.so] tktray]
