@@ -50,9 +50,25 @@ proc ::Totd::Init {} {
                      participants by clicking the whiteboard icon in a\
                      chatroom. All participants using %s will be invited." $prefs(appName)]
     dict set tips 4 [mc "Documentation is available at http://coccinella.im/documentation"]
-    dict set tips 5 [mc "To override the automatic creation of the XMPP resource you can add /resourcename to your Contact ID."]
+    dict set tips 5 [mc "To override the automatic creation of the XMPP resource you can add\
+                     /resourcename to your Contact ID."]
     dict set tips 6 [mc "Nicknames in chatrooms can be automatically completed using the TAB key.\
-		     Enter the first letter(s) of the nickname and then use the TAB key to complete it."]
+		     Enter the first letter(s) of the nickname and then use the TAB key to complete."]
+    dict set tips 7 [mc "You can carry %s with you on an USB stick and use the same configuration\
+                     on different computers. You can create such a cross-platform portable %s USB\
+                     stick this way:\n\n\
+		     1. Create a folder on the USB stick.\n\
+		     2. Put in this folder the Coccinella binaries (for Windows, Linux and Mac OS X).\
+                        Of course you do not necessarily need all binaries, for instance in case\
+                        you do not want to use the USB stick on Windows computers.\n\
+		     3. Then open on each platform (Windows, Linux and Mac OS X) the binary for that platform.\n\
+		     4. Go each time to Preferences and enable the checkbox option\
+                        'Store preferences in same folder as program' (on the General page).\n\
+		     5. Preferences will now be saved on the USB stick in the same folder as the binary."]
+    dict set tips 8 [mc "%s is free software. This means you have the freedom to improve %s for\
+		     internal use without breaking copyright laws. Feel free to contribute such\
+		     improvements back to the project so that others can build upon your contribution.\
+                     Check out http://coccinella.im/development to learn how you can help." $prefs(appName)]
     ::hooks::register launchFinalHook ::Totd::LaunchHook
     ::hooks::register prefsInitHook   ::Totd::InitPrefsHook
 
