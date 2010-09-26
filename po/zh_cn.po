@@ -9,10 +9,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: zh_CN\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2010-05-24 14:51+0200\n"
+"POT-Creation-Date: 2010-09-26 21:43+0200\n"
 "PO-Revision-Date: 2009-03-09 21:19+0800\n"
 "Last-Translator: lvjinhua <lvjinhua@gmail.com>\n"
 "Language-Team: Simplified Chinese\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -72,13 +73,13 @@ msgstr "检查更新(&U)"
 #: ../jabber/JUser.tcl:388 ../jabber/JUser.tcl:412 ../jabber/JWB.tcl:2052
 #: ../jabber/JWB.tcl:2057 ../jabber/Jabber.tcl:624 ../jabber/Jabber.tcl:871
 #: ../jabber/Jabber.tcl:918 ../jabber/Jabber.tcl:928 ../jabber/Jabber.tcl:942
-#: ../jabber/Jabber.tcl:956 ../jabber/Jabber.tcl:1505
-#: ../jabber/Jabber.tcl:1509 ../jabber/Jabber.tcl:1588
-#: ../jabber/Jabber.tcl:1590 ../jabber/Jabber.tcl:1685
-#: ../jabber/Jabber.tcl:1689 ../jabber/Jabber.tcl:2007
-#: ../jabber/Jabber.tcl:2038 ../jabber/Login.tcl:499 ../jabber/Login.tcl:527
-#: ../jabber/Login.tcl:536 ../jabber/Login.tcl:961 ../jabber/Login.tcl:1082
-#: ../jabber/Login.tcl:1085 ../jabber/MUC.tcl:318 ../jabber/MUC.tcl:321
+#: ../jabber/Jabber.tcl:956 ../jabber/Jabber.tcl:1509
+#: ../jabber/Jabber.tcl:1513 ../jabber/Jabber.tcl:1592
+#: ../jabber/Jabber.tcl:1594 ../jabber/Jabber.tcl:1689
+#: ../jabber/Jabber.tcl:1693 ../jabber/Jabber.tcl:2011
+#: ../jabber/Jabber.tcl:2042 ../jabber/Login.tcl:503 ../jabber/Login.tcl:531
+#: ../jabber/Login.tcl:540 ../jabber/Login.tcl:976 ../jabber/Login.tcl:1096
+#: ../jabber/Login.tcl:1099 ../jabber/MUC.tcl:318 ../jabber/MUC.tcl:321
 #: ../jabber/MUC.tcl:1162 ../jabber/MUC.tcl:1247 ../jabber/MUC.tcl:1356
 #: ../jabber/MUC.tcl:1514 ../jabber/MUC.tcl:1541 ../jabber/MUC.tcl:1717
 #: ../jabber/MUC.tcl:1719 ../jabber/MUC.tcl:1740 ../jabber/MUC.tcl:1742
@@ -106,7 +107,7 @@ msgstr "检查更新(&U)"
 #: ../lib/Dialogs.tcl:169 ../lib/Dialogs.tcl:412 ../lib/HttpTrpt.tcl:71
 #: ../lib/HttpTrpt.tcl:107 ../lib/HttpTrpt.tcl:136 ../lib/HttpTrpt.tcl:226
 #: ../lib/HttpTrpt.tcl:233 ../lib/HttpTrpt.tcl:239 ../lib/Httpd.tcl:78
-#: ../lib/Init.tcl:723 ../lib/Init.tcl:745 ../lib/MacintoshUtils.tcl:55
+#: ../lib/Init.tcl:726 ../lib/Init.tcl:748 ../lib/MacintoshUtils.tcl:55
 #: ../lib/MacintoshUtils.tcl:77 ../lib/MacintoshUtils.tcl:99
 #: ../lib/PrefUtils.tcl:91 ../lib/PrefUtils.tcl:217 ../lib/TheServer.tcl:65
 #: ../lib/UserActions.tcl:44 ../lib/UserActions.tcl:72
@@ -162,41 +163,41 @@ msgstr "自动检查更新"
 msgid "Close"
 msgstr "关闭"
 
-#: ../components/BuddyPounce.tcl:51
+#: ../components/BuddyPounce.tcl:52
 msgid "&Contact Actions"
 msgstr "联系"
 
-#: ../components/BuddyPounce.tcl:152
+#: ../components/BuddyPounce.tcl:156
 #, tcl-format
 msgid ""
 "Set a specific action for events related to %s. Select events using the tabs "
 "below."
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:153 ../components/BuddyPounce.tcl:161
-#: ../components/BuddyPounce.tcl:167 ../components/BuddyPounce.tcl:211
+#: ../components/BuddyPounce.tcl:157 ../components/BuddyPounce.tcl:165
+#: ../components/BuddyPounce.tcl:171 ../components/BuddyPounce.tcl:215
 msgid "Contact Actions"
 msgstr "联系动作"
 
-#: ../components/BuddyPounce.tcl:160
+#: ../components/BuddyPounce.tcl:164
 #, tcl-format
 msgid ""
 "Set a specific action for events related to any contact belonging to the "
 "group %s. Select events using the tabs below."
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:166
+#: ../components/BuddyPounce.tcl:170
 msgid ""
 "Set a specific action for events related to any contact in your contact "
 "list. Select events using the tabs below."
 msgstr ""
 
-#: ../components/BuddyPounce.tcl:169
+#: ../components/BuddyPounce.tcl:173
 msgid "Any"
 msgstr "任何"
 
-#: ../components/BuddyPounce.tcl:186 ../components/BuddyPounce.tcl:187
-#: ../components/BuddyPounce.tcl:625 ../components/Mood.tcl:296
+#: ../components/BuddyPounce.tcl:190 ../components/BuddyPounce.tcl:191
+#: ../components/BuddyPounce.tcl:629 ../components/Mood.tcl:296
 #: ../components/Mood.tcl:478 ../components/Mood.tcl:629
 #: ../components/Mood.tcl:670 ../components/UserActivity.tcl:245
 #: ../components/UserActivity.tcl:401 ../components/UserActivity.tcl:652
@@ -213,23 +214,23 @@ msgstr "任何"
 msgid "None"
 msgstr "None"
 
-#: ../components/BuddyPounce.tcl:238
+#: ../components/BuddyPounce.tcl:242
 msgid "Show popup"
 msgstr "显示弹出窗口"
 
-#: ../components/BuddyPounce.tcl:241
+#: ../components/BuddyPounce.tcl:245
 msgid "Play sound"
 msgstr "播放声音"
 
-#: ../components/BuddyPounce.tcl:246
+#: ../components/BuddyPounce.tcl:250
 msgid "Start chat"
 msgstr "开始聊天"
 
-#: ../components/BuddyPounce.tcl:254
+#: ../components/BuddyPounce.tcl:258
 msgid "Send message with subject"
 msgstr "带主题发送消息"
 
-#: ../components/BuddyPounce.tcl:262 ../components/Carbon.tcl:184
+#: ../components/BuddyPounce.tcl:266 ../components/Carbon.tcl:184
 #: ../components/Growl.tcl:71 ../components/Growl.tcl:74
 #: ../components/Growl.tcl:93 ../components/Growl.tcl:106
 #: ../components/Mood.tcl:490 ../components/UserActivity.tcl:258
@@ -238,8 +239,8 @@ msgstr "带主题发送消息"
 #: ../jabber/Create.tcl:427 ../jabber/Create.tcl:469 ../jabber/Create.tcl:547
 #: ../jabber/Create.tcl:756 ../jabber/Enter.tcl:650 ../jabber/Enter.tcl:694
 #: ../jabber/FTrans.tcl:505 ../jabber/FTrans.tcl:537 ../jabber/JUser.tcl:386
-#: ../jabber/Jabber.tcl:622 ../jabber/Jabber.tcl:866 ../jabber/Jabber.tcl:1536
-#: ../jabber/Jabber.tcl:2036 ../jabber/Jabber.tcl:2138 ../jabber/MUC.tcl:189
+#: ../jabber/Jabber.tcl:622 ../jabber/Jabber.tcl:866 ../jabber/Jabber.tcl:1540
+#: ../jabber/Jabber.tcl:2040 ../jabber/Jabber.tcl:2142 ../jabber/MUC.tcl:189
 #: ../jabber/MUC.tcl:365 ../jabber/MUC.tcl:811 ../jabber/MUC.tcl:840
 #: ../jabber/MUC.tcl:1618 ../jabber/MailBox.tcl:499 ../jabber/NewMsg.tcl:232
 #: ../jabber/Profiles.tcl:1664 ../jabber/Register.tcl:122
@@ -250,12 +251,12 @@ msgstr "带主题发送消息"
 msgid "Message"
 msgstr "信息"
 
-#: ../components/BuddyPounce.tcl:292 ../components/ImageMagic.tcl:143
-#: ../components/Totd.tcl:110 ../components/XMLConsole.tcl:109
+#: ../components/BuddyPounce.tcl:296 ../components/ImageMagic.tcl:143
+#: ../components/Totd.tcl:126 ../components/XMLConsole.tcl:109
 #: ../components/fsdialog.tcl:427 ../components/fsdialog.tcl:1052
 #: ../components/fsdialog.tcl:1444 ../contrib/ui/dialog.tcl:242
 #: ../contrib/ui/fontselector.tcl:152 ../jabber/Chat.tcl:354
-#: ../jabber/Jabber.tcl:1742 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
+#: ../jabber/Jabber.tcl:1746 ../jabber/MUC.tcl:202 ../jabber/MUC.tcl:1009
 #: ../jabber/MUC.tcl:1439 ../jabber/MUC.tcl:1632 ../jabber/Status.tcl:428
 #: ../jabber/Subscribe.tcl:1107 ../lib/Component.tcl:80
 #: ../whiteboard/ItemInspector.tcl:989 ../whiteboard/WDialogs.tcl:60
@@ -263,7 +264,7 @@ msgstr "信息"
 msgid "OK"
 msgstr "好"
 
-#: ../components/BuddyPounce.tcl:294 ../components/ImageMagic.tcl:145
+#: ../components/BuddyPounce.tcl:298 ../components/ImageMagic.tcl:145
 #: ../components/JivePhone.tcl:905 ../components/JivePhone.tcl:987
 #: ../components/Phone/Phone.tcl:432 ../components/fsdialog.tcl:430
 #: ../components/fsdialog.tcl:1054 ../components/fsdialog.tcl:1446
@@ -273,8 +274,8 @@ msgstr "好"
 #: ../jabber/Create.tcl:151 ../jabber/Create.tcl:670 ../jabber/Disco.tcl:1509
 #: ../jabber/Disco.tcl:1678 ../jabber/Enter.tcl:222 ../jabber/FTrans.tcl:220
 #: ../jabber/History.tcl:992 ../jabber/JUser.tcl:230 ../jabber/JUser.tcl:831
-#: ../jabber/Jabber.tcl:1020 ../jabber/Jabber.tcl:1958
-#: ../jabber/Jabber.tcl:2151 ../jabber/Login.tcl:275 ../jabber/MUC.tcl:204
+#: ../jabber/Jabber.tcl:1020 ../jabber/Jabber.tcl:1962
+#: ../jabber/Jabber.tcl:2155 ../jabber/Login.tcl:273 ../jabber/MUC.tcl:204
 #: ../jabber/MUC.tcl:462 ../jabber/MUC.tcl:1011 ../jabber/MUC.tcl:1441
 #: ../jabber/MUC.tcl:1634 ../jabber/Profiles.tcl:923
 #: ../jabber/Register.tcl:329 ../jabber/Register.tcl:1172
@@ -288,31 +289,32 @@ msgstr "好"
 msgid "Cancel"
 msgstr "取消"
 
-#: ../components/BuddyPounce.tcl:296
+#: ../components/BuddyPounce.tcl:300
 msgid "Disable All"
 msgstr "全部不启用"
 
-#: ../components/BuddyPounce.tcl:566
+#: ../components/BuddyPounce.tcl:570
 #, tcl-format
 msgid "%s just went online!"
 msgstr "%s 刚上线！"
 
-#: ../components/BuddyPounce.tcl:567
+#: ../components/BuddyPounce.tcl:571
 #, tcl-format
 msgid "%s just went offline!"
 msgstr "%s 刚下线！"
 
-#: ../components/BuddyPounce.tcl:568
+#: ../components/BuddyPounce.tcl:572
 #, tcl-format
 msgid "%s just sent you a message!"
 msgstr "%s 刚给您发来一条消息！"
 
-#: ../components/BuddyPounce.tcl:569
-#, tcl-format
-msgid "%s just started a chat!"
+#: ../components/BuddyPounce.tcl:573
+#, fuzzy, tcl-format
+#| msgid "%s just started a chat!"
+msgid "%s just started a chat session!"
 msgstr "%s聊天中!"
 
-#: ../components/BuddyPounce.tcl:595
+#: ../components/BuddyPounce.tcl:599
 msgid "Auto Reply"
 msgstr "自动回复"
 
@@ -1282,8 +1284,8 @@ msgstr "挂断"
 msgid "Call VM?"
 msgstr "呼叫 VM?"
 
-#: ../components/ParseURI.tcl:220 ../jabber/Login.tcl:691
-#: ../jabber/Login.tcl:758
+#: ../components/ParseURI.tcl:220 ../jabber/Login.tcl:702
+#: ../jabber/Login.tcl:769
 #, tcl-format
 msgid "Enter the password for your account %s"
 msgstr "输入帐号%s的密码"
@@ -1375,14 +1377,14 @@ msgstr "打开目录(&O)"
 
 #: ../components/SlideShow.tcl:46 ../components/SlideShow.tcl:358
 #: ../components/SlideShow.tcl:362 ../components/SlideShow.tcl:369
-#: ../components/Totd.tcl:114 ../contrib/wizard.tcl:224
+#: ../components/Totd.tcl:130 ../contrib/wizard.tcl:224
 #: ../jabber/Adhoc.tcl:209
 msgid "Previous"
 msgstr "后退"
 
 #: ../components/SlideShow.tcl:47 ../components/SlideShow.tcl:359
 #: ../components/SlideShow.tcl:364 ../components/SlideShow.tcl:370
-#: ../components/Totd.tcl:112 ../contrib/wizard.tcl:219
+#: ../components/Totd.tcl:128 ../contrib/wizard.tcl:219
 #: ../contrib/wizard.tcl:586 ../jabber/Adhoc.tcl:207 ../jabber/GotMsg.tcl:225
 #: ../jabber/Register.tcl:327 ../jabber/Register.tcl:1168
 #: ../lib/TSearch.tcl:81 ../lib/WSearch.tcl:72
@@ -1548,7 +1550,7 @@ msgstr "字典"
 msgid "Add to Dictionary"
 msgstr "添加的字典"
 
-#: ../components/Totd.tcl:18 ../components/Totd.tcl:93
+#: ../components/Totd.tcl:18 ../components/Totd.tcl:109
 msgid "Tip of the Day"
 msgstr ""
 
@@ -1600,14 +1602,43 @@ msgid ""
 "resourcename to your Contact ID."
 msgstr ""
 
-#: ../components/Totd.tcl:54
+#: ../components/Totd.tcl:55
 msgid ""
 "Nicknames in chatrooms can be automatically completed using the TAB key. "
 "Enter the first letter(s) of the nickname and then use the TAB key to "
-"complete it."
+"complete."
 msgstr ""
 
-#: ../components/Totd.tcl:108
+#: ../components/Totd.tcl:57
+#, tcl-format
+msgid ""
+"You can carry %s with you on an USB stick and use the same configuration on "
+"different computers. You can create such a cross-platform portable %s USB "
+"stick this way:\n"
+"\n"
+" 1. Create a folder on the USB stick.\n"
+" 2. Put in this folder the Coccinella binaries (for Windows, Linux and Mac "
+"OS X). Of course you do not necessarily need all binaries, for instance in "
+"case you do not want to use the USB stick on Windows computers.\n"
+" 3. Then open on each platform (Windows, Linux and Mac OS X) the binary for "
+"that platform.\n"
+" 4. Go each time to Preferences and enable the checkbox option 'Store "
+"preferences in same folder as program' (on the General page).\n"
+" 5. Preferences will now be saved on the USB stick in the same folder as the "
+"binary."
+msgstr ""
+
+#: ../components/Totd.tcl:68
+#, tcl-format
+msgid ""
+"%s is free software. This means you have the freedom to improve %s for "
+"internal use without breaking copyright laws. Feel free to contribute such "
+"improvements back to the project so that others can build upon your "
+"contribution. Check out http://coccinella.im/development to learn how you "
+"can help."
+msgstr ""
+
+#: ../components/Totd.tcl:124
 #, fuzzy, tcl-format
 #| msgid "Show tips on startup"
 msgid "Show tips on %s startup"
@@ -2320,7 +2351,7 @@ msgid "Chat"
 msgstr "聊天"
 
 #: ../jabber/Chat.tcl:341 ../jabber/JUser.tcl:180 ../jabber/JWB.tcl:450
-#: ../jabber/Login.tcl:174 ../jabber/MUC.tcl:242 ../jabber/Profiles.tcl:1090
+#: ../jabber/Login.tcl:172 ../jabber/MUC.tcl:242 ../jabber/Profiles.tcl:1090
 #: ../jabber/Subscribe.tcl:1087 ../jabber/VCard.tcl:309
 msgid "Contact ID"
 msgstr "联系ID"
@@ -2377,7 +2408,7 @@ msgstr "发送文件"
 #: ../jabber/Chat.tcl:1333 ../jabber/Chat.tcl:3286 ../jabber/GroupChat.tcl:661
 #: ../jabber/GroupChat.tcl:3183 ../jabber/History.tcl:998
 #: ../jabber/History.tcl:1351 ../jabber/JUser.tcl:829
-#: ../jabber/Jabber.tcl:1956 ../jabber/MailBox.tcl:508
+#: ../jabber/Jabber.tcl:1960 ../jabber/MailBox.tcl:508
 #: ../jabber/NewMsg.tcl:309 ../jabber/Profiles.tcl:920
 #: ../jabber/UserInfo.tcl:406 ../jabber/VCard.tcl:248 ../lib/Bookmarks.tcl:122
 #: ../lib/Dialogs.tcl:339 ../lib/EditDialogs.tcl:140
@@ -2637,12 +2668,12 @@ msgstr "无法从聊天室装载配置."
 #: ../jabber/Create.tcl:425 ../jabber/Create.tcl:467 ../jabber/Create.tcl:545
 #: ../jabber/Create.tcl:753 ../jabber/Enter.tcl:648 ../jabber/Enter.tcl:691
 #: ../jabber/FTrans.tcl:502 ../jabber/FTrans.tcl:534 ../jabber/JUser.tcl:384
-#: ../jabber/Jabber.tcl:620 ../jabber/Jabber.tcl:864 ../jabber/Jabber.tcl:2034
-#: ../jabber/Login.tcl:968 ../jabber/Login.tcl:992 ../jabber/Profiles.tcl:1662
-#: ../jabber/Register.tcl:120 ../jabber/Register.tcl:660
-#: ../jabber/Register.tcl:1289 ../jabber/Register.tcl:1354
-#: ../jabber/Register.tcl:1538 ../jabber/Search.tcl:349
-#: ../jabber/Search.tcl:424 ../lib/HttpTrpt.tcl:243
+#: ../jabber/Jabber.tcl:620 ../jabber/Jabber.tcl:864 ../jabber/Jabber.tcl:2038
+#: ../jabber/Login.tcl:983 ../jabber/Login.tcl:1007
+#: ../jabber/Profiles.tcl:1662 ../jabber/Register.tcl:120
+#: ../jabber/Register.tcl:660 ../jabber/Register.tcl:1289
+#: ../jabber/Register.tcl:1354 ../jabber/Register.tcl:1538
+#: ../jabber/Search.tcl:349 ../jabber/Search.tcl:424 ../lib/HttpTrpt.tcl:243
 msgid "Error code"
 msgstr "错误代码"
 
@@ -2771,7 +2802,7 @@ msgstr "搜寻服务器"
 msgid "Enter a server to discover and use its services."
 msgstr "输入要找寻的服务器,并使用其服务."
 
-#: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:531 ../jabber/Login.tcl:177
+#: ../jabber/Disco.tcl:1657 ../jabber/JUI.tcl:531 ../jabber/Login.tcl:175
 #: ../jabber/Profiles.tcl:1092 ../jabber/Profiles.tcl:1881
 #: ../jabber/Register.tcl:274 ../jabber/SetupAss.tcl:137
 #: ../jabber/SetupAss.tcl:165 ../jabber/StatusSlot.tcl:34
@@ -2792,8 +2823,8 @@ msgstr "作者"
 msgid "Home"
 msgstr "主页"
 
-#: ../jabber/Emoticons.tcl:602 ../jabber/Jabber.tcl:1697
-#: ../jabber/Jabber.tcl:1708 ../jabber/Roster.tcl:190
+#: ../jabber/Emoticons.tcl:602 ../jabber/Jabber.tcl:1701
+#: ../jabber/Jabber.tcl:1712 ../jabber/Roster.tcl:190
 #: ../jabber/UserInfo.tcl:211 ../jabber/UserInfo.tcl:220
 #: ../jabber/UserInfo.tcl:225 ../whiteboard/WDialogs.tcl:133
 msgid "Version"
@@ -2844,8 +2875,8 @@ msgstr ""
 "室可能需要密码."
 
 #: ../jabber/Enter.tcl:166 ../jabber/GroupChat.tcl:3464
-#: ../jabber/Login.tcl:185 ../jabber/Login.tcl:689 ../jabber/Login.tcl:691
-#: ../jabber/Login.tcl:756 ../jabber/Login.tcl:758 ../jabber/Profiles.tcl:1098
+#: ../jabber/Login.tcl:183 ../jabber/Login.tcl:700 ../jabber/Login.tcl:702
+#: ../jabber/Login.tcl:767 ../jabber/Login.tcl:769 ../jabber/Profiles.tcl:1098
 #: ../jabber/Register.tcl:1458 ../jabber/SetupAss.tcl:168 ../lib/Proxy.tcl:211
 msgid "Password"
 msgstr "密码"
@@ -2854,7 +2885,7 @@ msgstr "密码"
 msgid "Bookmarks"
 msgstr "书签"
 
-#: ../jabber/Enter.tcl:190 ../jabber/JForms.tcl:306 ../jabber/Login.tcl:230
+#: ../jabber/Enter.tcl:190 ../jabber/JForms.tcl:306 ../jabber/Login.tcl:228
 #: ../jabber/Profiles.tcl:1133 ../jabber/Register.tcl:717
 msgid "Password or secret"
 msgstr "密码"
@@ -2980,7 +3011,7 @@ msgstr "Tlen地址"
 msgid "Twitter user"
 msgstr ""
 
-#: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:229
+#: ../jabber/Gateway.tcl:91 ../jabber/JUser.tcl:193 ../jabber/Login.tcl:227
 #: ../jabber/Profiles.tcl:1132 ../jabber/VCard.tcl:322
 msgid "Chat address"
 msgstr "聊天地址"
@@ -3304,13 +3335,13 @@ msgid "&Close Window"
 msgstr "关闭窗口(&C)"
 
 #: ../jabber/JUI.tcl:173 ../jabber/JUI.tcl:1229 ../jabber/JUI.tcl:1849
-#: ../jabber/JUI.tcl:1852 ../jabber/JUI.tcl:2009 ../jabber/Login.tcl:117
-#: ../jabber/Login.tcl:130 ../jabber/Login.tcl:273 ../jabber/Profiles.tcl:1852
+#: ../jabber/JUI.tcl:1852 ../jabber/JUI.tcl:2007 ../jabber/Login.tcl:115
+#: ../jabber/Login.tcl:128 ../jabber/Login.tcl:271 ../jabber/Profiles.tcl:1852
 msgid "Login"
 msgstr "登录"
 
 #: ../jabber/JUI.tcl:174 ../jabber/JUI.tcl:1834 ../jabber/JUI.tcl:1854
-#: ../jabber/Jabber.tcl:2109 ../jabber/Jabber.tcl:2121
+#: ../jabber/Jabber.tcl:2113 ../jabber/Jabber.tcl:2125
 msgid "Logout With Message"
 msgstr "登出并留言"
 
@@ -3472,12 +3503,12 @@ msgstr "当前的连接不安全"
 msgid "Logged out"
 msgstr "登出"
 
-#: ../jabber/JUI.tcl:1828 ../jabber/JUI.tcl:1833 ../jabber/JUI.tcl:1999
-#: ../jabber/Jabber.tcl:2149
+#: ../jabber/JUI.tcl:1828 ../jabber/JUI.tcl:1833 ../jabber/JUI.tcl:1997
+#: ../jabber/Jabber.tcl:2153
 msgid "Logout"
 msgstr "登出"
 
-#: ../jabber/JUI.tcl:1990
+#: ../jabber/JUI.tcl:1988 ../jabber/Login.tcl:670
 msgid "Stop"
 msgstr "停止"
 
@@ -3778,100 +3809,100 @@ msgstr "收到严重错误: %s 连接已关闭."
 msgid "Error Log (noncriticals)"
 msgstr "错误"
 
-#: ../jabber/Jabber.tcl:1503 ../jabber/UserInfo.tcl:263
+#: ../jabber/Jabber.tcl:1507 ../jabber/UserInfo.tcl:263
 #, tcl-format
 msgid "Cannot query %s's last activity."
 msgstr "无法获取%s的最近活动."
 
-#: ../jabber/Jabber.tcl:1515 ../jabber/Jabber.tcl:1518
+#: ../jabber/Jabber.tcl:1519 ../jabber/Jabber.tcl:1522
 #: ../jabber/UserInfo.tcl:261
 msgid "Last Activity"
 msgstr "最近活动"
 
-#: ../jabber/Jabber.tcl:1516 ../jabber/Jabber.tcl:1529
-#: ../jabber/Jabber.tcl:1531
+#: ../jabber/Jabber.tcl:1520 ../jabber/Jabber.tcl:1533
+#: ../jabber/Jabber.tcl:1535
 #, tcl-format
 msgid "Cannot query %s's local time information."
 msgstr "无法获取%s的当地时间信息."
 
-#: ../jabber/Jabber.tcl:1545
+#: ../jabber/Jabber.tcl:1549
 #, tcl-format
 msgid "Time since client %s was last active"
 msgstr "客户端%s最近一次活动已历时"
 
-#: ../jabber/Jabber.tcl:1547
+#: ../jabber/Jabber.tcl:1551
 #, tcl-format
 msgid "Time since %s was last connected"
 msgstr "%s自最近一次连接历时"
 
-#: ../jabber/Jabber.tcl:1549
+#: ../jabber/Jabber.tcl:1553
 #, tcl-format
 msgid "Time since server %s was started"
 msgstr "服务器%s开启历时"
 
-#: ../jabber/Jabber.tcl:1552
+#: ../jabber/Jabber.tcl:1556
 msgid "The uptime/last activity is"
 msgstr "最后一次活动的时间是"
 
-#: ../jabber/Jabber.tcl:1586 ../jabber/UserInfo.tcl:295
+#: ../jabber/Jabber.tcl:1590 ../jabber/UserInfo.tcl:295
 #: ../jabber/UserInfo.tcl:325
 #, tcl-format
 msgid "Cannot query %s's local time."
 msgstr "无法查询%s的当地时间."
 
-#: ../jabber/Jabber.tcl:1594 ../jabber/UserInfo.tcl:293
+#: ../jabber/Jabber.tcl:1598 ../jabber/UserInfo.tcl:293
 #: ../jabber/UserInfo.tcl:323
 msgid "Local Time"
 msgstr "本地时间"
 
-#: ../jabber/Jabber.tcl:1595 ../jabber/UserInfo.tcl:303
+#: ../jabber/Jabber.tcl:1599 ../jabber/UserInfo.tcl:303
 #: ../jabber/UserInfo.tcl:332
 #, tcl-format
 msgid "%s's local time is: %s"
 msgstr "%s的当地时间: %s"
 
-#: ../jabber/Jabber.tcl:1683 ../jabber/UserInfo.tcl:213
+#: ../jabber/Jabber.tcl:1687 ../jabber/UserInfo.tcl:213
 #, tcl-format
 msgid "Cannot query %s's version."
 msgstr "无法查询%s的版本."
 
-#: ../jabber/Jabber.tcl:1722
+#: ../jabber/Jabber.tcl:1726
 #, tcl-format
 msgid "Version information for %s."
 msgstr "%s的版本信息."
 
-#: ../jabber/Jabber.tcl:1919 ../jabber/Jabber.tcl:2047
+#: ../jabber/Jabber.tcl:1923 ../jabber/Jabber.tcl:2051
 msgid "New Password"
 msgstr "新密码"
 
-#: ../jabber/Jabber.tcl:1936
+#: ../jabber/Jabber.tcl:1940
 msgid "Set a new password for"
 msgstr "请设置一个密码"
 
-#: ../jabber/Jabber.tcl:1938
+#: ../jabber/Jabber.tcl:1942
 msgid "New password"
 msgstr "新密码"
 
-#: ../jabber/Jabber.tcl:1942 ../jabber/Register.tcl:746
+#: ../jabber/Jabber.tcl:1946 ../jabber/Register.tcl:746
 #: ../jabber/SetupAss.tcl:169
 msgid "Retype password"
 msgstr "再输入一次密码"
 
-#: ../jabber/Jabber.tcl:2008 ../jabber/Register.tcl:834
+#: ../jabber/Jabber.tcl:2012 ../jabber/Register.tcl:834
 #: ../jabber/SetupAss.tcl:311
 msgid "Passwords do not match. Please try again."
 msgstr "密码不匹配.请重试."
 
-#: ../jabber/Jabber.tcl:2032
+#: ../jabber/Jabber.tcl:2036
 msgid "Cannot set new password."
 msgstr "无法设置新密码."
 
-#: ../jabber/Jabber.tcl:2048
+#: ../jabber/Jabber.tcl:2052
 msgid "Setting new password was successful."
 msgstr "设置新密码成功."
 
 #. TRANSLATORS; see login dialog
-#: ../jabber/Login.tcl:144
+#: ../jabber/Login.tcl:142
 msgid ""
 "Enter your account as user@example.org, or choose a profile. You should "
 "already have an account."
@@ -3879,14 +3910,14 @@ msgstr ""
 "输入你的帐号,如 user@example.org, 或者选择一个档案.你必须已经拥有一个帐号."
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
-#: ../jabber/Login.tcl:147
+#: ../jabber/Login.tcl:145
 msgid ""
 "Enter your Contact ID as user@example.org. You should already have an "
 "account with this server."
 msgstr "输入你的JID,如joey@myjabb.org.你必须已经拥有获有此服务器的帐号."
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
-#: ../jabber/Login.tcl:150
+#: ../jabber/Login.tcl:148
 msgid ""
 "Write XMPP server IP number or name, or choose from the popup menu. You "
 "should already have an account with this server."
@@ -3895,28 +3926,28 @@ msgstr ""
 "注册的账号。"
 
 #. TRANSLATORS; login dialog, but not default; this is a config option
-#: ../jabber/Login.tcl:154
+#: ../jabber/Login.tcl:152
 #, tcl-format
 msgid "Enter your username and password to login to %s."
 msgstr "输入你的用户名和密码以登录 %s."
 
-#: ../jabber/Login.tcl:165 ../jabber/Profiles.tcl:1070
+#: ../jabber/Login.tcl:163 ../jabber/Profiles.tcl:1070
 msgid "Profile"
 msgstr "档案"
 
-#: ../jabber/Login.tcl:181 ../jabber/Profiles.tcl:1095
+#: ../jabber/Login.tcl:179 ../jabber/Profiles.tcl:1095
 #: ../jabber/Register.tcl:1454 ../jabber/Search.tcl:935
 #: ../jabber/SetupAss.tcl:167 ../lib/Proxy.tcl:209
 #: ../whiteboard/WDialogs.tcl:192
 msgid "Username"
 msgstr "用户名"
 
-#: ../jabber/Login.tcl:189 ../jabber/Profiles.tcl:1102
+#: ../jabber/Login.tcl:187 ../jabber/Profiles.tcl:1102
 msgid "Resource"
 msgstr "资源"
 
-#: ../jabber/Login.tcl:241 ../jabber/Login.tcl:245 ../jabber/Login.tcl:249
-#: ../jabber/Login.tcl:415 ../jabber/Profiles.tcl:1170
+#: ../jabber/Login.tcl:239 ../jabber/Login.tcl:243 ../jabber/Login.tcl:247
+#: ../jabber/Login.tcl:413 ../jabber/Profiles.tcl:1170
 #: ../jabber/Profiles.tcl:1174 ../jabber/Profiles.tcl:1178
 #: ../jabber/Profiles.tcl:1269 ../jabber/Register.tcl:293
 #: ../jabber/Register.tcl:297 ../jabber/Register.tcl:301
@@ -3924,136 +3955,136 @@ msgstr "资源"
 msgid "More"
 msgstr "更多"
 
-#: ../jabber/Login.tcl:277 ../jabber/Profiles.tcl:891
+#: ../jabber/Login.tcl:275 ../jabber/Profiles.tcl:891
 #: ../jabber/Profiles.tcl:903
 msgid "Edit Profiles"
 msgstr "编辑档案"
 
-#: ../jabber/Login.tcl:400 ../jabber/Profiles.tcl:1250
+#: ../jabber/Login.tcl:398 ../jabber/Profiles.tcl:1250
 #: ../jabber/Register.tcl:530
 msgid "Less"
 msgstr "少于"
 
-#: ../jabber/Login.tcl:500
+#: ../jabber/Login.tcl:504
 #, tcl-format
 msgid "The %s is missing or is too short!"
 msgstr "%s 丢失或者过短!"
 
-#: ../jabber/Login.tcl:528 ../jabber/Register.tcl:590
+#: ../jabber/Login.tcl:532 ../jabber/Register.tcl:590
 #, tcl-format
 msgid "Illegal character(s) in %s: %s!"
 msgstr "非法字符出现在%s: %s!"
 
-#: ../jabber/Login.tcl:580
+#: ../jabber/Login.tcl:584
 msgid ""
 "The Contact ID differs from your profile. Do you want to save a new profile?"
 msgstr "联系人ID与你的档案中信息不匹配.是否保存为新档案?"
 
-#: ../jabber/Login.tcl:585 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1550
+#: ../jabber/Login.tcl:589 ../jabber/MUC.tcl:780 ../jabber/Profiles.tcl:1550
 msgid "Profile Name"
 msgstr "档案名"
 
-#: ../jabber/Login.tcl:587 ../jabber/Profiles.tcl:1145
+#: ../jabber/Login.tcl:591 ../jabber/Profiles.tcl:1145
 #: ../jabber/Profiles.tcl:1552
 msgid "Add Profile"
 msgstr "添加档案"
 
-#: ../jabber/Login.tcl:587 ../jabber/Profiles.tcl:1552
+#: ../jabber/Login.tcl:591 ../jabber/Profiles.tcl:1552
 msgid "Enter the name for the new profile."
 msgstr "输入新档案的名称."
 
-#: ../jabber/Login.tcl:610
+#: ../jabber/Login.tcl:614
 msgid ""
 "Your current login settings differ from your profile settings. Do you want "
 "to save them to your profile?"
 msgstr "你的登录设置与你的档案中信息不匹配.是否保存为新档案?"
 
-#: ../jabber/Login.tcl:659
+#: ../jabber/Login.tcl:668
 msgid "Lost connection to server, reconnecting"
 msgstr ""
 
-#: ../jabber/Login.tcl:842
+#: ../jabber/Login.tcl:855
 #, tcl-format
 msgid "Contacted %s. Waiting for response"
 msgstr "连接%s. 等待回应"
 
-#: ../jabber/Login.tcl:881
+#: ../jabber/Login.tcl:896
 #, tcl-format
 msgid "Connected to %s. Initializing the XML stream"
 msgstr "与 %s连接. 初始化XML流"
 
-#: ../jabber/Login.tcl:884
+#: ../jabber/Login.tcl:899
 msgid "Negotiating TLS security"
 msgstr "谈判 TLS 的安全"
 
-#: ../jabber/Login.tcl:901
+#: ../jabber/Login.tcl:915
 #, tcl-format
 msgid "Authorization to server %s was successful. Downloading contacts..."
 msgstr "服务器%s认证成功.正在下载联系人列表..."
 
-#: ../jabber/Login.tcl:959
+#: ../jabber/Login.tcl:974
 #, tcl-format
 msgid ""
 "Cannot connect to %s. Either there are server or network issues, or you "
 "misspelled the server's name."
 msgstr "无法连接到%s. 可能服务器或者网络存在问题,请确认服务器名称完整无误."
 
-#: ../jabber/Login.tcl:965
+#: ../jabber/Login.tcl:980
 #, tcl-format
 msgid "Server %s did not respond: timeout."
 msgstr "服务器%s没有回应 :超时."
 
-#: ../jabber/Login.tcl:970
+#: ../jabber/Login.tcl:985
 #, tcl-format
 msgid ""
 "Cannot login because this username is already in use by someone else (%s)."
 msgstr "无法登录，此用户名正被其他人使用(%s)."
 
-#: ../jabber/Login.tcl:973
+#: ../jabber/Login.tcl:988
 #, tcl-format
 msgid "The server %s has no support for TLS."
 msgstr "服务器%s不支持TLS."
 
-#: ../jabber/Login.tcl:976
+#: ../jabber/Login.tcl:991
 #, tcl-format
 msgid "Cannot negotiate TLS with server %s."
 msgstr "无法与服务器%s完成TLS验证."
 
-#: ../jabber/Login.tcl:979
+#: ../jabber/Login.tcl:994
 msgid "The server has no support for SASL authentication."
 msgstr "服务器不支持SASL验证."
 
-#: ../jabber/Login.tcl:982
+#: ../jabber/Login.tcl:997
 msgid "Cannot authenticate due to internal protocol error."
 msgstr "由于端口错误无法完成验证."
 
-#: ../jabber/Login.tcl:987
+#: ../jabber/Login.tcl:1002
 #, fuzzy, tcl-format
 #| msgid "Stream error received from the server with code: %s"
 msgid "Stream error received from the server with code: %s, %s"
 msgstr "从服务器接收流发生错误: %s"
 
-#: ../jabber/Login.tcl:990
+#: ../jabber/Login.tcl:1005
 msgid "The proxy server reported an error."
 msgstr "代理服务器反馈错误信息."
 
-#: ../jabber/Login.tcl:1002 ../jabber/Register.tcl:961
+#: ../jabber/Login.tcl:1017 ../jabber/Register.tcl:961
 msgid "The login process was aborted."
 msgstr "登录进程被放弃."
 
-#: ../jabber/Login.tcl:1003 ../jabber/Login.tcl:1004 ../jabber/Login.tcl:1005
-#: ../jabber/Login.tcl:1006 ../jabber/Login.tcl:1008
+#: ../jabber/Login.tcl:1018 ../jabber/Login.tcl:1019 ../jabber/Login.tcl:1020
+#: ../jabber/Login.tcl:1021 ../jabber/Login.tcl:1023
 #: ../jabber/Register.tcl:962 ../jabber/Register.tcl:963
 #: ../jabber/Register.tcl:964 ../jabber/Register.tcl:965
 #: ../jabber/Register.tcl:967
 msgid "Protocol error during the login process."
 msgstr "登陆进程中发生协议错误."
 
-#: ../jabber/Login.tcl:1007 ../jabber/Register.tcl:966
+#: ../jabber/Login.tcl:1022 ../jabber/Register.tcl:966
 msgid "Login failed because of unknown account or wrong password."
 msgstr "登陆失败：账号或密码错误."
 
-#: ../jabber/Login.tcl:1011
+#: ../jabber/Login.tcl:1026
 #, tcl-format
 msgid ""
 "Invalid server response due to bug in server software:  error <%s/> is not "
@@ -4061,11 +4092,11 @@ msgid ""
 "this bug to your server administrator."
 msgstr ""
 
-#: ../jabber/Login.tcl:1037
+#: ../jabber/Login.tcl:1052
 msgid "Do you want to retry a different password or profile?"
 msgstr ""
 
-#: ../jabber/Login.tcl:1069
+#: ../jabber/Login.tcl:1083
 #, tcl-format
 msgid "Do you want to register a new account with %s."
 msgstr "你是否希望以%s注册一个新的账户."
@@ -5197,7 +5228,7 @@ msgstr "文件%s传输被重置."
 msgid "Cannot start the internal HTTP server: %s"
 msgstr "不能启动HTTP服务器: %s"
 
-#: ../lib/Init.tcl:742 ../lib/Init.tcl:763 ../lib/Media.tcl:179
+#: ../lib/Init.tcl:745 ../lib/Init.tcl:766 ../lib/Media.tcl:179
 #: ../whiteboard/Plugins.tcl:445
 #, tcl-format
 msgid "Looking for %s"
@@ -5238,8 +5269,8 @@ msgid ""
 "location will be used the next time you start %s. Do you want to remove the "
 "old preferences?"
 msgstr ""
-"你已经选择为默认偏好. 如果你移动或删除你的个人设置 %s, 默认设置会在下次启动 %"
-"s. 你想移动或者删除旧的偏好吗?"
+"你已经选择为默认偏好. 如果你移动或删除你的个人设置 %s, 默认设置会在下次启动 "
+"%s. 你想移动或者删除旧的偏好吗?"
 
 #: ../lib/PrefHelpers.tcl:73 ../lib/PrefHelpers.tcl:116
 msgid "Default Applications"
@@ -6299,10 +6330,22 @@ msgstr "点工具, 单击标记,双击检视, 按住弹出"
 msgid "&Library"
 msgstr "支持库(&L)"
 
+#~ msgid "Hide all on taskbar click"
+#~ msgstr "单击任务栏全部隐藏"
+
+#~ msgid "Hide all on system tray click"
+#~ msgstr "点击从系统托盘隐藏"
+
+#~ msgid "Useful Tips"
+#~ msgstr "小提示"
+
+#~ msgid "chat"
+#~ msgstr "聊天中"
+
 #, fuzzy
-#~| msgid "cold"
-#~ msgid "bold"
-#~ msgstr "冷淡"
+#~| msgid "Normal"
+#~ msgid "normal"
+#~ msgstr "常规"
 
 #, fuzzy
 #~| msgid "Italic"
@@ -6310,18 +6353,6 @@ msgstr "支持库(&L)"
 #~ msgstr "斜体"
 
 #, fuzzy
-#~| msgid "Normal"
-#~ msgid "normal"
-#~ msgstr "常规"
-
-#~ msgid "chat"
-#~ msgstr "聊天中"
-
-#~ msgid "Useful Tips"
-#~ msgstr "小提示"
-
-#~ msgid "Hide all on system tray click"
-#~ msgstr "点击从系统托盘隐藏"
-
-#~ msgid "Hide all on taskbar click"
-#~ msgstr "单击任务栏全部隐藏"
+#~| msgid "cold"
+#~ msgid "bold"
+#~ msgstr "冷淡"
