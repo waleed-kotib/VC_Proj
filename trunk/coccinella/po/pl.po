@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pl\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2010-09-26 21:43+0200\n"
+"POT-Creation-Date: 2010-09-30 00:08+0200\n"
 "PO-Revision-Date: 2009-02-21 15:14\n"
 "Last-Translator: Zbigniew Baniewski <zb at ispid.com.pl>\n"
 "Language-Team: Polish\n"
@@ -1649,7 +1649,7 @@ msgstr ""
 #, tcl-format
 msgid ""
 "%s is free software. This means you have the freedom to improve %s for "
-"internal use without breaking copyright laws. Feel free to contribute such "
+"internal use without breaking copyright laws. Feel free to contribute "
 "improvements back to the project so that others can build upon your "
 "contribution. Check out http://coccinella.im/development to learn how you "
 "can help."
@@ -6457,22 +6457,10 @@ msgstr ""
 msgid "&Library"
 msgstr "Biblioteki"
 
-#~ msgid "Hide all on taskbar click"
-#~ msgstr "Ukryj wszystko przy kliknięciu w pasek zadań"
-
-#~ msgid "Hide all on system tray click"
-#~ msgstr "Kliknięciem na `tacce systemowej' ukryj wszystko"
-
-#~ msgid "Useful Tips"
-#~ msgstr "Użyteczne wskazówki"
-
-#~ msgid "chat"
-#~ msgstr "pogawędzę"
-
 #, fuzzy
-#~| msgid "Normal"
-#~ msgid "normal"
-#~ msgstr "Normalne"
+#~| msgid "cold"
+#~ msgid "bold"
+#~ msgstr "zimny"
 
 #, fuzzy
 #~| msgid "Italic"
@@ -6480,6 +6468,18 @@ msgstr "Biblioteki"
 #~ msgstr "Kursywa"
 
 #, fuzzy
-#~| msgid "cold"
-#~ msgid "bold"
-#~ msgstr "zimny"
+#~| msgid "Normal"
+#~ msgid "normal"
+#~ msgstr "Normalne"
+
+#~ msgid "chat"
+#~ msgstr "pogawędzę"
+
+#~ msgid "Useful Tips"
+#~ msgstr "Użyteczne wskazówki"
+
+#~ msgid "Hide all on system tray click"
+#~ msgstr "Kliknięciem na `tacce systemowej' ukryj wszystko"
+
+#~ msgid "Hide all on taskbar click"
+#~ msgstr "Ukryj wszystko przy kliknięciu w pasek zadań"

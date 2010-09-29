@@ -2,7 +2,7 @@
 #  
 #      This file is part of The Coccinella application. 
 #      It sets up the global 'this' array for useful things.
-#      
+#      ve
 #  Copyright (c) 2004-2008  Mats Bengtsson
 #  
 #   This program is free software: you can redistribute it and/or modify
@@ -498,7 +498,7 @@ proc ::Init::SetThisVersion {} {
     # default file, never read.
     set this(vers,major)    0
     set this(vers,minor)   96
-    set this(vers,release)  19
+    set this(vers,release)  21
     
     # NB: The 'minorRelease' number is only used for released versions and not
     #     in cvs or so called daily builds. cvs always have odd 'release'

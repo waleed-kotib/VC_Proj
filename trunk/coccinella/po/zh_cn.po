@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: zh_CN\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2010-09-26 21:43+0200\n"
+"POT-Creation-Date: 2010-09-30 00:08+0200\n"
 "PO-Revision-Date: 2009-03-09 21:19+0800\n"
 "Last-Translator: lvjinhua <lvjinhua@gmail.com>\n"
 "Language-Team: Simplified Chinese\n"
@@ -1632,7 +1632,7 @@ msgstr ""
 #, tcl-format
 msgid ""
 "%s is free software. This means you have the freedom to improve %s for "
-"internal use without breaking copyright laws. Feel free to contribute such "
+"internal use without breaking copyright laws. Feel free to contribute "
 "improvements back to the project so that others can build upon your "
 "contribution. Check out http://coccinella.im/development to learn how you "
 "can help."
@@ -6330,22 +6330,10 @@ msgstr "点工具, 单击标记,双击检视, 按住弹出"
 msgid "&Library"
 msgstr "支持库(&L)"
 
-#~ msgid "Hide all on taskbar click"
-#~ msgstr "单击任务栏全部隐藏"
-
-#~ msgid "Hide all on system tray click"
-#~ msgstr "点击从系统托盘隐藏"
-
-#~ msgid "Useful Tips"
-#~ msgstr "小提示"
-
-#~ msgid "chat"
-#~ msgstr "聊天中"
-
 #, fuzzy
-#~| msgid "Normal"
-#~ msgid "normal"
-#~ msgstr "常规"
+#~| msgid "cold"
+#~ msgid "bold"
+#~ msgstr "冷淡"
 
 #, fuzzy
 #~| msgid "Italic"
@@ -6353,6 +6341,18 @@ msgstr "支持库(&L)"
 #~ msgstr "斜体"
 
 #, fuzzy
-#~| msgid "cold"
-#~ msgid "bold"
-#~ msgstr "冷淡"
+#~| msgid "Normal"
+#~ msgid "normal"
+#~ msgstr "常规"
+
+#~ msgid "chat"
+#~ msgstr "聊天中"
+
+#~ msgid "Useful Tips"
+#~ msgstr "小提示"
+
+#~ msgid "Hide all on system tray click"
+#~ msgstr "点击从系统托盘隐藏"
+
+#~ msgid "Hide all on taskbar click"
+#~ msgstr "单击任务栏全部隐藏"

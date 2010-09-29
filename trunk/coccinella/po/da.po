@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: da\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2010-09-26 21:43+0200\n"
+"POT-Creation-Date: 2010-09-30 00:08+0200\n"
 "PO-Revision-Date: 2009-02-21 14:51\n"
 "Last-Translator: Mogens Pedersen <Mogens.Pedersen at skolekom.dk>\n"
 "Language-Team: Danish\n"
@@ -1748,7 +1748,7 @@ msgstr ""
 #, tcl-format
 msgid ""
 "%s is free software. This means you have the freedom to improve %s for "
-"internal use without breaking copyright laws. Feel free to contribute such "
+"internal use without breaking copyright laws. Feel free to contribute "
 "improvements back to the project so that others can build upon your "
 "contribution. Check out http://coccinella.im/development to learn how you "
 "can help."
@@ -7221,21 +7221,21 @@ msgid "&Library"
 msgstr "Bibliotek"
 
 #, fuzzy
-#~ msgid "Hide all on system tray click"
-#~ msgstr "Hide all on system tray click"
-
-#, fuzzy
-#~ msgid "chat"
-#~ msgstr "chat"
-
-#, fuzzy
-#~ msgid "normal"
-#~ msgstr "Normal"
+#~ msgid "bold"
+#~ msgstr "Bold"
 
 #, fuzzy
 #~ msgid "italic"
 #~ msgstr "Italic"
 
 #, fuzzy
-#~ msgid "bold"
-#~ msgstr "Bold"
+#~ msgid "normal"
+#~ msgstr "Normal"
+
+#, fuzzy
+#~ msgid "chat"
+#~ msgstr "chat"
+
+#, fuzzy
+#~ msgid "Hide all on system tray click"
+#~ msgstr "Hide all on system tray click"

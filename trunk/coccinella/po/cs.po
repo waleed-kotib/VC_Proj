@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: cs\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2010-09-26 21:43+0200\n"
+"POT-Creation-Date: 2010-09-30 00:08+0200\n"
 "PO-Revision-Date: 2009-11-28 17:54+0100\n"
 "Last-Translator: David Štancl <dstancl@dstancl.cz>\n"
 "Language-Team: Czech < >\n"
@@ -1654,7 +1654,7 @@ msgstr ""
 #, tcl-format
 msgid ""
 "%s is free software. This means you have the freedom to improve %s for "
-"internal use without breaking copyright laws. Feel free to contribute such "
+"internal use without breaking copyright laws. Feel free to contribute "
 "improvements back to the project so that others can build upon your "
 "contribution. Check out http://coccinella.im/development to learn how you "
 "can help."
@@ -6419,22 +6419,10 @@ msgstr ""
 msgid "&Library"
 msgstr "&Knihovna"
 
-#~ msgid "Hide all on taskbar click"
-#~ msgstr "Po kliknutí na ikonu skrýt všechna okna"
-
-#~ msgid "Hide all on system tray click"
-#~ msgstr "Schovat všechna okna do oznamovací oblasti"
-
-#~ msgid "Useful Tips"
-#~ msgstr "Užitečné tipy"
-
-#~ msgid "chat"
-#~ msgstr "ukecaný(á)"
-
 #, fuzzy
-#~| msgid "Normal"
-#~ msgid "normal"
-#~ msgstr "Normální"
+#~| msgid "cold"
+#~ msgid "bold"
+#~ msgstr "chladný(á)"
 
 #, fuzzy
 #~| msgid "Italic"
@@ -6442,6 +6430,18 @@ msgstr "&Knihovna"
 #~ msgstr "Kurzíva"
 
 #, fuzzy
-#~| msgid "cold"
-#~ msgid "bold"
-#~ msgstr "chladný(á)"
+#~| msgid "Normal"
+#~ msgid "normal"
+#~ msgstr "Normální"
+
+#~ msgid "chat"
+#~ msgstr "ukecaný(á)"
+
+#~ msgid "Useful Tips"
+#~ msgstr "Užitečné tipy"
+
+#~ msgid "Hide all on system tray click"
+#~ msgstr "Schovat všechna okna do oznamovací oblasti"
+
+#~ msgid "Hide all on taskbar click"
+#~ msgstr "Po kliknutí na ikonu skrýt všechna okna"
