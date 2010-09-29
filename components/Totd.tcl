@@ -64,11 +64,11 @@ proc ::Totd::Init {} {
 		     3. Then open on each platform (Windows, Linux and Mac OS X) the binary for that platform.\n\
 		     4. Go each time to Preferences and enable the checkbox option\
                         'Store preferences in same folder as program' (on the General page).\n\
-		     5. Preferences will now be saved on the USB stick in the same folder as the binary."]
+		     5. Preferences will now be saved on the USB stick in the same folder as the binary." $prefs(appName) $prefs(appName)]
     dict set tips 8 [mc "%s is free software. This means you have the freedom to improve %s for\
-		     internal use without breaking copyright laws. Feel free to contribute such\
+		     internal use without breaking copyright laws. Feel free to contribute\
 		     improvements back to the project so that others can build upon your contribution.\
-                     Check out http://coccinella.im/development to learn how you can help." $prefs(appName)]
+                     Check out http://coccinella.im/development to learn how you can help." $prefs(appName) $prefs(appName)]
     ::hooks::register launchFinalHook ::Totd::LaunchHook
     ::hooks::register prefsInitHook   ::Totd::InitPrefsHook
 

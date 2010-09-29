@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fr\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
-"POT-Creation-Date: 2010-09-26 21:43+0200\n"
+"POT-Creation-Date: 2010-09-30 00:08+0200\n"
 "PO-Revision-Date: 2009-08-14 00:49+0100\n"
 "Last-Translator: DomBonj <dombonj@gmail.com>\n"
 "Language-Team: French\n"
@@ -1652,7 +1652,7 @@ msgstr ""
 #, tcl-format
 msgid ""
 "%s is free software. This means you have the freedom to improve %s for "
-"internal use without breaking copyright laws. Feel free to contribute such "
+"internal use without breaking copyright laws. Feel free to contribute "
 "improvements back to the project so that others can build upon your "
 "contribution. Check out http://coccinella.im/development to learn how you "
 "can help."
@@ -6480,22 +6480,10 @@ msgstr ""
 msgid "&Library"
 msgstr "Bib&liothèque"
 
-#~ msgid "Hide all on taskbar click"
-#~ msgstr "Tout masquer en cliquant sur la barre des tâches"
-
-#~ msgid "Hide all on system tray click"
-#~ msgstr "Tout masquer en cliquant sur la zone de notification"
-
-#~ msgid "Useful Tips"
-#~ msgstr "Astuces"
-
-#~ msgid "chat"
-#~ msgstr "en discussion"
-
 #, fuzzy
-#~| msgid "Normal"
-#~ msgid "normal"
-#~ msgstr "Normale"
+#~| msgid "cold"
+#~ msgid "bold"
+#~ msgstr "j'ai froid"
 
 #, fuzzy
 #~| msgid "Italic"
@@ -6503,6 +6491,18 @@ msgstr "Bib&liothèque"
 #~ msgstr "Italique"
 
 #, fuzzy
-#~| msgid "cold"
-#~ msgid "bold"
-#~ msgstr "j'ai froid"
+#~| msgid "Normal"
+#~ msgid "normal"
+#~ msgstr "Normale"
+
+#~ msgid "chat"
+#~ msgstr "en discussion"
+
+#~ msgid "Useful Tips"
+#~ msgstr "Astuces"
+
+#~ msgid "Hide all on system tray click"
+#~ msgstr "Tout masquer en cliquant sur la zone de notification"
+
+#~ msgid "Hide all on taskbar click"
+#~ msgstr "Tout masquer en cliquant sur la barre des tâches"
