@@ -5,7 +5,22 @@
 
 Not to mention all bugfixes and rewrites.
 
+Coccinella-0.96.20 (20100929)
+
+ o Better detection of file names (603187)
+ o Fix error when trying to remove the last profile (260661)
+ o Chat state notifications trigger contact actions (270689)
+ o Russion translation of "Close message and main window separatelly" (540176)
+ o Exception when trying to edit contact actions on a offline group (555643)
+ o Automatic reconnection (140408)
+ o Added additional tips (152723)
+ o Verify server certicate (551811)
+ o Speed improvements (552466)
+ o Run Coccinella on 64 bit systems (380289)
+ o Public servers dropdown list is fixed (555902)
+
 Coccinella-0.96.18 (20100331)
+
  o enabled DnD of contacts within the roster works now with all styles (507360)
  o enhanced management of contacts which are members of multiple groups (507360)
  o in IRC, now all participants are shown in the member list (432076)
