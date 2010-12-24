@@ -1093,7 +1093,7 @@ proc ::Login::HandleErrorCode {errcode {errmsg ""}} {
 	return
     }
     if {$type eq "ok"} {
-    	set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type -timeout $errormessagetimeout \
+    	set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type \
         -default $default -message $str]
     } else {
     	set ans [::UI::MessageBox -icon error -title [mc "Error"] -type $type \
