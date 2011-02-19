@@ -3579,8 +3579,8 @@ proc jlib::handle_entity_time {jlibname from subiq args} {
     # Remove leading zeros since they will be interpreted as octals.
     regsub -all {0+([1-9]+)} $local {\1} local
     regsub -all {0+([1-9]+)} $gmt   {\1} gmt
-    set local [expr {$local}]
-    set gmt [expr {$gmt}]
+    set local [expr $local]
+    set gmt [expr $gmt]
     set mindiff [expr {($local - $gmt)/60}]
     set sign [expr {$mindiff >= 0 ? "" : "-"}]
     set zhour [expr {abs($mindiff)/60}]
