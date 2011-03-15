@@ -708,12 +708,16 @@ proc ::Rosticons::GarbageCollect {prevImagesD imagesD} {
     # use the 'rosterIconsChangedHook' to refresh new icons.
     dict for {type typeD} $imagesD {
 	dict for {pres image} $typeD {
-	    set prevImage [dict get $prevImagesD $type $pres]
-	    if {$prevImage ne $image} {
-		
-		# There is no danger with this since if inuse
-		# it wont get deleted until widget is.
-		image delete $prevImage
+	    # In case the new theme has fewer images than the previous
+	    # it will not garbage collect the images that not exist in
+	    # the new theme
+	    if {[dict exists $prevImagesD $type $pres]} {
+	        set prevImage [dict get $prevImagesD $type $pres]
+	    	if {$prevImage ne $image} {
+		    # There is no danger with this since if inuse
+		    # it wont get deleted until widget is.
+		    image delete $prevImage
+	    	}
 	    }
 	}
     }
