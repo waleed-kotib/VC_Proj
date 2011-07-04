@@ -42,6 +42,7 @@ proc ::Proxy::InitPrefsHook { } {
 	proxy_user      ""
 	proxy_pass      ""
 	noproxy         ""
+	STUNServer	""
 	setNATip        0
 	NATip           ""
     }
@@ -77,6 +78,7 @@ proc ::Proxy::InitPrefsHook { } {
       [list prefs(proxy_user)     prefs_proxyuser      $prefs(proxy_user)]    \
       [list prefs(proxy_pass)     prefs_proxypass      $prefs(proxy_pass)]    \
       [list prefs(noproxy)        prefs_noproxy        $prefs(noproxy)]       \
+      [list prefs(STUNServer)     prefs_STUNServer     $prefs(STUNServer)]    \
       [list prefs(setNATip)       prefs_setNATip       $prefs(setNATip)]      \
       [list prefs(NATip)          prefs_NATip          $prefs(NATip)]         \
       ]
@@ -254,7 +256,7 @@ proc ::Proxy::BuildNATFrame {w} {
     }
 
     foreach key {
-	setNATip    NATip 
+	setNATip NATip STUNServer
     } {
 	set tmpPrefs($key) $prefs($key)
     }
@@ -271,6 +273,11 @@ proc ::Proxy::BuildNATFrame {w} {
       -textvariable [namespace current]::tmpPrefs(NATip)
     if {$stun} {
 	ttk::button $wnat.stun -text [mc "Detect"] -command ::Proxy::GetStun
+	ttk::label $wnat.stunserverlabel -wraplength 300 \
+	  -text  [mc "Use the following STUN Server to detect the external IP address"]
+	ttk::entry $wnat.stunserver \
+	  -textvariable [namespace current]::tmpPrefs(STUNServer)
+	ttk::label $wnat.stunserverexample -text  [mc "(example: stunserver.org)"]
     }
     
     grid  $wnat.use  -  -sticky w
@@ -278,18 +285,23 @@ proc ::Proxy::BuildNATFrame {w} {
     grid columnconfigure $wnat 0 -weight 1
     if {$stun} {
 	grid  $wnat.stun  -column 1 -row 1 -padx 4
+	grid  $wnat.stunserverlabel x -sticky ew
+	grid  $wnat.stunserver x -sticky ew
+	grid  $wnat.stunserverexample x -sticky ew
     }
     SetUseNATState    
     return $w
 }
 
 proc ::Proxy::GetStun {} {
-    ::stun::request stun01.sipphone.com -command ::Proxy::GetStunCB
+    variable tmpPrefs
+
+    ::stun::request $tmpPrefs(STUNServer) -command ::Proxy::GetStunCB -timeout 5000
 }
 
 proc ::Proxy::GetStunCB {token status args} {
     variable tmpPrefs
-    
+
     array set argsA $args
     if {$status eq "ok" && [info exists argsA(-address)]} {
 	set tmpPrefs(NATip) $argsA(-address)
