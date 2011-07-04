@@ -137,6 +137,7 @@ proc ::JingleIAX::LoginHook { } {
 
 proc ::JingleIAX::InitState {} {
     global this
+    global prefs
     variable state
 
     set tempPort $state(local,port)
@@ -148,7 +149,7 @@ proc ::JingleIAX::InitState {} {
     set state(local,ip)    $this(ipnum)
 
     #---- Gets Public IP  ------
-    ::stun::request stun01.sipphone.com -command ::JingleIAX::StunCB
+    ::stun::request $prefs(STUNServer) -command ::JingleIAX::StunCB
 }
 
 proc ::JingleIAX::StunCB {token status args} {
