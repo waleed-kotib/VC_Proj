@@ -1,0 +1,7070 @@
+# translation of ro.po to Romanian
+# Romanian translations for Coccinella package.
+# Copyright (C) 2011 The Coccinella Project
+# This file is distributed under the same license as the Coccinella package.
+#
+# credits to Alexandru Cirip <alexandrucirip@gmail.com>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: ro\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
+"POT-Creation-Date: 2010-09-30 00:08+0200\n"
+"PO-Revision-Date: 2011-07-17 21:41+0200\n"
+"Last-Translator: Alexandru Cirip <alexandrucirip@gmail.com>\n"
+"Language-Team: Alexandru Cirip <alexandrucirip@gmail.com>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: KBabel 1.11.4\n"
+"X-Poedit-Language: Romanian\n"
+"X-Poedit-Country: ROMANIA\n"
+
+#. TRANSLATORS: splash screen strings; shown at startup
+#: ../Coccinella.tcl:173
+msgid "Sourcing Tcl code"
+msgstr "Recuperare cod Tcl"
+
+#: ../Coccinella.tcl:178
+msgid "Searching for our hostname"
+msgstr "Căutare nume de domeniu"
+
+#: ../Coccinella.tcl:196
+msgid "Loading Tcl packages"
+msgstr "Încărcare pachete Tcl"
+
+#: ../Coccinella.tcl:259
+msgid "Sourcing Jabber code"
+msgstr "Recuperare cod Jabber"
+
+#: ../Coccinella.tcl:269
+msgid "Initializing"
+msgstr "Initializare"
+
+#: ../Coccinella.tcl:283
+msgid "Setting preferences"
+msgstr "Aplicarea preferinţelor"
+
+#. TRANSLATORS: checking for new versions of Coccinella; see Info menu
+#: ../components/AutoUpdate.tcl:53
+msgid "&Update Check"
+msgstr "&Verificare actualizări"
+
+#: ../components/AutoUpdate.tcl:122
+#: ../components/ImageMagic.tcl:77
+#: ../components/ImageMagic.tcl:93
+#: ../components/JivePhone.tcl:612
+#: ../jabber/Adhoc.tcl:143
+#: ../jabber/Adhoc.tcl:383
+#: ../jabber/Avatar.tcl:337
+#: ../jabber/Chat.tcl:406
+#: ../jabber/Chat.tcl:2773
+#: ../jabber/Chat.tcl:3072
+#: ../jabber/Chat.tcl:3122
+#: ../jabber/Create.tcl:314
+#: ../jabber/Create.tcl:319
+#: ../jabber/Create.tcl:324
+#: ../jabber/Create.tcl:332
+#: ../jabber/Create.tcl:429
+#: ../jabber/Create.tcl:471
+#: ../jabber/Create.tcl:515
+#: ../jabber/Create.tcl:549
+#: ../jabber/Create.tcl:580
+#: ../jabber/Create.tcl:759
+#: ../jabber/Disco.tcl:1784
+#: ../jabber/Disco.tcl:1807
+#: ../jabber/Emoticons.tcl:654
+#: ../jabber/Emoticons.tcl:663
+#: ../jabber/Emoticons.tcl:815
+#: ../jabber/Emoticons.tcl:817
+#: ../jabber/Emoticons.tcl:851
+#: ../jabber/Emoticons.tcl:863
+#: ../jabber/Emoticons.tcl:865
+#: ../jabber/Enter.tcl:402
+#: ../jabber/Enter.tcl:452
+#: ../jabber/Enter.tcl:492
+#: ../jabber/Enter.tcl:637
+#: ../jabber/Enter.tcl:652
+#: ../jabber/Enter.tcl:697
+#: ../jabber/FTrans.tcl:371
+#: ../jabber/FTrans.tcl:407
+#: ../jabber/FTrans.tcl:442
+#: ../jabber/FTrans.tcl:447
+#: ../jabber/FTrans.tcl:458
+#: ../jabber/FTrans.tcl:509
+#: ../jabber/FTrans.tcl:541
+#: ../jabber/FTrans.tcl:680
+#: ../jabber/FTrans.tcl:682
+#: ../jabber/FTrans.tcl:693
+#: ../jabber/GroupChat.tcl:365
+#: ../jabber/GroupChat.tcl:2710
+#: ../jabber/GroupChat.tcl:2712
+#: ../jabber/GroupChat.tcl:2720
+#: ../jabber/GroupChat.tcl:3491
+#: ../jabber/JUser.tcl:295
+#: ../jabber/JUser.tcl:303
+#: ../jabber/JUser.tcl:322
+#: ../jabber/JUser.tcl:388
+#: ../jabber/JUser.tcl:412
+#: ../jabber/JWB.tcl:2052
+#: ../jabber/JWB.tcl:2057
+#: ../jabber/Jabber.tcl:624
+#: ../jabber/Jabber.tcl:871
+#: ../jabber/Jabber.tcl:918
+#: ../jabber/Jabber.tcl:928
+#: ../jabber/Jabber.tcl:942
+#: ../jabber/Jabber.tcl:956
+#: ../jabber/Jabber.tcl:1509
+#: ../jabber/Jabber.tcl:1513
+#: ../jabber/Jabber.tcl:1592
+#: ../jabber/Jabber.tcl:1594
+#: ../jabber/Jabber.tcl:1689
+#: ../jabber/Jabber.tcl:1693
+#: ../jabber/Jabber.tcl:2011
+#: ../jabber/Jabber.tcl:2042
+#: ../jabber/Login.tcl:503
+#: ../jabber/Login.tcl:531
+#: ../jabber/Login.tcl:540
+#: ../jabber/Login.tcl:976
+#: ../jabber/Login.tcl:1096
+#: ../jabber/Login.tcl:1099
+#: ../jabber/MUC.tcl:318
+#: ../jabber/MUC.tcl:321
+#: ../jabber/MUC.tcl:1162
+#: ../jabber/MUC.tcl:1247
+#: ../jabber/MUC.tcl:1356
+#: ../jabber/MUC.tcl:1514
+#: ../jabber/MUC.tcl:1541
+#: ../jabber/MUC.tcl:1717
+#: ../jabber/MUC.tcl:1719
+#: ../jabber/MUC.tcl:1740
+#: ../jabber/MUC.tcl:1742
+#: ../jabber/MailBox.tcl:1597
+#: ../jabber/MailBox.tcl:1621
+#: ../jabber/MailBox.tcl:1675
+#: ../jabber/MailBox.tcl:1688
+#: ../jabber/MailBox.tcl:1782
+#: ../jabber/MailBox.tcl:1816
+#: ../jabber/NewMsg.tcl:888
+#: ../jabber/NewMsg.tcl:924
+#: ../jabber/Profiles.tcl:1472
+#: ../jabber/Profiles.tcl:1480
+#: ../jabber/Profiles.tcl:1666
+#: ../jabber/Register.tcl:124
+#: ../jabber/Register.tcl:583
+#: ../jabber/Register.tcl:589
+#: ../jabber/Register.tcl:664
+#: ../jabber/Register.tcl:833
+#: ../jabber/Register.tcl:893
+#: ../jabber/Register.tcl:898
+#: ../jabber/Register.tcl:901
+#: ../jabber/Register.tcl:970
+#: ../jabber/Register.tcl:1255
+#: ../jabber/Register.tcl:1293
+#: ../jabber/Register.tcl:1358
+#: ../jabber/Register.tcl:1542
+#: ../jabber/Search.tcl:258
+#: ../jabber/Search.tcl:309
+#: ../jabber/Search.tcl:353
+#: ../jabber/Search.tcl:430
+#: ../jabber/Search.tcl:771
+#: ../jabber/SetupAss.tcl:306
+#: ../jabber/SetupAss.tcl:310
+#: ../jabber/SetupAss.tcl:319
+#: ../jabber/UserInfo.tcl:215
+#: ../jabber/UserInfo.tcl:265
+#: ../jabber/UserInfo.tcl:297
+#: ../jabber/UserInfo.tcl:326
+#: ../jabber/UserInfo.tcl:473
+#: ../jabber/UserInfo.tcl:602
+#: ../jabber/VCard.tcl:104
+#: ../jabber/VCard.tcl:106
+#: ../jabber/VCard.tcl:785
+#: ../jabber/VCard.tcl:845
+#: ../jabber/VCard.tcl:847
+#: ../jabber/VCard.tcl:893
+#: ../jabber/VCard.tcl:914
+#: ../lib/Dialogs.tcl:162
+#: ../lib/Dialogs.tcl:169
+#: ../lib/Dialogs.tcl:412
+#: ../lib/HttpTrpt.tcl:71
+#: ../lib/HttpTrpt.tcl:107
+#: ../lib/HttpTrpt.tcl:136
+#: ../lib/HttpTrpt.tcl:226
+#: ../lib/HttpTrpt.tcl:233
+#: ../lib/HttpTrpt.tcl:239
+#: ../lib/Httpd.tcl:78
+#: ../lib/Init.tcl:726
+#: ../lib/Init.tcl:748
+#: ../lib/MacintoshUtils.tcl:55
+#: ../lib/MacintoshUtils.tcl:77
+#: ../lib/MacintoshUtils.tcl:99
+#: ../lib/PrefUtils.tcl:91
+#: ../lib/PrefUtils.tcl:217
+#: ../lib/TheServer.tcl:65
+#: ../lib/UserActions.tcl:44
+#: ../lib/UserActions.tcl:72
+#: ../lib/UserActions.tcl:93
+#: ../lib/Utils.tcl:379
+#: ../lib/WindowsUtils.tcl:61
+#: ../lib/WindowsUtils.tcl:109
+#: ../lib/WindowsUtils.tcl:151
+#: ../plugins/HtmlImport.tcl:284
+#: ../plugins/PluginTextPlain.tcl:254
+#: ../plugins/WinImport.tcl:283
+#: ../whiteboard/CanvasCmd.tcl:448
+#: ../whiteboard/CanvasCmd.tcl:456
+#: ../whiteboard/CanvasFile.tcl:51
+#: ../whiteboard/CanvasFile.tcl:72
+#: ../whiteboard/CanvasFile.tcl:501
+#: ../whiteboard/CanvasFile.tcl:736
+#: ../whiteboard/CanvasFile.tcl:767
+#: ../whiteboard/CanvasFile.tcl:842
+#: ../whiteboard/FilePrefs.tcl:586
+#: ../whiteboard/GetFileIface.tcl:401
+#: ../whiteboard/Import.tcl:74
+#: ../whiteboard/Import.tcl:78
+#: ../whiteboard/Import.tcl:1172
+#: ../whiteboard/Import.tcl:1206
+#: ../whiteboard/Import.tcl:1309
+#: ../whiteboard/Import.tcl:2022
+#: ../whiteboard/Import.tcl:2043
+#: ../whiteboard/Multicast.tcl:198
+#: ../whiteboard/Multicast.tcl:234
+#: ../whiteboard/Multicast.tcl:239
+#: ../whiteboard/Multicast.tcl:247
+#: ../whiteboard/Multicast.tcl:254
+#: ../whiteboard/PutFileIface.tcl:77
+#: ../whiteboard/PutFileIface.tcl:114
+#: ../whiteboard/PutFileIface.tcl:125
+#: ../whiteboard/WBPrefs.tcl:300
+#: ../whiteboard/Whiteboard.tcl:3270
+#: ../whiteboard/Whiteboard.tcl:3276
+msgid "Error"
+msgstr "Eroare"
+
+#: ../components/AutoUpdate.tcl:123
+#, tcl-format
+msgid "Cannot connect to server %s to download update details: %s"
+msgstr "Nu mă pot conecta la serverul %s pentru a descărca detaliile de actualizare : %s"
+
+#: ../components/AutoUpdate.tcl:176
+msgid "Update Check"
+msgstr "Verificare actualizări"
+
+#: ../components/AutoUpdate.tcl:177
+#, tcl-format
+msgid "You already have the latest version available (%s)."
+msgstr "Deja aveţi cea mai recentă versiune (%s)."
+
+#: ../components/AutoUpdate.tcl:199
+msgid "New Version"
+msgstr "Versiune nouă"
+
+#: ../components/AutoUpdate.tcl:248
+msgid "Changes since previous release"
+msgstr "Modificări faţă de versiunea precedentă"
+
+#: ../components/AutoUpdate.tcl:258
+msgid "Automatically check for updates"
+msgstr "Verificare automată actualizări"
+
+#: ../components/AutoUpdate.tcl:265
+#: ../jabber/Search.tcl:1173
+#: ../plugins/PluginTextPlain.tcl:225
+msgid "Close"
+msgstr "Închide"
+
+#: ../components/BuddyPounce.tcl:52
+msgid "&Contact Actions"
+msgstr "Acţiuni &aplicabile acestui contact"
+
+#: ../components/BuddyPounce.tcl:156
+#, tcl-format
+msgid "Set a specific action for events related to %s. Select events using the tabs below."
+msgstr "Selectaţi o acţiune specifică pentru evenimente asociate cu %s. Selectaţi evenimentele utilizând taburile de dedesubt."
+
+#: ../components/BuddyPounce.tcl:157
+#: ../components/BuddyPounce.tcl:165
+#: ../components/BuddyPounce.tcl:171
+#: ../components/BuddyPounce.tcl:215
+msgid "Contact Actions"
+msgstr "Acţiuni contact"
+
+#: ../components/BuddyPounce.tcl:164
+#, tcl-format
+msgid "Set a specific action for events related to any contact belonging to the group %s. Select events using the tabs below."
+msgstr "Selectaţi o acţiune specifică pentru evenimente asociate cu orice contact aparţinând grupului %s.  Selectaţi evenimentele utilizând taburile de dedesubt."
+
+#: ../components/BuddyPounce.tcl:170
+msgid "Set a specific action for events related to any contact in your contact list. Select events using the tabs below."
+msgstr "Selectaţi o acţiune specifică pentru evenimente asociate cu orice contact din lista dvs. de contacte.  Selectaţi evenimentele utilizând taburile de dedesubt."
+
+#: ../components/BuddyPounce.tcl:173
+msgid "Any"
+msgstr "Oricare"
+
+#: ../components/BuddyPounce.tcl:190
+#: ../components/BuddyPounce.tcl:191
+#: ../components/BuddyPounce.tcl:629
+#: ../components/Mood.tcl:296
+#: ../components/Mood.tcl:478
+#: ../components/Mood.tcl:629
+#: ../components/Mood.tcl:670
+#: ../components/UserActivity.tcl:245
+#: ../components/UserActivity.tcl:401
+#: ../components/UserActivity.tcl:652
+#: ../components/UserActivity.tcl:695
+#: ../jabber/Emoticons.tcl:755
+#: ../jabber/GroupChat.tcl:173
+#: ../jabber/JUser.tcl:110
+#: ../jabber/JUser.tcl:345
+#: ../jabber/Subscribe.tcl:325
+#: ../jabber/Subscribe.tcl:570
+#: ../jabber/Subscribe.tcl:1283
+#: ../jabber/Subscribe.tcl:1326
+#: ../whiteboard/CanvasUtils.tcl:154
+#: ../whiteboard/CanvasUtils.tcl:204
+#: ../whiteboard/FilePrefs.tcl:436
+#: ../whiteboard/FilePrefs.tcl:437
+#: ../whiteboard/FilePrefs.tcl:445
+#: ../whiteboard/FilePrefs.tcl:446
+#: ../whiteboard/FilePrefs.tcl:514
+#: ../whiteboard/FilePrefs.tcl:593
+#: ../whiteboard/ItemInspector.tcl:212
+#: ../whiteboard/Whiteboard.tcl:501
+#: ../whiteboard/Whiteboard.tcl:530
+msgid "None"
+msgstr "Nici unul"
+
+#: ../components/BuddyPounce.tcl:242
+msgid "Show popup"
+msgstr "Afişează pop-up"
+
+#: ../components/BuddyPounce.tcl:245
+msgid "Play sound"
+msgstr "Emite sunet"
+
+#: ../components/BuddyPounce.tcl:250
+msgid "Start chat"
+msgstr "Porneşte conversaţia"
+
+#: ../components/BuddyPounce.tcl:258
+msgid "Send message with subject"
+msgstr "Trimite mesaj cu subiect"
+
+#: ../components/BuddyPounce.tcl:266
+#: ../components/Carbon.tcl:184
+#: ../components/Growl.tcl:71
+#: ../components/Growl.tcl:74
+#: ../components/Growl.tcl:93
+#: ../components/Growl.tcl:106
+#: ../components/Mood.tcl:490
+#: ../components/UserActivity.tcl:258
+#: ../jabber/AutoAway.tcl:294
+#: ../jabber/AutoAway.tcl:317
+#: ../jabber/AutoAway.tcl:340
+#: ../jabber/AutoAway.tcl:378
+#: ../jabber/Create.tcl:427
+#: ../jabber/Create.tcl:469
+#: ../jabber/Create.tcl:547
+#: ../jabber/Create.tcl:756
+#: ../jabber/Enter.tcl:650
+#: ../jabber/Enter.tcl:694
+#: ../jabber/FTrans.tcl:505
+#: ../jabber/FTrans.tcl:537
+#: ../jabber/JUser.tcl:386
+#: ../jabber/Jabber.tcl:622
+#: ../jabber/Jabber.tcl:866
+#: ../jabber/Jabber.tcl:1540
+#: ../jabber/Jabber.tcl:2040
+#: ../jabber/Jabber.tcl:2142
+#: ../jabber/MUC.tcl:189
+#: ../jabber/MUC.tcl:365
+#: ../jabber/MUC.tcl:811
+#: ../jabber/MUC.tcl:840
+#: ../jabber/MUC.tcl:1618
+#: ../jabber/MailBox.tcl:499
+#: ../jabber/NewMsg.tcl:232
+#: ../jabber/Profiles.tcl:1664
+#: ../jabber/Register.tcl:122
+#: ../jabber/Register.tcl:662
+#: ../jabber/Register.tcl:1291
+#: ../jabber/Register.tcl:1356
+#: ../jabber/Register.tcl:1540
+#: ../jabber/Search.tcl:351
+#: ../jabber/Search.tcl:419
+#: ../jabber/Search.tcl:427
+#: ../jabber/Status.tcl:876
+#: ../lib/HttpTrpt.tcl:246
+msgid "Message"
+msgstr "Mesaj"
+
+#: ../components/BuddyPounce.tcl:296
+#: ../components/ImageMagic.tcl:143
+#: ../components/Totd.tcl:126
+#: ../components/XMLConsole.tcl:109
+#: ../components/fsdialog.tcl:427
+#: ../components/fsdialog.tcl:1052
+#: ../components/fsdialog.tcl:1444
+#: ../contrib/ui/dialog.tcl:242
+#: ../contrib/ui/fontselector.tcl:152
+#: ../jabber/Chat.tcl:354
+#: ../jabber/Jabber.tcl:1746
+#: ../jabber/MUC.tcl:202
+#: ../jabber/MUC.tcl:1009
+#: ../jabber/MUC.tcl:1439
+#: ../jabber/MUC.tcl:1632
+#: ../jabber/Status.tcl:428
+#: ../jabber/Subscribe.tcl:1107
+#: ../lib/Component.tcl:80
+#: ../whiteboard/ItemInspector.tcl:989
+#: ../whiteboard/WDialogs.tcl:60
+#: ../whiteboard/WDialogs.tcl:232
+msgid "OK"
+msgstr "OK"
+
+#: ../components/BuddyPounce.tcl:298
+#: ../components/ImageMagic.tcl:145
+#: ../components/JivePhone.tcl:905
+#: ../components/JivePhone.tcl:987
+#: ../components/Phone/Phone.tcl:432
+#: ../components/fsdialog.tcl:430
+#: ../components/fsdialog.tcl:1054
+#: ../components/fsdialog.tcl:1446
+#: ../contrib/ui/dialog.tcl:243
+#: ../contrib/ui/fontselector.tcl:154
+#: ../contrib/ui/progress.tcl:316
+#: ../contrib/wizard.tcl:227
+#: ../jabber/Adhoc.tcl:201
+#: ../jabber/Adhoc.tcl:396
+#: ../jabber/Chat.tcl:356
+#: ../jabber/Create.tcl:151
+#: ../jabber/Create.tcl:670
+#: ../jabber/Disco.tcl:1509
+#: ../jabber/Disco.tcl:1678
+#: ../jabber/Enter.tcl:222
+#: ../jabber/FTrans.tcl:220
+#: ../jabber/History.tcl:992
+#: ../jabber/JUser.tcl:230
+#: ../jabber/JUser.tcl:831
+#: ../jabber/Jabber.tcl:1020
+#: ../jabber/Jabber.tcl:1962
+#: ../jabber/Jabber.tcl:2155
+#: ../jabber/Login.tcl:273
+#: ../jabber/MUC.tcl:204
+#: ../jabber/MUC.tcl:462
+#: ../jabber/MUC.tcl:1011
+#: ../jabber/MUC.tcl:1441
+#: ../jabber/MUC.tcl:1634
+#: ../jabber/Profiles.tcl:923
+#: ../jabber/Register.tcl:329
+#: ../jabber/Register.tcl:1172
+#: ../jabber/Register.tcl:1485
+#: ../jabber/Search.tcl:131
+#: ../jabber/Status.tcl:430
+#: ../jabber/UserInfo.tcl:408
+#: ../jabber/VCard.tcl:250
+#: ../jabber/VCard.tcl:260
+#: ../lib/Bookmarks.tcl:125
+#: ../lib/Component.tcl:82
+#: ../lib/Dialogs.tcl:132
+#: ../lib/Dialogs.tcl:341
+#: ../lib/EditDialogs.tcl:143
+#: ../lib/EditDialogs.tcl:332
+#: ../lib/Preferences.tcl:240
+#: ../whiteboard/FilePrefs.tcl:529
+#: ../whiteboard/ItemInspector.tcl:505
+#: ../whiteboard/ItemInspector.tcl:866
+#: ../whiteboard/Multicast.tcl:92
+msgid "Cancel"
+msgstr "Anulare"
+
+#: ../components/BuddyPounce.tcl:300
+msgid "Disable All"
+msgstr "Toate dezactivate"
+
+#: ../components/BuddyPounce.tcl:570
+#, tcl-format
+msgid "%s just went online!"
+msgstr "%s tocmai s-a conectat !"
+
+#: ../components/BuddyPounce.tcl:571
+#, tcl-format
+msgid "%s just went offline!"
+msgstr "%s tocmai s-a deconectat !"
+
+#: ../components/BuddyPounce.tcl:572
+#, tcl-format
+msgid "%s just sent you a message!"
+msgstr "%s tocmai v-a trimis un mesaj !"
+
+#: ../components/BuddyPounce.tcl:573
+#, tcl-format
+#| msgid "%s just started a chat!"
+msgid "%s just started a chat session!"
+msgstr "%s tocmai a pornit o sesiune de conversaţie!"
+
+#: ../components/BuddyPounce.tcl:599
+msgid "Auto Reply"
+msgstr "Răspuns automat"
+
+#. TRANSLATORS: automatic logout when computer is put in sleep mode and relogin on wakeup; in preferences dialog (Mac OS X only!)
+#: ../components/Carbon.tcl:149
+#: ../components/Carbon.tcl:170
+msgid "Sleep"
+msgstr "Inactiv"
+
+#: ../components/Carbon.tcl:182
+msgid "Logout on sleep"
+msgstr "Deconectare la inactivitate"
+
+#: ../components/Carbon.tcl:187
+msgid "Relogin on wakeup"
+msgstr "Reconectare la reluarea activităţii"
+
+#. TRANSLATORS: geographical location of the user ( http://xmpp.org/extensions/xep-0080.html#format ); see Action menu when logged in to a server with PEP support
+#: ../components/Geolocation.tcl:48
+msgid "Locat&ion"
+msgstr "L&ocalizare"
+
+#: ../components/Geolocation.tcl:52
+msgid "Altitude in meters above or below sea level"
+msgstr "Altitudine în metri peste sau sub nivelul mării"
+
+#: ../components/Geolocation.tcl:53
+msgid "A named area such as a campus or neighborhood"
+msgstr ""
+
+#: ../components/Geolocation.tcl:54
+msgid "GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north"
+msgstr ""
+
+#: ../components/Geolocation.tcl:55
+msgid "A specific building on a street or in an area"
+msgstr ""
+
+#: ../components/Geolocation.tcl:56
+msgid "The nation where the user is located"
+msgstr "Ţara unde este localizat utilizatorul"
+
+#: ../components/Geolocation.tcl:57
+#| msgid "GPS Datum"
+msgid "GPS datum"
+msgstr "Referinţă GPS"
+
+#: ../components/Geolocation.tcl:58
+msgid "A natural-language name for or description of the location"
+msgstr ""
+
+#: ../components/Geolocation.tcl:59
+msgid "Horizontal GPS error in arc minutes"
+msgstr ""
+
+#: ../components/Geolocation.tcl:60
+msgid "A particular floor in a building"
+msgstr ""
+
+#: ../components/Geolocation.tcl:61
+msgid "Latitude in decimal degrees North"
+msgstr "Latitudine Nord în grade zecimale"
+
+#: ../components/Geolocation.tcl:62
+#| msgid "An administrative region of the nation, such as a state or province"
+msgid "A locality within the administrative region, such as a town or city"
+msgstr "O localitate din regiunea administrativă, cum ar fi o comună sau un oraş"
+
+#: ../components/Geolocation.tcl:63
+msgid "Longitude in decimal degrees East"
+msgstr "Longitudine Est în grade zecimale"
+
+#: ../components/Geolocation.tcl:64
+msgid "A code used for postal delivery"
+msgstr ""
+
+#: ../components/Geolocation.tcl:65
+#: ../jabber/JForms.tcl:308
+#: ../jabber/Register.tcl:719
+msgid "An administrative region of the nation, such as a state or province"
+msgstr "O regiune administrativă a ţării, cum ar fi un judeţ sau o provincie"
+
+#: ../components/Geolocation.tcl:66
+msgid "A particular room in a building"
+msgstr ""
+
+#: ../components/Geolocation.tcl:67
+msgid "A thoroughfare within the locality, or a crossing of two thoroughfares"
+msgstr ""
+
+#: ../components/Geolocation.tcl:68
+msgid "A catch-all element that captures any other information about the location"
+msgstr ""
+
+#: ../components/Geolocation.tcl:69
+msgid "UTC timestamp specifying the moment when the reading was taken"
+msgstr ""
+
+#: ../components/Geolocation.tcl:72
+msgid "Altitude"
+msgstr "Altitudine"
+
+#: ../components/Geolocation.tcl:73
+msgid "Named Area"
+msgstr "Loc denumit"
+
+#: ../components/Geolocation.tcl:74
+msgid "GPS Bearing"
+msgstr "Directie GPS"
+
+#: ../components/Geolocation.tcl:75
+msgid "Building"
+msgstr "Clădire"
+
+#: ../components/Geolocation.tcl:76
+#: ../jabber/VCard.tcl:507
+msgid "Country"
+msgstr "Ţară"
+
+#: ../components/Geolocation.tcl:77
+msgid "GPS Datum"
+msgstr "Referință GPS"
+
+#: ../components/Geolocation.tcl:78
+#: ../jabber/Emoticons.tcl:599
+#: ../jabber/FTrans.tcl:204
+#: ../jabber/FTrans.tcl:570
+#: ../jabber/OOB.tcl:96
+#: ../jabber/VCard.tcl:328
+#: ../whiteboard/WDialogs.tcl:128
+msgid "Description"
+msgstr "Descriere"
+
+#: ../components/Geolocation.tcl:79
+msgid "GPS Error"
+msgstr "Erroare GPS"
+
+#: ../components/Geolocation.tcl:80
+msgid "Floor"
+msgstr "Etaj"
+
+#: ../components/Geolocation.tcl:81
+msgid "Latitude"
+msgstr "Latitudine"
+
+#: ../components/Geolocation.tcl:82
+msgid "Locality"
+msgstr "Localitate"
+
+#: ../components/Geolocation.tcl:83
+msgid "Longitude"
+msgstr "Longitudine"
+
+#: ../components/Geolocation.tcl:84
+#: ../jabber/VCard.tcl:506
+msgid "Postal code"
+msgstr "Code poștal"
+
+#: ../components/Geolocation.tcl:85
+#: ../jabber/VCard.tcl:505
+msgid "Region"
+msgstr "Regiune"
+
+#: ../components/Geolocation.tcl:86
+msgid "Room"
+msgstr "Camera"
+
+#: ../components/Geolocation.tcl:87
+msgid "Street"
+msgstr "Strada"
+
+#: ../components/Geolocation.tcl:88
+#: ../jabber/Emoticons.tcl:617
+#: ../whiteboard/FilePrefs.tcl:473
+#: ../whiteboard/ItemInspector.tcl:375
+msgid "Text"
+msgstr "Text"
+
+#: ../components/Geolocation.tcl:89
+msgid "Timestamp"
+msgstr "Timp"
+
+#: ../components/Geolocation.tcl:105
+#: ../components/JivePhone.tcl:95
+#: ../jabber/AvatarMB.tcl:583
+#: ../jabber/MUC.tcl:992
+#: ../lib/EditDialogs.tcl:122
+#: ../whiteboard/WBPrefs.tcl:191
+msgid "Remove"
+msgstr "Elilmină"
+
+#: ../components/Geolocation.tcl:158
+msgid "Set your location that will be shown to your contacts."
+msgstr "Stabiliți localizarea dvs. care va fi afișată contactelor dvs."
+
+#: ../components/Geolocation.tcl:159
+msgid "Enter your location details below. At least you should set latitude and longitude."
+msgstr "Introduceți mai jos detaliile localizării dvs. Trebuie să introduceți cel puțin latitudinea și longitudinea."
+
+#: ../components/Geolocation.tcl:162
+#: ../components/Geolocation.tcl:367
+#: ../components/fsdialog.tcl:421
+#: ../jabber/GroupChat.tcl:3463
+msgid "Location"
+msgstr "Localizare"
+
+#: ../components/Geolocation.tcl:195
+msgid "Synchronize with Google Earth"
+msgstr "Sincronizare cu Google Earth"
+
+#: ../components/Geolocation.tcl:373
+#, tcl-format
+#| msgid "This is location data for"
+msgid "This is location data for %s"
+msgstr "Date de localizare pentru %s"
+
+#: ../components/Growl.tcl:162
+#: ../components/taskbar/Taskbar.tcl:185
+#: ../jabber/JUI.tcl:178
+#: ../jabber/JUI.tcl:532
+#: ../jabber/JUI.tcl:1839
+#: ../jabber/JUI.tcl:1859
+#: ../jabber/MegaPresence.tcl:96
+#: ../jabber/StatusSlot.tcl:35
+msgid "Status"
+msgstr "Stare"
+
+#: ../components/Growl.tcl:170
+#: ../jabber/FTrans.tcl:574
+#: ../jabber/OOB.tcl:114
+msgid "Receive File"
+msgstr "Recepție fișier"
+
+#: ../components/Growl.tcl:172
+#: ../components/Growl.tcl:178
+#: ../components/Notifier.tcl:133
+#: ../jabber/FTrans.tcl:565
+#: ../jabber/OOB.tcl:92
+#: ../whiteboard/ItemInspector.tcl:364
+msgid "File"
+msgstr "Fișier"
+
+#: ../components/Growl.tcl:174
+#: ../components/Notifier.tcl:135
+#: ../components/fsdialog.tcl:490
+#: ../jabber/FTrans.tcl:567
+#: ../whiteboard/CanvasUtils.tcl:173
+#: ../whiteboard/Whiteboard.tcl:555
+msgid "Size"
+msgstr "Dimensiune"
+
+#: ../components/Growl.tcl:177
+#: ../components/Notifier.tcl:138
+#: ../jabber/FTrans.tcl:573
+#: ../jabber/OOB.tcl:113
+#, tcl-format
+msgid "%s wants to send you this file: %s Do you want to receive this file?"
+msgstr "%s dorește să vă transmită fișierul: %s. Doriți să recepționați acest fișier?"
+
+#: ../components/Growl.tcl:186
+msgid "Ring, ring"
+msgstr "Sună, sună"
+
+#: ../components/Growl.tcl:187
+#, tcl-format
+msgid "Phone is ringing from %s"
+msgstr "%s vă apelează la telefon"
+
+#: ../components/Growl.tcl:188
+#: ../components/JivePhone.tcl:480
+#: ../components/Phone/Phone.tcl:382
+#: ../components/Phone/Phone.tcl:413
+#: ../jabber/Rosticons.tcl:585
+msgid "Phone"
+msgstr "Telefon"
+
+#: ../components/Growl.tcl:197
+#: ../components/Mood.tcl:212
+msgid "afraid"
+msgstr "înfricoşat"
+
+#: ../components/Growl.tcl:198
+#: ../components/Mood.tcl:213
+msgid "amazed"
+msgstr "uimit"
+
+#: ../components/Growl.tcl:199
+#: ../components/Mood.tcl:214
+msgid "angry"
+msgstr "supărat"
+
+#: ../components/Growl.tcl:200
+#: ../components/Mood.tcl:215
+msgid "annoyed"
+msgstr "enervat"
+
+#: ../components/Growl.tcl:201
+#: ../components/Mood.tcl:216
+msgid "anxious"
+msgstr "neliniştit"
+
+#: ../components/Growl.tcl:202
+#: ../components/Mood.tcl:217
+msgid "aroused"
+msgstr "trezit"
+
+#: ../components/Growl.tcl:203
+#: ../components/Mood.tcl:218
+msgid "ashamed"
+msgstr "ruşinat"
+
+#: ../components/Growl.tcl:204
+#: ../components/Mood.tcl:219
+msgid "bored"
+msgstr "plictisit"
+
+#: ../components/Growl.tcl:205
+#: ../components/Mood.tcl:220
+msgid "brave"
+msgstr "curajos"
+
+#: ../components/Growl.tcl:206
+#: ../components/Mood.tcl:221
+msgid "calm"
+msgstr "calm"
+
+#: ../components/Growl.tcl:207
+#: ../components/Mood.tcl:222
+msgid "cold"
+msgstr "rece"
+
+#: ../components/Growl.tcl:208
+#: ../components/Mood.tcl:223
+msgid "confused"
+msgstr "confuz"
+
+#: ../components/Growl.tcl:209
+#: ../components/Mood.tcl:224
+msgid "contented"
+msgstr "satisfăcut"
+
+#: ../components/Growl.tcl:210
+#: ../components/Mood.tcl:225
+msgid "cranky"
+msgstr "capricios"
+
+#: ../components/Growl.tcl:211
+#: ../components/Mood.tcl:226
+msgid "curious"
+msgstr "curios"
+
+#: ../components/Growl.tcl:212
+#: ../components/Mood.tcl:227
+msgid "depressed"
+msgstr "deprimat"
+
+#: ../components/Growl.tcl:213
+#: ../components/Mood.tcl:228
+msgid "disappointed"
+msgstr "dezamăgit"
+
+#: ../components/Growl.tcl:214
+#: ../components/Mood.tcl:229
+msgid "disgusted"
+msgstr "dezgustat"
+
+#: ../components/Growl.tcl:215
+#: ../components/Mood.tcl:230
+msgid "distracted"
+msgstr "distras"
+
+#: ../components/Growl.tcl:216
+#: ../components/Mood.tcl:231
+msgid "embarrassed"
+msgstr "jenat"
+
+#: ../components/Growl.tcl:217
+#: ../components/Mood.tcl:232
+msgid "excited"
+msgstr "excitat"
+
+#: ../components/Growl.tcl:218
+#: ../components/Mood.tcl:233
+msgid "flirtatious"
+msgstr "flirtând"
+
+#: ../components/Growl.tcl:219
+#: ../components/Mood.tcl:234
+msgid "frustrated"
+msgstr "frustrat"
+
+#: ../components/Growl.tcl:220
+#: ../components/Mood.tcl:235
+msgid "grumpy"
+msgstr "morocănos"
+
+#: ../components/Growl.tcl:221
+#: ../components/Mood.tcl:236
+msgid "guilty"
+msgstr "vinovat"
+
+#: ../components/Growl.tcl:222
+#: ../components/Mood.tcl:237
+msgid "happy"
+msgstr "fericit"
+
+#: ../components/Growl.tcl:223
+#: ../components/Mood.tcl:238
+msgid "hot"
+msgstr "fierbinte"
+
+#: ../components/Growl.tcl:224
+#: ../components/Mood.tcl:239
+msgid "humbled"
+msgstr "smerit"
+
+#: ../components/Growl.tcl:225
+#: ../components/Mood.tcl:240
+msgid "humiliated"
+msgstr "umilit"
+
+#: ../components/Growl.tcl:226
+#: ../components/Mood.tcl:241
+msgid "hungry"
+msgstr "înfometat"
+
+#: ../components/Growl.tcl:227
+#: ../components/Mood.tcl:242
+msgid "hurt"
+msgstr "rănit"
+
+#: ../components/Growl.tcl:228
+#: ../components/Mood.tcl:243
+msgid "impressed"
+msgstr "impresionat"
+
+#: ../components/Growl.tcl:229
+#: ../components/Mood.tcl:244
+msgid "in awe"
+msgstr "admirativ"
+
+#: ../components/Growl.tcl:230
+#: ../components/Mood.tcl:245
+msgid "in love"
+msgstr "îndrăgostit"
+
+#: ../components/Growl.tcl:231
+#: ../components/Mood.tcl:246
+msgid "indignant"
+msgstr "indignat"
+
+#: ../components/Growl.tcl:232
+#: ../components/Mood.tcl:247
+msgid "interested"
+msgstr "interesat"
+
+#: ../components/Growl.tcl:233
+#: ../components/Mood.tcl:248
+msgid "intoxicated"
+msgstr "intoxicat"
+
+#: ../components/Growl.tcl:234
+#: ../components/Mood.tcl:249
+msgid "invincible"
+msgstr "invincibil"
+
+#: ../components/Growl.tcl:235
+#: ../components/Mood.tcl:250
+msgid "jealous"
+msgstr "gelos"
+
+#: ../components/Growl.tcl:236
+#: ../components/Mood.tcl:251
+msgid "lonely"
+msgstr "singuratic"
+
+#: ../components/Growl.tcl:237
+#: ../components/Mood.tcl:252
+msgid "mean"
+msgstr "rău"
+
+#: ../components/Growl.tcl:238
+#: ../components/Mood.tcl:253
+msgid "moody"
+msgstr "indispus"
+
+#: ../components/Growl.tcl:239
+#: ../components/Mood.tcl:254
+msgid "nervous"
+msgstr "neliniştit"
+
+#: ../components/Growl.tcl:240
+#: ../components/Mood.tcl:255
+msgid "neutral"
+msgstr "neutru"
+
+#: ../components/Growl.tcl:241
+#: ../components/Mood.tcl:256
+msgid "offended"
+msgstr "ofensat"
+
+#: ../components/Growl.tcl:242
+#: ../components/Mood.tcl:257
+msgid "playful"
+msgstr "jucăuş"
+
+#: ../components/Growl.tcl:243
+#: ../components/Mood.tcl:258
+msgid "proud"
+msgstr "mândru"
+
+#: ../components/Growl.tcl:244
+#: ../components/Mood.tcl:259
+msgid "relieved"
+msgstr "uşurat"
+
+#: ../components/Growl.tcl:245
+#: ../components/Mood.tcl:260
+msgid "remorseful"
+msgstr "chinuit de remuşcări"
+
+#: ../components/Growl.tcl:246
+#: ../components/Mood.tcl:261
+msgid "restless"
+msgstr "agitat"
+
+#: ../components/Growl.tcl:247
+#: ../components/Mood.tcl:262
+msgid "sad"
+msgstr "trist"
+
+#: ../components/Growl.tcl:248
+#: ../components/Mood.tcl:263
+msgid "sarcastic"
+msgstr "sarcastic"
+
+#: ../components/Growl.tcl:249
+#: ../components/Mood.tcl:264
+msgid "serious"
+msgstr "serios"
+
+#: ../components/Growl.tcl:250
+#: ../components/Mood.tcl:265
+msgid "shocked"
+msgstr "şocat"
+
+#: ../components/Growl.tcl:251
+#: ../components/Mood.tcl:266
+msgid "shy"
+msgstr "timid"
+
+#: ../components/Growl.tcl:252
+#: ../components/Mood.tcl:267
+msgid "sick"
+msgstr "bolnav"
+
+#: ../components/Growl.tcl:253
+#: ../components/Mood.tcl:268
+msgid "sleepy"
+msgstr "adormit"
+
+#: ../components/Growl.tcl:254
+#: ../components/Mood.tcl:269
+msgid "stressed"
+msgstr "stresat"
+
+#: ../components/Growl.tcl:255
+#: ../components/Mood.tcl:270
+msgid "surprised"
+msgstr "surprins"
+
+#: ../components/Growl.tcl:256
+#: ../components/Mood.tcl:271
+msgid "thirsty"
+msgstr "însetat"
+
+#: ../components/Growl.tcl:257
+#: ../components/Mood.tcl:272
+msgid "worried"
+msgstr "îngrijorat"
+
+#: ../components/Growl.tcl:259
+msgid "Mood change"
+msgstr "Schimbarea stării de spirit"
+
+#: ../components/Growl.tcl:264
+msgid "is"
+msgstr "este"
+
+#: ../components/Growl.tcl:268
+msgid "because"
+msgstr "pentru că"
+
+#: ../components/Growl.tcl:271
+msgid "retracted mood"
+msgstr "stare de spirit retrasă"
+
+#: ../components/Growl.tcl:273
+#: ../components/Mood.tcl:293
+#: ../components/Mood.tcl:485
+#: ../components/Mood.tcl:587
+#: ../components/Mood.tcl:602
+#: ../components/Mood.tcl:666
+msgid "Mood"
+msgstr "Dispoziţie"
+
+#. TRANSLATORS: see Plugins menu in whiteboard
+#: ../components/ImageMagic.tcl:61
+#: ../whiteboard/CanvasUtils.tcl:144
+msgid "Take &Snapshot"
+msgstr "&Captură de ecran"
+
+#: ../components/ImageMagic.tcl:63
+#: ../jabber/JUI.tcl:201
+#: ../whiteboard/Whiteboard.tcl:590
+msgid "Plu&gins"
+msgstr "Module &complementare"
+
+#: ../components/ImageMagic.tcl:105
+msgid "Take Snapshot"
+msgstr "Capturează ecranul"
+
+#: ../components/ImageMagic.tcl:118
+msgid "Click on a window or drag a rectangular area to import a snapshot into the current whiteboard."
+msgstr "Click pe o fereastră sau trageţi un dreptunghi pentru a importa o captură în tabla de desen curentă."
+
+#: ../components/ImageMagic.tcl:183
+#, fuzzy, tcl-format
+msgid "Dangerous in-box path name: %s"
+msgstr "Denumire cale periculoasă: %s"
+
+#: ../components/ImageMagic.tcl:195
+#, tcl-format
+msgid "Click OK to remove files: %s"
+msgstr "Click OK pentru a şterge fişierele: %s"
+
+#: ../components/JivePhone.tcl:69
+#: ../components/JivePhone.tcl:83
+#: ../components/JivePhone.tcl:91
+#: ../components/JivePhone.tcl:250
+#: ../components/JivePhone.tcl:361
+#: ../components/JivePhone.tcl:1106
+#: ../components/Phone/IAX/JingleIax.tcl:575
+msgid "Call"
+msgstr "Apelează"
+
+#: ../components/JivePhone.tcl:72
+msgid "Forward Call"
+msgstr "Redirecţionează apelul"
+
+#: ../components/JivePhone.tcl:93
+msgid "New"
+msgstr "Nou"
+
+#: ../components/JivePhone.tcl:94
+msgid "Modify"
+msgstr "Modifică"
+
+#: ../components/JivePhone.tcl:341
+msgid "Unknown"
+msgstr "Necunoscut"
+
+#: ../components/JivePhone.tcl:354
+msgid "Forward current call to"
+msgstr "Redirecţionează apelul curent spre"
+
+#: ../components/JivePhone.tcl:468
+msgid "Call to"
+msgstr "Apel către"
+
+#: ../components/JivePhone.tcl:470
+#: ../components/Phone/Phone.tcl:404
+msgid "Forward to"
+msgstr "Redirecţionare către"
+
+#: ../components/JivePhone.tcl:494
+#: ../components/Phone/Phone.tcl:427
+msgid "Number"
+msgstr "Număr"
+
+#: ../components/JivePhone.tcl:497
+#: ../components/Phone/Phone.tcl:430
+msgid "Dial"
+msgstr "Formează număr"
+
+#: ../components/JivePhone.tcl:613
+#: ../components/Phone/IAX/JingleIax.tcl:233
+#, tcl-format
+msgid "Failed calling %s"
+msgstr "Apelul către %s a eşuat"
+
+#: ../components/JivePhone.tcl:629
+msgid "Address Book"
+msgstr "Agendă"
+
+#: ../components/JivePhone.tcl:865
+#: ../components/JivePhone.tcl:881
+msgid "New address book"
+msgstr "Agendă nouă"
+
+#: ../components/JivePhone.tcl:888
+#: ../components/JivePhone.tcl:970
+#: ../components/fsdialog.tcl:488
+#: ../jabber/Emoticons.tcl:601
+#: ../jabber/Search.tcl:934
+#: ../jabber/UserInfo.tcl:224
+msgid "Name"
+msgstr "Nume"
+
+#: ../components/JivePhone.tcl:891
+#: ../components/JivePhone.tcl:973
+#: ../jabber/Gateway.tcl:85
+msgid "Phone number"
+msgstr "Număr de telefon"
+
+#: ../components/JivePhone.tcl:903
+#: ../components/JivePhone.tcl:985
+#: ../jabber/Create.tcl:668
+#: ../jabber/Enter.tcl:220
+msgid "Enter"
+msgstr "Introduceţi"
+
+#: ../components/JivePhone.tcl:947
+#: ../components/JivePhone.tcl:963
+msgid "Modify address book"
+msgstr "Modificaţi agenda"
+
+#. TRANSLATORS: check http://www.mebeam.com/
+#: ../components/MeBeam.tcl:43
+msgid "Invite MeBeam"
+msgstr "Invitaţi prin MeBeam"
+
+#: ../components/MeBeam.tcl:127
+msgid "Please join me for video chat on"
+msgstr "Te rog să participi alături de mine la conversaţie video pe"
+
+#. TRANSLATORS: Moods, more information at http://xmpp.org/extensions/xep-0107.html#moods
+#. TRANSLATORS: Impressed with fear or apprehension; in fear; apprehensive.
+#: ../components/Mood.tcl:88
+msgid "Afraid"
+msgstr "Înfricoşat"
+
+#. TRANSLATORS: Astonished; confounded with fear, surprise or wonder.
+#: ../components/Mood.tcl:90
+msgid "Amazed"
+msgstr "Uimit"
+
+#. TRANSLATORS: Displaying or feeling anger, i.e., a strong feeling of displeasure, hostility or antagonism towards someone or something, usually combined with an urge to harm.
+#: ../components/Mood.tcl:92
+msgid "Angry"
+msgstr "Supărat"
+
+#. TRANSLATORS: To be disturbed or irritated, especially by continued or repeated acts.
+#: ../components/Mood.tcl:94
+msgid "Annoyed"
+msgstr "Enervat"
+
+#. TRANSLATORS: Full of anxiety or disquietude; greatly concerned or solicitous, esp. respecting something future or unknown; being in painful suspense.
+#: ../components/Mood.tcl:96
+msgid "Anxious"
+msgstr "Neliniştit"
+
+#. TRANSLATORS: To be stimulated in one's feelings, especially to be sexually stimulated.
+#: ../components/Mood.tcl:98
+msgid "Aroused"
+msgstr "Trezit"
+
+#. TRANSLATORS: Feeling shame or guilt.
+#: ../components/Mood.tcl:100
+msgid "Ashamed"
+msgstr "Ruşinat"
+
+#. TRANSLATORS: Suffering from boredom; uninterested, without attention.
+#: ../components/Mood.tcl:102
+msgid "Bored"
+msgstr "Plictisit"
+
+#. TRANSLATORS: Strong in the face of fear; courageous.
+#: ../components/Mood.tcl:104
+msgid "Brave"
+msgstr "Curajos"
+
+#. TRANSLATORS: Peaceful, quiet.
+#: ../components/Mood.tcl:106
+msgid "Calm"
+msgstr "Calm"
+
+#. TRANSLATORS: Feeling the sensation of coldness, especially to the point of discomfort.
+#: ../components/Mood.tcl:108
+msgid "Cold"
+msgstr "Rece"
+
+#. TRANSLATORS: Chaotic, jumbled or muddled.
+#: ../components/Mood.tcl:110
+msgid "Confused"
+msgstr "Confuz"
+
+#. TRANSLATORS: Pleased at the satisfaction of a want or desire; satisfied.
+#: ../components/Mood.tcl:112
+msgid "Contented"
+msgstr "Satisfăcut"
+
+#. TRANSLATORS: Grouchy, irritable; easily upset.
+#: ../components/Mood.tcl:114
+msgid "Cranky"
+msgstr "Capricios"
+
+#. TRANSLATORS: Inquisitive; tending to ask questions, investigate, or explore.
+#: ../components/Mood.tcl:116
+msgid "Curious"
+msgstr "Curios"
+
+#. TRANSLATORS: Severely despondent and unhappy.
+#: ../components/Mood.tcl:118
+msgid "Depressed"
+msgstr "Deprimat"
+
+#. TRANSLATORS: Defeated of expectation or hope; let down.
+#: ../components/Mood.tcl:120
+msgid "Disappointed"
+msgstr "Dezamăgit"
+
+#. TRANSLATORS: Filled with disgust; irritated and out of patience.
+#: ../components/Mood.tcl:122
+msgid "Disgusted"
+msgstr "Dezgustat"
+
+#. TRANSLATORS: Having one's attention diverted; preoccupied.
+#: ../components/Mood.tcl:124
+msgid "Distracted"
+msgstr "Distras"
+
+#. TRANSLATORS: Having a feeling of shameful discomfort.
+#: ../components/Mood.tcl:126
+msgid "Embarrassed"
+msgstr "Jenat"
+
+#. TRANSLATORS: Having great enthusiasm.
+#: ../components/Mood.tcl:128
+msgid "Excited"
+msgstr "Excitat"
+
+#. TRANSLATORS: In the mood for flirting.
+#: ../components/Mood.tcl:130
+msgid "Flirtatious"
+msgstr "Flirtând"
+
+#. TRANSLATORS: Suffering from frustration; dissatisfied, agitated, or discontented because one is unable to perform an action or fulfill a desire.
+#: ../components/Mood.tcl:132
+msgid "Frustrated"
+msgstr "Frustrat"
+
+#. TRANSLATORS: Unhappy and irritable.
+#: ../components/Mood.tcl:134
+msgid "Grumpy"
+msgstr "Morocănos"
+
+#. TRANSLATORS: Feeling responsible for wrongdoing; feeling blameworthy.
+#: ../components/Mood.tcl:136
+msgid "Guilty"
+msgstr "Vinovat"
+
+#. TRANSLATORS: Experiencing the effect of favourable fortune; having the feeling arising from the consciousness of well-being or of enjoyment; enjoying good of any kind, as peace, tranquillity, comfort; contented; joyous.
+#: ../components/Mood.tcl:138
+msgid "Happy"
+msgstr "Fericit"
+
+#. TRANSLATORS: Feeling the sensation of heat, especially to the point of discomfort.
+#: ../components/Mood.tcl:140
+msgid "Hot"
+msgstr "Fierbinte"
+
+#. TRANSLATORS: Having or showing a modest or low estimate of one's own importance; feeling lowered in dignity or importance.
+#: ../components/Mood.tcl:142
+msgid "Humbled"
+msgstr "Smerit"
+
+#. TRANSLATORS: Feeling deprived of dignity or self-respect.
+#: ../components/Mood.tcl:144
+msgid "Humiliated"
+msgstr "Umilit"
+
+#. TRANSLATORS: Having a physical need for food.
+#: ../components/Mood.tcl:146
+msgid "Hungry"
+msgstr "Înfometat"
+
+#. TRANSLATORS: Wounded, injured, or pained, whether physically or emotionally.
+#: ../components/Mood.tcl:148
+msgid "Hurt"
+msgstr "Rănit"
+
+#. TRANSLATORS: Favourably affected by something or someone.
+#: ../components/Mood.tcl:150
+msgid "Impressed"
+msgstr "Impresionat"
+
+#. TRANSLATORS: Feeling amazement at something or someone; or feeling a combination of fear and reverence.
+#: ../components/Mood.tcl:152
+msgid "In awe"
+msgstr "Admirativ"
+
+#. TRANSLATORS: Feeling strong affection, care, liking, or attraction.
+#: ../components/Mood.tcl:154
+msgid "In love"
+msgstr "Îndrăgostit"
+
+#. TRANSLATORS: Showing anger or indignation, especially at something unjust or wrong.
+#: ../components/Mood.tcl:156
+msgid "Indignant"
+msgstr "Indignat"
+
+#. TRANSLATORS: Showing great attention to something or someone; having or showing interest.
+#: ../components/Mood.tcl:158
+msgid "Interested"
+msgstr "Interesat"
+
+#. TRANSLATORS: Under the influence of alcohol; drunk.
+#: ../components/Mood.tcl:160
+msgid "Intoxicated"
+msgstr "Intoxicat"
+
+#. TRANSLATORS: Feeling as if one cannot be defeated, overcome or denied.
+#: ../components/Mood.tcl:162
+msgid "Invincible"
+msgstr "Invincibil"
+
+#. TRANSLATORS: Fearful of being replaced in position or affection.
+#: ../components/Mood.tcl:164
+msgid "Jealous"
+msgstr "Gelos"
+
+#. TRANSLATORS: Feeling isolated, empty, or abandoned.
+#: ../components/Mood.tcl:166
+msgid "Lonely"
+msgstr "Singuratic"
+
+#. TRANSLATORS: Causing or intending to cause intentional harm; bearing ill will towards another; cruel; malicious.
+#: ../components/Mood.tcl:168
+msgid "Mean"
+msgstr "Rău"
+
+#. TRANSLATORS: Given to sudden or frequent changes of mind or feeling; temperamental.
+#: ../components/Mood.tcl:170
+msgid "Moody"
+msgstr "Indispus"
+
+#. TRANSLATORS: Easily agitated or alarmed; apprehensive or anxious.
+#: ../components/Mood.tcl:172
+msgid "Nervous"
+msgstr "Neliniştit"
+
+#. TRANSLATORS: Not having a strong mood or emotional state.
+#: ../components/Mood.tcl:174
+msgid "Neutral"
+msgstr "Neutru"
+
+#. TRANSLATORS: Feeling emotionally hurt, displeased, or insulted.
+#: ../components/Mood.tcl:176
+msgid "Offended"
+msgstr "Ofensat"
+
+#. TRANSLATORS: Interested in play; fun, recreational, unserious, lighthearted; joking, silly.
+#: ../components/Mood.tcl:178
+msgid "Playful"
+msgstr "Jucăuş"
+
+#. TRANSLATORS: Feeling a sense of one's own worth or accomplishment.
+#: ../components/Mood.tcl:180
+msgid "Proud"
+msgstr "Mândru"
+
+#. TRANSLATORS: Feeling uplifted because of the removal of stress or discomfort.
+#: ../components/Mood.tcl:182
+msgid "Relieved"
+msgstr "Uşurat"
+
+#. TRANSLATORS: Feeling regret or sadness for doing something wrong.
+#: ../components/Mood.tcl:184
+msgid "Remorseful"
+msgstr "Chinuit de remuşcări"
+
+#. TRANSLATORS: Without rest; unable to be still or quiet; uneasy; continually moving.
+#: ../components/Mood.tcl:186
+msgid "Restless"
+msgstr "Agitat"
+
+#. TRANSLATORS: Feeling sorrow; sorrowful, mournful.
+#: ../components/Mood.tcl:188
+msgid "Sad"
+msgstr "Trist"
+
+#. TRANSLATORS: Mocking and ironical.
+#: ../components/Mood.tcl:190
+msgid "Sarcastic"
+msgstr "Sarcastic"
+
+#. TRANSLATORS: Without humor or expression of happiness; grave in manner or disposition; earnest; thoughtful; solemn.
+#: ../components/Mood.tcl:192
+msgid "Serious"
+msgstr "Serios"
+
+#. TRANSLATORS: Surprised, startled, confused, or taken aback.
+#: ../components/Mood.tcl:194
+msgid "Shocked"
+msgstr "Şocat"
+
+#. TRANSLATORS: Feeling easily frightened or scared; timid; reserved or coy.
+#: ../components/Mood.tcl:196
+msgid "Shy"
+msgstr "Timid"
+
+#. TRANSLATORS: Feeling in poor health; ill.
+#: ../components/Mood.tcl:198
+msgid "Sick"
+msgstr "Bolnav"
+
+#. TRANSLATORS: Feeling the need for sleep.
+#: ../components/Mood.tcl:200
+msgid "Sleepy"
+msgstr "Adormit"
+
+#. TRANSLATORS: Suffering emotional pressure.
+#: ../components/Mood.tcl:202
+msgid "Stressed"
+msgstr "Stresat"
+
+#. TRANSLATORS: Experiencing a feeling caused by something unexpected.
+#: ../components/Mood.tcl:204
+msgid "Surprised"
+msgstr "Surprins"
+
+#. TRANSLATORS: Feeling the need to drink.
+#: ../components/Mood.tcl:206
+msgid "Thirsty"
+msgstr "Însetat"
+
+#. TRANSLATORS: Thinking about unpleasant things that have happened or that might happen; feeling afraid and unhappy.
+#: ../components/Mood.tcl:208
+msgid "Worried"
+msgstr "Îngrijorat"
+
+#: ../components/Mood.tcl:304
+#: ../components/Mood.tcl:641
+msgid "&Custom Mood"
+msgstr "&Stare de spirit particularizată"
+
+#: ../components/Mood.tcl:471
+msgid "Only contacts with compatible software will see your mood."
+msgstr "Numai contactele cu software compatibil vor vedea starea dvs. de spirit"
+
+#: ../components/Mood.tcl:471
+msgid "Select your mood to show to your contacts."
+msgstr "Selectaţi starea dvs. de spirit care va fi afişată contactelor dvs."
+
+#: ../components/Mood.tcl:474
+msgid "Custom Mood"
+msgstr "Stare de spirit particularizată"
+
+#: ../components/NotifyCall.tcl:85
+#: ../components/Phone/NotifyCall.tcl:168
+msgid "Notify Call"
+msgstr "Anunţă apelul"
+
+#: ../components/NotifyCall.tcl:94
+#: ../components/Phone/NotifyCall.tcl:169
+msgid "Inbound Call"
+msgstr "Apel de intrare"
+
+#: ../components/NotifyCall.tcl:115
+#: ../components/Phone/NotifyCall.tcl:264
+msgid "Hung Up"
+msgstr "Apel încheiat"
+
+#: ../components/NotifyCall.tcl:118
+msgid "Call VM?"
+msgstr "Apelaţi VM?"
+
+#: ../components/ParseURI.tcl:220
+#: ../jabber/Login.tcl:702
+#: ../jabber/Login.tcl:769
+#, tcl-format
+msgid "Enter the password for your account %s"
+msgstr "Introduceţi parola contului dvs. %s"
+
+#: ../components/ParseURI.tcl:391
+#, tcl-format
+msgid "Please enter your desired nickname for the chatroom %s"
+msgstr "Introduceţi pseudonimul pe care doriţi să îl aveţi în sala de conversaţii %s"
+
+#: ../components/ParseURI.tcl:392
+#: ../components/ParseURI.tcl:396
+#: ../jabber/Create.tcl:111
+#: ../jabber/Create.tcl:636
+#: ../jabber/Enter.tcl:164
+#: ../jabber/GroupChat.tcl:3464
+#: ../jabber/JUser.tcl:182
+#: ../jabber/JUser.tcl:726
+#: ../jabber/MUC.tcl:478
+#: ../jabber/Profiles.tcl:1105
+#: ../jabber/Subscribe.tcl:322
+#: ../jabber/Subscribe.tcl:1285
+#: ../jabber/VCard.tcl:307
+msgid "Nickname"
+msgstr "Pseudonim"
+
+#: ../components/ParseURI.tcl:559
+#: ../jabber/FTrans.tcl:594
+#: ../jabber/MailBox.tcl:2133
+#: ../jabber/OOB.tcl:133
+msgid "Save File"
+msgstr "Salvează fişier"
+
+#: ../components/Phone/IAX/JingleIax.tcl:63
+msgid "&Call"
+msgstr "&Apelează"
+
+#: ../components/Phone/NotifyCall.tcl:171
+msgid "Make Call"
+msgstr "Lansează apel"
+
+#: ../components/Phone/NotifyCall.tcl:172
+msgid "Outbound Call"
+msgstr "Appel de ieşire"
+
+#: ../components/Phone/NotifyCall.tcl:266
+msgid "Answer"
+msgstr "Răspunde"
+
+#: ../components/Phone/NotifyCall.tcl:275
+#: ../jabber/JUser.tcl:593
+#: ../jabber/Jabber.tcl:720
+#: ../jabber/Subscribe.tcl:447
+#: ../jabber/Subscribe.tcl:467
+#: ../jabber/Subscribe.tcl:667
+#: ../jabber/Subscribe.tcl:700
+#: ../jabber/Subscribe.tcl:779
+#: ../jabber/Subscribe.tcl:826
+#: ../jabber/Subscribe.tcl:892
+msgid "Info"
+msgstr "Info"
+
+#: ../components/Phone/NotifyCall.tcl:367
+#: ../components/Phone/NotifyCall.tcl:795
+msgid "Do you want to hang up?"
+msgstr "Doriţi să închideţi?"
+
+#: ../components/Phone/NotifyCall.tcl:574
+msgid "Call Notification"
+msgstr "Notificare apel"
+
+#: ../components/Phone/NotifyCall.tcl:605
+#: ../jabber/AppStatusSlot.tcl:65
+#: ../jabber/MegaPresence.tcl:81
+#: ../jabber/Search.tcl:901
+#: ../jabber/StatusSlot.tcl:63
+msgid "Close Slot"
+msgstr "închide slot"
+
+#: ../components/Phone/NotifyCall.tcl:636
+#, tcl-format
+msgid "%s is calling"
+msgstr "Vă apelează %s"
+
+#: ../components/Phone/NotifyCall.tcl:663
+msgid "Answer call"
+msgstr "Răspundeţi la apel"
+
+#: ../components/Phone/NotifyCall.tcl:664
+msgid "Hangup call"
+msgstr "Încheiaţi convorbirea"
+
+#: ../components/Phone/NotifyCall.tcl:717
+#, tcl-format
+msgid "%s is on the phone"
+msgstr "%s vorbeşte la telefon"
+
+#. TRANSLATORS; whiteboard slide show menu
+#: ../components/SlideShow.tcl:43
+#: ../components/SlideShow.tcl:123
+msgid "Slide Show"
+msgstr "Derulare diapozitive"
+
+#: ../components/SlideShow.tcl:44
+msgid "&Open Folder"
+msgstr "&Deschide director"
+
+#: ../components/SlideShow.tcl:46
+#: ../components/SlideShow.tcl:358
+#: ../components/SlideShow.tcl:362
+#: ../components/SlideShow.tcl:369
+#: ../components/Totd.tcl:130
+#: ../contrib/wizard.tcl:224
+#: ../jabber/Adhoc.tcl:209
+msgid "Previous"
+msgstr "Precedent"
+
+#: ../components/SlideShow.tcl:47
+#: ../components/SlideShow.tcl:359
+#: ../components/SlideShow.tcl:364
+#: ../components/SlideShow.tcl:370
+#: ../components/Totd.tcl:128
+#: ../contrib/wizard.tcl:219
+#: ../contrib/wizard.tcl:586
+#: ../jabber/Adhoc.tcl:207
+#: ../jabber/GotMsg.tcl:225
+#: ../jabber/Register.tcl:327
+#: ../jabber/Register.tcl:1168
+#: ../lib/TSearch.tcl:81
+#: ../lib/WSearch.tcl:72
+msgid "Next"
+msgstr "Următor"
+
+#: ../components/SlideShow.tcl:48
+#: ../components/SlideShow.tcl:354
+#: ../components/SlideShow.tcl:367
+#: ../whiteboard/ItemInspector.tcl:213
+msgid "First"
+msgstr "Primul"
+
+#: ../components/SlideShow.tcl:49
+#: ../components/SlideShow.tcl:355
+#: ../components/SlideShow.tcl:368
+#: ../whiteboard/ItemInspector.tcl:214
+msgid "Last"
+msgstr "Ultimul"
+
+#: ../components/SlideShow.tcl:121
+#: ../jabber/Chat.tcl:1347
+#: ../jabber/GroupChat.tcl:677
+#: ../lib/FileCache.tcl:599
+#: ../whiteboard/FilePrefs.tcl:77
+#: ../whiteboard/Plugins.tcl:1324
+#: ../whiteboard/WBPrefs.tcl:74
+msgid "Whiteboard"
+msgstr "Tablă de desen"
+
+#: ../components/SlideShow.tcl:137
+msgid "Show navigation buttons"
+msgstr "Afişează butoanele de navigare"
+
+#: ../components/SlideShow.tcl:139
+msgid "Resize window to fit slides"
+msgstr "Redimensionează fereastra pentru a se potrivi diapozitivelor"
+
+#: ../components/SlideShow.tcl:207
+#: ../lib/FileCache.tcl:667
+#: ../whiteboard/GetFileIface.tcl:292
+msgid "Open Folder"
+msgstr "Deschide director"
+
+#. TRANSLATORS; Sound settings in preferences
+#: ../components/Sounds.tcl:76
+msgid "Contact is online"
+msgstr "Contactul este conectat"
+
+#: ../components/Sounds.tcl:77
+msgid "Contact is offline"
+msgstr "Contactul este deconectat"
+
+#: ../components/Sounds.tcl:78
+msgid "Incoming message"
+msgstr "Mesaj primit"
+
+#: ../components/Sounds.tcl:79
+msgid "Incoming chat"
+msgstr "Conversaţie primită"
+
+#: ../components/Sounds.tcl:80
+msgid "New chat thread"
+msgstr "Topic nou de conversaţie"
+
+#: ../components/Sounds.tcl:81
+msgid "Contact presence change"
+msgstr "Schimbare de prezenţă a contactului"
+
+#: ../components/Sounds.tcl:82
+msgid "Logged in"
+msgstr "Conectat"
+
+#: ../components/Sounds.tcl:83
+msgid "Chatroom presence change"
+msgstr "Schimbare de prezenţă în sala de conversaţii"
+
+#: ../components/Sounds.tcl:503
+msgid "Sounds"
+msgstr "Sunete"
+
+#: ../components/Sounds.tcl:536
+msgid "Alert sounds"
+msgstr "Sunete de alertă"
+
+#: ../components/Sounds.tcl:547
+msgid "Sound set"
+msgstr "Set de sunete"
+
+#: ../components/Sounds.tcl:555
+msgid "Enable or disable sounds below"
+msgstr "Activaţi sau dezactivaţi sunelete de mai jos"
+
+#: ../components/Sounds.tcl:567
+msgid "Play"
+msgstr "Play"
+
+#: ../components/Sounds.tcl:575
+msgid "Volume"
+msgstr "Volum"
+
+#: ../components/Sounds.tcl:586
+#| msgid "Sound set"
+msgid "Sound device"
+msgstr "Dispozitiv sunet"
+
+#: ../components/Sounds.tcl:595
+msgid "MIDI Player"
+msgstr "Player MIDI"
+
+#: ../components/Sounds.tcl:604
+msgid "External Midi Player"
+msgstr "Player MIDI extern"
+
+#: ../components/Sounds.tcl:605
+msgid "Set command to use for playing MIDI sounds. This option is only relevant if you use a sound set with MIDI files."
+msgstr "Introduceţi comanda utilizată pentru a asculta fişiere MIDI. Această opţiune este relevantă doar dacă utilizaţi un set de sunete cu fişiere MIDI."
+
+#: ../components/Sounds.tcl:606
+msgid "MIDI command"
+msgstr "Commanda MIDI"
+
+#: ../components/Sounds.tcl:654
+#: ../components/Sounds.tcl:698
+#: ../components/Sounds.tcl:724
+#: ../contrib/ui/fontselector.tcl:156
+#: ../contrib/ui/openimage.tcl:97
+#: ../jabber/Emoticons.tcl:749
+#: ../jabber/Roster.tcl:519
+#: ../jabber/Roster.tcl:1402
+#: ../jabber/Rosticons.tcl:605
+#: ../jabber/SetupAss.tcl:116
+#: ../lib/PrefHelpers.tcl:104
+#: ../whiteboard/WBPrefs.tcl:120
+#: ../whiteboard/WBPrefs.tcl:123
+#: ../whiteboard/WBPrefs.tcl:196
+msgid "Default"
+msgstr "Implicit"
+
+#. TRANSLATORS; Only on Mac OS X and Windows in preferences.
+#: ../components/Speech.tcl:281
+#: ../components/Speech.tcl:337
+msgid "Text-to-Speech"
+msgstr "Sinteză vocală"
+
+#: ../components/Speech.tcl:349
+msgid "Text-to-speech for whiteboard text"
+msgstr "Sinteză vocală pentru textul din tabla de desen"
+
+#: ../components/Speech.tcl:351
+msgid "Text-to-speech for messages"
+msgstr "Sinteză vocală pentru mesaje"
+
+#: ../components/Speech.tcl:353
+msgid "Text-to-speech for chat"
+msgstr "Sinteză vocală pentru conversaţie"
+
+#: ../components/Speech.tcl:376
+msgid "Select voice for incoming text"
+msgstr "Selectaţi vocea pentru text primit"
+
+#: ../components/Speech.tcl:377
+msgid "Select voice for outgoing write"
+msgstr "Selectaţi vocea pentru textul scris spre a fi trimis"
+
+#: ../components/Spell.tcl:55
+msgid "Check Spelling"
+msgstr "Verificare ortografie"
+
+#: ../components/Spell.tcl:59
+msgid "Dictionaries"
+msgstr "Dicţionare"
+
+#: ../components/Spell.tcl:164
+msgid "Add to Dictionary"
+msgstr "Adăugare la dicţionar"
+
+#: ../components/Totd.tcl:18
+#: ../components/Totd.tcl:109
+msgid "Tip of the Day"
+msgstr ""
+
+#: ../components/Totd.tcl:30
+#, tcl-format
+msgid ""
+"If the desired chat system is not available when you want to add a contact, this indicates no server support had been detected. Luckily, for most chat systems you can use another server without the need to register a new account. \n"
+"\n"
+" Instructions:\n"
+" 1. Login to your account in %s.\n"
+" 2. Select the Discover Server option in the Actions menu.\n"
+" 3. Find a server with support for the desired chat system at http://coccinella.im/servers/servers.html (you can sort the columns).\n"
+" 4. Enter the name of the desired server and proceed.\n"
+" 5. The chat system will become available in the list!"
+msgstr ""
+
+#: ../components/Totd.tcl:43
+msgid "Typing the /clean command during a chat conversation will empty your chat window, whilst the /retain command will restore its content. Your contacts do not see these commands."
+msgstr ""
+
+#: ../components/Totd.tcl:46
+#, tcl-format
+msgid "You might be interested in the hidden XML console if you are a developer. You can open it with the command %s+Shift+D"
+msgstr ""
+
+#: ../components/Totd.tcl:49
+#, tcl-format
+msgid "You can initiate a whiteboard session with multiple participants by clicking the whiteboard icon in a chatroom. All participants using %s will be invited."
+msgstr ""
+
+#: ../components/Totd.tcl:52
+msgid "Documentation is available at http://coccinella.im/documentation"
+msgstr ""
+
+#: ../components/Totd.tcl:53
+msgid "To override the automatic creation of the XMPP resource you can add /resourcename to your Contact ID."
+msgstr ""
+
+#: ../components/Totd.tcl:55
+msgid "Nicknames in chatrooms can be automatically completed using the TAB key. Enter the first letter(s) of the nickname and then use the TAB key to complete."
+msgstr ""
+
+#: ../components/Totd.tcl:57
+#, tcl-format
+msgid ""
+"You can carry %s with you on an USB stick and use the same configuration on different computers. You can create such a cross-platform portable %s USB stick this way:\n"
+"\n"
+" 1. Create a folder on the USB stick.\n"
+" 2. Put in this folder the Coccinella binaries (for Windows, Linux and Mac OS X). Of course you do not necessarily need all binaries, for instance in case you do not want to use the USB stick on Windows computers.\n"
+" 3. Then open on each platform (Windows, Linux and Mac OS X) the binary for that platform.\n"
+" 4. Go each time to Preferences and enable the checkbox option 'Store preferences in same folder as program' (on the General page).\n"
+" 5. Preferences will now be saved on the USB stick in the same folder as the binary."
+msgstr ""
+
+#: ../components/Totd.tcl:68
+#, tcl-format
+msgid "%s is free software. This means you have the freedom to improve %s for internal use without breaking copyright laws. Feel free to contribute improvements back to the project so that others can build upon your contribution. Check out http://coccinella.im/development to learn how you can help."
+msgstr ""
+
+#: ../components/Totd.tcl:124
+#, tcl-format
+#| msgid "Show tips on startup"
+msgid "Show tips on %s startup"
+msgstr "Arată sugestii la %s pornire"
+
+#. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
+#: ../components/UserActivity.tcl:54
+msgid "Acti&vity"
+msgstr "Acti&vitate"
+
+#: ../components/UserActivity.tcl:225
+msgid "Set your activity that will be shown to your contacts."
+msgstr "Selectaţi activitatea care va fi afişată contactelor dvs."
+
+#: ../components/UserActivity.tcl:226
+msgid "Select from the first button your general activity, and optionally, your specific actvity from the second button. You may also add a descriptive text."
+msgstr "Selectaţi cu primul buton activitatea dvs. generală şi, opţional, mai specific cu al doilea buton. Puteţi de asemenea să adăugaţi un text descriptiv."
+
+#: ../components/UserActivity.tcl:229
+msgid "User Activity"
+msgstr "Activitate utilizator"
+
+#: ../components/UserActivity.tcl:252
+#: ../jabber/VCard.tcl:287
+#: ../lib/PrefHelpers.tcl:71
+#: ../lib/PrefNet.tcl:82
+#: ../lib/Preferences.tcl:217
+msgid "General"
+msgstr "General"
+
+#: ../components/UserActivity.tcl:255
+msgid "Specific"
+msgstr "Specific"
+
+#: ../components/UserActivity.tcl:260
+msgid "Show all specific activities"
+msgstr "Afişaţi toate activităţile specifice"
+
+#: ../components/UserActivity.tcl:318
+msgid "Doing chores"
+msgstr "La  corvezi"
+
+#: ../components/UserActivity.tcl:319
+msgid "Buying groceries"
+msgstr "Cumpărând de-ale gurii"
+
+#: ../components/UserActivity.tcl:320
+msgid "Cleaning"
+msgstr "Facând curăţenie"
+
+#: ../components/UserActivity.tcl:321
+msgid "Cooking"
+msgstr "Gătind"
+
+#: ../components/UserActivity.tcl:322
+msgid "Doing maintenance"
+msgstr "Facând mentenanţă"
+
+#: ../components/UserActivity.tcl:323
+msgid "Doing the dishes"
+msgstr "Spălând vasele"
+
+#: ../components/UserActivity.tcl:324
+msgid "Doing the laundry"
+msgstr "Spălând rufele"
+
+#: ../components/UserActivity.tcl:325
+msgid "Gardening"
+msgstr "Grădinărind"
+
+#: ../components/UserActivity.tcl:326
+msgid "Running an errand"
+msgstr "Facând un comision"
+
+#: ../components/UserActivity.tcl:327
+msgid "Walking the dog"
+msgstr "Plimbând câinele"
+
+#: ../components/UserActivity.tcl:329
+msgid "Drinking"
+msgstr "Bând"
+
+#: ../components/UserActivity.tcl:330
+msgid "Having a beer"
+msgstr "Bând o bere"
+
+#: ../components/UserActivity.tcl:331
+msgid "Having coffee"
+msgstr "Bând o cafea"
+
+#: ../components/UserActivity.tcl:332
+msgid "Having tea"
+msgstr "Bând ceai"
+
+#: ../components/UserActivity.tcl:334
+msgid "Eating"
+msgstr "Mâncând"
+
+#: ../components/UserActivity.tcl:335
+msgid "Having a snack"
+msgstr "Luând o gustare"
+
+#: ../components/UserActivity.tcl:336
+msgid "Having breakfast"
+msgstr "Luând micul dejun"
+
+#: ../components/UserActivity.tcl:337
+msgid "Having dinner"
+msgstr "Luând cina"
+
+#: ../components/UserActivity.tcl:338
+msgid "Having lunch"
+msgstr "Luând prânzul"
+
+#: ../components/UserActivity.tcl:340
+msgid "Exercising"
+msgstr "Făcând exerciţii"
+
+#: ../components/UserActivity.tcl:341
+msgid "Hiking"
+msgstr "În drumeţie"
+
+#: ../components/UserActivity.tcl:342
+msgid "Jogging"
+msgstr "Jogging"
+
+#: ../components/UserActivity.tcl:343
+msgid "Playing sports"
+msgstr "Făcând sport"
+
+#: ../components/UserActivity.tcl:344
+msgid "Running"
+msgstr "Alergând"
+
+#: ../components/UserActivity.tcl:345
+msgid "Skiing"
+msgstr "Skiind"
+
+#: ../components/UserActivity.tcl:346
+msgid "Swimming"
+msgstr "Înotând"
+
+#: ../components/UserActivity.tcl:347
+msgid "Working out"
+msgstr "Făcând gimnastică"
+
+#: ../components/UserActivity.tcl:349
+msgid "Grooming"
+msgstr "Facându-mi toaleta"
+
+#: ../components/UserActivity.tcl:350
+msgid "At the spa"
+msgstr "La spa"
+
+#: ../components/UserActivity.tcl:351
+msgid "Brushing teeth"
+msgstr "Spălându-mă pe dinţi"
+
+#: ../components/UserActivity.tcl:352
+msgid "Getting a haircut"
+msgstr "Tunzându-ma"
+
+#: ../components/UserActivity.tcl:353
+msgid "Shaving"
+msgstr "Bărbierindu-mă"
+
+#: ../components/UserActivity.tcl:354
+msgid "Taking a bath"
+msgstr "Facând o baie"
+
+#: ../components/UserActivity.tcl:355
+msgid "Taking a shower"
+msgstr "Făcând un duş"
+
+#: ../components/UserActivity.tcl:357
+msgid "Having appointment"
+msgstr "Într-o întâlnire"
+
+#: ../components/UserActivity.tcl:359
+msgid "Inactive"
+msgstr "Inactiv"
+
+#: ../components/UserActivity.tcl:360
+msgid "Day off"
+msgstr "Zi liberă"
+
+#: ../components/UserActivity.tcl:361
+msgid "Hanging out"
+msgstr "Pe afară"
+
+#: ../components/UserActivity.tcl:362
+msgid "On vacation"
+msgstr "În vacanţă"
+
+#: ../components/UserActivity.tcl:363
+msgid "Scheduled holiday"
+msgstr "Sărbătoare legală"
+
+#: ../components/UserActivity.tcl:364
+msgid "Sleeping"
+msgstr "Dormind"
+
+#: ../components/UserActivity.tcl:366
+msgid "Relaxing"
+msgstr "Relaxându-mă"
+
+#: ../components/UserActivity.tcl:367
+msgid "Gaming"
+msgstr "Joucându-mă"
+
+#: ../components/UserActivity.tcl:368
+msgid "Going out"
+msgstr "Ieşind în oraş"
+
+#: ../components/UserActivity.tcl:369
+msgid "Partying"
+msgstr "Petrecând"
+
+#: ../components/UserActivity.tcl:370
+msgid "Reading"
+msgstr "Citind"
+
+#: ../components/UserActivity.tcl:371
+msgid "Rehearsing"
+msgstr "Repetând"
+
+#: ../components/UserActivity.tcl:372
+msgid "Shopping"
+msgstr "La cumpărături"
+
+#: ../components/UserActivity.tcl:373
+msgid "Socializing"
+msgstr "Socializând"
+
+#: ../components/UserActivity.tcl:374
+msgid "Sunbathing"
+msgstr "Făcând plajă"
+
+#: ../components/UserActivity.tcl:375
+msgid "Watching tv"
+msgstr "Privind la TV"
+
+#: ../components/UserActivity.tcl:376
+msgid "Watching a movie"
+msgstr "Privind un film"
+
+#: ../components/UserActivity.tcl:378
+msgid "Talking"
+msgstr "Vorbind"
+
+#: ../components/UserActivity.tcl:379
+msgid "In real life"
+msgstr "În viaţa reală"
+
+#: ../components/UserActivity.tcl:380
+msgid "On the phone"
+msgstr "La telefon"
+
+#: ../components/UserActivity.tcl:381
+msgid "On video phone"
+msgstr "La videofon"
+
+#: ../components/UserActivity.tcl:383
+msgid "Traveling"
+msgstr "Călătorind"
+
+#: ../components/UserActivity.tcl:384
+msgid "Commuting"
+msgstr "Facând naveta"
+
+#: ../components/UserActivity.tcl:385
+msgid "Cycling"
+msgstr "Pe bicicletă"
+
+#: ../components/UserActivity.tcl:386
+msgid "Driving"
+msgstr "La volan"
+
+#: ../components/UserActivity.tcl:387
+msgid "In a car"
+msgstr "În maşină"
+
+#: ../components/UserActivity.tcl:388
+msgid "On a bus"
+msgstr "În autobuz"
+
+#: ../components/UserActivity.tcl:389
+msgid "On a plane"
+msgstr "În avion"
+
+#: ../components/UserActivity.tcl:390
+msgid "On a train"
+msgstr "În tren"
+
+#: ../components/UserActivity.tcl:391
+msgid "On a trip"
+msgstr "În excursie"
+
+#: ../components/UserActivity.tcl:392
+msgid "Walking"
+msgstr "La plimbare"
+
+#: ../components/UserActivity.tcl:394
+msgid "Working"
+msgstr "Lucrând"
+
+#: ../components/UserActivity.tcl:395
+msgid "Coding"
+msgstr "Programând"
+
+#: ../components/UserActivity.tcl:396
+msgid "In a meeting"
+msgstr "Într-o întâlnire"
+
+#: ../components/UserActivity.tcl:397
+msgid "Studying"
+msgstr "Studiind"
+
+#: ../components/UserActivity.tcl:398
+msgid "Writing"
+msgstr "Scriind"
+
+#: ../components/UserActivity.tcl:605
+#: ../components/UserActivity.tcl:627
+#: ../components/UserActivity.tcl:693
+#: ../components/UserActivity.tcl:700
+msgid "Activity"
+msgstr "Activitate"
+
+#: ../components/UserActivity.tcl:665
+msgid "Custom Activity"
+msgstr "Activitate personalizată"
+
+#. TRANSLATORS; hidden XML console: Control + Shift + D (or Command + Shift + D on Mac OS X)
+#: ../components/XMLConsole.tcl:96
+msgid "XML Console"
+msgstr "Consolă XML"
+
+#: ../components/XMLConsole.tcl:108
+#, fuzzy
+msgid "Pretty format"
+msgstr "Format simpatic"
+
+#: ../components/XMLConsole.tcl:111
+#: ../components/fsdialog.tcl:1050
+#: ../contrib/ui/openimage.tcl:95
+#: ../jabber/History.tcl:994
+#: ../whiteboard/Whiteboard.tcl:450
+#: ../whiteboard/Whiteboard.tcl:2933
+#: ../whiteboard/Whiteboard.tcl:2935
+msgid "Clear"
+msgstr "Şterge"
+
+#. TRANSLATORS: strings of open file dialog; e.g. click "Whiteboard..." and then "Open File..."
+#: ../components/fsdialog.tcl:343
+msgid "Sorting"
+msgstr "Sortare"
+
+#: ../components/fsdialog.tcl:347
+msgid "Short View"
+msgstr "Vizualizare pe scurt"
+
+#: ../components/fsdialog.tcl:353
+msgid "Detailed View"
+msgstr "Vizualizare detaliată"
+
+#: ../components/fsdialog.tcl:360
+msgid "Show Hidden Files"
+msgstr "Arată fişierele ascunse"
+
+#: ../components/fsdialog.tcl:365
+msgid "Separate Folders"
+msgstr "Directoare separate"
+
+#: ../components/fsdialog.tcl:370
+msgid "By Name"
+msgstr "După nume"
+
+#: ../components/fsdialog.tcl:376
+msgid "By Date"
+msgstr "După dată"
+
+#: ../components/fsdialog.tcl:382
+msgid "By Size"
+msgstr "După dimensiune"
+
+#: ../components/fsdialog.tcl:389
+msgid "Reverse"
+msgstr "Invers"
+
+#: ../components/fsdialog.tcl:394
+msgid "Folders First"
+msgstr "Întâi directoarele"
+
+#: ../components/fsdialog.tcl:425
+msgid "Filter"
+msgstr "Filtru"
+
+#: ../components/fsdialog.tcl:492
+#: ../jabber/Emoticons.tcl:603
+#: ../jabber/History.tcl:950
+#: ../jabber/MailBox.tcl:689
+#: ../jabber/NewMsg.tcl:446
+msgid "Date"
+msgstr "Dată"
+
+#: ../components/fsdialog.tcl:494
+msgid "Permissions"
+msgstr "Permisiuni"
+
+#: ../components/fsdialog.tcl:496
+#: ../jabber/MUC.tcl:516
+msgid "Owner"
+msgstr "Proprietar"
+
+#: ../components/fsdialog.tcl:498
+#: ../jabber/JUser.tcl:184
+#: ../jabber/Subscribe.tcl:324
+#: ../jabber/Subscribe.tcl:1287
+msgid "Group"
+msgstr "Grup"
+
+#: ../components/fsdialog.tcl:1040
+msgid "New Folder"
+msgstr "Director nou"
+
+#: ../components/fsdialog.tcl:1045
+msgid "Create new folder in"
+msgstr "Creează un nou director în"
+
+#: ../components/fsdialog.tcl:1131
+#, tcl-format
+msgid "File %s already exists. Do you want to overwrite it?"
+msgstr "Fişierul %s există deja. Doriţi să îl suprascrieţi?"
+
+#: ../components/fsdialog.tcl:1138
+#, tcl-format
+msgid "File %s does not exist."
+msgstr "Fişierul %s nu există."
+
+#: ../components/fsdialog.tcl:1158
+#, tcl-format
+msgid "Cannot change to the directory %s. Permission denied."
+msgstr "Nu pot intra în directorul %s. Permisiunea refuzată."
+
+#: ../components/fsdialog.tcl:1361
+#: ../plugins/PluginTextPlain.tcl:222
+#: ../whiteboard/Import.tcl:1802
+msgid "Save As"
+msgstr "Salvează ca"
+
+#: ../components/fsdialog.tcl:1363
+#: ../jabber/AvatarMB.tcl:567
+#: ../whiteboard/Multicast.tcl:90
+msgid "Open"
+msgstr "Deschide"
+
+#: ../components/fsdialog.tcl:1427
+msgid "Folder"
+msgstr "Director"
+
+#: ../components/taskbar/Taskbar.tcl:186
+#: ../components/taskbar/Taskbar.tcl:374
+msgid "Mi&nimize"
+msgstr "&Minimizează"
+
+#. TRANSLATORS; menu item for sending normal message (no chat!)
+#: ../components/taskbar/Taskbar.tcl:187
+#: ../jabber/Disco.tcl:155
+#: ../jabber/GroupChat.tcl:221
+#: ../jabber/JUI.tcl:176
+#: ../jabber/JUI.tcl:1837
+#: ../jabber/JUI.tcl:1857
+#: ../jabber/Roster.tcl:122
+#: ../jabber/Search.tcl:33
+#: ../jabber/Search.tcl:41
+msgid "&Message"
+msgstr "&Mesaj"
+
+#: ../components/taskbar/Taskbar.tcl:188
+#: ../jabber/JUI.tcl:166
+#: ../whiteboard/Whiteboard.tcl:579
+#: ../whiteboard/Whiteboard.tcl:2208
+#: ../whiteboard/Whiteboard.tcl:2285
+msgid "&Preferences"
+msgstr "&Preferinţe"
+
+#: ../components/taskbar/Taskbar.tcl:189
+#: ../jabber/JUI.tcl:181
+#: ../jabber/JUI.tcl:1836
+#: ../jabber/JUI.tcl:1856
+#: ../jabber/Roster.tcl:127
+#: ../jabber/Roster.tcl:188
+#: ../jabber/Search.tcl:32
+#: ../jabber/Search.tcl:40
+msgid "&Add Contact"
+msgstr "&Adaugă contact"
+
+#: ../components/taskbar/Taskbar.tcl:190
+#: ../jabber/JUI.tcl:1267
+#: ../whiteboard/Whiteboard.tcl:2209
+#: ../whiteboard/Whiteboard.tcl:2287
+msgid "&Info"
+msgstr "&Info"
+
+#: ../components/taskbar/Taskbar.tcl:191
+msgid "&About Coccinella"
+msgstr "&Despre Coccinella"
+
+#: ../components/taskbar/Taskbar.tcl:192
+#: ../jabber/JUI.tcl:227
+msgid "&Home Page"
+msgstr "&Sit web"
+
+#: ../components/taskbar/Taskbar.tcl:193
+#: ../jabber/JUI.tcl:225
+msgid "&Report Bug"
+msgstr "&Raportează bug"
+
+#: ../components/taskbar/Taskbar.tcl:197
+#: ../jabber/JUI.tcl:167
+#: ../whiteboard/Whiteboard.tcl:432
+#: ../whiteboard/Whiteboard.tcl:610
+msgid "&Quit"
+msgstr "&Ieşire"
+
+#: ../components/taskbar/Taskbar.tcl:380
+msgid "&Restore"
+msgstr "&Restaurează"
+
+#: ../components/taskbar/Taskbar.tcl:484
+msgid "Start minimized in taskbar"
+msgstr "Porneşte minimizat în bara de task-uri"
+
+#: ../components/taskbar/Taskbar.tcl:487
+msgid "Start minimized in system tray"
+msgstr "Porneşte minimizat în bara de sistem"
+
+#: ../components/taskbar/Taskbar.tcl:490
+msgid "Hide/Show all when main window is hidden/shown"
+msgstr ""
+
+#. TRANSLATORS; right-click menu of the toolbars
+#: ../contrib/ttoolbar.tcl:452
+msgid "Show Text and Icon"
+msgstr "Afişează text şi icoană"
+
+#: ../contrib/ttoolbar.tcl:456
+msgid "Show Text"
+msgstr "Afişează text"
+
+#: ../contrib/ttoolbar.tcl:460
+msgid "Show Icon"
+msgstr "Afişează icoană"
+
+#: ../contrib/ui/dialog.tcl:244
+#: ../jabber/Subscribe.tcl:351
+msgid "Yes"
+msgstr "Da"
+
+#: ../contrib/ui/dialog.tcl:245
+#: ../jabber/Subscribe.tcl:353
+msgid "No"
+msgstr "Nu"
+
+#: ../contrib/ui/dialog.tcl:246
+msgid "Retry"
+msgstr "Reîncercare"
+
+#: ../contrib/ui/dialog.tcl:247
+msgid "Abort"
+msgstr "Abandon"
+
+#: ../contrib/ui/dialog.tcl:248
+msgid "Ignore"
+msgstr "Ignoră"
+
+#: ../contrib/ui/fontselector.tcl:20
+#: ../jabber/JPrefs.tcl:193
+msgid "Select Font"
+msgstr "Selectează font"
+
+#: ../contrib/ui/fontselector.tcl:114
+#: ../whiteboard/ItemInspector.tcl:367
+msgid "Font size"
+msgstr "Dimensiune font"
+
+#: ../contrib/ui/fontselector.tcl:124
+#: ../whiteboard/ItemInspector.tcl:368
+msgid "Font weight"
+msgstr "Stil font"
+
+#: ../contrib/ui/fontselector.tcl:126
+#: ../jabber/JUI.tcl:205
+#: ../whiteboard/CanvasUtils.tcl:189
+#: ../whiteboard/ItemInspector.tcl:242
+#: ../whiteboard/Whiteboard.tcl:571
+msgid "Normal"
+msgstr "Normal"
+
+#: ../contrib/ui/fontselector.tcl:127
+#: ../whiteboard/CanvasUtils.tcl:191
+#: ../whiteboard/ItemInspector.tcl:243
+#: ../whiteboard/Whiteboard.tcl:573
+msgid "Bold"
+msgstr "Bold"
+
+#: ../contrib/ui/fontselector.tcl:128
+#: ../whiteboard/CanvasUtils.tcl:193
+#: ../whiteboard/ItemInspector.tcl:244
+#: ../whiteboard/Whiteboard.tcl:575
+msgid "Italic"
+msgstr "Italic"
+
+#: ../contrib/ui/openimage.tcl:62
+msgid "Image Files"
+msgstr "Fişiere imagini"
+
+#: ../contrib/ui/openimage.tcl:93
+#: ../contrib/ui/openimage.tcl:151
+msgid "Open Image"
+msgstr "Deschide imagine"
+
+#: ../contrib/ui/progress.tcl:24
+#: ../contrib/ui/progress.tcl:33
+#: ../contrib/ui/progress.tcl:44
+msgid "Progress"
+msgstr "Progres"
+
+#: ../contrib/ui/progress.tcl:392
+msgid "Remaining"
+msgstr "Restant"
+
+#. TRANSLATORS; see File menu in main window
+#: ../contrib/wizard.tcl:206
+#: ../jabber/SetupAss.tcl:81
+#: ../jabber/SetupAss.tcl:98
+#: ../jabber/SetupAss.tcl:342
+msgid "Setup Assistant"
+msgstr "Asistent de configurare"
+
+#: ../contrib/wizard.tcl:583
+#: ../jabber/Adhoc.tcl:425
+msgid "Finish"
+msgstr "Terminare"
+
+#. TRANSLATORS; balloon mouse over texts in control panel (menu at the bottom of the main window) for arrow and close button
+#: ../jabber/AppStatusSlot.tcl:64
+#: ../jabber/MegaPresence.tcl:80
+#: ../jabber/Search.tcl:900
+#: ../jabber/StatusSlot.tcl:62
+msgid "Right click to open menu"
+msgstr "Click dreapta pentru a deschide meniu"
+
+#: ../jabber/AppStatusSlot.tcl:80
+msgid "Application Status"
+msgstr "Notificări aplicaţie"
+
+#: ../jabber/AppStatusSlot.tcl:88
+#: ../jabber/JUI.tcl:586
+#: ../jabber/JUI.tcl:655
+#: ../jabber/Roster.tcl:87
+#: ../jabber/Roster.tcl:95
+#: ../jabber/Status.tcl:42
+#: ../jabber/Status.tcl:50
+msgid "Not Available"
+msgstr "Deconectat"
+
+#: ../jabber/AppStatusSlot.tcl:158
+#, tcl-format
+msgid "Message from %s, %s"
+msgstr "Mesaj de la %s, %s"
+
+#: ../jabber/AppStatusSlot.tcl:170
+#, tcl-format
+msgid "New chat with %s"
+msgstr "Conversaţie nouă cu %s"
+
+#. TRANSLATORS; see preferences
+#: ../jabber/AutoAway.tcl:249
+#: ../jabber/AutoAway.tcl:272
+msgid "Auto Away"
+msgstr "Absent automat"
+
+#: ../jabber/AutoAway.tcl:284
+msgid "Away after"
+msgstr "Absent după"
+
+#: ../jabber/AutoAway.tcl:286
+#: ../jabber/AutoAway.tcl:309
+#: ../jabber/AutoAway.tcl:332
+msgid "Minutes"
+msgstr "minute"
+
+#: ../jabber/AutoAway.tcl:307
+msgid "Extended Away after"
+msgstr "Indisponibil după"
+
+#: ../jabber/AutoAway.tcl:330
+msgid "Logout after"
+msgstr "Deconectare după"
+
+#. TRANSLATORS; Relogin when the user starts working again on the computer
+#: ../jabber/AutoAway.tcl:344
+msgid "Relogin on activity"
+msgstr "Reconectare la reluarea activităţii"
+
+#: ../jabber/AutoAway.tcl:361
+msgid "Apply auto-away on hidden chat tabs"
+msgstr "Activează absenţa automată pentru taburile de conversaţie ascunse"
+
+#: ../jabber/AutoAway.tcl:366
+msgid "If activated then directed auto-away presence will be sent to users on hidden chat tabs"
+msgstr "La activare, absenţa automată va fi semnalizată utilizatorilor din taburile de conversaţie ascunse"
+
+#. TRANSLATORS; this preference option automatically sets the user's presence to Do Not Disturb when he or she is chatting with too much contacts at the same moment (this number is configurable). There also is a delay until the presence is automatically changed back to the previous presence state when the number of active chats is down again.
+#: ../jabber/AutoAway.tcl:372
+msgid "Do Not Disturb when (active chat sessions)"
+msgstr "\"Nu deranjaţi\" atunci când (sesiuni de conversaţie active)"
+
+#: ../jabber/AutoAway.tcl:389
+msgid "When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb."
+msgstr "Când aveţi <număr> sau mai multe sesiuni de conversaţie active, indicatorul de prezenţă va fi schimbat automat la \"Nu deranjaţi\""
+
+#. TRANSLATORS; first Control Panel, then Avatar, then Open, then putting an asterisk (*) in the filter field, pressing return and trying to open a non-image file
+#: ../jabber/Avatar.tcl:366
+#: ../jabber/Disco.tcl:874
+#: ../jabber/RosterTree.tcl:870
+msgid "The supported image formats are"
+msgstr "Formatele de imagine suportate sunt"
+
+#: ../jabber/Avatar.tcl:374
+#, tcl-format
+msgid "Cannot create an image from %s."
+msgstr "Nu se poate crea o imagine din %s."
+
+#: ../jabber/Avatar.tcl:381
+#, tcl-format
+msgid "The avatar must be square of size %s."
+msgstr "Avatarul trebuie sa fie un pătrat cu latura de  %s pixeli."
+
+#: ../jabber/AvatarMB.tcl:523
+msgid "Recent Avatars"
+msgstr "Avatare recente"
+
+#: ../jabber/AvatarMB.tcl:573
+#: ../jabber/MUC.tcl:990
+#: ../whiteboard/Multicast.tcl:94
+msgid "Edit"
+msgstr "Editare"
+
+#: ../jabber/AvatarMB.tcl:578
+msgid "Clear Menu"
+msgstr "Reiniţializare meniu"
+
+#: ../jabber/AvatarMB.tcl:741
+#: ../jabber/VCard.tcl:412
+#: ../jabber/VCard.tcl:645
+msgid "Select Avatar"
+msgstr "Selectare avatar"
+
+#: ../jabber/Chat.tcl:311
+#: ../jabber/Chat.tcl:323
+#: ../jabber/Chat.tcl:2099
+#: ../jabber/Chat.tcl:3212
+#: ../jabber/Chat.tcl:4197
+#: ../jabber/JUI.tcl:1245
+msgid "Chat"
+msgstr "Conversaţie"
+
+#: ../jabber/Chat.tcl:341
+#: ../jabber/JUser.tcl:180
+#: ../jabber/JWB.tcl:450
+#: ../jabber/Login.tcl:172
+#: ../jabber/MUC.tcl:242
+#: ../jabber/Profiles.tcl:1090
+#: ../jabber/Subscribe.tcl:1087
+#: ../jabber/VCard.tcl:309
+msgid "Contact ID"
+msgstr "Identificator contact"
+
+#. TRANSLATORS; Control + T (or Command + T on Mac OS X), then enter @ and proceed
+#: ../jabber/Chat.tcl:405
+#: ../jabber/Chat.tcl:3121
+#: ../jabber/Disco.tcl:1783
+#: ../jabber/MUC.tcl:1248
+#, tcl-format
+msgid "%s is invalid. Do you want to continue anyway?"
+msgstr "%s este invalid. Doriţi sa continui?"
+
+#. TRANSLATORS; composing events in chat window
+#: ../jabber/Chat.tcl:673
+#: ../jabber/Chat.tcl:675
+#: ../jabber/Chat.tcl:3704
+#, tcl-format
+msgid "%s is composing a reply"
+msgstr "%s compune un răspuns"
+
+#: ../jabber/Chat.tcl:674
+#, tcl-format
+msgid "%s is on the chat"
+msgstr "%s este în conversaţie"
+
+#: ../jabber/Chat.tcl:676
+#, tcl-format
+msgid "%s is thinking what to write"
+msgstr "%s se gândeşte ce să scrie"
+
+#: ../jabber/Chat.tcl:677
+#, tcl-format
+msgid "%s has left the chat for a while"
+msgstr "%s a părăsit conversaţia pentru o vreme"
+
+#: ../jabber/Chat.tcl:678
+#, tcl-format
+msgid "%s has closed the chat"
+msgstr "%s a închis conversaţia"
+
+#: ../jabber/Chat.tcl:841
+#: ../jabber/Chat.tcl:1577
+#: ../jabber/GotMsg.tcl:261
+#: ../jabber/GroupChat.tcl:2365
+#: ../jabber/History.tcl:800
+#: ../jabber/MailBox.tcl:683
+#: ../jabber/NewMsg.tcl:367
+#: ../jabber/NewMsg.tcl:450
+msgid "Subject"
+msgstr "Subiect"
+
+#: ../jabber/Chat.tcl:1325
+#: ../jabber/FTrans.tcl:218
+#: ../jabber/GroupChat.tcl:658
+#: ../jabber/GroupChat.tcl:863
+#: ../jabber/NewMsg.tcl:302
+msgid "Send"
+msgstr "Trimite"
+
+#: ../jabber/Chat.tcl:1329
+#: ../jabber/FTrans.tcl:38
+#: ../jabber/FTrans.tcl:182
+msgid "Send File"
+msgstr "Trimite fişier"
+
+#: ../jabber/Chat.tcl:1333
+#: ../jabber/Chat.tcl:3286
+#: ../jabber/GroupChat.tcl:661
+#: ../jabber/GroupChat.tcl:3183
+#: ../jabber/History.tcl:998
+#: ../jabber/History.tcl:1351
+#: ../jabber/JUser.tcl:829
+#: ../jabber/Jabber.tcl:1960
+#: ../jabber/MailBox.tcl:508
+#: ../jabber/NewMsg.tcl:309
+#: ../jabber/Profiles.tcl:920
+#: ../jabber/UserInfo.tcl:406
+#: ../jabber/VCard.tcl:248
+#: ../lib/Bookmarks.tcl:122
+#: ../lib/Dialogs.tcl:339
+#: ../lib/EditDialogs.tcl:140
+#: ../lib/EditDialogs.tcl:284
+#: ../lib/Preferences.tcl:237
+#: ../whiteboard/CanvasFile.tcl:686
+#: ../whiteboard/FilePrefs.tcl:526
+#: ../whiteboard/ItemInspector.tcl:503
+#: ../whiteboard/ItemInspector.tcl:864
+msgid "Save"
+msgstr "Salvează"
+
+#. TRANSLATORS; history of past chat conversations
+#: ../jabber/Chat.tcl:1338
+#: ../jabber/GroupChat.tcl:664
+#: ../jabber/History.tcl:946
+msgid "History"
+msgstr "Istoric"
+
+#: ../jabber/Chat.tcl:1342
+#: ../jabber/GroupChat.tcl:673
+#: ../jabber/History.tcl:996
+#: ../jabber/MailBox.tcl:511
+#: ../jabber/NewMsg.tcl:312
+#: ../lib/Dialogs.tcl:103
+#: ../lib/Dialogs.tcl:115
+#: ../lib/Dialogs.tcl:130
+msgid "Print"
+msgstr "Tipăreşte"
+
+#: ../jabber/Chat.tcl:1352
+#: ../jabber/GroupChat.tcl:480
+#: ../jabber/GroupChat.tcl:667
+msgid "Invite"
+msgstr "Invită"
+
+#. TRANSLATORS; balloon mouse over texts in chat dialog
+#: ../jabber/Chat.tcl:1599
+msgid "Enter the subject of the conversation, set by pressing Return"
+msgstr "Introduceţi subiectul conversaţiei, setaţi tastând Return"
+
+#: ../jabber/Chat.tcl:1636
+msgid "Show or hide the chat history"
+msgstr "Arată sau ascunde istoricul conversaţiei"
+
+#: ../jabber/Chat.tcl:1637
+#: ../jabber/GroupChat.tcl:917
+msgid "If checked, Return sends message, else use Ctrl/Cmd-Return"
+msgstr "Dacă este setat, Return trimite mesaj; dacă nu, utilizaţi Ctrl/Cmd-Return"
+
+#: ../jabber/Chat.tcl:1638
+#: ../jabber/NewMsg.tcl:375
+msgid "Insert emoticon"
+msgstr "Inseraţi emoticon"
+
+#: ../jabber/Chat.tcl:1639
+#: ../jabber/GroupChat.tcl:919
+msgid "Show or hide status changes in chat"
+msgstr "Arată sau ascunde schimbările de stare în conversaţie"
+
+#: ../jabber/Chat.tcl:1730
+msgid "Enter your message and press Return or Shift-Return"
+msgstr "Introduceţi mesajul dvs. şi tastaţi Return sau Shift-Return"
+
+#. TRANSLATORS; Control + F (or Command + F on Mac OS X)
+#: ../jabber/Chat.tcl:1886
+#: ../jabber/GroupChat.tcl:1170
+#: ../jabber/History.tcl:1077
+#: ../jabber/JUI.tcl:254
+#: ../jabber/JUI.tcl:1791
+#: ../jabber/RosterTree.tcl:2081
+msgid "Find"
+msgstr "Găseşte"
+
+#: ../jabber/Chat.tcl:1888
+#: ../jabber/GroupChat.tcl:1172
+#: ../jabber/History.tcl:1080
+#: ../jabber/JUI.tcl:255
+#: ../jabber/JUI.tcl:1792
+#: ../jabber/RosterTree.tcl:2083
+msgid "Find Next"
+msgstr "Găseşte următorul"
+
+#: ../jabber/Chat.tcl:1889
+#: ../jabber/GroupChat.tcl:1173
+#: ../jabber/History.tcl:1081
+#: ../jabber/JUI.tcl:256
+#: ../jabber/JUI.tcl:1793
+#: ../jabber/RosterTree.tcl:2084
+msgid "Find Previous"
+msgstr "Găseşte precedentul"
+
+#: ../jabber/Chat.tcl:1961
+#: ../jabber/Create.tcl:723
+#: ../jabber/NewMsg.tcl:1066
+#: ../jabber/NewMsg.tcl:1097
+#: ../jabber/Profiles.tcl:983
+#: ../jabber/Profiles.tcl:1623
+#: ../jabber/Register.tcl:84
+#: ../lib/EditDialogs.tcl:226
+#: ../lib/Preferences.tcl:393
+#: ../lib/Preferences.tcl:454
+#: ../lib/Preferences.tcl:497
+#: ../whiteboard/CanvasFile.tcl:548
+msgid "Warning"
+msgstr "Avertizare"
+
+#: ../jabber/Chat.tcl:1962
+msgid "Do you want to invite this contact to a new chatroom?"
+msgstr "Doriţi să invitaţi acest contact într-o sală de conversaţie nouă?"
+
+#: ../jabber/Chat.tcl:2101
+#| msgid "Offline"
+msgid "Offline Chat"
+msgstr "Conversaţie neconectat"
+
+#: ../jabber/Chat.tcl:2239
+#: ../jabber/GroupChat.tcl:1239
+msgid "Close tab"
+msgstr "Închide tab"
+
+#: ../jabber/Chat.tcl:2557
+msgid "You need to be logged in to see the presence of this contact"
+msgstr "Trebuie să fiţi conectat pentru a vedea prezenţa acestui contact"
+
+#: ../jabber/Chat.tcl:2759
+msgid "Converting Chat into Conference"
+msgstr "Conversie conversaţie în conferinţă"
+
+#: ../jabber/Chat.tcl:2774
+#: ../jabber/Create.tcl:314
+#: ../jabber/Create.tcl:581
+#: ../jabber/GroupChat.tcl:366
+msgid "Cannot find any chatroom service."
+msgstr "Nu pot găsi nici un serviciu pentru sală de conversaţie."
+
+#: ../jabber/Chat.tcl:3073
+#: ../jabber/GroupChat.tcl:2721
+#: ../jabber/NewMsg.tcl:888
+msgid "Cannot send when not logged in."
+msgstr "Nu se poate trimite când nu sunteţi conectat."
+
+#: ../jabber/Chat.tcl:3564
+msgid "Do you want to close this chat window and lose the complete conversation?"
+msgstr "Doriţi să închideţi această fereastră de conversaţie şi să pierdeţi toată conversaţia?"
+
+#. TRANSLATORS; see Chat settings in preferences
+#: ../jabber/Chat.tcl:4220
+msgid "By default use active <Return> to send messages"
+msgstr "Implicit utilizaţi <Return> pentru a trimite mesaje"
+
+#: ../jabber/Chat.tcl:4222
+msgid "Show incoming messages in new window"
+msgstr "Arată mesajele primite în fereastră nouă"
+
+#: ../jabber/Chat.tcl:4224
+msgid "Treat normal messages as chat messages"
+msgstr "Tratează mesajele normale ca şi mesaje de conversaţie"
+
+#: ../jabber/Chat.tcl:4229
+msgid "Double click message in inbox"
+msgstr "Dublu click pe mesaj dintre mesajele primite"
+
+#: ../jabber/Chat.tcl:4230
+msgid "Open message in new window"
+msgstr "Deschide mesaj în fereastră nouă"
+
+#: ../jabber/Chat.tcl:4233
+msgid "Reply to sender"
+msgstr "Răspunde expeditorului"
+
+#: ../jabber/Chat.tcl:4240
+msgid "History length"
+msgstr "Lungime istoric"
+
+#: ../jabber/Chat.tcl:4243
+msgid "More recent than"
+msgstr "Mai recent decât"
+
+#: ../jabber/Chat.tcl:4246
+msgid "Ten seconds"
+msgstr "Zece secunde"
+
+#: ../jabber/Chat.tcl:4247
+msgid "One minute"
+msgstr "Un minut"
+
+#: ../jabber/Chat.tcl:4248
+msgid "Ten minutes"
+msgstr "Zece minute"
+
+#: ../jabber/Chat.tcl:4249
+msgid "One hour"
+msgstr "O oră"
+
+#: ../jabber/Chat.tcl:4250
+msgid "No restriction"
+msgstr "Fără limită"
+
+#: ../jabber/Chat.tcl:4260
+msgid "Number of messages to display"
+msgstr "Număr de mesaje de afişat"
+
+#. TRANSLATORS; the user's name that is showed in the in the user's chat dialog, but not on the screen of the remote contact
+#: ../jabber/Chat.tcl:4267
+msgid "Local nickname"
+msgstr "Pseudonim local"
+
+#: ../jabber/Chat.tcl:4272
+msgid "Your nickname for local display"
+msgstr "Pseudonimul dvs. care va fi afişat local"
+
+#: ../jabber/Create.tcl:57
+msgid "Create Chatroom"
+msgstr "Creează o sală de conversaţie"
+
+#: ../jabber/Create.tcl:81
+#: ../jabber/GroupChat.tcl:197
+#: ../whiteboard/WDialogs.tcl:202
+#: ../whiteboard/WDialogs.tcl:203
+#: ../whiteboard/WDialogs.tcl:204
+#: ../whiteboard/WDialogs.tcl:205
+#: ../whiteboard/WDialogs.tcl:213
+#: ../whiteboard/WDialogs.tcl:214
+msgid "not available"
+msgstr "indisponibil"
+
+#: ../jabber/Create.tcl:96
+msgid "Select a service, and enter a chatroom and nickname. Optionally, you can configure the chatroom."
+msgstr "Selectaţi un serviciu şi introduceţi un nume pentru sala de conversaţie si un pseudonim. Opţional, puteţi configura sala de conversaţie."
+
+#: ../jabber/Create.tcl:105
+#: ../jabber/Create.tcl:627
+#: ../jabber/Enter.tcl:128
+#: ../jabber/Register.tcl:1124
+#: ../jabber/Register.tcl:1451
+#: ../jabber/Search.tcl:154
+#: ../jabber/UserInfo.tcl:564
+msgid "Service"
+msgstr "Serviciu"
+
+#: ../jabber/Create.tcl:108
+#: ../jabber/Create.tcl:632
+#: ../jabber/Enter.tcl:162
+#: ../jabber/GroupChat.tcl:1548
+#: ../jabber/GroupChat.tcl:1551
+#: ../jabber/GroupChat.tcl:3463
+#: ../jabber/GroupChat.tcl:3665
+msgid "Chatroom"
+msgstr "Sala de conversaţie"
+
+#: ../jabber/Create.tcl:122
+#: ../jabber/Enter.tcl:186
+msgid "Select or manually enter a chatroom service"
+msgstr "Selectaţi sau introduceţi manual un serviciu pentru sala de conversaţie"
+
+#: ../jabber/Create.tcl:123
+#: ../jabber/Enter.tcl:188
+msgid "Select or manually enter the name of a chatroom"
+msgstr "Choisissez ou entrez manuellement le nom d'un salon de discussion"
+
+#: ../jabber/Create.tcl:124
+#: ../jabber/Enter.tcl:189
+#: ../jabber/GroupChat.tcl:3741
+#: ../jabber/JForms.tcl:305
+#: ../jabber/JUser.tcl:200
+#: ../jabber/Profiles.tcl:1134
+#: ../jabber/Register.tcl:716
+#: ../jabber/VCard.tcl:323
+msgid "Familiar name"
+msgstr "Nume familiar"
+
+#: ../jabber/Create.tcl:147
+#: ../jabber/GroupChat.tcl:670
+msgid "Configure"
+msgstr "Configurare"
+
+#: ../jabber/Create.tcl:149
+msgid "Create"
+msgstr "Creează"
+
+#: ../jabber/Create.tcl:319
+msgid "You must provide a chatroom name."
+msgstr "Trebuie să stabiliţi un nume pentru sala de conversaţie."
+
+#: ../jabber/Create.tcl:324
+msgid "You must provide a nickname."
+msgstr "Trebuie sa stabiliţi un pseudonim."
+
+#: ../jabber/Create.tcl:332
+#: ../jabber/Create.tcl:515
+#: ../jabber/JUser.tcl:294
+#: ../jabber/Profiles.tcl:1472
+msgid "Invalid Contact ID."
+msgstr "Identificator de contact invalid."
+
+#: ../jabber/Create.tcl:337
+msgid "Downloading configuration form"
+msgstr "Descarc formularul de configurare"
+
+#: ../jabber/Create.tcl:423
+#: ../jabber/Create.tcl:465
+#: ../jabber/Enter.tcl:646
+msgid "Cannot download the configuration form of the chatroom."
+msgstr "Nu pot descărca formularul de configurare al sălii de conversaţie."
+
+#: ../jabber/Create.tcl:425
+#: ../jabber/Create.tcl:467
+#: ../jabber/Create.tcl:545
+#: ../jabber/Create.tcl:753
+#: ../jabber/Enter.tcl:648
+#: ../jabber/Enter.tcl:691
+#: ../jabber/FTrans.tcl:502
+#: ../jabber/FTrans.tcl:534
+#: ../jabber/JUser.tcl:384
+#: ../jabber/Jabber.tcl:620
+#: ../jabber/Jabber.tcl:864
+#: ../jabber/Jabber.tcl:2038
+#: ../jabber/Login.tcl:983
+#: ../jabber/Login.tcl:1007
+#: ../jabber/Profiles.tcl:1662
+#: ../jabber/Register.tcl:120
+#: ../jabber/Register.tcl:660
+#: ../jabber/Register.tcl:1289
+#: ../jabber/Register.tcl:1354
+#: ../jabber/Register.tcl:1538
+#: ../jabber/Search.tcl:349
+#: ../jabber/Search.tcl:424
+#: ../lib/HttpTrpt.tcl:243
+msgid "Error code"
+msgstr "Cod de eroare"
+
+#: ../jabber/Create.tcl:433
+#: ../jabber/Register.tcl:1223
+msgid "Waiting for Get to be pressed"
+msgstr "Aştept să apăsaţi Preia"
+
+#: ../jabber/Create.tcl:543
+#, tcl-format
+msgid "Cannot enter/create chatroom %s."
+msgstr "Nu pot creea/intra în sala de conversaţie %s."
+
+#: ../jabber/Create.tcl:594
+msgid "Enter/Create Chatroom"
+msgstr "Creează/intră în sala de conversaţie"
+
+#: ../jabber/Create.tcl:624
+msgid "Select a chatroom service, a chatroom, and a nickname."
+msgstr "Selectaţi un serviciu pentru sala de conversaţie, o sală de conversaţie şi un pseudonim."
+
+#: ../jabber/Create.tcl:724
+#: ../jabber/Enter.tcl:493
+msgid "Please fill in all fields before entering chatroom."
+msgstr "Vă rugăm să completaţi toate câmpurile înainte de a intra în sala de conversaţie"
+
+#: ../jabber/Create.tcl:747
+#: ../jabber/Enter.tcl:685
+#, tcl-format
+msgid "Cannot enter chatroom %s."
+msgstr "Nu pot intra în sala de conversaţie %s."
+
+#: ../jabber/Disco.tcl:156
+#: ../jabber/GroupChat.tcl:222
+#: ../jabber/JUI.tcl:177
+#: ../jabber/JUI.tcl:1838
+#: ../jabber/JUI.tcl:1858
+#: ../jabber/Roster.tcl:121
+#: ../jabber/Roster.tcl:527
+#: ../jabber/Search.tcl:34
+#: ../jabber/Search.tcl:42
+msgid "Cha&t"
+msgstr "&Conversaţie"
+
+#: ../jabber/Disco.tcl:157
+#: ../jabber/JUI.tcl:185
+#: ../jabber/JUI.tcl:1840
+#: ../jabber/JUI.tcl:1860
+msgid "Enter Chat&room"
+msgstr "Intraţi în &sala de conversaţie"
+
+#: ../jabber/Disco.tcl:160
+#: ../jabber/JUI.tcl:186
+#: ../jabber/JUI.tcl:1841
+#: ../jabber/JUI.tcl:1861
+msgid "&Create Chatroom"
+msgstr "&Creează sala de conversaţie"
+
+#: ../jabber/Disco.tcl:164
+#: ../jabber/GroupChat.tcl:224
+#: ../jabber/Roster.tcl:126
+#: ../jabber/Roster.tcl:187
+#: ../jabber/Search.tcl:35
+#: ../jabber/Search.tcl:43
+msgid "View &Business Card"
+msgstr "Afişează &carte de vizită"
+
+#: ../jabber/Disco.tcl:166
+#: ../jabber/JUI.tcl:180
+#: ../jabber/JUI.tcl:1835
+#: ../jabber/JUI.tcl:1855
+msgid "&Search"
+msgstr "&Caută"
+
+#: ../jabber/Disco.tcl:169
+#: ../jabber/JUI.tcl:182
+#: ../jabber/JUI.tcl:1831
+#: ../jabber/JUI.tcl:1846
+msgid "Re&gister"
+msgstr "&Abonare"
+
+#: ../jabber/Disco.tcl:172
+#: ../jabber/Roster.tcl:194
+msgid "&Unregister"
+msgstr "&Dezabonare"
+
+#: ../jabber/Disco.tcl:174
+#: ../jabber/JUI.tcl:214
+#: ../jabber/JUI.tcl:1916
+#: ../jabber/JUI.tcl:1930
+#: ../jabber/Roster.tcl:132
+msgid "Show"
+msgstr "Afişare"
+
+#. TRANSLATORS; to set the background image in the main window
+#: ../jabber/Disco.tcl:176
+#: ../jabber/Roster.tcl:138
+msgid "&Background Image"
+msgstr "&Image de fond"
+
+#. TRANSLATORS; refresh the listed items
+#: ../jabber/Disco.tcl:179
+#: ../jabber/MUC.tcl:484
+#: ../jabber/Roster.tcl:144
+#: ../jabber/Roster.tcl:195
+msgid "Refresh"
+msgstr "Reîmprospătare"
+
+#. TRANSLATORS; look for available services on a server
+#: ../jabber/Disco.tcl:181
+#: ../jabber/JUI.tcl:183
+#: ../jabber/JUI.tcl:1843
+#: ../jabber/JUI.tcl:1863
+msgid "&Discover Server"
+msgstr "&Descoperă server"
+
+#: ../jabber/Disco.tcl:182
+msgid "Remove &Listing"
+msgstr "Elimină &lista"
+
+#: ../jabber/Disco.tcl:183
+msgid "C&ommands"
+msgstr "C&omenzi"
+
+#: ../jabber/Disco.tcl:187
+#: ../jabber/GroupChat.tcl:232
+#: ../jabber/JUI.tcl:192
+#: ../jabber/Roster.tcl:172
+msgid "&Whiteboard"
+msgstr "&Tablă de desen"
+
+#: ../jabber/Disco.tcl:789
+msgid "Services"
+msgstr "Servicii"
+
+#. TRANSLATORS: to set background image in services or contacts tab
+#: ../jabber/Disco.tcl:873
+#: ../jabber/RosterTree.tcl:869
+msgid "Select an image file for the background. To remove a background image press Remove and Save."
+msgstr "Alegeţi un fişier pentru imaginea de fond. Pentru a îndepărta o imagine de fond apăsaţi Elimină şi Salvează."
+
+#: ../jabber/Disco.tcl:881
+#: ../jabber/RosterTree.tcl:877
+msgid "Background Image"
+msgstr "Image de fond"
+
+#: ../jabber/Disco.tcl:1491
+#: ../jabber/Disco.tcl:1676
+#: ../jabber/Enter.tcl:131
+#: ../jabber/MUC.tcl:1616
+#: ../jabber/UserInfo.tcl:175
+msgid "Discover"
+msgstr "Descoperă"
+
+#: ../jabber/Disco.tcl:1622
+#: ../jabber/Disco.tcl:1637
+msgid "Discover Server"
+msgstr "Descoperă server"
+
+#: ../jabber/Disco.tcl:1650
+msgid "Enter a server to discover and use its services."
+msgstr "Introduceţi un server spre a fi descoperit şi a-i utiliza serviciile."
+
+#: ../jabber/Disco.tcl:1657
+#: ../jabber/JUI.tcl:531
+#: ../jabber/Login.tcl:175
+#: ../jabber/Profiles.tcl:1092
+#: ../jabber/Profiles.tcl:1881
+#: ../jabber/Register.tcl:274
+#: ../jabber/SetupAss.tcl:137
+#: ../jabber/SetupAss.tcl:165
+#: ../jabber/StatusSlot.tcl:34
+#: ../whiteboard/WDialogs.tcl:172
+msgid "Server"
+msgstr "Server"
+
+#: ../jabber/Disco.tcl:1665
+msgid "Discover permanently"
+msgstr "Descoperă permanent"
+
+#. TRANSLATORS; see Emoticons in preferences
+#: ../jabber/Emoticons.tcl:598
+msgid "Author"
+msgstr "Autor"
+
+#: ../jabber/Emoticons.tcl:600
+#: ../jabber/VCard.tcl:450
+msgid "Home"
+msgstr "Domiciliu"
+
+#: ../jabber/Emoticons.tcl:602
+#: ../jabber/Jabber.tcl:1701
+#: ../jabber/Jabber.tcl:1712
+#: ../jabber/Roster.tcl:190
+#: ../jabber/UserInfo.tcl:211
+#: ../jabber/UserInfo.tcl:220
+#: ../jabber/UserInfo.tcl:225
+#: ../whiteboard/WDialogs.tcl:133
+msgid "Version"
+msgstr "Versiune"
+
+#: ../jabber/Emoticons.tcl:615
+#: ../whiteboard/ItemInspector.tcl:369
+msgid "Image"
+msgstr "Imagine"
+
+#: ../jabber/Emoticons.tcl:639
+#: ../jabber/Emoticons.tcl:835
+msgid "Iconset Archive"
+msgstr "Arhivă de seturi de icoane"
+
+#: ../jabber/Emoticons.tcl:641
+#: ../jabber/Emoticons.tcl:775
+#: ../jabber/Emoticons.tcl:837
+msgid "Import Iconset"
+msgstr "Importă un set de icoane"
+
+#: ../jabber/Emoticons.tcl:715
+msgid "Emoticons"
+msgstr "Emoticoane"
+
+#: ../jabber/Emoticons.tcl:741
+msgid "The selected iconset will become the default."
+msgstr "Setul de icoane selectat va deveni cel implicit."
+
+#: ../jabber/Emoticons.tcl:813
+#: ../jabber/Emoticons.tcl:861
+#, tcl-format
+msgid "Cannot load iconset %s."
+msgstr "Nu pot încărca setul de icoane %s."
+
+#: ../jabber/Emoticons.tcl:852
+#, tcl-format
+msgid "Iconset %s already exists."
+msgstr "Setul de icoane %s există deja."
+
+#: ../jabber/Enter.tcl:78
+msgid "Enter Chatroom"
+msgstr "Intraţi în sala de conversaţie"
+
+#: ../jabber/Enter.tcl:117
+msgid "Select a service, and enter a chatroom and nickname. You can discover the available chatrooms on the selected service. Some chatrooms may require a password."
+msgstr "Selectaţi un serviciu şi introduceţi o sală de conversaţie şi un pseudonim. Puteţi descoperi sălile de discuţie disponibile pentru serviciul selectat. Unele săli de conversaţi pot cere o parolă."
+
+#: ../jabber/Enter.tcl:166
+#: ../jabber/GroupChat.tcl:3464
+#: ../jabber/Login.tcl:183
+#: ../jabber/Login.tcl:700
+#: ../jabber/Login.tcl:702
+#: ../jabber/Login.tcl:767
+#: ../jabber/Login.tcl:769
+#: ../jabber/Profiles.tcl:1098
+#: ../jabber/Register.tcl:1458
+#: ../jabber/SetupAss.tcl:168
+#: ../lib/Proxy.tcl:211
+msgid "Password"
+msgstr "Parola"
+
+#: ../jabber/Enter.tcl:187
+#: ../jabber/Enter.tcl:261
+msgid "Bookmarks"
+msgstr "Marcaje"
+
+#: ../jabber/Enter.tcl:190
+#: ../jabber/JForms.tcl:306
+#: ../jabber/Login.tcl:228
+#: ../jabber/Profiles.tcl:1133
+#: ../jabber/Register.tcl:717
+msgid "Password or secret"
+msgstr "Parolă sau secret"
+
+#: ../jabber/Enter.tcl:403
+#: ../jabber/Enter.tcl:453
+#, tcl-format
+msgid "Cannot find any chatrooms at %s."
+msgstr "Nu pot găsi nici o sală de conversaţie la %s."
+
+#: ../jabber/Enter.tcl:469
+msgid "Loading available chatrooms"
+msgstr "Încarc sălile de conversaţie disponibile"
+
+#: ../jabber/Enter.tcl:638
+#, tcl-format
+msgid "Cannot enter chatroom %s: %s Do you want to retry?"
+msgstr "Nu pot intra în sala de conversaţie %s : %s. Doriţi să mai încerc?"
+
+#: ../jabber/FTrans.tcl:195
+#, tcl-format
+msgid "Send a file to %s. A description is optional."
+msgstr "Trimiteţi un fişier la %s. O descirere este opţională."
+
+#: ../jabber/FTrans.tcl:201
+#: ../jabber/FTrans.tcl:284
+msgid "Select File"
+msgstr "Selecţie fişier"
+
+#: ../jabber/FTrans.tcl:372
+#: ../jabber/FTrans.tcl:408
+#: ../jabber/FTrans.tcl:459
+#, tcl-format
+msgid "%s does not support file transfer."
+msgstr "%s nu permite transferul de fişiere."
+
+#: ../jabber/FTrans.tcl:379
+#, fuzzy
+msgid "Waiting for disco result"
+msgstr "Aştept rezultatele explorării"
+
+#: ../jabber/FTrans.tcl:442
+msgid "You must select a file to send."
+msgstr "Trebuie să selectaţi un fişier pentru transmisie."
+
+#: ../jabber/FTrans.tcl:447
+msgid "The selected file does not exist. Select a new one."
+msgstr "Fişierul selectat nu există. Alegeţi unul nou."
+
+#: ../jabber/FTrans.tcl:497
+#: ../jabber/FTrans.tcl:529
+#, tcl-format
+msgid "%s did not accepted the file %s."
+msgstr "%s nu a acceptat fişierul %s."
+
+#: ../jabber/FTrans.tcl:500
+#: ../jabber/FTrans.tcl:532
+#, tcl-format
+msgid "Cannot send the file %s to %s."
+msgstr "Nu pot transmite fişierul %s la %s."
+
+#: ../jabber/FTrans.tcl:513
+#: ../jabber/FTrans.tcl:543
+msgid "File Transfer"
+msgstr "Transfer de fişiere"
+
+#: ../jabber/FTrans.tcl:514
+#: ../jabber/FTrans.tcl:544
+#, tcl-format
+msgid "File transfer of %s to %s was successful."
+msgstr "Transferul de fişiere %s la %s a avut succes."
+
+#: ../jabber/FTrans.tcl:654
+#: ../lib/HttpTrpt.tcl:181
+msgid "Rate"
+msgstr "Debit"
+
+#: ../jabber/FTrans.tcl:658
+#: ../lib/HttpTrpt.tcl:162
+#: ../whiteboard/GetFileIface.tcl:513
+msgid "Writing file"
+msgstr "Scriu fişier"
+
+#: ../jabber/FTrans.tcl:678
+#, tcl-format
+msgid "Cannot download file %s from %s."
+msgstr "Nu pot descărca fişierul %s de la %s."
+
+#: ../jabber/FTrans.tcl:694
+msgid "The MD5 checksums did not match. The file may be corrupt."
+msgstr "Sumele de control MD5 sunt diferite. Fişierul poate fi compromis."
+
+#: ../jabber/Gateway.tcl:63
+#: ../jabber/Rosticons.tcl:587
+#: ../jabber/Search.tcl:936
+#: ../jabber/VCard.tcl:308
+msgid "Email"
+msgstr "Email"
+
+#. TRANSLATORS; AOL AIM address
+#: ../jabber/Gateway.tcl:73
+msgid "Screen name"
+msgstr "Nume de utilizator"
+
+#: ../jabber/Gateway.tcl:76
+msgid "Gadu-Gadu number"
+msgstr "Număr Gadu-Gadu"
+
+#. TRANSLATORS; also known as UIN
+#: ../jabber/Gateway.tcl:78
+msgid "ICQ number"
+msgstr "Număr ICQ"
+
+#: ../jabber/Gateway.tcl:79
+msgid "IRC"
+msgstr "IRC"
+
+#: ../jabber/Gateway.tcl:80
+#: ../jabber/Gateway.tcl:86
+#: ../jabber/JForms.tcl:300
+#: ../jabber/Register.tcl:711
+#: ../jabber/VCard.tcl:324
+msgid "Email address"
+msgstr "Adresa email"
+
+#: ../jabber/Gateway.tcl:81
+msgid "MSN Address"
+msgstr "Adresa MSN"
+
+#: ../jabber/Gateway.tcl:87
+msgid "QQ number"
+msgstr "Număr QQ"
+
+#: ../jabber/Gateway.tcl:88
+msgid "Tlen address"
+msgstr "Adresa Tlen"
+
+#: ../jabber/Gateway.tcl:90
+msgid "Twitter user"
+msgstr ""
+
+#: ../jabber/Gateway.tcl:91
+#: ../jabber/JUser.tcl:193
+#: ../jabber/Login.tcl:227
+#: ../jabber/Profiles.tcl:1132
+#: ../jabber/VCard.tcl:322
+msgid "Chat address"
+msgstr "Adresa chat"
+
+#: ../jabber/Gateway.tcl:92
+msgid "Yahoo ID"
+msgstr "ID Yahoo"
+
+#. TRANSLATORS; Window title of popup dialog when receiving a message (instead of a chat message!)
+#: ../jabber/GotMsg.tcl:209
+msgid "Incoming Message"
+msgstr "Mesaj de intrare"
+
+#: ../jabber/GotMsg.tcl:227
+#: ../jabber/MailBox.tcl:505
+msgid "Forward"
+msgstr "Redirectare"
+
+#: ../jabber/GotMsg.tcl:229
+#: ../jabber/MailBox.tcl:502
+msgid "Reply"
+msgstr "Răspuns"
+
+#: ../jabber/GotMsg.tcl:239
+msgid "Show incoming messages in this window"
+msgstr "Afişează mesajele de intrare în această fereastră"
+
+#: ../jabber/GotMsg.tcl:251
+#: ../jabber/MailBox.tcl:686
+#: ../jabber/NewMsg.tcl:442
+msgid "From"
+msgstr "De la"
+
+#: ../jabber/GroupChat.tcl:172
+msgid "Moderators"
+msgstr "Moderatori"
+
+#: ../jabber/GroupChat.tcl:174
+msgid "Participants"
+msgstr "Participanti"
+
+#: ../jabber/GroupChat.tcl:175
+msgid "Visitors"
+msgstr "Vizitatori"
+
+#: ../jabber/GroupChat.tcl:187
+msgid "available"
+msgstr "disponibil"
+
+#. TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a short moment
+#: ../jabber/GroupChat.tcl:189
+msgid "away"
+msgstr "absent"
+
+#: ../jabber/GroupChat.tcl:190
+msgid "free for chat"
+msgstr "liber pentru conversaţie"
+
+#. TRANSLATORS; presence state when the user don't wants to be interrupted, except in really urgent circumstances
+#: ../jabber/GroupChat.tcl:192
+msgid "do not disturb"
+msgstr "nu deranjaţi"
+
+#. TRANSLATORS; presence state when the user is not physically available at his/her computer or device, for a longer period
+#: ../jabber/GroupChat.tcl:194
+msgid "extended away"
+msgstr "indisponibil"
+
+#. TRANSLATORS; presence state when the user is available, but not visible as available to her or his contacts
+#: ../jabber/GroupChat.tcl:196
+msgid "invisible"
+msgstr "invisibil"
+
+#: ../jabber/GroupChat.tcl:223
+#: ../jabber/Roster.tcl:123
+msgid "Send &File"
+msgstr "Trimite &fişier"
+
+#: ../jabber/GroupChat.tcl:225
+msgid "&Edit Nickname"
+msgstr "&Editează pseudonim"
+
+#: ../jabber/GroupChat.tcl:226
+msgid "&Ignore"
+msgstr "&Ignoră"
+
+#: ../jabber/GroupChat.tcl:478
+#, tcl-format
+msgid "%s invited you to %s. Do you want to enter this chatroom?"
+msgstr "%s v-a invitat la %s. Doriţi să intraţi în această sală de conversaţie?"
+
+#: ../jabber/GroupChat.tcl:918
+msgid "Bookmark this chatroom"
+msgstr "Marchează această sală de conversaţie"
+
+#. TRANSLATORS; subject of a chatroom discussion with multiple people
+#: ../jabber/GroupChat.tcl:926
+msgid "Topic"
+msgstr "Topic"
+
+#: ../jabber/GroupChat.tcl:1508
+msgid "You logged out and exited the chatroom"
+msgstr "V-aţi deconectat şi aţi ieşit din sala de conversaţie"
+
+#: ../jabber/GroupChat.tcl:2537
+#, tcl-format
+msgid "Do you want to exit the chatroom %s?"
+msgstr "Doriţi să ieşiţi din sala de conversaţie %s ?"
+
+#: ../jabber/GroupChat.tcl:2708
+#: ../jabber/MUC.tcl:1715
+#: ../jabber/MUC.tcl:1738
+#, tcl-format
+msgid "Cannot interact with the chatroom %s."
+msgstr "Nu pot contacta sala de conversaţie %s."
+
+#: ../jabber/GroupChat.tcl:3465
+msgid "Auto Join"
+msgstr "Legare automată"
+
+#: ../jabber/GroupChat.tcl:3690
+msgid "Synchronize chatroom presence with global presence"
+msgstr "Sincronizează prezenţa în sala de conversaţie cu prezenţa globală"
+
+#: ../jabber/GroupChat.tcl:3699
+msgid "Custom Colors"
+msgstr "Culori personalizate"
+
+#. TRANSLATORS; in preferences; use different colors for different chatroom participants
+#: ../jabber/GroupChat.tcl:3704
+msgid "Enable nickname coloring"
+msgstr "Activaţi colorarea pseudonimului"
+
+#: ../jabber/GroupChat.tcl:3734
+msgid "Default nickname"
+msgstr "Pseudonim implicit"
+
+#: ../jabber/GroupChat.tcl:3754
+msgid "Choose Color"
+msgstr "Alegere culoare"
+
+#. TRANSLATORS; this string shows when a new conversation thread has been started
+#: ../jabber/History.tcl:840
+#: ../jabber/History.tcl:1160
+msgid "Thread started"
+msgstr "Fir de discuţie pornit"
+
+#: ../jabber/History.tcl:853
+msgid "You entered the chatroom"
+msgstr "Aţi intrat în sala de conversaţie"
+
+#: ../jabber/History.tcl:859
+msgid "Exit chatroom"
+msgstr "Ieşire sală de conversaţie"
+
+#: ../jabber/History.tcl:1042
+msgid "No registered history for"
+msgstr "Nu există istoric înregistrat pentru"
+
+#: ../jabber/JForms.tcl:269
+msgid "You are already registered with this service. These are your current registration settings."
+msgstr "Sunteţi deja înregistrat la acest serviciu. Aici sunt setările dvs. de înregistrare curente."
+
+#: ../jabber/JForms.tcl:297
+#: ../jabber/Register.tcl:708
+msgid "Street portion of a physical or mailing address"
+msgstr "Strada dintr-o adresă fizică sau poştală"
+
+#: ../jabber/JForms.tcl:298
+#: ../jabber/Register.tcl:709
+msgid "Locality portion of a physical or mailing address"
+msgstr "Localitatea dintr-o adresă fizică sau poştală"
+
+#: ../jabber/JForms.tcl:299
+#: ../jabber/Register.tcl:710
+msgid "Some date (e.g., birth date, hire date, sign-up date)"
+msgstr "O dată calendaristică (ex. data naşterii, data închirierii, data înregistrării)"
+
+#: ../jabber/JForms.tcl:301
+#: ../jabber/Register.tcl:712
+msgid "First name or given name"
+msgstr "Prenume"
+
+#: ../jabber/JForms.tcl:302
+#: ../jabber/Register.tcl:713
+#: ../jabber/Register.tcl:796
+msgid "You are already registered with this service. These are your current login settings."
+msgstr "Sunteţi deja înregistrat la acest serviciu. Aici sunt datele dvs. de conectare curente."
+
+#: ../jabber/JForms.tcl:303
+#: ../jabber/Register.tcl:714
+msgid "Last name, surname, or family name"
+msgstr "Nume de familie"
+
+#: ../jabber/JForms.tcl:304
+#: ../jabber/Register.tcl:715
+msgid "Full name"
+msgstr "Nume complet"
+
+#: ../jabber/JForms.tcl:307
+#: ../jabber/Register.tcl:718
+msgid "Telephone number"
+msgstr "Număr de telefon"
+
+#: ../jabber/JForms.tcl:309
+#: ../jabber/Register.tcl:720
+#: ../jabber/VCard.tcl:389
+msgid "URL to personal website"
+msgstr "URL sit web personal"
+
+#: ../jabber/JForms.tcl:310
+#: ../jabber/Register.tcl:721
+msgid "Account name associated with the user"
+msgstr "Nume de cont asociat cu utilizatorul"
+
+#: ../jabber/JForms.tcl:311
+#: ../jabber/Register.tcl:722
+msgid "Postal code portion of a physical or mailing address"
+msgstr "Cod poştal"
+
+#: ../jabber/JForms.tcl:467
+msgid "Labels with (*) are required."
+msgstr "Parametrii cu (*) sunt obligatorii."
+
+#. TRANSLATORS; see preferences
+#: ../jabber/JPrefs.tcl:110
+#: ../jabber/JPrefs.tcl:177
+msgid "Appearance"
+msgstr "Aspect"
+
+#: ../jabber/JPrefs.tcl:111
+#: ../jabber/JPrefs.tcl:289
+msgid "Customization"
+msgstr "Personalizare"
+
+#: ../jabber/JPrefs.tcl:188
+msgid "Use tabbed interface"
+msgstr "Interfaţă cu taburi"
+
+#: ../jabber/JPrefs.tcl:192
+msgid "Chat window"
+msgstr "Fereastră de discuţie"
+
+#: ../jabber/JPrefs.tcl:196
+msgid "Theme"
+msgstr "Temă"
+
+#: ../jabber/JPrefs.tcl:202
+#: ../jabber/SetupAss.tcl:127
+#: ../lib/PrefGeneral.tcl:105
+#: ../lib/PrefGeneral.tcl:117
+#: ../whiteboard/Plugins.tcl:1347
+#, tcl-format
+msgid "Requires a restart of %s"
+msgstr "Necesită restart după %s"
+
+#: ../jabber/JPrefs.tcl:208
+msgid "Skin"
+msgstr "Aspect"
+
+#: ../jabber/JPrefs.tcl:234
+msgid "Windows opacity"
+msgstr "Opacitate ferestre"
+
+#: ../jabber/JPrefs.tcl:300
+msgid "Save message inbox between sessions"
+msgstr "Salvează cutia poştală cu mesaje primite între sesiuni"
+
+#: ../jabber/JPrefs.tcl:302
+#, tcl-format
+msgid "Login on %s startup"
+msgstr "Conectare la %s la pornire"
+
+#: ../jabber/JPrefs.tcl:304
+msgid "Remember open windows between sessions"
+msgstr "Memorează ferestrele deschise între sesiuni"
+
+#: ../jabber/JPrefs.tcl:307
+msgid "Show notifier window"
+msgstr "Afişează fereastra de notificări"
+
+#: ../jabber/JUI.tcl:144
+#: ../jabber/JUI.tcl:1726
+#: ../jabber/JUI.tcl:1730
+#: ../jabber/JUI.tcl:1742
+#: ../jabber/JUI.tcl:1745
+msgid "&New Account"
+msgstr "&Cont nou"
+
+#: ../jabber/JUI.tcl:145
+#: ../jabber/JUI.tcl:1731
+#: ../jabber/JUI.tcl:1750
+msgid "&Remove Account"
+msgstr "&Sterge cont"
+
+#: ../jabber/JUI.tcl:146
+#: ../jabber/JUI.tcl:1732
+#: ../jabber/JUI.tcl:1747
+msgid "New P&assword"
+msgstr "&Parolă nouă"
+
+#: ../jabber/JUI.tcl:147
+#: ../jabber/JUI.tcl:1727
+#: ../jabber/JUI.tcl:1733
+#: ../jabber/JUI.tcl:1748
+msgid "&Setup Assistant"
+msgstr "Asistent de &configurare"
+
+#: ../jabber/JUI.tcl:149
+#: ../jabber/JUI.tcl:1734
+#: ../jabber/JUI.tcl:1741
+#: ../jabber/JUI.tcl:1744
+msgid "&Edit Profiles"
+msgstr "&Editor profiluri"
+
+#: ../jabber/JUI.tcl:150
+#: ../jabber/JUI.tcl:1735
+#: ../jabber/JUI.tcl:1749
+msgid "Edit &Business Card"
+msgstr "Editor &carte de vizită"
+
+#: ../jabber/JUI.tcl:152
+#: ../whiteboard/WBPrefs.tcl:185
+msgid "Import"
+msgstr "Import"
+
+#: ../jabber/JUI.tcl:153
+msgid "Icon &Set"
+msgstr "&Set de icoane"
+
+#: ../jabber/JUI.tcl:154
+#: ../jabber/JUI.tcl:159
+#: ../jabber/JUI.tcl:1715
+#: ../jabber/JUI.tcl:1718
+#: ../jabber/JUI.tcl:1737
+#: ../jabber/RosterTree.tcl:2067
+#: ../jabber/UserInfo.tcl:661
+#: ../jabber/VCard.tcl:800
+msgid "&Business Card"
+msgstr "&Carte de vizită"
+
+#: ../jabber/JUI.tcl:156
+#: ../jabber/UserInfo.tcl:418
+#: ../jabber/VCard.tcl:264
+msgid "Export"
+msgstr "Export"
+
+#: ../jabber/JUI.tcl:157
+msgid "&Contacts"
+msgstr "&Contacte"
+
+#: ../jabber/JUI.tcl:158
+#: ../jabber/JUI.tcl:202
+msgid "&Inbox"
+msgstr "&Mesaje"
+
+#: ../jabber/JUI.tcl:163
+#: ../jabber/JUI.tcl:1706
+#: ../jabber/JUI.tcl:1709
+#: ../jabber/JWB.tcl:161
+#: ../whiteboard/Whiteboard.tcl:424
+#: ../whiteboard/Whiteboard.tcl:608
+msgid "&Close Window"
+msgstr "&Închide fereastra"
+
+#: ../jabber/JUI.tcl:173
+#: ../jabber/JUI.tcl:1229
+#: ../jabber/JUI.tcl:1849
+#: ../jabber/JUI.tcl:1852
+#: ../jabber/JUI.tcl:2007
+#: ../jabber/Login.tcl:115
+#: ../jabber/Login.tcl:128
+#: ../jabber/Login.tcl:271
+#: ../jabber/Profiles.tcl:1852
+msgid "Login"
+msgstr "Conectare"
+
+#: ../jabber/JUI.tcl:174
+#: ../jabber/JUI.tcl:1834
+#: ../jabber/JUI.tcl:1854
+#: ../jabber/Jabber.tcl:2113
+#: ../jabber/Jabber.tcl:2125
+msgid "Logout With Message"
+msgstr "Deconectare cu mesaj"
+
+#: ../jabber/JUI.tcl:187
+#: ../jabber/JUI.tcl:1842
+#: ../jabber/JUI.tcl:1862
+msgid "Edit &Bookmarks"
+msgstr "Editare &marcaje"
+
+#: ../jabber/JUI.tcl:204
+msgid "Font Size"
+msgstr "Dimensiune font"
+
+#: ../jabber/JUI.tcl:207
+#: ../whiteboard/Whiteboard.tcl:457
+#: ../whiteboard/Whiteboard.tcl:2943
+#: ../whiteboard/Whiteboard.tcl:2965
+#: ../whiteboard/Whiteboard.tcl:2968
+msgid "Larger"
+msgstr "Mai mare"
+
+#: ../jabber/JUI.tcl:209
+msgid "Large"
+msgstr "Mare"
+
+#: ../jabber/JUI.tcl:211
+msgid "Huge"
+msgstr "Foarte mare"
+
+#: ../jabber/JUI.tcl:215
+msgid "Tool&bar"
+msgstr "&Bară de utilităţi"
+
+#: ../jabber/JUI.tcl:217
+msgid "&Tabs"
+msgstr "&Taburi"
+
+#: ../jabber/JUI.tcl:220
+msgid "Control Panel"
+msgstr "Panou de control"
+
+#: ../jabber/JUI.tcl:222
+msgid "&Error Log"
+msgstr "&Log erori"
+
+#: ../jabber/JUI.tcl:223
+msgid "&Debug"
+msgstr "&Debug"
+
+#: ../jabber/JUI.tcl:231
+#: ../jabber/JUI.tcl:826
+#: ../jabber/JUI.tcl:998
+#: ../jabber/JUI.tcl:1940
+msgid "Show Control Panel"
+msgstr "Afişează panoul de control"
+
+#: ../jabber/JUI.tcl:238
+#: ../whiteboard/Whiteboard.tcl:414
+#: ../whiteboard/Whiteboard.tcl:416
+#, tcl-format
+msgid "&About %s"
+msgstr "&Despre %s"
+
+#: ../jabber/JUI.tcl:245
+#: ../jabber/JUI.tcl:1773
+#: ../jabber/JUI.tcl:1782
+#: ../whiteboard/Whiteboard.tcl:443
+#: ../whiteboard/Whiteboard.tcl:2897
+#: ../whiteboard/Whiteboard.tcl:2899
+msgid "&Undo"
+msgstr "&Anulează"
+
+#: ../jabber/JUI.tcl:246
+#: ../jabber/JUI.tcl:1774
+#: ../jabber/JUI.tcl:1784
+#: ../whiteboard/Whiteboard.tcl:444
+#: ../whiteboard/Whiteboard.tcl:2902
+#: ../whiteboard/Whiteboard.tcl:2904
+msgid "Re&do"
+msgstr "&Reface"
+
+#: ../jabber/JUI.tcl:248
+#: ../whiteboard/Whiteboard.tcl:446
+#: ../whiteboard/Whiteboard.tcl:613
+#: ../whiteboard/Whiteboard.tcl:2910
+#: ../whiteboard/Whiteboard.tcl:2912
+#: ../whiteboard/Whiteboard.tcl:2916
+#: ../whiteboard/Whiteboard.tcl:2919
+msgid "Cu&t"
+msgstr "&Taie"
+
+#: ../jabber/JUI.tcl:249
+#: ../jabber/RosterTree.tcl:1837
+#: ../whiteboard/Whiteboard.tcl:447
+#: ../whiteboard/Whiteboard.tcl:614
+#: ../whiteboard/Whiteboard.tcl:2914
+#: ../whiteboard/Whiteboard.tcl:2917
+#: ../whiteboard/Whiteboard.tcl:2920
+msgid "&Copy"
+msgstr "&Copiază"
+
+#: ../jabber/JUI.tcl:250
+#: ../whiteboard/Whiteboard.tcl:448
+#: ../whiteboard/Whiteboard.tcl:615
+#: ../whiteboard/Whiteboard.tcl:2923
+#: ../whiteboard/Whiteboard.tcl:2925
+#: ../whiteboard/Whiteboard.tcl:2927
+msgid "&Paste"
+msgstr "&Lipeşte"
+
+#: ../jabber/JUI.tcl:252
+#: ../jabber/JUI.tcl:1772
+#: ../jabber/JUI.tcl:1780
+#: ../jabber/JUI.tcl:1787
+#: ../jabber/Subscribe.tcl:1091
+msgid "All"
+msgstr "Tot"
+
+#: ../jabber/JUI.tcl:485
+#: ../jabber/Roster.tcl:1589
+msgid "Contacts"
+msgstr "Contacte"
+
+#. TRANSLATORS; right mouse click menu (on arrow) in control panel (bottom of main window): status info slot
+#: ../jabber/JUI.tcl:529
+#: ../jabber/StatusSlot.tcl:32
+msgid "Own Contact ID"
+msgstr "ID-ul meu de contact"
+
+#: ../jabber/JUI.tcl:530
+#: ../jabber/StatusSlot.tcl:33
+msgid "Own Full Contact ID"
+msgstr "ID-ul meu de contact complet"
+
+#: ../jabber/JUI.tcl:606
+msgid "Displays your Contact ID or nickname"
+msgstr "Afişează ID-ul dvs. de contact sau pseudonimul"
+
+#: ../jabber/JUI.tcl:607
+#: ../jabber/JUI.tcl:613
+msgid "Set your status message"
+msgstr "Setează mesajul dvs. de stare"
+
+#: ../jabber/JUI.tcl:992
+#: ../jabber/JUI.tcl:1937
+msgid "Hide Control Panel"
+msgstr "Ascunde panoul de control"
+
+#: ../jabber/JUI.tcl:1233
+#: ../jabber/JUI.tcl:1237
+#: ../jabber/MailBox.tcl:465
+#: ../jabber/MailBox.tcl:1955
+msgid "Inbox"
+msgstr "Mesaje"
+
+#: ../jabber/JUI.tcl:1241
+msgid "Contact"
+msgstr "Contact"
+
+#: ../jabber/JUI.tcl:1244
+#: ../jabber/JUser.tcl:101
+#: ../jabber/JUser.tcl:152
+msgid "Add Contact"
+msgstr "Adaugă un contact"
+
+#: ../jabber/JUI.tcl:1265
+#: ../whiteboard/Whiteboard.tcl:2207
+msgid "&File"
+msgstr "&Fişier"
+
+#: ../jabber/JUI.tcl:1266
+msgid "&Action"
+msgstr "&Acţiune"
+
+#: ../jabber/JUI.tcl:1268
+#: ../lib/EditDialogs.tcl:126
+#: ../whiteboard/Whiteboard.tcl:2210
+msgid "&Edit"
+msgstr "&Editare"
+
+#. TRANSLATORS; code for these strings is not finished
+#: ../jabber/JUI.tcl:1536
+msgid "The connection is secure"
+msgstr "Conexiunea este securizată"
+
+#: ../jabber/JUI.tcl:1540
+msgid "The connection is medium secure"
+msgstr "Conexiunea are securitate medie"
+
+#: ../jabber/JUI.tcl:1544
+msgid "The connection is insecure"
+msgstr "Conexiunea este nesecurizată"
+
+#: ../jabber/JUI.tcl:1586
+msgid "Logged out"
+msgstr "Deconectat"
+
+#: ../jabber/JUI.tcl:1828
+#: ../jabber/JUI.tcl:1833
+#: ../jabber/JUI.tcl:1997
+#: ../jabber/Jabber.tcl:2153
+msgid "Logout"
+msgstr "Deconectare"
+
+#: ../jabber/JUI.tcl:1988
+#: ../jabber/Login.tcl:670
+msgid "Stop"
+msgstr "Stop"
+
+#: ../jabber/JUser.tcl:163
+msgid "Select the chat system and contact ID of the contact you would like to add."
+msgstr "Selectaţi sistemul de conversaţie şi ID-ul contactului pe care doriţi să-l adăugaţi."
+
+#: ../jabber/JUser.tcl:165
+msgid "Nickname and group are optional and can be set or changed later."
+msgstr "Pseudonimul şi grupul sunt opţionale şi pot fi setate sau schimbate mai târziu."
+
+#: ../jabber/JUser.tcl:177
+msgid "Chat system"
+msgstr "Sistem de conversaţie"
+
+#: ../jabber/JUser.tcl:201
+msgid "Group to which this contact should belong to"
+msgstr "Grup la care acest contact ar trebui să aparţină"
+
+#: ../jabber/JUser.tcl:228
+#: ../jabber/MUC.tcl:988
+#: ../lib/EditDialogs.tcl:119
+#: ../lib/EditDialogs.tcl:279
+#: ../whiteboard/Multicast.tcl:96
+msgid "Add"
+msgstr "Adaugă"
+
+#: ../jabber/JUser.tcl:302
+#: ../jabber/Search.tcl:257
+#: ../jabber/Search.tcl:770
+#, tcl-format
+msgid "%s is already in your list. Do you want to continue anyway?"
+msgstr "%s se află deja în lista dvs. de contacte. Doriţi totuşi să continuaţi?"
+
+#: ../jabber/JUser.tcl:323
+#: ../jabber/JUser.tcl:477
+#: ../jabber/JUser.tcl:534
+#, tcl-format
+msgid "To add a contact from a chat system without open federation, you need an account on this closed system, plus you need to register this account with the corresponding transport (%s). Do you want to do this now?"
+msgstr "Pentru a adăuga un contact dintr-un sistem de conversaţie nefederal, trebuie să creaţi un cont pe acest sistem închis şi trebuie să înregistraţi acest cont cu transportul corespunzător (%s). Doriţi să faceţi asta acum?"
+
+#: ../jabber/JUser.tcl:382
+#, tcl-format
+msgid "Cannot set %s's nickname or group."
+msgstr "Nu pot seta pseudonimul sau grupul pentru %s."
+
+#: ../jabber/JUser.tcl:591
+#: ../jabber/JUser.tcl:696
+#, tcl-format
+msgid "This is your own account at %s that acts as a service that transports messages to that IM system. It needs to be in your list. You have a subscription for %s: %s."
+msgstr "Acesta este contul dvs. propriu la %s care se comportă ca un serviciu care transportă mesaje la acel sistem de mesagerie instantanee. Trebuie să se afle în lista dvs. Sunteţi înregistrat la %s : %s."
+
+#: ../jabber/JUser.tcl:644
+msgid "Transport Details"
+msgstr "Detalii de transport"
+
+#: ../jabber/JUser.tcl:646
+msgid "Edit Contact"
+msgstr "Editare contact"
+
+#: ../jabber/JUser.tcl:698
+#, tcl-format
+msgid "Edit nickname and group of %s. You also can request or remove presence subscription."
+msgstr "Editare pseudonim şi grup pentru %s. Puteţi de asemenea solicita sau elimina subscrierea prezenţei."
+
+#: ../jabber/JUser.tcl:741
+#| msgid "Available"
+msgid "Available groups"
+msgstr "Grupuri disponibile"
+
+#: ../jabber/JUser.tcl:744
+#| msgid "Group"
+msgid "Group:"
+msgstr "Grup:"
+
+#: ../jabber/JUser.tcl:756
+msgid "Current groups"
+msgstr ""
+
+#: ../jabber/JUser.tcl:771
+#| msgid "Add"
+msgid "Add ->"
+msgstr "Adaugă ->"
+
+#: ../jabber/JUser.tcl:773
+#| msgid "Remove"
+msgid "<- Remove"
+msgstr "<- Elimină"
+
+#: ../jabber/JUser.tcl:784
+msgid "Request presence subscription"
+msgstr "Solicită subscrierea prezenţei"
+
+#: ../jabber/JUser.tcl:789
+msgid "Remove presence subscription"
+msgstr "Elimină subscrierea prezenţei"
+
+#. TRANSLATORS; these strings are balloon mouse over tooltips in the edit contact dialog
+#: ../jabber/JUser.tcl:797
+msgid "Both you and your contact can see eachother's presence."
+msgstr "Dvs. şi contactul dvs. puteţi vedea fiecare prezenţa celuilalt."
+
+#: ../jabber/JUser.tcl:798
+msgid "You cannot see your contact's presence, but your contact can see yours."
+msgstr "Nu puteţi vedea prezenţa contactului, dar el poate vede prezenţa dvs."
+
+#: ../jabber/JUser.tcl:799
+msgid "Both you and your contact cannot see eachother's presence."
+msgstr "Nici dvs., nici contactul dvs. nu puteţi vedea prezenţa celuilalt."
+
+#: ../jabber/JUser.tcl:800
+#: ../jabber/Roster.tcl:1632
+msgid "You can see your contact's presence, but your contact can't see yours."
+msgstr "Puteţi vedea prezenţa contactului, dar el nu poate vedea prezenţa dvs."
+
+#: ../jabber/JUser.tcl:847
+#: ../jabber/Subscribe.tcl:332
+#: ../jabber/Subscribe.tcl:368
+#: ../jabber/Subscribe.tcl:1302
+#: ../jabber/Subscribe.tcl:1562
+msgid "View business card"
+msgstr "Vizualizare carte de vizită"
+
+#: ../jabber/JWB.tcl:154
+#: ../whiteboard/Whiteboard.tcl:607
+msgid "New &Window"
+msgstr "Fereastră &nouă"
+
+#: ../jabber/JWB.tcl:155
+#: ../whiteboard/Whiteboard.tcl:422
+msgid "&Open File"
+msgstr "&Deschide fişier"
+
+#: ../jabber/JWB.tcl:156
+#: ../whiteboard/Whiteboard.tcl:420
+msgid "&Import Image/Movie"
+msgstr "&Importă imagine/film"
+
+#: ../jabber/JWB.tcl:157
+#: ../whiteboard/Whiteboard.tcl:421
+#: ../whiteboard/Whiteboard.tcl:2774
+msgid "Open St&ream"
+msgstr "Deschide &flux"
+
+#: ../jabber/JWB.tcl:159
+msgid "Stop &Transactions"
+msgstr "Opreşte &tranzacţii"
+
+#: ../jabber/JWB.tcl:162
+#: ../whiteboard/Whiteboard.tcl:425
+msgid "&Save"
+msgstr "&Salvează"
+
+#: ../jabber/JWB.tcl:163
+#: ../whiteboard/Whiteboard.tcl:426
+msgid "Save &As"
+msgstr "Salvează &ca"
+
+#: ../jabber/JWB.tcl:164
+#: ../whiteboard/Whiteboard.tcl:427
+msgid "Sa&ve As Item"
+msgstr "Salvează ca &element"
+
+#: ../jabber/JWB.tcl:166
+#: ../whiteboard/Whiteboard.tcl:429
+msgid "Page Set&up"
+msgstr "&Dimensiuni pagină"
+
+#: ../jabber/JWB.tcl:167
+#: ../whiteboard/Whiteboard.tcl:430
+msgid "&Print"
+msgstr "&Print"
+
+#: ../jabber/JWB.tcl:332
+#: ../jabber/JWB.tcl:334
+#, tcl-format
+msgid "Chat With %s"
+msgstr "Discută cu %s"
+
+#: ../jabber/JWB.tcl:454
+msgid "Send Live"
+msgstr "Transmite live"
+
+#: ../jabber/JWB.tcl:631
+#: ../jabber/JWB.tcl:646
+msgid "Do you want to close this whiteboard and lose the complete session?"
+msgstr "Doriţi să închideţi tabla de desen şi să pierdeţi toată sesiunea?"
+
+#: ../jabber/JWB.tcl:656
+msgid "Do you want to save the changes?"
+msgstr "Doriţi să salvaţi modificările?"
+
+#: ../jabber/JWB.tcl:656
+msgid "This whiteboard document has been changed."
+msgstr "Acest document tablă de desen a fost modificat."
+
+#: ../jabber/JWB.tcl:815
+msgid "This contact is not online anymore and the message is therefore not sent."
+msgstr "Acest contact nu mai este conectat şi mesajul nu a fost, în consecinţă, transmis."
+
+#: ../jabber/JWB.tcl:977
+#, tcl-format
+msgid "%s is not online. If your message contains any images or other multimedia, your contact will not see them unless you are online while he/she reads your message. Do you want to send it anyway?"
+msgstr "%s nu este conectat. Dacă mesajul dvs. conţine imagini sau alte componente multimedia, contactul nu le va vedea decât dacă veţi fi conectat şi dvs. în momentul în care va citi mesajul. Doriţi să transmiteţi oricum?"
+
+#: ../jabber/JWB.tcl:986
+#: ../jabber/JWB.tcl:2080
+msgid "Invalid Contact ID. You need to enter a valid one at the bottom (e.g. user@example.org)."
+msgstr "ID contact invalid. Trebuie să introduceţi unul valid jos (ex. utilizator@exemplu.ro)."
+
+#: ../jabber/JWB.tcl:1522
+#: ../whiteboard/GetFileIface.tcl:286
+msgid "Request To User"
+msgstr "Cerere către utilizator"
+
+#: ../jabber/JWB.tcl:1523
+#: ../whiteboard/GetFileIface.tcl:287
+#, tcl-format
+msgid "We are about to receive the file %s. Do you want to receive it?"
+msgstr "Suntem pe cale de a recepţiona fişierul %s. Doriţi recepţionarea acestuia?"
+
+#: ../jabber/JWB.tcl:2058
+#: ../whiteboard/Import.tcl:79
+#: ../whiteboard/Whiteboard.tcl:3277
+#, tcl-format
+msgid "Cannot find importer for the MIME type %s"
+msgstr "Nu găsesc filtru de import pentru tipul MIME %s"
+
+#: ../jabber/Jabber.tcl:618
+#, tcl-format
+msgid "Cannot send message to %s."
+msgstr "Nu pot trimite mesaj către %s."
+
+#: ../jabber/Jabber.tcl:721
+#, tcl-format
+msgid "Your registered account with the %s service will be put in your list of contacts to work as a transport with this service."
+msgstr "Contul dvs. la serviciul %s va fi introdus în lista de contacte pentru a funcţiona ca un transport către acest serviciu."
+
+#: ../jabber/Jabber.tcl:772
+#: ../jabber/Jabber.tcl:777
+#: ../jabber/Jabber.tcl:783
+#: ../jabber/Jabber.tcl:832
+#: ../jabber/Subscribe.tcl:210
+#: ../jabber/Subscribe.tcl:243
+#: ../jabber/Subscribe.tcl:996
+#: ../jabber/Subscribe.tcl:1015
+#: ../jabber/Subscribe.tcl:1411
+#: ../jabber/Subscribe.tcl:1439
+#: ../jabber/Subscribe.tcl:1448
+#: ../jabber/Subscribe.tcl:1492
+#: ../jabber/Subscribe.tcl:1600
+#: ../jabber/Subscribe.tcl:1620
+msgid "Presence Subscription"
+msgstr "Subscriere prezenţă"
+
+#: ../jabber/Jabber.tcl:773
+#, tcl-format
+msgid "Because %s does not allow you to see his/her presence anymore, he/she is removed."
+msgstr "Întrucât  %s nu vă mai permite să îi vedeţi prezenţa, este înlăturat."
+
+#: ../jabber/Jabber.tcl:778
+#, tcl-format
+msgid "%s does not allow you to see his/her presence anymore."
+msgstr "%s nu vă mai permite să îi vedeţi prezenţa."
+
+#: ../jabber/Jabber.tcl:785
+#, tcl-format
+msgid "%s does not allow you to see his/her presence anymore. Do you want to remove %s?"
+msgstr "%s nu vă mai permite să îi vedeţi prezenţa. Doriţi eliminarea %s ?"
+
+#: ../jabber/Jabber.tcl:818
+#, tcl-format
+msgid "Cannot subscribe to %s's presence. The contact does not allow you to see his/her presence."
+msgstr "Nu pot subscrie la prezenţa %s. Acest contact nu vă permite să îi vedeţi prezenţa."
+
+#: ../jabber/Jabber.tcl:823
+msgid "Subscription Failed"
+msgstr "Subscriere eşuată"
+
+#: ../jabber/Jabber.tcl:833
+#, tcl-format
+msgid "You cannot see %s's presence anymore."
+msgstr "Nu mai puteţi vedea prezenţa lui %s."
+
+#: ../jabber/Jabber.tcl:862
+msgid "Presence Error"
+msgstr "Eroare de prezenţă"
+
+#: ../jabber/Jabber.tcl:919
+#: ../jabber/Jabber.tcl:949
+msgid "The connection was unexpectedly broken."
+msgstr "Conexiunea a fost întreruptă neaşteptat."
+
+#: ../jabber/Jabber.tcl:924
+#: ../jabber/Jabber.tcl:926
+#: ../jabber/Jabber.tcl:936
+#: ../jabber/Jabber.tcl:938
+#, tcl-format
+msgid "Received a fatal error: %s The connection is closed."
+msgstr "Eroare fatală %s Conexiunea este închisă."
+
+#: ../jabber/Jabber.tcl:1007
+msgid "Error Log (noncriticals)"
+msgstr "Log erori (necritice)"
+
+#: ../jabber/Jabber.tcl:1507
+#: ../jabber/UserInfo.tcl:263
+#, tcl-format
+msgid "Cannot query %s's last activity."
+msgstr "Nu pot interoga ultima activitate pentru %s."
+
+#: ../jabber/Jabber.tcl:1519
+#: ../jabber/Jabber.tcl:1522
+#: ../jabber/UserInfo.tcl:261
+msgid "Last Activity"
+msgstr "Ultima activitate"
+
+#: ../jabber/Jabber.tcl:1520
+#: ../jabber/Jabber.tcl:1533
+#: ../jabber/Jabber.tcl:1535
+#, tcl-format
+msgid "Cannot query %s's local time information."
+msgstr "Nu pot afla informaţii despre ora locală pentru %s."
+
+#: ../jabber/Jabber.tcl:1549
+#, tcl-format
+msgid "Time since client %s was last active"
+msgstr "Timp de când clientul %s a fost ultima data activ"
+
+#: ../jabber/Jabber.tcl:1551
+#, tcl-format
+msgid "Time since %s was last connected"
+msgstr "Timp de când %s a fost ultima dată conectat"
+
+#: ../jabber/Jabber.tcl:1553
+#, tcl-format
+msgid "Time since server %s was started"
+msgstr "Timp de la pornirea serverului %s"
+
+#: ../jabber/Jabber.tcl:1556
+msgid "The uptime/last activity is"
+msgstr "Durata de funcţionare/ultima activitate este"
+
+#: ../jabber/Jabber.tcl:1590
+#: ../jabber/UserInfo.tcl:295
+#: ../jabber/UserInfo.tcl:325
+#, tcl-format
+msgid "Cannot query %s's local time."
+msgstr "Nu pot cunoaşte ora locală a lui %s."
+
+#: ../jabber/Jabber.tcl:1598
+#: ../jabber/UserInfo.tcl:293
+#: ../jabber/UserInfo.tcl:323
+msgid "Local Time"
+msgstr "Ora locală"
+
+#: ../jabber/Jabber.tcl:1599
+#: ../jabber/UserInfo.tcl:303
+#: ../jabber/UserInfo.tcl:332
+#, tcl-format
+msgid "%s's local time is: %s"
+msgstr "Ora locală a lui %s este %s"
+
+#: ../jabber/Jabber.tcl:1687
+#: ../jabber/UserInfo.tcl:213
+#, tcl-format
+msgid "Cannot query %s's version."
+msgstr "Nu pot afla versiunea lui %s."
+
+#: ../jabber/Jabber.tcl:1726
+#, tcl-format
+msgid "Version information for %s."
+msgstr "Informaţii despre versiunea lui %s."
+
+#: ../jabber/Jabber.tcl:1923
+#: ../jabber/Jabber.tcl:2051
+msgid "New Password"
+msgstr "Parola nouă"
+
+#: ../jabber/Jabber.tcl:1940
+msgid "Set a new password for"
+msgstr "Setează parolă nouă pentru"
+
+#: ../jabber/Jabber.tcl:1942
+msgid "New password"
+msgstr "Parolă nouă"
+
+#: ../jabber/Jabber.tcl:1946
+#: ../jabber/Register.tcl:746
+#: ../jabber/SetupAss.tcl:169
+msgid "Retype password"
+msgstr "Reintroduceţi parola"
+
+#: ../jabber/Jabber.tcl:2012
+#: ../jabber/Register.tcl:834
+#: ../jabber/SetupAss.tcl:311
+msgid "Passwords do not match. Please try again."
+msgstr "Parolele nu coincid. Mai încercaţi."
+
+#: ../jabber/Jabber.tcl:2036
+msgid "Cannot set new password."
+msgstr "Nu pot seta noua parolă."
+
+#: ../jabber/Jabber.tcl:2052
+msgid "Setting new password was successful."
+msgstr "Setarea noii parole a avut succes."
+
+#. TRANSLATORS; see login dialog
+#: ../jabber/Login.tcl:142
+msgid "Enter your account as user@example.org, or choose a profile. You should already have an account."
+msgstr "Introduceţi contul dvs. ca utlizator@exemplu.ro sau alegeţi un profil. Trebuie ca deja să aveţi un cont."
+
+#. TRANSLATORS; login dialog, but not default; this is a config option
+#: ../jabber/Login.tcl:145
+msgid "Enter your Contact ID as user@example.org. You should already have an account with this server."
+msgstr "Introduceţi ID-ul dvs. de contact ca utlizator@exemplu.ro. Trebuie să aveţi deja un cont pe server."
+
+#. TRANSLATORS; login dialog, but not default; this is a config option
+#: ../jabber/Login.tcl:148
+msgid "Write XMPP server IP number or name, or choose from the popup menu. You should already have an account with this server."
+msgstr "Scrieţi adresa IP sau numele serverului XMPP, sau alegeţi din meniul. Trebuie să aveţi deja un cont pe acest server."
+
+#. TRANSLATORS; login dialog, but not default; this is a config option
+#: ../jabber/Login.tcl:152
+#, tcl-format
+msgid "Enter your username and password to login to %s."
+msgstr "Introduceţi numele de utilizator şi parola pentru a vă conecta la %s."
+
+#: ../jabber/Login.tcl:163
+#: ../jabber/Profiles.tcl:1070
+msgid "Profile"
+msgstr "Profil"
+
+#: ../jabber/Login.tcl:179
+#: ../jabber/Profiles.tcl:1095
+#: ../jabber/Register.tcl:1454
+#: ../jabber/Search.tcl:935
+#: ../jabber/SetupAss.tcl:167
+#: ../lib/Proxy.tcl:209
+#: ../whiteboard/WDialogs.tcl:192
+msgid "Username"
+msgstr "Nume de utilizator"
+
+#: ../jabber/Login.tcl:187
+#: ../jabber/Profiles.tcl:1102
+msgid "Resource"
+msgstr "Resurse"
+
+#: ../jabber/Login.tcl:239
+#: ../jabber/Login.tcl:243
+#: ../jabber/Login.tcl:247
+#: ../jabber/Login.tcl:413
+#: ../jabber/Profiles.tcl:1170
+#: ../jabber/Profiles.tcl:1174
+#: ../jabber/Profiles.tcl:1178
+#: ../jabber/Profiles.tcl:1269
+#: ../jabber/Register.tcl:293
+#: ../jabber/Register.tcl:297
+#: ../jabber/Register.tcl:301
+#: ../jabber/Register.tcl:541
+msgid "More"
+msgstr "Mai mult"
+
+#: ../jabber/Login.tcl:275
+#: ../jabber/Profiles.tcl:891
+#: ../jabber/Profiles.tcl:903
+msgid "Edit Profiles"
+msgstr "Editare profil"
+
+#: ../jabber/Login.tcl:398
+#: ../jabber/Profiles.tcl:1250
+#: ../jabber/Register.tcl:530
+msgid "Less"
+msgstr "Mai puţin"
+
+#: ../jabber/Login.tcl:504
+#, tcl-format
+msgid "The %s is missing or is too short!"
+msgstr "%s lipseşte sau este prea scurt!"
+
+#: ../jabber/Login.tcl:532
+#: ../jabber/Register.tcl:590
+#, tcl-format
+msgid "Illegal character(s) in %s: %s!"
+msgstr "%s conţine caractere ilegale: %s !"
+
+#: ../jabber/Login.tcl:584
+msgid "The Contact ID differs from your profile. Do you want to save a new profile?"
+msgstr "ID-ul contactului diferă de acela al profilului dvs. Doriţi salvarea unui nou profil?"
+
+#: ../jabber/Login.tcl:589
+#: ../jabber/MUC.tcl:780
+#: ../jabber/Profiles.tcl:1550
+msgid "Profile Name"
+msgstr "Nume profil"
+
+#: ../jabber/Login.tcl:591
+#: ../jabber/Profiles.tcl:1145
+#: ../jabber/Profiles.tcl:1552
+msgid "Add Profile"
+msgstr "Adăugare profil"
+
+#: ../jabber/Login.tcl:591
+#: ../jabber/Profiles.tcl:1552
+msgid "Enter the name for the new profile."
+msgstr "Introduceţi numele noului profil."
+
+#: ../jabber/Login.tcl:614
+msgid "Your current login settings differ from your profile settings. Do you want to save them to your profile?"
+msgstr "Setările login curente diferă de acelea ale profilului dvs. Doriţi salvarea lor în profilul dvs.?"
+
+#: ../jabber/Login.tcl:668
+msgid "Lost connection to server, reconnecting"
+msgstr ""
+
+#: ../jabber/Login.tcl:855
+#, tcl-format
+msgid "Contacted %s. Waiting for response"
+msgstr "%s a fost contactat. Aştept răspunsul"
+
+#: ../jabber/Login.tcl:896
+#, tcl-format
+msgid "Connected to %s. Initializing the XML stream"
+msgstr "Conectat la %s. Initializare flux XML"
+
+#: ../jabber/Login.tcl:899
+msgid "Negotiating TLS security"
+msgstr "Negociere securitate TLS"
+
+#: ../jabber/Login.tcl:915
+#, tcl-format
+msgid "Authorization to server %s was successful. Downloading contacts..."
+msgstr "Autorizare reuşită la serverul %s. Descarc contactele..."
+
+#: ../jabber/Login.tcl:974
+#, tcl-format
+msgid "Cannot connect to %s. Either there are server or network issues, or you misspelled the server's name."
+msgstr "Nu mă pot conecta la %s. Ori sunt probleme de server sau de reţea, ori aţi scris greşit numele serverului."
+
+#: ../jabber/Login.tcl:980
+#, tcl-format
+msgid "Server %s did not respond: timeout."
+msgstr "Serverul %s nu răspunde: timp expirat."
+
+#: ../jabber/Login.tcl:985
+#, tcl-format
+msgid "Cannot login because this username is already in use by someone else (%s)."
+msgstr "Nu mă pot conecta pentru că acest nume de utilizator este deja folosit de către altcineva (%s)."
+
+#: ../jabber/Login.tcl:988
+#, tcl-format
+msgid "The server %s has no support for TLS."
+msgstr "Serverul %s nu permite securizare  TLS."
+
+#: ../jabber/Login.tcl:991
+#, tcl-format
+msgid "Cannot negotiate TLS with server %s."
+msgstr "Nu pot negocia securizarea TLS cu serverul %s."
+
+#: ../jabber/Login.tcl:994
+msgid "The server has no support for SASL authentication."
+msgstr "Serverul nu permite autentificare SASL."
+
+#: ../jabber/Login.tcl:997
+msgid "Cannot authenticate due to internal protocol error."
+msgstr "Autentificare imposibilă din cauza unor erori interne de protocol."
+
+#: ../jabber/Login.tcl:1002
+#, tcl-format
+#| msgid "Stream error received from the server with code: %s"
+msgid "Stream error received from the server with code: %s, %s"
+msgstr "Eroare de flux primită de la server cu codul: %s, %s"
+
+#: ../jabber/Login.tcl:1005
+msgid "The proxy server reported an error."
+msgstr "Serverul proxy a raportat o eroare."
+
+#: ../jabber/Login.tcl:1017
+#: ../jabber/Register.tcl:961
+msgid "The login process was aborted."
+msgstr "Procedura de conexiune a fost abandonată."
+
+#: ../jabber/Login.tcl:1018
+#: ../jabber/Login.tcl:1019
+#: ../jabber/Login.tcl:1020
+#: ../jabber/Login.tcl:1021
+#: ../jabber/Login.tcl:1023
+#: ../jabber/Register.tcl:962
+#: ../jabber/Register.tcl:963
+#: ../jabber/Register.tcl:964
+#: ../jabber/Register.tcl:965
+#: ../jabber/Register.tcl:967
+msgid "Protocol error during the login process."
+msgstr "Eroare de protocol pe parcursul procesului de conectare."
+
+#: ../jabber/Login.tcl:1022
+#: ../jabber/Register.tcl:966
+msgid "Login failed because of unknown account or wrong password."
+msgstr "Conectare eşuată din cauza contului necunoscut sau parolei greşite."
+
+#: ../jabber/Login.tcl:1026
+#, tcl-format
+msgid "Invalid server response due to bug in server software:  error <%s/> is not defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting this bug to your server administrator."
+msgstr ""
+
+#: ../jabber/Login.tcl:1052
+msgid "Do you want to retry a different password or profile?"
+msgstr ""
+
+#: ../jabber/Login.tcl:1083
+#, tcl-format
+msgid "Do you want to register a new account with %s."
+msgstr "Doriţi înregistrarea unui nou cont la %s."
+
+#. TRANSLATORS: strings related to Multi-User Chat (MUC) chatrooms
+#: ../jabber/MUC.tcl:136
+#: ../jabber/MUC.tcl:164
+msgid "Invite Contact"
+msgstr "Invitaţie contact"
+
+#: ../jabber/MUC.tcl:176
+#, tcl-format
+msgid "Invite contact to chatroom %s."
+msgstr "Invitaţie contact în sala de conversaţie %s."
+
+#: ../jabber/MUC.tcl:314
+#, tcl-format
+msgid "Cannot invite %s to %s."
+msgstr "Nu îl pot invita pe %s în sala %s."
+
+#: ../jabber/MUC.tcl:362
+#, tcl-format
+msgid "%s invites you to join chatroom %s."
+msgstr "%s vă invită în sala de conversaţie %s."
+
+#: ../jabber/MUC.tcl:369
+#, tcl-format
+msgid "The password %s is needed for entry."
+msgstr "Parola %s este necesară pentru a intra."
+
+#: ../jabber/MUC.tcl:372
+msgid "Do you want to join right away?"
+msgstr "Doriţi să intraţi imediat?"
+
+#: ../jabber/MUC.tcl:373
+msgid "Invitation"
+msgstr "Invitaţie"
+
+#: ../jabber/MUC.tcl:427
+#: ../jabber/MUC.tcl:440
+#: ../jabber/MUC.tcl:552
+#: ../jabber/MUC.tcl:1423
+msgid "Configure Chatroom"
+msgstr "Configurare sală de conversaţie"
+
+#: ../jabber/MUC.tcl:478
+msgid "Affiliation"
+msgstr "Afiliere"
+
+#: ../jabber/MUC.tcl:478
+msgid "Role"
+msgstr "Rol"
+
+#: ../jabber/MUC.tcl:508
+msgid "Grant"
+msgstr "Acordare"
+
+#: ../jabber/MUC.tcl:512
+msgid "Voice"
+msgstr "Voce"
+
+#: ../jabber/MUC.tcl:513
+msgid "Member"
+msgstr "Membru"
+
+#: ../jabber/MUC.tcl:514
+msgid "Moderator"
+msgstr "Moderator"
+
+#: ../jabber/MUC.tcl:515
+msgid "Admin"
+msgstr "Administrator"
+
+#: ../jabber/MUC.tcl:527
+msgid "Revoke"
+msgstr "Revocare"
+
+#: ../jabber/MUC.tcl:548
+#: ../jabber/MUC.tcl:809
+msgid "Kick Participant"
+msgstr "Eliminare participant"
+
+#: ../jabber/MUC.tcl:550
+msgid "Ban Participant"
+msgstr "Interzicere definitivă participant"
+
+#: ../jabber/MUC.tcl:554
+#: ../jabber/MUC.tcl:1591
+msgid "Destroy Chatroom"
+msgstr "Distruge sala de discuţie"
+
+#: ../jabber/MUC.tcl:564
+msgid "Edit Lists"
+msgstr "Editare liste"
+
+#: ../jabber/MUC.tcl:810
+#, tcl-format
+msgid "Kick %s from the chatroom %s."
+msgstr "Elimină %s din sala de discuţie %s."
+
+#: ../jabber/MUC.tcl:839
+#, tcl-format
+msgid "Ban %s from the chatroom %s."
+msgstr "Interzice definitiv accesul lui %s în sala de discuţie %s."
+
+#: ../jabber/MUC.tcl:879
+msgid "Edit the voice list"
+msgstr "Editare listă voce"
+
+#: ../jabber/MUC.tcl:880
+msgid "Edit the ban list"
+msgstr "Editare listă interdicţii definitive"
+
+#: ../jabber/MUC.tcl:881
+msgid "Edit the member list"
+msgstr "Editare listă de membri"
+
+#: ../jabber/MUC.tcl:882
+msgid "Edit the moderator list"
+msgstr "Editare listă de moderatori"
+
+#: ../jabber/MUC.tcl:883
+msgid "Edit the admin list"
+msgstr "Editare listă de administratori"
+
+#: ../jabber/MUC.tcl:884
+msgid "Edit the owner list"
+msgstr "Editare listă de proprietari"
+
+#: ../jabber/MUC.tcl:1014
+msgid "Reset"
+msgstr "Reiniţializare"
+
+#: ../jabber/MUC.tcl:1357
+msgid "Not yet implemented."
+msgstr "Neimplementat."
+
+#: ../jabber/MUC.tcl:1605
+#, tcl-format
+msgid "Do you want to destroy the chatroom %s? Optionally, you can point present chatroom participants to an alternative chatroom and tell why the chatroom is destroyed."
+msgstr "Doriţi să distrugeţi sala de discuţie %s? Opţional, puteţi sugera participanţilor prezenţi o sală alternativă şi puteţi spune un motiv pentru care sala este distrusă."
+
+#: ../jabber/MUC.tcl:1614
+msgid "Alternative chatroom"
+msgstr "Sală alternativă"
+
+#: ../jabber/MailBox.tcl:514
+#: ../lib/Bookmarks.tcl:129
+#: ../whiteboard/FilePrefs.tcl:144
+msgid "Delete"
+msgstr "Şterge"
+
+#: ../jabber/MailBox.tcl:1176
+#: ../jabber/NewMsg.tcl:1008
+#: ../jabber/NewMsg.tcl:1101
+msgid "Save Message"
+msgstr "Salvează mesaj"
+
+#: ../jabber/MailBox.tcl:1179
+msgid "Open Failed"
+msgstr "Deschidere eşuată"
+
+#: ../jabber/MailBox.tcl:1180
+#, tcl-format
+#| msgid "Finished uploading file %s to %s."
+msgid "Failed opening file %s: %s"
+msgstr "Eroare la deschiderea fişierului %s: %s"
+
+#: ../jabber/MailBox.tcl:1291
+msgid "Missing Entities"
+msgstr ""
+
+#: ../jabber/MailBox.tcl:1292
+#, tcl-format
+msgid "There were %s images or similar entities that could not be obtained because the user is not online."
+msgstr ""
+
+#: ../jabber/MailBox.tcl:1598
+#: ../jabber/MailBox.tcl:1676
+#, tcl-format
+msgid "Cannot open the inbox file %s when trying to save it."
+msgstr "Nu pot deschide fişierul cutie poştală %s pentru salvare."
+
+#: ../jabber/MailBox.tcl:1621
+#: ../jabber/MailBox.tcl:1688
+msgid "Error renaming Inbox file."
+msgstr ""
+
+#: ../jabber/MailBox.tcl:1783
+#: ../jabber/MailBox.tcl:1817
+#, tcl-format
+msgid "Cannot read the inbox file %s: %s"
+msgstr "Nu pot citi fişierul cutie poştală %s : %s"
+
+#: ../jabber/MegaPresence.tcl:102
+#: ../jabber/MegaPresence.tcl:111
+#: ../jabber/VCard.tcl:411
+msgid "Avatar"
+msgstr "Avatar"
+
+#: ../jabber/MegaPresence.tcl:150
+msgid "Presence Control"
+msgstr "Controlul prezenţei"
+
+#: ../jabber/NewMsg.tcl:305
+msgid "Quote"
+msgstr "Citat"
+
+#: ../jabber/NewMsg.tcl:439
+msgid "Forwarded message"
+msgstr "Mesaj redirecţionat"
+
+#: ../jabber/NewMsg.tcl:901
+#, tcl-format
+msgid "Contact ID %s is invalid. Do you want to skip it and send to the rest?"
+msgstr "ID-ul contactului %s este invalid. Doriţi omiterea lui şi transmiterea către ceilalţi?"
+
+#: ../jabber/NewMsg.tcl:904
+#, tcl-format
+msgid "Invalid Contact ID: %s. Please correct and resend."
+msgstr "ID-ul contactului %s invalid. Vă rog corectaţi şi retransmiteţi."
+
+#: ../jabber/NewMsg.tcl:925
+msgid "You need to fill in at least one valid address."
+msgstr "Trebuie să completaţi cel puţin o adresă validă."
+
+#: ../jabber/NewMsg.tcl:984
+#, tcl-format
+msgid "On %s, %s %s wrote:"
+msgstr "La %s, %s %s a scris: "
+
+#: ../jabber/NewMsg.tcl:1068
+msgid "There are unsaved messages. Do you still want to quit?"
+msgstr "Există mesaje nesalvate. Doriţi să abandonaţi?"
+
+#: ../jabber/NewMsg.tcl:1099
+msgid "Do you want to save this message before closing?"
+msgstr "Doriţi salvarea acestui mesaj înainte de închidere?"
+
+#: ../jabber/Profiles.tcl:810
+msgid "Accounts"
+msgstr "Conturi"
+
+#. TRANSLATORS: string shown if you change anything in an existing account profile in the login dialog
+#: ../jabber/Profiles.tcl:982
+#: ../jabber/Profiles.tcl:1598
+msgid "You changed one or more values. Do you want to save them before closing?"
+msgstr "Aţi modificat una sau mai multe valori. Doriţi salvarea lor înainte de închidere?"
+
+#. TRANSLATORS: See File in the main window, and then Edit Profiles...
+#: ../jabber/Profiles.tcl:1064
+msgid "Edit, add or delete profiles. The selected profile will become the default."
+msgstr "Editare, adăugare sau ştergere profiluri. Profilul selectat va deveni cel implicit."
+
+#: ../jabber/Profiles.tcl:1147
+msgid "Delete Profile"
+msgstr "Ştergere profil"
+
+#: ../jabber/Profiles.tcl:1480
+msgid "You need to fill in at least the server name and user name."
+msgstr "Trebuie să completaţi cel puţin numele serverului şi numele de utilizator."
+
+#: ../jabber/Profiles.tcl:1585
+msgid "Do you want to register a new account?"
+msgstr "Doriţi sa înregistraţi un cont nou?"
+
+#: ../jabber/Profiles.tcl:1625
+msgid "The selected profile will be deleted. Do you also want to delete the account for this profile? This action cannot be undone. Press Cancel to abort deletion of account and profile."
+msgstr "Profilul selectat va fi şters. Doriţi să ştergeţi de asemenea şi contul asociat acestui profil? Această acţiune nu poate fi dată înapoi. Apăsaţi Anulare pentru a anula ştergerea contului şi a profilului."
+
+#: ../jabber/Profiles.tcl:1660
+#: ../jabber/Register.tcl:118
+#, tcl-format
+msgid "Cannot unregister from %s."
+msgstr "Nu pot dezînscrie de la %s."
+
+#: ../jabber/Profiles.tcl:1802
+msgid "Connection"
+msgstr "Connexiune"
+
+#: ../jabber/Profiles.tcl:1818
+msgid "Use secure connection"
+msgstr "Utilizaţi o conexiune securizată"
+
+#: ../jabber/Profiles.tcl:1821
+msgid "Certificate"
+msgstr "Certificat"
+
+#: ../jabber/Profiles.tcl:1824
+msgid "Use SASL authentication"
+msgstr "Utilizati autenfiticare SASL"
+
+#: ../jabber/Profiles.tcl:1827
+msgid "Use TLS and SASL"
+msgstr "Utilizaţi TLS şi SASL"
+
+#: ../jabber/Profiles.tcl:1830
+msgid "Use TLS on separate port (old)"
+msgstr "Utilizaţi TLS pe port separat (antic)"
+
+#: ../jabber/Profiles.tcl:1833
+msgid "Use compression"
+msgstr "Utilizaţi compresie"
+
+#: ../jabber/Profiles.tcl:1863
+msgid "Plain text password"
+msgstr "Parolă în clar"
+
+#: ../jabber/Profiles.tcl:1866
+msgid "Priority"
+msgstr "Prioritate"
+
+#: ../jabber/Profiles.tcl:1873
+msgid "Login as invisible"
+msgstr "Conectare ca invizibil"
+
+#: ../jabber/Profiles.tcl:1889
+#: ../lib/Proxy.tcl:204
+#: ../whiteboard/WDialogs.tcl:191
+msgid "Host"
+msgstr "Gazdă"
+
+#: ../jabber/Profiles.tcl:1891
+#: ../lib/Proxy.tcl:206
+#: ../whiteboard/WDialogs.tcl:193
+msgid "Port"
+msgstr "Port"
+
+#: ../jabber/Profiles.tcl:1915
+msgid "Use HTTP transport"
+msgstr "Foloseşte transport HTTP"
+
+#: ../jabber/Profiles.tcl:1920
+#: ../lib/PrefNet.tcl:119
+#: ../lib/Proxy.tcl:144
+msgid "Proxy"
+msgstr "Proxy"
+
+#. TRANSLATORS: See File in the main window, and then Remove Account...
+#: ../jabber/Register.tcl:76
+msgid "Remove Account"
+msgstr "Şterge cont"
+
+#: ../jabber/Register.tcl:77
+msgid "Do you really want to remove your account? This process cannot be undone."
+msgstr "Doriţi într-adevăr să ştergeţi contul dvs.? Această operaţiune nu poate fi dată înapoi."
+
+#: ../jabber/Register.tcl:85
+msgid "You are about to unregister a transport with a number of dependent contacts. Do you want to remove these contacts as well (Yes), keep them (No), or cancel everything (Cancel)?"
+msgstr "Sunteţi pe cale de a dezînregistra un transport cu un număr de contacte dependente de el. Doriţi să eliminaţi de asemenea şi aceste contacte (Da), să le păstraţi (Nu), sau să anulaţi totul (Anulare) ?"
+
+#: ../jabber/Register.tcl:133
+msgid "Unregister"
+msgstr "Dezînregistrare"
+
+#: ../jabber/Register.tcl:134
+#, tcl-format
+msgid "You are unregistered from %s."
+msgstr "Aţi fost dezînregistrat de la %s."
+
+#: ../jabber/Register.tcl:233
+#: ../jabber/Register.tcl:248
+#: ../jabber/SetupAss.tcl:192
+#: ../jabber/SetupAss.tcl:196
+msgid "New Account"
+msgstr "Cont nou"
+
+#: ../jabber/Register.tcl:260
+#, tcl-format
+msgid "Register with the service %s. You may need to press the Next button to retrieve the registration instructions."
+msgstr "Înregistrare la serviciul %s. Poate fi necesar să apăsaţi butorul Următor pentru a lua instrucţiunile de înregistrare."
+
+#: ../jabber/Register.tcl:262
+msgid "Select a server from the list or manually enter one. Then press Next to retrieve the registration instructions. Follow the instructions and hit Register."
+msgstr "Selectaţi un server din listă sau introduceţi manual unul. Apoi apăsaţi Următor pentru a lua instrucţiunile de înregistrare. Urmaţi instrucţiunile şi apăsaţi Înregistrare."
+
+#: ../jabber/Register.tcl:584
+#: ../jabber/Register.tcl:1256
+#: ../jabber/Search.tcl:310
+msgid "Please first enter or select a server."
+msgstr "Vă rog, mai întâi introduceţi sau selectaţi un server."
+
+#: ../jabber/Register.tcl:594
+#: ../jabber/Register.tcl:1263
+#: ../jabber/Search.tcl:315
+msgid "Waiting for server response"
+msgstr "Aştept răspunsul serverului"
+
+#: ../jabber/Register.tcl:658
+#: ../jabber/Register.tcl:1287
+msgid "Cannot obtain registration information."
+msgstr "Nu pot obţine informaţia de înregistrare."
+
+#: ../jabber/Register.tcl:670
+#: ../jabber/Register.tcl:1039
+#: ../jabber/Register.tcl:1076
+#: ../jabber/Register.tcl:1088
+#: ../jabber/Register.tcl:1170
+#: ../jabber/Register.tcl:1418
+#: ../jabber/Register.tcl:1430
+#: ../jabber/Register.tcl:1483
+msgid "Register"
+msgstr "Înregistrare"
+
+#: ../jabber/Register.tcl:792
+#: ../jabber/SetupAss.tcl:177
+msgid "Save password"
+msgstr "Salvează parola"
+
+#: ../jabber/Register.tcl:891
+msgid "The registration failed because this username is already in use by someone else."
+msgstr "Înregistrarea a eşuat din cauză că numele de utilizator este deja utilizat de către altcineva."
+
+#: ../jabber/Register.tcl:896
+msgid "The registration failed."
+msgstr "Înregistrarea a eşuat."
+
+#: ../jabber/Register.tcl:924
+#, tcl-format
+msgid "The registration with %s was successful. Now you just need to Login using the same username and password."
+msgstr "Înregistrarea la %s a avut succes. Acum ramâne doar să vă conectaţi utilizând aceleaşi nume de utilizator şi parolă."
+
+#: ../jabber/Register.tcl:954
+#, tcl-format
+msgid "You are now registered and automatically logged in as %s"
+msgstr "Acum sunteţi înregistrat şi conectat automat ca %s"
+
+#: ../jabber/Register.tcl:1119
+#: ../jabber/Register.tcl:1442
+msgid "Select a service and press Next"
+msgstr "Selectaţi un serviciu şi apăsaţi Următor"
+
+#: ../jabber/Register.tcl:1352
+#: ../jabber/Register.tcl:1536
+#, tcl-format
+msgid "Cannot register with service %s."
+msgstr "Nu mă pot înregistra la serviciul %s."
+
+#: ../jabber/Register.tcl:1361
+#: ../jabber/Register.tcl:1544
+#, tcl-format
+msgid "Registration with service %s was successful."
+msgstr "Înregistrarea la serviciul %s a reuşit."
+
+#: ../jabber/Roster.tcl:81
+#: ../jabber/Roster.tcl:89
+#: ../jabber/Status.tcl:36
+#: ../jabber/Status.tcl:44
+msgid "Available"
+msgstr "Disponibil"
+
+#: ../jabber/Roster.tcl:82
+#: ../jabber/Roster.tcl:90
+#: ../jabber/Roster.tcl:135
+#: ../jabber/Status.tcl:37
+#: ../jabber/Status.tcl:45
+msgid "Away"
+msgstr "Absent"
+
+#: ../jabber/Roster.tcl:83
+#: ../jabber/Roster.tcl:91
+#: ../jabber/Status.tcl:38
+#: ../jabber/Status.tcl:46
+msgid "Free For Chat"
+msgstr "Liber pentru discuţie"
+
+#: ../jabber/Roster.tcl:84
+#: ../jabber/Roster.tcl:92
+#: ../jabber/Roster.tcl:134
+#: ../jabber/Status.tcl:39
+#: ../jabber/Status.tcl:47
+msgid "Do Not Disturb"
+msgstr "Nu deranjaţi"
+
+#: ../jabber/Roster.tcl:85
+#: ../jabber/Roster.tcl:93
+#: ../jabber/Roster.tcl:136
+#: ../jabber/Status.tcl:40
+#: ../jabber/Status.tcl:48
+msgid "Extended Away"
+msgstr "Indisponibil"
+
+#: ../jabber/Roster.tcl:86
+#: ../jabber/Roster.tcl:94
+#: ../jabber/Status.tcl:41
+#: ../jabber/Status.tcl:49
+msgid "Invisible"
+msgstr "Invisibil"
+
+#: ../jabber/Roster.tcl:125
+msgid "&History"
+msgstr "&Istoric"
+
+#: ../jabber/Roster.tcl:128
+#: ../jabber/Roster.tcl:189
+msgid "&Edit Contact"
+msgstr "&Editare contact"
+
+#: ../jabber/Roster.tcl:129
+msgid "&Remove Contact"
+msgstr "&Şterge contact"
+
+#: ../jabber/Roster.tcl:131
+#: ../whiteboard/ItemInspector.tcl:378
+msgid "Style"
+msgstr "Stil"
+
+#: ../jabber/Roster.tcl:133
+msgid "&Offline"
+msgstr "&Deconectat"
+
+#: ../jabber/Roster.tcl:137
+msgid "&Transports"
+msgstr "&Transporturi"
+
+#: ../jabber/Roster.tcl:140
+msgid "Sort"
+msgstr "Sortare"
+
+#: ../jabber/Roster.tcl:141
+msgid "&Increasing"
+msgstr "&Crescător"
+
+#: ../jabber/Roster.tcl:142
+msgid "&Decreasing"
+msgstr "&Descrescător"
+
+#: ../jabber/Roster.tcl:186
+msgid "Last Login/Activity"
+msgstr "Ultima conectare/activitate"
+
+#: ../jabber/Roster.tcl:191
+msgid "Login to Transport"
+msgstr "Conectare la transport"
+
+#: ../jabber/Roster.tcl:192
+msgid "Logout from Transport"
+msgstr "Deconectare de la transport"
+
+#: ../jabber/Roster.tcl:394
+#: ../jabber/Roster.tcl:405
+msgid "Remove Contact"
+msgstr "Eliminare contact"
+
+#: ../jabber/Roster.tcl:395
+#: ../jabber/Roster.tcl:406
+msgid "Do you really want to remove this contact? This action cannot be undone."
+msgstr "Doriţi într-adevăr eliminarea acestui contact? Acţiunea nu poate fi dată înapoi."
+
+#: ../jabber/Roster.tcl:598
+#, tcl-format
+msgid "Login to %s"
+msgstr "Conectare la %s"
+
+#: ../jabber/Roster.tcl:601
+#, tcl-format
+msgid "Logout from %s"
+msgstr "Deconectare de la %s"
+
+#: ../jabber/Roster.tcl:829
+msgid "The roster is up to date"
+msgstr "Lista de contacte este la zi"
+
+#: ../jabber/Roster.tcl:1412
+msgid "Transport"
+msgstr "Transport"
+
+#: ../jabber/Roster.tcl:1610
+msgid "Remove contact without presence subscription"
+msgstr "Elimină contact fără subscriere de prezenţă"
+
+#: ../jabber/Roster.tcl:1612
+msgid "Clear list of contacts on logout"
+msgstr "Goleşte lista de contacte la deconectare"
+
+#: ../jabber/Roster.tcl:1614
+msgid "Chat on double-click instead of message"
+msgstr "Discuţie la dublu click în loc de mesaj"
+
+#: ../jabber/Roster.tcl:1617
+msgid "Show offline users"
+msgstr "Afişează utilizatorii neconectaţi"
+
+#: ../jabber/Roster.tcl:1619
+msgid "Show transports"
+msgstr "Afişează transporturile"
+
+#: ../jabber/Roster.tcl:1621
+msgid "Show contacts without any subscription"
+msgstr "Afişează contactele fără nici o înscriere"
+
+#: ../jabber/RosterTree.tcl:68
+msgid "Online"
+msgstr "Conectat"
+
+#: ../jabber/RosterTree.tcl:69
+msgid "Offline"
+msgstr "Deconectat"
+
+#: ../jabber/RosterTree.tcl:70
+msgid "Transports"
+msgstr "Transporturi"
+
+#: ../jabber/RosterTree.tcl:71
+msgid "Subscription Pending"
+msgstr "Subscriere în curs"
+
+#: ../jabber/RosterTree.tcl:1838
+#| msgid "More"
+msgid "&Move"
+msgstr "&Mutare"
+
+#: ../jabber/RosterTree.tcl:1839
+#| msgid "Cancel"
+msgid "Canc&el"
+msgstr "Anulare"
+
+#. TRANSLATORS: themes for the contact icons (different presence state icons); see preferences
+#: ../jabber/Rosticons.tcl:433
+msgid "Contact Icons"
+msgstr "Icoane contact"
+
+#: ../jabber/Rosticons.tcl:483
+msgid "Select iconsets for each group. A deselected group will use the normal iconset."
+msgstr "Choisissez le jeu d'icônes pour chaque groupe. Un groupe non sélectionné utilisera le jeu d'icônes normal."
+
+#: ../jabber/Rosticons.tcl:581
+msgid "Standard"
+msgstr "Standard"
+
+#: ../jabber/Rosticons.tcl:583
+msgid "Groups"
+msgstr "Grupuri"
+
+#: ../jabber/Rosticons.tcl:631
+msgid "Key"
+msgstr "Cod"
+
+#: ../jabber/Rosticons.tcl:633
+msgid "Icon"
+msgstr "Icoană"
+
+#: ../jabber/Search.tcl:88
+#: ../jabber/Search.tcl:129
+#: ../jabber/Search.tcl:1149
+#: ../lib/TSearch.tcl:76
+#: ../lib/WSearch.tcl:68
+msgid "Search"
+msgstr "Caută"
+
+#: ../jabber/Search.tcl:117
+msgid "Search contacts with the selected service. A new search form will empty the previous one."
+msgstr "Caută contacte la serviciul selectat. Un formular nou îl va goli pe cel precedent."
+
+#: ../jabber/Search.tcl:155
+msgid "New Form"
+msgstr "Formular nou"
+
+#: ../jabber/Search.tcl:203
+#: ../jabber/Search.tcl:321
+#: ../jabber/Search.tcl:544
+msgid "Search results"
+msgstr "Rezultatele căutării"
+
+#: ../jabber/Search.tcl:347
+msgid "Cannot obtain search form."
+msgstr "Nu pot obţine formularul de căutare."
+
+#: ../jabber/Search.tcl:417
+msgid "There was an invalid field. Please correct it."
+msgstr "Un câmp a fost invalid. Vă rog, corectaţi-l."
+
+#: ../jabber/Search.tcl:422
+msgid "Cannot search."
+msgstr "Nu pot căuta."
+
+#: ../jabber/Search.tcl:929
+#: ../jabber/Search.tcl:945
+#: ../jabber/Search.tcl:1022
+msgid "Search People"
+msgstr "Caută persoane"
+
+#: ../jabber/Search.tcl:933
+msgid "Full Name"
+msgstr "Nume complet"
+
+#: ../jabber/SetupAss.tcl:101
+#, tcl-format
+msgid "This setup assistant will help you to configure the most important settings to get started with %s."
+msgstr "Acest asistent de configurare vă va ajuta să configuraţi cele mai importante setări pentru a porni cu %s."
+
+#: ../jabber/SetupAss.tcl:103
+msgid "Any time you can press Previous to go back. Press Next to proceed."
+msgstr "Oricând puteţi apăsa Precedent pentru a vă duce înapoi. Apăsaţi Următor pentru a continua."
+
+#: ../jabber/SetupAss.tcl:111
+#: ../lib/PrefGeneral.tcl:103
+msgid "Language"
+msgstr "Limba"
+
+#: ../jabber/SetupAss.tcl:114
+msgid "Choose your language"
+msgstr "Alegeţi limba dvs."
+
+#: ../jabber/SetupAss.tcl:131
+msgid "Select Server"
+msgstr "Selectare server"
+
+#: ../jabber/SetupAss.tcl:135
+#: ../jabber/SetupAss.tcl:320
+msgid "Select or enter a server you wish to have your account on. If you already have an account, use the server of this account."
+msgstr "Selectaţi sau introduceţi un server pe care doriţi să aveţi contul dvs. Dacă deja aveţi un cont, utilizaţi serverul acestui cont."
+
+#: ../jabber/SetupAss.tcl:160
+msgid "Username & Password"
+msgstr "Nume utilizator şi parolă"
+
+#: ../jabber/SetupAss.tcl:164
+msgid "Enter your username and password. If the chosen username is already in use by someone else, you will not be able to register."
+msgstr "Introduceţi numele şi parola. Dacă numele ales este deja utilizat de către altcineva, nu vă veţi putea înregistra."
+
+#: ../jabber/SetupAss.tcl:195
+msgid "Click on the button below to create a new account. You must be connected to the Internet. Pay attention to a possible firewall!"
+msgstr "Click pe butonul de dedesubt pentru a crea un cont nou. Trebuie să fiţi conectat la Internet. Atenţie la firewall!"
+
+#: ../jabber/SetupAss.tcl:207
+msgid "Finished"
+msgstr "Terminat"
+
+#: ../jabber/SetupAss.tcl:210
+msgid "That's all. Also, be nice to the bug and his friends ;-)"
+msgstr "Asta este tot. De asemenea, fiţi bun cu gărgăriţa şi cu prietenii ei ;-)"
+
+#: ../jabber/SetupAss.tcl:307
+msgid "Be sure to fill in all entries before you continue."
+msgstr "Asiguraţi-vă că aţi completat toate câmpurile înainte de a continua."
+
+#: ../jabber/SetupAss.tcl:342
+msgid "Are you sure you want to close the setup assistant? You may start it any time later from the menu."
+msgstr "Sunteţi sigur că doriţi închiderea asistentului de configurare? După aceea îl puteţi porni oricând din meniu."
+
+#: ../jabber/Status.tcl:256
+#: ../jabber/Status.tcl:274
+#: ../jabber/Status.tcl:335
+msgid "Attach Message"
+msgstr "Ataşează mesaj"
+
+#: ../jabber/Status.tcl:386
+msgid "Set Status"
+msgstr "Setează stare"
+
+#: ../jabber/Status.tcl:400
+msgid "My Status"
+msgstr "Starea mea"
+
+#: ../jabber/Status.tcl:413
+msgid "Status message"
+msgstr "Mesaj de stare"
+
+#: ../jabber/Status.tcl:756
+#: ../jabber/Status.tcl:864
+msgid "Custom Status"
+msgstr "Stare personalizată"
+
+#. TRANSLATORS: custom status dialog; Control + B (or Command + B on Mac OS X)
+#: ../jabber/Status.tcl:861
+msgid "Select a presence state and optionally enter a message."
+msgstr "Selectaţi o stare a prezenţei şi opţional introduceţi un mesaj."
+
+#: ../jabber/Status.tcl:862
+msgid "The most frequent combinations are easily reachable as menu entries."
+msgstr "Combinaţiile utilizate cele mai frecvent sunt uşor de accesat ca intrări în meniu."
+
+#: ../jabber/StatusSlot.tcl:84
+msgid "Status Info"
+msgstr "Informaţii de stare"
+
+#: ../jabber/Subscribe.tcl:258
+#, tcl-format
+msgid "May %s see your presence?"
+msgstr "Îl autorizaţi pe %s să vă vadă prezenţa?"
+
+#. TRANSLATORS: shown in subscription request dialog when someone tries to add the user to his or her list
+#: ../jabber/Subscribe.tcl:262
+msgid "Entering a nickname and group is optional, and for your personal use only."
+msgstr "Introducerea unui pseudonim şi a unui grup este opţională şi numai pentru uzul dvs. personal."
+
+#. TRANSLATORS: shown in subscription request dialog if auto-accept and the timer option are both enabled in the preferences
+#: ../jabber/Subscribe.tcl:277
+#: ../jabber/Subscribe.tcl:450
+#: ../jabber/Subscribe.tcl:812
+#: ../jabber/Subscribe.tcl:828
+#: ../jabber/Subscribe.tcl:1037
+#: ../jabber/Subscribe.tcl:1145
+#, tcl-format
+msgid "Subscription request will be accepted in: %s secs."
+msgstr "Cererea de înscriere va fi acceptată în %s secunde."
+
+#: ../jabber/Subscribe.tcl:280
+#: ../jabber/Subscribe.tcl:301
+#: ../jabber/Subscribe.tcl:1040
+#: ../jabber/Subscribe.tcl:1060
+msgid "Pause"
+msgstr "Pauză"
+
+#. TRANSLATORS: shown in subscription request dialog if auto-rejept and the timer option are both enabled in the preferences
+#: ../jabber/Subscribe.tcl:298
+#: ../jabber/Subscribe.tcl:470
+#: ../jabber/Subscribe.tcl:878
+#: ../jabber/Subscribe.tcl:894
+#: ../jabber/Subscribe.tcl:1057
+#: ../jabber/Subscribe.tcl:1162
+#, tcl-format
+msgid "Subscription request will be rejected in: %s secs."
+msgstr "Cererea de înscriere va fi respinsă în %s secunde."
+
+#: ../jabber/Subscribe.tcl:446
+#: ../jabber/Subscribe.tcl:666
+#: ../jabber/Subscribe.tcl:825
+#, tcl-format
+msgid "%s can see your presence."
+msgstr "%s poate vedea prezenţa dvs."
+
+#: ../jabber/Subscribe.tcl:466
+#: ../jabber/Subscribe.tcl:699
+#: ../jabber/Subscribe.tcl:891
+#, tcl-format
+msgid "%s cannot see your presence."
+msgstr "%s nu poate vedea prezenţa dvs."
+
+#: ../jabber/Subscribe.tcl:1030
+#: ../jabber/Subscribe.tcl:1220
+#: ../jabber/Subscribe.tcl:1449
+#, tcl-format
+msgid "%s contacts want to see your presence. Select those who may see your presence."
+msgstr "%s contacte doresc să vadă prezenţa dvs. Selectaţii pe cei pe care îi autorizaţi."
+
+#: ../jabber/Subscribe.tcl:1086
+msgid "Allow"
+msgstr "Autorizare"
+
+#: ../jabber/Subscribe.tcl:1412
+#: ../jabber/Subscribe.tcl:1440
+#, tcl-format
+msgid "%s allows you to see his/her presence."
+msgstr "%s vă autorizează să îi vedeţi prezenţa."
+
+#: ../jabber/Subscribe.tcl:1491
+#: ../jabber/Subscribe.tcl:1538
+#, tcl-format
+msgid "%s additional contacts can see your presence."
+msgstr "%s contacte adiţionale pot vedea prezenţa dvs."
+
+#: ../jabber/Subscribe.tcl:1633
+msgid "If someone wants to see my presence and"
+msgstr "Dacă cineva doreşte să vadă prezenţa mea şi"
+
+#: ../jabber/Subscribe.tcl:1634
+msgid "is not in my list"
+msgstr "nu se află în lista mea"
+
+#: ../jabber/Subscribe.tcl:1635
+msgid "is in my list"
+msgstr "se află în lista mea"
+
+#: ../jabber/Subscribe.tcl:1638
+#: ../whiteboard/FilePrefs.tcl:492
+msgid "Always ask"
+msgstr "Întreabă întotdeauna"
+
+#: ../jabber/Subscribe.tcl:1639
+msgid "Auto-accept"
+msgstr "Acceptare automată"
+
+#: ../jabber/Subscribe.tcl:1640
+msgid "Auto-reject"
+msgstr "Rejectare automată"
+
+#: ../jabber/Subscribe.tcl:1663
+msgid "If auto-accept/reject show dialog with timer"
+msgstr "În cazul acceptării/rejectării automate, afişează dialog cu temporizare"
+
+#: ../jabber/Subscribe.tcl:1666
+msgid "The dialog is closed after (Seconds)"
+msgstr "Dialogul este închis după (secunde)"
+
+#: ../jabber/Subscribe.tcl:1686
+msgid "Put contacts who add me to their list in"
+msgstr "Pune contactele care mă adaugă în lista lor în"
+
+#: ../jabber/Subscribe.tcl:1689
+msgid "Default group"
+msgstr "Grup implicit"
+
+#: ../jabber/UserInfo.tcl:142
+#: ../jabber/VCard.tcl:82
+#, tcl-format
+msgid "Downloading business card from %s"
+msgstr "Descarc cartea de vizită de la %s"
+
+#: ../jabber/UserInfo.tcl:226
+msgid "Operating system"
+msgstr "Sistem de operare"
+
+#: ../jabber/UserInfo.tcl:356
+#: ../jabber/VCard.tcl:102
+#: ../jabber/VCard.tcl:844
+msgid "Cannot download business card."
+msgstr "Nu pot descărca cartea de vizită."
+
+#: ../jabber/UserInfo.tcl:384
+#: ../jabber/VCard.tcl:227
+#, tcl-format
+msgid "Business Card: %s"
+msgstr "Carte de vizită: %s"
+
+#: ../jabber/UserInfo.tcl:474
+#, tcl-format
+msgid "Failed to obtain personal notes: %s"
+msgstr ""
+
+#. TRANSLATORS: in the business card dialog, there can be made notes about each contact
+#: ../jabber/UserInfo.tcl:527
+msgid "Notes"
+msgstr "Note"
+
+#: ../jabber/UserInfo.tcl:533
+msgid "Add your personal notes about this contact."
+msgstr "Ajoutez vos notes personnelles à propos de ce contact."
+
+#: ../jabber/UserInfo.tcl:562
+msgid "Client"
+msgstr "Client"
+
+#: ../jabber/VCard.tcl:111
+msgid "Business card downloaded."
+msgstr "Carte de vizită descărcată."
+
+#: ../jabber/VCard.tcl:224
+msgid "Edit Business Card"
+msgstr "Editare carte de vizită"
+
+#: ../jabber/VCard.tcl:294
+msgid "First name"
+msgstr "Prenume"
+
+#: ../jabber/VCard.tcl:295
+msgid "Middle"
+msgstr "Iniţiale al doilea prenume"
+
+#: ../jabber/VCard.tcl:296
+msgid "Last name"
+msgstr "Nume de familie"
+
+#: ../jabber/VCard.tcl:345
+msgid "Personal"
+msgstr "Personal"
+
+#: ../jabber/VCard.tcl:362
+msgid "Website"
+msgstr "Sit web"
+
+#: ../jabber/VCard.tcl:363
+msgid "Occupation"
+msgstr "Profesiune"
+
+#: ../jabber/VCard.tcl:364
+msgid "Birthday"
+msgstr "Data naşterii"
+
+#: ../jabber/VCard.tcl:385
+msgid "Format: mm/dd/yyyy"
+msgstr "Format : ll/zz/aaaa"
+
+#: ../jabber/VCard.tcl:395
+msgid "Email addresses"
+msgstr "Adresă e-mail"
+
+#: ../jabber/VCard.tcl:414
+msgid "Remove Avatar"
+msgstr "Elimină avatar"
+
+#: ../jabber/VCard.tcl:473
+msgid "Work"
+msgstr "Serviciu"
+
+#: ../jabber/VCard.tcl:499
+msgid "Company"
+msgstr "Companie"
+
+#: ../jabber/VCard.tcl:500
+msgid "Department"
+msgstr "Departament"
+
+#: ../jabber/VCard.tcl:501
+msgid "Title"
+msgstr "Titlu"
+
+#: ../jabber/VCard.tcl:502
+msgid "Address 1"
+msgstr "Adresa 1"
+
+#: ../jabber/VCard.tcl:503
+msgid "Address 2"
+msgstr "Adresa 2"
+
+#: ../jabber/VCard.tcl:504
+msgid "City"
+msgstr "Localitate"
+
+#: ../jabber/VCard.tcl:508
+msgid "Tel (voice)"
+msgstr "Tel (voce)"
+
+#: ../jabber/VCard.tcl:509
+msgid "Tel (fax)"
+msgstr "Tel (fax)"
+
+#: ../jabber/VCard.tcl:890
+msgid "Open Business Card"
+msgstr "Deschide carte de vizită"
+
+#: ../lib/Bookmarks.tcl:32
+msgid "Edit Bookmarks"
+msgstr "Editare marcaje"
+
+#: ../lib/Bookmarks.tcl:127
+#: ../lib/Bookmarks.tcl:172
+msgid "New Bookmark"
+msgstr "Marcaj nou"
+
+#: ../lib/Component.tcl:59
+#: ../whiteboard/WDialogs.tcl:39
+msgid "There are no plugins or helper applications identified on this system."
+msgstr "Nu au fost detectate extensii sau aplicatii auxiliare pe acest sistem."
+
+#: ../lib/Component.tcl:68
+#: ../whiteboard/Plugins.tcl:1326
+#: ../whiteboard/WDialogs.tcl:47
+msgid "Plugins"
+msgstr "Extensii"
+
+#. TRANSLATORS: shown on Linux when trying to print
+#: ../lib/Dialogs.tcl:120
+#, fuzzy
+msgid "Shell print command, edit if desired"
+msgstr "Comandă de tipărire shell, editaţi dacă doriţi"
+
+#: ../lib/Dialogs.tcl:470
+#: ../lib/Splash.tcl:83
+#: ../lib/UI.tcl:488
+#: ../lib/UI.tcl:490
+#, tcl-format
+msgid "About %s"
+msgstr "Despre %s"
+
+#. TRANSLATORS: some old whiteboard feature
+#: ../lib/EditDialogs.tcl:81
+#: ../lib/EditDialogs.tcl:93
+msgid "Edit Shortcuts"
+msgstr "Editare scurtături"
+
+#: ../lib/EditDialogs.tcl:226
+msgid "Warning: you have edited the shortcuts. Don't you want to save them?"
+msgstr "Atenţie: aţi editat scurtăturile. Nu doriţi salvarea lor?"
+
+#: ../lib/EditDialogs.tcl:276
+msgid "Add Shortcut"
+msgstr "Adaugă scurtătură"
+
+#: ../lib/EditDialogs.tcl:277
+msgid "New shortcut"
+msgstr "Scurtătură nouă"
+
+#: ../lib/EditDialogs.tcl:278
+#: ../lib/EditDialogs.tcl:283
+msgid "Complete ip number or name"
+msgstr "Completaţi IP sau nume"
+
+#: ../lib/EditDialogs.tcl:281
+msgid "Edit Shortcut"
+msgstr "Editare scurtătură"
+
+#: ../lib/EditDialogs.tcl:282
+msgid "Shortcut"
+msgstr "Scurtătură"
+
+#. TRANSLATORS: see preferences, whiteboard cache settings
+#: ../lib/FileCache.tcl:602
+msgid "File Cache"
+msgstr "Cache fişiere"
+
+#: ../lib/FileCache.tcl:627
+msgid "Disk cache size"
+msgstr "Dimensiune tampon disc"
+
+#: ../lib/FileCache.tcl:631
+msgid "Clear Cache"
+msgstr "Golire tampon"
+
+#: ../lib/FileCache.tcl:636
+msgid "Amount of cache to store recent whiteboard files to increase speed."
+msgstr "Dimensiune tampon pentru stocarea fişierelor recente tip tablă de desen pentru creşterea vitezei."
+
+#: ../lib/FileCache.tcl:648
+msgid "Synchronise cache"
+msgstr "Sincronizare tampon"
+
+#: ../lib/FileCache.tcl:655
+msgid "Always"
+msgstr "Întotdeauna"
+
+#: ../lib/FileCache.tcl:656
+msgid "Once per session"
+msgstr "O dată pe sesiune"
+
+#: ../lib/FileCache.tcl:657
+msgid "Never"
+msgstr "Niciodată"
+
+#: ../lib/HttpTrpt.tcl:66
+#, tcl-format
+msgid "Cannot open file %s"
+msgstr "Nu pot deschide fişierul %s"
+
+#: ../lib/HttpTrpt.tcl:100
+#: ../lib/HttpTrpt.tcl:133
+#: ../lib/HttpTrpt.tcl:227
+#: ../lib/HttpTrpt.tcl:241
+#, tcl-format
+msgid "Cannot download the file %s."
+msgstr "Nu pot descărca fişierul %s."
+
+#: ../lib/HttpTrpt.tcl:102
+#: ../lib/HttpTrpt.tcl:135
+#: ../lib/HttpTrpt.tcl:229
+#, tcl-format
+msgid "File transport error: %s"
+msgstr "Eroare transmisie fişier: %s"
+
+#: ../lib/HttpTrpt.tcl:169
+#: ../lib/HttpTrpt.tcl:188
+msgid "Downloading"
+msgstr "Descărcare în curs"
+
+#: ../lib/HttpTrpt.tcl:221
+msgid "Timeout"
+msgstr "Timp expirat"
+
+#: ../lib/HttpTrpt.tcl:222
+msgid "Cannot download file over HTTP: timeout."
+msgstr "Nu pot descărca fişierul prin HTTP: timp expirat"
+
+#: ../lib/HttpTrpt.tcl:234
+msgid "The server closed the socket without replying."
+msgstr "Serverul a închis socket-ul fără să răspundă."
+
+#: ../lib/HttpTrpt.tcl:252
+#, tcl-format
+msgid "Download of file %s finished."
+msgstr "Descărcarea fişierului %s terminată."
+
+#: ../lib/HttpTrpt.tcl:258
+#, tcl-format
+msgid "File transport of %s was reset."
+msgstr "Transmisia fişierului %s a fost reiniţializată."
+
+#: ../lib/Httpd.tcl:79
+#, tcl-format
+msgid "Cannot start the internal HTTP server: %s"
+msgstr "Nu pot porni serverul HTTP intern: %s"
+
+#: ../lib/Init.tcl:745
+#: ../lib/Init.tcl:766
+#: ../lib/Media.tcl:179
+#: ../whiteboard/Plugins.tcl:445
+#, tcl-format
+msgid "Looking for %s"
+msgstr "Caut %s"
+
+#: ../lib/MacintoshUtils.tcl:56
+#: ../lib/MacintoshUtils.tcl:78
+#: ../lib/MacintoshUtils.tcl:100
+#: ../lib/UserActions.tcl:45
+#: ../lib/UserActions.tcl:73
+#: ../lib/UserActions.tcl:94
+msgid "Cannot find necessary Tcl extension."
+msgstr "Nu pot găsi extensia Tcl necesară."
+
+#: ../lib/PrefGeneral.tcl:59
+msgid "Settings"
+msgstr "Setări"
+
+#: ../lib/PrefGeneral.tcl:63
+msgid "Store preferences on same drive as program"
+msgstr "Salvaţi preferinţele pe acelaşi dispozitiv cu aplicaţia"
+
+#: ../lib/PrefGeneral.tcl:66
+msgid "Store preferences in same folder as program"
+msgstr "Salvaţi preferinţele în acelaşi director cu aplicaţia"
+
+#: ../lib/PrefGeneral.tcl:129
+msgid "You have chosen to store your preferences on the same drive as the application. If this drive is not a removable device your personal settings could be visible. Do you want to continue?"
+msgstr "Aţi ales salvarea preferinţelor dvs. pe acelaşi disc cu aplicaţia. Dacă discul nu este portabil, setările dvs. personale pot fi vizibile. Doriţi să continuaţi?"
+
+#: ../lib/PrefGeneral.tcl:144
+#: ../lib/PrefGeneral.tcl:168
+#, tcl-format
+msgid "You have chosen to store your preferences in the default location. If you remove or move your personal settings at %s, the preferences in the default location will be used the next time you start %s. Do you want to remove the old preferences?"
+msgstr "Aţi ales să salvaţi preferinţele în locaţia implicită. Dacă eliminaţi sau mutaţi setările dvs. personale la %s, preferinţele din locaţia implicită vor fi utilizate data viitoare când veţi porni %s. Doriţi înlăturarea preferinţelor vechi?"
+
+#: ../lib/PrefHelpers.tcl:73
+#: ../lib/PrefHelpers.tcl:116
+msgid "Default Applications"
+msgstr "Aplicaţii implicite"
+
+#: ../lib/PrefHelpers.tcl:127
+msgid "Browser"
+msgstr "Browser"
+
+#: ../lib/PrefHelpers.tcl:131
+msgid "Email client"
+msgstr "Client e-mail"
+
+#: ../lib/PrefNet.tcl:84
+msgid "Network"
+msgstr "Reţea"
+
+#: ../lib/PrefNet.tcl:123
+msgid "NAT"
+msgstr "NAT"
+
+#: ../lib/PrefNet.tcl:127
+msgid "Ports"
+msgstr "Porturi"
+
+#: ../lib/PrefNet.tcl:131
+msgid "Certificates"
+msgstr "Certificate"
+
+#: ../lib/PrefNet.tcl:151
+msgid "Built in server"
+msgstr "Server integrat"
+
+#: ../lib/PrefNet.tcl:153
+msgid "File transfer"
+msgstr "Transfer de fişiere"
+
+#: ../lib/PrefNet.tcl:191
+#: ../lib/PrefNet.tcl:226
+msgid "TLS certificate file"
+msgstr "Ficşier certificat TLS"
+
+#: ../lib/PrefNet.tcl:194
+#: ../lib/PrefNet.tcl:200
+#: ../lib/PrefNet.tcl:206
+msgid "Browse"
+msgstr "Parcurge"
+
+#: ../lib/PrefNet.tcl:197
+#: ../lib/PrefNet.tcl:235
+msgid "TLS private key file"
+msgstr "Fişier cheie privată TLS"
+
+#: ../lib/PrefNet.tcl:203
+#: ../lib/PrefNet.tcl:244
+#| msgid "TLS certificate file"
+msgid "TLS CA certificate file"
+msgstr "Fişier certificat TLS CA"
+
+#: ../lib/PrefUtils.tcl:218
+#, tcl-format
+msgid "Cannot open file %s."
+msgstr "Nu pot deschide fişierul %s."
+
+#: ../lib/Preferences.tcl:174
+msgid "Preferences"
+msgstr "Preferinţe"
+
+#: ../lib/Preferences.tcl:243
+msgid "Factory Settings"
+msgstr "Setări implicite din fabrică"
+
+#: ../lib/Preferences.tcl:394
+msgid "Do you really want to reset your customization to factory defaults?"
+msgstr "Doriţi resetarea personalizărilor la setările implicite din fabrică?"
+
+#: ../lib/Preferences.tcl:456
+#, tcl-format
+msgid "At least one setting requires a restart of %s."
+msgstr "Cel puţin un parametru este necesar după repornirea %s."
+
+#: ../lib/Preferences.tcl:499
+msgid "The preferences have been changed. Do you want to cancel anyway?"
+msgstr "Preferinţele au fost modificte. Doriţi anularea?"
+
+#: ../lib/Proxy.tcl:152
+msgid "NAT Address"
+msgstr "Adresă NAT"
+
+#: ../lib/Proxy.tcl:196
+msgid "Usage of this HTTP proxy settings is determined by each profile's settings. File transfers will not work if you use an HTTP proxy."
+msgstr "Utilizarea acestor parametri proxy HTTP este determinată prin setările fiecărui profil. Transferul de fişiere nu va funcţiona dacă utilizaţi proxy HTTP."
+
+#: ../lib/Proxy.tcl:197
+msgid "Use proxy"
+msgstr "Foloseşte proxy"
+
+#: ../lib/Proxy.tcl:200
+#: ../whiteboard/FilePrefs.tcl:462
+#: ../whiteboard/ItemInspector.tcl:289
+#: ../whiteboard/WDialogs.tcl:123
+msgid "Type"
+msgstr "Tip"
+
+#: ../lib/Proxy.tcl:216
+msgid "Exclude addresses (* as wildcard)."
+msgstr "Exclude adresele (* drept wildcard)"
+
+#: ../lib/Proxy.tcl:267
+msgid "Use the following external address"
+msgstr "Folosiţi următoarea adresă externă"
+
+#: ../lib/Proxy.tcl:273
+msgid "Detect"
+msgstr "Detectare"
+
+#: ../lib/TheServer.tcl:64
+msgid "Cannot start server socket. Perhaps you are not connected."
+msgstr "Nu pot porni socket-ul  server. Verificaţi conexiunea de reţea."
+
+#: ../lib/Types.tcl:577
+msgid "World Application"
+msgstr "World Application"
+
+#: ../lib/Types.tcl:578
+msgid "QuickDraw 3D Metafile"
+msgstr "Metafişier QuickDraw 3D"
+
+#: ../lib/Types.tcl:579
+msgid "Tcl File"
+msgstr "Fişier Tcl"
+
+#: ../lib/Types.tcl:580
+msgid "Itcl File"
+msgstr "Fişier Itcl"
+
+#: ../lib/Types.tcl:581
+msgid "Session Description Protocol"
+msgstr "Session Description Protocol"
+
+#: ../lib/Types.tcl:582
+msgid "Adobe Flash Media"
+msgstr "Adobe Flash Media"
+
+#: ../lib/Types.tcl:583
+msgid "Mac Binary"
+msgstr "Mac Binar"
+
+#: ../lib/Types.tcl:584
+msgid "VTK 3D"
+msgstr "VTK 3D"
+
+#: ../lib/Types.tcl:585
+msgid "Generic File"
+msgstr "Fişier generic"
+
+#: ../lib/Types.tcl:586
+msgid "PDF Document"
+msgstr "Document PDF"
+
+#: ../lib/Types.tcl:587
+msgid "PostScript Document"
+msgstr "Document PostScript"
+
+#: ../lib/Types.tcl:588
+#: ../lib/Types.tcl:617
+msgid "RTF Document"
+msgstr "Document RTF"
+
+#: ../lib/Types.tcl:589
+msgid "JavaScript File"
+msgstr "Fişier JavaScript"
+
+#: ../lib/Types.tcl:590
+msgid "TeX File"
+msgstr "Fişier TeX"
+
+#: ../lib/Types.tcl:591
+msgid "Archive Tar"
+msgstr "Archivă Tar"
+
+#: ../lib/Types.tcl:592
+msgid "Abi Word Document"
+msgstr "Document Abi Word"
+
+#: ../lib/Types.tcl:593
+msgid "Microsoft Excel Spreadsheet"
+msgstr "Foaie de calcul Microsoft Excel"
+
+#: ../lib/Types.tcl:594
+msgid "Microsoft PowerPoint Presentation"
+msgstr "Prezentare Microsoft PowerPoint"
+
+#: ../lib/Types.tcl:595
+msgid "Microsoft Word Document"
+msgstr "Document Microsoft Word"
+
+#: ../lib/Types.tcl:596
+msgid "MPEG Audio"
+msgstr "Audio MPEG"
+
+#: ../lib/Types.tcl:597
+msgid "AIFF/Amiga Audio"
+msgstr "Audio AIFF/Amiga"
+
+#: ../lib/Types.tcl:598
+msgid "ULAW (Sun) Audio"
+msgstr "Audio ULAW (Sun)"
+
+#: ../lib/Types.tcl:599
+msgid "Streaming Audio"
+msgstr "Audio Streaming"
+
+#: ../lib/Types.tcl:600
+msgid "WAV Audio"
+msgstr "Audio WAV"
+
+#: ../lib/Types.tcl:601
+msgid "QCP Audio"
+msgstr "Audio QCP"
+
+#: ../lib/Types.tcl:602
+msgid "MIDI Audio"
+msgstr "Audio MIDI"
+
+#: ../lib/Types.tcl:603
+msgid "BMP Image"
+msgstr "Imagine BMP"
+
+#: ../lib/Types.tcl:604
+msgid "FlashPix Image"
+msgstr "Imagine FlashPix"
+
+#: ../lib/Types.tcl:605
+msgid "GIF Image"
+msgstr "Imagine GIF"
+
+#: ../lib/Types.tcl:606
+msgid "JPEG Image"
+msgstr "Imagine JPEG"
+
+#: ../lib/Types.tcl:607
+msgid "Macpaint Image"
+msgstr "Imagine Macpaint"
+
+#: ../lib/Types.tcl:608
+msgid "Adobe Photoshop Image"
+msgstr "Imagine Adobe Photoshop"
+
+#: ../lib/Types.tcl:609
+msgid "PNG Image"
+msgstr "Imagine PNG"
+
+#: ../lib/Types.tcl:610
+msgid "PICT Image"
+msgstr "Imagine PICT"
+
+#: ../lib/Types.tcl:611
+msgid "SGI Image"
+msgstr "Imagine SGI"
+
+#: ../lib/Types.tcl:612
+msgid "Truevision Targa Image"
+msgstr "Imagine Truevision Targa"
+
+#: ../lib/Types.tcl:613
+msgid "TIFF Image"
+msgstr "Imagine TIFF"
+
+#: ../lib/Types.tcl:614
+msgid "X PixMap Image"
+msgstr "Imagine X PixMap"
+
+#: ../lib/Types.tcl:615
+msgid "Plain Text Document"
+msgstr "Document text"
+
+#: ../lib/Types.tcl:616
+msgid "XML Document"
+msgstr "Document XML"
+
+#: ../lib/Types.tcl:618
+msgid "HTML Document"
+msgstr "Document HTML"
+
+#: ../lib/Types.tcl:619
+msgid "Cascading Style Sheet"
+msgstr "Foaie de stil CSS"
+
+#: ../lib/Types.tcl:620
+msgid "QuickTime Video"
+msgstr "Video QuickTime"
+
+#: ../lib/Types.tcl:621
+msgid "MPEG-4 Video"
+msgstr "Video MPEG-4"
+
+#: ../lib/Types.tcl:622
+msgid "DV Video"
+msgstr "Video DV"
+
+#: ../lib/Types.tcl:623
+msgid "MPEG Video"
+msgstr "Video MPEG"
+
+#: ../lib/Types.tcl:624
+msgid "Microsoft AVI Video"
+msgstr "Video Microsoft AVI"
+
+#: ../lib/Types.tcl:625
+msgid "Autodesk's FLIC File"
+msgstr "Fişier Autodesk FLIC"
+
+#: ../lib/UserActions.tcl:135
+msgid "Quit"
+msgstr "Ieşire"
+
+#: ../lib/UserActions.tcl:136
+msgid "Do you actually want to quit?"
+msgstr "Doriţi într-adevăr să ieşiţi?"
+
+#: ../whiteboard/CanvasCmd.tcl:447
+#: ../whiteboard/CanvasFile.tcl:737
+#: ../whiteboard/CanvasFile.tcl:768
+#, tcl-format
+msgid "Cannot write to %s: %s"
+msgstr "Nu pot scrie la %s : %s"
+
+#: ../whiteboard/CanvasCmd.tcl:455
+#: ../whiteboard/CanvasFile.tcl:52
+#: ../whiteboard/CanvasFile.tcl:71
+#: ../whiteboard/CanvasFile.tcl:500
+#: ../whiteboard/CanvasFile.tcl:843
+#, tcl-format
+msgid "Cannot read %s: %s"
+msgstr "Nu pot citi %s : %s"
+
+#: ../whiteboard/CanvasDraw.tcl:1353
+msgid "Arc tool, click and drag"
+msgstr "Arc (click şi trage)"
+
+#: ../whiteboard/CanvasDraw.tcl:1462
+#: ../whiteboard/CanvasDraw.tcl:1519
+#: ../whiteboard/Whiteboard.tcl:87
+msgid "Arc tool, click to set center, spacebar to cancel"
+msgstr "Arc (clck pentru centru, <spaţiu> pentru anulare)"
+
+#: ../whiteboard/CanvasFile.tcl:549
+msgid "Opening a whiteboard file clears the current whiteboard!"
+msgstr "Deschiderea unui fişier tablă de desen şterge tabla de desen curentă!"
+
+#: ../whiteboard/CanvasFile.tcl:554
+msgid "Open File"
+msgstr "Deschide fişier"
+
+#: ../whiteboard/CanvasFile.tcl:758
+msgid "Save Canvas Item"
+msgstr "Salvează element de fundal"
+
+#: ../whiteboard/CanvasUtils.tcl:90
+#: ../whiteboard/Whiteboard.tcl:475
+msgid "Thickness"
+msgstr "Grosime"
+
+#: ../whiteboard/CanvasUtils.tcl:101
+#: ../whiteboard/Whiteboard.tcl:486
+msgid "Brush Thickness"
+msgstr "Grosime pensulă"
+
+#: ../whiteboard/CanvasUtils.tcl:112
+#: ../whiteboard/Whiteboard.tcl:516
+msgid "Arcs"
+msgstr "Arce"
+
+#: ../whiteboard/CanvasUtils.tcl:113
+#: ../whiteboard/ItemInspector.tcl:230
+#: ../whiteboard/Whiteboard.tcl:517
+msgid "Pieslice"
+msgstr "Felie de tort"
+
+#: ../whiteboard/CanvasUtils.tcl:115
+#: ../whiteboard/ItemInspector.tcl:231
+#: ../whiteboard/Whiteboard.tcl:519
+msgid "Chord"
+msgstr "Coardă"
+
+#: ../whiteboard/CanvasUtils.tcl:117
+#: ../whiteboard/ItemInspector.tcl:232
+#: ../whiteboard/Whiteboard.tcl:521
+msgid "Arc"
+msgstr "Arc"
+
+#: ../whiteboard/CanvasUtils.tcl:121
+#: ../whiteboard/CanvasUtils.tcl:1607
+msgid "Color"
+msgstr "Culoare"
+
+#: ../whiteboard/CanvasUtils.tcl:123
+msgid "Fill Color"
+msgstr "Culoare de umplere"
+
+#: ../whiteboard/CanvasUtils.tcl:125
+msgid "Outline Color"
+msgstr "Couloare contur"
+
+#: ../whiteboard/CanvasUtils.tcl:127
+#: ../whiteboard/CanvasUtils.tcl:129
+#: ../whiteboard/CanvasUtils.tcl:149
+#: ../whiteboard/Whiteboard.tcl:452
+#: ../whiteboard/Whiteboard.tcl:2940
+#: ../whiteboard/Whiteboard.tcl:2949
+msgid "&Edit Item"
+msgstr "&Editare element"
+
+#: ../whiteboard/CanvasUtils.tcl:131
+msgid "Save Image As"
+msgstr "Salvează imaginea ca"
+
+#: ../whiteboard/CanvasUtils.tcl:133
+#: ../whiteboard/Whiteboard.tcl:463
+#: ../whiteboard/Whiteboard.tcl:2946
+#: ../whiteboard/Whiteboard.tcl:2958
+#: ../whiteboard/Whiteboard.tcl:2961
+msgid "Image Larger"
+msgstr "Imagine mai mare"
+
+#: ../whiteboard/CanvasUtils.tcl:135
+#: ../whiteboard/Whiteboard.tcl:464
+#: ../whiteboard/Whiteboard.tcl:2947
+#: ../whiteboard/Whiteboard.tcl:2959
+#: ../whiteboard/Whiteboard.tcl:2962
+msgid "Image Smaller"
+msgstr "Imagine mai mică"
+
+#: ../whiteboard/CanvasUtils.tcl:137
+msgid "Export Image"
+msgstr "Exportă imagine"
+
+#: ../whiteboard/CanvasUtils.tcl:139
+msgid "Export Movie"
+msgstr "Exportă film"
+
+#: ../whiteboard/CanvasUtils.tcl:141
+msgid "Sync Playback"
+msgstr "Sincronizează lectura"
+
+#: ../whiteboard/CanvasUtils.tcl:146
+msgid "Timecode"
+msgstr "Cod de timp"
+
+#: ../whiteboard/CanvasUtils.tcl:151
+msgid "Reload Image"
+msgstr "Reîncarcă imagine"
+
+#: ../whiteboard/CanvasUtils.tcl:153
+#: ../whiteboard/CanvasUtils.tcl:166
+#: ../whiteboard/Whiteboard.tcl:500
+#: ../whiteboard/Whiteboard.tcl:513
+msgid "Line Smoothness"
+msgstr "Netezime linie"
+
+#: ../whiteboard/CanvasUtils.tcl:169
+msgid "Straighten"
+msgstr "Îndreaptă"
+
+#: ../whiteboard/CanvasUtils.tcl:171
+#: ../whiteboard/Whiteboard.tcl:553
+msgid "Font"
+msgstr "Font"
+
+#: ../whiteboard/CanvasUtils.tcl:188
+#: ../whiteboard/Whiteboard.tcl:570
+msgid "Weight"
+msgstr "Stil"
+
+#: ../whiteboard/CanvasUtils.tcl:197
+msgid "Add Speech Bubble"
+msgstr "Adaugă bulă de conversaţie"
+
+#: ../whiteboard/CanvasUtils.tcl:205
+#: ../whiteboard/ItemInspector.tcl:221
+#: ../whiteboard/Whiteboard.tcl:531
+msgid "Dotted"
+msgstr "Punctat"
+
+#: ../whiteboard/CanvasUtils.tcl:206
+#: ../whiteboard/ItemInspector.tcl:223
+#: ../whiteboard/Whiteboard.tcl:532
+msgid "Dashed"
+msgstr "Cratimă-cratimă"
+
+#: ../whiteboard/CanvasUtils.tcl:207
+#: ../whiteboard/ItemInspector.tcl:222
+#: ../whiteboard/Whiteboard.tcl:533
+msgid "Dash-dotted"
+msgstr "Cratimă-punct"
+
+#: ../whiteboard/CanvasUtils.tcl:217
+#: ../whiteboard/CanvasUtils.tcl:1431
+#: ../whiteboard/ItemInspector.tcl:362
+#: ../whiteboard/Whiteboard.tcl:543
+#: ../whiteboard/Whiteboard.tcl:2539
+msgid "Dash"
+msgstr "Cratimă"
+
+#: ../whiteboard/FilePrefs.tcl:79
+msgid "File Types"
+msgstr "Tipuri de fişier"
+
+#: ../whiteboard/FilePrefs.tcl:146
+msgid "Edit File Type"
+msgstr "Editează tipul de fişier"
+
+#: ../whiteboard/FilePrefs.tcl:148
+msgid "Add File Type"
+msgstr "Adaugă"
+
+#: ../whiteboard/FilePrefs.tcl:176
+msgid "File Type"
+msgstr "Tip de fişier"
+
+#: ../whiteboard/FilePrefs.tcl:179
+#: ../whiteboard/FilePrefs.tcl:484
+msgid "Open with"
+msgstr "Deschide cu"
+
+#: ../whiteboard/FilePrefs.tcl:405
+msgid "Add/Edit File Type"
+msgstr "Adaugă/Editează tipul de fişier"
+
+#: ../whiteboard/FilePrefs.tcl:465
+msgid "MIME type"
+msgstr "Tip MIME"
+
+#: ../whiteboard/FilePrefs.tcl:468
+#: ../whiteboard/WDialogs.tcl:138
+msgid "Extensions"
+msgstr "Extensii"
+
+#: ../whiteboard/FilePrefs.tcl:472
+msgid "Encoding"
+msgstr "Codare"
+
+#: ../whiteboard/FilePrefs.tcl:475
+msgid "Binary"
+msgstr "Binar"
+
+#: ../whiteboard/FilePrefs.tcl:478
+msgid "Action"
+msgstr "Actiune"
+
+#: ../whiteboard/FilePrefs.tcl:479
+msgid "Reject file"
+msgstr "Respinge fişierul"
+
+#: ../whiteboard/FilePrefs.tcl:481
+msgid "Save to disk"
+msgstr "Salvează pe disc."
+
+#: ../whiteboard/FilePrefs.tcl:587
+msgid "One or more fields are missing. Try again or cancel."
+msgstr "Unul sau mai multe câmpuri lipsesc. Încercaţi încă o dată sau renunţaţi."
+
+#: ../whiteboard/GetFileIface.tcl:130
+#: ../whiteboard/GetFileIface.tcl:232
+#: ../whiteboard/GetFileIface.tcl:233
+#: ../whiteboard/PutFileIface.tcl:248
+msgid "File Transfer Error"
+msgstr "Eroare de transfer de fişiere"
+
+#: ../whiteboard/GetFileIface.tcl:459
+#, tcl-format
+msgid ""
+"Received response of the server %s.\n"
+" Error code %s\n"
+"Message: %s"
+msgstr ""
+"Răspuns primit de la serverul %s.\n"
+"Cod de eroare %s\n"
+"Mesaj: %s"
+
+#: ../whiteboard/GetFileIface.tcl:468
+#: ../whiteboard/PutFileIface.tcl:177
+#, tcl-format
+msgid "Contacting %s. Waiting for response"
+msgstr "%s a fost contactat. Aştept un răspuns"
+
+#: ../whiteboard/GetFileIface.tcl:469
+#: ../whiteboard/PutFileIface.tcl:178
+#, tcl-format
+msgid "Connection to %s failed: received an eof."
+msgstr "Conexiune la %s eşuată: am recepţionat un EOF."
+
+#: ../whiteboard/GetFileIface.tcl:470
+#: ../whiteboard/PutFileIface.tcl:179
+#, tcl-format
+msgid "Connection to %s failed."
+msgstr "Conexiune la %s eşuată."
+
+#: ../whiteboard/GetFileIface.tcl:471
+#: ../whiteboard/PutFileIface.tcl:180
+#, tcl-format
+msgid "Contacted %s. Negotiating"
+msgstr "%s a fost contactat. Negociere în curs"
+
+#: ../whiteboard/GetFileIface.tcl:472
+#: ../whiteboard/PutFileIface.tcl:181
+#, tcl-format
+msgid "Cannot read server response from %s."
+msgstr "Nu pot citi răspunsul serverului de la %s."
+
+#: ../whiteboard/GetFileIface.tcl:473
+#: ../whiteboard/PutFileIface.tcl:182
+#, tcl-format
+msgid "The server at %s did not respond with a well formed protocol."
+msgstr "Serverul %s nu a răspuns cu un protocol formulat corect."
+
+#: ../whiteboard/GetFileIface.tcl:474
+#: ../whiteboard/PutFileIface.tcl:183
+#, tcl-format
+msgid "%s accepted file %s. Initiating file transfer"
+msgstr "%s a acceptat fişierul %s. Iniţializez transferul"
+
+#: ../whiteboard/GetFileIface.tcl:475
+#, tcl-format
+msgid "Transfer from %s ended prematurely."
+msgstr "Transferul de la %s s-a terminat prematur."
+
+#: ../whiteboard/GetFileIface.tcl:476
+#, tcl-format
+msgid "Finished downloading file %s from %s."
+msgstr "Fişierul %s s-a terminat de descărcat de la %s."
+
+#: ../whiteboard/GetFileIface.tcl:477
+#, tcl-format
+msgid "Cannot download from %s: network error."
+msgstr "Nu pot descărca de la %s : eroare de reţea."
+
+#: ../whiteboard/Import.tcl:59
+msgid "Import Image/Movie"
+msgstr "Importă imagine/video"
+
+#: ../whiteboard/Import.tcl:1809
+msgid "Save As GIF"
+msgstr "Salvează în format GIF"
+
+#: ../whiteboard/Import.tcl:2015
+#| msgid "Unknown"
+msgid "unknown file"
+msgstr "fişier necunoscut"
+
+#: ../whiteboard/Import.tcl:2020
+#| msgid "Unknown"
+msgid "Unknown file"
+msgstr "Fişier necunoscut"
+
+#: ../whiteboard/Import.tcl:2023
+#, tcl-format
+#| msgid "Cannot find importer for the MIME type %s"
+msgid "No url found for the file \"%s\" with MIME type %s"
+msgstr "Nu am găsit url pentru fişierul \"%s\" de tip MIME %s"
+
+#: ../whiteboard/ItemInspector.tcl:193
+msgid "Edit Item"
+msgstr "Editare element"
+
+#: ../whiteboard/ItemInspector.tcl:211
+#: ../whiteboard/ItemInspector.tcl:365
+#: ../whiteboard/Whiteboard.tcl:497
+msgid "Fill"
+msgstr "Umplere"
+
+#: ../whiteboard/ItemInspector.tcl:215
+msgid "Both"
+msgstr "Ambele"
+
+#: ../whiteboard/ItemInspector.tcl:216
+#, fuzzy
+msgid "Butt"
+msgstr "Pană"
+
+#: ../whiteboard/ItemInspector.tcl:217
+msgid "Projecting"
+msgstr "Carrée"
+
+#: ../whiteboard/ItemInspector.tcl:218
+msgid "Round"
+msgstr "Rotunjire"
+
+#: ../whiteboard/ItemInspector.tcl:219
+msgid "Bevel"
+msgstr "Teşire"
+
+#: ../whiteboard/ItemInspector.tcl:220
+msgid "Miter"
+msgstr "Îmbinare"
+
+#: ../whiteboard/ItemInspector.tcl:224
+#: ../whiteboard/ItemInspector.tcl:829
+msgid "False"
+msgstr "Fals"
+
+#: ../whiteboard/ItemInspector.tcl:225
+#: ../whiteboard/ItemInspector.tcl:829
+msgid "True"
+msgstr "Adevărat"
+
+#: ../whiteboard/ItemInspector.tcl:226
+msgid "Gray 75%"
+msgstr "Gri 75%"
+
+#: ../whiteboard/ItemInspector.tcl:227
+msgid "Gray 50%"
+msgstr "Gri 50%"
+
+#: ../whiteboard/ItemInspector.tcl:228
+msgid "Gray 25%"
+msgstr "Gri 25%"
+
+#: ../whiteboard/ItemInspector.tcl:229
+msgid "Gray 12%"
+msgstr "Gri 12%"
+
+#: ../whiteboard/ItemInspector.tcl:233
+msgid "N"
+msgstr "N"
+
+#: ../whiteboard/ItemInspector.tcl:234
+msgid "NE"
+msgstr "NE"
+
+#: ../whiteboard/ItemInspector.tcl:235
+msgid "E"
+msgstr "E"
+
+#: ../whiteboard/ItemInspector.tcl:236
+msgid "SE"
+msgstr "SE"
+
+#: ../whiteboard/ItemInspector.tcl:237
+msgid "S"
+msgstr "S"
+
+#: ../whiteboard/ItemInspector.tcl:238
+msgid "SW"
+msgstr "SW"
+
+#: ../whiteboard/ItemInspector.tcl:239
+msgid "W"
+msgstr "W"
+
+#: ../whiteboard/ItemInspector.tcl:240
+msgid "NW"
+msgstr "NW"
+
+#: ../whiteboard/ItemInspector.tcl:241
+msgid "Center"
+msgstr "Centru"
+
+#: ../whiteboard/ItemInspector.tcl:245
+msgid "Left"
+msgstr "Stânga"
+
+#: ../whiteboard/ItemInspector.tcl:246
+msgid "Right"
+msgstr "Dreapta"
+
+#: ../whiteboard/ItemInspector.tcl:247
+msgid "Transparent"
+msgstr "Transparent"
+
+#: ../whiteboard/ItemInspector.tcl:305
+msgid "Coordinates"
+msgstr "Coordonate"
+
+#: ../whiteboard/ItemInspector.tcl:358
+msgid "Anchor"
+msgstr "Ancoră"
+
+#: ../whiteboard/ItemInspector.tcl:359
+msgid "Arrow"
+msgstr "Săgeată"
+
+#: ../whiteboard/ItemInspector.tcl:360
+msgid "Arrow shape"
+msgstr "Formă săgeată"
+
+#: ../whiteboard/ItemInspector.tcl:361
+#, fuzzy
+msgid "Cap style"
+msgstr "Stil capete"
+
+#: ../whiteboard/ItemInspector.tcl:363
+msgid "Extend"
+msgstr "Extinde"
+
+#: ../whiteboard/ItemInspector.tcl:366
+msgid "Font familiy"
+msgstr "Familie font"
+
+#: ../whiteboard/ItemInspector.tcl:370
+#, fuzzy
+msgid "Join style"
+msgstr "Stil unire"
+
+#: ../whiteboard/ItemInspector.tcl:371
+msgid "Justify"
+msgstr "Justificat"
+
+#: ../whiteboard/ItemInspector.tcl:372
+msgid "Outline"
+msgstr "Contur"
+
+#: ../whiteboard/ItemInspector.tcl:373
+msgid "Outline stipple"
+msgstr "Contur punctat"
+
+#: ../whiteboard/ItemInspector.tcl:374
+msgid "Tags"
+msgstr "Etichete"
+
+#: ../whiteboard/ItemInspector.tcl:376
+msgid "Smooth"
+msgstr "Neted"
+
+#: ../whiteboard/ItemInspector.tcl:377
+msgid "Stipple"
+msgstr "Punctat"
+
+#: ../whiteboard/ItemInspector.tcl:379
+msgid "Underline"
+msgstr "Subliniere"
+
+#: ../whiteboard/ItemInspector.tcl:380
+#: ../whiteboard/WBPrefs.tcl:108
+msgid "Width"
+msgstr "Lăţime"
+
+#: ../whiteboard/ItemInspector.tcl:489
+msgid "Lock this item from being edited"
+msgstr "Blocaţi editarea acestui element"
+
+#: ../whiteboard/ItemInspector.tcl:955
+msgid "Broken Image"
+msgstr "Imagine coruptă"
+
+#. TRANSLATORS: old whiteboard feature
+#: ../whiteboard/Multicast.tcl:53
+msgid "Open Stream"
+msgstr "Deschide flux"
+
+#: ../whiteboard/Multicast.tcl:68
+msgid "Open QuickTime live stream"
+msgstr "Deschide flux QuickTime"
+
+#: ../whiteboard/Multicast.tcl:71
+msgid "Write URL or choose from shortcut"
+msgstr "Scrieţi URL sau alegeţi din prescurtare"
+
+#: ../whiteboard/Multicast.tcl:78
+msgid "Open a URL which contains a SDP file with extension .mov for a QuickTime realtime live streaming sending. Can be audio (radio) or video (TV). Alternatively, use your web browser to find the SDP file for a live transmission, download it on disk and open it is an ordinary movie."
+msgstr "Deschideţi un URL care conţine un fişier SDP cu extensia .mov pentru transmisie streaming live QuickTime. Poate fi audio (radio) sau video (TV). Alternativ, folosiţi browserul web pentru a găsi fişierul SDP pentru o transmisie live, descărcaţi-l pe disc şi deschideţi-l ca pe un film obişnuit."
+
+#: ../whiteboard/Plugins.tcl:1346
+msgid "Select the plugins you want to be loaded."
+msgstr "Alegeţi plugin-urile care doriţi să fie încărcate."
+
+#: ../whiteboard/Plugins.tcl:1366
+msgid "Support for mp3, wav, and a few other audio formats"
+msgstr "Suport pentru mp3, wav şi câteva alte formate audio"
+
+#: ../whiteboard/Plugins.tcl:1367
+msgid "Support for common image formats"
+msgstr "Suport pentru formate curente de imagini"
+
+#: ../whiteboard/Plugins.tcl:1368
+msgid "Support for PNG images"
+msgstr "Suport pentru imagini PNG"
+
+#: ../whiteboard/Plugins.tcl:1369
+msgid "Support for several animation, video and audio formats"
+msgstr "Suport pentru mai multe formate de animaţie, video şi audio"
+
+#: ../whiteboard/Plugins.tcl:1370
+msgid "Support for several animation, image, video and audio formats"
+msgstr "Suport pentru mai multe formate de animaţie, imagine, video şi audio"
+
+#: ../whiteboard/Plugins.tcl:1371
+msgid "Import plain text documents"
+msgstr "Import documente text"
+
+#: ../whiteboard/Plugins.tcl:1372
+msgid "Import HTML pages"
+msgstr "Import pagini HTML"
+
+#: ../whiteboard/Plugins.tcl:1373
+msgid "Import Itcl applets"
+msgstr "Import applet-uri Itcl"
+
+#: ../whiteboard/Plugins.tcl:1374
+msgid "Import documents on Windows"
+msgstr "Import documente pe Windows"
+
+#: ../whiteboard/PutFileIface.tcl:168
+#, tcl-format
+msgid "The server at %s responded with a code %s: %s"
+msgstr "Serverul %s a răspuns cu un cod %s : %s"
+
+#: ../whiteboard/PutFileIface.tcl:184
+#, tcl-format
+msgid "Transfer to %s ended prematurely."
+msgstr "Transferul către %s s-a încheiat prematur."
+
+#: ../whiteboard/PutFileIface.tcl:185
+#, tcl-format
+msgid "Finished uploading file %s to %s."
+msgstr "S-a încheiat transferul fişierului %s către %s."
+
+#: ../whiteboard/PutFileIface.tcl:186
+#, tcl-format
+msgid "Cannot upload to %s: network error."
+msgstr "Nu pot transfera către %s : eroare de reţea."
+
+#: ../whiteboard/WBPrefs.tcl:76
+msgid "Fonts"
+msgstr "Fonturi"
+
+#: ../whiteboard/WBPrefs.tcl:111
+msgid "Height"
+msgstr "Înălţime"
+
+#: ../whiteboard/WBPrefs.tcl:127
+msgid "Smooth freehand strokes"
+msgstr "Tuşă de mână liberă fină"
+
+#: ../whiteboard/WBPrefs.tcl:129
+msgid "Create new item for each line of text"
+msgstr "Creează element nou pentru fiecare linie de text"
+
+#: ../whiteboard/WBPrefs.tcl:131
+msgid "Only edit local whiteboard items"
+msgstr "Editaţi numai elementele locale de pe tabla de desen"
+
+#: ../whiteboard/WBPrefs.tcl:136
+msgid "Items created by others cannot be edited when enabled"
+msgstr "Elementele create de alţii nu pot fi editate când este activat"
+
+#: ../whiteboard/WBPrefs.tcl:155
+msgid "System"
+msgstr "Sistem"
+
+#: ../whiteboard/WBPrefs.tcl:212
+msgid "Warning: by importing any other fonts than the standard three ones (Times, Helvetica or Courier), you must be confident that all remote clients also have this font installed on their system."
+msgstr "Atenţie: la importarea altor fonturi decât cele trei standard (Times, Helvetica şi Courier), trebuie să fiţi încredinţat că toţi clienţii de la distanţă au instalate aceste fonturi pe sistemele lor."
+
+#: ../whiteboard/WBPrefs.tcl:299
+msgid "The standard fonts, Times, Helvetica, and Courier, may not be removed."
+msgstr "Fonturile standard Times, Helvetica şi Courier nu pot fi înlăturate."
+
+#: ../whiteboard/WDialogs.tcl:169
+msgid "no"
+msgstr "nu"
+
+#: ../whiteboard/WDialogs.tcl:169
+msgid "yes"
+msgstr "da"
+
+#: ../whiteboard/WDialogs.tcl:188
+msgid "Activated"
+msgstr "Activat"
+
+#: ../whiteboard/WDialogs.tcl:194
+msgid "Buffering support"
+msgstr "Funcţie tampon"
+
+#: ../whiteboard/WDialogs.tcl:195
+msgid "Blocking support"
+msgstr "Funcţie de blocare"
+
+#: ../whiteboard/WDialogs.tcl:196
+msgid "Secured"
+msgstr "Securizat"
+
+#: ../whiteboard/Whiteboard.tcl:76
+#: ../whiteboard/Whiteboard.tcl:1665
+msgid "Point tool, click to mark, double click to inspect, right click to popup"
+msgstr "Indicator, click pentru selecţie, dublu click pentru inspectare, click dreapta pentru meniu"
+
+#: ../whiteboard/Whiteboard.tcl:77
+msgid "Move tool"
+msgstr "Deplasare"
+
+#: ../whiteboard/Whiteboard.tcl:78
+msgid "Line tool"
+msgstr "Linie"
+
+#: ../whiteboard/Whiteboard.tcl:79
+msgid "Arrow tool"
+msgstr "Săgeată"
+
+#: ../whiteboard/Whiteboard.tcl:80
+msgid "Rectangle tool"
+msgstr "Dreptunghi"
+
+#: ../whiteboard/Whiteboard.tcl:81
+msgid "Oval tool"
+msgstr "Elipsă"
+
+#: ../whiteboard/Whiteboard.tcl:82
+msgid "Click to delete"
+msgstr "Click pentru a şterge"
+
+#: ../whiteboard/Whiteboard.tcl:83
+msgid "Pen tool"
+msgstr "Creion"
+
+#: ../whiteboard/Whiteboard.tcl:84
+msgid "Brush tool"
+msgstr "Pensulă"
+
+#: ../whiteboard/Whiteboard.tcl:85
+msgid "Paint tool, shift-click for transparency"
+msgstr "Umplere (shift+clic pentru transparenţă)"
+
+#: ../whiteboard/Whiteboard.tcl:86
+msgid "Polygon tool, spacebar to cancel"
+msgstr "Linie poligonală (<spaţiu> pentru sfârşit)"
+
+#: ../whiteboard/Whiteboard.tcl:88
+msgid "Rotate tool, select item first"
+msgstr "Rotaţie (mai întâi selectaţi elementul)"
+
+#: ../whiteboard/Whiteboard.tcl:89
+msgid "Text tool"
+msgstr "Text"
+
+#: ../whiteboard/Whiteboard.tcl:449
+#: ../whiteboard/Whiteboard.tcl:2931
+msgid "Select &All"
+msgstr "Selectează &tot"
+
+#: ../whiteboard/Whiteboard.tcl:454
+#: ../whiteboard/Whiteboard.tcl:2941
+#: ../whiteboard/Whiteboard.tcl:2950
+msgid "&Raise"
+msgstr "&Apropiat"
+
+#: ../whiteboard/Whiteboard.tcl:455
+#: ../whiteboard/Whiteboard.tcl:2942
+#: ../whiteboard/Whiteboard.tcl:2951
+msgid "&Lower"
+msgstr "&Îndepărtat"
+
+#: ../whiteboard/Whiteboard.tcl:458
+#: ../whiteboard/Whiteboard.tcl:2944
+#: ../whiteboard/Whiteboard.tcl:2966
+#: ../whiteboard/Whiteboard.tcl:2969
+msgid "Smaller"
+msgstr "Mai mic"
+
+#: ../whiteboard/Whiteboard.tcl:459
+#: ../whiteboard/Whiteboard.tcl:2945
+#: ../whiteboard/Whiteboard.tcl:2953
+#: ../whiteboard/Whiteboard.tcl:2955
+msgid "Flip"
+msgstr "Ranversat"
+
+#: ../whiteboard/Whiteboard.tcl:460
+msgid "Horizontal"
+msgstr "Orizontal"
+
+#: ../whiteboard/Whiteboard.tcl:461
+msgid "Vertical"
+msgstr "Vertical"
+
+#: ../whiteboard/Whiteboard.tcl:470
+msgid "Background Color"
+msgstr "Couloare de fond"
+
+#: ../whiteboard/Whiteboard.tcl:472
+msgid "Grid"
+msgstr "Grid"
+
+#: ../whiteboard/Whiteboard.tcl:546
+msgid "Shift Constrain"
+msgstr "Constrângere Shift"
+
+#: ../whiteboard/Whiteboard.tcl:547
+msgid "To 90 degrees"
+msgstr "La 90 de grade"
+
+#: ../whiteboard/Whiteboard.tcl:549
+msgid "To 45 degrees"
+msgstr "La 45 de grade"
+
+#: ../whiteboard/Whiteboard.tcl:589
+msgid "&Server"
+msgstr "&Server"
+
+#: ../whiteboard/Whiteboard.tcl:1662
+#: ../whiteboard/Whiteboard.tcl:2452
+msgid "Point tool, click to mark, double click to inspect, press to popup"
+msgstr "Indicator (click pentru selecţie, dublu click pentru inspectare, apasă pentru meniu)"
+
+#: ../whiteboard/Whiteboard.tcl:2211
+#: ../whiteboard/Whiteboard.tcl:2286
+msgid "&Library"
+msgstr "&Bibliotecă"
+
