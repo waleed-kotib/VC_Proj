@@ -6,10 +6,10 @@
 # credits to Alexandru Cirip <alexandrucirip@gmail.com>, 2011.
 msgid ""
 msgstr ""
-"Project-Id-Version: ro\n"
+"Project-Id-Version: Română\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/coccinella/+filebug\n"
 "POT-Creation-Date: 2010-09-30 00:08+0200\n"
-"PO-Revision-Date: 2011-07-17 21:41+0200\n"
+"PO-Revision-Date: 2011-07-20 14:47+0200\n"
 "Last-Translator: Alexandru Cirip <alexandrucirip@gmail.com>\n"
 "Language-Team: Alexandru Cirip <alexandrucirip@gmail.com>\n"
 "Language: \n"
@@ -535,15 +535,15 @@ msgstr "Altitudine în metri peste sau sub nivelul mării"
 
 #: ../components/Geolocation.tcl:53
 msgid "A named area such as a campus or neighborhood"
-msgstr ""
+msgstr "O zonă denumită, cum ar fi un campus sau un cartier"
 
 #: ../components/Geolocation.tcl:54
 msgid "GPS bearing (direction in which the entity is heading to reach its next waypoint), measured in decimal degrees relative to true north"
-msgstr ""
+msgstr "Direcţia GPS (direcţia în care entitatea se deplasează pentru a atinge următoarea destinaţie), măsurată în grade zecimale relativ la nordul adevarat"
 
 #: ../components/Geolocation.tcl:55
 msgid "A specific building on a street or in an area"
-msgstr ""
+msgstr "O anumită clădire pe o stradă sau într-o zonă"
 
 #: ../components/Geolocation.tcl:56
 msgid "The nation where the user is located"
@@ -556,15 +556,15 @@ msgstr "Referinţă GPS"
 
 #: ../components/Geolocation.tcl:58
 msgid "A natural-language name for or description of the location"
-msgstr ""
+msgstr "O denumire în limbaj comun a locaţiei sau o descriere a ei"
 
 #: ../components/Geolocation.tcl:59
 msgid "Horizontal GPS error in arc minutes"
-msgstr ""
+msgstr "Eroare GPS orizontală în minute de arc"
 
 #: ../components/Geolocation.tcl:60
 msgid "A particular floor in a building"
-msgstr ""
+msgstr "Un anumit etaj într-o clădire"
 
 #: ../components/Geolocation.tcl:61
 msgid "Latitude in decimal degrees North"
@@ -581,7 +581,7 @@ msgstr "Longitudine Est în grade zecimale"
 
 #: ../components/Geolocation.tcl:64
 msgid "A code used for postal delivery"
-msgstr ""
+msgstr "Un cod utilizat pentru livrare poştală"
 
 #: ../components/Geolocation.tcl:65
 #: ../jabber/JForms.tcl:308
@@ -591,19 +591,19 @@ msgstr "O regiune administrativă a ţării, cum ar fi un judeţ sau o provincie
 
 #: ../components/Geolocation.tcl:66
 msgid "A particular room in a building"
-msgstr ""
+msgstr "O anumită cameră dintr-o clădire"
 
 #: ../components/Geolocation.tcl:67
 msgid "A thoroughfare within the locality, or a crossing of two thoroughfares"
-msgstr ""
+msgstr "Un traseu din localitate, sau o intersecţie a două trasee"
 
 #: ../components/Geolocation.tcl:68
 msgid "A catch-all element that captures any other information about the location"
-msgstr ""
+msgstr "Un element prinde-tot care capturează orice altă informaţie despre locaţie"
 
 #: ../components/Geolocation.tcl:69
 msgid "UTC timestamp specifying the moment when the reading was taken"
-msgstr ""
+msgstr "Timpul UTC specific momentului în care a fost efectuată citirea"
 
 #: ../components/Geolocation.tcl:72
 msgid "Altitude"
@@ -1750,7 +1750,7 @@ msgstr "Afişează butoanele de navigare"
 
 #: ../components/SlideShow.tcl:139
 msgid "Resize window to fit slides"
-msgstr "Redimensionează fereastra pentru a se potrivi diapozitivelor"
+msgstr "Redimensionează fereastra pentru a cuprinde întreaga imagine"
 
 #: ../components/SlideShow.tcl:207
 #: ../lib/FileCache.tcl:667
@@ -1894,7 +1894,7 @@ msgstr "Adăugare la dicţionar"
 #: ../components/Totd.tcl:18
 #: ../components/Totd.tcl:109
 msgid "Tip of the Day"
-msgstr ""
+msgstr "Pontul zilei"
 
 #: ../components/Totd.tcl:30
 #, tcl-format
@@ -1908,32 +1908,40 @@ msgid ""
 " 4. Enter the name of the desired server and proceed.\n"
 " 5. The chat system will become available in the list!"
 msgstr ""
+"Dacă sistemul de chat dorit nu este disponibil atunci când doriţi să adăugaţi un contact, aceasta indică faptul că nu a fost detectat suport pentru server. Din fericire, pentru majoritatea sistemelor de chat puteţi folosi un alt server fără să fie nevoie să înregistraţi un cont nou. \n"
+"\n"
+" Instrucţiuni:\n"
+" 1. Logati-vă la contul dvs. din %s.\n"
+" 2. Din meniul Acţiuni selectaţi opţiunea Descoperă Server.\n"
+" 3. Găsiţi un server cu suport pentru sistemul de chat dorit la http://coccinella.im/servers/servers.html (puteţi sorta coloanele).\n"
+" 4. Introduceţi numele serverului dorit şi continuaţi.\n"
+" 5. Sistemul de chat va deveni disponibil în listă!"
 
 #: ../components/Totd.tcl:43
 msgid "Typing the /clean command during a chat conversation will empty your chat window, whilst the /retain command will restore its content. Your contacts do not see these commands."
-msgstr ""
+msgstr "Tastând comanda /clean în timpul unei conversaţii veţi goli fereastra de conversaţie, pe când comanda /retain va restaura conţinutul. Contactele dvs. nu văd aceste comenzi."
 
 #: ../components/Totd.tcl:46
 #, tcl-format
 msgid "You might be interested in the hidden XML console if you are a developer. You can open it with the command %s+Shift+D"
-msgstr ""
+msgstr "Aţi putea fi interesaţi de consola ascunsa XML daca sunteţi dezvoltator. O puteţi deschide cu comanda  %s+Shift+D"
 
 #: ../components/Totd.tcl:49
 #, tcl-format
 msgid "You can initiate a whiteboard session with multiple participants by clicking the whiteboard icon in a chatroom. All participants using %s will be invited."
-msgstr ""
+msgstr "Puteţi iniţia o sesiune tablă de desen cu mai mulţi participanţi apăsând icoana tablă de desen într-o sală de discuţie. Toţi participanţii care folosesc %s vor fi invitaţi."
 
 #: ../components/Totd.tcl:52
 msgid "Documentation is available at http://coccinella.im/documentation"
-msgstr ""
+msgstr "Documentaţia este disponibilă la adresa http://coccinella.im/documentation"
 
 #: ../components/Totd.tcl:53
 msgid "To override the automatic creation of the XMPP resource you can add /resourcename to your Contact ID."
-msgstr ""
+msgstr "Pentru a sări peste crearea automată a resursei XMPP puteţi adăuga /resourcename la ID-ul contactului"
 
 #: ../components/Totd.tcl:55
 msgid "Nicknames in chatrooms can be automatically completed using the TAB key. Enter the first letter(s) of the nickname and then use the TAB key to complete."
-msgstr ""
+msgstr "Pseudonimele în sălile de discuţie pot fi completate automat utilizând tasta TAB. Introduceţi primele litere ale pseudonimului şi apăsaţi TAB pentru completare."
 
 #: ../components/Totd.tcl:57
 #, tcl-format
@@ -1946,17 +1954,23 @@ msgid ""
 " 4. Go each time to Preferences and enable the checkbox option 'Store preferences in same folder as program' (on the General page).\n"
 " 5. Preferences will now be saved on the USB stick in the same folder as the binary."
 msgstr ""
+"Puteţi lua %s  cu dvs. pe un stick USB şi veţi avea aceeaşi configuraţie pe computere diferite. Puteţi crea un stick USB %s multiplatformă astfel:\n"
+" 1. Creaţi un director pe stick-ul USB.\n"
+" 2. Puneţi în acest director executabilele binare Coccinella (pentru Windows, Linux si Mac OS X). Desigur, nu aveţi nevoie de toate fişierele binare, spre exemplu în cazul în care nu doriţi să utilizaţi stick-ul USB pe computere Windows.\n"
+" 3. Apoi deschideţi pe fiecare platformă (Windows, Linux şi Mac OS X) executabilul pentru acea platformă.\n"
+" 4. Mergeţi de fiecare dată la Preferinţe şi activaţi opţiunea 'Salvează preferinţele în acelaşi folder cu programul' (la General).\n"
+" 5. Preferinţele vor fi salvate acum pe stick-ul USB în acelaşi director ca şi binarele."
 
 #: ../components/Totd.tcl:68
 #, tcl-format
 msgid "%s is free software. This means you have the freedom to improve %s for internal use without breaking copyright laws. Feel free to contribute improvements back to the project so that others can build upon your contribution. Check out http://coccinella.im/development to learn how you can help."
-msgstr ""
+msgstr "%s este software gratuit. Aceasta înseamnă că aveţi libertatea să îmbunătăţiţi %s pentru uz intern, fără a viola legea drepturilor de autor. Simţiţi-vă liberi să contribuiţi la acest proiect cu îmbunătăţiri pentru ca şi alţii să poată dezvolta pornind de la contribuţia dvs. Vedeţi la http://coccinella.im/development cum puteţi fi de ajutor."
 
 #: ../components/Totd.tcl:124
 #, tcl-format
 #| msgid "Show tips on startup"
 msgid "Show tips on %s startup"
-msgstr "Arată sugestii la %s pornire"
+msgstr "Arată sugestii la pornirea %s"
 
 #. TRANSLATORS; user activity settings; see Action menu when logged in to a server with PEP support
 #: ../components/UserActivity.tcl:54
@@ -2493,7 +2507,7 @@ msgstr "Porneşte minimizat în bara de sistem"
 
 #: ../components/taskbar/Taskbar.tcl:490
 msgid "Hide/Show all when main window is hidden/shown"
-msgstr ""
+msgstr "Arată/Ascunde tot când fereastra principală este arătată/ascunsă"
 
 #. TRANSLATORS; right-click menu of the toolbars
 #: ../contrib/ttoolbar.tcl:452
@@ -2671,7 +2685,7 @@ msgstr "La activare, absenţa automată va fi semnalizată utilizatorilor din ta
 #. TRANSLATORS; this preference option automatically sets the user's presence to Do Not Disturb when he or she is chatting with too much contacts at the same moment (this number is configurable). There also is a delay until the presence is automatically changed back to the previous presence state when the number of active chats is down again.
 #: ../jabber/AutoAway.tcl:372
 msgid "Do Not Disturb when (active chat sessions)"
-msgstr "\"Nu deranjaţi\" atunci când (sesiuni de conversaţie active)"
+msgstr "\"Nu deranjaţi\" când sunt sesiuni de conversaţie active"
 
 #: ../jabber/AutoAway.tcl:389
 msgid "When you have <number> or more active chat sessions, presence state will be automatically changed to Do Not Disturb."
@@ -3544,7 +3558,7 @@ msgstr "Adresa Tlen"
 
 #: ../jabber/Gateway.tcl:90
 msgid "Twitter user"
-msgstr ""
+msgstr "Utilizator Twitter"
 
 #: ../jabber/Gateway.tcl:91
 #: ../jabber/JUser.tcl:193
@@ -3804,7 +3818,7 @@ msgstr "Temă"
 #: ../whiteboard/Plugins.tcl:1347
 #, tcl-format
 msgid "Requires a restart of %s"
-msgstr "Necesită restart după %s"
+msgstr "Necesită restartarea %s"
 
 #: ../jabber/JPrefs.tcl:208
 msgid "Skin"
@@ -3816,12 +3830,12 @@ msgstr "Opacitate ferestre"
 
 #: ../jabber/JPrefs.tcl:300
 msgid "Save message inbox between sessions"
-msgstr "Salvează cutia poştală cu mesaje primite între sesiuni"
+msgstr "Salvează mesajele primite între sesiuni"
 
 #: ../jabber/JPrefs.tcl:302
 #, tcl-format
 msgid "Login on %s startup"
-msgstr "Conectare la %s la pornire"
+msgstr "Conectare la pornirea %s"
 
 #: ../jabber/JPrefs.tcl:304
 msgid "Remember open windows between sessions"
@@ -4215,7 +4229,7 @@ msgstr "Grup:"
 
 #: ../jabber/JUser.tcl:756
 msgid "Current groups"
-msgstr ""
+msgstr "Grupuri curente"
 
 #: ../jabber/JUser.tcl:771
 #| msgid "Add"
@@ -4651,7 +4665,7 @@ msgstr "Setările login curente diferă de acelea ale profilului dvs. Doriţi sa
 
 #: ../jabber/Login.tcl:668
 msgid "Lost connection to server, reconnecting"
-msgstr ""
+msgstr "Conexiunea la server pierdută, reconectez"
 
 #: ../jabber/Login.tcl:855
 #, tcl-format
@@ -4741,11 +4755,11 @@ msgstr "Conectare eşuată din cauza contului necunoscut sau parolei greşite."
 #: ../jabber/Login.tcl:1026
 #, tcl-format
 msgid "Invalid server response due to bug in server software:  error <%s/> is not defined in section 6.4 SASL Errors of RFC 3920.  Please consider reporting this bug to your server administrator."
-msgstr ""
+msgstr "Răspuns de la server invalid din cauza unei greşeli în software-ul serverului: eroarea <%s/> nu este definită în secţiunea 6.4 SASL Erori din RFC 3920. Vă rugăm să luaţi în considerare raportarea acestei erori administratorului serverului."
 
 #: ../jabber/Login.tcl:1052
 msgid "Do you want to retry a different password or profile?"
-msgstr ""
+msgstr "Doriţi să reîncercaţi o parolă sau un profil diferit?"
 
 #: ../jabber/Login.tcl:1083
 #, tcl-format
@@ -4918,29 +4932,29 @@ msgstr "Eroare la deschiderea fişierului %s: %s"
 
 #: ../jabber/MailBox.tcl:1291
 msgid "Missing Entities"
-msgstr ""
+msgstr "Entităţi lipsă"
 
 #: ../jabber/MailBox.tcl:1292
 #, tcl-format
 msgid "There were %s images or similar entities that could not be obtained because the user is not online."
-msgstr ""
+msgstr "Au fost %s imagini sau entităţi similare ce nu au putut fi obţinute deoarece utilizatorul nu este conectat."
 
 #: ../jabber/MailBox.tcl:1598
 #: ../jabber/MailBox.tcl:1676
 #, tcl-format
 msgid "Cannot open the inbox file %s when trying to save it."
-msgstr "Nu pot deschide fişierul cutie poştală %s pentru salvare."
+msgstr "Nu pot deschide fişierul mesaje %s pentru salvare."
 
 #: ../jabber/MailBox.tcl:1621
 #: ../jabber/MailBox.tcl:1688
 msgid "Error renaming Inbox file."
-msgstr ""
+msgstr "Eroare la redenumirea fişierului mesaje."
 
 #: ../jabber/MailBox.tcl:1783
 #: ../jabber/MailBox.tcl:1817
 #, tcl-format
 msgid "Cannot read the inbox file %s: %s"
-msgstr "Nu pot citi fişierul cutie poştală %s : %s"
+msgstr "Nu pot citi fişierul mesaje %s : %s"
 
 #: ../jabber/MegaPresence.tcl:102
 #: ../jabber/MegaPresence.tcl:111
@@ -5372,7 +5386,7 @@ msgstr "Icoane contact"
 
 #: ../jabber/Rosticons.tcl:483
 msgid "Select iconsets for each group. A deselected group will use the normal iconset."
-msgstr "Choisissez le jeu d'icônes pour chaque groupe. Un groupe non sélectionné utilisera le jeu d'icônes normal."
+msgstr "Selectaţi seturi de icoane pentru fiecare grup. Un grup deselectat va utiliza setul normal de icoane."
 
 #: ../jabber/Rosticons.tcl:581
 msgid "Standard"
@@ -5667,7 +5681,7 @@ msgstr "Carte de vizită: %s"
 #: ../jabber/UserInfo.tcl:474
 #, tcl-format
 msgid "Failed to obtain personal notes: %s"
-msgstr ""
+msgstr "Nu am putut obţine notele personale: %s"
 
 #. TRANSLATORS: in the business card dialog, there can be made notes about each contact
 #: ../jabber/UserInfo.tcl:527
